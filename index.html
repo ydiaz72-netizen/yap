@@ -134,6 +134,11 @@
   .stepcard b{font:700 18px Fredoka,system-ui,sans-serif}
   .stepcard span:last-child{font-size:14px;color:var(--muted);font-weight:700}
   .c1{background:var(--plum-soft)} .c2{background:var(--sun-soft)} .c3{background:var(--coral-soft)} .c4{background:var(--teal-soft)}
+  .sheet-bg{position:fixed;inset:0;background:rgba(43,33,64,.5);display:flex;align-items:flex-end;justify-content:center;z-index:20}
+  .sheet{background:var(--bg);width:100%;max-width:560px;border-radius:24px 24px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom));max-height:92vh;overflow:auto}
+  .sheet textarea{font-size:14px;font-weight:600;line-height:1.4}
+  .exgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:2px}
+  .exb{text-align:center;text-decoration:none;font-size:16px;padding:14px 10px;margin-top:8px}
   .hidden{display:none !important}
   .err{color:var(--coral);font-weight:700;font-size:14px;min-height:18px;margin-top:6px}
 </style>
@@ -427,7 +432,7 @@ const S = {
   players:[], cat:"mix", rounds:2, time:90,
   round:1, turn:0, used:new Set(), fmtCycle:0,
   current:null, rerolled:false, timerId:null, left:0, total:0,
-  draft:{name:"",lang:"de",level:2}, rating:null, err:""
+  draft:{name:"",lang:"de",level:2}, rating:null, err:"", log:[]
 };
 
 /* ===================== STATS (local, best-effort) ===================== */
@@ -638,7 +643,11 @@ feedback(){
   <div class="coach">
     <h3>🧑‍🏫 Coach moment</h3>
     <p style="margin:0 0 8px;font-size:15px">Whoever speaks the best <b>${langName}</b> at the table: say one phrase that would sound more natural — or a new word ${esc(p.name)} can use.</p>
-    <textarea id="tip" rows="2" placeholder="Optional: type the tip so ${esc(p.name)} can keep it"></textarea>
+    <label class="lbl" style="margin-top:10px">✍️ What ${esc(p.name)} said <span class="de">· optional</span></label>
+    <textarea id="ans" rows="2" placeholder="A sentence or two from the answer"></textarea>
+    <label class="lbl">💡 Tip or better phrase <span class="de">· optional</span></label>
+    <textarea id="tip" rows="2" placeholder="e.g. Say “I went” instead of “I go”"></textarea>
+    <p class="note" style="margin:6px 0 0">Saved for ${esc(p.name)}'s review at the end · Für die Auswertung gespeichert</p>
   </div>
   <button class="btn primary" onclick="nextTurn()">${isLastTurn()?"See results 🏆":"Next player →"}<small>${isLastTurn()?"Ergebnisse":"Nächste Person"}</small></button>`;
 },
@@ -665,16 +674,18 @@ results(){
     ${award("learned","💡","Best teacher","Beste/r Lehrer/in")}
   </div>
   <div class="card">
-    <h3>Your tips <span class="de">· Deine Tipps</span></h3>
-    <p class="note">Tap your name to see the tips you got.</p>
-    ${S.players.map((p,i)=>`
-      <button class="chip" style="margin-top:8px" onclick="$('tips${i}').classList.toggle('show')">${esc(p.name)} (${p.tips.length})</button>
-      <div class="tips" id="tips${i}">${p.tips.length?p.tips.map(t=>`• ${esc(t)}`).join("<br>"):"No written tips this time."}</div>`).join("")}
+    <h3>📤 Your review <span class="de">· Deine Auswertung</span></h3>
+    <p class="note">Each player can send themselves their questions, answers, useful words and tips to practice later.<br><span class="de">Schick dir deine Fragen, Antworten und Tipps zum Wiederholen.</span></p>
+    <div class="row" style="margin-top:6px">
+    ${S.players.map((p,i)=>`<button class="chip" onclick="openExport(${i})">📤 ${esc(p.name)}</button>`).join("")}
+    </div>
+    <button class="btn secondary" style="margin-top:12px" onclick="openExport(-1)">📋 Export whole game<small>Ganzes Spiel exportieren (für Organisator/innen)</small></button>
   </div>
   <div class="card center">
     <h3>Did you enjoy it? <span class="de">· Hat's Spaß gemacht?</span></h3>
     <div class="faces">${["😞","😐","🙂","😄","🤩"].map((f,i)=>`<button class="face ${S.rating===i+1?"on":""}" onclick="rate(${i+1})">${f}</button>`).join("")}</div>
   </div>
+  <p class="note center" style="margin:4px 0 0">⚠️ Send your reviews before starting a new game · Erst Auswertung senden, dann neu starten</p>
   <button class="btn primary" onclick="playAgain()">🔁 Play another round!<small>Noch eine Runde!</small></button>
   <button class="btn secondary" onclick="newGame()">New players · Neue Spieler</button>
   <a class="powered" href="https://setzio.com" target="_blank" rel="noopener">
@@ -723,7 +734,7 @@ function resetScores(){ S.players.forEach(p=>{p.pts=0;p.reacts={clear:0,creative
 function startGame(){
   try{ audio = audio || new (window.AudioContext||window.webkitAudioContext)(); }catch(e){}
   keepAwake();
-  resetScores(); S.round=1; S.turn=0; S.rating=null; S.fmtCycle=Math.floor(Math.random()*3);
+  resetScores(); S.log=[]; S.round=1; S.turn=0; S.rating=null; S.fmtCycle=Math.floor(Math.random()*3);
   bump("started"); go("handoff");
 }
 function showChallenge(){ keepAwake(); S.current=choosePrompt(S.players[S.turn].lang, S.players[S.turn].level); S.rerolled=false; go("challenge"); }
@@ -748,13 +759,89 @@ function react(k){ S.turnReacts[k]++; render(); }
 function resetReacts(){ S.turnReacts={clear:0,creative:0,funny:0,learned:0}; render(); }
 function isLastTurn(){ return S.round===S.rounds && S.turn===S.players.length-1; }
 function nextTurn(){
-  const p=S.players[S.turn], tip=(($("tip")||{}).value||"").trim();
+  const p=S.players[S.turn], tip=(($("tip")||{}).value||"").trim(), ans=(($("ans")||{}).value||"").trim();
   if(tip) p.tips.push(tip);
+  S.log.push({pi:S.turn, round:S.round, q:S.current.t, f:S.current.f, c:S.current.c, words:S.current.w.slice(), ans, tip, reacts:{...S.turnReacts}});
   let gained=2; for(const k in S.turnReacts){ p.reacts[k]+=S.turnReacts[k]; gained+=S.turnReacts[k]; }
   p.pts+=gained;
   if(isLastTurn()){ bump("completed"); go("results"); return; }
   S.turn++; if(S.turn>=S.players.length){ S.turn=0; S.round++; }
   go("handoff");
+}
+/* ===================== EXPORT / SHARE ===================== */
+function appLink(){ try{ return location.protocol.startsWith("http") ? location.origin : "pontetalk.setzio.com"; }catch(e){ return "pontetalk.setzio.com"; } }
+function today(){ const d=new Date(); return `${String(d.getDate()).padStart(2,"0")}.${String(d.getMonth()+1).padStart(2,"0")}.${d.getFullYear()}`; }
+function reactLine(r){ return REACTS.filter(x=>r[x.k]).map(x=>`${x.e}${r[x.k]}`).join("  ") || "–"; }
+function playerReview(i){
+  const p=S.players[i], L=p.lang, turns=S.log.filter(t=>t.pi===i);
+  const t=(en,de)=>L==="en"?en:de;
+  let out=`🌉 PonteTalk – ${t("Your practice review","Deine Übungs-Auswertung")}\n`;
+  out+=`${today()} · ${p.name} · ${L==="en"?"🇬🇧 English":"🇩🇪 Deutsch"} ${LEVELS[p.level].code}\n`;
+  out+=`${t("Points","Punkte")}: ${p.pts}\n\n`;
+  if(!turns.length) out+=t("No turns played yet.","Noch keine Runden gespielt.")+"\n";
+  turns.forEach((x,n)=>{
+    const f=FMTS[x.f], c=CATS[x.c];
+    out+=`${n+1}) ${f.e} ${L==="en"?f.en:f.de} · ${c.e} ${L==="en"?c.en:c.de}\n`;
+    out+=`❓ ${x.q}\n`;
+    if(x.ans) out+=`✍️ ${t("You said","Du hast gesagt")}: ${x.ans}\n`;
+    if(x.tip) out+=`💡 ${t("Tip","Tipp")}: ${x.tip}\n`;
+    out+=`📚 ${t("Useful words","Nützliche Wörter")}: ${x.words.join(", ")}\n`;
+    out+=`👏 ${t("Reactions","Reaktionen")}: ${reactLine(x.reacts)}\n\n`;
+  });
+  out+=`🎯 ${t("Practice idea: answer each question again at home — out loud, using the tip and the useful words.","Übungsidee: Beantworte jede Frage zu Hause noch einmal laut – mit dem Tipp und den nützlichen Wörtern.")}\n\n`;
+  out+=`${t("Play again","Nochmal spielen")}: ${appLink()}`;
+  return out;
+}
+function gameReview(){
+  let out=`🌉 PonteTalk – Game summary · Spielübersicht\n${today()} · ${S.players.length} players · ${S.rounds} round(s)\n\n`;
+  const ranked=S.players.map((p,i)=>({p,i})).sort((a,b)=>b.p.pts-a.p.pts);
+  out+=`🏆 Scores\n`+ranked.map((r,n)=>`${n+1}. ${r.p.name} (${r.p.lang==="en"?"EN":"DE"} ${LEVELS[r.p.level].code}) – ${r.p.pts}`).join("\n")+"\n\n";
+  S.players.forEach((p,i)=>{
+    out+=`━━━━━━━━━━\n👤 ${p.name}\n`;
+    S.log.filter(t=>t.pi===i).forEach((x,n)=>{
+      out+=`${n+1}) ${x.q}\n`;
+      if(x.ans) out+=`   ✍️ ${x.ans}\n`;
+      if(x.tip) out+=`   💡 ${x.tip}\n`;
+      out+=`   👏 ${reactLine(x.reacts)}\n`;
+    });
+    out+="\n";
+  });
+  out+=`${appLink()}`;
+  return out;
+}
+function openExport(i){
+  const text = i<0 ? gameReview() : playerReview(i);
+  const name = i<0 ? "game" : S.players[i].name;
+  const canShare = !!(navigator.share);
+  const box=document.createElement("div");
+  box.className="sheet-bg";
+  box.innerHTML=`<div class="sheet">
+    <div class="topline" style="margin-bottom:8px"><h3 style="margin:0">📤 ${i<0?"Whole game":esc(name)}</h3><button class="chip" id="exClose">✕</button></div>
+    <textarea id="exText" rows="9" readonly>${esc(text)}</textarea>
+    ${canShare?`<button class="btn primary" id="exShare">📲 Send… <small>WhatsApp, Email, Telegram…</small></button>`:""}
+    <div class="exgrid">
+      <a class="btn secondary exb" id="exWa" href="https://wa.me/?text=${encodeURIComponent(text)}" target="_blank" rel="noopener">💬 WhatsApp</a>
+      <a class="btn secondary exb" id="exMail" href="mailto:?subject=${encodeURIComponent("PonteTalk – "+(i<0?"Game summary":"Review "+name))}&body=${encodeURIComponent(text)}">✉️ Email</a>
+      <button class="btn secondary exb" id="exCopy">📋 Copy</button>
+      <button class="btn secondary exb" id="exDl">⬇️ Save .txt</button>
+    </div>
+    <p class="note center" id="exMsg" style="min-height:18px;margin:8px 0 0"></p>
+  </div>`;
+  document.body.appendChild(box);
+  const msg=t=>{ $("exMsg").textContent=t; };
+  $("exClose").onclick=()=>box.remove();
+  box.addEventListener("click",e=>{ if(e.target===box) box.remove(); });
+  if(canShare) $("exShare").onclick=async()=>{ try{ await navigator.share({title:"PonteTalk", text}); }catch(e){} };
+  $("exCopy").onclick=async()=>{
+    try{ await navigator.clipboard.writeText(text); msg("Copied! · Kopiert!"); }
+    catch(e){ const t=$("exText"); t.removeAttribute("readonly"); t.select(); try{ document.execCommand("copy"); msg("Copied! · Kopiert!"); }catch(_){ msg("Select the text above and copy it."); } t.setAttribute("readonly",""); }
+  };
+  $("exDl").onclick=()=>{
+    try{ const blob=new Blob([text],{type:"text/plain;charset=utf-8"}); const a=document.createElement("a");
+      a.href=URL.createObjectURL(blob); a.download=`PonteTalk-${name.replace(/[^\w-]+/g,"_")}-${today().replace(/\./g,"-")}.txt`;
+      document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500); msg("Saved · Gespeichert"); }
+    catch(e){ msg("Couldn't save – try Copy instead."); }
+  };
 }
 function rate(n){ const first=S.rating===null; S.rating=n; const s=loadStats(); if(first) s.ratings.push(n); else s.ratings[s.ratings.length-1]=n; saveStats(s); render(); }
 function playAgain(){ bump("replays"); startGame(); }
