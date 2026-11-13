@@ -139,6 +139,14 @@
   .sheet textarea{font-size:14px;font-weight:600;line-height:1.4}
   .exgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:2px}
   .exb{text-align:center;text-decoration:none;font-size:16px;padding:14px 10px;margin-top:8px}
+  .coach-score{margin-top:6px;background:var(--sun-soft)}
+  .coach-score.need{outline:3px solid var(--coral)}
+  .ratings{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .rate{position:relative;border:2px solid var(--line);background:#fff;border-radius:16px;padding:10px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:1px;color:var(--ink);font-family:Nunito,system-ui,sans-serif}
+  .rate .e{font-size:26px} .rate b{font-size:15px} .rate .de{font-size:12px}
+  .rate .rp{position:absolute;top:6px;right:9px;font:700 13px Fredoka,system-ui,sans-serif;color:var(--muted)}
+  .rate.on{border-color:var(--coral);background:var(--coral-soft);box-shadow:0 3px 0 #D9492A}
+  .rate.on .rp{color:var(--coral)}
   .hidden{display:none !important}
   .err{color:var(--coral);font-weight:700;font-size:14px;min-height:18px;margin-top:6px}
 </style>
@@ -418,6 +426,12 @@ const P1 = {
  }
 };
 
+const RATINGS = [
+  {v:1,pts:1,e:"🌱",en:"Keep practicing",de:"Weiter üben"},
+  {v:2,pts:3,e:"👍",en:"Good",de:"Gut"},
+  {v:3,pts:5,e:"⭐",en:"Great",de:"Sehr gut"},
+  {v:4,pts:8,e:"🏆",en:"Excellent",de:"Ausgezeichnet"}
+];
 const REACTS = [
   {k:"clear",e:"👍",en:"Clear",de:"Verständlich"},
   {k:"creative",e:"🔥",en:"Creative",de:"Kreativ"},
@@ -532,7 +546,7 @@ home(){
   <div class="steps">
     <div class="stepcard c1"><span class="se">🗣️</span><b>Pick</b><span>your language &amp; level</span></div>
     <div class="stepcard c2"><span class="se">📱</span><b>Pass</b><span>the phone &amp; speak</span></div>
-    <div class="stepcard c3"><span class="se">🔥</span><b>React</b><span>&amp; give one tip</span></div>
+    <div class="stepcard c3"><span class="se">🔥</span><b>Score</b><span>coach rates, table reacts</span></div>
     <div class="stepcard c4"><span class="se">🏆</span><b>Win</b><span>&amp; everyone learns</span></div>
   </div>
 
@@ -633,7 +647,17 @@ feedback(){
   return `
   <div class="topline"><span>Feedback for ${esc(p.name)}</span>${langBadge(L)}</div>
   <h2>${bi("How was it?","Wie war's?")}</h2>
-  <p class="sub">Everyone taps a reaction — tap once per person.<br><span class="de">Jede Person tippt eine Reaktion.</span></p>
+  <div class="coach coach-score ${S.needRating?"need":""}">
+    <h3>🧑‍🏫 Coach score <span class="de">· Bewertung</span></h3>
+    <p style="margin:0 0 10px;font-size:15px">The best <b>${langName}</b> speaker at the table judges ${esc(p.name)}'s answer: grammar, words and how natural it sounded.<br><span class="de">Die Person, die am besten ${L==="en"?"Englisch":"Deutsch"} spricht, bewertet.</span></p>
+    <div class="ratings">${RATINGS.map(r=>`
+      <button class="rate ${S.turnRating===r.v?"on":""}" onclick="setRating(${r.v})">
+        <span class="e">${r.e}</span><b>${r.en}</b><span class="de">${r.de}</span><span class="rp">+${r.pts}</span>
+      </button>`).join("")}</div>
+    ${S.needRating?`<p class="err" style="margin:8px 0 0">Coach: pick a score first · Bitte zuerst bewerten</p>`:""}
+  </div>
+  <h3 style="margin:18px 0 4px">👏 Table reactions <span class="de">· Reaktionen</span></h3>
+  <p class="note" style="margin:0 0 10px">Everyone taps one — +1 point each · Jede Person tippt eine</p>
   <div class="reacts">${REACTS.map(r=>`
     <button class="react ${t[r.k]?"hit":""}" onclick="react('${r.k}')">
       ${t[r.k]?`<span class="n">${t[r.k]}</span>`:""}
@@ -641,12 +665,12 @@ feedback(){
     </button>`).join("")}</div>
   <button class="btn ghost" onclick="resetReacts()" style="font-size:13px">Oops, reset reactions</button>
   <div class="coach">
-    <h3>🧑‍🏫 Coach moment</h3>
-    <p style="margin:0 0 8px;font-size:15px">Whoever speaks the best <b>${langName}</b> at the table: say one phrase that would sound more natural — or a new word ${esc(p.name)} can use.</p>
+    <h3>💬 Coach tip <span class="de">· Tipp</span></h3>
+    <p style="margin:0 0 8px;font-size:15px">Say one phrase that would sound more natural — or a new word ${esc(p.name)} can use.</p>
     <label class="lbl" style="margin-top:10px">✍️ What ${esc(p.name)} said <span class="de">· optional</span></label>
-    <textarea id="ans" rows="2" placeholder="A sentence or two from the answer"></textarea>
+    <textarea id="ans" rows="2" placeholder="A sentence or two from the answer" oninput="S.turnAns=this.value">${esc(S.turnAns||"")}</textarea>
     <label class="lbl">💡 Tip or better phrase <span class="de">· optional</span></label>
-    <textarea id="tip" rows="2" placeholder="e.g. Say “I went” instead of “I go”"></textarea>
+    <textarea id="tip" rows="2" placeholder="e.g. Say “I went” instead of “I go”" oninput="S.turnTip=this.value">${esc(S.turnTip||"")}</textarea>
     <p class="note" style="margin:6px 0 0">Saved for ${esc(p.name)}'s review at the end · Für die Auswertung gespeichert</p>
   </div>
   <button class="btn primary" onclick="nextTurn()">${isLastTurn()?"See results 🏆":"Next player →"}<small>${isLastTurn()?"Ergebnisse":"Nächste Person"}</small></button>`;
@@ -664,10 +688,11 @@ results(){
   <h2 class="center">${bi("Great game!","Super gespielt!")}</h2>
   <div class="card">${ranked.map((r,n)=>`
     <div class="rank"><span class="medal">${medals[n]||"⭐"}</span>${avatar(r.p,r.i)}
-      <div><div class="pname">${esc(r.p.name)}</div><div class="pmeta">${r.p.lang==="en"?"🇬🇧":"🇩🇪"} ${LEVELS[r.p.level].code}</div></div>
+      <div><div class="pname">${esc(r.p.name)}</div><div class="pmeta">${r.p.lang==="en"?"🇬🇧":"🇩🇪"} ${LEVELS[r.p.level].code}${r.p.ratings.length?` · ${avgLabel(r.p)}`:""}</div></div>
       <span class="pts">${r.p.pts}</span></div>`).join("")}</div>
   <div class="card">
     <h3>Awards <span class="de">· Auszeichnungen</span></h3>
+    ${bestSpeaker()}
     ${award("creative","🔥","Most creative","Am kreativsten")}
     ${award("funny","😂","Funniest","Am lustigsten")}
     ${award("clear","👍","Clearest speaker","Am verständlichsten")}
@@ -730,7 +755,7 @@ function removePlayer(i){ S.players.splice(i,1); render(); }
 function toSettings(){ if(S.players.length<2){ S.err="Add at least 2 players · Mindestens 2 Spieler"; render(); return; } S.err=""; go("settings"); }
 function setOpt(k,v){ S[k]=v; render(); }
 function setRounds(d){ S.rounds=Math.min(10,Math.max(1,S.rounds+d)); render(); }
-function resetScores(){ S.players.forEach(p=>{p.pts=0;p.reacts={clear:0,creative:0,funny:0,learned:0};p.tips=[];}); }
+function resetScores(){ S.players.forEach(p=>{p.pts=0;p.coach=0;p.ratings=[];p.reacts={clear:0,creative:0,funny:0,learned:0};p.tips=[];}); }
 function startGame(){
   try{ audio = audio || new (window.AudioContext||window.webkitAudioContext)(); }catch(e){}
   keepAwake();
@@ -754,15 +779,19 @@ function tick(){
   $("barFill").style.width=`${Math.max(S.left,0)/S.total*100}%`;
 }
 function stopTimer(ended){ if(S.timerId){ clearInterval(S.timerId); S.timerId=null; } if(ended){ beep(); const t=$("timer"); if(t) t.textContent="⏰ Time!"; } }
-function finishTurn(){ stopTimer(false); S.turnReacts={clear:0,creative:0,funny:0,learned:0}; go("feedback"); }
-function react(k){ S.turnReacts[k]++; render(); }
+function finishTurn(){ stopTimer(false); S.turnReacts={clear:0,creative:0,funny:0,learned:0}; S.turnRating=0; S.turnAns=""; S.turnTip=""; S.needRating=false; go("feedback"); }
+function setRating(v){ S.turnRating=v; S.needRating=false; const y=window.scrollY; render(); window.scrollTo(0,y); }
+function react(k){ S.turnReacts[k]++; const y=window.scrollY; render(); window.scrollTo(0,y); }
 function resetReacts(){ S.turnReacts={clear:0,creative:0,funny:0,learned:0}; render(); }
 function isLastTurn(){ return S.round===S.rounds && S.turn===S.players.length-1; }
 function nextTurn(){
-  const p=S.players[S.turn], tip=(($("tip")||{}).value||"").trim(), ans=(($("ans")||{}).value||"").trim();
+  if(!S.turnRating){ S.needRating=true; render(); window.scrollTo({top:0,behavior:"smooth"}); return; }
+  const p=S.players[S.turn], tip=(S.turnTip||"").trim(), ans=(S.turnAns||"").trim();
+  const R=RATINGS.find(r=>r.v===S.turnRating);
   if(tip) p.tips.push(tip);
-  S.log.push({pi:S.turn, round:S.round, q:S.current.t, f:S.current.f, c:S.current.c, words:S.current.w.slice(), ans, tip, reacts:{...S.turnReacts}});
-  let gained=2; for(const k in S.turnReacts){ p.reacts[k]+=S.turnReacts[k]; gained+=S.turnReacts[k]; }
+  S.log.push({pi:S.turn, round:S.round, q:S.current.t, f:S.current.f, c:S.current.c, words:S.current.w.slice(), ans, tip, rating:R.v, reacts:{...S.turnReacts}});
+  p.coach+=R.pts; p.ratings.push(R.v);
+  let gained=R.pts; for(const k in S.turnReacts){ p.reacts[k]+=S.turnReacts[k]; gained+=S.turnReacts[k]; }
   p.pts+=gained;
   if(isLastTurn()){ bump("completed"); go("results"); return; }
   S.turn++; if(S.turn>=S.players.length){ S.turn=0; S.round++; }
@@ -783,6 +812,7 @@ function playerReview(i){
     const f=FMTS[x.f], c=CATS[x.c];
     out+=`${n+1}) ${f.e} ${L==="en"?f.en:f.de} · ${c.e} ${L==="en"?c.en:c.de}\n`;
     out+=`❓ ${x.q}\n`;
+    if(x.rating){ const R=RATINGS[x.rating-1]; out+=`🧑‍🏫 ${t("Coach score","Bewertung")}: ${R.e} ${L==="en"?R.en:R.de}\n`; }
     if(x.ans) out+=`✍️ ${t("You said","Du hast gesagt")}: ${x.ans}\n`;
     if(x.tip) out+=`💡 ${t("Tip","Tipp")}: ${x.tip}\n`;
     out+=`📚 ${t("Useful words","Nützliche Wörter")}: ${x.words.join(", ")}\n`;
@@ -800,6 +830,7 @@ function gameReview(){
     out+=`━━━━━━━━━━\n👤 ${p.name}\n`;
     S.log.filter(t=>t.pi===i).forEach((x,n)=>{
       out+=`${n+1}) ${x.q}\n`;
+      if(x.rating){ const R=RATINGS[x.rating-1]; out+=`   🧑‍🏫 ${R.e} ${R.en}\n`; }
       if(x.ans) out+=`   ✍️ ${x.ans}\n`;
       if(x.tip) out+=`   💡 ${x.tip}\n`;
       out+=`   👏 ${reactLine(x.reacts)}\n`;
@@ -842,6 +873,12 @@ function openExport(i){
       document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500); msg("Saved · Gespeichert"); }
     catch(e){ msg("Couldn't save – try Copy instead."); }
   };
+}
+function avgLabel(p){ const a=p.ratings.reduce((x,y)=>x+y,0)/p.ratings.length; const r=RATINGS[Math.min(3,Math.max(0,Math.round(a)-1))]; return `${r.e} ${r.en}`; }
+function bestSpeaker(){
+  const c=S.players.map((p,i)=>({p,i,a:p.ratings.length?p.ratings.reduce((x,y)=>x+y,0)/p.ratings.length:0})).sort((x,y)=>y.a-x.a)[0];
+  if(!c||!c.a) return "";
+  return `<div class="award"><span class="e">🏅</span><div>Best speaker (coach score) <span class="de">· Beste Sprecher/in</span><br><span style="color:${COLORS[c.i%COLORS.length]}">${esc(c.p.name)}</span></div></div>`;
 }
 function rate(n){ const first=S.rating===null; S.rating=n; const s=loadStats(); if(first) s.ratings.push(n); else s.ratings[s.ratings.length-1]=n; saveStats(s); render(); }
 function playAgain(){ bump("replays"); startGame(); }
