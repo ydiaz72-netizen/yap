@@ -636,7 +636,7 @@ challenge(){
     <div class="timer" id="timer">0:00</div>
     <div class="bar" id="bar"><i id="barFill"></i></div>
   </div>
-  <button class="btn primary" id="startBtn" onclick="startTimer()">▶ ${L==="en"?"Start speaking":"Los, sprich!"}</button>
+  <button class="btn primary" id="startBtn" onclick="startTimer()">⏱️ ${L==="en"?"Start timer":"Timer starten"}<small>${L==="en"?"Then answer out loud to the table":"Dann antworte laut für alle"}</small></button>
   <button class="btn secondary hidden" id="doneBtn" onclick="finishTurn()">✓ ${L==="en"?"I'm done":"Fertig"}<small>Feedback time · Zeit für Feedback</small></button>
   ${S.rerolled?"":`<button class="btn ghost" id="rerollBtn" onclick="reroll()">🔄 ${L==="en"?"Different challenge (once)":"Andere Aufgabe (einmal)"}</button>`}`;
 },
