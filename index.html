@@ -147,6 +147,14 @@
   .rate .rp{position:absolute;top:6px;right:9px;font:700 13px Fredoka,system-ui,sans-serif;color:var(--muted)}
   .rate.on{border-color:var(--coral);background:var(--coral-soft);box-shadow:0 3px 0 #D9492A}
   .rate.on .rp{color:var(--coral)}
+  .hintbtn{border-color:var(--plum);background:var(--plum-soft)}
+  .bonusbox{background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:14px;margin-top:14px}
+  .bonus{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:left;border:2px solid var(--line);background:#fff;border-radius:14px;padding:10px 12px;margin-top:8px;font:600 15px Nunito,system-ui,sans-serif;color:var(--ink)}
+  button.bonus{cursor:pointer} button.bonus:disabled{cursor:default}
+  .bonus.got{border-color:var(--teal);background:var(--teal-soft)}
+  .bonus.off{opacity:.6}
+  .bonus .bp{font:700 18px Fredoka,system-ui,sans-serif;color:var(--teal);flex:none}
+  .bonus.off .bp{color:var(--muted)}
   .hidden{display:none !important}
   .err{color:var(--coral);font-weight:700;font-size:14px;min-height:18px;margin-top:6px}
 </style>
@@ -629,8 +637,9 @@ challenge(){
     <div class="prompt">${esc(c.t)}</div>
     <p class="note" style="margin:0 0 10px">${fHow}</p>
     <div class="task">🎯 ${TASKS[L][p.level]}</div>
-    <button class="chip" style="margin-top:12px" onclick="$('hints').classList.toggle('show')">💬 ${L==="en"?"Useful words":"Nützliche Wörter"}</button>
-    <div class="hints ${p.level===0?"show":""}" id="hints">${c.w.map(w=>`<span class="hint">${esc(w)}</span>`).join("")}</div>
+    <button class="chip ${S.hintsUsed?"":"hintbtn"}" style="margin-top:12px" onclick="openHints()">💬 ${L==="en"?"Need help? Useful words":"Hilfe? Nützliche Wörter"}</button>
+    ${S.hintsUsed?"":`<p class="note" style="margin:6px 0 0">🙈 ${L==="en"?"Answer without help = +2 bonus":"Ohne Hilfe antworten = +2 Bonus"}</p>`}
+    <div class="hints ${S.hintsUsed?"show":""}" id="hints">${c.w.map(w=>`<span class="hint">${esc(w)}</span>`).join("")}</div>
   </div>
   <div id="timerBox" class="hidden">
     <div class="timer" id="timer">0:00</div>
@@ -655,6 +664,14 @@ feedback(){
         <span class="e">${r.e}</span><b>${r.en}</b><span class="de">${r.de}</span><span class="rp">+${r.pts}</span>
       </button>`).join("")}</div>
     ${S.needRating?`<p class="err" style="margin:8px 0 0">Coach: pick a score first · Bitte zuerst bewerten</p>`:""}
+  </div>
+  <div class="bonusbox">
+    <h3 style="margin:0 0 8px">🎁 Bonus</h3>
+    <div class="bonus ${S.hintsUsed?"off":"got"}"><span>🙈 <b>No hints</b> <span class="de">· Ohne Hilfe</span></span><span class="bp">${S.hintsUsed?"–":"+2"}</span></div>
+    <button class="bonus ${S.timeUp?(S.keptTalking?"got":"off"):"off"}" onclick="toggleKept()" ${S.timeUp?"":"disabled"}>
+      <span>🎤 <b>Kept talking to the end</b> <span class="de">· Bis zum Ende</span>${S.timeUp?`<br><span class="note">${S.keptTalking?"Tap to remove if they went quiet":"Tap if they really kept talking"}</span>`:`<br><span class="note">Finished before the timer · Vor Ablauf fertig</span>`}</span>
+      <span class="bp">${S.timeUp&&S.keptTalking?"+2":"–"}</span>
+    </button>
   </div>
   <h3 style="margin:18px 0 4px">👏 Table reactions <span class="de">· Reaktionen</span></h3>
   <p class="note" style="margin:0 0 10px">Everyone taps one — +1 point each · Jede Person tippt eine</p>
@@ -755,15 +772,20 @@ function removePlayer(i){ S.players.splice(i,1); render(); }
 function toSettings(){ if(S.players.length<2){ S.err="Add at least 2 players · Mindestens 2 Spieler"; render(); return; } S.err=""; go("settings"); }
 function setOpt(k,v){ S[k]=v; render(); }
 function setRounds(d){ S.rounds=Math.min(10,Math.max(1,S.rounds+d)); render(); }
-function resetScores(){ S.players.forEach(p=>{p.pts=0;p.coach=0;p.ratings=[];p.reacts={clear:0,creative:0,funny:0,learned:0};p.tips=[];}); }
+function resetScores(){ S.players.forEach(p=>{p.pts=0;p.coach=0;p.bonus=0;p.ratings=[];p.reacts={clear:0,creative:0,funny:0,learned:0};p.tips=[];}); }
 function startGame(){
   try{ audio = audio || new (window.AudioContext||window.webkitAudioContext)(); }catch(e){}
   keepAwake();
   resetScores(); S.log=[]; S.round=1; S.turn=0; S.rating=null; S.fmtCycle=Math.floor(Math.random()*3);
   bump("started"); go("handoff");
 }
-function showChallenge(){ keepAwake(); S.current=choosePrompt(S.players[S.turn].lang, S.players[S.turn].level); S.rerolled=false; go("challenge"); }
-function reroll(){ S.current=choosePrompt(S.players[S.turn].lang, S.players[S.turn].level); S.rerolled=true; render(); }
+function showChallenge(){ keepAwake(); S.current=choosePrompt(S.players[S.turn].lang, S.players[S.turn].level); S.rerolled=false; S.hintsUsed=false; S.timeUp=false; go("challenge"); }
+function reroll(){ S.current=choosePrompt(S.players[S.turn].lang, S.players[S.turn].level); S.rerolled=true; S.hintsUsed=false; render(); }
+function openHints(){
+  S.hintsUsed=true;
+  const h=$("hints"); if(h) h.classList.add("show");
+  const btn=document.querySelector(".hintbtn"); if(btn){ btn.classList.remove("hintbtn"); const n=btn.nextElementSibling; if(n && n.classList.contains("note")) n.remove(); }
+}
 function startTimer(){
   try{ if(audio && audio.state==="suspended") audio.resume(); }catch(e){}
   S.total = S.current.f==="quick" ? Math.round(S.time/2) : S.time; S.left=S.total;
@@ -778,8 +800,10 @@ function tick(){
   const low=S.left<=10; t.classList.toggle("low",low); $("bar").classList.toggle("low",low);
   $("barFill").style.width=`${Math.max(S.left,0)/S.total*100}%`;
 }
-function stopTimer(ended){ if(S.timerId){ clearInterval(S.timerId); S.timerId=null; } if(ended){ beep(); const t=$("timer"); if(t) t.textContent="⏰ Time!"; } }
-function finishTurn(){ stopTimer(false); S.turnReacts={clear:0,creative:0,funny:0,learned:0}; S.turnRating=0; S.turnAns=""; S.turnTip=""; S.needRating=false; go("feedback"); }
+function stopTimer(ended){ if(S.timerId){ clearInterval(S.timerId); S.timerId=null; } if(ended){ S.timeUp=true; beep(); const t=$("timer"); if(t) t.textContent="⏰ Time!"; const d=$("doneBtn"); if(d) d.innerHTML="✓ Time's up – feedback<small>Zeit um – Feedback</small>"; } }
+function finishTurn(){ stopTimer(false); S.turnReacts={clear:0,creative:0,funny:0,learned:0}; S.turnRating=0; S.turnAns=""; S.turnTip=""; S.needRating=false; S.keptTalking=!!S.timeUp; go("feedback"); }
+function toggleKept(){ if(!S.timeUp) return; S.keptTalking=!S.keptTalking; const y=window.scrollY; render(); window.scrollTo(0,y); }
+function turnBonus(){ const b=[]; if(!S.hintsUsed) b.push({k:"nohints",e:"🙈",en:"No hints",de:"Ohne Hilfe",pts:2}); if(S.timeUp && S.keptTalking) b.push({k:"kept",e:"🎤",en:"Kept talking",de:"Bis zum Ende gesprochen",pts:2}); return b; }
 function setRating(v){ S.turnRating=v; S.needRating=false; const y=window.scrollY; render(); window.scrollTo(0,y); }
 function react(k){ S.turnReacts[k]++; const y=window.scrollY; render(); window.scrollTo(0,y); }
 function resetReacts(){ S.turnReacts={clear:0,creative:0,funny:0,learned:0}; render(); }
@@ -789,9 +813,11 @@ function nextTurn(){
   const p=S.players[S.turn], tip=(S.turnTip||"").trim(), ans=(S.turnAns||"").trim();
   const R=RATINGS.find(r=>r.v===S.turnRating);
   if(tip) p.tips.push(tip);
-  S.log.push({pi:S.turn, round:S.round, q:S.current.t, f:S.current.f, c:S.current.c, words:S.current.w.slice(), ans, tip, rating:R.v, reacts:{...S.turnReacts}});
+  const bonus=turnBonus();
+  S.log.push({pi:S.turn, round:S.round, q:S.current.t, f:S.current.f, c:S.current.c, words:S.current.w.slice(), ans, tip, rating:R.v, bonus:bonus.map(b=>b.k), reacts:{...S.turnReacts}});
   p.coach+=R.pts; p.ratings.push(R.v);
-  let gained=R.pts; for(const k in S.turnReacts){ p.reacts[k]+=S.turnReacts[k]; gained+=S.turnReacts[k]; }
+  p.bonus=(p.bonus||0)+bonus.reduce((a,b)=>a+b.pts,0);
+  let gained=R.pts+bonus.reduce((a,b)=>a+b.pts,0); for(const k in S.turnReacts){ p.reacts[k]+=S.turnReacts[k]; gained+=S.turnReacts[k]; }
   p.pts+=gained;
   if(isLastTurn()){ bump("completed"); go("results"); return; }
   S.turn++; if(S.turn>=S.players.length){ S.turn=0; S.round++; }
@@ -813,6 +839,7 @@ function playerReview(i){
     out+=`${n+1}) ${f.e} ${L==="en"?f.en:f.de} · ${c.e} ${L==="en"?c.en:c.de}\n`;
     out+=`❓ ${x.q}\n`;
     if(x.rating){ const R=RATINGS[x.rating-1]; out+=`🧑‍🏫 ${t("Coach score","Bewertung")}: ${R.e} ${L==="en"?R.en:R.de}\n`; }
+    if(x.bonus && x.bonus.length) out+=`🎁 Bonus: ${x.bonus.map(k=>k==="nohints"?t("🙈 No hints","🙈 Ohne Hilfe"):t("🎤 Kept talking","🎤 Bis zum Ende gesprochen")).join(", ")}\n`;
     if(x.ans) out+=`✍️ ${t("You said","Du hast gesagt")}: ${x.ans}\n`;
     if(x.tip) out+=`💡 ${t("Tip","Tipp")}: ${x.tip}\n`;
     out+=`📚 ${t("Useful words","Nützliche Wörter")}: ${x.words.join(", ")}\n`;
@@ -831,6 +858,7 @@ function gameReview(){
     S.log.filter(t=>t.pi===i).forEach((x,n)=>{
       out+=`${n+1}) ${x.q}\n`;
       if(x.rating){ const R=RATINGS[x.rating-1]; out+=`   🧑‍🏫 ${R.e} ${R.en}\n`; }
+      if(x.bonus && x.bonus.length) out+=`   🎁 ${x.bonus.map(k=>k==="nohints"?"🙈 No hints":"🎤 Kept talking").join(", ")}\n`;
       if(x.ans) out+=`   ✍️ ${x.ans}\n`;
       if(x.tip) out+=`   💡 ${x.tip}\n`;
       out+=`   👏 ${reactLine(x.reacts)}\n`;
