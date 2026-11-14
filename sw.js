@@ -1,6 +1,6 @@
 // PonteTalk offline support: the game keeps working with weak or no signal.
-const CACHE = "pontetalk-v1";
-const CORE = ["/", "/index.html", "/manifest.webmanifest", "/icon-192.png", "/icon-512.png", "/apple-touch-icon.png"];
+const CACHE = "pontetalk-v3";
+const CORE = ["/", "/index.html", "/manifest.webmanifest", "/icon-192.png", "/icon-512.png", "/apple-touch-icon.png", "/supabase.js"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting()));

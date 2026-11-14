@@ -4,12 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#FFF6EC">
-<meta name="description" content="PonteTalk – a speaking game for English & German learners. Pass the phone, speak, connect.">
+<meta name="description" content="PonteTalk – a speaking game for language learners: English, German, Spanish, Portuguese, Polish, Ukrainian and Arabic. Pass the phone, speak, connect.">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="PonteTalk">
 <link rel="manifest" href="manifest.webmanifest">
+<script src="supabase.js" defer></script>
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <title>PonteTalk · Speak. Connect. Play.</title>
@@ -155,6 +156,21 @@
   .bonus.off{opacity:.6}
   .bonus .bp{font:700 18px Fredoka,system-ui,sans-serif;color:var(--teal);flex:none}
   .bonus.off .bp{color:var(--muted)}
+  .chip.lang.on{border-color:var(--coral);background:var(--coral-soft)}
+  .flagrow{display:flex;justify-content:center;gap:8px;font-size:22px;margin-top:10px}
+  [dir=rtl] .prompt,[dir=rtl] .peek-q{font-family:"Noto Naskh Arabic","Geeza Pro","Segoe UI",Tahoma,sans-serif;line-height:1.6}
+  .big-cta2{font-size:19px;padding:16px;margin:-6px 0 16px}
+  .roomcode{font:700 54px Fredoka,system-ui,sans-serif;letter-spacing:.18em;color:var(--coral);margin:2px 0}
+  .obanner{background:var(--sun-soft);border-radius:14px;padding:10px 12px;font-weight:700;font-size:14px;margin-bottom:12px}
+  .obanner.bad{background:var(--coral-soft);color:#9A2E16}
+  .dot{width:12px;height:12px;border-radius:50%;background:#C9C2D6;margin-left:auto;flex:none}
+  .dot.on{background:var(--teal);box-shadow:0 0 0 4px var(--teal-soft)}
+  .player .x{margin-left:6px}
+  .or{text-align:center;color:var(--muted);font-weight:700;margin:14px 0 4px}
+  .turnwho{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+  .turnwho .avatar{width:48px;height:48px;font-size:22px}
+  .resume{background:var(--teal-soft);border-color:var(--teal)}
+  .react:disabled,.rate:disabled{cursor:default;opacity:.85}
   .hidden{display:none !important}
   .err{color:var(--coral);font-weight:700;font-size:14px;min-height:18px;margin-top:6px}
 </style>
@@ -194,6 +210,10 @@ const TASKS = {
   en:["Answer in 1–2 short sentences. Short is great!","Answer in 2–3 simple sentences.","Give a reason and one example.","Use a connector (although, however, so that) — and an idiom if you can!"],
   de:["Antworte in 1–2 kurzen Sätzen. Kurz ist super!","Antworte in 2–3 einfachen Sätzen.","Nenne einen Grund und ein Beispiel.","Benutze einen Nebensatz (weil, obwohl, damit) – und eine Redewendung, wenn du kannst!"]
 };
+
+/* Game text for each practice language */
+const T = {"en": {"name": "English", "nameEn": "English", "nameDe": "Englisch", "flag": "🇬🇧", "code": "EN", "dir": "ltr", "color": "#6C4AB6", "round": "Round", "ready": "I'm ready!", "startTimer": "Start timer", "startSub": "Then answer out loud to the table", "done": "I'm done", "reroll": "Different challenge (once)", "help": "Need help? Useful words", "nohint": "Answer without help = +2 bonus", "tasks": ["Answer in 1–2 short sentences. Short is great!", "Answer in 2–3 simple sentences.", "Give a reason and one example.", "Use a connector (although, however, so that) — and an idiom if you can!"], "fmt": {"role": "Role Play", "quick": "Quick Response", "wwyd": "What Would You Do?"}, "how": {"role": "Pick someone at the table to play the other person.", "quick": "Answer fast — no overthinking!", "wwyd": "Explain what you would do and why."}, "a1wwyd": "What do you do?", "a1how": "Say what you do. Simple is great!", "cats": {"everyday": "Everyday Life", "social": "Social", "work": "Work & Career", "travel": "Travel", "mix": "Surprise me"}, "levels": ["Starter", "Beginner", "Intermediate", "Advanced"], "ratings": ["Keep practicing", "Good", "Great", "Excellent"], "r": {"bonus": "Bonus", "title": "Your practice review", "points": "Points", "coach": "Coach score", "nohints": "No hints", "kept": "Kept talking", "said": "You said", "tip": "Tip", "words": "Useful words", "reacts": "Reactions", "practice": "Practice idea: answer each question again at home — out loud, using the tip and the useful words.", "again": "Play again", "none": "No turns played yet."}}, "de": {"name": "Deutsch", "nameEn": "German", "nameDe": "Deutsch", "flag": "🇩🇪", "code": "DE", "dir": "ltr", "color": "#167B70", "round": "Runde", "ready": "Ich bin bereit!", "startTimer": "Timer starten", "startSub": "Dann antworte laut für alle", "done": "Fertig", "reroll": "Andere Aufgabe (einmal)", "help": "Hilfe? Nützliche Wörter", "nohint": "Ohne Hilfe antworten = +2 Bonus", "tasks": ["Antworte in 1–2 kurzen Sätzen. Kurz ist super!", "Antworte in 2–3 einfachen Sätzen.", "Nenne einen Grund und ein Beispiel.", "Benutze einen Nebensatz (weil, obwohl, damit) – und eine Redewendung, wenn du kannst!"], "fmt": {"role": "Rollenspiel", "quick": "Schnelle Antwort", "wwyd": "Was würdest du tun?"}, "how": {"role": "Wähle eine Person am Tisch für die andere Rolle.", "quick": "Antworte schnell – nicht zu lange nachdenken!", "wwyd": "Erkläre, was du tun würdest und warum."}, "a1wwyd": "Was machst du?", "a1how": "Sag, was du machst. Einfach ist super!", "cats": {"everyday": "Alltag", "social": "Soziales", "work": "Arbeit & Beruf", "travel": "Reisen", "mix": "Überrasch mich"}, "levels": ["Einsteiger", "Anfänger", "Mittelstufe", "Fortgeschritten"], "ratings": ["Weiter üben", "Gut", "Sehr gut", "Ausgezeichnet"], "r": {"bonus": "Bonus", "title": "Deine Übungs-Auswertung", "points": "Punkte", "coach": "Bewertung", "nohints": "Ohne Hilfe", "kept": "Bis zum Ende gesprochen", "said": "Du hast gesagt", "tip": "Tipp", "words": "Nützliche Wörter", "reacts": "Reaktionen", "practice": "Übungsidee: Beantworte jede Frage zu Hause noch einmal laut – mit dem Tipp und den nützlichen Wörtern.", "again": "Nochmal spielen", "none": "Noch keine Runden gespielt."}}, "es": {"name": "Español", "nameEn": "Spanish", "nameDe": "Spanisch", "flag": "🇪🇸", "code": "ES", "dir": "ltr", "color": "#C2410C", "round": "Ronda", "ready": "¡Estoy listo/a!", "startTimer": "Iniciar temporizador", "startSub": "Luego responde en voz alta para todos", "done": "He terminado", "reroll": "Otro reto (una vez)", "help": "¿Ayuda? Palabras útiles", "nohint": "Responder sin ayuda = +2 de bonus", "tasks": ["Responde en 1–2 frases cortas. ¡Corto está genial!", "Responde en 2–3 frases sencillas.", "Da una razón y un ejemplo.", "Usa un conector (aunque, sin embargo, para que) — ¡y una expresión si puedes!"], "fmt": {"role": "Juego de rol", "quick": "Respuesta rápida", "wwyd": "¿Qué harías?"}, "how": {"role": "Elige a alguien de la mesa para hacer el otro papel.", "quick": "Responde rápido, ¡sin pensarlo mucho!", "wwyd": "Explica qué harías y por qué."}, "a1wwyd": "¿Qué haces?", "a1how": "Di qué haces. ¡Sencillo está genial!", "cats": {"everyday": "Vida diaria", "social": "Vida social", "work": "Trabajo", "travel": "Viajes", "mix": "Sorpréndeme"}, "levels": ["Inicial", "Principiante", "Intermedio", "Avanzado"], "ratings": ["Sigue practicando", "Bien", "Muy bien", "Excelente"], "r": {"bonus": "Bonus", "title": "Tu resumen de práctica", "points": "Puntos", "coach": "Nota del coach", "nohints": "Sin ayuda", "kept": "Habló hasta el final", "said": "Dijiste", "tip": "Consejo", "words": "Palabras útiles", "reacts": "Reacciones", "practice": "Idea para practicar: responde otra vez cada pregunta en casa, en voz alta, usando el consejo y las palabras útiles.", "again": "Jugar otra vez", "none": "Todavía no se ha jugado ninguna ronda."}}, "pt": {"name": "Português", "nameEn": "Portuguese", "nameDe": "Portugiesisch", "flag": "🇧🇷", "code": "PT", "dir": "ltr", "color": "#15803D", "round": "Rodada", "ready": "Estou pronto/a!", "startTimer": "Iniciar cronômetro", "startSub": "Depois responda em voz alta para todos", "done": "Terminei", "reroll": "Outro desafio (uma vez)", "help": "Precisa de ajuda? Palavras úteis", "nohint": "Responder sem ajuda = +2 de bônus", "tasks": ["Responda em 1–2 frases curtas. Curto está ótimo!", "Responda em 2–3 frases simples.", "Dê um motivo e um exemplo.", "Use um conector (embora, porém, para que) — e uma expressão, se puder!"], "fmt": {"role": "Encenação", "quick": "Resposta rápida", "wwyd": "O que você faria?"}, "how": {"role": "Escolha alguém da mesa para fazer o outro papel.", "quick": "Responda rápido — sem pensar demais!", "wwyd": "Explique o que você faria e por quê."}, "a1wwyd": "O que você faz?", "a1how": "Diga o que você faz. Simples está ótimo!", "cats": {"everyday": "Dia a dia", "social": "Vida social", "work": "Trabalho", "travel": "Viagens", "mix": "Me surpreenda"}, "levels": ["Inicial", "Iniciante", "Intermediário", "Avançado"], "ratings": ["Continue praticando", "Bom", "Muito bom", "Excelente"], "r": {"bonus": "Bônus", "title": "Seu resumo de prática", "points": "Pontos", "coach": "Nota do coach", "nohints": "Sem ajuda", "kept": "Falou até o fim", "said": "Você disse", "tip": "Dica", "words": "Palavras úteis", "reacts": "Reações", "practice": "Ideia para praticar: responda de novo cada pergunta em casa, em voz alta, usando a dica e as palavras úteis.", "again": "Jogar de novo", "none": "Nenhuma rodada jogada ainda."}}, "pl": {"name": "Polski", "nameEn": "Polish", "nameDe": "Polnisch", "flag": "🇵🇱", "code": "PL", "dir": "ltr", "color": "#BE123C", "round": "Runda", "ready": "Jestem gotowy/gotowa!", "startTimer": "Uruchom minutnik", "startSub": "Potem odpowiedz na głos przy stole", "done": "Skończyłem/am", "reroll": "Inne zadanie (raz)", "help": "Potrzebujesz pomocy? Przydatne słowa", "nohint": "Odpowiedź bez pomocy = +2 punkty bonusowe", "tasks": ["Odpowiedz 1–2 krótkimi zdaniami. Krótko jest super!", "Odpowiedz 2–3 prostymi zdaniami.", "Podaj powód i przykład.", "Użyj spójnika (chociaż, jednak, żeby) — i idiomu, jeśli potrafisz!"], "fmt": {"role": "Scenka", "quick": "Szybka odpowiedź", "wwyd": "Co byś zrobił/a?"}, "how": {"role": "Wybierz osobę przy stole do drugiej roli.", "quick": "Odpowiadaj szybko — bez długiego namysłu!", "wwyd": "Wyjaśnij, co byś zrobił/a i dlaczego."}, "a1wwyd": "Co robisz?", "a1how": "Powiedz, co robisz. Prosto jest super!", "cats": {"everyday": "Codzienność", "social": "Życie towarzyskie", "work": "Praca", "travel": "Podróże", "mix": "Zaskocz mnie"}, "levels": ["Start", "Podstawowy", "Średniozaawansowany", "Zaawansowany"], "ratings": ["Ćwicz dalej", "Dobrze", "Bardzo dobrze", "Doskonale"], "r": {"bonus": "Bonus", "title": "Twoje podsumowanie ćwiczeń", "points": "Punkty", "coach": "Ocena trenera", "nohints": "Bez pomocy", "kept": "Mówił/a do końca", "said": "Powiedziałeś/aś", "tip": "Wskazówka", "words": "Przydatne słowa", "reacts": "Reakcje", "practice": "Pomysł na ćwiczenie: odpowiedz w domu jeszcze raz na każde pytanie — na głos, korzystając ze wskazówki i przydatnych słów.", "again": "Zagraj ponownie", "none": "Nie rozegrano jeszcze żadnej rundy."}}, "uk": {"name": "Українська", "nameEn": "Ukrainian", "nameDe": "Ukrainisch", "flag": "🇺🇦", "code": "UK", "dir": "ltr", "color": "#1D4ED8", "round": "Раунд", "ready": "Я готовий/готова!", "startTimer": "Запустити таймер", "startSub": "Потім відповідай уголос для всіх", "done": "Я закінчив/ла", "reroll": "Інше завдання (один раз)", "help": "Потрібна допомога? Корисні слова", "nohint": "Відповідь без допомоги = +2 бонус", "tasks": ["Відповідай 1–2 короткими реченнями. Коротко — це супер!", "Відповідай 2–3 простими реченнями.", "Наведи причину і приклад.", "Використай сполучник (хоча, однак, щоб) — і ідіому, якщо можеш!"], "fmt": {"role": "Рольова гра", "quick": "Швидка відповідь", "wwyd": "Що б ти зробив/ла?"}, "how": {"role": "Обери когось за столом на іншу роль.", "quick": "Відповідай швидко — не задумуйся!", "wwyd": "Поясни, що б ти зробив/ла і чому."}, "a1wwyd": "Що ти робиш?", "a1how": "Скажи, що ти робиш. Просто — це супер!", "cats": {"everyday": "Повсякдення", "social": "Спілкування", "work": "Робота", "travel": "Подорожі", "mix": "Здивуй мене"}, "levels": ["Старт", "Початковий", "Середній", "Просунутий"], "ratings": ["Практикуйся далі", "Добре", "Дуже добре", "Відмінно"], "r": {"bonus": "Бонус", "title": "Твій підсумок практики", "points": "Бали", "coach": "Оцінка коуча", "nohints": "Без підказок", "kept": "Говорив/ла до кінця", "said": "Ти сказав/ла", "tip": "Порада", "words": "Корисні слова", "reacts": "Реакції", "practice": "Ідея для практики: удома ще раз відповідай уголос на кожне запитання, використовуючи пораду і корисні слова.", "again": "Грати знову", "none": "Ще не зіграно жодного раунду."}}, "ar": {"name": "العربية", "nameEn": "Arabic", "nameDe": "Arabisch", "flag": "🇸🇦", "code": "AR", "dir": "rtl", "color": "#A16207", "round": "الجولة", "ready": "أنا جاهز!", "startTimer": "ابدأ المؤقت", "startSub": "ثم أجب بصوت عالٍ أمام الجميع", "done": "انتهيت", "reroll": "تحدٍّ آخر (مرة واحدة)", "help": "تحتاج مساعدة؟ كلمات مفيدة", "nohint": "الإجابة بدون مساعدة = نقطتان إضافيتان", "tasks": ["أجب بجملة أو جملتين قصيرتين. القصير رائع!", "أجب بجملتين أو ثلاث جمل بسيطة.", "اذكر سببًا ومثالًا.", "استخدم أداة ربط (مع أنّ، لكنّ، لكي) — وتعبيرًا اصطلاحيًا إن استطعت!"], "fmt": {"role": "لعب أدوار", "quick": "إجابة سريعة", "wwyd": "ماذا كنت ستفعل؟"}, "how": {"role": "اختر شخصًا على الطاولة ليؤدي الدور الآخر.", "quick": "أجب بسرعة — بدون تفكير طويل!", "wwyd": "اشرح ماذا كنت ستفعل ولماذا."}, "a1wwyd": "ماذا تفعل؟", "a1how": "قل ماذا تفعل. البساطة رائعة!", "cats": {"everyday": "الحياة اليومية", "social": "الحياة الاجتماعية", "work": "العمل", "travel": "السفر", "mix": "فاجئني"}, "levels": ["مبتدئ جدًا", "مبتدئ", "متوسط", "متقدم"], "ratings": ["واصل التدريب", "جيد", "جيد جدًا", "ممتاز"], "r": {"bonus": "مكافأة", "title": "ملخص تدريبك", "points": "النقاط", "coach": "تقييم المدرب", "nohints": "بدون مساعدة", "kept": "تحدث حتى النهاية", "said": "قلت", "tip": "نصيحة", "words": "كلمات مفيدة", "reacts": "التفاعلات", "practice": "فكرة للتدريب: أجب عن كل سؤال مرة أخرى في البيت بصوت عالٍ، مستخدمًا النصيحة والكلمات المفيدة.", "again": "العب مرة أخرى", "none": "لم تُلعب أي جولة بعد."}}};
+const LANG_KEYS = ["en", "de", "es", "pt", "pl", "uk", "ar"];
 
 const P = {
  en:{
@@ -448,6 +468,10 @@ const REACTS = [
 ];
 const COLORS = ["#FF6B4A","#6C4AB6","#20A99A","#E9A21C","#E0457B","#3D7BD9","#7A9A2B","#9C5B3B","#0E8FB0","#B44AA0"];
 
+/* Spanish, Brazilian Portuguese, Polish, Ukrainian, Arabic (MSA) */
+Object.assign(P, {"es": {"everyday": {"role": [{"t": "Estás en la farmacia. Explica que te duele la cabeza y pregunta qué puedes tomar.", "w": ["el dolor de cabeza", "el analgésico", "¿Cada cuánto?"]}, {"t": "La música de tus vecinos está muy alta a las 11 de la noche. Llama a la puerta y pídeles con educación que la bajen.", "w": ["Perdona que te moleste", "bajar el volumen", "madrugar"]}, {"t": "Estás en correos y quieres enviar un paquete al extranjero. Pregunta el precio y cuánto tarda.", "w": ["el paquete", "el envío", "el número de seguimiento"]}], "quick": [{"t": "¿Qué desayunaste hoy?", "w": ["normalmente", "una tostada", "un café"]}, {"t": "Describe tu domingo perfecto en tres frases.", "w": ["dormir hasta tarde", "relajarse", "dar un paseo"]}, {"t": "¿Qué llevas siempre contigo y por qué?", "w": ["las llaves", "la cartera", "por si acaso"]}], "wwyd": [{"t": "Llegas a casa y te das cuenta de que tus llaves siguen en el trabajo. ¿Qué harías?", "w": ["el cerrajero", "la llave de repuesto", "llamar a alguien"]}, {"t": "El cajero te da demasiado cambio. ¿Qué harías?", "w": ["honesto", "el cambio", "devolverlo"]}, {"t": "Tu lavadora se rompe e inunda la cocina. ¿Qué harías primero?", "w": ["apagar", "el casero", "secar el suelo"]}]}, "social": {"role": [{"t": "Conoces a alguien nuevo en una fiesta. Preséntate y encuentra dos cosas en común.", "w": ["Encantado/a", "¿Y tú?", "¡Yo también!"]}, {"t": "Invita a un amigo al cine este fin de semana. Acordad el día, la hora y la película.", "w": ["¿Estás libre?", "¿Qué tal si…?", "¡Me parece bien!"]}, {"t": "Una amiga cancela los planes en el último momento, otra vez. Dile con amabilidad cómo te sientes.", "w": ["decepcionado/a", "la próxima vez", "Lo entiendo, pero…"]}], "quick": [{"t": "¿Qué es lo mejor que te ha pasado esta semana?", "w": ["la verdad", "tener suerte", "por fin"]}, {"t": "Recomienda al grupo una canción, una película o un libro. ¿Por qué deberíamos probarlo?", "w": ["merece la pena", "imprescindible", "Os va a encantar"]}, {"t": "¿Qué hobby te gustaría probar algún día?", "w": ["Siempre he querido", "probar", "algún día"]}], "wwyd": [{"t": "Olvidaste el cumpleaños de tu mejor amiga. Fue ayer. ¿Qué harías?", "w": ["pedir perdón", "compensarlo", "con retraso"]}, {"t": "Estás invitado/a a cenar y la comida no te gusta nada. ¿Qué harías?", "w": ["con educación", "no tener mucha hambre", "probar"]}, {"t": "Alguien en la mesa no ha dicho ni una palabra en toda la noche. ¿Qué harías?", "w": ["incluir", "hacer una pregunta", "sentirse bienvenido"]}]}, "work": {"role": [{"t": "Estás en una entrevista de trabajo. Describe tu mayor fortaleza con un ejemplo.", "w": ["responsable", "por ejemplo", "trabajar en equipo"]}, {"t": "Llama a tu jefa: estás enfermo/a y hoy no puedes ir.", "w": ["encontrarse mal", "ir al médico", "ponerse al día"]}, {"t": "Pídele a un compañero que te cambie el turno el próximo viernes.", "w": ["un favor", "cambiar el turno", "devolver el favor"]}], "quick": [{"t": "Describe tu trabajo ideal en una frase.", "w": ["trabajar con", "ser responsable de", "flexible"]}, {"t": "¿Cuál es la habilidad más útil que has aprendido?", "w": ["la habilidad", "aprender", "muy práctico"]}, {"t": "¿Café o té en el trabajo? ¿Por qué?", "w": ["prefiero", "me mantiene despierto/a", "el descanso"]}], "wwyd": [{"t": "Un compañero siempre presenta tu trabajo como suyo. ¿Qué harías?", "w": ["hablar claro", "el reconocimiento", "el jefe"]}, {"t": "Te ofrecen un trabajo genial, pero en otro país. ¿Qué harías?", "w": ["la oportunidad", "mudarse al extranjero", "la familia"]}, {"t": "Cometiste un error que le cuesta dinero a tu empresa. ¿Qué harías?", "w": ["admitirlo", "solucionarlo", "la responsabilidad"]}]}, "travel": {"role": [{"t": "Han cancelado tu vuelo. Habla con la aerolínea y pide un vuelo nuevo y un hotel.", "w": ["cambiar el vuelo", "el vale", "la compensación"]}, {"t": "En la recepción del hotel: tu habitación no está limpia. Pide otra habitación.", "w": ["quejarse", "lamentablemente", "¿Podría…?"]}, {"t": "Pregunta a una persona del lugar cómo llegar a la estación y dónde se come bien cerca.", "w": ["Disculpe", "todo recto", "recomendar"]}], "quick": [{"t": "¿Cuál es el lugar más bonito que has visitado?", "w": ["impresionante", "la comida", "inolvidable"]}, {"t": "¿Ventanilla o pasillo? ¿Por qué?", "w": ["las vistas", "el espacio para las piernas", "levantarse"]}, {"t": "Di tres cosas que siempre llevas en la maleta.", "w": ["el cargador", "el pasaporte", "la crema solar"]}], "wwyd": [{"t": "Pierdes el pasaporte el último día de tus vacaciones. ¿Qué harías?", "w": ["la embajada", "la denuncia", "la emergencia"]}, {"t": "Pierdes el último tren a casa a medianoche. ¿Qué harías?", "w": ["el taxi", "pasar la noche", "compartir coche"]}, {"t": "Tu compañero de viaje quiere cambiar todos los planes el primer día. ¿Qué harías?", "w": ["llegar a un acuerdo", "separarse un día", "flexible"]}]}}, "pt": {"everyday": {"role": [{"t": "Você está na farmácia. Explique que está com dor de cabeça e pergunte o que pode tomar.", "w": ["a dor de cabeça", "o analgésico", "De quanto em quanto tempo?"]}, {"t": "A música dos seus vizinhos está muito alta às 23h. Bata na porta e peça com educação para abaixarem o volume.", "w": ["Desculpe incomodar", "abaixar o volume", "acordar cedo"]}, {"t": "Você está nos Correios e quer mandar um pacote para o exterior. Pergunte o preço e quanto tempo demora.", "w": ["o pacote", "a entrega", "o código de rastreio"]}], "quick": [{"t": "O que você tomou no café da manhã hoje?", "w": ["normalmente", "pão com manteiga", "um cafezinho"]}, {"t": "Descreva o seu domingo perfeito em três frases.", "w": ["dormir até tarde", "relaxar", "dar uma volta"]}, {"t": "O que você sempre leva com você — e por quê?", "w": ["as chaves", "a carteira", "por via das dúvidas"]}], "wwyd": [{"t": "Você chega em casa e percebe que as chaves ficaram no trabalho. O que você faria?", "w": ["o chaveiro", "a chave reserva", "ligar para alguém"]}, {"t": "O caixa te dá troco a mais. O que você faria?", "w": ["honesto", "o troco", "devolver"]}, {"t": "A sua máquina de lavar quebra e alaga a cozinha. O que você faria primeiro?", "w": ["desligar", "o proprietário", "secar o chão"]}]}, "social": {"role": [{"t": "Você conhece alguém numa festa. Apresente-se e descubram duas coisas em comum.", "w": ["Prazer!", "E você?", "Eu também!"]}, {"t": "Convide um amigo para ir ao cinema neste fim de semana. Combinem o dia, a hora e o filme.", "w": ["Você está livre?", "Que tal…?", "Combinado!"]}, {"t": "Uma amiga cancela os planos em cima da hora — de novo. Diga a ela, com carinho, como você se sente.", "w": ["chateado/a", "da próxima vez", "Eu entendo, mas…"]}], "quick": [{"t": "Qual foi a melhor coisa que aconteceu com você esta semana?", "w": ["na verdade", "dar sorte", "finalmente"]}, {"t": "Recomende ao grupo uma música, um filme ou um livro. Por que devemos experimentar?", "w": ["vale a pena", "imperdível", "Vocês vão adorar"]}, {"t": "Que hobby você gostaria de experimentar um dia?", "w": ["Sempre quis", "experimentar", "um dia"]}], "wwyd": [{"t": "Você esqueceu o aniversário da sua melhor amiga. Foi ontem. O que você faria?", "w": ["pedir desculpas", "compensar", "atrasado"]}, {"t": "Você foi convidado/a para jantar e não gostou nada da comida. O que você faria?", "w": ["com educação", "estar sem muita fome", "provar"]}, {"t": "Alguém na mesa não disse uma palavra a noite toda. O que você faria?", "w": ["incluir", "fazer uma pergunta", "se sentir bem-vindo"]}]}, "work": {"role": [{"t": "Você está numa entrevista de emprego. Descreva o seu maior ponto forte com um exemplo.", "w": ["responsável", "por exemplo", "trabalho em equipe"]}, {"t": "Ligue para a sua chefe: você está doente e não pode ir hoje.", "w": ["estar passando mal", "ir ao médico", "colocar em dia"]}, {"t": "Peça a um colega para trocar de turno com você na próxima sexta.", "w": ["um favor", "trocar o turno", "retribuir o favor"]}], "quick": [{"t": "Descreva o emprego dos seus sonhos em uma frase.", "w": ["trabalhar com", "ser responsável por", "flexível"]}, {"t": "Qual é a habilidade mais útil que você já aprendeu?", "w": ["a habilidade", "aprender", "muito prático"]}, {"t": "Café ou chá no trabalho — e por quê?", "w": ["prefiro", "me deixa acordado/a", "a pausa"]}], "wwyd": [{"t": "Um colega sempre apresenta o seu trabalho como se fosse dele. O que você faria?", "w": ["falar abertamente", "o reconhecimento", "o gerente"]}, {"t": "Você recebe uma ótima proposta de emprego — mas em outro país. O que você faria?", "w": ["a oportunidade", "mudar para o exterior", "a família"]}, {"t": "Você cometeu um erro que custa dinheiro à sua empresa. O que você faria?", "w": ["admitir", "resolver", "a responsabilidade"]}]}, "travel": {"role": [{"t": "O seu voo foi cancelado. Fale com a companhia aérea e peça um novo voo e um hotel.", "w": ["remarcar", "o voucher", "a indenização"]}, {"t": "Na recepção do hotel: o seu quarto não está limpo. Peça outro quarto.", "w": ["reclamar", "infelizmente", "Você poderia…?"]}, {"t": "Pergunte a um morador como chegar à estação e onde comer bem por perto.", "w": ["Com licença", "sempre em frente", "recomendar"]}], "quick": [{"t": "Qual é o lugar mais bonito que você já visitou?", "w": ["de tirar o fôlego", "a comida", "inesquecível"]}, {"t": "Janela ou corredor — e por quê?", "w": ["a vista", "o espaço para as pernas", "levantar"]}, {"t": "Diga três coisas que você sempre leva na mala.", "w": ["o carregador", "o passaporte", "o protetor solar"]}], "wwyd": [{"t": "Você perde o passaporte no último dia das férias. O que você faria?", "w": ["a embaixada", "o boletim de ocorrência", "a emergência"]}, {"t": "Você perde o último trem para casa à meia-noite. O que você faria?", "w": ["o táxi", "passar a noite", "dividir uma carona"]}, {"t": "O seu parceiro de viagem quer mudar todos os planos no primeiro dia. O que você faria?", "w": ["chegar a um acordo", "se separar por um dia", "flexível"]}]}}, "pl": {"everyday": {"role": [{"t": "Jesteś w aptece. Wyjaśnij, że boli cię głowa, i zapytaj, co możesz wziąć.", "w": ["ból głowy", "tabletka przeciwbólowa", "Jak często?"]}, {"t": "Muzyka u sąsiadów o 23:00 jest za głośna. Zapukaj i grzecznie poproś, żeby ściszyli.", "w": ["Przepraszam, że przeszkadzam", "ściszyć", "wcześnie wstaję"]}, {"t": "Jesteś na poczcie i chcesz wysłać paczkę za granicę. Zapytaj o cenę i jak długo to potrwa.", "w": ["paczka", "dostawa", "numer przesyłki"]}], "quick": [{"t": "Co dziś zjadłeś/zjadłaś na śniadanie?", "w": ["zwykle", "kanapka", "kawa"]}, {"t": "Opisz swoją idealną niedzielę w trzech zdaniach.", "w": ["wyspać się", "odpocząć", "iść na spacer"]}, {"t": "Co zawsze masz przy sobie — i dlaczego?", "w": ["klucze", "portfel", "na wszelki wypadek"]}], "wwyd": [{"t": "Wracasz do domu i orientujesz się, że klucze zostały w pracy. Co byś zrobił/zrobiła?", "w": ["ślusarz", "zapasowy klucz", "zadzwonić do kogoś"]}, {"t": "Kasjerka wydaje ci za dużo reszty. Co byś zrobił/zrobiła?", "w": ["uczciwy", "reszta", "oddać"]}, {"t": "Twoja pralka się psuje i zalewa kuchnię. Co byś zrobił/zrobiła najpierw?", "w": ["wyłączyć", "właściciel mieszkania", "wytrzeć podłogę"]}]}, "social": {"role": [{"t": "Na imprezie poznajesz kogoś nowego. Przedstaw się i znajdźcie dwie wspólne rzeczy.", "w": ["Miło mi", "A ty?", "Ja też!"]}, {"t": "Zaproś przyjaciela do kina w ten weekend. Ustalcie dzień, godzinę i film.", "w": ["Masz czas?", "Może…?", "Brzmi super!"]}, {"t": "Przyjaciółka znowu odwołuje spotkanie w ostatniej chwili. Powiedz jej życzliwie, jak się czujesz.", "w": ["rozczarowany/a", "następnym razem", "Rozumiem, ale…"]}], "quick": [{"t": "Co najlepszego przydarzyło ci się w tym tygodniu?", "w": ["właściwie", "mieć szczęście", "w końcu"]}, {"t": "Poleć grupie piosenkę, film albo książkę. Dlaczego warto?", "w": ["warto", "koniecznie", "Spodoba wam się"]}, {"t": "Jakie hobby chciałbyś/chciałabyś kiedyś wypróbować?", "w": ["zawsze chciałem/am", "spróbować", "kiedyś"]}], "wwyd": [{"t": "Zapomniałeś/zapomniałaś o urodzinach najlepszej przyjaciółki. Były wczoraj. Co byś zrobił/zrobiła?", "w": ["przeprosić", "wynagrodzić", "spóźnione życzenia"]}, {"t": "Jesteś zaproszony/zaproszona na kolację i jedzenie w ogóle ci nie smakuje. Co byś zrobił/zrobiła?", "w": ["uprzejmie", "nie jestem zbyt głodny/a", "spróbować"]}, {"t": "Ktoś przy stole nie powiedział ani słowa przez cały wieczór. Co byś zrobił/zrobiła?", "w": ["włączyć do rozmowy", "zadać pytanie", "czuć się mile widzianym"]}]}, "work": {"role": [{"t": "Jesteś na rozmowie o pracę. Opisz swoją największą mocną stronę na przykładzie.", "w": ["sumienny", "na przykład", "praca zespołowa"]}, {"t": "Zadzwoń do szefowej: jesteś chory/chora i nie możesz dziś przyjść.", "w": ["źle się czuję", "iść do lekarza", "nadrobić"]}, {"t": "Poproś kolegę, żeby zamienił się z tobą zmianą w przyszły piątek.", "w": ["przysługa", "zamienić się", "odwdzięczyć się"]}], "quick": [{"t": "Opisz swoją wymarzoną pracę w jednym zdaniu.", "w": ["pracować z", "odpowiadać za", "elastyczny"]}, {"t": "Jaka jest najbardziej przydatna umiejętność, której się nauczyłeś/nauczyłaś?", "w": ["umiejętność", "nauczyć się", "bardzo przydatne"]}, {"t": "Kawa czy herbata w pracy — i dlaczego?", "w": ["wolę", "pobudza mnie", "przerwa"]}], "wwyd": [{"t": "Kolega ciągle przypisuje sobie twoją pracę. Co byś zrobił/zrobiła?", "w": ["powiedzieć wprost", "uznanie", "przełożony"]}, {"t": "Dostajesz świetną ofertę pracy — ale w innym kraju. Co byś zrobił/zrobiła?", "w": ["szansa", "wyjechać za granicę", "rodzina"]}, {"t": "Popełniłeś/popełniłaś błąd, który kosztuje firmę pieniądze. Co byś zrobił/zrobiła?", "w": ["przyznać się", "naprawić", "odpowiedzialność"]}]}, "travel": {"role": [{"t": "Twój lot został odwołany. Porozmawiaj z liniami lotniczymi i poproś o nowy lot i hotel.", "w": ["zmienić rezerwację", "voucher", "odszkodowanie"]}, {"t": "W recepcji hotelu: twój pokój nie jest posprzątany. Poproś o inny pokój.", "w": ["złożyć reklamację", "niestety", "Czy mógłby Pan / mogłaby Pani…?"]}, {"t": "Zapytaj mieszkankę, jak dojść na dworzec i gdzie w pobliżu można dobrze zjeść.", "w": ["Przepraszam", "prosto", "polecić"]}], "quick": [{"t": "Jakie jest najpiękniejsze miejsce, które odwiedziłeś/odwiedziłaś?", "w": ["zapierający dech w piersiach", "jedzenie", "niezapomniany"]}, {"t": "Miejsce przy oknie czy przy przejściu — i dlaczego?", "w": ["widok", "miejsce na nogi", "wstawać"]}, {"t": "Wymień trzy rzeczy, które zawsze pakujesz.", "w": ["ładowarka", "paszport", "krem z filtrem"]}], "wwyd": [{"t": "Ostatniego dnia urlopu gubisz paszport. Co byś zrobił/zrobiła?", "w": ["ambasada", "zgłoszenie na policji", "sytuacja awaryjna"]}, {"t": "O północy uciekł ci ostatni pociąg do domu. Co byś zrobił/zrobiła?", "w": ["taksówka", "przenocować", "wspólny przejazd"]}, {"t": "Twój towarzysz podróży chce zmienić wszystkie plany pierwszego dnia. Co byś zrobił/zrobiła?", "w": ["kompromis", "rozdzielić się na jeden dzień", "elastyczny"]}]}}, "uk": {"everyday": {"role": [{"t": "Ти в аптеці. Поясни, що в тебе болить голова, і запитай, що можна випити.", "w": ["головний біль", "знеболювальне", "Як часто?"]}, {"t": "О 23:00 у сусідів дуже гучна музика. Постукай і ввічливо попроси зробити тихіше.", "w": ["Вибачте, що турбую", "зробити тихіше", "рано вставати"]}, {"t": "Ти на пошті й хочеш надіслати посилку за кордон. Запитай про ціну і скільки часу це займе.", "w": ["посилка", "доставка", "номер відстеження"]}], "quick": [{"t": "Що ти сьогодні їв/їла на сніданок?", "w": ["зазвичай", "бутерброд", "кава"]}, {"t": "Опиши свою ідеальну неділю трьома реченнями.", "w": ["виспатися", "відпочити", "піти на прогулянку"]}, {"t": "Що ти завжди носиш із собою — і чому?", "w": ["ключі", "гаманець", "про всяк випадок"]}], "wwyd": [{"t": "Ти приходиш додому і розумієш, що ключі залишилися на роботі. Що б ти зробив/зробила?", "w": ["слюсар", "запасний ключ", "комусь подзвонити"]}, {"t": "Касирка дає тобі забагато решти. Що б ти зробив/зробила?", "w": ["чесний", "решта", "повернути"]}, {"t": "Твоя пральна машина зламалася і залила кухню. Що б ти зробив/зробила спочатку?", "w": ["вимкнути", "орендодавець", "витерти підлогу"]}]}, "social": {"role": [{"t": "На вечірці ти знайомишся з новою людиною. Представся і знайдіть дві спільні речі.", "w": ["Приємно познайомитися", "А ти?", "Я теж!"]}, {"t": "Запроси друга в кіно на вихідних. Домовтеся про день, час і фільм.", "w": ["Ти вільний?", "Може, …?", "Чудово!"]}, {"t": "Подруга знову скасовує плани в останню хвилину. Скажи їй лагідно, що ти відчуваєш.", "w": ["розчарований/розчарована", "наступного разу", "Я розумію, але…"]}], "quick": [{"t": "Що найкраще сталося з тобою цього тижня?", "w": ["насправді", "пощастило", "нарешті"]}, {"t": "Порадь групі пісню, фільм або книжку. Чому варто спробувати?", "w": ["варто", "обов'язково", "Вам сподобається"]}, {"t": "Яке хобі ти хотів/хотіла б колись спробувати?", "w": ["завжди хотів/хотіла", "спробувати", "колись"]}], "wwyd": [{"t": "Ти забув/забула про день народження найкращої подруги. Він був учора. Що б ти зробив/зробила?", "w": ["вибачитися", "загладити провину", "запізніле привітання"]}, {"t": "Тебе запросили на вечерю, а їжа тобі зовсім не смакує. Що б ти зробив/зробила?", "w": ["ввічливо", "я не дуже голодний/голодна", "скуштувати"]}, {"t": "Хтось за столом не сказав ні слова за весь вечір. Що б ти зробив/зробила?", "w": ["залучити до розмови", "поставити запитання", "почуватися бажаним гостем"]}]}, "work": {"role": [{"t": "Ти на співбесіді. Опиши свою найсильнішу рису на прикладі.", "w": ["надійний", "наприклад", "командна робота"]}, {"t": "Подзвони начальниці: ти захворів/захворіла і сьогодні не можеш прийти.", "w": ["погано почуватися", "піти до лікаря", "надолужити"]}, {"t": "Попроси колегу помінятися з тобою зміною наступної п'ятниці.", "w": ["послуга", "помінятися", "віддячити"]}], "quick": [{"t": "Опиши роботу своєї мрії одним реченням.", "w": ["працювати з", "відповідати за", "гнучкий"]}, {"t": "Яка найкорисніша навичка, якої ти навчився/навчилася?", "w": ["навичка", "навчитися", "дуже корисно"]}, {"t": "Кава чи чай на роботі — і чому?", "w": ["я віддаю перевагу", "бадьорить", "перерва"]}], "wwyd": [{"t": "Колега постійно видає твою роботу за свою. Що б ти зробив/зробила?", "w": ["сказати прямо", "визнання", "керівник"]}, {"t": "Тобі пропонують чудову роботу — але в іншій країні. Що б ти зробив/зробила?", "w": ["можливість", "переїхати за кордон", "родина"]}, {"t": "Ти зробив/зробила помилку, яка коштує твоїй компанії грошей. Що б ти зробив/зробила?", "w": ["визнати", "виправити", "відповідальність"]}]}, "travel": {"role": [{"t": "Твій рейс скасували. Поговори з авіакомпанією і попроси новий рейс і готель.", "w": ["переоформити квиток", "ваучер", "компенсація"]}, {"t": "На рецепції готелю: твій номер неприбраний. Попроси інший номер.", "w": ["поскаржитися", "на жаль", "Чи не могли б ви…?"]}, {"t": "Запитай місцеву жительку, як дійти до вокзалу і де поблизу смачно поїсти.", "w": ["Перепрошую", "прямо", "порадити"]}], "quick": [{"t": "Яке найкрасивіше місце, де ти бував/бувала?", "w": ["захопливий", "їжа", "незабутній"]}, {"t": "Місце біля вікна чи біля проходу — і чому?", "w": ["краєвид", "місце для ніг", "вставати"]}, {"t": "Назви три речі, які ти завжди пакуєш.", "w": ["зарядка", "паспорт", "сонцезахисний крем"]}], "wwyd": [{"t": "В останній день відпустки ти губиш паспорт. Що б ти зробив/зробила?", "w": ["посольство", "заява в поліцію", "надзвичайна ситуація"]}, {"t": "Опівночі ти запізнюєшся на останній потяг додому. Що б ти зробив/зробила?", "w": ["таксі", "переночувати", "спільна поїздка"]}, {"t": "Твій попутник хоче змінити всі плани в перший же день. Що б ти зробив/зробила?", "w": ["компроміс", "розійтися на день", "гнучкий"]}]}}, "ar": {"everyday": {"role": [{"t": "أنت في الصيدلية. اشرح أن لديك صداعًا واسأل ماذا يمكنك أن تأخذ.", "w": ["صداع", "مسكّن", "كم مرة؟"]}, {"t": "موسيقى جيرانك عالية جدًا في الساعة الحادية عشرة ليلًا. اطرق الباب واطلب منهم بلطف أن يخفضوا الصوت.", "w": ["آسف على الإزعاج", "خفض الصوت", "أستيقظ مبكرًا"]}, {"t": "أنت في مكتب البريد وتريد إرسال طرد إلى الخارج. اسأل عن السعر وكم يستغرق.", "w": ["طرد", "التوصيل", "رقم التتبع"]}], "quick": [{"t": "ماذا أكلت على الفطور اليوم؟", "w": ["عادةً", "خبز", "فنجان قهوة"]}, {"t": "صف يوم عطلتك المثالي في ثلاث جمل.", "w": ["أنام حتى وقت متأخر", "أسترخي", "أتمشى"]}, {"t": "ما الشيء الذي تحمله معك دائمًا، ولماذا؟", "w": ["المفاتيح", "المحفظة", "احتياطًا"]}], "wwyd": [{"t": "تصل إلى البيت وتكتشف أن مفاتيحك ما زالت في العمل. ماذا كنت ستفعل؟", "w": ["صانع المفاتيح", "مفتاح احتياطي", "أتصل بأحد"]}, {"t": "يعطيك الكاشير باقيًا أكثر من اللازم. ماذا كنت ستفعل؟", "w": ["أمين", "الباقي", "أُرجعه"]}, {"t": "تعطّلت غسالتك وأغرقت المطبخ بالماء. ماذا كنت ستفعل أولًا؟", "w": ["أطفئها", "صاحب الشقة", "أمسح الأرض"]}]}, "social": {"role": [{"t": "تتعرف على شخص جديد في حفلة. عرّف بنفسك واكتشفا شيئين مشتركين.", "w": ["تشرفت بمعرفتك", "وأنت؟", "وأنا أيضًا!"]}, {"t": "ادعُ صديقًا إلى السينما في عطلة نهاية الأسبوع. اتفقا على اليوم والوقت والفيلم.", "w": ["هل أنت متفرغ؟", "ما رأيك في…؟", "فكرة رائعة!"]}, {"t": "صديقتك تلغي الموعد في اللحظة الأخيرة مرة أخرى. قل لها بلطف كيف تشعر.", "w": ["خائب الأمل", "في المرة القادمة", "أفهم، لكن…"]}], "quick": [{"t": "ما أجمل شيء حدث لك هذا الأسبوع؟", "w": ["في الحقيقة", "كنت محظوظًا", "أخيرًا"]}, {"t": "اقترح على المجموعة أغنية أو فيلمًا أو كتابًا. لماذا يجب أن نجربه؟", "w": ["يستحق", "لا بد أن تشاهدوه", "سيعجبكم"]}, {"t": "ما الهواية التي تحب أن تجربها يومًا ما؟", "w": ["لطالما أردت", "أجرّب", "يومًا ما"]}], "wwyd": [{"t": "نسيت عيد ميلاد صديقك المقرّب. كان أمس. ماذا كنت ستفعل؟", "w": ["أعتذر", "أعوّضه", "متأخر"]}, {"t": "أنت مدعو إلى العشاء والطعام لا يعجبك أبدًا. ماذا كنت ستفعل؟", "w": ["بأدب", "لست جائعًا كثيرًا", "أتذوّق"]}, {"t": "شخص على الطاولة لم يقل كلمة واحدة طوال السهرة. ماذا كنت ستفعل؟", "w": ["أُشركه", "أطرح سؤالًا", "يشعر بالترحيب"]}]}, "work": {"role": [{"t": "أنت في مقابلة عمل. صف أكبر نقطة قوة لديك مع مثال.", "w": ["يُعتمد عليه", "على سبيل المثال", "العمل الجماعي"]}, {"t": "اتصل بمديرتك: أنت مريض ولا تستطيع الحضور اليوم.", "w": ["أشعر بتوعّك", "أذهب إلى الطبيب", "أعوّض العمل"]}, {"t": "اطلب من زميلك أن يبدّل معك المناوبة يوم الخميس القادم.", "w": ["معروف", "أبدّل", "أردّ الجميل"]}], "quick": [{"t": "صف وظيفة أحلامك في جملة واحدة.", "w": ["أعمل مع", "مسؤول عن", "مرن"]}, {"t": "ما أكثر مهارة مفيدة تعلّمتها؟", "w": ["مهارة", "أتعلّم", "مفيدة جدًا"]}, {"t": "قهوة أم شاي في العمل، ولماذا؟", "w": ["أفضّل", "تبقيني مستيقظًا", "استراحة"]}], "wwyd": [{"t": "زميل ينسب عملك إلى نفسه دائمًا. ماذا كنت ستفعل؟", "w": ["أتكلم بصراحة", "التقدير", "المدير"]}, {"t": "حصلت على عرض عمل رائع، لكن في بلد آخر. ماذا كنت ستفعل؟", "w": ["فرصة", "أنتقل إلى الخارج", "العائلة"]}, {"t": "ارتكبت خطأً كلّف شركتك مالًا. ماذا كنت ستفعل؟", "w": ["أعترف", "أصلحه", "المسؤولية"]}]}, "travel": {"role": [{"t": "أُلغيت رحلتك. تحدّث مع شركة الطيران واطلب رحلة جديدة وفندقًا.", "w": ["تغيير الحجز", "قسيمة", "تعويض"]}, {"t": "في استقبال الفندق: غرفتك غير نظيفة. اطلب غرفة أخرى.", "w": ["أشتكي", "للأسف", "هل يمكنك…؟"]}, {"t": "اسأل أحد السكان المحليين عن الطريق إلى محطة القطار وعن مطعم جيد قريب.", "w": ["عفوًا", "على طول", "تنصحني"]}], "quick": [{"t": "ما أجمل مكان زرته؟", "w": ["يخطف الأنفاس", "الطعام", "لا يُنسى"]}, {"t": "مقعد بجانب النافذة أم بجانب الممر، ولماذا؟", "w": ["المنظر", "مساحة للأرجل", "أقوم"]}, {"t": "اذكر ثلاثة أشياء تحزمها دائمًا.", "w": ["الشاحن", "جواز السفر", "واقي الشمس"]}], "wwyd": [{"t": "أضعت جواز سفرك في آخر يوم من إجازتك. ماذا كنت ستفعل؟", "w": ["السفارة", "بلاغ للشرطة", "حالة طارئة"]}, {"t": "فاتك آخر قطار إلى البيت عند منتصف الليل. ماذا كنت ستفعل؟", "w": ["سيارة أجرة", "أبيت الليلة", "مشاركة الرحلة"]}, {"t": "رفيقك في السفر يريد تغيير كل الخطط في اليوم الأول. ماذا كنت ستفعل؟", "w": ["حل وسط", "نفترق ليوم واحد", "مرن"]}]}}});
+Object.assign(P1, {"es": {"everyday": {"role": [{"t": "Pide un café y un trozo de tarta en una cafetería.", "w": ["Quiero…", "por favor", "¿Cuánto es?"]}, {"t": "Compra tres manzanas y pan en el mercado.", "w": ["tres manzanas", "pan", "¡Gracias!"]}, {"t": "Pregunta a una persona en la calle: “¿Qué hora es?”", "w": ["Perdone", "¿Qué hora…?", "Gracias"]}], "quick": [{"t": "¿Cómo te llamas y de dónde eres?", "w": ["Me llamo…", "Soy de…", "Vivo en…"]}, {"t": "¿Cuál es tu comida favorita?", "w": ["Mi comida favorita es…", "Me gusta…", "rico"]}, {"t": "¿Qué haces por la mañana?", "w": ["Me levanto", "Bebo…", "a las siete"]}], "wwyd": [{"t": "Tienes hambre. ¿Qué haces?", "w": ["Como…", "Cocino", "un bocadillo"]}, {"t": "Llueve. ¿Qué te llevas?", "w": ["el paraguas", "la chaqueta", "Me llevo…"]}, {"t": "Estás cansado/a. ¿Qué haces?", "w": ["Duermo", "Me voy a la cama", "un café"]}]}, "social": {"role": [{"t": "Saluda a una persona nueva. Di tu nombre y pregunta el suyo.", "w": ["¡Hola!", "Me llamo…", "¿Cómo te llamas?"]}, {"t": "Pregunta a un amigo: “¿Quieres tomar un café?”", "w": ["¿Quieres…?", "hoy", "¡Vale, genial!"]}, {"t": "Felicita a una amiga por su cumpleaños y dale un regalo.", "w": ["¡Feliz cumpleaños!", "Es para ti", "¡Gracias!"]}], "quick": [{"t": "¿Quién hay en tu familia?", "w": ["mi madre", "mi hermano", "Tengo…"]}, {"t": "¿Qué te gusta hacer el fin de semana?", "w": ["Me gusta…", "jugar", "ver la tele"]}, {"t": "¿Cuál es tu color favorito?", "w": ["Mi color favorito es…", "azul", "porque"]}], "wwyd": [{"t": "Tu amiga está triste. ¿Qué le dices?", "w": ["¿Estás bien?", "Lo siento", "¿Te ayudo?"]}, {"t": "Es tu cumpleaños. ¿Qué haces?", "w": ["una fiesta", "la tarta", "los amigos"]}, {"t": "Una persona nueva llega a la mesa. ¿Qué dices?", "w": ["¡Hola!", "¡Bienvenido/a!", "Siéntate, por favor"]}]}, "work": {"role": [{"t": "Saluda a tu jefe por la mañana y di cómo estás.", "w": ["Buenos días", "Estoy bien", "¿Y usted?"]}, {"t": "Pregunta a una compañera: “¿Dónde está la sala de reuniones?”", "w": ["Perdona", "¿Dónde está…?", "Gracias"]}, {"t": "Dile a un compañero que quieres un café. Pregunta si él también quiere uno.", "w": ["Quiero…", "¿Quieres…?", "Sí, por favor"]}], "quick": [{"t": "¿En qué trabajas?", "w": ["Soy…", "Trabajo en…", "estudiante"]}, {"t": "¿A qué hora empiezas el trabajo o las clases?", "w": ["Empiezo a las…", "en punto", "todos los días"]}, {"t": "¿Cómo vas al trabajo o a clase?", "w": ["en autobús", "en bici", "a pie"]}], "wwyd": [{"t": "Llegas tarde al trabajo. ¿Qué dices?", "w": ["Perdón, llego tarde", "el autobús", "No pasa nada"]}, {"t": "Tu ordenador no funciona. ¿Qué haces?", "w": ["Pregunto a…", "ayuda", "No funciona"]}, {"t": "Estás enfermo/a. ¿A quién llamas?", "w": ["Llamo a…", "mi jefe", "Estoy enfermo/a"]}]}, "travel": {"role": [{"t": "Compra un billete de tren a Berlín.", "w": ["Un billete, por favor", "a Berlín", "¿Cuánto cuesta?"]}, {"t": "Llegas a un hotel. Di tu nombre en la recepción.", "w": ["Hola", "Tengo una reserva", "Me llamo…"]}, {"t": "Pregunta: “¿Dónde está el baño, por favor?”", "w": ["Perdone", "¿Dónde está…?", "izquierda / derecha"]}], "quick": [{"t": "¿Adónde quieres viajar?", "w": ["Quiero ir a…", "porque", "bonito"]}, {"t": "¿Te gusta más la playa o la montaña?", "w": ["Me gusta…", "la playa", "la montaña"]}, {"t": "¿Qué hay hoy en tu bolso?", "w": ["el móvil", "las llaves", "agua"]}], "wwyd": [{"t": "Estás perdido/a en una ciudad nueva. ¿Qué haces?", "w": ["Pregunto…", "un mapa", "¿Dónde está…?"]}, {"t": "Tu tren llega tarde. ¿Qué haces?", "w": ["Espero", "un café", "Llamo a…"]}, {"t": "Estás de vacaciones y hace sol. ¿Qué haces?", "w": ["nadar", "dar un paseo", "comer un helado"]}]}}, "pt": {"everyday": {"role": [{"t": "Peça um café e um pedaço de bolo numa cafeteria.", "w": ["Eu queria…", "por favor", "Quanto custa?"]}, {"t": "Compre três maçãs e pão na feira.", "w": ["três maçãs", "pão", "Obrigado/a!"]}, {"t": "Pergunte a uma pessoa na rua: “Que horas são?”", "w": ["Com licença", "Que horas…?", "Obrigado/a"]}], "quick": [{"t": "Como você se chama e de onde você é?", "w": ["Eu me chamo…", "Eu sou de…", "Eu moro em…"]}, {"t": "Qual é a sua comida favorita?", "w": ["A minha comida favorita é…", "Eu gosto de…", "gostoso"]}, {"t": "O que você faz de manhã?", "w": ["Eu acordo", "Eu bebo…", "às sete horas"]}], "wwyd": [{"t": "Você está com fome. O que você faz?", "w": ["Eu como…", "Eu cozinho", "um sanduíche"]}, {"t": "Está chovendo. O que você leva?", "w": ["o guarda-chuva", "a jaqueta", "Eu levo…"]}, {"t": "Você está cansado/a. O que você faz?", "w": ["Eu durmo", "Eu vou para a cama", "um café"]}]}, "social": {"role": [{"t": "Diga oi para uma pessoa nova. Diga o seu nome e pergunte o nome dela.", "w": ["Oi!", "Eu me chamo…", "Qual é o seu nome?"]}, {"t": "Pergunte a um amigo: “Você quer tomar um café?”", "w": ["Você quer…?", "hoje", "Legal, ótimo!"]}, {"t": "Dê parabéns a uma amiga pelo aniversário e dê um presente a ela.", "w": ["Feliz aniversário!", "É para você", "Obrigado/a!"]}], "quick": [{"t": "Quem tem na sua família?", "w": ["a minha mãe", "o meu irmão", "Eu tenho…"]}, {"t": "O que você gosta de fazer no fim de semana?", "w": ["Eu gosto de…", "jogar", "ver TV"]}, {"t": "Qual é a sua cor favorita?", "w": ["A minha cor favorita é…", "azul", "porque"]}], "wwyd": [{"t": "A sua amiga está triste. O que você diz?", "w": ["Tudo bem?", "Sinto muito", "Posso ajudar?"]}, {"t": "É o seu aniversário. O que você faz?", "w": ["uma festa", "o bolo", "os amigos"]}, {"t": "Uma pessoa nova chega à mesa. O que você diz?", "w": ["Oi!", "Bem-vindo/a!", "Senta aqui, por favor"]}]}, "work": {"role": [{"t": "Diga bom dia ao seu chefe e diga como você está.", "w": ["Bom dia", "Estou bem", "E o senhor?"]}, {"t": "Pergunte a uma colega: “Onde fica a sala de reunião?”", "w": ["Com licença", "Onde fica…?", "Obrigado/a"]}, {"t": "Diga a um colega que você quer um café. Pergunte se ele também quer.", "w": ["Eu quero…", "Você quer…?", "Sim, por favor"]}], "quick": [{"t": "Qual é a sua profissão?", "w": ["Eu sou…", "Eu trabalho em…", "estudante"]}, {"t": "Que horas você começa o trabalho ou a aula?", "w": ["Eu começo às…", "horas", "todo dia"]}, {"t": "Como você vai para o trabalho ou para a aula?", "w": ["de ônibus", "de bicicleta", "a pé"]}], "wwyd": [{"t": "Você chega atrasado/a ao trabalho. O que você diz?", "w": ["Desculpe o atraso", "o ônibus", "Tudo bem"]}, {"t": "O seu computador não funciona. O que você faz?", "w": ["Eu pergunto a…", "ajuda", "Não funciona"]}, {"t": "Você está doente. Para quem você liga?", "w": ["Eu ligo para…", "o meu chefe", "Estou doente"]}]}, "travel": {"role": [{"t": "Compre uma passagem de trem para Berlim.", "w": ["Uma passagem, por favor", "para Berlim", "Quanto custa?"]}, {"t": "Você chega a um hotel. Diga o seu nome na recepção.", "w": ["Boa tarde", "Eu tenho uma reserva", "Meu nome é…"]}, {"t": "Pergunte: “Onde fica o banheiro, por favor?”", "w": ["Com licença", "Onde fica…?", "esquerda / direita"]}], "quick": [{"t": "Para onde você quer viajar?", "w": ["Eu quero ir para…", "porque", "bonito"]}, {"t": "Você gosta mais de praia ou de montanha?", "w": ["Eu gosto de…", "a praia", "a montanha"]}, {"t": "O que tem na sua bolsa hoje?", "w": ["o celular", "as chaves", "água"]}], "wwyd": [{"t": "Você está perdido/a numa cidade nova. O que você faz?", "w": ["Eu pergunto…", "um mapa", "Onde fica…?"]}, {"t": "O seu trem está atrasado. O que você faz?", "w": ["Eu espero", "um café", "Eu ligo para…"]}, {"t": "Você está de férias e está fazendo sol. O que você faz?", "w": ["nadar", "dar uma volta", "tomar sorvete"]}]}}, "pl": {"everyday": {"role": [{"t": "Zamów w kawiarni kawę i kawałek ciasta.", "w": ["Poproszę…", "proszę", "Ile płacę?"]}, {"t": "Kup na targu trzy jabłka i chleb.", "w": ["trzy jabłka", "chleb", "Dziękuję!"]}, {"t": "Zapytaj osobę na ulicy: „Która jest godzina?”", "w": ["Przepraszam", "Która…?", "Dziękuję"]}], "quick": [{"t": "Jak masz na imię i skąd jesteś?", "w": ["Mam na imię…", "Jestem z…", "Mieszkam w…"]}, {"t": "Jakie jest twoje ulubione jedzenie?", "w": ["Moje ulubione jedzenie to…", "Lubię…", "pyszne"]}, {"t": "Co robisz rano?", "w": ["Wstaję", "Piję…", "o siódmej"]}], "wwyd": [{"t": "Jesteś głodny/głodna. Co robisz?", "w": ["Jem…", "Gotuję", "kanapka"]}, {"t": "Pada deszcz. Co bierzesz ze sobą?", "w": ["parasol", "kurtka", "Biorę…"]}, {"t": "Jesteś zmęczony/zmęczona. Co robisz?", "w": ["Śpię", "Idę spać", "kawa"]}]}, "social": {"role": [{"t": "Przywitaj się z nową osobą. Powiedz, jak masz na imię, i zapytaj o jej imię.", "w": ["Cześć!", "Mam na imię…", "Jak masz na imię?"]}, {"t": "Zapytaj przyjaciela: „Idziemy na kawę?”", "w": ["Chcesz…?", "dzisiaj", "Super, chętnie!"]}, {"t": "Złóż przyjaciółce życzenia urodzinowe i daj jej prezent.", "w": ["Wszystkiego najlepszego!", "To dla ciebie", "Dziękuję!"]}], "quick": [{"t": "Kto jest w twojej rodzinie?", "w": ["moja mama", "mój brat", "Mam…"]}, {"t": "Co lubisz robić w weekend?", "w": ["Lubię…", "grać", "oglądać telewizję"]}, {"t": "Jaki jest twój ulubiony kolor?", "w": ["Mój ulubiony kolor to…", "niebieski", "bo"]}], "wwyd": [{"t": "Twoja przyjaciółka jest smutna. Co mówisz?", "w": ["Wszystko w porządku?", "Przykro mi", "Mogę pomóc?"]}, {"t": "Masz urodziny. Co robisz?", "w": ["impreza", "tort", "przyjaciele"]}, {"t": "Nowa osoba przychodzi do stołu. Co mówisz?", "w": ["Cześć!", "Witaj!", "Usiądź, proszę"]}]}, "work": {"role": [{"t": "Powiedz szefowi „Dzień dobry” i powiedz, jak się masz.", "w": ["Dzień dobry", "Dobrze, dziękuję", "A Pan?"]}, {"t": "Zapytaj koleżankę: „Gdzie jest sala konferencyjna?”", "w": ["Przepraszam", "Gdzie jest…?", "Dziękuję"]}, {"t": "Powiedz koledze, że chcesz kawę. Zapytaj, czy on też chce.", "w": ["Chcę…", "Chcesz…?", "Tak, poproszę"]}], "quick": [{"t": "Kim jesteś z zawodu?", "w": ["Jestem…", "Pracuję w…", "student / studentka"]}, {"t": "O której zaczynasz pracę albo szkołę?", "w": ["Zaczynam o…", "godzinie", "codziennie"]}, {"t": "Jak jeździsz do pracy albo do szkoły?", "w": ["autobusem", "rowerem", "pieszo"]}], "wwyd": [{"t": "Spóźniasz się do pracy. Co mówisz?", "w": ["Przepraszam za spóźnienie", "autobus", "Nic się nie stało"]}, {"t": "Twój komputer nie działa. Co robisz?", "w": ["Pytam…", "pomoc", "Nie działa"]}, {"t": "Jesteś chory/chora. Do kogo dzwonisz?", "w": ["Dzwonię do…", "szef", "Jestem chory/chora"]}]}, "travel": {"role": [{"t": "Kup bilet na pociąg do Berlina.", "w": ["Poproszę bilet", "do Berlina", "Ile kosztuje?"]}, {"t": "Przyjeżdżasz do hotelu. Podaj swoje nazwisko w recepcji.", "w": ["Dzień dobry", "Mam rezerwację", "Nazywam się…"]}, {"t": "Zapytaj: „Przepraszam, gdzie jest toaleta?”", "w": ["Przepraszam", "Gdzie jest…?", "w lewo / w prawo"]}], "quick": [{"t": "Dokąd chcesz pojechać?", "w": ["Chcę pojechać do…", "bo", "piękny"]}, {"t": "Wolisz morze czy góry?", "w": ["Wolę…", "morze", "góry"]}, {"t": "Co masz dziś w torbie?", "w": ["telefon", "klucze", "woda"]}], "wwyd": [{"t": "Zgubiłeś/zgubiłaś się w nowym mieście. Co robisz?", "w": ["Pytam…", "mapa", "Gdzie jest…?"]}, {"t": "Twój pociąg jest opóźniony. Co robisz?", "w": ["Czekam", "kawa", "Dzwonię do…"]}, {"t": "Jesteś na wakacjach i świeci słońce. Co robisz?", "w": ["pływać", "iść na spacer", "jeść lody"]}]}}, "uk": {"everyday": {"role": [{"t": "Замов у кав'ярні каву і шматок торта.", "w": ["Мені, будь ласка, …", "будь ласка", "Скільки коштує?"]}, {"t": "Купи на ринку три яблука і хліб.", "w": ["три яблука", "хліб", "Дякую!"]}, {"t": "Запитай людину на вулиці: «Котра година?»", "w": ["Перепрошую", "Котра…?", "Дякую"]}], "quick": [{"t": "Як тебе звати і звідки ти?", "w": ["Мене звати…", "Я з…", "Я живу в…"]}, {"t": "Яка твоя улюблена їжа?", "w": ["Моя улюблена їжа — …", "Я люблю…", "смачно"]}, {"t": "Що ти робиш уранці?", "w": ["Я встаю", "Я п'ю…", "о сьомій"]}], "wwyd": [{"t": "Ти голодний/голодна. Що ти робиш?", "w": ["Я їм…", "Я готую", "бутерброд"]}, {"t": "Іде дощ. Що ти береш із собою?", "w": ["парасолька", "куртка", "Я беру…"]}, {"t": "Ти втомився/втомилася. Що ти робиш?", "w": ["Я сплю", "Я йду спати", "кава"]}]}, "social": {"role": [{"t": "Привітайся з новою людиною. Скажи своє ім'я і запитай, як її звати.", "w": ["Привіт!", "Мене звати…", "Як тебе звати?"]}, {"t": "Запитай друга: «Підемо на каву?»", "w": ["Хочеш…?", "сьогодні", "Супер, давай!"]}, {"t": "Привітай подругу з днем народження і подаруй їй подарунок.", "w": ["З днем народження!", "Це тобі", "Дякую!"]}], "quick": [{"t": "Хто є у твоїй родині?", "w": ["моя мама", "мій брат", "У мене є…"]}, {"t": "Що ти любиш робити на вихідних?", "w": ["Я люблю…", "грати", "дивитися телевізор"]}, {"t": "Який твій улюблений колір?", "w": ["Мій улюблений колір — …", "синій", "тому що"]}], "wwyd": [{"t": "Твоя подруга сумна. Що ти кажеш?", "w": ["Усе гаразд?", "Мені шкода", "Можу допомогти?"]}, {"t": "У тебе день народження. Що ти робиш?", "w": ["вечірка", "торт", "друзі"]}, {"t": "Нова людина підходить до столу. Що ти кажеш?", "w": ["Привіт!", "Ласкаво просимо!", "Сідай, будь ласка"]}]}, "work": {"role": [{"t": "Привітайся з начальником зранку і скажи, як у тебе справи.", "w": ["Доброго ранку", "У мене все добре", "А у вас?"]}, {"t": "Запитай колегу: «Де переговорна кімната?»", "w": ["Перепрошую", "Де…?", "Дякую"]}, {"t": "Скажи колезі, що хочеш каву. Запитай, чи він теж хоче.", "w": ["Я хочу…", "Хочеш…?", "Так, будь ласка"]}], "quick": [{"t": "Ким ти працюєш?", "w": ["Я…", "Я працюю в…", "студент / студентка"]}, {"t": "О котрій ти починаєш роботу або навчання?", "w": ["Я починаю о…", "годині", "щодня"]}, {"t": "Як ти добираєшся на роботу або на навчання?", "w": ["автобусом", "на велосипеді", "пішки"]}], "wwyd": [{"t": "Ти запізнюєшся на роботу. Що ти кажеш?", "w": ["Вибачте за запізнення", "автобус", "Нічого страшного"]}, {"t": "Твій комп'ютер не працює. Що ти робиш?", "w": ["Я питаю…", "допомога", "Він не працює"]}, {"t": "Ти захворів/захворіла. Кому ти дзвониш?", "w": ["Я дзвоню…", "начальнику", "Я захворів/захворіла"]}]}, "travel": {"role": [{"t": "Купи квиток на потяг до Берліна.", "w": ["Один квиток, будь ласка", "до Берліна", "Скільки коштує?"]}, {"t": "Ти приїжджаєш у готель. Назви своє ім'я на рецепції.", "w": ["Добрий день", "У мене бронювання", "Моє прізвище…"]}, {"t": "Запитай: «Де туалет, будь ласка?»", "w": ["Перепрошую", "Де…?", "ліворуч / праворуч"]}], "quick": [{"t": "Куди ти хочеш поїхати?", "w": ["Я хочу поїхати до…", "тому що", "гарний"]}, {"t": "Тобі більше подобається море чи гори?", "w": ["Мені подобається…", "море", "гори"]}, {"t": "Що сьогодні у твоїй сумці?", "w": ["телефон", "ключі", "вода"]}], "wwyd": [{"t": "Ти заблукав/заблукала в новому місті. Що ти робиш?", "w": ["Я питаю…", "мапа", "Де…?"]}, {"t": "Твій потяг запізнюється. Що ти робиш?", "w": ["Я чекаю", "кава", "Я дзвоню…"]}, {"t": "Ти у відпустці, і світить сонце. Що ти робиш?", "w": ["плавати", "гуляти", "їсти морозиво"]}]}}, "ar": {"everyday": {"role": [{"t": "اطلب قهوة وقطعة كعك في المقهى.", "w": ["أريد…", "من فضلك", "بكم هذا؟"]}, {"t": "اشترِ ثلاث تفاحات وخبزًا من السوق.", "w": ["ثلاث تفاحات", "خبز", "شكرًا!"]}, {"t": "اسأل شخصًا في الشارع: «كم الساعة؟»", "w": ["عفوًا", "كم الساعة؟", "شكرًا"]}], "quick": [{"t": "ما اسمك ومن أين أنت؟", "w": ["اسمي…", "أنا من…", "أسكن في…"]}, {"t": "ما أكلتك المفضلة؟", "w": ["أكلتي المفضلة هي…", "أحب…", "لذيذ"]}, {"t": "ماذا تفعل في الصباح؟", "w": ["أستيقظ", "أشرب…", "في الساعة السابعة"]}], "wwyd": [{"t": "أنت جائع. ماذا تفعل؟", "w": ["آكل…", "أطبخ", "شطيرة"]}, {"t": "إنها تمطر. ماذا تأخذ معك؟", "w": ["مظلة", "جاكيت", "آخذ…"]}, {"t": "أنت متعب. ماذا تفعل؟", "w": ["أنام", "أذهب إلى السرير", "قهوة"]}]}, "social": {"role": [{"t": "سلّم على شخص جديد. قل اسمك واسأله عن اسمه.", "w": ["مرحبًا!", "اسمي…", "ما اسمك؟"]}, {"t": "اسأل صديقًا: «هل تريد أن نشرب قهوة؟»", "w": ["هل تريد…؟", "اليوم", "حسنًا، رائع!"]}, {"t": "هنّئ صديقتك بعيد ميلادها وأعطها هدية.", "w": ["عيد ميلاد سعيد!", "هذه لكِ", "شكرًا!"]}], "quick": [{"t": "من في عائلتك؟", "w": ["أمي", "أخي", "عندي…"]}, {"t": "ماذا تحب أن تفعل في العطلة؟", "w": ["أحب…", "ألعب", "أشاهد التلفاز"]}, {"t": "ما لونك المفضل؟", "w": ["لوني المفضل هو…", "الأزرق", "لأن"]}], "wwyd": [{"t": "صديقتك حزينة. ماذا تقول لها؟", "w": ["هل أنتِ بخير؟", "أنا آسف", "هل أساعدك؟"]}, {"t": "اليوم عيد ميلادك. ماذا تفعل؟", "w": ["حفلة", "كعكة", "الأصدقاء"]}, {"t": "شخص جديد يأتي إلى الطاولة. ماذا تقول؟", "w": ["مرحبًا!", "أهلًا وسهلًا!", "تفضّل، اجلس"]}]}, "work": {"role": [{"t": "قل صباح الخير لمديرك وقل كيف حالك.", "w": ["صباح الخير", "أنا بخير", "وأنت؟"]}, {"t": "اسأل زميلتك: «أين غرفة الاجتماعات؟»", "w": ["عفوًا", "أين…؟", "شكرًا"]}, {"t": "قل لزميلك إنك تريد قهوة. اسأله إن كان يريد واحدة أيضًا.", "w": ["أريد…", "هل تريد…؟", "نعم، من فضلك"]}], "quick": [{"t": "ما عملك؟", "w": ["أنا…", "أعمل في…", "طالب / طالبة"]}, {"t": "متى يبدأ عملك أو دراستك؟", "w": ["أبدأ في الساعة…", "صباحًا", "كل يوم"]}, {"t": "كيف تذهب إلى العمل أو الدراسة؟", "w": ["بالحافلة", "بالدراجة", "مشيًا"]}], "wwyd": [{"t": "تأخرت عن العمل. ماذا تقول؟", "w": ["آسف على التأخير", "الحافلة", "لا مشكلة"]}, {"t": "حاسوبك لا يعمل. ماذا تفعل؟", "w": ["أسأل…", "مساعدة", "لا يعمل"]}, {"t": "أنت مريض. بمن تتصل؟", "w": ["أتصل بـ…", "مديري", "أنا مريض"]}]}, "travel": {"role": [{"t": "اشترِ تذكرة قطار إلى برلين.", "w": ["تذكرة واحدة من فضلك", "إلى برلين", "بكم؟"]}, {"t": "وصلت إلى الفندق. قل اسمك في الاستقبال.", "w": ["مساء الخير", "عندي حجز", "اسمي…"]}, {"t": "اسأل: «أين الحمّام من فضلك؟»", "w": ["عفوًا", "أين…؟", "يسار / يمين"]}], "quick": [{"t": "إلى أين تريد أن تسافر؟", "w": ["أريد أن أسافر إلى…", "لأن", "جميل"]}, {"t": "هل تحب البحر أم الجبال أكثر؟", "w": ["أحب…", "البحر", "الجبال"]}, {"t": "ماذا في حقيبتك اليوم؟", "w": ["الهاتف", "المفاتيح", "الماء"]}], "wwyd": [{"t": "أنت تائه في مدينة جديدة. ماذا تفعل؟", "w": ["أسأل…", "خريطة", "أين…؟"]}, {"t": "قطارك متأخر. ماذا تفعل؟", "w": ["أنتظر", "قهوة", "أتصل بـ…"]}, {"t": "أنت في إجازة والجو مشمس. ماذا تفعل؟", "w": ["أسبح", "أتمشى", "آكل البوظة"]}]}}});
+
 /* ===================== STATE ===================== */
 const S = {
   screen:"home",
@@ -467,7 +491,7 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const pick = a => a[Math.floor(Math.random()*a.length)];
 function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
-function langBadge(l){ return l==="en" ? '<span class="badge b-en">🇬🇧 English</span>' : '<span class="badge b-de">🇩🇪 Deutsch</span>'; }
+function langBadge(l){ const t=T[l]; return `<span class="badge" style="background:${t.color}1F;color:${t.color}">${t.flag} ${t.name}</span>`; }
 function avatar(p,i){ return `<div class="avatar" style="background:${COLORS[i%COLORS.length]}">${esc(p.name.charAt(0).toUpperCase())}</div>`; }
 function bi(en,de){ return `${en} <span class="de">· ${de}</span>`; }
 
@@ -506,11 +530,11 @@ const HERO_SVG = `<svg viewBox="0 0 120 120" aria-hidden="true"><rect width="120
 <rect x="49" y="22" width="22" height="15" rx="6" fill="#fff"/><path d="M57 36 L63 36 L60 41 Z" fill="#fff"/>
 <circle cx="54.5" cy="29.5" r="1.8" fill="#FF6B4A"/><circle cx="60" cy="29.5" r="1.8" fill="#FF6B4A"/><circle cx="65.5" cy="29.5" r="1.8" fill="#FF6B4A"/></svg>`;
 function samplePrompt(){
-  const lang = Math.random()<.5 ? "en" : "de";
-  const pool = Math.random()<.3 ? P1 : P;
+  const lang = pick(LANG_KEYS);
+  const a1 = Math.random()<.3, pool = a1 ? P1 : P;
   const c = pick(["everyday","social","work","travel"]), f = pick(["role","quick","wwyd"]);
   const x = pick(pool[lang][c][f]);
-  return {...x, lang, f: (pool===P1 && f==="wwyd") ? "quick" : f};
+  return {...x, lang, f, a1};
 }
 
 /* ===================== RENDER ===================== */
@@ -533,20 +557,22 @@ home(){
     <div class="hero-icon">${HERO_SVG}</div>
     <h1 class="center brand">PonteTalk <span class="beta">Beta</span></h1>
     <p class="tagline">Speak. Connect. Play.</p>
-    <p class="sub center" style="margin-bottom:14px">${bi("The speaking game for English &amp; German learners","Das Sprechspiel für Englisch- &amp; Deutschlernende")}</p>
+    <p class="sub center" style="margin-bottom:14px">${bi("The speaking game for language learners","Das Sprechspiel für Sprachlernende")}</p>
     <div class="feats">
       <span class="feat">👥 2–10 players</span>
-      <span class="feat">🇬🇧 ⇄ 🇩🇪</span>
+      <span class="feat">🌍 7 languages</span>
       <span class="feat">🎯 A1 – B2+</span>
       <span class="feat">📱 One phone</span>
     </div>
+    <div class="flagrow">${LANG_KEYS.map(k=>`<span title="${T[k].name}">${T[k].flag}</span>`).join("")}</div>
   </div>
 
-  <button class="btn primary big-cta" onclick="go('setup')">▶ Start playing<small>Spiel starten</small></button>
+  <button class="btn primary big-cta" onclick="go('setup')">▶ Play together<small>One phone, passed around · Ein Handy für alle</small></button>
+  <button class="btn secondary big-cta2" onclick="O.err='';go('online')">🌐 Play online<small>Everyone on their own phone · Jede/r am eigenen Handy</small></button>
 
   <div class="peek" onclick="render()">
-    <div class="peek-top"><span class="badge ${s.lang==='en'?'b-en':'b-de'}">${s.lang==='en'?'🇬🇧 English':'🇩🇪 Deutsch'}</span><span class="badge b-fmt">${FMTS[s.f].e} ${s.lang==='en'?FMTS[s.f].en:FMTS[s.f].de}</span></div>
-    <div class="peek-q">“${esc(s.t)}”</div>
+    <div class="peek-top">${langBadge(s.lang)}<span class="badge b-fmt">${FMTS[s.f].e} ${s.a1&&s.f==="wwyd"?T[s.lang].a1wwyd:T[s.lang].fmt[s.f]}</span></div>
+    <div class="peek-q" dir="${T[s.lang].dir}">${esc(s.t)}</div>
     <div class="peek-foot">🎲 Tap for another sample · Tippen für ein neues Beispiel</div>
   </div>
 
@@ -569,7 +595,7 @@ setup(){
   const d=S.draft;
   const list = S.players.map((p,i)=>`
     <div class="player">${avatar(p,i)}
-      <div><div class="pname">${esc(p.name)}</div><div class="pmeta">${p.lang==="en"?"🇬🇧 English":"🇩🇪 Deutsch"} · ${LEVELS[p.level].code}</div></div>
+      <div><div class="pname">${esc(p.name)}</div><div class="pmeta">${T[p.lang].flag} ${T[p.lang].name} · ${LEVELS[p.level].code}</div></div>
       <button class="x" onclick="removePlayer(${i})" aria-label="Remove">×</button>
     </div>`).join("");
   return `
@@ -581,11 +607,10 @@ setup(){
     <input type="text" id="pname" maxlength="16" placeholder="e.g. Ana" value="${esc(d.name)}" autocomplete="off">
     <label class="lbl">I'm practicing · Ich übe</label>
     <div class="row">
-      <button class="chip en ${d.lang==="en"?"on":""}" onclick="setDraft('lang','en')">🇬🇧 English</button>
-      <button class="chip de ${d.lang==="de"?"on":""}" onclick="setDraft('lang','de')">🇩🇪 Deutsch</button>
+      ${LANG_KEYS.map(k=>`<button class="chip lang ${d.lang===k?"on":""}" onclick="setDraft('lang','${k}')">${T[k].flag} ${T[k].name}</button>`).join("")}
     </div>
     <label class="lbl">My level · Mein Niveau</label>
-    <div class="row">${LEVELS.map((l,i)=>`<button class="chip ${d.level===i?"on":""}" onclick="setDraft('level',${i})">${l.code} · ${d.lang==="en"?l.en:l.de}</button>`).join("")}</div>
+    <div class="row">${LEVELS.map((l,i)=>`<button class="chip ${d.level===i?"on":""}" onclick="setDraft('level',${i})">${l.code} · ${T[d.lang].levels[i]}</button>`).join("")}</div>
     <div class="err" id="err">${esc(S.err)}</div>
     <button class="btn secondary" onclick="addPlayer()">+ Add player<small>Spieler hinzufügen</small></button>
   </div>
@@ -622,43 +647,43 @@ handoff(){
     <p class="sub" style="margin:10px 0 0">${bi("Pass the phone to","Gib das Handy weiter an")}</p>
     <div class="big-name" style="color:${COLORS[i%COLORS.length]}">${esc(p.name)}</div>
     <div>${langBadge(p.lang)} <span class="badge b-fmt">${LEVELS[p.level].code}</span></div>
-    <button class="btn primary" style="margin-top:28px" onclick="showChallenge()">${p.lang==="en"?"I'm ready!":"Ich bin bereit!"}</button>
+    <button class="btn primary" style="margin-top:28px" onclick="showChallenge()">${T[p.lang].ready}</button>
   </div>`;
 },
 challenge(){
   const p=S.players[S.turn], c=S.current, L=p.lang;
   const f=FMTS[c.f], cat=CATS[c.c], a1=p.level===0 && c.f==="wwyd";
-  const fLabel = a1 ? (L==="en"?f.a1En:f.a1De) : (L==="en"?f.en:f.de);
-  const fHow = a1 ? (L==="en"?f.a1HowEn:f.a1HowDe) : (L==="en"?f.howEn:f.howDe);
+  const fLabel = a1 ? T[L].a1wwyd : T[L].fmt[c.f];
+  const fHow = a1 ? T[L].a1how : T[L].how[c.f];
   return `
-  <div class="topline"><span>${esc(p.name)} · ${L==="en"?"Round":"Runde"} ${S.round}/${S.rounds}</span>${langBadge(L)}</div>
-  <div class="card">
-    <div class="row"><span class="badge b-fmt">${f.e} ${fLabel}</span><span class="badge b-cat">${cat.e} ${L==="en"?cat.en:cat.de}</span></div>
+  <div class="topline"><span>${esc(p.name)} · ${T[L].round} ${S.round}/${S.rounds}</span>${langBadge(L)}</div>
+  <div class="card" dir="${T[L].dir}">
+    <div class="row"><span class="badge b-fmt">${f.e} ${fLabel}</span><span class="badge b-cat">${cat.e} ${T[L].cats[c.c]}</span></div>
     <div class="prompt">${esc(c.t)}</div>
     <p class="note" style="margin:0 0 10px">${fHow}</p>
-    <div class="task">🎯 ${TASKS[L][p.level]}</div>
-    <button class="chip ${S.hintsUsed?"":"hintbtn"}" style="margin-top:12px" onclick="openHints()">💬 ${L==="en"?"Need help? Useful words":"Hilfe? Nützliche Wörter"}</button>
-    ${S.hintsUsed?"":`<p class="note" style="margin:6px 0 0">🙈 ${L==="en"?"Answer without help = +2 bonus":"Ohne Hilfe antworten = +2 Bonus"}</p>`}
+    <div class="task">🎯 ${T[L].tasks[p.level]}</div>
+    <button class="chip ${S.hintsUsed?"":"hintbtn"}" style="margin-top:12px" onclick="openHints()">💬 ${T[L].help}</button>
+    ${S.hintsUsed?"":`<p class="note" style="margin:6px 0 0">🙈 ${T[L].nohint}</p>`}
     <div class="hints ${S.hintsUsed?"show":""}" id="hints">${c.w.map(w=>`<span class="hint">${esc(w)}</span>`).join("")}</div>
   </div>
   <div id="timerBox" class="hidden">
     <div class="timer" id="timer">0:00</div>
     <div class="bar" id="bar"><i id="barFill"></i></div>
   </div>
-  <button class="btn primary" id="startBtn" onclick="startTimer()">⏱️ ${L==="en"?"Start timer":"Timer starten"}<small>${L==="en"?"Then answer out loud to the table":"Dann antworte laut für alle"}</small></button>
-  <button class="btn secondary hidden" id="doneBtn" onclick="finishTurn()">✓ ${L==="en"?"I'm done":"Fertig"}<small>Feedback time · Zeit für Feedback</small></button>
-  ${S.rerolled?"":`<button class="btn ghost" id="rerollBtn" onclick="reroll()">🔄 ${L==="en"?"Different challenge (once)":"Andere Aufgabe (einmal)"}</button>`}`;
+  <button class="btn primary" id="startBtn" onclick="startTimer()">⏱️ ${T[L].startTimer}<small>${T[L].startSub}</small></button>
+  <button class="btn secondary hidden" id="doneBtn" onclick="finishTurn()">✓ ${T[L].done}<small>Feedback time · Zeit für Feedback</small></button>
+  ${S.rerolled?"":`<button class="btn ghost" id="rerollBtn" onclick="reroll()">🔄 ${T[L].reroll}</button>`}`;
 },
 feedback(){
   const p=S.players[S.turn], L=p.lang;
   const t = S.turnReacts;
-  const langName = L==="en" ? "English" : "German · Deutsch";
+  const langName = T[L].nameEn;
   return `
   <div class="topline"><span>Feedback for ${esc(p.name)}</span>${langBadge(L)}</div>
   <h2>${bi("How was it?","Wie war's?")}</h2>
   <div class="coach coach-score ${S.needRating?"need":""}">
     <h3>🧑‍🏫 Coach score <span class="de">· Bewertung</span></h3>
-    <p style="margin:0 0 10px;font-size:15px">The best <b>${langName}</b> speaker at the table judges ${esc(p.name)}'s answer: grammar, words and how natural it sounded.<br><span class="de">Die Person, die am besten ${L==="en"?"Englisch":"Deutsch"} spricht, bewertet.</span></p>
+    <p style="margin:0 0 10px;font-size:15px">The best <b>${langName}</b> speaker at the table judges ${esc(p.name)}'s answer: grammar, words and how natural it sounded.<br><span class="de">Die Person, die am besten ${T[L].nameDe} spricht, bewertet.</span></p>
     <div class="ratings">${RATINGS.map(r=>`
       <button class="rate ${S.turnRating===r.v?"on":""}" onclick="setRating(${r.v})">
         <span class="e">${r.e}</span><b>${r.en}</b><span class="de">${r.de}</span><span class="rp">+${r.pts}</span>
@@ -685,9 +710,9 @@ feedback(){
     <h3>💬 Coach tip <span class="de">· Tipp</span></h3>
     <p style="margin:0 0 8px;font-size:15px">Say one phrase that would sound more natural — or a new word ${esc(p.name)} can use.</p>
     <label class="lbl" style="margin-top:10px">✍️ What ${esc(p.name)} said <span class="de">· optional</span></label>
-    <textarea id="ans" rows="2" placeholder="A sentence or two from the answer" oninput="S.turnAns=this.value">${esc(S.turnAns||"")}</textarea>
+    <textarea id="ans" dir="auto" rows="2" placeholder="A sentence or two from the answer" oninput="S.turnAns=this.value">${esc(S.turnAns||"")}</textarea>
     <label class="lbl">💡 Tip or better phrase <span class="de">· optional</span></label>
-    <textarea id="tip" rows="2" placeholder="e.g. Say “I went” instead of “I go”" oninput="S.turnTip=this.value">${esc(S.turnTip||"")}</textarea>
+    <textarea id="tip" dir="auto" rows="2" placeholder="e.g. Say “I went” instead of “I go”" oninput="S.turnTip=this.value">${esc(S.turnTip||"")}</textarea>
     <p class="note" style="margin:6px 0 0">Saved for ${esc(p.name)}'s review at the end · Für die Auswertung gespeichert</p>
   </div>
   <button class="btn primary" onclick="nextTurn()">${isLastTurn()?"See results 🏆":"Next player →"}<small>${isLastTurn()?"Ergebnisse":"Nächste Person"}</small></button>`;
@@ -705,7 +730,7 @@ results(){
   <h2 class="center">${bi("Great game!","Super gespielt!")}</h2>
   <div class="card">${ranked.map((r,n)=>`
     <div class="rank"><span class="medal">${medals[n]||"⭐"}</span>${avatar(r.p,r.i)}
-      <div><div class="pname">${esc(r.p.name)}</div><div class="pmeta">${r.p.lang==="en"?"🇬🇧":"🇩🇪"} ${LEVELS[r.p.level].code}${r.p.ratings.length?` · ${avgLabel(r.p)}`:""}</div></div>
+      <div><div class="pname">${esc(r.p.name)}</div><div class="pmeta">${T[r.p.lang].flag} ${LEVELS[r.p.level].code}${r.p.ratings.length?` · ${avgLabel(r.p)}`:""}</div></div>
       <span class="pts">${r.p.pts}</span></div>`).join("")}</div>
   <div class="card">
     <h3>Awards <span class="de">· Auszeichnungen</span></h3>
@@ -746,6 +771,7 @@ stats(){
   <div class="card">
     <div class="stat"><span>Games started</span><b>${s.started}</b></div>
     <div class="stat"><span>Games finished</span><b>${s.completed}</b></div>
+    <div class="stat"><span>Online games hosted</span><b>${s.online||0}</b></div>
     <div class="stat"><span>"Play another round" taps</span><b>${s.replays}</b></div>
     <div class="stat"><span>Enjoyment ratings</span><b>${s.ratings.length}</b></div>
     <div class="stat" style="border:none"><span>Average rating (1–5)</span><b>${avg}</b></div>
@@ -827,35 +853,36 @@ function nextTurn(){
 function appLink(){ try{ return location.protocol.startsWith("http") ? location.origin : "pontetalk.setzio.com"; }catch(e){ return "pontetalk.setzio.com"; } }
 function today(){ const d=new Date(); return `${String(d.getDate()).padStart(2,"0")}.${String(d.getMonth()+1).padStart(2,"0")}.${d.getFullYear()}`; }
 function reactLine(r){ return REACTS.filter(x=>r[x.k]).map(x=>`${x.e}${r[x.k]}`).join("  ") || "–"; }
-function playerReview(i){
-  const p=S.players[i], L=p.lang, turns=S.log.filter(t=>t.pi===i);
-  const t=(en,de)=>L==="en"?en:de;
-  let out=`🌉 PonteTalk – ${t("Your practice review","Deine Übungs-Auswertung")}\n`;
-  out+=`${today()} · ${p.name} · ${L==="en"?"🇬🇧 English":"🇩🇪 Deutsch"} ${LEVELS[p.level].code}\n`;
-  out+=`${t("Points","Punkte")}: ${p.pts}\n\n`;
-  if(!turns.length) out+=t("No turns played yet.","Noch keine Runden gespielt.")+"\n";
+function playerReview(i, ctx){
+  ctx=ctx||{players:S.players, log:S.log, rounds:S.rounds};
+  const p=ctx.players[i], L=p.lang, X=T[L], R=X.r, turns=ctx.log.filter(t=>t.pi===i);
+  let out=`🌉 PonteTalk – ${R.title}\n`;
+  out+=`${today()} · ${p.name} · ${X.flag} ${X.name} ${LEVELS[p.level].code}\n`;
+  out+=`${R.points}: ${p.pts}\n\n`;
+  if(!turns.length) out+=R.none+"\n";
   turns.forEach((x,n)=>{
-    const f=FMTS[x.f], c=CATS[x.c];
-    out+=`${n+1}) ${f.e} ${L==="en"?f.en:f.de} · ${c.e} ${L==="en"?c.en:c.de}\n`;
+    const a1 = p.level===0 && x.f==="wwyd";
+    out+=`${n+1}) ${FMTS[x.f].e} ${a1?X.a1wwyd:X.fmt[x.f]} · ${CATS[x.c].e} ${X.cats[x.c]}\n`;
     out+=`❓ ${x.q}\n`;
-    if(x.rating){ const R=RATINGS[x.rating-1]; out+=`🧑‍🏫 ${t("Coach score","Bewertung")}: ${R.e} ${L==="en"?R.en:R.de}\n`; }
-    if(x.bonus && x.bonus.length) out+=`🎁 Bonus: ${x.bonus.map(k=>k==="nohints"?t("🙈 No hints","🙈 Ohne Hilfe"):t("🎤 Kept talking","🎤 Bis zum Ende gesprochen")).join(", ")}\n`;
-    if(x.ans) out+=`✍️ ${t("You said","Du hast gesagt")}: ${x.ans}\n`;
-    if(x.tip) out+=`💡 ${t("Tip","Tipp")}: ${x.tip}\n`;
-    out+=`📚 ${t("Useful words","Nützliche Wörter")}: ${x.words.join(", ")}\n`;
-    out+=`👏 ${t("Reactions","Reaktionen")}: ${reactLine(x.reacts)}\n\n`;
+    if(x.rating){ out+=`🧑‍🏫 ${R.coach}: ${RATINGS[x.rating-1].e} ${X.ratings[x.rating-1]}\n`; }
+    if(x.bonus && x.bonus.length) out+=`🎁 ${R.bonus}: ${x.bonus.map(k=>k==="nohints"?`🙈 ${R.nohints}`:`🎤 ${R.kept}`).join(", ")}\n`;
+    if(x.ans) out+=`✍️ ${R.said}: ${x.ans}\n`;
+    if(x.tip) out+=`💡 ${R.tip}: ${x.tip}\n`;
+    out+=`📚 ${R.words}: ${x.words.join(", ")}\n`;
+    out+=`👏 ${R.reacts}: ${reactLine(x.reacts)}\n\n`;
   });
-  out+=`🎯 ${t("Practice idea: answer each question again at home — out loud, using the tip and the useful words.","Übungsidee: Beantworte jede Frage zu Hause noch einmal laut – mit dem Tipp und den nützlichen Wörtern.")}\n\n`;
-  out+=`${t("Play again","Nochmal spielen")}: ${appLink()}`;
+  out+=`🎯 ${R.practice}\n\n`;
+  out+=`${R.again}: ${appLink()}`;
   return out;
 }
-function gameReview(){
-  let out=`🌉 PonteTalk – Game summary · Spielübersicht\n${today()} · ${S.players.length} players · ${S.rounds} round(s)\n\n`;
-  const ranked=S.players.map((p,i)=>({p,i})).sort((a,b)=>b.p.pts-a.p.pts);
-  out+=`🏆 Scores\n`+ranked.map((r,n)=>`${n+1}. ${r.p.name} (${r.p.lang==="en"?"EN":"DE"} ${LEVELS[r.p.level].code}) – ${r.p.pts}`).join("\n")+"\n\n";
-  S.players.forEach((p,i)=>{
+function gameReview(ctx){
+  ctx=ctx||{players:S.players, log:S.log, rounds:S.rounds};
+  let out=`🌉 PonteTalk – Game summary · Spielübersicht\n${today()} · ${ctx.players.length} players · ${ctx.rounds} round(s)\n\n`;
+  const ranked=ctx.players.map((p,i)=>({p,i})).sort((a,b)=>b.p.pts-a.p.pts);
+  out+=`🏆 Scores\n`+ranked.map((r,n)=>`${n+1}. ${r.p.name} (${T[r.p.lang].code} ${LEVELS[r.p.level].code}) – ${r.p.pts}`).join("\n")+"\n\n";
+  ctx.players.forEach((p,i)=>{
     out+=`━━━━━━━━━━\n👤 ${p.name}\n`;
-    S.log.filter(t=>t.pi===i).forEach((x,n)=>{
+    ctx.log.filter(t=>t.pi===i).forEach((x,n)=>{
       out+=`${n+1}) ${x.q}\n`;
       if(x.rating){ const R=RATINGS[x.rating-1]; out+=`   🧑‍🏫 ${R.e} ${R.en}\n`; }
       if(x.bonus && x.bonus.length) out+=`   🎁 ${x.bonus.map(k=>k==="nohints"?"🙈 No hints":"🎤 Kept talking").join(", ")}\n`;
@@ -868,15 +895,16 @@ function gameReview(){
   out+=`${appLink()}`;
   return out;
 }
-function openExport(i){
-  const text = i<0 ? gameReview() : playerReview(i);
-  const name = i<0 ? "game" : S.players[i].name;
+function openExport(i, ctx){
+  ctx=ctx||{players:S.players, log:S.log, rounds:S.rounds};
+  const text = i<0 ? gameReview(ctx) : playerReview(i, ctx);
+  const name = i<0 ? "game" : ctx.players[i].name;
   const canShare = !!(navigator.share);
   const box=document.createElement("div");
   box.className="sheet-bg";
   box.innerHTML=`<div class="sheet">
     <div class="topline" style="margin-bottom:8px"><h3 style="margin:0">📤 ${i<0?"Whole game":esc(name)}</h3><button class="chip" id="exClose">✕</button></div>
-    <textarea id="exText" rows="9" readonly>${esc(text)}</textarea>
+    <textarea id="exText" dir="auto" rows="9" readonly>${esc(text)}</textarea>
     ${canShare?`<button class="btn primary" id="exShare">📲 Send… <small>WhatsApp, Email, Telegram…</small></button>`:""}
     <div class="exgrid">
       <a class="btn secondary exb" id="exWa" href="https://wa.me/?text=${encodeURIComponent(text)}" target="_blank" rel="noopener">💬 WhatsApp</a>
@@ -921,6 +949,490 @@ function confirmQuit(){
   $("qYes").onclick=()=>{ box.remove(); go("results"); };
 }
 function resetStats(){ saveStats({started:0,completed:0,replays:0,ratings:[]}); render(); }
+
+/* =====================================================================
+   ONLINE MODE — each player on their own phone, synced live.
+   The host's phone runs the game; everyone else sends actions to it.
+   Transport: Supabase Realtime (broadcast + presence). No database tables,
+   nothing is stored on a server.
+   ===================================================================== */
+const SB_URL = "https://urcqlknkfxnurxyhwvin.supabase.co";
+const SB_KEY = "sb_publishable_3h1UKntrdbfYUYUxi9e8Fw_-g9y3kze";
+const CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+const O = { role:null, code:"", me:null, G:null, online:[], tr:null, status:"idle", err:"",
+            codeInput:"", timerId:null, localEnd:0, tickId:null, hostTimeout:null, viewKey:"",
+            draftAns:"", draftTip:"", sentNote:"", hostSeen:0, rating:null };
+
+function uid(){ return Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4); }
+function newCode(){ let c=""; for(let i=0;i<4;i++) c+=CODE_CHARS[Math.floor(Math.random()*CODE_CHARS.length)]; return c; }
+function ostore(){ try{ return useLocalTransport() ? sessionStorage : localStorage; }catch(e){ return null; } } // test mode keeps each tab separate
+function myId(){ try{ const st=ostore(); let id=st.getItem("pt_id"); if(!id){ id=uid(); st.setItem("pt_id",id); } return id; }catch(e){ return O._id || (O._id=uid()); } }
+function useLocalTransport(){ try{ return new URLSearchParams(location.search).get("transport")==="local"; }catch(e){ return false; } }
+function roomLink(){ try{ return (location.protocol.startsWith("http") ? location.origin : "https://pontetalk.setzio.com") + "/?join=" + O.code; }catch(e){ return "https://pontetalk.setzio.com/?join="+O.code; } }
+function saveSession(){ try{ ostore().setItem("pt_online", JSON.stringify({role:O.role, code:O.code, me:O.me, G:O.role==="host"?O.G:null, at:Date.now()})); }catch(e){} }
+function loadSession(){ try{ const x=JSON.parse(ostore().getItem("pt_online")); if(x && Date.now()-x.at < 6*3600e3) return x; }catch(e){} return null; }
+function clearSession(){ try{ ostore().removeItem("pt_online"); }catch(e){} }
+
+/* ---------- transport ---------- */
+function makeTransport(code, me, h){
+  if(useLocalTransport()){
+    // Test transport: several tabs of the same browser talk via BroadcastChannel.
+    const bc = new BroadcastChannel("pt-"+code), seen = {};
+    const beat = () => bc.postMessage({_p:me});
+    bc.onmessage = e => {
+      const d=e.data;
+      if(d._p){ seen[d._p.id]={...d._p, t:Date.now()}; h.onPresence(Object.values(seen)); return; }
+      if(d._bye){ delete seen[d._bye]; h.onPresence(Object.values(seen)); return; }
+      h.onMsg(d);
+    };
+    seen[me.id]={...me,t:Date.now()};
+    const iv = setInterval(()=>{ beat(); const now=Date.now(); let ch=false;
+      for(const k in seen){ if(k!==me.id && now-seen[k].t>6000){ delete seen[k]; ch=true; } }
+      seen[me.id].t=now; if(ch) h.onPresence(Object.values(seen)); }, 1500);
+    setTimeout(()=>{ beat(); h.onPresence(Object.values(seen)); h.onReady(); }, 50);
+    return { send:m=>bc.postMessage(m), track:m=>{ me=m; seen[m.id]={...m,t:Date.now()}; beat(); },
+             close:()=>{ clearInterval(iv); bc.postMessage({_bye:me.id}); bc.close(); } };
+  }
+  if(!window.supabase || !window.supabase.createClient){ setTimeout(()=>h.onError("lib"),0); return {send(){},track(){},close(){}}; }
+  const client = window.supabase.createClient(SB_URL, SB_KEY, {auth:{persistSession:false, autoRefreshToken:false}, realtime:{params:{eventsPerSecond:20}}});
+  const ch = client.channel("pt-"+code, {config:{broadcast:{self:false}, presence:{key:me.id}}});
+  ch.on("broadcast", {event:"m"}, ({payload}) => h.onMsg(payload));
+  ch.on("presence", {event:"sync"}, () => { const st=ch.presenceState(); h.onPresence(Object.values(st).map(a=>a[0]).filter(Boolean)); });
+  ch.subscribe(async status => {
+    if(status==="SUBSCRIBED"){ try{ await ch.track(me); }catch(e){} h.onReady(); }
+    else if(status==="CHANNEL_ERROR" || status==="TIMED_OUT"){ h.onError(status); }
+  });
+  return { send:m=>{ try{ ch.send({type:"broadcast", event:"m", payload:m}); }catch(e){} },
+           track:m=>{ try{ ch.track(m); }catch(e){} },
+           close:()=>{ try{ client.removeChannel(ch); }catch(e){} } };
+}
+
+/* ---------- connect / leave ---------- */
+function onlineConnect(role, code, resumeG){
+  if(O.tr){ O.tr.close(); O.tr=null; }
+  O.role=role; O.code=code; O.status="connecting"; O.err=""; O.online=[]; O.viewKey="";
+  O.me={ id:myId(), name:S.draft.name.trim(), lang:S.draft.lang, level:S.draft.level, host:role==="host" };
+  if(role==="host"){
+    O.G = resumeG || { v:0, phase:"lobby", hostId:O.me.id, players:[], cat:"mix", rounds:2, time:90 };
+    O.G.hostId = O.me.id;
+    if(!O.G.players.some(p=>p.id===O.me.id)) O.G.players.unshift(newPlayer(O.me));
+  } else { O.G=null; }
+  saveSession();
+  O.tr = makeTransport(code, O.me, {
+    onReady(){ O.status="live"; if(role==="host") pushState(); else O.tr.send({kind:"hello", from:O.me.id}); renderOnline(); },
+    onError(e){ O.status="error"; O.err = e==="lib" ? "Couldn't load the online module. Check your internet and reload." : "Connection problem. Check your internet — retrying…";
+      renderOnline(); if(e!=="lib") setTimeout(()=>{ if(O.status==="error" && O.code) onlineConnect(O.role, O.code, O.role==="host"?O.G:null); }, 4000); },
+    onPresence(list){ O.online=list; if(list.some(p=>p.id===(O.G&&O.G.hostId))) O.hostSeen=Date.now(); if(role==="host") hostPresence(list); renderOnline(); },
+    onMsg(m){ handleMsg(m); }
+  });
+  keepAwake();
+  go("lobby");
+}
+function onlineLeave(){
+  if(O.tr){ O.tr.close(); O.tr=null; }
+  if(O.hostTimeout){ clearTimeout(O.hostTimeout); O.hostTimeout=null; }
+  stopOnlineTick(); clearSession();
+  O.role=null; O.code=""; O.G=null; O.status="idle";
+  history.replaceState && history.replaceState(null,"",location.pathname);
+  go("home");
+}
+function newPlayer(m){ return { id:m.id, name:m.name, lang:m.lang, level:m.level, pts:0, coach:0, bonus:0, ratings:[], reacts:{clear:0,creative:0,funny:0,learned:0}, tips:[] }; }
+
+/* ---------- messages ---------- */
+function handleMsg(m){
+  if(!m || !m.kind) return;
+  if(O.role==="host"){
+    if(m.kind==="hello"){ pushState(); }
+    else if(m.kind==="action"){ applyAction(m.from, m.a); }
+  } else {
+    if(m.kind==="state" && m.G){
+      if(O.G && m.G.hostId===O.G.hostId && m.G.v < O.G.v && m.G.phase===O.G.phase) return; // stale
+      O.G=m.G; O.hostSeen=Date.now(); syncTimer(); saveSession(); renderOnline();
+    }
+  }
+}
+function act(a){ if(O.role==="host") applyAction(O.me.id, a); else if(O.tr) O.tr.send({kind:"action", from:O.me.id, a}); }
+function pushState(){
+  const G=O.G; G.v=(G.v||0)+1;
+  if(G.tp && G.tp.timer && !G.tp.timeUp) G.tp.timer.remainMs = Math.max(0, G.tp.timer.endsAt - Date.now());
+  if(O.tr) O.tr.send({kind:"state", G});
+  syncTimer(); saveSession(); renderOnline();
+}
+
+/* ---------- host: presence ---------- */
+function hostPresence(list){
+  const G=O.G; let changed=false;
+  list.forEach(m=>{
+    if(!m || !m.id || !m.name) return;
+    const ex=G.players.find(p=>p.id===m.id);
+    if(!ex){ G.players.push(newPlayer(m)); changed=true; }
+    else if(G.phase==="lobby" && (ex.name!==m.name || ex.lang!==m.lang || ex.level!==m.level)){ ex.name=m.name; ex.lang=m.lang; ex.level=m.level; changed=true; }
+  });
+  if(G.phase==="lobby"){
+    const ids=new Set(list.map(m=>m.id)); const before=G.players.length;
+    G.players=G.players.filter(p=>p.id===G.hostId || ids.has(p.id));
+    if(G.players.length!==before) changed=true;
+  }
+  if(changed) pushState();
+}
+function isOnline(id){ return id===O.me.id || O.online.some(p=>p.id===id); }
+
+/* ---------- host: game logic ---------- */
+function oPick(lang, level){
+  const G=O.G, used=new Set(G.used||[]), pool=level===0?P1:P, tag=level===0?"a1":"std";
+  const fmtKeys=["role","quick","wwyd"], fmt=fmtKeys[(G.fmtCycle++)%3];
+  const cats = G.cat==="mix" ? shuffle(["everyday","social","work","travel"]) : [G.cat];
+  const find = fmts => { for(const c of cats) for(const f of fmts){
+      const list=pool[lang][c][f].map((x,i)=>({...x,c,f,id:`${lang}-${tag}-${c}-${f}-${i}`})).filter(x=>!used.has(x.id));
+      if(list.length) return pick(list); } return null; };
+  let x = find([fmt]) || find(shuffle(fmtKeys.slice()));
+  if(!x){ G.used=(G.used||[]).filter(id=>!id.startsWith(`${lang}-${tag}-`)); used.clear(); (G.used).forEach(i=>used.add(i)); x=find([fmt]); }
+  G.used=[...(G.used||[]), x.id];
+  return x;
+}
+function oNewTurn(){
+  const G=O.G, p=G.players[G.turn];
+  G.current = oPick(p.lang, p.level);
+  G.tp = { hintsUsed:false, rerolled:false, timer:null, timeUp:false, kept:false, reactsBy:{}, rating:0, ratedBy:null, notes:[] };
+  G.phase = "turn";
+}
+function oStart(){
+  const G=O.G;
+  G.players.forEach(p=>{ p.pts=0; p.coach=0; p.bonus=0; p.ratings=[]; p.reacts={clear:0,creative:0,funny:0,learned:0}; p.tips=[]; });
+  G.round=1; G.turn=0; G.used=[]; G.log=[]; G.fmtCycle=Math.floor(Math.random()*3);
+  oNewTurn(); bump("started"); bump("online");
+}
+function oIsLast(){ const G=O.G; return G.round===G.rounds && G.turn===G.players.length-1; }
+function oAdvance(){
+  const G=O.G;
+  if(oIsLast()){ G.phase="results"; G.tp=null; bump("completed"); return; }
+  G.turn++; if(G.turn>=G.players.length){ G.turn=0; G.round++; }
+  oNewTurn();
+}
+function oScore(){
+  const G=O.G, tp=G.tp, p=G.players[G.turn], R=RATINGS.find(r=>r.v===tp.rating);
+  const reacts={clear:0,creative:0,funny:0,learned:0}; Object.values(tp.reactsBy).forEach(k=>{ if(reacts[k]!==undefined) reacts[k]++; });
+  const bonus=[]; if(!tp.hintsUsed) bonus.push("nohints"); if(tp.timeUp && tp.kept) bonus.push("kept");
+  const rc=Object.values(reacts).reduce((a,b)=>a+b,0);
+  p.pts += R.pts + bonus.length*2 + rc; p.coach+=R.pts; p.bonus+=bonus.length*2; p.ratings.push(R.v);
+  for(const k in reacts) p.reacts[k]+=reacts[k];
+  const tips=tp.notes.filter(n=>n.type==="tip").map(n=>n.text), ans=tp.notes.filter(n=>n.type==="ans").map(n=>n.text);
+  p.tips.push(...tips);
+  G.log.push({pi:G.turn, round:G.round, q:G.current.t, f:G.current.f, c:G.current.c, words:G.current.w.slice(), ans:ans.join(" / "), tip:tips.join(" / "), rating:R.v, bonus, reacts});
+}
+function applyAction(from, a){
+  const G=O.G; if(!G || !a) return;
+  const active = G.players[G.turn] || {}, isActive = from===active.id, isHost = from===G.hostId, tp=G.tp;
+  switch(a.type){
+    case "settings": if(isHost && G.phase==="lobby"){ if(a.cat) G.cat=a.cat; if(a.rounds) G.rounds=Math.min(10,Math.max(1,a.rounds)); if(a.time) G.time=a.time; } break;
+    case "start": if(isHost && (G.phase==="lobby"||G.phase==="results") && G.players.length>=2) oStart(); break;
+    case "lobby": if(isHost){ G.phase="lobby"; G.tp=null; } break;
+    case "kick": if(isHost && G.phase==="lobby" && a.id!==G.hostId) G.players=G.players.filter(p=>p.id!==a.id); break;
+    case "hint": if(G.phase==="turn" && isActive) tp.hintsUsed=true; break;
+    case "reroll": if(G.phase==="turn" && isActive && !tp.rerolled && !tp.timer){ G.current=oPick(active.lang, active.level); tp.rerolled=true; tp.hintsUsed=false; } break;
+    case "timer": if(G.phase==="turn" && (isActive||isHost) && !tp.timer){
+        const total = G.current.f==="quick" ? Math.round(G.time/2) : G.time;
+        tp.timer={ id:uid(), total, endsAt:Date.now()+total*1000, remainMs:total*1000 };
+        if(O.hostTimeout) clearTimeout(O.hostTimeout);
+        O.hostTimeout=setTimeout(()=>{ if(O.G.tp && O.G.tp.timer && O.G.phase==="turn"){ O.G.tp.timeUp=true; O.G.tp.kept=true; pushState(); } }, total*1000+150);
+      } break;
+    case "done": if(G.phase==="turn" && (isActive||isHost)){ if(O.hostTimeout){ clearTimeout(O.hostTimeout); O.hostTimeout=null; } G.phase="feedback"; } break;
+    case "skip": if(isHost && (G.phase==="turn"||G.phase==="feedback")){ if(O.hostTimeout){ clearTimeout(O.hostTimeout); O.hostTimeout=null; } oAdvance(); } break;
+    case "react": if(G.phase==="feedback" && !isActive){ tp.reactsBy[from] = tp.reactsBy[from]===a.k ? undefined : a.k; if(tp.reactsBy[from]===undefined) delete tp.reactsBy[from]; } break;
+    case "rate": if(G.phase==="feedback" && (!isActive||isHost) && RATINGS.some(r=>r.v===a.v)){ tp.rating=a.v; tp.ratedBy=from; } break;
+    case "kept": if(G.phase==="feedback" && !isActive && tp.timeUp) tp.kept=!tp.kept; break;
+    case "note": if(G.phase==="feedback" && a.text && String(a.text).trim()){ const by=(G.players.find(p=>p.id===from)||{}).name||"?"; tp.notes.push({type:a.note==="ans"?"ans":"tip", text:String(a.text).trim().slice(0,300), by}); } break;
+    case "next": if(G.phase==="feedback" && (!isActive||isHost) && tp.rating){ oScore(); oAdvance(); } break;
+    default: return;
+  }
+  pushState();
+}
+
+/* ---------- timer display ---------- */
+function syncTimer(){
+  const t = O.G && O.G.tp && O.G.tp.timer;
+  if(!t){ O.timerId=null; stopOnlineTick(); return; }
+  if(t.id!==O.timerId){ O.timerId=t.id; O.localEnd = Date.now() + (t.remainMs||0); beepArmed=true; }
+  startOnlineTick();
+}
+let beepArmed=false;
+function startOnlineTick(){ if(O.tickId) return; O.tickId=setInterval(onlineTick, 250); onlineTick(); }
+function stopOnlineTick(){ if(O.tickId){ clearInterval(O.tickId); O.tickId=null; } }
+function onlineTick(){
+  const G=O.G, t=G&&G.tp&&G.tp.timer, el=$("otimer"); if(!t){ stopOnlineTick(); return; }
+  const left = G.tp.timeUp ? 0 : Math.max(0, Math.ceil((O.localEnd-Date.now())/1000));
+  if(left===0 && beepArmed && G.phase==="turn"){ beepArmed=false; beep(); }
+  if(!el) return;
+  el.textContent = left===0 ? "⏰ Time!" : `${Math.floor(left/60)}:${String(left%60).padStart(2,"0")}`;
+  el.classList.toggle("low", left<=10);
+  const bar=$("obar"), fill=$("obarFill"); if(bar){ bar.classList.toggle("low", left<=10); fill.style.width = `${left/t.total*100}%`; }
+}
+
+/* ---------- views ---------- */
+function oForm(){
+  const d=S.draft;
+  return `
+    <label class="lbl">Your name · Dein Name</label>
+    <input type="text" id="oname" maxlength="16" placeholder="e.g. Ana" value="${esc(d.name)}" autocomplete="off" oninput="S.draft.name=this.value">
+    <label class="lbl">I'm practicing · Ich übe</label>
+    <div class="row">${LANG_KEYS.map(k=>`<button class="chip lang ${d.lang===k?"on":""}" onclick="setDraft('lang','${k}')">${T[k].flag} ${T[k].name}</button>`).join("")}</div>
+    <label class="lbl">My level · Mein Niveau</label>
+    <div class="row">${LEVELS.map((l,i)=>`<button class="chip ${d.level===i?"on":""}" onclick="setDraft('level',${i})">${l.code} · ${T[d.lang].levels[i]}</button>`).join("")}</div>`;
+}
+VIEWS.online = function(){
+  const ses = loadSession();
+  return `
+  <div class="topline"><button class="chip" onclick="go('home')">← Back</button><span>🌐 Online</span></div>
+  <h2>${bi("Play online","Online spielen")}</h2>
+  <p class="sub">Everyone joins from their own phone. Talk on a video call (Zoom, WhatsApp, Teams…) while you play.<br><span class="de">Alle spielen am eigenen Handy – sprecht per Videoanruf.</span></p>
+  ${ses && ses.code ? `<div class="card resume"><b>Continue game ${esc(ses.code)}?</b> <span class="de">· Spiel fortsetzen?</span>
+     <button class="btn secondary" onclick="resumeOnline()">↩️ Rejoin ${esc(ses.code)}<small>${ses.role==="host"?"You're the host":"As "+esc(ses.me&&ses.me.name||"")}</small></button></div>` : ""}
+  <div class="card">${oForm()}
+    <label class="lbl">Room code · Raumcode <span class="de">(to join)</span></label>
+    <input type="text" id="ocode" maxlength="4" placeholder="e.g. K7QM" value="${esc(O.codeInput)}" autocomplete="off" autocapitalize="characters"
+      style="text-transform:uppercase;letter-spacing:.3em;font-size:22px;text-align:center" oninput="O.codeInput=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')">
+    <div class="err">${esc(O.err)}</div>
+    <button class="btn primary" onclick="joinOnline()">🚪 Join game<small>Spiel beitreten</small></button>
+    <div class="or">— or · oder —</div>
+    <button class="btn secondary" onclick="hostOnline()">✨ Create a new game<small>Neues Spiel erstellen (du bist Host)</small></button>
+  </div>`;
+};
+function oCheckName(){ const n=($("oname")||{}).value; if(n!==undefined) S.draft.name=n; if(!S.draft.name.trim()){ O.err="Please type your name · Bitte Namen eingeben"; render(); return false; } O.err=""; return true; }
+function hostOnline(){ if(!oCheckName()) return; onlineConnect("host", newCode(), null); }
+function joinOnline(){
+  if(!oCheckName()) return;
+  const c=(O.codeInput||"").toUpperCase(); if(c.length!==4){ O.err="Type the 4-letter room code · 4-stelligen Code eingeben"; render(); return; }
+  onlineConnect("guest", c, null);
+}
+function resumeOnline(){
+  const s=loadSession(); if(!s) return render();
+  S.draft.name=s.me.name; S.draft.lang=s.me.lang; S.draft.level=s.me.level;
+  onlineConnect(s.role, s.code, s.role==="host"?s.G:null);
+}
+
+function oStatusBar(){
+  const G=O.G, hostGone = O.role==="guest" && G && !O.online.some(p=>p.id===G.hostId) && Date.now()-O.hostSeen>6000;
+  if(O.status==="connecting") return `<div class="obanner">🔌 Connecting… · Verbinde…</div>`;
+  if(O.status==="error") return `<div class="obanner bad">⚠️ ${esc(O.err)}</div>`;
+  if(O.role==="guest" && !G) return `<div class="obanner">⏳ Looking for room ${esc(O.code)}… Make sure the host has created it. · Warte auf den Host…</div>`;
+  if(hostGone) return `<div class="obanner bad">📴 The host seems offline. Waiting for them to come back… · Host offline</div>`;
+  return "";
+}
+function oPlayersList(G){
+  return G.players.map((p,i)=>`
+    <div class="player">${avatar(p,i)}
+      <div><div class="pname">${esc(p.name)} ${p.id===G.hostId?'<span class="badge b-fmt">Host</span>':""} ${p.id===O.me.id?'<span class="note">(you)</span>':""}</div>
+      <div class="pmeta">${T[p.lang].flag} ${T[p.lang].name} · ${LEVELS[p.level].code}</div></div>
+      <span class="dot ${isOnline(p.id)?"on":""}" title="${isOnline(p.id)?"online":"offline"}"></span>
+      ${O.role==="host" && p.id!==G.hostId && G.phase==="lobby" ? `<button class="x" onclick="act({type:'kick',id:'${p.id}'})" aria-label="Remove">×</button>`:""}
+    </div>`).join("");
+}
+VIEWS.lobby = function(){
+  const G=O.G;
+  if(!G || G.phase==="lobby"){
+    const host=O.role==="host";
+    return `
+    <div class="topline"><button class="chip" onclick="confirmLeave()">← Leave</button><span>🌐 Online</span></div>
+    ${oStatusBar()}
+    <div class="card center">
+      <div class="note">Room code · Raumcode</div>
+      <div class="roomcode">${esc(O.code)}</div>
+      ${host?`<p class="note" style="margin:4px 0 10px">Share the code or the link · Code oder Link teilen</p>
+      <div class="exgrid">
+        <button class="btn secondary exb" onclick="shareRoom()">📲 Invite</button>
+        <button class="btn secondary exb" onclick="copyRoom()">📋 Copy link</button>
+      </div><p class="note" id="roomMsg" style="min-height:16px;margin:6px 0 0"></p>`:`<p class="note">You're in! · Du bist drin!</p>`}
+    </div>
+    ${G?`<div class="card"><h3>Players · Spieler (${G.players.length}/10)</h3>${oPlayersList(G)}</div>`:""}
+    ${G && host ? `<div class="card">
+      <label class="lbl" style="margin-top:0">Topic · Thema</label>
+      <div class="row">${Object.entries(CATS).map(([k,c])=>`<button class="chip ${G.cat===k?"on":""}" onclick="act({type:'settings',cat:'${k}'})">${c.e} ${c.en} · ${c.de}</button>`).join("")}</div>
+      <label class="lbl">Rounds · Runden</label>
+      <div class="stepper"><button class="step" onclick="act({type:'settings',rounds:${G.rounds-1}})" ${G.rounds<=1?"disabled":""}>−</button>
+        <div class="stepval"><b>${G.rounds}</b><span>${G.rounds===1?"round · Runde":"rounds · Runden"}</span></div>
+        <button class="step" onclick="act({type:'settings',rounds:${G.rounds+1}})" ${G.rounds>=10?"disabled":""}>+</button></div>
+      <label class="lbl">Speaking time · Sprechzeit</label>
+      <div class="row">${[60,90,120].map(n=>`<button class="chip ${G.time===n?"on":""}" onclick="act({type:'settings',time:${n}})">${n}s</button>`).join("")}</div>
+    </div>
+    <button class="btn primary" ${G.players.length<2?'style="opacity:.45"':""} onclick="${G.players.length<2?"":"act({type:'start'})"}">▶ Start game<small>${G.players.length<2?"Waiting for at least 1 more player · Warte auf Mitspieler":"Spiel starten"}</small></button>`
+    : G ? `<div class="card center"><div class="emoji">⏳</div><p>Waiting for the host to start…<br><span class="de">Warte, bis der Host startet…</span></p>
+      <p class="note">${CATS[G.cat].e} ${CATS[G.cat].en} · ${G.rounds} rounds · ${G.time}s</p></div>` : ""}`;
+  }
+  if(G.phase==="turn") return oTurnView();
+  if(G.phase==="feedback") return oFeedbackView();
+  if(G.phase==="results") return oResultsView();
+  return "";
+};
+function oHeader(){
+  const G=O.G, a=G.players[G.turn];
+  return `<div class="topline"><span>${T[a.lang].round} ${G.round}/${G.rounds} · ${G.turn+1}/${G.players.length}</span>
+    <span class="row" style="gap:6px">${O.role==="host"?`<button class="chip" onclick="hostMenu()">⚙️</button>`:""}<button class="chip" onclick="confirmLeave()">✕</button></span></div>${oStatusBar()}`;
+}
+function oTurnView(){
+  const G=O.G, a=G.players[G.turn], tp=G.tp, c=G.current, L=a.lang, X=T[L], me=a.id===O.me.id;
+  const f=FMTS[c.f], a1=a.level===0 && c.f==="wwyd";
+  const fLabel=a1?X.a1wwyd:X.fmt[c.f], fHow=a1?X.a1how:X.how[c.f];
+  const timer = tp.timer ? `<div class="timer" id="otimer">…</div><div class="bar" id="obar"><i id="obarFill"></i></div>` : "";
+  const offline = !isOnline(a.id);
+  return `${oHeader()}
+    <div class="turnwho">${avatar(a,G.turn)}<div>${me?`<b>${bi("Your turn!","Du bist dran!")}</b>`:`<b>${esc(a.name)}</b> <span class="note">is speaking · spricht</span>`}<br>${langBadge(L)} <span class="badge b-fmt">${LEVELS[a.level].code}</span></div></div>
+    ${offline && O.role==="host" ? `<div class="obanner bad">📴 ${esc(a.name)} seems offline. <button class="chip" onclick="act({type:'skip'})">Skip turn</button></div>`:""}
+    <div class="card" dir="${X.dir}">
+      <div class="row"><span class="badge b-fmt">${f.e} ${fLabel}</span><span class="badge b-cat">${CATS[c.c].e} ${X.cats[c.c]}</span></div>
+      <div class="prompt">${esc(c.t)}</div>
+      ${me?`<p class="note" style="margin:0 0 10px">${fHow}</p><div class="task">🎯 ${X.tasks[a.level]}</div>
+        ${tp.hintsUsed?`<div class="hints show">${c.w.map(w=>`<span class="hint">${esc(w)}</span>`).join("")}</div>`
+          :`<button class="chip hintbtn" style="margin-top:12px" onclick="act({type:'hint'})">💬 ${X.help}</button><p class="note" style="margin:6px 0 0">🙈 ${X.nohint}</p>`}`
+        :`<p class="note" style="margin:0">🎧 Listen on the call — you'll give feedback next.<br><span class="de">Hör im Anruf zu – gleich gibst du Feedback.</span></p>`}
+    </div>
+    ${timer}
+    ${me ? (tp.timer
+        ? `<button class="btn secondary" onclick="act({type:'done'})">✓ ${X.done}<small>Feedback time · Zeit für Feedback</small></button>`
+        : `<button class="btn primary" onclick="act({type:'timer'})">⏱️ ${X.startTimer}<small>${X.startSub}</small></button>
+           ${tp.rerolled?"":`<button class="btn ghost" onclick="act({type:'reroll'})">🔄 ${X.reroll}</button>`}`)
+      : (O.role==="host" ? `<p class="note center" style="margin-top:10px">Host: if ${esc(a.name)} is stuck, you can <a href="#" onclick="act({type:'${tp.timer?"done":"timer"}'});return false">${tp.timer?"end the turn":"start the timer"}</a>.</p>` : "")}`;
+}
+function oFeedbackView(){
+  const G=O.G, a=G.players[G.turn], me=a.id===O.me.id;
+  return `${oHeader()}
+    <div class="turnwho">${avatar(a,G.turn)}<div><b>${me?bi("How did you do?","Wie war's?"):`Feedback for ${esc(a.name)}`}</b><br>${langBadge(a.lang)}</div></div>
+    <div id="odyn">${oFeedbackDyn()}</div>
+    ${me ? "" : `<div class="coach" style="margin-top:14px">
+      <h3>💬 Coach tip <span class="de">· Tipp</span></h3>
+      <label class="lbl" style="margin-top:6px">✍️ What ${esc(a.name)} said <span class="de">· optional</span></label>
+      <textarea id="oans" dir="auto" rows="2" placeholder="A sentence from the answer" oninput="O.draftAns=this.value">${esc(O.draftAns)}</textarea>
+      <button class="chip" style="margin-top:6px" onclick="sendNote('ans')">Send · Senden</button>
+      <label class="lbl">💡 Tip or better phrase <span class="de">· optional</span></label>
+      <textarea id="otip" dir="auto" rows="2" placeholder="e.g. Say “I went” instead of “I go”" oninput="O.draftTip=this.value">${esc(O.draftTip)}</textarea>
+      <button class="chip" style="margin-top:6px" onclick="sendNote('tip')">Send · Senden</button>
+      <p class="note" id="noteMsg" style="min-height:16px;margin:6px 0 0">${esc(O.sentNote)}</p>
+    </div>`}
+    <div id="odyn2">${oFeedbackDyn2()}</div>`;
+}
+function oFeedbackDyn(){
+  const G=O.G, a=G.players[G.turn], tp=G.tp, me=a.id===O.me.id, canJudge=!me||O.role==="host";
+  const counts={clear:0,creative:0,funny:0,learned:0}; Object.values(tp.reactsBy).forEach(k=>{ if(counts[k]!==undefined) counts[k]++; });
+  const mine=tp.reactsBy[O.me.id];
+  const L=a.lang, rater=tp.ratedBy ? (G.players.find(p=>p.id===tp.ratedBy)||{}).name : "";
+  return `
+    <div class="coach coach-score">
+      <h3>🧑‍🏫 Coach score <span class="de">· Bewertung</span></h3>
+      <p style="margin:0 0 10px;font-size:15px">${me?`The best <b>${T[L].nameEn}</b> speaker is scoring you… · Du wirst bewertet…`:`The best <b>${T[L].nameEn}</b> speaker picks one. · Die Person, die am besten ${T[L].nameDe} spricht, wählt.`}</p>
+      <div class="ratings">${RATINGS.map(r=>`<button class="rate ${tp.rating===r.v?"on":""}" ${canJudge?`onclick="act({type:'rate',v:${r.v}})"`:"disabled"}>
+        <span class="e">${r.e}</span><b>${r.en}</b><span class="de">${r.de}</span><span class="rp">+${r.pts}</span></button>`).join("")}</div>
+      ${rater?`<p class="note" style="margin:8px 0 0">Scored by ${esc(rater)}</p>`:""}
+    </div>
+    <div class="bonusbox">
+      <h3 style="margin:0 0 8px">🎁 Bonus</h3>
+      <div class="bonus ${tp.hintsUsed?"off":"got"}"><span>🙈 <b>No hints</b> <span class="de">· Ohne Hilfe</span></span><span class="bp">${tp.hintsUsed?"–":"+2"}</span></div>
+      <button class="bonus ${tp.timeUp&&tp.kept?"got":"off"}" ${tp.timeUp&&!me?`onclick="act({type:'kept'})"`:"disabled"}>
+        <span>🎤 <b>Kept talking to the end</b> <span class="de">· Bis zum Ende</span><br><span class="note">${tp.timeUp?(me?"":(tp.kept?"Tap to remove if they went quiet":"Tap if they really kept talking")):"Finished before the timer · Vor Ablauf fertig"}</span></span>
+        <span class="bp">${tp.timeUp&&tp.kept?"+2":"–"}</span></button>
+    </div>
+    <h3 style="margin:18px 0 4px">👏 Reactions <span class="de">· Reaktionen</span></h3>
+    <p class="note" style="margin:0 0 10px">${me?"Your table's reactions · Reaktionen der Gruppe":"Pick one — tap again to undo · Eine wählen"}</p>
+    <div class="reacts">${REACTS.map(r=>`<button class="react ${mine===r.k?"hit":""}" ${me?"disabled":`onclick="act({type:'react',k:'${r.k}'})"`}>
+      ${counts[r.k]?`<span class="n">${counts[r.k]}</span>`:""}<span class="e">${r.e}</span>${r.en}<br><span class="de">${r.de}</span></button>`).join("")}</div>
+    `;
+}
+function oFeedbackDyn2(){
+  const G=O.G, a=G.players[G.turn], tp=G.tp, me=a.id===O.me.id, canJudge=!me||O.role==="host";
+  return `
+    ${tp.notes.length?`<div class="card" style="margin-top:14px"><h3>📝 Notes · Notizen</h3>${tp.notes.map(n=>`<p style="margin:6px 0">${n.type==="tip"?"💡":"✍️"} <span dir="auto">${esc(n.text)}</span> <span class="note">— ${esc(n.by)}</span></p>`).join("")}</div>`:""}
+    ${canJudge ? `<button class="btn primary" ${tp.rating?"":'style="opacity:.45"'} onclick="${tp.rating?"act({type:'next'})":"needScore()"}">${oIsLast()?"See results 🏆":"Next player →"}<small>${tp.rating?(oIsLast()?"Ergebnisse":"Nächste Person"):"Coach: pick a score first · Erst bewerten"}</small></button>`
+      : `<p class="note center" style="margin-top:14px">⏳ Waiting for the coach and the table… · Warte auf Feedback…</p>`}`;
+}
+function needScore(){ const el=document.querySelector(".coach-score"); if(el){ el.classList.add("need"); el.scrollIntoView({behavior:"smooth",block:"center"}); } }
+function sendNote(kind){
+  const v = kind==="ans" ? O.draftAns : O.draftTip;
+  if(!v || !v.trim()) return;
+  act({type:"note", note:kind, text:v});
+  if(kind==="ans") O.draftAns=""; else O.draftTip="";
+  const el=$(kind==="ans"?"oans":"otip"); if(el) el.value="";
+  O.sentNote="Sent ✓ · Gesendet ✓"; const m=$("noteMsg"); if(m) m.textContent=O.sentNote;
+}
+function oResultsView(){
+  const G=O.G, ranked=G.players.map((p,i)=>({p,i})).sort((a,b)=>b.p.pts-a.p.pts), medals=["🥇","🥈","🥉"];
+  const meIdx=G.players.findIndex(p=>p.id===O.me.id);
+  const avg = p => p.ratings.length ? (()=>{ const a=p.ratings.reduce((x,y)=>x+y,0)/p.ratings.length; const r=RATINGS[Math.min(3,Math.max(0,Math.round(a)-1))]; return `${r.e} ${r.en}`; })() : "";
+  return `
+    <div class="topline"><span>🌐 ${esc(O.code)}</span><button class="chip" onclick="confirmLeave()">✕ Leave</button></div>${oStatusBar()}
+    <h1 class="center">🏆</h1><h2 class="center">${bi("Great game!","Super gespielt!")}</h2>
+    <div class="card">${ranked.map((r,n)=>`<div class="rank"><span class="medal">${medals[n]||"⭐"}</span>${avatar(r.p,r.i)}
+      <div><div class="pname">${esc(r.p.name)} ${r.p.id===O.me.id?'<span class="note">(you)</span>':""}</div><div class="pmeta">${T[r.p.lang].flag} ${LEVELS[r.p.level].code}${r.p.ratings.length?` · ${avg(r.p)}`:""}</div></div>
+      <span class="pts">${r.p.pts}</span></div>`).join("")}</div>
+    <div class="card">
+      <h3>📤 Your review <span class="de">· Deine Auswertung</span></h3>
+      <p class="note">Your questions, answers, useful words and tips — to practice later.</p>
+      ${meIdx>=0?`<button class="btn primary" onclick="openExport(${meIdx}, oCtx())">📤 My review · Meine Auswertung</button>`:""}
+      ${O.role==="host"?`<button class="btn secondary" onclick="openExport(-1, oCtx())">📋 Export whole game<small>Ganzes Spiel (für Host)</small></button>`:""}
+    </div>
+    <div class="card center">
+      <h3>Did you enjoy it? <span class="de">· Hat's Spaß gemacht?</span></h3>
+      <div class="faces">${["😞","😐","🙂","😄","🤩"].map((f,i)=>`<button class="face ${O.rating===i+1?"on":""}" onclick="oRate(${i+1})">${f}</button>`).join("")}</div>
+    </div>
+    ${O.role==="host" ? `<button class="btn primary" onclick="bump('replays');act({type:'start'})">🔁 Play another round!<small>Same players · Gleiche Gruppe</small></button>
+      <button class="btn secondary" onclick="act({type:'lobby'})">👥 Back to lobby<small>Change settings or players</small></button>`
+      : `<p class="note center">The host can start another round · Der Host kann neu starten</p>`}`;
+}
+function oCtx(){ return {players:O.G.players, log:O.G.log||[], rounds:O.G.rounds}; }
+function oRate(n){ const first=O.rating===null; O.rating=n; const s=loadStats(); if(first) s.ratings.push(n); else s.ratings[s.ratings.length-1]=n; saveStats(s); renderOnline(true); }
+
+/* ---------- small helpers ---------- */
+async function shareRoom(){
+  const text=`Join my PonteTalk game 🌉 Code: ${O.code}\n${roomLink()}`;
+  try{ if(navigator.share){ await navigator.share({title:"PonteTalk", text}); return; } }catch(e){ return; }
+  location.href = "https://wa.me/?text="+encodeURIComponent(text);
+}
+async function copyRoom(){
+  const m=$("roomMsg");
+  try{ await navigator.clipboard.writeText(roomLink()); if(m) m.textContent="Link copied! · Kopiert!"; }
+  catch(e){ if(m) m.textContent=roomLink(); }
+}
+function confirmLeave(){
+  const box=document.createElement("div");
+  box.style.cssText="position:fixed;inset:0;background:rgba(43,33,64,.45);display:grid;place-items:center;padding:20px;z-index:9";
+  box.innerHTML=`<div class="card" style="max-width:360px;width:100%"><h3>Leave this game?</h3><p class="note">${O.role==="host"?"You're the host — the game stops for everyone.":"You can rejoin with the same code."}</p>
+    <button class="btn primary" id="lYes">Leave · Verlassen</button><button class="btn ghost" id="lNo">Stay · Bleiben</button></div>`;
+  document.body.appendChild(box);
+  $("lNo").onclick=()=>box.remove(); $("lYes").onclick=()=>{ box.remove(); onlineLeave(); };
+}
+function hostMenu(){
+  const box=document.createElement("div");
+  box.className="sheet-bg";
+  box.innerHTML=`<div class="sheet"><div class="topline"><h3 style="margin:0">⚙️ Host</h3><button class="chip" id="hmX">✕</button></div>
+    <button class="btn secondary" id="hmSkip">⏭️ Skip this turn<small>No points · Ohne Punkte</small></button>
+    <button class="btn secondary" id="hmEnd">🏁 End game now<small>Show results · Ergebnisse zeigen</small></button>
+    <button class="btn ghost" id="hmLobby">👥 Back to lobby</button></div>`;
+  document.body.appendChild(box);
+  const close=()=>box.remove();
+  $("hmX").onclick=close; box.addEventListener("click",e=>{ if(e.target===box) close(); });
+  $("hmSkip").onclick=()=>{ close(); act({type:"skip"}); };
+  $("hmEnd").onclick=()=>{ close(); if(O.hostTimeout){ clearTimeout(O.hostTimeout); O.hostTimeout=null; } O.G.phase="results"; O.G.tp=null; bump("completed"); pushState(); };
+  $("hmLobby").onclick=()=>{ close(); act({type:"lobby"}); };
+}
+
+/* ---------- render glue ---------- */
+function renderOnline(force){
+  if(S.screen!=="lobby") return;
+  const G=O.G;
+  // During feedback, update only the live part so typing in the note boxes isn't interrupted.
+  const key = G ? `${G.phase}|${G.round}|${G.turn}` : "none";
+  if(!force && G && G.phase==="feedback" && O.viewKey===key && $("odyn")){
+    const y=window.scrollY; $("odyn").innerHTML=oFeedbackDyn(); if($("odyn2")) $("odyn2").innerHTML=oFeedbackDyn2(); window.scrollTo(0,y); return;
+  }
+  if(O.viewKey!==key){ O.draftAns=""; O.draftTip=""; O.sentNote=""; if(G && G.phase!=="results") O.rating=null; }
+  const sameView = O.viewKey===key, y=window.scrollY;
+  O.viewKey=key;
+  $("app").innerHTML = VIEWS.lobby();
+  if(sameView) window.scrollTo(0,y); else window.scrollTo(0,0);
+  if(G && G.tp && G.tp.timer) onlineTick();
+}
+// Re-check the host connection banner every few seconds.
+setInterval(()=>{ if(S.screen==="lobby" && O.role==="guest") renderOnline(); }, 4000);
+// Open the join screen straight from an invite link (?join=CODE).
+(function(){ try{ const c=new URLSearchParams(location.search).get("join"); if(c){ O.codeInput=c.toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,4); S.screen="online"; } }catch(e){} })();
 
 render();
 /* Offline support + installable app (only works on the real website, safely skipped elsewhere) */
