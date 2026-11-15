@@ -1995,7 +1995,8 @@ const LEGAL = {
   email: "yvette@setzio.com"
 };
 const A = { sb:null, user:null, profile:null, games:null, status:"loading", step:"email", email:"", code:"", err:"", msg:"",
-            busy:false, editing:false, ret:"home", pf:null, saving:{}, legalRet:"home" };
+            busy:false, editing:false, ret:"home", pf:null, saving:{}, legalRet:"home",
+            google:false /* set to true once Google sign-in is switched on in Supabase (setup guide step 4) */ };
 
 function authClient(){
   if(A.sb) return A.sb;
@@ -2020,6 +2021,8 @@ async function authInit(){
        if(ch) history.replaceState(null,"",u.pathname+(u.search||"")+u.hash); }catch(e){}
   sb.auth.onAuthStateChange((evt, session)=>{ const u=session?session.user:null; if((u&&u.id)!==(A.user&&A.user.id)) setTimeout(()=>authSet(u),0); });
   window.addEventListener("online", flushQueue);
+  const recheck=async()=>{ if(A.user || document.visibilityState!=="visible") return; try{ const { data } = await sb.auth.getSession(); if(data && data.session){ await authSet(data.session.user); if(S.screen==="account" && A.profile && A.profile.display_name) authReturn(); } }catch(e){} };
+  document.addEventListener("visibilitychange", recheck); window.addEventListener("focus", recheck);
   authRefreshView();
 }
 async function authSet(user){
@@ -2065,7 +2068,7 @@ async function sendCode(){
   try{
     const { error } = await sb.auth.signInWithOtp({ email, options:{ shouldCreateUser:true } });
     if(error) throw error;
-    A.step="code"; A.msg=`We sent a code to ${email} · Code gesendet`;
+    A.step="code"; A.msg="";
   }catch(e){ A.err=authErr(e); }
   A.busy=false; render();
 }
@@ -2319,19 +2322,22 @@ VIEWS.account = function(){
       <div>🆓 <b>Free</b> · Kostenlos</div>
     </div>
     <div class="card">
-      <button class="btn gbtn" onclick="googleSignIn()" ${A.busy?"disabled":""}>${G_LOGO}<span>Continue with Google · Weiter mit Google</span></button>
-      <div class="divider"><span>or with email · oder per E-Mail</span></div>
+      ${A.google?`<button class="btn gbtn" onclick="googleSignIn()" ${A.busy?"disabled":""}>${G_LOGO}<span>Continue with Google · Weiter mit Google</span></button>
+      <div class="divider"><span>or with email · oder per E-Mail</span></div>`:A.step!=="email"?"":`<p class="note" style="margin-top:0">Sign in with your email — no password needed.<br><span class="de">Anmelden mit deiner E-Mail – ohne Passwort.</span></p>`}
       ${A.step==="email" ? `
         <label class="lbl" for="aemail">Email · E-Mail</label>
         <input type="email" id="aemail" inputmode="email" autocomplete="email" placeholder="you@example.com" value="${esc(A.email)}" oninput="A.email=this.value" onkeydown="if(event.key==='Enter')sendCode()">
-        <button class="btn primary" onclick="sendCode()" ${A.busy?"disabled":""}>${A.busy?"Sending… · Wird gesendet…":"📧 Send me a code"}<small>Wir schicken dir einen Code</small></button>`
+        <button class="btn primary" onclick="sendCode()" ${A.busy?"disabled":""}>${A.busy?"Sending… · Wird gesendet…":"📧 Email me a code"}<small>Wir schicken dir einen Code</small></button>`
       : `
-        <p class="note">Check your inbox (and spam) for a code from PonteTalk.<br><span class="de">Schau in dein Postfach (auch Spam).</span></p>
-        <label class="lbl" for="acode">Code</label>
-        <input type="text" id="acode" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="123456" class="codein" value="${esc(A.code)}" oninput="A.code=this.value" onkeydown="if(event.key==='Enter')verifyCode()">
+        <div class="center" style="font-size:44px;line-height:1">📬</div>
+        <h3 class="center" style="margin:6px 0">Check your email! <span class="de">· Schau in deine E-Mails!</span></h3>
+        <p class="center" style="margin:0 0 4px">We sent a code to<br><b>${esc(A.email)}</b></p>
+        <p class="note center">Subject: “Your PonteTalk code”. Not there? Check spam.<br><span class="de">Betreff: „Your PonteTalk code“. Nicht da? Schau im Spam-Ordner.</span></p>
+        <label class="lbl" for="acode">Type the code · Code eingeben</label>
+        <input type="text" id="acode" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="12345678" class="codein" value="${esc(A.code)}" oninput="A.code=this.value" onkeydown="if(event.key==='Enter')verifyCode()">
         <button class="btn primary" onclick="verifyCode()" ${A.busy?"disabled":""}>${A.busy?"Checking… · Prüfe…":"✅ Sign in · Anmelden"}</button>
         <div class="row" style="justify-content:center;margin-top:6px">
-          <button class="chip" onclick="sendCode()">🔁 Send again · Nochmal</button>
+          <button class="chip" onclick="sendCode()">🔁 Send again · Nochmal senden</button>
           <button class="chip" onclick="A.step='email';A.code='';A.msg='';A.err='';render()">✏️ Other email</button>
         </div>`}
       ${msg}
