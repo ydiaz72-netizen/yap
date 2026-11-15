@@ -760,13 +760,14 @@ feedback(){
 },
 results(){
   const ranked = S.players.map((p,i)=>({p,i})).sort((a,b)=>b.p.pts-a.p.pts);
+  const top = `<div class="topline"><button class="chip" onclick="goHome()">🏠 Home</button><button class="chip" onclick="playAgain()">🔁 Play again</button></div>`;
   const medals=["🥇","🥈","🥉"];
   const award = (k,e,en,de) => {
     const best = S.players.map((p,i)=>({p,i})).sort((a,b)=>b.p.reacts[k]-a.p.reacts[k])[0];
     if(!best || best.p.reacts[k]===0) return "";
     return `<div class="award"><span class="e">${e}</span><div>${en} <span class="de">· ${de}</span><br><span style="color:${COLORS[best.i%COLORS.length]}">${esc(best.p.name)}</span></div></div>`;
   };
-  return `
+  return `${top}
   <h1 class="center">🏆</h1>
   <h2 class="center">${bi("Great game!","Super gespielt!")}</h2>
   <div class="card">${ranked.map((r,n)=>`
@@ -795,7 +796,9 @@ results(){
   </div>
   <p class="note center" style="margin:4px 0 0">⚠️ Send your reviews before starting a new game · Erst Auswertung senden, dann neu starten</p>
   <button class="btn primary" onclick="playAgain()">🔁 Play another round!<small>Noch eine Runde!</small></button>
-  <button class="btn secondary" onclick="newGame()">New players · Neue Spieler</button>
+  <button class="btn secondary" onclick="go('settings')">🎮 Change game or settings<small>Same players · Gleiche Gruppe</small></button>
+  <button class="btn secondary" onclick="newGame()">👥 New players · Neue Spieler</button>
+  <button class="btn ghost" onclick="goHome()">🏠 Back to home · Zur Startseite</button>
   <a class="powered" href="https://setzio.com" target="_blank" rel="noopener">
     <span class="pw-top">Powered by <b>Setzio</b></span>
     <span class="pw-sub">Booking &amp; CRM app for salons, spas &amp; studios · <u>Try it free</u></span>
@@ -984,6 +987,7 @@ function bestSpeaker(){
 function rate(n){ const first=S.rating===null; S.rating=n; const s=loadStats(); if(first) s.ratings.push(n); else s.ratings[s.ratings.length-1]=n; saveStats(s); render(); }
 function playAgain(){ bump("replays"); startGame(); }
 function newGame(){ S.players=[]; go("setup"); }
+function goHome(){ go("home"); }
 function confirmQuit(){
   const box=document.createElement("div");
   box.style.cssText="position:fixed;inset:0;background:rgba(43,33,64,.45);display:grid;place-items:center;padding:20px;z-index:9";
@@ -1477,7 +1481,8 @@ function oResultsView(){
     </div>
     ${O.role==="host" ? `<button class="btn primary" onclick="bump('replays');act({type:'start'})">🔁 Play another round!<small>Same players · Gleiche Gruppe</small></button>
       <button class="btn secondary" onclick="act({type:'lobby'})">👥 Back to lobby<small>Change settings or players</small></button>`
-      : `<p class="note center">The host can start another round · Der Host kann neu starten</p>`}`;
+      : `<p class="note center">The host can start another round · Der Host kann neu starten</p>`}
+    <button class="btn ghost" onclick="confirmLeave()">🏠 Leave & go home · Zur Startseite</button>`;
 }
 function oCtx(){ return {players:O.G.players, log:O.G.log||[], rounds:O.G.rounds, clog:O.G.clog||[]}; }
 function oRate(n){ const first=O.rating===null; O.rating=n; const s=loadStats(); if(first) s.ratings.push(n); else s.ratings[s.ratings.length-1]=n; saveStats(s); renderOnline(true); }
