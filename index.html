@@ -14,9 +14,15 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <title>PonteTalk · Speak. Connect. Play.</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
 <style>
+  /* Fonts are served from this site (no Google connection) */
+  @font-face{font-family:'Fredoka';font-style:normal;font-display:swap;font-weight:300 700;src:url(fonts/fredoka-latin-wght-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+  @font-face{font-family:'Fredoka';font-style:normal;font-display:swap;font-weight:300 700;src:url(fonts/fredoka-latin-ext-wght-normal.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+  @font-face{font-family:'Nunito';font-style:normal;font-display:swap;font-weight:200 1000;src:url(fonts/nunito-latin-wght-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+  @font-face{font-family:'Nunito';font-style:normal;font-display:swap;font-weight:200 1000;src:url(fonts/nunito-latin-ext-wght-normal.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+  @font-face{font-family:'Nunito';font-style:normal;font-display:swap;font-weight:200 1000;src:url(fonts/nunito-cyrillic-wght-normal.woff2) format('woff2');unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+  @font-face{font-family:'Nunito';font-style:normal;font-display:swap;font-weight:200 1000;src:url(fonts/nunito-cyrillic-ext-wght-normal.woff2) format('woff2');unicode-range:U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F}
+  @font-face{font-family:'Noto Nastaliq Urdu';font-style:normal;font-display:swap;font-weight:400 700;src:url(fonts/noto-nastaliq-urdu-arabic-wght-normal.woff2) format('woff2');unicode-range:U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC,U+102E0-102FB,U+10E60-10E7E,U+10EC2-10EC4,U+10EFC-10EFF,U+1EE00-1EE03,U+1EE05-1EE1F,U+1EE21-1EE22,U+1EE24,U+1EE27,U+1EE29-1EE32,U+1EE34-1EE37,U+1EE39,U+1EE3B,U+1EE42,U+1EE47,U+1EE49,U+1EE4B,U+1EE4D-1EE4F,U+1EE51-1EE52,U+1EE54,U+1EE57,U+1EE59,U+1EE5B,U+1EE5D,U+1EE5F,U+1EE61-1EE62,U+1EE64,U+1EE67-1EE6A,U+1EE6C-1EE72,U+1EE74-1EE77,U+1EE79-1EE7C,U+1EE7E,U+1EE80-1EE89,U+1EE8B-1EE9B,U+1EEA1-1EEA3,U+1EEA5-1EEA9,U+1EEAB-1EEBB,U+1EEF0-1EEF1}
   :root{
     --bg:#FFF6EC; --card:#FFFFFF; --ink:#2B2140; --muted:#6E6680;
     --coral:#FF6B4A; --coral-soft:#FFE3DB; --sun:#FFC145; --sun-soft:#FFF1CC;
@@ -200,6 +206,39 @@
   .rom{font:italic 600 13px Nunito,system-ui,sans-serif;color:var(--muted);direction:ltr;unicode-bidi:isolate}
   [lang=ur] .prompt,[lang=ur].peek-q,.cword[lang=ur],[lang=ur] .task,[lang=ur].hint,[lang=ur] .hint{font-family:"Noto Nastaliq Urdu","Jameel Noori Nastaleeq","Urdu Typesetting",serif;line-height:2.1}
   body.has-chat .wrap{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+  /* accounts */
+  .acctline{margin-bottom:0}
+  .acctchip{font-size:14px;padding:7px 12px;max-width:60%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .acard{border:2px solid var(--plum-soft)}
+  .perks div{padding:5px 0}
+  .gbtn{background:#fff;color:var(--ink);border:2px solid var(--line);display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 3px 0 var(--line)}
+  .divider{display:flex;align-items:center;gap:10px;color:#8a7f95;font-size:14px;margin:14px 0 4px}
+  .divider:before,.divider:after{content:"";flex:1;height:2px;background:var(--line)}
+  .codein{font-size:26px;letter-spacing:6px;text-align:center;font-weight:800}
+  .codein::placeholder{letter-spacing:6px;opacity:.35}
+  .okmsg{color:var(--teal);font-weight:700;margin:10px 0 0}
+  .linkbtn{background:none;border:none;padding:0;color:var(--plum);text-decoration:underline;font:inherit;cursor:pointer}
+  .prof{display:flex;align-items:center;gap:12px}
+  .sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .sbox{background:var(--plum-soft);border-radius:14px;padding:10px 6px;text-align:center;display:flex;flex-direction:column}
+  .sbox b{font:700 24px Fredoka,Nunito,sans-serif;color:var(--plum)}
+  .sbox span{font-size:12px;color:#6b6178;line-height:1.2}
+  .bars{display:flex;align-items:flex-end;gap:6px;height:110px;padding-top:6px}
+  .bar{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:2px}
+  .bar i{display:block;width:100%;background:var(--coral);border-radius:8px 8px 3px 3px;min-height:6px}
+  .bar span{font-size:12px;font-weight:700;color:#6b6178}
+  .hrow{display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;border-top:1px solid var(--line);padding:10px 2px;text-align:left;font:inherit;color:var(--ink);cursor:pointer}
+  .hrow:first-of-type{border-top:none}
+  .hico{font-size:26px}
+  .hmid{flex:1;line-height:1.3}
+  .hpts{font:700 20px Fredoka,Nunito,sans-serif;color:var(--coral);white-space:nowrap}
+  .btn.danger{background:#D93636;color:#fff;box-shadow:0 4px 0 #A92525}
+  .dangertext{color:#C62F2F}
+  .legal{text-align:center;font-size:13px;color:#8a7f95;margin:14px 0 4px}
+  .legal button{background:none;border:none;padding:4px;color:#8a7f95;text-decoration:underline;font:inherit;cursor:pointer}
+  .legaltext h3{font-size:17px;margin-top:14px}
+  .legaltext p{font-size:15px}
+  .legaltext hr{border:none;border-top:2px solid var(--line);margin:16px 0}
   .chatfab{position:fixed;right:calc(16px + env(safe-area-inset-right));bottom:calc(18px + env(safe-area-inset-bottom));width:58px;height:58px;border-radius:50%;border:none;background:var(--plum);color:#fff;font-size:26px;box-shadow:0 6px 16px rgba(108,74,182,.35);cursor:pointer;z-index:15}
   .chatbadge{position:absolute;top:-4px;right:-4px;background:var(--coral);color:#fff;font:800 12px Nunito,system-ui,sans-serif;border-radius:999px;padding:3px 7px;border:2px solid #fff}
   .chatpanel{position:fixed;left:0;right:0;bottom:0;margin:0 auto;max-width:560px;height:min(72vh,560px);background:var(--bg);border-radius:22px 22px 0 0;box-shadow:0 -8px 30px rgba(43,33,64,.25);display:flex;flex-direction:column;z-index:16;padding-bottom:env(safe-area-inset-bottom)}
@@ -623,6 +662,7 @@ const VIEWS = {
 home(){
   const s = samplePrompt();
   return `
+  <div class="topline acctline"><span></span><button class="chip acctchip" onclick="A.ret='home';A.err='';A.msg='';go('account')">${A.user?`👤 ${esc(meName()||"My account")}`:"👤 Sign in · Anmelden"}</button></div>
   <div class="hero">
     <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
     <div class="hero-icon">${HERO_SVG}</div>
@@ -655,12 +695,14 @@ home(){
     <div class="stepcard c4"><span class="se">🏆</span><b>Win</b><span>&amp; everyone learns</span></div>
   </div>
 
+  <button class="btn secondary" onclick="A.ret='home';A.err='';A.msg='';go('account')">🏆 My games &amp; progress<small>${A.user?"Meine Spiele &amp; Fortschritt":"Free account · Kostenloses Konto"}</small></button>
   <button class="btn ghost" onclick="go('stats')">📊 Host stats · Statistik</button>
   <a class="powered" href="https://setzio.com" target="_blank" rel="noopener">
     <span class="pw-top">Powered by <b>Setzio</b></span>
     <span class="pw-sub">Booking &amp; CRM app for salons, spas &amp; studios · <u>Try it free</u></span>
     <span class="beta-note">🧪 Free beta test version · Kostenlose Beta-Testversion</span>
-  </a>`;
+  </a>
+  ${legalLinks()}`;
 },
 setup(){
   const d=S.draft;
@@ -816,6 +858,7 @@ results(){
     ${award("clear","👍","Clearest speaker","Am verständlichsten")}
     ${award("learned","💡","Best teacher","Beste/r Lehrer/in")}
   </div>
+  ${saveCardInperson()}
   <div class="card">
     <h3>📤 Your review <span class="de">· Deine Auswertung</span></h3>
     <p class="note">Each player can send themselves their questions, answers, useful words and tips to practice later.<br><span class="de">Schick dir deine Fragen, Antworten und Tipps zum Wiederholen.</span></p>
@@ -881,7 +924,7 @@ function resetScores(){ S.players.forEach(p=>{p.pts=0;p.coach=0;p.bonus=0;p.cact
 function startGame(){
   try{ audio = audio || new (window.AudioContext||window.webkitAudioContext)(); }catch(e){}
   keepAwake();
-  resetScores(); S.log=[]; S.round=1; S.turn=0; S.rating=null; S.fmtCycle=Math.floor(Math.random()*3);
+  resetScores(); S.gid=uid(); S.savedIdx=null; S.log=[]; S.round=1; S.turn=0; S.rating=null; S.fmtCycle=Math.floor(Math.random()*3);
   if(S.game==="charades"){ cStartGame(); return; }
   bump("started"); go("handoff");
 }
@@ -1081,7 +1124,7 @@ function makeTransport(code, me, h){
              close:()=>{ clearInterval(iv); bc.postMessage({_bye:me.id}); bc.close(); } };
   }
   if(!window.supabase || !window.supabase.createClient){ setTimeout(()=>h.onError("lib"),0); return {send(){},track(){},close(){}}; }
-  const client = window.supabase.createClient(SB_URL, SB_KEY, {auth:{persistSession:false, autoRefreshToken:false}, realtime:{params:{eventsPerSecond:20}}});
+  const client = window.supabase.createClient(SB_URL, SB_KEY, {auth:{persistSession:false, autoRefreshToken:false, storageKey:"pt-rt"}, realtime:{params:{eventsPerSecond:20}}});
   const ch = client.channel("pt-"+code, {config:{broadcast:{self:false}, presence:{key:me.id}}});
   ch.on("broadcast", {event:"m"}, ({payload}) => h.onMsg(payload));
   ch.on("presence", {event:"sync"}, () => { const st=ch.presenceState(); h.onPresence(Object.values(st).map(a=>a[0]).filter(Boolean)); });
@@ -1194,7 +1237,7 @@ function oNewTurn(){
 function oStart(){
   const G=O.G;
   G.players.forEach(p=>{ p.pts=0; p.coach=0; p.bonus=0; p.cact=0; p.cguess=0; p.ratings=[]; p.reacts={clear:0,creative:0,funny:0,learned:0}; p.tips=[]; });
-  G.round=1; G.turn=0; G.used=[]; G.log=[]; G.clog=[]; G.cused=[]; G.fmtCycle=Math.floor(Math.random()*3);
+  G.gid=uid(); G.round=1; G.turn=0; G.used=[]; G.log=[]; G.clog=[]; G.cused=[]; G.fmtCycle=Math.floor(Math.random()*3);
   if(G.game==="charades") oCNewTurn(); else oNewTurn();
   bump("started"); bump("online");
 }
@@ -1510,6 +1553,7 @@ function oResultsView(){
       <div><div class="pname">${esc(r.p.name)} ${r.p.id===O.me.id?'<span class="note">(you)</span>':""}</div><div class="pmeta">${T[r.p.lang].flag} ${LEVELS[r.p.level].code}${r.p.ratings.length?` · ${avg(r.p)}`:""}</div></div>
       <span class="pts">${r.p.pts}</span></div>`).join("")}</div>
     ${G.game==="charades" && charadesAwards(G.players) ? `<div class="card"><h3>Awards <span class="de">· Auszeichnungen</span></h3>${charadesAwards(G.players)}</div>` : ""}
+    ${saveCardOnline()}
     <div class="card">
       <h3>📤 Your review <span class="de">· Deine Auswertung</span></h3>
       <p class="note">Your questions, answers, useful words and tips — to practice later.</p>
@@ -1941,6 +1985,452 @@ function sendChat(text){
   act({type:"chat", text:t.slice(0,300)});
   if(text===undefined){ O.chatDraft=""; if(inp){ inp.value=""; inp.focus(); } }
 }
+
+/* ===================== ACCOUNTS: login, profile, game history ===================== */
+const LEGAL = {
+  name: "Yvette Diaz Rosario",
+  street: "Am Alten Brunen 7",
+  city: "99099 Erfurt",
+  country: "Deutschland",
+  email: "yvette@setzio.com"
+};
+const A = { sb:null, user:null, profile:null, games:null, status:"loading", step:"email", email:"", code:"", err:"", msg:"",
+            busy:false, editing:false, ret:"home", pf:null, saving:{}, legalRet:"home" };
+
+function authClient(){
+  if(A.sb) return A.sb;
+  if(!window.supabase || !window.supabase.createClient) return null;
+  try{ A.sb = window.supabase.createClient(SB_URL, SB_KEY, {auth:{persistSession:true, autoRefreshToken:true, detectSessionInUrl:true, flowType:"pkce", storageKey:"pt-auth"}}); }
+  catch(e){ A.sb=null; }
+  return A.sb;
+}
+function lsGet(k, d){ try{ const v=JSON.parse(localStorage.getItem(k)); return v==null?d:v; }catch(e){ return d; } }
+function lsSet(k, v){ try{ if(v==null) localStorage.removeItem(k); else localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+function meName(){ return (A.profile && A.profile.display_name) || ""; }
+
+async function authInit(){
+  const sb=authClient();
+  if(!sb){ A.status="out"; return; }
+  try{
+    const { data } = await sb.auth.getSession();
+    await authSet(data && data.session ? data.session.user : null);
+  }catch(e){ A.status="out"; }
+  // Tidy the address bar after coming back from Google
+  try{ const u=new URL(location.href); let ch=false; ["code","auth","error","error_code","error_description"].forEach(k=>{ if(u.searchParams.has(k)){ if(k==="error_description") A.err=u.searchParams.get(k); u.searchParams.delete(k); ch=true; } });
+       if(ch) history.replaceState(null,"",u.pathname+(u.search||"")+u.hash); }catch(e){}
+  sb.auth.onAuthStateChange((evt, session)=>{ const u=session?session.user:null; if((u&&u.id)!==(A.user&&A.user.id)) setTimeout(()=>authSet(u),0); });
+  window.addEventListener("online", flushQueue);
+  authRefreshView();
+}
+async function authSet(user){
+  A.user=user||null; A.status=user?"in":"out";
+  if(!user){ A.profile=null; A.games=null; authRefreshView(); return; }
+  A.step="email"; A.code=""; A.err="";
+  await loadProfile(); flushQueue(); loadGames();
+  authRefreshView();
+}
+function authRefreshView(){
+  if(["account","home","results","impressum","privacy"].includes(S.screen)) render();
+  else if(S.screen==="lobby" && O.G && O.G.phase==="results") renderOnline(true);
+}
+async function loadProfile(){
+  try{
+    const { data, error } = await A.sb.from("profiles").select("display_name,practicing,level").eq("id", A.user.id).maybeSingle();
+    if(error) throw error;
+    A.profile = data || null;
+    if(A.profile && A.profile.display_name && !S.draft.name){
+      S.draft.name=A.profile.display_name;
+      if(A.profile.practicing && T[A.profile.practicing]) S.draft.lang=A.profile.practicing;
+      if(A.profile.level!=null) S.draft.level=A.profile.level;
+    }
+  }catch(e){ A.profile = A.profile || null; }
+}
+async function loadGames(){
+  try{
+    const { data, error } = await A.sb.from("games").select("id,client_key,played_at,mode,game,lang,level,rounds,players,score,rank,rating")
+      .order("played_at",{ascending:false}).limit(200);
+    if(error) throw error;
+    A.games=data||[];
+  }catch(e){ if(!A.games) A.games=null; }
+  if(S.screen==="account") render();
+}
+
+/* ---- sign in ---- */
+async function sendCode(){
+  const inp=$("aemail"), email=((inp&&inp.value)||A.email||"").trim().toLowerCase();
+  A.email=email;
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ A.err="Please type a valid email · Bitte gültige E-Mail eingeben"; render(); return; }
+  const sb=authClient(); if(!sb){ A.err=offlineMsg(); render(); return; }
+  A.busy=true; A.err=""; A.msg=""; render();
+  try{
+    const { error } = await sb.auth.signInWithOtp({ email, options:{ shouldCreateUser:true } });
+    if(error) throw error;
+    A.step="code"; A.msg=`We sent a code to ${email} · Code gesendet`;
+  }catch(e){ A.err=authErr(e); }
+  A.busy=false; render();
+}
+async function verifyCode(){
+  const inp=$("acode"), token=((inp&&inp.value)||A.code||"").replace(/\D/g,"");
+  A.code=token;
+  if(token.length<6){ A.err="Type the code from the email · Code aus der E-Mail eingeben"; render(); return; }
+  A.busy=true; A.err=""; render();
+  try{
+    const { data, error } = await A.sb.auth.verifyOtp({ email:A.email, token, type:"email" });
+    if(error) throw error;
+    A.busy=false; A.msg="";
+    await authSet(data.user || (data.session && data.session.user));
+    if(A.profile && A.profile.display_name) authReturn(); else render();
+    return;
+  }catch(e){ A.err=authErr(e); }
+  A.busy=false; render();
+}
+async function googleSignIn(){
+  const sb=authClient(); if(!sb){ A.err=offlineMsg(); render(); return; }
+  try{ sessionStorage.setItem("pt_ret", A.ret||"home"); }catch(e){}
+  A.busy=true; A.err=""; render();
+  try{
+    const { error } = await sb.auth.signInWithOAuth({ provider:"google", options:{ redirectTo: location.origin + location.pathname + "?auth=google" } });
+    if(error) throw error;
+  }catch(e){ A.busy=false; A.err=authErr(e); render(); }
+}
+function authReturn(){
+  // After signing in: go back to where the person came from (e.g. the results screen to save the game)
+  const r=A.ret||"home";
+  if(r==="results" && S.players.length && S.gid) go("results");
+  else if(r==="lobby" && O.G) go("lobby");
+  else go("account");
+}
+function authErr(e){
+  const m=String((e&&e.message)||e||"").toLowerCase();
+  if(!navigator.onLine) return offlineMsg();
+  if(m.includes("rate") || m.includes("security purposes") || m.includes("too many")) return "Too many tries — please wait a minute and try again · Bitte kurz warten";
+  if(m.includes("expired") || m.includes("invalid") || m.includes("otp") || m.includes("token")) return "That code is wrong or expired. Try again or send a new one · Code falsch oder abgelaufen";
+  if(m.includes("provider is not enabled") || m.includes("unsupported provider")) return "Google sign-in isn't switched on yet · Google-Anmeldung noch nicht aktiv";
+  return "Something went wrong — please try again · Etwas ist schiefgelaufen";
+}
+function offlineMsg(){ return "You need internet to sign in · Zum Anmelden brauchst du Internet"; }
+async function signOut(){
+  try{ await A.sb.auth.signOut(); }catch(e){}
+  A.user=null; A.profile=null; A.games=null; A.status="out"; A.step="email"; A.code=""; A.msg="Signed out · Abgemeldet"; render();
+}
+
+/* ---- profile ---- */
+async function saveProfile(){
+  const name=(($("pfname")||{}).value||"").trim().slice(0,30);
+  if(!name){ A.err="Please type your name · Bitte Namen eingeben"; render(); return; }
+  const pf=A.pf||{};
+  const row={ id:A.user.id, display_name:name, practicing:pf.lang||S.draft.lang, level:pf.level!=null?pf.level:S.draft.level, updated_at:new Date().toISOString() };
+  A.busy=true; A.err=""; render();
+  try{
+    const { error } = await A.sb.from("profiles").upsert(row);
+    if(error) throw error;
+    A.profile={display_name:row.display_name, practicing:row.practicing, level:row.level};
+    S.draft.name=row.display_name; S.draft.lang=row.practicing; S.draft.level=row.level;
+    const wasEditing=A.editing; A.editing=false; A.pf=null; A.busy=false;
+    if(!wasEditing && (A.ret==="results"||A.ret==="lobby")){ authReturn(); return; }
+  }catch(e){ A.err=authErr(e); }
+  A.busy=false; render();
+}
+function editProfile(){ A.editing=true; A.pf={lang:(A.profile&&A.profile.practicing)||S.draft.lang, level:(A.profile&&A.profile.level!=null)?A.profile.level:S.draft.level}; render(); }
+function setPf(k,v){ const n=$("pfname"); A.pf=A.pf||{}; if(n) A.pf.name=n.value; A.pf[k]=v; render(); }
+
+/* ---- saving games ---- */
+function gameRecord(mode, ctx, i, key, game){
+  const p=ctx.players[i];
+  const rank=1+ctx.players.filter(q=>q.pts>p.pts).length;
+  const rating=(p.ratings&&p.ratings.length) ? Math.round(p.ratings.reduce((a,b)=>a+b,0)/p.ratings.length*100)/100 : null;
+  let review=""; try{ review=playerReview(i, ctx).slice(0,19000); }catch(e){}
+  return { client_key:String(key).slice(0,80), played_at:new Date().toISOString(), mode, game, lang:p.lang, level:p.level,
+           rounds:ctx.rounds, players:ctx.players.length, score:p.pts, rank, rating, review };
+}
+function inpersonRecord(i){ return gameRecord("inperson", {players:S.players, log:S.log, rounds:S.rounds, clog:S.clog}, i, `ip-${S.gid}-${i}`, S.game); }
+function onlineRecord(){
+  const G=O.G, i=G.players.findIndex(p=>p.id===O.me.id); if(i<0) return null;
+  return gameRecord("online", oCtx(), i, `on-${G.gid||O.code}-${O.me.id}`, G.game==="charades"?"emoji":"speak");
+}
+async function saveRecord(rec){
+  if(!A.user) return "auth";
+  const row={...rec, user_id:A.user.id};
+  try{
+    if(!navigator.onLine) throw new Error("offline");
+    const { error } = await A.sb.from("games").upsert(row, { onConflict:"user_id,client_key", ignoreDuplicates:true });
+    if(error) throw error;
+    if(A.games && !A.games.some(g=>g.client_key===rec.client_key)) A.games.unshift({...rec, id:null});
+    loadGames();
+    return "ok";
+  }catch(e){
+    const q=lsGet("pt_queue",[]); if(!q.some(r=>r.client_key===rec.client_key)) q.push(rec); lsSet("pt_queue", q.slice(-30));
+    return "queued";
+  }
+}
+async function flushQueue(){
+  if(!A.user || !navigator.onLine) return;
+  const q=lsGet("pt_queue",[]); if(!q.length) return;
+  const left=[];
+  for(const rec of q){
+    try{ const { error } = await A.sb.from("games").upsert({...rec, user_id:A.user.id}, { onConflict:"user_id,client_key", ignoreDuplicates:true }); if(error) throw error; }
+    catch(e){ left.push(rec); }
+  }
+  lsSet("pt_queue", left.length?left:null);
+  if(left.length<q.length) loadGames();
+}
+async function saveInperson(i){
+  if(!S.gid) return;
+  A.saving["ip-"+S.gid]="busy"; render();
+  const r=await saveRecord(inpersonRecord(i));
+  A.saving["ip-"+S.gid]=r; S.savedIdx=i; lsSet("pt_pending", null); render();
+}
+function maybeSaveOnline(){
+  const G=O.G; if(!A.user || !G || G.phase!=="results") return;
+  const k="on-"+(G.gid||O.code)+"-"+G.round; if(A.saving[k]) return;
+  const rec=onlineRecord(); if(!rec) return;
+  A.saving[k]="busy";
+  saveRecord(rec).then(r=>{ A.saving[k]=r; lsSet("pt_pending", null); if(S.screen==="lobby") renderOnline(true); });
+}
+function onlineSaveState(){ const G=O.G; return G ? A.saving["on-"+(G.gid||O.code)+"-"+G.round] : null; }
+function keepScoresFrom(where){
+  // Not signed in yet: remember this game so it can still be saved after signing in (even after Google's page reload)
+  if(where==="results" && S.gid) lsSet("pt_pending", {t:Date.now(), names:S.players.map(p=>p.name), recs:S.players.map((p,i)=>inpersonRecord(i))});
+  if(where==="lobby"){ const r=onlineRecord(); if(r) lsSet("pt_pending", {t:Date.now(), names:[O.me.name], recs:[r]}); }
+  A.ret=where; A.err=""; A.msg=""; go("account");
+}
+async function savePending(i){
+  const p=lsGet("pt_pending",null); if(!p||!p.recs[i]) return;
+  A.busy=true; render();
+  await saveRecord(p.recs[i]);
+  lsSet("pt_pending", null); A.busy=false; render();
+}
+function pendingGame(){ const p=lsGet("pt_pending",null); if(!p || Date.now()-p.t>2*86400000){ if(p) lsSet("pt_pending",null); return null; } return p; }
+
+/* Card shown on the in-person results screen */
+function saveCardInperson(){
+  if(!S.gid) return "";
+  if(!A.user) return `<div class="card acard">
+      <h3>🔐 Keep your scores <span class="de">· Punkte behalten</span></h3>
+      <p class="note">Free account: save this game, see your history and track your progress.<br><span class="de">Kostenloses Konto: Spiel speichern, Verlauf &amp; Fortschritt sehen.</span></p>
+      <button class="btn primary" onclick="keepScoresFrom('results')">👤 Sign in / Create account<small>Anmelden / Konto erstellen</small></button></div>`;
+  const st=A.saving["ip-"+S.gid];
+  if(st==="ok" || st==="queued") return `<div class="card acard center">
+      <h3>${st==="ok"?"✅ Saved to My games":"📶 Saved — will upload when you're online"}</h3>
+      <p class="note" style="margin:0">${st==="ok"?"Gespeichert":"Wird hochgeladen, sobald du online bist"} · ${esc(S.players[S.savedIdx]?S.players[S.savedIdx].name:"")}</p>
+      <button class="btn ghost" onclick="A.ret='results';go('account')">🏆 See my games · Meine Spiele</button></div>`;
+  const mine=meName().toLowerCase();
+  return `<div class="card acard">
+      <h3>💾 Save to My games <span class="de">· Speichern</span></h3>
+      <p class="note">Which player are you? · Wer bist du?</p>
+      <div class="row">${S.players.map((p,i)=>`<button class="chip ${p.name.toLowerCase()===mine?"on":""}" ${st==="busy"?"disabled":""} onclick="saveInperson(${i})">${p.name.toLowerCase()===mine?"⭐ ":""}${esc(p.name)}</button>`).join("")}</div>
+      <p class="note" style="margin:8px 0 0">Only you see your saved games. Other players can save theirs on their own phone.</p></div>`;
+}
+/* Card shown on the online results screen */
+function saveCardOnline(){
+  if(O.G.players.findIndex(p=>p.id===O.me.id)<0) return "";
+  if(!A.user) return `<div class="card acard">
+      <h3>🔐 Keep your scores <span class="de">· Punkte behalten</span></h3>
+      <p class="note">Free account: save this game, see your history and track your progress.</p>
+      <button class="btn primary" onclick="keepScoresFrom('lobby')">👤 Sign in / Create account<small>Anmelden / Konto erstellen</small></button></div>`;
+  maybeSaveOnline();
+  const st=onlineSaveState();
+  return `<div class="card acard center"><h3>${st==="ok"?"✅ Saved to My games":st==="queued"?"📶 Saved — will upload when you're online":"💾 Saving…"}</h3>
+    <button class="btn ghost" onclick="A.ret='lobby';go('account')">🏆 See my games · Meine Spiele</button></div>`;
+}
+
+/* ---- account screen ---- */
+const GAME_ICON = { speak:"🗣️", charades:"🎭", emoji:"😀" };
+const GAME_NAME = { speak:"Speak Up", charades:"Charades", emoji:"Emoji Charades" };
+function fmtDate(iso){ try{ const d=new Date(iso); return `${String(d.getDate()).padStart(2,"0")}.${String(d.getMonth()+1).padStart(2,"0")}.${d.getFullYear()}`; }catch(e){ return ""; } }
+function acctBack(){ const r=A.ret||"home"; A.ret="home"; A.editing=false; if(r==="results" && S.players.length && S.gid) go("results"); else if(r==="lobby" && O.G) go("lobby"); else go("home"); }
+
+function acctStats(gs){
+  if(!gs.length) return `<p class="note center" style="margin:10px 0">No games yet. Finish a game and tap <b>Save</b> on the results screen!<br><span class="de">Noch keine Spiele gespeichert.</span></p>`;
+  const total=gs.reduce((a,g)=>a+(g.score||0),0), wins=gs.filter(g=>g.rank===1&&g.players>1).length;
+  const rated=gs.filter(g=>g.rating!=null), avgR=rated.length ? rated.reduce((a,g)=>a+Number(g.rating),0)/rated.length : null;
+  const best=Math.max(...gs.map(g=>g.score||0));
+  const days=new Set(gs.map(g=>fmtDate(g.played_at))).size;
+  const R=avgR!=null ? RATINGS[Math.min(3,Math.max(0,Math.round(avgR)-1))] : null;
+  const last=gs.slice(0,10).reverse(), mx=Math.max(1,...last.map(g=>g.score||0));
+  const langs={}; gs.forEach(g=>{ langs[g.lang]=(langs[g.lang]||0)+1; });
+  return `<div class="sgrid">
+      <div class="sbox"><b>${gs.length}</b><span>games · Spiele</span></div>
+      <div class="sbox"><b>${total}</b><span>points · Punkte</span></div>
+      <div class="sbox"><b>${wins}</b><span>🥇 wins · Siege</span></div>
+      <div class="sbox"><b>${best}</b><span>best score · Rekord</span></div>
+      <div class="sbox"><b>${days}</b><span>days played · Tage</span></div>
+      <div class="sbox"><b>${R?R.e:"–"}</b><span>${R?esc(R.en):"coach rating"}</span></div>
+    </div>
+    ${last.length>1?`<h3 style="margin-top:14px">📈 Last ${last.length} games <span class="de">· Letzte Spiele</span></h3>
+    <div class="bars">${last.map(g=>`<div class="bar" title="${g.score}"><i style="height:${Math.max(6,Math.round((g.score||0)/mx*100))}%"></i><span>${g.score||0}</span></div>`).join("")}</div>`:""}
+    <div class="row" style="margin-top:10px">${Object.entries(langs).map(([l,n])=>T[l]?`<span class="feat">${T[l].flag} ${T[l].name} · ${n}</span>`:"").join("")}</div>`;
+}
+function acctHistory(gs){
+  if(!gs.length) return "";
+  const medals=["🥇","🥈","🥉"];
+  return `<div class="card"><h3>🗂️ My games <span class="de">· Meine Spiele</span></h3>
+    ${gs.slice(0,50).map((g,n)=>`<button class="hrow" onclick="openGame(${n})">
+      <span class="hico">${GAME_ICON[g.game]||"🎮"}</span>
+      <span class="hmid"><b>${GAME_NAME[g.game]||"Game"}</b> ${g.mode==="online"?"🌐":"📱"}<br><span class="note">${fmtDate(g.played_at)} · ${T[g.lang]?T[g.lang].flag:""} ${g.level!=null&&LEVELS[g.level]?LEVELS[g.level].code:""} · ${g.players} players</span></span>
+      <span class="hpts">${g.players>1&&medals[g.rank-1]?medals[g.rank-1]:""} ${g.score}</span></button>`).join("")}
+    ${gs.length>50?`<p class="note center">Showing your last 50 games</p>`:""}</div>`;
+}
+async function openGame(n){
+  const g=(A.games||[])[n]; if(!g) return;
+  let review="";
+  try{ if(g.id){ const { data } = await A.sb.from("games").select("review").eq("id", g.id).maybeSingle(); review=(data&&data.review)||""; } else review=g.review||""; }catch(e){}
+  const head=`${GAME_ICON[g.game]||"🎮"} ${GAME_NAME[g.game]||"Game"} · ${fmtDate(g.played_at)}\nScore · Punkte: ${g.score} · Rank · Platz: ${g.rank}/${g.players}\n\n`;
+  openExport(-1, null, {text: head+(review||"(No review saved for this game.)"), name:"game-"+fmtDate(g.played_at), heading:`${GAME_ICON[g.game]||"🎮"} ${fmtDate(g.played_at)}`, subject:"My game "+fmtDate(g.played_at)});
+}
+function confirmDelete(){
+  const box=document.createElement("div"); box.className="sheet-bg";
+  box.innerHTML=`<div class="sheet">
+    <h3>Delete your account? <span class="de">· Konto löschen?</span></h3>
+    <p>This permanently deletes your login, your profile and <b>all saved games</b>. It can't be undone.<br><span class="de">Login, Profil und alle gespeicherten Spiele werden endgültig gelöscht.</span></p>
+    <button class="btn danger" id="delYes">🗑️ Delete forever · Endgültig löschen</button>
+    <button class="btn ghost" id="delNo">Cancel · Abbrechen</button>
+    <p class="note center" id="delMsg"></p></div>`;
+  document.body.appendChild(box);
+  $("delNo").onclick=()=>box.remove();
+  $("delYes").onclick=async()=>{
+    $("delYes").disabled=true; $("delMsg").textContent="Deleting… · Wird gelöscht…";
+    try{
+      const { error } = await A.sb.rpc("delete_my_account");
+      if(error) throw error;
+      try{ await A.sb.auth.signOut(); }catch(e){}
+      lsSet("pt_queue",null); lsSet("pt_pending",null);
+      A.user=null; A.profile=null; A.games=null; A.status="out"; A.step="email"; A.msg="Your account was deleted · Dein Konto wurde gelöscht";
+      box.remove(); render();
+    }catch(e){ $("delYes").disabled=false; $("delMsg").textContent=authErr(e); }
+  };
+}
+function legalLinks(){ return `<p class="legal"><button onclick="openLegal('impressum')">Impressum</button> · <button onclick="openLegal('privacy')">Datenschutz · Privacy</button></p>`; }
+function openLegal(which){ if(S.screen!=="impressum" && S.screen!=="privacy") A.legalRet=S.screen; go(which); }
+function legalBack(){ const r=A.legalRet||"home"; if(r==="lobby" && !O.G) go("home"); else if(r==="results" && !S.players.length) go("home"); else go(r); }
+const G_LOGO = `<svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>`;
+
+VIEWS.account = function(){
+  const top=`<div class="topline"><button class="chip" onclick="acctBack()">← Back</button><span>👤 Account · Konto</span></div>`;
+  const msg = `${A.err?`<div class="err">${esc(A.err)}</div>`:""}${A.msg?`<p class="note center okmsg">${esc(A.msg)}</p>`:""}`;
+  if(A.status==="loading") return `${top}<p class="note center" style="margin-top:40px">Loading… · Lädt…</p>`;
+  if(A.status!=="in"){
+    return `${top}
+    <h2>${bi("Your PonteTalk account","Dein PonteTalk-Konto")}</h2>
+    <div class="card perks">
+      <div>🏆 <b>Keep your scores</b> &amp; game history <span class="de">· Punkte &amp; Verlauf</span></div>
+      <div>📈 <b>See your progress</b> over time <span class="de">· Fortschritt sehen</span></div>
+      <div>📝 <b>Your reviews &amp; tips</b> saved to practice later <span class="de">· Tipps gespeichert</span></div>
+      <div>🆓 <b>Free</b> · Kostenlos</div>
+    </div>
+    <div class="card">
+      <button class="btn gbtn" onclick="googleSignIn()" ${A.busy?"disabled":""}>${G_LOGO}<span>Continue with Google · Weiter mit Google</span></button>
+      <div class="divider"><span>or with email · oder per E-Mail</span></div>
+      ${A.step==="email" ? `
+        <label class="lbl" for="aemail">Email · E-Mail</label>
+        <input type="email" id="aemail" inputmode="email" autocomplete="email" placeholder="you@example.com" value="${esc(A.email)}" oninput="A.email=this.value" onkeydown="if(event.key==='Enter')sendCode()">
+        <button class="btn primary" onclick="sendCode()" ${A.busy?"disabled":""}>${A.busy?"Sending… · Wird gesendet…":"📧 Send me a code"}<small>Wir schicken dir einen Code</small></button>`
+      : `
+        <p class="note">Check your inbox (and spam) for a code from PonteTalk.<br><span class="de">Schau in dein Postfach (auch Spam).</span></p>
+        <label class="lbl" for="acode">Code</label>
+        <input type="text" id="acode" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="123456" class="codein" value="${esc(A.code)}" oninput="A.code=this.value" onkeydown="if(event.key==='Enter')verifyCode()">
+        <button class="btn primary" onclick="verifyCode()" ${A.busy?"disabled":""}>${A.busy?"Checking… · Prüfe…":"✅ Sign in · Anmelden"}</button>
+        <div class="row" style="justify-content:center;margin-top:6px">
+          <button class="chip" onclick="sendCode()">🔁 Send again · Nochmal</button>
+          <button class="chip" onclick="A.step='email';A.code='';A.msg='';A.err='';render()">✏️ Other email</button>
+        </div>`}
+      ${msg}
+      <p class="note center" style="margin:12px 0 0">You must be 16 or older. By continuing you accept our <button class="linkbtn" onclick="openLegal('privacy')">privacy policy</button>.<br><span class="de">Ab 16 Jahren. Mit dem Fortfahren akzeptierst du die Datenschutzerklärung.</span></p>
+    </div>
+    ${legalLinks()}`;
+  }
+  // Signed in, but no name yet (or editing)
+  if(!A.profile || !A.profile.display_name || A.editing){
+    const pf=A.pf||{lang:S.draft.lang, level:S.draft.level, name:(A.profile&&A.profile.display_name)||S.draft.name||""};
+    A.pf=pf;
+    return `${top}
+    <h2>${A.editing?bi("Edit profile","Profil bearbeiten"):bi("Welcome! 👋","Willkommen!")}</h2>
+    <p class="sub">${A.editing?"":"Tell us a little about you. You can change this anytime."}</p>
+    <div class="card">
+      <label class="lbl" for="pfname">Your name in games · Dein Name im Spiel</label>
+      <input type="text" id="pfname" maxlength="16" placeholder="e.g. Ana" value="${esc(pf.name||"")}" autocomplete="nickname">
+      <label class="lbl">I'm practicing · Ich übe</label>
+      <div class="row">${LANG_KEYS.map(k=>`<button class="chip lang ${pf.lang===k?"on":""}" onclick="setPf('lang','${k}')">${T[k].flag} ${T[k].name}</button>`).join("")}</div>
+      <label class="lbl">My level · Mein Niveau</label>
+      <div class="row">${LEVELS.map((l,i)=>`<button class="chip ${pf.level===i?"on":""}" onclick="setPf('level',${i})">${l.code} · ${T[pf.lang].levels[i]}</button>`).join("")}</div>
+      ${msg}
+      <button class="btn primary" onclick="saveProfile()" ${A.busy?"disabled":""}>💾 Save · Speichern</button>
+      ${A.editing?`<button class="btn ghost" onclick="A.editing=false;A.pf=null;A.err='';render()">Cancel · Abbrechen</button>`:""}
+    </div>
+    <p class="note center">Signed in as ${esc(A.user.email||"")}</p>`;
+  }
+  const P=A.profile, gs=A.games||[], pend=pendingGame();
+  const meIdx = pend ? pend.names.findIndex(n=>n.toLowerCase()===P.display_name.toLowerCase()) : -1;
+  return `${top}
+  <div class="card prof">
+    <div class="avatar" style="background:var(--plum);width:52px;height:52px;font-size:24px">${esc(P.display_name.charAt(0).toUpperCase())}</div>
+    <div style="flex:1"><div class="pname" style="font-size:20px">${esc(P.display_name)}</div>
+      <div class="pmeta">${T[P.practicing]?`${T[P.practicing].flag} ${T[P.practicing].name}`:""} · ${LEVELS[P.level]?LEVELS[P.level].code:""}</div></div>
+    <button class="chip" onclick="editProfile()">✏️ Edit</button>
+  </div>
+  ${msg}
+  ${pend ? `<div class="card acard"><h3>💾 Save your last game? <span class="de">· Letztes Spiel speichern?</span></h3>
+     ${pend.recs.length>1?`<p class="note">Which player were you? · Wer warst du?</p><div class="row">${pend.names.map((n,i)=>`<button class="chip ${i===meIdx?"on":""}" onclick="savePending(${i})">${i===meIdx?"⭐ ":""}${esc(n)}</button>`).join("")}</div>`
+       :`<button class="btn primary" onclick="savePending(0)">💾 Save · Speichern</button>`}
+     <button class="btn ghost" onclick="lsSet('pt_pending',null);render()">No thanks · Nein danke</button></div>` : ""}
+  <div class="card"><h3>📊 My stats <span class="de">· Meine Statistik</span></h3>
+    ${A.games===null?`<p class="note center">Loading your games… <button class="linkbtn" onclick="loadGames()">Retry</button></p>`:acctStats(gs)}</div>
+  ${acctHistory(gs)}
+  <p class="note center">Tap a game to see its questions, answers &amp; tips · Tippe auf ein Spiel für Details</p>
+  <button class="btn secondary" onclick="signOut()">🚪 Sign out · Abmelden</button>
+  <button class="btn ghost dangertext" onclick="confirmDelete()">🗑️ Delete my account · Konto löschen</button>
+  <p class="note center">Signed in as ${esc(A.user.email||"")}</p>
+  ${legalLinks()}`;
+};
+AFTER.account = function(){
+  const n=$("pfname"); if(n) n.addEventListener("input",e=>{ A.pf=A.pf||{}; A.pf.name=e.target.value; });
+  const f=$("acode")||$("aemail"); if(f && !A.busy && S.screen==="account" && window.innerWidth>700) f.focus({preventScroll:true});
+};
+
+/* ---- legal pages ---- */
+VIEWS.impressum = function(){
+  return `<div class="topline"><button class="chip" onclick="legalBack()">← Back</button><span>Impressum</span></div>
+  <h2>Impressum</h2>
+  <div class="card legaltext">
+    <p><b>Angaben gemäß § 5 DDG</b></p>
+    <p>${esc(LEGAL.name)}<br>${esc(LEGAL.street)}<br>${esc(LEGAL.city)}<br>${esc(LEGAL.country)}</p>
+    <p><b>Kontakt</b><br>E-Mail: ${esc(LEGAL.email)}</p>
+    <p><b>Hinweis</b><br>PonteTalk ist eine kostenlose Beta-Testversion, ein Projekt von Setzio (in Gründung).</p>
+    <p><b>Verbraucherstreitbeilegung</b><br>Wir sind nicht bereit und nicht verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.</p>
+  </div>
+  ${legalLinks()}`;
+};
+VIEWS.privacy = function(){
+  const who=`${esc(LEGAL.name)}, ${esc(LEGAL.street)}, ${esc(LEGAL.city)}, ${esc(LEGAL.country)} · ${esc(LEGAL.email)}`;
+  return `<div class="topline"><button class="chip" onclick="legalBack()">← Back</button><span>Datenschutz</span></div>
+  <h2>Datenschutzerklärung <span class="de">· Privacy policy</span></h2>
+  <div class="card legaltext">
+    <p class="note">Stand: November 2026 · English summary below.</p>
+    <h3>1. Verantwortlich</h3><p>${who}</p>
+    <h3>2. Ohne Konto spielen</h3>
+    <p>Du kannst PonteTalk ohne Konto nutzen. Spielstände, Einstellungen und Ton-Einstellung werden nur lokal auf deinem Gerät gespeichert (Local Storage). Das ist technisch notwendig (§ 25 Abs. 2 TDDDG). Wir verwenden <b>keine Tracking-Cookies, keine Analyse-Tools und keine Werbung</b>. Schriften werden von unserem eigenen Server geladen, nicht von Google.</p>
+    <h3>3. Hosting</h3>
+    <p>Die Website wird bei Vercel Inc. (USA) gehostet. Beim Aufruf werden technisch notwendige Server-Logdaten (z. B. IP-Adresse, Zeitpunkt, Browser) kurzzeitig verarbeitet, um die Seite sicher auszuliefern (Art. 6 Abs. 1 lit. f DSGVO). Vercel ist unter dem EU-US Data Privacy Framework zertifiziert; zusätzlich gelten Standardvertragsklauseln.</p>
+    <h3>4. Online-Spiele</h3>
+    <p>Für Online-Spiele nutzen wir Supabase (Server in Frankfurt, EU). Dabei werden dein eingegebener Spielname, Sprache, Niveau, Spielzüge und Chat-Nachrichten in Echtzeit an die Mitspielenden übertragen. Diese Daten werden <b>nicht dauerhaft gespeichert</b> und sind nach dem Spiel weg (Art. 6 Abs. 1 lit. b DSGVO).</p>
+    <h3>5. Konto</h3>
+    <p>Wenn du ein Konto erstellst, speichern wir bei Supabase (Frankfurt, EU): deine E-Mail-Adresse, deinen Spielnamen, Sprache und Niveau sowie deine gespeicherten Spiele (Punkte, Platz, Fragen, Antworten und Tipps). Zweck: dir deinen Spielverlauf und Fortschritt anzuzeigen (Art. 6 Abs. 1 lit. b DSGVO). Deine Daten sieht nur du. Die Daten bleiben gespeichert, bis du dein Konto löschst. Du kannst dein Konto jederzeit in der App unter „Konto löschen“ selbst löschen – dann werden alle Daten sofort entfernt.</p>
+    <p><b>Anmeldung per E-Mail-Code:</b> Den Code versenden wir über Resend, Inc. (USA). Dabei wird deine E-Mail-Adresse übermittelt. Resend ist unter dem EU-US Data Privacy Framework zertifiziert bzw. es gelten Standardvertragsklauseln.</p>
+    <p><b>Anmeldung mit Google:</b> Wenn du „Weiter mit Google“ wählst, wirst du zu Google (Google Ireland Ltd. / Google LLC) weitergeleitet. Wir erhalten von Google deine E-Mail-Adresse und deinen Namen. Es gelten zusätzlich die Datenschutzhinweise von Google.</p>
+    <h3>6. Deine Rechte</h3>
+    <p>Du hast das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch (Art. 15–21 DSGVO). Schreib uns dazu einfach an ${esc(LEGAL.email)}. Du kannst dich außerdem bei einer Datenschutz-Aufsichtsbehörde beschweren.</p>
+    <h3>7. Alter</h3><p>Ein Konto darfst du ab 16 Jahren erstellen.</p>
+    <hr>
+    <h3>English summary</h3>
+    <p>You can play without an account; then everything stays on your device. No tracking, no analytics, no ads. Online games run through Supabase (Frankfurt, EU) and are not stored. If you create an account, we store your email, game name, language, level and the games you save, only so you can see your history. Only you can see them. Login codes are sent via Resend (USA); "Continue with Google" shares your email and name from Google. You can delete your account and all data anytime in the app. Questions or data requests: ${esc(LEGAL.email)}. Accounts are for ages 16+.</p>
+  </div>
+  ${legalLinks()}`;
+};
+
+/* Start: remember where to return after Google sign-in, then connect */
+try{ const u=new URL(location.href); if(u.searchParams.get("auth")==="google" || u.searchParams.has("code")){ S.screen="account"; A.ret=sessionStorage.getItem("pt_ret")||"home"; sessionStorage.removeItem("pt_ret"); if(A.ret==="results"||A.ret==="lobby") A.ret="home"; } }catch(e){}
+// supabase.js loads with 'defer', so it is ready only once the page has finished loading
+if(window.supabase) authInit(); else document.addEventListener("DOMContentLoaded", authInit);
 
 render();
 /* Offline support + installable app (only works on the real website, safely skipped elsewhere) */
