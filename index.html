@@ -171,6 +171,27 @@
   .turnwho .avatar{width:48px;height:48px;font-size:22px}
   .resume{background:var(--teal-soft);border-color:var(--teal)}
   .react:disabled,.rate:disabled{cursor:default;opacity:.85}
+  .reqcard{border-color:var(--plum);background:var(--plum-soft)}
+  .reqcard .chip.on{border-color:var(--teal);background:var(--teal-soft)}
+  .timerrow{display:flex;align-items:center;justify-content:center;gap:10px;position:relative}
+  .timerrow .soundbtn{position:absolute;right:0;font-size:18px}
+  .cemoji{font-size:64px;line-height:1.1}
+  .cword{font:700 34px Fredoka,system-ui,sans-serif;margin:4px 0;line-height:1.15}
+  .cardword{border:3px solid var(--coral)}
+  .cguessers{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .cg{display:flex;align-items:center;gap:8px;background:#fff;border:2px solid var(--line);border-radius:16px;padding:10px;font:700 16px Nunito,system-ui,sans-serif;color:var(--ink);cursor:pointer;text-align:left}
+  .cg:active{transform:scale(.97)} .cg .avatar{width:32px;height:32px;font-size:15px}
+  .cline{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px dashed var(--line)} .cline:last-child{border-bottom:none}
+  .cemo{font-size:30px;line-height:1.2}
+  .clue{min-height:52px;font-size:34px;letter-spacing:4px;text-align:center;background:#fff;border:2px dashed var(--plum);border-radius:16px;padding:8px;line-height:1.3;word-break:break-all}
+  .clue.big{font-size:44px;border:none;background:none}
+  .clue .note{letter-spacing:normal;font-size:14px;line-height:1.4;display:inline-block;padding-top:8px}
+  .ekeys{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;background:#fff;border-radius:16px;padding:8px;border:1.5px solid var(--line)}
+  .ekeys button{font-size:26px;background:none;border:none;padding:6px 0;border-radius:10px;cursor:pointer;touch-action:manipulation}
+  .ekeys button:active{background:var(--plum-soft)}
+  .feed{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:8px 12px;margin-top:10px;font-size:15px}
+  .feed div{padding:3px 0} .feed .ok{color:#167B70;font-weight:700}
+  .guessrow{display:flex;gap:8px;align-items:center;margin-top:12px}
   .hidden{display:none !important}
   .err{color:var(--coral);font-weight:700;font-size:14px;min-height:18px;margin-top:6px}
 </style>
@@ -478,7 +499,7 @@ const S = {
   players:[], cat:"mix", rounds:2, time:90,
   round:1, turn:0, used:new Set(), fmtCycle:0,
   current:null, rerolled:false, timerId:null, left:0, total:0,
-  draft:{name:"",lang:"de",level:2}, rating:null, err:"", log:[]
+  draft:{name:"",lang:"de",level:2}, rating:null, err:"", log:[], game:"speak", cdiff:"auto", clog:[], cused:[]
 };
 
 /* ===================== STATS (local, best-effort) ===================== */
@@ -496,7 +517,21 @@ function avatar(p,i){ return `<div class="avatar" style="background:${COLORS[i%C
 function bi(en,de){ return `${en} <span class="de">· ${de}</span>`; }
 
 let audio=null;
-function beep(){ try{ if(!audio) return; const o=audio.createOscillator(), g=audio.createGain(); o.connect(g); g.connect(audio.destination); o.frequency.value=880; g.gain.setValueAtTime(.2,audio.currentTime); g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+.6); o.start(); o.stop(audio.currentTime+.6);}catch(e){} }
+function soundOn(){ try{ return localStorage.getItem("pt_sound")!=="off"; }catch(e){ return true; } }
+function ensureAudio(){ try{ if(!audio) audio=new (window.AudioContext||window.webkitAudioContext)(); if(audio.state==="suspended") audio.resume(); }catch(e){} }
+document.addEventListener("pointerdown", ensureAudio, {passive:true}); // phones only allow sound after a tap
+function tone(freq, dur, vol, type){
+  try{ if(!audio || !soundOn()) return; const t0=audio.currentTime, o=audio.createOscillator(), g=audio.createGain();
+    o.type=type||"sine"; o.frequency.value=freq; o.connect(g); g.connect(audio.destination);
+    g.gain.setValueAtTime(0.0001,t0); g.gain.exponentialRampToValueAtTime(vol,t0+0.01); g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+    o.start(t0); o.stop(t0+dur+0.02); }catch(e){}
+}
+// Last 10 seconds: soft ticks, then three rising beeps for 3-2-1.
+function countdownSound(n){ if(n>3) tone(1050, 0.07, 0.12, "triangle"); else tone(n===3?660:n===2?740:830, 0.18, 0.22, "sine"); }
+function toggleSound(){ try{ localStorage.setItem("pt_sound", soundOn()?"off":"on"); }catch(e){} ensureAudio(); document.querySelectorAll(".soundbtn").forEach(b=>b.textContent=soundOn()?"🔊":"🔇"); }
+function soundBtn(){ return `<button class="chip soundbtn" onclick="toggleSound()" aria-label="Sound on/off">${soundOn()?"🔊":"🔇"}</button>`; }
+function beep(){ if(!soundOn()) return; tone(880,0.25,0.25,"sine"); setTimeout(()=>tone(1175,0.5,0.25,"sine"),180); }
+function beepOld(){ try{ if(!audio) return; const o=audio.createOscillator(), g=audio.createGain(); o.connect(g); g.connect(audio.destination); o.frequency.value=880; g.gain.setValueAtTime(.2,audio.currentTime); g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+.6); o.start(); o.stop(audio.currentTime+.6);}catch(e){} }
 let wake=null;
 async function keepAwake(){ try{ if('wakeLock' in navigator && !wake){ wake = await navigator.wakeLock.request('screen'); } }catch(e){} }
 
@@ -562,7 +597,7 @@ home(){
       <span class="feat">👥 2–10 players</span>
       <span class="feat">🌍 7 languages</span>
       <span class="feat">🎯 A1 – B2+</span>
-      <span class="feat">📱 One phone</span>
+      <span class="feat">🎭 2 games</span>
     </div>
     <div class="flagrow">${LANG_KEYS.map(k=>`<span title="${T[k].name}">${T[k].flag}</span>`).join("")}</div>
   </div>
@@ -622,8 +657,12 @@ settings(){
   <div class="topline"><button class="chip" onclick="go('setup')">← Back</button><span>${S.players.length} players</span></div>
   <h2>${bi("Game settings","Einstellungen")}</h2>
   <div class="card">
-    <label class="lbl" style="margin-top:0">Topic · Thema</label>
-    <div class="row">${Object.entries(CATS).map(([k,c])=>`<button class="chip ${S.cat===k?"on":""}" onclick="setOpt('cat','${k}')">${c.e} ${c.en} · ${c.de}</button>`).join("")}</div>
+    <label class="lbl" style="margin-top:0">Game · Spiel</label>
+    ${gameChips(S.game,"setGame")}
+    ${S.game==="charades"
+      ? `<label class="lbl">Difficulty · Schwierigkeit</label>${cDiffChips(S.cdiff, S.players, "setCDiff")}`
+      : `<label class="lbl">Topic · Thema</label>
+    <div class="row">${Object.entries(CATS).map(([k,c])=>`<button class="chip ${S.cat===k?"on":""}" onclick="setOpt('cat','${k}')">${c.e} ${c.en} · ${c.de}</button>`).join("")}</div>`}
     <label class="lbl">Rounds · Runden</label>
     <div class="stepper">
       <button class="step" onclick="setRounds(-1)" ${S.rounds<=1?"disabled":""} aria-label="Fewer rounds">−</button>
@@ -632,9 +671,9 @@ settings(){
     </div>
     <p class="note" style="margin-bottom:0">The table decides! 1–10 rounds · Ihr entscheidet: 1–10 Runden</p>
     <p class="note">${S.rounds} round${S.rounds>1?"s":""} = ${S.rounds*S.players.length} turns · about ${Math.round(S.rounds*S.players.length*(S.time/60+1.5))} min</p>
-    <label class="lbl">Speaking time · Sprechzeit</label>
-    <div class="row">${[60,90,120].map(n=>`<button class="chip ${S.time===n?"on":""}" onclick="setOpt('time',${n})">${n}s</button>`).join("")}</div>
-    <p class="note">Quick Response turns get half the time.</p>
+    <label class="lbl">${S.game==="charades"?"Acting time · Spielzeit":"Speaking time · Sprechzeit"}</label>
+    <div class="row">${(S.game==="charades"?[45,60,90]:[60,90,120]).map(n=>`<button class="chip ${S.time===n?"on":""}" onclick="setOpt('time',${n})">${n}s</button>`).join("")}</div>
+    <p class="note">${S.game==="charades"?"Each actor gets this long to act out as many words as possible.":"Quick Response turns get half the time."}</p>
   </div>
   <button class="btn primary" onclick="startGame()">Let's go!<small>Los geht's!</small></button>`;
 },
@@ -667,7 +706,7 @@ challenge(){
     <div class="hints ${S.hintsUsed?"show":""}" id="hints">${c.w.map(w=>`<span class="hint">${esc(w)}</span>`).join("")}</div>
   </div>
   <div id="timerBox" class="hidden">
-    <div class="timer" id="timer">0:00</div>
+    <div class="timerrow"><div class="timer" id="timer">0:00</div>${soundBtn()}</div>
     <div class="bar" id="bar"><i id="barFill"></i></div>
   </div>
   <button class="btn primary" id="startBtn" onclick="startTimer()">⏱️ ${T[L].startTimer}<small>${T[L].startSub}</small></button>
@@ -734,7 +773,7 @@ results(){
       <span class="pts">${r.p.pts}</span></div>`).join("")}</div>
   <div class="card">
     <h3>Awards <span class="de">· Auszeichnungen</span></h3>
-    ${bestSpeaker()}
+    ${bestSpeaker()}${charadesAwards(S.players)}
     ${award("creative","🔥","Most creative","Am kreativsten")}
     ${award("funny","😂","Funniest","Am lustigsten")}
     ${award("clear","👍","Clearest speaker","Am verständlichsten")}
@@ -798,11 +837,12 @@ function removePlayer(i){ S.players.splice(i,1); render(); }
 function toSettings(){ if(S.players.length<2){ S.err="Add at least 2 players · Mindestens 2 Spieler"; render(); return; } S.err=""; go("settings"); }
 function setOpt(k,v){ S[k]=v; render(); }
 function setRounds(d){ S.rounds=Math.min(10,Math.max(1,S.rounds+d)); render(); }
-function resetScores(){ S.players.forEach(p=>{p.pts=0;p.coach=0;p.bonus=0;p.ratings=[];p.reacts={clear:0,creative:0,funny:0,learned:0};p.tips=[];}); }
+function resetScores(){ S.players.forEach(p=>{p.pts=0;p.coach=0;p.bonus=0;p.cact=0;p.cguess=0;p.ratings=[];p.reacts={clear:0,creative:0,funny:0,learned:0};p.tips=[];}); }
 function startGame(){
   try{ audio = audio || new (window.AudioContext||window.webkitAudioContext)(); }catch(e){}
   keepAwake();
   resetScores(); S.log=[]; S.round=1; S.turn=0; S.rating=null; S.fmtCycle=Math.floor(Math.random()*3);
+  if(S.game==="charades"){ cStartGame(); return; }
   bump("started"); go("handoff");
 }
 function showChallenge(){ keepAwake(); S.current=choosePrompt(S.players[S.turn].lang, S.players[S.turn].level); S.rerolled=false; S.hintsUsed=false; S.timeUp=false; go("challenge"); }
@@ -814,7 +854,7 @@ function openHints(){
 }
 function startTimer(){
   try{ if(audio && audio.state==="suspended") audio.resume(); }catch(e){}
-  S.total = S.current.f==="quick" ? Math.round(S.time/2) : S.time; S.left=S.total;
+  S.total = S.current.f==="quick" ? Math.round(S.time/2) : S.time; S.left=S.total; S.lastCount=null;
   $("timerBox").classList.remove("hidden"); $("startBtn").classList.add("hidden"); $("doneBtn").classList.remove("hidden");
   const rb=$("rerollBtn"); if(rb) rb.classList.add("hidden");
   tick(); S.timerId=setInterval(()=>{ S.left--; tick(); if(S.left<=0){ stopTimer(true); } },1000);
@@ -824,6 +864,7 @@ function tick(){
   const t=$("timer"); if(!t) return;
   t.textContent=`${m}:${String(s).padStart(2,"0")}`;
   const low=S.left<=10; t.classList.toggle("low",low); $("bar").classList.toggle("low",low);
+  if(S.left>0 && S.left<=10 && S.lastCount!==S.left){ S.lastCount=S.left; countdownSound(S.left); }
   $("barFill").style.width=`${Math.max(S.left,0)/S.total*100}%`;
 }
 function stopTimer(ended){ if(S.timerId){ clearInterval(S.timerId); S.timerId=null; } if(ended){ S.timeUp=true; beep(); const t=$("timer"); if(t) t.textContent="⏰ Time!"; const d=$("doneBtn"); if(d) d.innerHTML="✓ Time's up – feedback<small>Zeit um – Feedback</small>"; } }
@@ -854,12 +895,12 @@ function appLink(){ try{ return location.protocol.startsWith("http") ? location.
 function today(){ const d=new Date(); return `${String(d.getDate()).padStart(2,"0")}.${String(d.getMonth()+1).padStart(2,"0")}.${d.getFullYear()}`; }
 function reactLine(r){ return REACTS.filter(x=>r[x.k]).map(x=>`${x.e}${r[x.k]}`).join("  ") || "–"; }
 function playerReview(i, ctx){
-  ctx=ctx||{players:S.players, log:S.log, rounds:S.rounds};
+  ctx=ctx||{players:S.players, log:S.log, rounds:S.rounds, clog:S.clog};
   const p=ctx.players[i], L=p.lang, X=T[L], R=X.r, turns=ctx.log.filter(t=>t.pi===i);
   let out=`🌉 PonteTalk – ${R.title}\n`;
   out+=`${today()} · ${p.name} · ${X.flag} ${X.name} ${LEVELS[p.level].code}\n`;
   out+=`${R.points}: ${p.pts}\n\n`;
-  if(!turns.length) out+=R.none+"\n";
+  if(!turns.length && !(ctx.clog||[]).length) out+=R.none+"\n";
   turns.forEach((x,n)=>{
     const a1 = p.level===0 && x.f==="wwyd";
     out+=`${n+1}) ${FMTS[x.f].e} ${a1?X.a1wwyd:X.fmt[x.f]} · ${CATS[x.c].e} ${X.cats[x.c]}\n`;
@@ -871,17 +912,19 @@ function playerReview(i, ctx){
     out+=`📚 ${R.words}: ${x.words.join(", ")}\n`;
     out+=`👏 ${R.reacts}: ${reactLine(x.reacts)}\n\n`;
   });
-  out+=`🎯 ${R.practice}\n\n`;
+  out+=charadesReview(i, ctx);
+  if(turns.length) out+=`🎯 ${R.practice}\n\n`;
   out+=`${R.again}: ${appLink()}`;
   return out;
 }
 function gameReview(ctx){
-  ctx=ctx||{players:S.players, log:S.log, rounds:S.rounds};
+  ctx=ctx||{players:S.players, log:S.log, rounds:S.rounds, clog:S.clog};
   let out=`🌉 PonteTalk – Game summary · Spielübersicht\n${today()} · ${ctx.players.length} players · ${ctx.rounds} round(s)\n\n`;
   const ranked=ctx.players.map((p,i)=>({p,i})).sort((a,b)=>b.p.pts-a.p.pts);
   out+=`🏆 Scores\n`+ranked.map((r,n)=>`${n+1}. ${r.p.name} (${T[r.p.lang].code} ${LEVELS[r.p.level].code}) – ${r.p.pts}`).join("\n")+"\n\n";
   ctx.players.forEach((p,i)=>{
     out+=`━━━━━━━━━━\n👤 ${p.name}\n`;
+    if((ctx.clog||[]).length) out+=`   🎭 acted ${p.cact||0} · 🧠 guessed ${p.cguess||0}\n`;
     ctx.log.filter(t=>t.pi===i).forEach((x,n)=>{
       out+=`${n+1}) ${x.q}\n`;
       if(x.rating){ const R=RATINGS[x.rating-1]; out+=`   🧑‍🏫 ${R.e} ${R.en}\n`; }
@@ -896,7 +939,7 @@ function gameReview(ctx){
   return out;
 }
 function openExport(i, ctx){
-  ctx=ctx||{players:S.players, log:S.log, rounds:S.rounds};
+  ctx=ctx||{players:S.players, log:S.log, rounds:S.rounds, clog:S.clog};
   const text = i<0 ? gameReview(ctx) : playerReview(i, ctx);
   const name = i<0 ? "game" : ctx.players[i].name;
   const canShare = !!(navigator.share);
@@ -1066,14 +1109,21 @@ function hostPresence(list){
   list.forEach(m=>{
     if(!m || !m.id || !m.name) return;
     const ex=G.players.find(p=>p.id===m.id);
-    if(!ex){ G.players.push(newPlayer(m)); changed=true; }
+    if(!ex){
+      G.pending=G.pending||[]; G.declined=G.declined||[];
+      if(G.locked || G.declined.includes(m.id) || G.pending.some(q=>q.id===m.id)) return;
+      if(G.phase==="lobby"){ G.players.push(newPlayer(m)); changed=true; }
+      else { G.pending.push({id:m.id, name:m.name, lang:m.lang, level:m.level}); changed=true; }
+    }
     else if(G.phase==="lobby" && (ex.name!==m.name || ex.lang!==m.lang || ex.level!==m.level)){ ex.name=m.name; ex.lang=m.lang; ex.level=m.level; changed=true; }
   });
+  const ids=new Set(list.map(m=>m.id));
   if(G.phase==="lobby"){
-    const ids=new Set(list.map(m=>m.id)); const before=G.players.length;
+    const before=G.players.length;
     G.players=G.players.filter(p=>p.id===G.hostId || ids.has(p.id));
     if(G.players.length!==before) changed=true;
   }
+  if(G.pending && G.pending.some(q=>!ids.has(q.id))){ G.pending=G.pending.filter(q=>ids.has(q.id)); changed=true; }
   if(changed) pushState();
 }
 function isOnline(id){ return id===O.me.id || O.online.some(p=>p.id===id); }
@@ -1099,16 +1149,17 @@ function oNewTurn(){
 }
 function oStart(){
   const G=O.G;
-  G.players.forEach(p=>{ p.pts=0; p.coach=0; p.bonus=0; p.ratings=[]; p.reacts={clear:0,creative:0,funny:0,learned:0}; p.tips=[]; });
-  G.round=1; G.turn=0; G.used=[]; G.log=[]; G.fmtCycle=Math.floor(Math.random()*3);
-  oNewTurn(); bump("started"); bump("online");
+  G.players.forEach(p=>{ p.pts=0; p.coach=0; p.bonus=0; p.cact=0; p.cguess=0; p.ratings=[]; p.reacts={clear:0,creative:0,funny:0,learned:0}; p.tips=[]; });
+  G.round=1; G.turn=0; G.used=[]; G.log=[]; G.clog=[]; G.cused=[]; G.fmtCycle=Math.floor(Math.random()*3);
+  if(G.game==="charades") oCNewTurn(); else oNewTurn();
+  bump("started"); bump("online");
 }
 function oIsLast(){ const G=O.G; return G.round===G.rounds && G.turn===G.players.length-1; }
 function oAdvance(){
   const G=O.G;
   if(oIsLast()){ G.phase="results"; G.tp=null; bump("completed"); return; }
   G.turn++; if(G.turn>=G.players.length){ G.turn=0; G.round++; }
-  oNewTurn();
+  if(G.game==="charades") oCNewTurn(); else oNewTurn();
 }
 function oScore(){
   const G=O.G, tp=G.tp, p=G.players[G.turn], R=RATINGS.find(r=>r.v===tp.rating);
@@ -1124,11 +1175,19 @@ function oScore(){
 function applyAction(from, a){
   const G=O.G; if(!G || !a) return;
   const active = G.players[G.turn] || {}, isActive = from===active.id, isHost = from===G.hostId, tp=G.tp;
+  if(!isHost && !G.players.some(p=>p.id===from)) return; // people waiting outside can't play
+  if(oCApply(from, a, isActive, isHost)){ pushState(); return; }
   switch(a.type){
-    case "settings": if(isHost && G.phase==="lobby"){ if(a.cat) G.cat=a.cat; if(a.rounds) G.rounds=Math.min(10,Math.max(1,a.rounds)); if(a.time) G.time=a.time; } break;
+    case "lock": if(isHost){ G.locked=!G.locked; } break;
+    case "accept": if(isHost && G.pending){ const q=G.pending.find(x=>x.id===a.id); if(q){ G.pending=G.pending.filter(x=>x.id!==a.id); if(!G.players.some(p=>p.id===q.id) && G.players.length<10) G.players.push(newPlayer(q)); } } break;
+    case "decline": if(isHost && G.pending){ G.pending=G.pending.filter(x=>x.id!==a.id); G.declined=[...(G.declined||[]), a.id]; } break;
+    case "settings": if(isHost && G.phase==="lobby"){ if(a.cat) G.cat=a.cat; if(a.rounds) G.rounds=Math.min(10,Math.max(1,a.rounds)); if(a.time) G.time=a.time;
+        if(a.game){ G.game=a.game; if(a.game==="charades" && G.time>90) G.time=60; if(a.game!=="charades" && G.time<60) G.time=90; }
+        if(a.cdiff!==undefined) G.cdiff=a.cdiff;
+        if(a.cmode) G.cmode=a.cmode; } break;
     case "start": if(isHost && (G.phase==="lobby"||G.phase==="results") && G.players.length>=2) oStart(); break;
     case "lobby": if(isHost){ G.phase="lobby"; G.tp=null; } break;
-    case "kick": if(isHost && G.phase==="lobby" && a.id!==G.hostId) G.players=G.players.filter(p=>p.id!==a.id); break;
+    case "kick": if(isHost && G.phase==="lobby" && a.id!==G.hostId){ G.players=G.players.filter(p=>p.id!==a.id); G.declined=[...(G.declined||[]), a.id]; } break;
     case "hint": if(G.phase==="turn" && isActive) tp.hintsUsed=true; break;
     case "reroll": if(G.phase==="turn" && isActive && !tp.rerolled && !tp.timer){ G.current=oPick(active.lang, active.level); tp.rerolled=true; tp.hintsUsed=false; } break;
     case "timer": if(G.phase==="turn" && (isActive||isHost) && !tp.timer){
@@ -1138,7 +1197,7 @@ function applyAction(from, a){
         O.hostTimeout=setTimeout(()=>{ if(O.G.tp && O.G.tp.timer && O.G.phase==="turn"){ O.G.tp.timeUp=true; O.G.tp.kept=true; pushState(); } }, total*1000+150);
       } break;
     case "done": if(G.phase==="turn" && (isActive||isHost)){ if(O.hostTimeout){ clearTimeout(O.hostTimeout); O.hostTimeout=null; } G.phase="feedback"; } break;
-    case "skip": if(isHost && (G.phase==="turn"||G.phase==="feedback")){ if(O.hostTimeout){ clearTimeout(O.hostTimeout); O.hostTimeout=null; } oAdvance(); } break;
+    case "skip": if(isHost && (G.phase==="turn"||G.phase==="feedback"||G.phase==="cturn"||G.phase==="csum")){ if(O.hostTimeout){ clearTimeout(O.hostTimeout); O.hostTimeout=null; } oAdvance(); } break;
     case "react": if(G.phase==="feedback" && !isActive){ tp.reactsBy[from] = tp.reactsBy[from]===a.k ? undefined : a.k; if(tp.reactsBy[from]===undefined) delete tp.reactsBy[from]; } break;
     case "rate": if(G.phase==="feedback" && (!isActive||isHost) && RATINGS.some(r=>r.v===a.v)){ tp.rating=a.v; tp.ratedBy=from; } break;
     case "kept": if(G.phase==="feedback" && !isActive && tp.timeUp) tp.kept=!tp.kept; break;
@@ -1162,7 +1221,9 @@ function stopOnlineTick(){ if(O.tickId){ clearInterval(O.tickId); O.tickId=null;
 function onlineTick(){
   const G=O.G, t=G&&G.tp&&G.tp.timer, el=$("otimer"); if(!t){ stopOnlineTick(); return; }
   const left = G.tp.timeUp ? 0 : Math.max(0, Math.ceil((O.localEnd-Date.now())/1000));
-  if(left===0 && beepArmed && G.phase==="turn"){ beepArmed=false; beep(); }
+  const timed = G.phase==="turn" || G.phase==="cturn";
+  if(left===0 && beepArmed && timed){ beepArmed=false; beep(); }
+  if(left>0 && left<=10 && timed && O.lastCount!==left+"|"+t.id){ O.lastCount=left+"|"+t.id; countdownSound(left); }
   if(!el) return;
   el.textContent = left===0 ? "⏰ Time!" : `${Math.floor(left/60)}:${String(left%60).padStart(2,"0")}`;
   el.classList.toggle("low", left<=10);
@@ -1228,8 +1289,37 @@ function oPlayersList(G){
       ${O.role==="host" && p.id!==G.hostId && G.phase==="lobby" ? `<button class="x" onclick="act({type:'kick',id:'${p.id}'})" aria-label="Remove">×</button>`:""}
     </div>`).join("");
 }
+function oOutsider(){
+  const G=O.G; if(!G || O.role==="host") return false;
+  return !G.players.some(p=>p.id===O.me.id);
+}
+function oWaitView(){
+  const G=O.G, pend=(G.pending||[]).some(q=>q.id===O.me.id), dec=(G.declined||[]).includes(O.me.id);
+  let icon="⏳", title="Asking to join…", de="Anfrage wird gesendet…", note="Hang on a moment.";
+  if(dec){ icon="🙅"; title="The host didn't let you in this time"; de="Der Host hat abgelehnt"; note="You can ask the host on the call, then try again later."; }
+  else if(G.locked && !pend){ icon="🔒"; title="This room is locked"; de="Dieser Raum ist gesperrt"; note="The game already started. Ask the host to unlock it, then reload this page."; }
+  else if(pend){ icon="🔔"; title="Request sent — waiting for the host"; de="Anfrage gesendet – warte auf den Host"; note="The host will accept you in a moment. You'll join from the next turn."; }
+  return `<div class="topline"><button class="chip" onclick="confirmLeave()">← Leave</button><span>🌐 ${esc(O.code)}</span></div>${oStatusBar()}
+    <div class="handoff"><div class="emoji">${icon}</div><h2>${title}</h2><p class="sub">${de}</p><p class="note">${note}</p>
+    ${G.phase!=="lobby"?`<p class="note">Game in progress · ${G.players.length} players · ${T[(G.players[G.turn]||{lang:"en"}).lang].round} ${G.round||1}/${G.rounds}</p>`:""}</div>`;
+}
+function oRequests(){
+  const G=O.G; if(O.role!=="host" || !G || !(G.pending||[]).length) return "";
+  return `<div class="card reqcard"><h3>🔔 Wants to join · Möchte mitspielen</h3>${G.pending.map(q=>`
+    <div class="player"><div class="avatar" style="background:var(--plum)">${esc(q.name.charAt(0).toUpperCase())}</div>
+      <div><div class="pname">${esc(q.name)}</div><div class="pmeta">${T[q.lang].flag} ${T[q.lang].name} · ${LEVELS[q.level].code}</div></div>
+      <span class="row" style="margin-left:auto;gap:6px">
+        <button class="chip" onclick="act({type:'decline',id:'${q.id}'})">✕</button>
+        <button class="chip on" onclick="act({type:'accept',id:'${q.id}'})">✓ Accept</button></span></div>`).join("")}
+    ${G.players.length>=10?`<p class="note">The room is full (10 players).</p>`:""}</div>`;
+}
+function oLockBtn(){
+  const G=O.G; if(O.role!=="host" || !G) return "";
+  return `<button class="chip ${G.locked?"on":""}" onclick="act({type:'lock'})">${G.locked?"🔒 Locked":"🔓 Open"}</button>`;
+}
 VIEWS.lobby = function(){
   const G=O.G;
+  if(oOutsider()) return oWaitView();
   if(!G || G.phase==="lobby"){
     const host=O.role==="host";
     return `
@@ -1244,22 +1334,32 @@ VIEWS.lobby = function(){
         <button class="btn secondary exb" onclick="copyRoom()">📋 Copy link</button>
       </div><p class="note" id="roomMsg" style="min-height:16px;margin:6px 0 0"></p>`:`<p class="note">You're in! · Du bist drin!</p>`}
     </div>
-    ${G?`<div class="card"><h3>Players · Spieler (${G.players.length}/10)</h3>${oPlayersList(G)}</div>`:""}
+    ${G?`<div class="card"><div class="topline" style="margin-bottom:4px"><h3 style="margin:0">Players · Spieler (${G.players.length}/10)</h3>${oLockBtn()}</div>
+      ${host&&G.locked?`<p class="note" style="margin:0 0 6px">🔒 Locked — nobody new can join · Gesperrt</p>`:""}${oPlayersList(G)}</div>`:""}
     ${G && host ? `<div class="card">
-      <label class="lbl" style="margin-top:0">Topic · Thema</label>
-      <div class="row">${Object.entries(CATS).map(([k,c])=>`<button class="chip ${G.cat===k?"on":""}" onclick="act({type:'settings',cat:'${k}'})">${c.e} ${c.en} · ${c.de}</button>`).join("")}</div>
+      <label class="lbl" style="margin-top:0">Game · Spiel</label>
+      ${gameChips(G.game,"oSetGame")}
+      ${G.game==="charades" ? `<label class="lbl">How to give clues · Hinweise</label>
+      <div class="row"><button class="chip ${G.cmode!=="camera"?"on":""}" onclick="act({type:'settings',cmode:'emoji'})">😀 Emoji clues</button>
+        <button class="chip ${G.cmode==="camera"?"on":""}" onclick="act({type:'settings',cmode:'camera'})">🎥 Act on camera</button></div>
+      <p class="note" style="margin:6px 0 0">${G.cmode==="camera"?"Everyone needs to be on a video call (Zoom, WhatsApp…). · Alle im Videoanruf.":"No camera needed: the actor sends emojis, the others type their guesses. · Keine Kamera nötig."}</p>
+      <label class="lbl">Difficulty · Schwierigkeit</label>${cDiffChips(G.cdiff===undefined?"auto":G.cdiff, G.players, "oSetCDiff")}`
+      : `<label class="lbl">Topic · Thema</label>
+      <div class="row">${Object.entries(CATS).map(([k,c])=>`<button class="chip ${G.cat===k?"on":""}" onclick="act({type:'settings',cat:'${k}'})">${c.e} ${c.en} · ${c.de}</button>`).join("")}</div>`}
       <label class="lbl">Rounds · Runden</label>
       <div class="stepper"><button class="step" onclick="act({type:'settings',rounds:${G.rounds-1}})" ${G.rounds<=1?"disabled":""}>−</button>
         <div class="stepval"><b>${G.rounds}</b><span>${G.rounds===1?"round · Runde":"rounds · Runden"}</span></div>
         <button class="step" onclick="act({type:'settings',rounds:${G.rounds+1}})" ${G.rounds>=10?"disabled":""}>+</button></div>
-      <label class="lbl">Speaking time · Sprechzeit</label>
-      <div class="row">${[60,90,120].map(n=>`<button class="chip ${G.time===n?"on":""}" onclick="act({type:'settings',time:${n}})">${n}s</button>`).join("")}</div>
+      <label class="lbl">${G.game==="charades"?"Acting time · Spielzeit":"Speaking time · Sprechzeit"}</label>
+      <div class="row">${(G.game==="charades"?[45,60,90]:[60,90,120]).map(n=>`<button class="chip ${G.time===n?"on":""}" onclick="act({type:'settings',time:${n}})">${n}s</button>`).join("")}</div>
     </div>
     <button class="btn primary" ${G.players.length<2?'style="opacity:.45"':""} onclick="${G.players.length<2?"":"act({type:'start'})"}">▶ Start game<small>${G.players.length<2?"Waiting for at least 1 more player · Warte auf Mitspieler":"Spiel starten"}</small></button>`
     : G ? `<div class="card center"><div class="emoji">⏳</div><p>Waiting for the host to start…<br><span class="de">Warte, bis der Host startet…</span></p>
-      <p class="note">${CATS[G.cat].e} ${CATS[G.cat].en} · ${G.rounds} rounds · ${G.time}s</p></div>` : ""}`;
+      <p class="note">${G.game==="charades"?(G.cmode==="camera"?"🎭 Charades · 🎥 camera":"🎭 Charades · 😀 emoji clues"):`🗣️ Speak Up · ${CATS[G.cat].e} ${CATS[G.cat].en}`} · ${G.rounds} rounds · ${G.time}s</p></div>` : ""}`;
   }
   if(G.phase==="turn") return oTurnView();
+  if(G.phase==="cturn") return oCTurnView();
+  if(G.phase==="csum") return oCSumView();
   if(G.phase==="feedback") return oFeedbackView();
   if(G.phase==="results") return oResultsView();
   return "";
@@ -1267,13 +1367,13 @@ VIEWS.lobby = function(){
 function oHeader(){
   const G=O.G, a=G.players[G.turn];
   return `<div class="topline"><span>${T[a.lang].round} ${G.round}/${G.rounds} · ${G.turn+1}/${G.players.length}</span>
-    <span class="row" style="gap:6px">${O.role==="host"?`<button class="chip" onclick="hostMenu()">⚙️</button>`:""}<button class="chip" onclick="confirmLeave()">✕</button></span></div>${oStatusBar()}`;
+    <span class="row" style="gap:6px">${oLockBtn()}${O.role==="host"?`<button class="chip" onclick="hostMenu()">⚙️</button>`:""}<button class="chip" onclick="confirmLeave()">✕</button></span></div>${oStatusBar()}${oRequests()}`;
 }
 function oTurnView(){
   const G=O.G, a=G.players[G.turn], tp=G.tp, c=G.current, L=a.lang, X=T[L], me=a.id===O.me.id;
   const f=FMTS[c.f], a1=a.level===0 && c.f==="wwyd";
   const fLabel=a1?X.a1wwyd:X.fmt[c.f], fHow=a1?X.a1how:X.how[c.f];
-  const timer = tp.timer ? `<div class="timer" id="otimer">…</div><div class="bar" id="obar"><i id="obarFill"></i></div>` : "";
+  const timer = tp.timer ? `<div class="timerrow"><div class="timer" id="otimer">…</div>${soundBtn()}</div><div class="bar" id="obar"><i id="obarFill"></i></div>` : "";
   const offline = !isOnline(a.id);
   return `${oHeader()}
     <div class="turnwho">${avatar(a,G.turn)}<div>${me?`<b>${bi("Your turn!","Du bist dran!")}</b>`:`<b>${esc(a.name)}</b> <span class="note">is speaking · spricht</span>`}<br>${langBadge(L)} <span class="badge b-fmt">${LEVELS[a.level].code}</span></div></div>
@@ -1357,11 +1457,12 @@ function oResultsView(){
   const meIdx=G.players.findIndex(p=>p.id===O.me.id);
   const avg = p => p.ratings.length ? (()=>{ const a=p.ratings.reduce((x,y)=>x+y,0)/p.ratings.length; const r=RATINGS[Math.min(3,Math.max(0,Math.round(a)-1))]; return `${r.e} ${r.en}`; })() : "";
   return `
-    <div class="topline"><span>🌐 ${esc(O.code)}</span><button class="chip" onclick="confirmLeave()">✕ Leave</button></div>${oStatusBar()}
+    <div class="topline"><span>🌐 ${esc(O.code)}</span><span class="row" style="gap:6px">${oLockBtn()}<button class="chip" onclick="confirmLeave()">✕ Leave</button></span></div>${oStatusBar()}${oRequests()}
     <h1 class="center">🏆</h1><h2 class="center">${bi("Great game!","Super gespielt!")}</h2>
     <div class="card">${ranked.map((r,n)=>`<div class="rank"><span class="medal">${medals[n]||"⭐"}</span>${avatar(r.p,r.i)}
       <div><div class="pname">${esc(r.p.name)} ${r.p.id===O.me.id?'<span class="note">(you)</span>':""}</div><div class="pmeta">${T[r.p.lang].flag} ${LEVELS[r.p.level].code}${r.p.ratings.length?` · ${avg(r.p)}`:""}</div></div>
       <span class="pts">${r.p.pts}</span></div>`).join("")}</div>
+    ${G.game==="charades" && charadesAwards(G.players) ? `<div class="card"><h3>Awards <span class="de">· Auszeichnungen</span></h3>${charadesAwards(G.players)}</div>` : ""}
     <div class="card">
       <h3>📤 Your review <span class="de">· Deine Auswertung</span></h3>
       <p class="note">Your questions, answers, useful words and tips — to practice later.</p>
@@ -1376,7 +1477,7 @@ function oResultsView(){
       <button class="btn secondary" onclick="act({type:'lobby'})">👥 Back to lobby<small>Change settings or players</small></button>`
       : `<p class="note center">The host can start another round · Der Host kann neu starten</p>`}`;
 }
-function oCtx(){ return {players:O.G.players, log:O.G.log||[], rounds:O.G.rounds}; }
+function oCtx(){ return {players:O.G.players, log:O.G.log||[], rounds:O.G.rounds, clog:O.G.clog||[]}; }
 function oRate(n){ const first=O.rating===null; O.rating=n; const s=loadStats(); if(first) s.ratings.push(n); else s.ratings[s.ratings.length-1]=n; saveStats(s); renderOnline(true); }
 
 /* ---------- small helpers ---------- */
@@ -1418,14 +1519,17 @@ function renderOnline(force){
   if(S.screen!=="lobby") return;
   const G=O.G;
   // During feedback, update only the live part so typing in the note boxes isn't interrupted.
-  const key = G ? `${G.phase}|${G.round}|${G.turn}` : "none";
+  const key = G ? `${G.phase}|${G.round}|${G.turn}|${(G.pending||[]).length}|${G.locked?1:0}|${oOutsider()?1:0}` : "none";
   if(!force && G && G.phase==="feedback" && O.viewKey===key && $("odyn")){
     const y=window.scrollY; $("odyn").innerHTML=oFeedbackDyn(); if($("odyn2")) $("odyn2").innerHTML=oFeedbackDyn2(); window.scrollTo(0,y); return;
   }
-  if(O.viewKey!==key){ O.draftAns=""; O.draftTip=""; O.sentNote=""; if(G && G.phase!=="results") O.rating=null; }
-  const sameView = O.viewKey===key, y=window.scrollY;
+  const turnKey = G ? `${G.phase}|${G.round}|${G.turn}` : "none";
+  if(O.turnKey!==turnKey){ O.turnKey=turnKey; O.draftAns=""; O.draftTip=""; O.sentNote=""; if(G && G.phase!=="results") O.rating=null; }
+  const sameView = (O.viewKey||"").split("|").slice(0,3).join("|")===turnKey, y=window.scrollY;
   O.viewKey=key;
+  const keep={}; document.querySelectorAll("[data-keep]").forEach(el=>{ keep[el.id]={v:el.value, f:document.activeElement===el, s:el.selectionStart}; });
   $("app").innerHTML = VIEWS.lobby();
+  for(const id in keep){ const el=$(id); if(el){ el.value=keep[id].v; if(keep[id].f){ el.focus({preventScroll:true}); try{ el.setSelectionRange(keep[id].s,keep[id].s); }catch(e){} } } }
   if(sameView) window.scrollTo(0,y); else window.scrollTo(0,0);
   if(G && G.tp && G.tp.timer) onlineTick();
 }
@@ -1433,6 +1537,303 @@ function renderOnline(force){
 setInterval(()=>{ if(S.screen==="lobby" && O.role==="guest") renderOnline(); }, 4000);
 // Open the join screen straight from an invite link (?join=CODE).
 (function(){ try{ const c=new URLSearchParams(location.search).get("join"); if(c){ O.codeInput=c.toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,4); S.screen="online"; } }catch(e){} })();
+
+/* =====================================================================
+   CHARADES — the actor mimes, everyone guesses out loud in the language
+   they're practicing. Works on one phone and online.
+   ===================================================================== */
+const CW_LANGS = ["en","de","es","pt","pl","uk","ar"];
+const CW = [["🐶",0,["dog","der Hund","el perro","o cachorro","pies","собака","كلب"]],["🐱",0,["cat","die Katze","el gato","o gato","kot","кіт","قطة"]],["🐘",0,["elephant","der Elefant","el elefante","o elefante","słoń","слон","فيل"]],["🐒",0,["monkey","der Affe","el mono","o macaco","małpa","мавпа","قرد"]],["🐍",0,["snake","die Schlange","la serpiente","a cobra","wąż","змія","ثعبان"]],["🐔",0,["chicken","das Huhn","la gallina","a galinha","kura","курка","دجاجة"]],["🐟",0,["fish","der Fisch","el pez","o peixe","ryba","риба","سمكة"]],["🦁",0,["lion","der Löwe","el león","o leão","lew","лев","أسد"]],["🐰",0,["rabbit","das Kaninchen","el conejo","o coelho","królik","кролик","أرنب"]],["🦆",0,["duck","die Ente","el pato","o pato","kaczka","качка","بطة"]],["🍌",0,["banana","die Banane","el plátano","a banana","banan","банан","موزة"]],["🍎",0,["apple","der Apfel","la manzana","a maçã","jabłko","яблуко","تفاحة"]],["🍕",0,["pizza","die Pizza","la pizza","a pizza","pizza","піца","بيتزا"]],["🍦",0,["ice cream","das Eis","el helado","o sorvete","lody","морозиво","بوظة"]],["☕",0,["coffee","der Kaffee","el café","o café","kawa","кава","قهوة"]],["🍝",0,["spaghetti","die Spaghetti","los espaguetis","o espaguete","spaghetti","спагеті","معكرونة"]],["🥚",0,["egg","das Ei","el huevo","o ovo","jajko","яйце","بيضة"]],["📱",0,["phone","das Handy","el móvil","o celular","telefon","телефон","هاتف"]],["🚗",0,["car","das Auto","el coche","o carro","samochód","автомобіль","سيارة"]],["🚲",0,["bicycle","das Fahrrad","la bicicleta","a bicicleta","rower","велосипед","دراجة"]],["✈️",0,["airplane","das Flugzeug","el avión","o avião","samolot","літак","طائرة"]],["☂️",0,["umbrella","der Regenschirm","el paraguas","o guarda-chuva","parasol","парасолька","مظلة"]],["👓",0,["glasses","die Brille","las gafas","os óculos","okulary","окуляри","نظارة"]],["🎸",0,["guitar","die Gitarre","la guitarra","o violão","gitara","гітара","غيتار"]],["⚽",0,["football","der Fußball","el fútbol","o futebol","piłka nożna","футбол","كرة القدم"]],["🪥",0,["toothbrush","die Zahnbürste","el cepillo de dientes","a escova de dentes","szczoteczka do zębów","зубна щітка","فرشاة أسنان"]],["🛏️",0,["bed","das Bett","la cama","a cama","łóżko","ліжко","سرير"]],["🔑",0,["key","der Schlüssel","la llave","a chave","klucz","ключ","مفتاح"]],["👶",0,["baby","das Baby","el bebé","o bebê","niemowlę","немовля","طفل رضيع"]],["🌧️",0,["rain","der Regen","la lluvia","a chuva","deszcz","дощ","مطر"]],["🏊",1,["swimming","schwimmen","nadar","nadar","pływać","плавати","السباحة"]],["💃",1,["dancing","tanzen","bailar","dançar","tańczyć","танцювати","الرقص"]],["😴",1,["sleeping","schlafen","dormir","dormir","spać","спати","النوم"]],["🍳",1,["cooking","kochen","cocinar","cozinhar","gotować","готувати","الطبخ"]],["🚿",1,["taking a shower","duschen","ducharse","tomar banho","brać prysznic","приймати душ","الاستحمام"]],["🦷",1,["brushing your teeth","Zähne putzen","lavarse los dientes","escovar os dentes","myć zęby","чистити зуби","تنظيف الأسنان"]],["📖",1,["reading","lesen","leer","ler","czytać","читати","القراءة"]],["🎤",1,["singing","singen","cantar","cantar","śpiewać","співати","الغناء"]],["🏃",1,["running","laufen","correr","correr","biegać","бігати","الجري"]],["🚴",1,["cycling","Rad fahren","montar en bici","andar de bicicleta","jeździć na rowerze","кататися на велосипеді","ركوب الدراجة"]],["📞",1,["calling someone","telefonieren","llamar por teléfono","ligar para alguém","dzwonić do kogoś","дзвонити комусь","الاتصال بالهاتف"]],["🤳",1,["taking a selfie","ein Selfie machen","hacerse un selfie","tirar uma selfie","robić selfie","робити селфі","التقاط صورة سيلفي"]],["🧹",1,["cleaning","putzen","limpiar","limpar","sprzątać","прибирати","التنظيف"]],["👕",1,["ironing","bügeln","planchar","passar roupa","prasować","прасувати","الكيّ"]],["🛒",1,["shopping","einkaufen","ir de compras","fazer compras","robić zakupy","робити покупки","التسوق"]],["🚘",1,["driving","Auto fahren","conducir","dirigir","prowadzić samochód","водити машину","قيادة السيارة"]],["🎣",1,["fishing","angeln","pescar","pescar","łowić ryby","рибалити","صيد السمك"]],["🧘",1,["doing yoga","Yoga machen","hacer yoga","fazer ioga","ćwiczyć jogę","займатися йогою","ممارسة اليوغا"]],["📸",1,["taking a photo","fotografieren","hacer una foto","tirar uma foto","robić zdjęcie","фотографувати","التصوير"]],["🍽️",1,["eating","essen","comer","comer","jeść","їсти","الأكل"]],["🥱",1,["yawning","gähnen","bostezar","bocejar","ziewać","позіхати","التثاؤب"]],["🤧",1,["sneezing","niesen","estornudar","espirrar","kichać","чхати","العطس"]],["🎹",1,["playing the piano","Klavier spielen","tocar el piano","tocar piano","grać na pianinie","грати на піаніно","العزف على البيانو"]],["🧗",1,["climbing","klettern","escalar","escalar","wspinać się","лазити по скелях","التسلق"]],["🏋️",1,["lifting weights","Gewichte heben","levantar pesas","levantar peso","podnosić ciężary","піднімати штангу","رفع الأثقال"]],["🎨",1,["painting","malen","pintar","pintar","malować","малювати","الرسم"]],["🧳",1,["packing a suitcase","den Koffer packen","hacer la maleta","fazer a mala","pakować walizkę","пакувати валізу","تحضير الحقيبة"]],["⛷️",1,["skiing","Ski fahren","esquiar","esquiar","jeździć na nartach","кататися на лижах","التزلج"]],["🌱",1,["gardening","im Garten arbeiten","trabajar en el jardín","cuidar do jardim","pracować w ogrodzie","працювати в саду","البستنة"]],["🐕",1,["walking the dog","mit dem Hund Gassi gehen","pasear al perro","passear com o cachorro","wyprowadzać psa","вигулювати собаку","تمشية الكلب"]],["👨‍🍳",2,["chef","der Koch / die Köchin","el cocinero / la cocinera","o cozinheiro / a cozinheira","kucharz / kucharka","кухар / кухарка","طبّاخ"]],["👩‍⚕️",2,["doctor","der Arzt / die Ärztin","el médico / la médica","o médico / a médica","lekarz / lekarka","лікар / лікарка","طبيب"]],["👮",2,["police officer","der Polizist / die Polizistin","el policía / la policía","o policial / a policial","policjant / policjantka","поліцейський / поліцейська","شرطي"]],["💇",2,["hairdresser","der Friseur / die Friseurin","el peluquero / la peluquera","o cabeleireiro / a cabeleireira","fryzjer / fryzjerka","перукар / перукарка","مصفّف شعر"]],["🧑‍🏫",2,["teacher","der Lehrer / die Lehrerin","el profesor / la profesora","o professor / a professora","nauczyciel / nauczycielka","вчитель / вчителька","معلّم"]],["🧑‍🚒",2,["firefighter","der Feuerwehrmann / die Feuerwehrfrau","el bombero / la bombera","o bombeiro / a bombeira","strażak / strażaczka","пожежник / пожежниця","رجل إطفاء"]],["🦷",2,["dentist","der Zahnarzt / die Zahnärztin","el dentista / la dentista","o dentista / a dentista","dentysta / dentystka","стоматолог / стоматологиня","طبيب أسنان"]],["🧑‍✈️",2,["pilot","der Pilot / die Pilotin","el piloto / la piloto","o piloto / a piloto","pilot / pilotka","пілот / пілотеса","طيّار"]],["🤵",2,["waiter","der Kellner / die Kellnerin","el camarero / la camarera","o garçom / a garçonete","kelner / kelnerka","офіціант / офіціантка","نادل"]],["📷",2,["photographer","der Fotograf / die Fotografin","el fotógrafo / la fotógrafa","o fotógrafo / a fotógrafa","fotograf / fotografka","фотограф / фотографиня","مصوّر"]],["🏗️",2,["construction worker","der Bauarbeiter / die Bauarbeiterin","el albañil / la albañila","o pedreiro / a pedreira","budowlaniec","будівельник / будівельниця","عامل بناء"]],["🎻",2,["musician","der Musiker / die Musikerin","el músico / la música","o músico / a musicista","muzyk / muzyczka","музикант / музикантка","موسيقي"]],["🚌",2,["missing the bus","den Bus verpassen","perder el autobús","perder o ônibus","spóźnić się na autobus","запізнитися на автобус","فوات الحافلة"]],["🗝️",2,["losing your keys","den Schlüssel verlieren","perder las llaves","perder as chaves","zgubić klucze","загубити ключі","فقدان المفاتيح"]],["🎂",2,["a birthday party","eine Geburtstagsparty","una fiesta de cumpleaños","uma festa de aniversário","przyjęcie urodzinowe","вечірка на день народження","حفلة عيد ميلاد"]],["💍",2,["a wedding","eine Hochzeit","una boda","um casamento","ślub","весілля","حفل زفاف"]],["🩺",2,["going to the doctor","zum Arzt gehen","ir al médico","ir ao médico","iść do lekarza","йти до лікаря","الذهاب إلى الطبيب"]],["🛄",2,["checking in at the airport","am Flughafen einchecken","facturar en el aeropuerto","fazer o check-in no aeroporto","odprawa na lotnisku","реєстрація в аеропорту","تسجيل الوصول في المطار"]],["🎬",2,["going to the cinema","ins Kino gehen","ir al cine","ir ao cinema","iść do kina","йти в кіно","الذهاب إلى السينما"]],["🌹",2,["a first date","das erste Date","la primera cita","o primeiro encontro","pierwsza randka","перше побачення","الموعد الأول"]],["☔",2,["getting caught in the rain","vom Regen überrascht werden","mojarse con la lluvia","pegar chuva","zmoknąć na deszczu","потрапити під дощ","التبلّل بالمطر"]],["🧾",2,["paying the bill","die Rechnung bezahlen","pagar la cuenta","pagar a conta","płacić rachunek","оплатити рахунок","دفع الفاتورة"]],["🥶",2,["being cold","frieren","tener frío","sentir frio","marznąć","мерзнути","الشعور بالبرد"]],["😱",2,["being scared","Angst haben","tener miedo","ter medo","bać się","боятися","الخوف"]],["🤒",2,["having a fever","Fieber haben","tener fiebre","estar com febre","mieć gorączkę","мати температуру","الإصابة بالحمّى"]],["🚕",2,["hailing a taxi","ein Taxi heranwinken","parar un taxi","chamar um táxi","łapać taksówkę","ловити таксі","إيقاف سيارة أجرة"]],["🧊",2,["slipping on ice","auf dem Eis ausrutschen","resbalar en el hielo","escorregar no gelo","poślizgnąć się na lodzie","посковзнутися на льоду","الانزلاق على الجليد"]],["🎁",2,["opening a present","ein Geschenk auspacken","abrir un regalo","abrir um presente","otwierać prezent","відкривати подарунок","فتح هدية"]],["🏕️",2,["camping","zelten","ir de camping","acampar","biwakować","жити в наметі","التخييم"]],["🥴",2,["jet lag","der Jetlag","el jet lag","o jet lag","jet lag","джетлаг","اضطراب الرحلات الجوية"]],["🥰",3,["falling in love","sich verlieben","enamorarse","apaixonar-se","zakochać się","закохатися","الوقوع في الحب"]],["😤",3,["being jealous","eifersüchtig sein","estar celoso","estar com ciúmes","być zazdrosnym","ревнувати","الغيرة"]],["😳",3,["being embarrassed","verlegen sein","tener vergüenza","ficar com vergonha","wstydzić się","соромитися","الإحراج"]],["🤯",3,["being stressed","gestresst sein","estar estresado","estar estressado","być zestresowanym","бути в стресі","التوتر"]],["🏆",3,["winning the lottery","im Lotto gewinnen","ganar la lotería","ganhar na loteria","wygrać na loterii","виграти в лотерею","الفوز باليانصيب"]],["🧟",3,["a zombie","ein Zombie","un zombi","um zumbi","zombie","зомбі","زومبي"]],["🦸",3,["a superhero","ein Superheld","un superhéroe","um super-herói","superbohater","супергерой","بطل خارق"]],["🏴‍☠️",3,["a pirate","ein Pirat","un pirata","um pirata","pirat","пірат","قرصان"]],["🧜",3,["a mermaid","eine Meerjungfrau","una sirena","uma sereia","syrena","русалка","حورية البحر"]],["👻",3,["a ghost","ein Gespenst","un fantasma","um fantasma","duch","привид","شبح"]],["🕵️",3,["a detective","ein Detektiv","un detective","um detetive","detektyw","детектив","محقّق"]],["🤖",3,["a robot","ein Roboter","un robot","um robô","robot","робот","روبوت"]],["🧙",3,["a wizard","ein Zauberer","un mago","um mago","czarodziej","чарівник","ساحر"]],["🚀",3,["an astronaut","ein Astronaut","un astronauta","um astronauta","astronauta","астронавт","رائد فضاء"]],["🦖",3,["a dinosaur","ein Dinosaurier","un dinosaurio","um dinossauro","dinozaur","динозавр","ديناصور"]],["🎢",3,["a roller coaster","eine Achterbahn","una montaña rusa","uma montanha-russa","kolejka górska","американські гірки","قطار الملاهي"]],["🌋",3,["a volcano","ein Vulkan","un volcán","um vulcão","wulkan","вулкан","بركان"]],["🌪️",3,["a tornado","ein Tornado","un tornado","um tornado","tornado","торнадо","إعصار"]],["🤐",3,["keeping a secret","ein Geheimnis bewahren","guardar un secreto","guardar um segredo","dochować tajemnicy","зберігати таємницю","كتمان السرّ"]],["⏰",3,["oversleeping","verschlafen","quedarse dormido","perder a hora","zaspać","проспати","النوم أكثر من اللازم"]],["🤥",3,["telling a lie","lügen","mentir","mentir","kłamać","брехати","الكذب"]],["🤝",3,["a job interview","ein Vorstellungsgespräch","una entrevista de trabajo","uma entrevista de emprego","rozmowa kwalifikacyjna","співбесіда","مقابلة عمل"]],["📦",3,["moving house","umziehen","mudarse de casa","mudar de casa","przeprowadzać się","переїжджати","الانتقال إلى منزل جديد"]],["🗣️",3,["learning a language","eine Sprache lernen","aprender un idioma","aprender um idioma","uczyć się języka","вивчати мову","تعلّم لغة"]],["🌍",3,["travelling around the world","um die Welt reisen","viajar por el mundo","viajar pelo mundo","podróżować dookoła świata","подорожувати світом","السفر حول العالم"]],["🔥",3,["a barbecue","ein Grillfest","una barbacoa","um churrasco","grill","барбекю","حفلة شواء"]],["🧩",3,["doing a jigsaw puzzle","ein Puzzle machen","hacer un rompecabezas","montar um quebra-cabeça","układać puzzle","складати пазл","تركيب أحجية"]],["🧘‍♀️",3,["meditating","meditieren","meditar","meditar","medytować","медитувати","التأمّل"]],["🎉",3,["a surprise party","eine Überraschungsparty","una fiesta sorpresa","uma festa surpresa","impreza niespodzianka","вечірка-сюрприз","حفلة مفاجئة"]],["🥵",3,["a heatwave","eine Hitzewelle","una ola de calor","uma onda de calor","fala upałów","спека","موجة حرّ"]]]; // [emoji, difficulty, [en,de,es,pt,pl,uk,ar]]
+const CDIFF = [
+  {k:0, e:"🟢", en:"Easy",   de:"Leicht",  hint:"Animals, food, things · Tiere, Essen, Dinge"},
+  {k:1, e:"🟡", en:"Medium", de:"Mittel",  hint:"Actions · Tätigkeiten"},
+  {k:2, e:"🟠", en:"Hard",   de:"Schwer",  hint:"Jobs & situations · Berufe & Situationen"},
+  {k:3, e:"🔴", en:"Expert", de:"Experte", hint:"Feelings & stories · Gefühle & Geschichten"},
+  {k:"mix", e:"🎲", en:"Mix", de:"Gemischt", hint:"A bit of everything · Von allem etwas"}
+];
+function cWord(i, lang){ const x=CW[i]; return x ? x[2][CW_LANGS.indexOf(lang)] : ""; }
+function cAutoDiff(players){ if(!players.length) return 0; return Math.min(3, Math.min(...players.map(p=>p.level))); }
+function cResolveDiff(d, players){ return d==="auto" ? cAutoDiff(players) : d; }
+function cPick(diff, used){
+  let pool = CW.map((x,i)=>i).filter(i => diff==="mix" || CW[i][1]===diff);
+  let free = pool.filter(i=>!used.includes(i));
+  if(!free.length){ used.splice(0, used.length, ...used.filter(i=>!pool.includes(i))); free=pool.slice(); }
+  const i = pick(free); used.push(i); return i;
+}
+function cAnswerChips(i, langs){
+  return langs.map(l=>`<span class="hint" dir="${T[l].dir}">${T[l].flag} ${esc(cWord(i,l))}</span>`).join("");
+}
+function cGuesserLangs(players, actorIdx){ return [...new Set(players.filter((p,j)=>j!==actorIdx).map(p=>p.lang))]; }
+function cDiffChips(cur, players, onclickFn){
+  const auto = cAutoDiff(players);
+  return `<div class="row">
+    <button class="chip ${cur==="auto"?"on":""}" onclick="${onclickFn}('auto')">✨ Auto · ${CDIFF[auto].e} ${CDIFF[auto].en}</button>
+    ${CDIFF.map(d=>`<button class="chip ${cur===d.k?"on":""}" onclick="${onclickFn}(${typeof d.k==="string"?`'${d.k}'`:d.k})">${d.e} ${d.en} · ${d.de}</button>`).join("")}</div>
+    <p class="note" style="margin:6px 0 0">${cur==="auto"?`Picked from the lowest level at the table · nach dem niedrigsten Niveau`:esc((CDIFF.find(d=>d.k===cur)||{}).hint||"")}</p>`;
+}
+function gameChips(cur, fn){
+  return `<div class="row">
+    <button class="chip ${cur!=="charades"?"on":""}" onclick="${fn}('speak')">🗣️ Speak Up</button>
+    <button class="chip ${cur==="charades"?"on":""}" onclick="${fn}('charades')">🎭 Charades · Pantomime</button></div>
+    <p class="note" style="margin:6px 0 0">${cur==="charades"
+      ? "Act out words without speaking — the others guess out loud in their practice language. · Ohne Worte vorspielen, die anderen raten."
+      : "Answer speaking challenges, get coached and scored. · Sprechaufgaben mit Feedback."}</p>`;
+}
+
+/* ---------- one phone ---------- */
+function setGame(g){ S.game=g; if(g==="charades" && S.time>90) S.time=60; render(); }
+function setCDiff(d){ S.cdiff=d; render(); }
+function cStartGame(){
+  S.cused=[]; S.clog=[]; S.cturn=null; bump("started"); go("chandoff");
+}
+function cShowTurn(){ keepAwake(); S.cturn={w:null, guessed:[], skips:0, started:false}; go("cturn"); }
+function cStart(){
+  ensureAudio();
+  const ct=S.cturn; ct.started=true; ct.w=cPick(cResolveDiff(S.cdiff,S.players), S.cused);
+  S.total=S.time; S.left=S.total; S.lastCount=null;
+  $("cpre").classList.add("hidden"); $("clive").classList.remove("hidden"); $("timerBox").classList.remove("hidden");
+  cRefresh(); tick();
+  S.timerId=setInterval(()=>{ S.left--; tick(); if(S.left<=0){ stopTimer(true); setTimeout(()=>go("csum"), 900); } },1000);
+}
+function cRefresh(){
+  const ct=S.cturn, a=S.players[S.turn], box=$("cbox"); if(!box||ct.w===null) return;
+  box.innerHTML = `<div class="cemoji">${CW[ct.w][0]}</div>
+    <div class="cword" dir="${T[a.lang].dir}">${esc(cWord(ct.w,a.lang))}</div>
+    <div class="note" style="margin-top:8px">Accept these answers · Diese Antworten zählen:</div>
+    <div>${cAnswerChips(ct.w, cGuesserLangs(S.players, S.turn))}</div>`;
+  const n=$("ccount"); if(n) n.textContent=`✓ ${ct.guessed.length}`;
+}
+function cGuess(i){
+  const ct=S.cturn; if(!ct||!ct.started||ct.w===null||S.left<=0) return;
+  ct.guessed.push({w:ct.w, by:i}); S.clog.push({actor:S.turn, w:ct.w, by:i});
+  const a=S.players[S.turn], g=S.players[i]; a.pts++; a.cact=(a.cact||0)+1; g.pts++; g.cguess=(g.cguess||0)+1;
+  tone(990,0.08,0.18,"sine"); setTimeout(()=>tone(1320,0.12,0.18,"sine"),70);
+  ct.w=cPick(cResolveDiff(S.cdiff,S.players), S.cused); cRefresh();
+}
+function cSkip(){
+  const ct=S.cturn; if(!ct||!ct.started||S.left<=0) return;
+  ct.skips++; (ct.skipped=ct.skipped||[]).push(ct.w); S.clog.push({actor:S.turn, w:ct.w, skip:true});
+  ct.w=cPick(cResolveDiff(S.cdiff,S.players), S.cused); cRefresh();
+}
+function cEndEarly(){ stopTimer(false); go("csum"); }
+function cNext(){
+  if(isLastTurn()){ bump("completed"); go("results"); return; }
+  S.turn++; if(S.turn>=S.players.length){ S.turn=0; S.round++; }
+  go("chandoff");
+}
+VIEWS.chandoff = function(){
+  const p=S.players[S.turn], i=S.turn;
+  return `<div class="topline"><span>Round ${S.round}/${S.rounds} · Runde ${S.round}</span><button class="chip" onclick="confirmQuit()">End game</button></div>
+  <div class="handoff">
+    <div class="emoji">🎭</div>
+    <p class="sub" style="margin:10px 0 0">${bi("Pass the phone to","Gib das Handy weiter an")}</p>
+    <div class="big-name" style="color:${COLORS[i%COLORS.length]}">${esc(p.name)}</div>
+    <div>${langBadge(p.lang)}</div>
+    <p class="note" style="margin-top:14px">🤫 You're the actor — don't let the others see the screen!<br><span class="de">Du spielst vor – niemand darf den Bildschirm sehen!</span></p>
+    <button class="btn primary" style="margin-top:18px" onclick="cShowTurn()">${T[p.lang].ready}</button>
+  </div>`;
+};
+VIEWS.cturn = function(){
+  const a=S.players[S.turn];
+  const guessers=S.players.map((p,i)=>({p,i})).filter(x=>x.i!==S.turn);
+  return `<div class="topline"><span>🎭 ${esc(a.name)} · ${T[a.lang].round} ${S.round}/${S.rounds}</span><span class="badge b-fmt" id="ccount">✓ 0</span></div>
+  <div id="timerBox" class="hidden"><div class="timerrow"><div class="timer" id="timer">0:00</div>${soundBtn()}</div><div class="bar" id="bar"><i id="barFill"></i></div></div>
+  <div id="cpre" class="card center">
+    <div class="cemoji">🤐</div>
+    <h3>No talking — only gestures! <span class="de">· Nur Gesten!</span></h3>
+    <p class="note">Act out as many words as you can in ${S.time} seconds. Tap the name of whoever guesses — they must say it in the language they're practicing.<br><span class="de">So viele Wörter wie möglich. Tippe auf den Namen, wer es errät.</span></p>
+    <button class="btn primary" onclick="cStart()">⏱️ ${T[a.lang].startTimer}</button>
+  </div>
+  <div id="clive" class="hidden">
+    <div class="card center cardword" id="cbox"></div>
+    <h3 style="margin:4px 0 8px">🙋 Who guessed it? <span class="de">· Wer hat's erraten?</span></h3>
+    <div class="cguessers">${guessers.map(x=>`<button class="cg" style="border-color:${COLORS[x.i%COLORS.length]}" onclick="cGuess(${x.i})"><span class="avatar" style="background:${COLORS[x.i%COLORS.length]}">${esc(x.p.name.charAt(0).toUpperCase())}</span>${esc(x.p.name)}</button>`).join("")}</div>
+    <div class="exgrid" style="margin-top:6px">
+      <button class="btn secondary exb" onclick="cSkip()">⏭️ Skip</button>
+      <button class="btn ghost exb" onclick="cEndEarly()">🏁 End turn</button>
+    </div>
+  </div>`;
+};
+VIEWS.csum = function(){
+  const ct=S.cturn||{guessed:[],skips:0}, a=S.players[S.turn], langs=[...new Set(S.players.map(p=>p.lang))];
+  const skipped=(ct.skipped||[]).map(w=>({w}));
+  return `<div class="topline"><span>🎭 ${esc(a.name)}</span><span>${T[a.lang].round} ${S.round}/${S.rounds}</span></div>
+  <h2 class="center">⏰ ${bi("Time's up!","Zeit um!")}</h2>
+  <div class="card center"><div class="big-name" style="font-size:40px;color:var(--coral)">${ct.guessed.length}</div>
+    <p class="note" style="margin:0">${ct.guessed.length===1?"word guessed":"words guessed"} · ${esc(a.name)} +${ct.guessed.length} points</p></div>
+  ${ct.guessed.length?`<div class="card"><h3>✅ Guessed · Erraten</h3>${ct.guessed.map(g=>`<div class="cline"><span class="cemo">${CW[g.w][0]}</span><div>${cAnswerChips(g.w, langs)}<div class="note">by ${esc(S.players[g.by].name)} · +1</div></div></div>`).join("")}</div>`:""}
+  ${skipped.length?`<div class="card"><h3>⏭️ Skipped — learn these! <span class="de">· Übersprungen</span></h3>${skipped.map(g=>`<div class="cline"><span class="cemo">${CW[g.w][0]}</span><div>${cAnswerChips(g.w, langs)}</div></div>`).join("")}</div>`:""}
+  <button class="btn primary" onclick="cNext()">${isLastTurn()?"See results 🏆":"Next actor →"}<small>${isLastTurn()?"Ergebnisse":"Nächste Person"}</small></button>`;
+};
+function charadesAwards(players){
+  const best=k=>players.map((p,i)=>({p,i})).sort((a,b)=>(b.p[k]||0)-(a.p[k]||0))[0];
+  const row=(k,e,en,de)=>{ const b=best(k); if(!b||!(b.p[k])) return ""; return `<div class="award"><span class="e">${e}</span><div>${en} <span class="de">· ${de}</span><br><span style="color:${COLORS[b.i%COLORS.length]}">${esc(b.p.name)}</span> <span class="note">(${b.p[k]})</span></div></div>`; };
+  return row("cact","🎭","Best actor","Beste/r Schauspieler/in")+row("cguess","🧠","Best guesser","Beste/r Rater/in");
+}
+function charadesReview(i, ctx){
+  const p=ctx.players[i], L=p.lang, items=(ctx.clog||[]).filter(x=>x.actor===i||x.by===i);
+  if(!items.length) return "";
+  const seen=new Set(); let out=`🎭 Charades\n`;
+  items.forEach(x=>{ if(seen.has(x.w)) return; seen.add(x.w);
+    const role = x.skip ? "⏭️" : x.actor===i ? "🎭" : "🧠";
+    out+=`${role} ${CW[x.w][0]} ${cWord(x.w,L)}${L!=="en"?`  (${cWord(x.w,"en")})`:""}\n`; });
+  return out+`\n🎭 = you acted · 🧠 = you guessed · ⏭️ = skipped\n\n`;
+}
+
+/* ---------- online ---------- */
+function oSetGame(g){ act({type:"settings", game:g}); }
+function oSetCDiff(d){ act({type:"settings", cdiff:d}); }
+function oCNewTurn(){
+  const G=O.G;
+  G.tp={ timer:null, timeUp:false, w:null, guessed:[], skips:[], last:null, cstarted:false, clue:[], feed:[] };
+  G.phase="cturn";
+}
+function oCPickNext(){ const G=O.G; G.tp.w=cPick(cResolveDiff(G.cdiff||"auto", G.players), G.cused); G.tp.clue=[]; }
+function oCCredit(by){
+  const G=O.G, tp=G.tp, actor=G.players[G.turn], g=G.players[by];
+  tp.guessed.push({w:tp.w, by}); G.clog.push({actor:G.turn, w:tp.w, by});
+  actor.pts++; actor.cact=(actor.cact||0)+1; g.pts++; g.cguess=(g.cguess||0)+1;
+  tp.last={w:tp.w, by}; oCPickNext();
+}
+function oCApply(from, a, isActive, isHost){
+  const G=O.G, tp=G.tp;
+  switch(a.type){
+    case "cstart": if(G.phase==="cturn" && (isActive||isHost) && !tp.timer){
+        tp.cstarted=true; oCPickNext();
+        const total=G.time; tp.timer={ id:uid(), total, endsAt:Date.now()+total*1000, remainMs:total*1000 };
+        if(O.hostTimeout) clearTimeout(O.hostTimeout);
+        O.hostTimeout=setTimeout(()=>{ if(O.G.phase==="cturn"){ O.G.tp.timeUp=true; O.G.phase="csum"; pushState(); } }, total*1000+150);
+      } return true;
+    case "cguess": if(G.phase==="cturn" && (isActive||isHost) && tp.timer && tp.w!==null && G.players[a.by] && a.by!==G.turn){ oCCredit(a.by); } return true;
+    case "cclue": if(G.phase==="cturn" && isActive && tp.timer && Array.isArray(a.clue)){
+        tp.clue = a.clue.slice(0,12).map(x=>String(x).slice(0,12));
+      } return true;
+    case "cguesstext": if(G.phase==="cturn" && !isActive && tp.timer && !tp.timeUp && tp.w!==null && a.text){
+        const gi=G.players.findIndex(p=>p.id===from); if(gi<0) return true;
+        const ok=cMatches(a.text, tp.w, G.players[gi].lang);
+        tp.feed=(tp.feed||[]).concat([{by:G.players[gi].name, text:String(a.text).slice(0,60), ok}]).slice(-20);
+        if(ok){ oCCredit(gi); }
+      } return true;
+    case "cskip": if(G.phase==="cturn" && (isActive||isHost) && tp.timer && tp.w!==null){
+        tp.skips.push(tp.w); G.clog.push({actor:G.turn, w:tp.w, skip:true}); tp.last={w:tp.w, skip:true}; oCPickNext();
+      } return true;
+    case "cend": if(G.phase==="cturn" && (isActive||isHost)){ if(O.hostTimeout){ clearTimeout(O.hostTimeout); O.hostTimeout=null; } tp.timeUp=true; G.phase="csum"; } return true;
+    case "cnext": if(G.phase==="csum" && (isActive||isHost)){ oAdvance(); } return true;
+  }
+  return false;
+}
+function oCTurnView(){
+  const G=O.G, a=G.players[G.turn], tp=G.tp, me=a.id===O.me.id;
+  const timer = tp.timer ? `<div class="timerrow"><div class="timer" id="otimer">…</div>${soundBtn()}</div><div class="bar" id="obar"><i id="obarFill"></i></div>` : "";
+  const myLang = (G.players.find(p=>p.id===O.me.id)||O.me).lang;
+  const offline = !isOnline(a.id);
+  let body="";
+  const emojiMode = G.cmode!=="camera";
+  if(me && emojiMode && tp.timer){ body=oEmojiActor(G,a,tp,timer); }
+  else if(!me && emojiMode){ body=oEmojiGuesser(G,a,tp,timer,myLang); }
+  else if(me){
+    if(!tp.timer){
+      body=`<div class="card center"><div class="cemoji">${emojiMode?"😀":"🤐"}</div><h3>${bi("You're the actor!","Du spielst vor!")}</h3>
+        <p class="note">${emojiMode
+          ? `Describe as many words as you can in ${G.time} seconds — using only emojis! The others type their guesses.<br><span class="de">Nur mit Emojis beschreiben – die anderen tippen ihre Antworten.</span>`
+          : `Turn your camera on and act out as many words as you can in ${G.time} seconds — no talking! Tap whoever guesses.<br><span class="de">Kamera an, nur Gesten! Tippe auf den Namen, wer es errät.</span>`}</p>
+        <button class="btn primary" onclick="act({type:'cstart'})">⏱️ ${T[a.lang].startTimer}</button></div>`;
+    } else {
+      const guessers=G.players.map((p,i)=>({p,i})).filter(x=>x.i!==G.turn);
+      body=`${timer}<div class="card center cardword"><div class="cemoji">${CW[tp.w][0]}</div><div class="cword" dir="${T[a.lang].dir}">${esc(cWord(tp.w,a.lang))}</div>
+        <div class="note" style="margin-top:8px">Accept these answers · Diese Antworten zählen:</div><div>${cAnswerChips(tp.w, cGuesserLangs(G.players, G.turn))}</div></div>
+        <h3 style="margin:4px 0 8px">🙋 Who guessed it? <span class="de">· Wer hat's erraten?</span></h3>
+        <div class="cguessers">${guessers.map(x=>`<button class="cg" style="border-color:${COLORS[x.i%COLORS.length]}" onclick="act({type:'cguess',by:${x.i}})"><span class="avatar" style="background:${COLORS[x.i%COLORS.length]}">${esc(x.p.name.charAt(0).toUpperCase())}</span>${esc(x.p.name)}</button>`).join("")}</div>
+        <div class="exgrid" style="margin-top:6px"><button class="btn secondary exb" onclick="act({type:'cskip'})">⏭️ Skip</button><button class="btn ghost exb" onclick="act({type:'cend'})">🏁 End turn</button></div>`;
+    }
+  } else {
+    const last = tp.last ? `<div class="card center"><div class="note">${tp.last.skip?"⏭️ Skipped · Übersprungen":`✅ Guessed by ${esc(G.players[tp.last.by].name)}`}</div>
+      <div class="cemoji" style="font-size:40px">${CW[tp.last.w][0]}</div><div class="cword" style="font-size:24px" dir="${T[myLang].dir}">${esc(cWord(tp.last.w,myLang))}</div></div>` : "";
+    body=`${timer}<div class="card center"><div class="cemoji">🎭</div>
+      <h3>${esc(a.name)} is acting! <span class="de">· spielt vor!</span></h3>
+      <p>Guess out loud in <b>${T[myLang].flag} ${T[myLang].name}</b>!</p>
+      <p class="note">${tp.timer?"Watch the camera and shout your guess · Rate laut!":"Get ready… · Gleich geht's los…"}</p>
+      <div class="big-name" style="font-size:34px;color:var(--coral)">✓ ${tp.guessed.length}</div></div>${last}
+      ${O.role==="host" && offline ? `<div class="obanner bad">📴 ${esc(a.name)} seems offline. <button class="chip" onclick="act({type:'skip'})">Skip turn</button></div>`:""}`;
+  }
+  return `${oHeader()}<div class="turnwho">${avatar(a,G.turn)}<div><b>🎭 ${me?bi("Your turn!","Du bist dran!"):esc(a.name)}</b><br>${langBadge(a.lang)}</div></div>${body}`;
+}
+function oCSumView(){
+  const G=O.G, a=G.players[G.turn], tp=G.tp||{guessed:[],skips:[]}, me=a.id===O.me.id, langs=[...new Set(G.players.map(p=>p.lang))];
+  return `${oHeader()}
+  <h2 class="center">⏰ ${bi("Time's up!","Zeit um!")}</h2>
+  <div class="card center"><div class="big-name" style="font-size:40px;color:var(--coral)">${tp.guessed.length}</div>
+    <p class="note" style="margin:0">${tp.guessed.length===1?"word guessed":"words guessed"} · ${esc(a.name)} +${tp.guessed.length}</p></div>
+  ${tp.guessed.length?`<div class="card"><h3>✅ Guessed · Erraten</h3>${tp.guessed.map(g=>`<div class="cline"><span class="cemo">${CW[g.w][0]}</span><div>${cAnswerChips(g.w, langs)}<div class="note">by ${esc(G.players[g.by].name)} · +1</div></div></div>`).join("")}</div>`:""}
+  ${tp.skips.length?`<div class="card"><h3>⏭️ Skipped — learn these! <span class="de">· Übersprungen</span></h3>${tp.skips.map(w=>`<div class="cline"><span class="cemo">${CW[w][0]}</span><div>${cAnswerChips(w, langs)}</div></div>`).join("")}</div>`:""}
+  ${me||O.role==="host" ? `<button class="btn primary" onclick="act({type:'cnext'})">${oIsLast()?"See results 🏆":"Next actor →"}<small>${oIsLast()?"Ergebnisse":"Nächste Person"}</small></button>`
+    : `<p class="note center">⏳ Waiting for ${esc(a.name)} to continue… · Warte…</p>`}`;
+}
+
+/* ---------- EMOJI CHARADES (online, no camera needed) ---------- */
+const EKEYS = [
+  {t:"😀", n:"People", e:"😀 😂 😍 😢 😡 😱 😴 🤔 🤢 🥶 🥵 😎 🤫 🙄 👶 👦 👧 👨 👩 👴 👵 👮 👨‍🍳 👩‍⚕️ 👩‍🏫 🧑‍🚒 👻 🤖 🧙 🦸"},
+  {t:"🏃", n:"Actions", e:"🏃 🚶 💃 🏊 🚴 🧗 🏋️ 🧘 🛌 🗣️ 👀 👂 👃 👄 ✋ 👍 👎 👏 🙏 💪 🦵 🦶 ✍️ 🤳"},
+  {t:"🐶", n:"Nature", e:"🐶 🐱 🐭 🐰 🦊 🐻 🐼 🦁 🐮 🐷 🐸 🐵 🐔 🐟 🐍 🐘 🦖 🌳 🌸 🌞 🌙 ⭐ 🌧️ ❄️ 🔥 🌊 🌋 🌪️"},
+  {t:"🍔", n:"Food", e:"🍎 🍌 🍇 🍓 🍕 🍔 🍟 🌭 🥗 🍝 🍣 🍞 🧀 🥚 🍰 🎂 🍦 🍫 ☕ 🍺 🍷 🥛 🍳 🍴"},
+  {t:"🚗", n:"Things", e:"🏠 🏫 🏥 🏪 🏨 ⛪ 🏰 🚗 🚌 🚕 🚲 ✈️ 🚀 🚢 🚂 📱 💻 📺 📷 🎸 🎹 ⚽ 🎁 💍 🔑 🧳 ☂️ 👓 📖 ✏️ 💰 ⏰ 🛒 🧹 🚿 🛏️"},
+  {t:"❓", n:"Symbols", e:"➕ ➖ ❌ ✅ ❓ ❗ ⬆️ ⬇️ ⬅️ ➡️ 🔁 ↩️ 💯 ❤️ 💔 1️⃣ 2️⃣ 3️⃣ 🔊 🔇 📍 ⏳"}
+].map(g=>({...g, list:g.e.split(" ")}));
+const ARTICLES = {en:["the","a","an","to"], de:["der","die","das","den","dem","des","ein","eine","einen","einem"], es:["el","la","los","las","un","una"],
+  pt:["o","a","os","as","um","uma"], pl:[], uk:[], ar:[]};
+function cNorm(s, lang){
+  s=String(s||"").toLowerCase().trim();
+  if(lang==="ar"){ s=s.replace(/[ً-ْـ]/g,"").replace(/[أإآ]/g,"ا").replace(/ة/g,"ه").replace(/ى/g,"ي").replace(/(^|\s)ال/g,"$1"); }
+  else { s=s.normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/ß/g,"ss"); }
+  s=s.replace(/[.,!?¿¡'"“”„«»()…\-–—]/g," ").replace(/\s+/g," ").trim();
+  const arts=(ARTICLES[lang]||[]).map(a=>a.normalize("NFD").replace(/[̀-ͯ]/g,""));
+  return s.split(" ").filter(w=>!arts.includes(w)).join(" ");
+}
+function lev(a,b){ const m=a.length,n=b.length; if(Math.abs(m-n)>2) return 9; const d=Array.from({length:m+1},(_,i)=>[i]); for(let j=1;j<=n;j++) d[0][j]=j;
+  for(let i=1;i<=m;i++) for(let j=1;j<=n;j++) d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1)); return d[m][n]; }
+function cMatches(guess, w, lang){
+  const g=cNorm(guess,lang); if(!g) return false;
+  return cWord(w,lang).split("/").map(x=>cNorm(x,lang)).some(t=> t && (g===t || (t.length>=5 && lev(g,t)<=1) || (t.length>=9 && lev(g,t)<=2)));
+}
+function oCClue(next){ act({type:"cclue", clue:next}); }
+function eTap(i,j){ const G=O.G, c=(G.tp.clue||[]).slice(); if(c.length>=12) return; c.push(EKEYS[i].list[j]); oCClue(c); }
+function eBack(){ const c=(O.G.tp.clue||[]).slice(0,-1); oCClue(c); }
+function eClear(){ oCClue([]); }
+function eTab(i){ O.etab=i; renderOnline(true); }
+function sendGuess(){
+  const el=$("cguessin"); if(!el || !el.value.trim()) return;
+  act({type:"cguesstext", text:el.value.trim().slice(0,60)}); el.value=""; el.focus();
+}
+function oEmojiActor(G,a,tp,timer){
+  const guessers=G.players.map((p,i)=>({p,i})).filter(x=>x.i!==G.turn), tab=O.etab||0;
+  return `${timer}
+    <div class="card center cardword"><div class="cemoji" style="font-size:44px">${CW[tp.w][0]}</div><div class="cword" dir="${T[a.lang].dir}">${esc(cWord(tp.w,a.lang))}</div>
+      <div class="note">Give clues with emojis only — no words! · Nur Emojis!</div></div>
+    <div class="clue">${(tp.clue||[]).length?(tp.clue||[]).join(" "):`<span class="note">Tap emojis below to build your clue</span>`}</div>
+    <div class="row" style="gap:6px;margin:6px 0">${EKEYS.map((g,i)=>`<button class="chip ${tab===i?"on":""}" onclick="eTab(${i})">${g.t}</button>`).join("")}
+      <button class="chip" onclick="eBack()">⌫</button><button class="chip" onclick="eClear()">🗑️</button></div>
+    <div class="ekeys">${EKEYS[tab].list.map((e,j)=>`<button onclick="eTap(${tab},${j})">${e}</button>`).join("")}</div>
+    ${oGuessFeed(tp,G)}
+    <p class="note" style="margin:10px 0 4px">Typed guesses are checked automatically. Guessed out loud? Tap the name: · Laut geraten? Name antippen:</p>
+    <div class="cguessers">${guessers.map(x=>`<button class="cg" style="border-color:${COLORS[x.i%COLORS.length]}" onclick="act({type:'cguess',by:${x.i}})"><span class="avatar" style="background:${COLORS[x.i%COLORS.length]}">${esc(x.p.name.charAt(0).toUpperCase())}</span>${esc(x.p.name)}</button>`).join("")}</div>
+    <div class="exgrid" style="margin-top:6px"><button class="btn secondary exb" onclick="act({type:'cskip'})">⏭️ Skip</button><button class="btn ghost exb" onclick="act({type:'cend'})">🏁 End turn</button></div>`;
+}
+function oGuessFeed(tp,G){
+  const f=(tp.feed||[]).slice(-6).reverse(); if(!f.length) return "";
+  return `<div class="feed">${f.map(x=>`<div class="${x.ok?"ok":""}">${x.ok?"✅":"❌"} <b>${esc(x.by)}</b>: <span dir="auto">${esc(x.text)}</span></div>`).join("")}</div>`;
+}
+function oEmojiGuesser(G,a,tp,timer,myLang){
+  const last = tp.last ? `<div class="card center"><div class="note">${tp.last.skip?"⏭️ Skipped · Übersprungen":`✅ Guessed by ${esc(G.players[tp.last.by].name)}`}</div>
+      <div class="cemoji" style="font-size:36px">${CW[tp.last.w][0]}</div><div class="cword" style="font-size:22px" dir="${T[myLang].dir}">${esc(cWord(tp.last.w,myLang))}</div></div>` : "";
+  return `${timer}
+    <div class="card center"><div class="note">😀 ${esc(a.name)}'s clue · Hinweis</div>
+      <div class="clue big">${(tp.clue||[]).length?(tp.clue||[]).join(" "):`<span class="note">${tp.timer?"Waiting for emojis… · Warte auf Emojis…":"Get ready… · Gleich geht's los…"}</span>`}</div>
+      <div class="big-name" style="font-size:28px;color:var(--coral)">✓ ${tp.guessed.length}</div></div>
+    ${tp.timer?`<div class="guessrow"><input type="text" id="cguessin" data-keep="1" dir="auto" maxlength="60" placeholder="Your guess in ${T[myLang].name}…" autocomplete="off" onkeydown="if(event.key==='Enter')sendGuess()">
+      <button class="btn primary" style="margin:0;width:auto;padding:12px 16px" onclick="sendGuess()">➤</button></div>
+      <p class="note" style="margin:4px 0 0">Type it in <b>${T[myLang].flag} ${T[myLang].name}</b> — small typos and missing accents are OK.</p>`:""}
+    ${oGuessFeed(tp,G)}${last}`;
+}
 
 render();
 /* Offline support + installable app (only works on the real website, safely skipped elsewhere) */
