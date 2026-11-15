@@ -199,6 +199,23 @@
   .task .roman{margin:4px 0 0;font-size:13px}
   .rom{font:italic 600 13px Nunito,system-ui,sans-serif;color:var(--muted);direction:ltr;unicode-bidi:isolate}
   [lang=ur] .prompt,[lang=ur].peek-q,.cword[lang=ur],[lang=ur] .task,[lang=ur].hint,[lang=ur] .hint{font-family:"Noto Nastaliq Urdu","Jameel Noori Nastaleeq","Urdu Typesetting",serif;line-height:2.1}
+  body.has-chat .wrap{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+  .chatfab{position:fixed;right:calc(16px + env(safe-area-inset-right));bottom:calc(18px + env(safe-area-inset-bottom));width:58px;height:58px;border-radius:50%;border:none;background:var(--plum);color:#fff;font-size:26px;box-shadow:0 6px 16px rgba(108,74,182,.35);cursor:pointer;z-index:15}
+  .chatbadge{position:absolute;top:-4px;right:-4px;background:var(--coral);color:#fff;font:800 12px Nunito,system-ui,sans-serif;border-radius:999px;padding:3px 7px;border:2px solid #fff}
+  .chatpanel{position:fixed;left:0;right:0;bottom:0;margin:0 auto;max-width:560px;height:min(72vh,560px);background:var(--bg);border-radius:22px 22px 0 0;box-shadow:0 -8px 30px rgba(43,33,64,.25);display:flex;flex-direction:column;z-index:16;padding-bottom:env(safe-area-inset-bottom)}
+  .chathead{display:flex;justify-content:space-between;align-items:center;padding:12px 12px 6px;font-family:Fredoka,system-ui,sans-serif;font-size:18px}
+  .chatlist{flex:1;overflow-y:auto;padding:6px 12px;display:flex;flex-direction:column;gap:8px}
+  .cm{max-width:80%;align-self:flex-start;position:relative}
+  .cm.me{align-self:flex-end}
+  .cmn{font-weight:800;font-size:12px;margin:0 0 2px 6px}
+  .cmb{background:#fff;border:1.5px solid var(--line);border-radius:16px 16px 16px 4px;padding:8px 12px;font-size:15px;word-wrap:break-word}
+  .cm.me .cmb{background:var(--coral-soft);border-color:#F8C3B4;border-radius:16px 16px 4px 16px}
+  .cmdel{position:absolute;right:-30px;top:18px;background:none;border:none;font-size:14px;cursor:pointer;opacity:.6}
+  .chatquick{display:flex;gap:4px;padding:6px 12px 0}
+  .chatquick button{background:#fff;border:1.5px solid var(--line);border-radius:999px;font-size:18px;padding:4px 8px;cursor:pointer}
+  .chatinrow{display:flex;gap:8px;padding:8px 12px 12px}
+  .chatinrow input{flex:1;border:2px solid var(--line);border-radius:14px;padding:10px 12px;font:600 16px Nunito,system-ui,sans-serif}
+  .chatinrow .btn{margin:0;width:auto;padding:10px 16px}
   .hidden{display:none !important}
   .err{color:var(--coral);font-weight:700;font-size:14px;min-height:18px;margin-top:6px}
 </style>
@@ -593,6 +610,7 @@ function samplePrompt(){
 /* ===================== RENDER ===================== */
 function render(){
   const app = $("app");
+  if(S.screen!=="lobby"){ const c=$("ochat"); if(c) c.remove(); }
   stopTimer(false);
   const v = VIEWS[S.screen]();
   app.innerHTML = v;
@@ -840,6 +858,7 @@ stats(){
 }
 };
 const AFTER = {
+  lobby(){ renderChat(); },
   setup(){ const i=$("pname"); if(i){ i.addEventListener("input",e=>S.draft.name=e.target.value); i.addEventListener("keydown",e=>{ if(e.key==="Enter") addPlayer(); }); } }
 };
 
@@ -959,20 +978,22 @@ function gameReview(ctx){
   out+=`${appLink()}`;
   return out;
 }
-function openExport(i, ctx){
+function openExport(i, ctx, raw){
   ctx=ctx||{players:S.players, log:S.log, rounds:S.rounds, clog:S.clog};
-  const text = i<0 ? gameReview(ctx) : playerReview(i, ctx);
-  const name = i<0 ? "game" : ctx.players[i].name;
+  const text = raw ? raw.text : (i<0 ? gameReview(ctx) : playerReview(i, ctx));
+  const name = raw ? raw.name : (i<0 ? "game" : ctx.players[i].name);
+  const heading = raw ? raw.heading : (i<0?"Whole game":esc(name));
+  const subject = raw ? raw.subject : (i<0?"Game summary":"Review "+name);
   const canShare = !!(navigator.share);
   const box=document.createElement("div");
   box.className="sheet-bg";
   box.innerHTML=`<div class="sheet">
-    <div class="topline" style="margin-bottom:8px"><h3 style="margin:0">📤 ${i<0?"Whole game":esc(name)}</h3><button class="chip" id="exClose">✕</button></div>
+    <div class="topline" style="margin-bottom:8px"><h3 style="margin:0">📤 ${heading}</h3><button class="chip" id="exClose">✕</button></div>
     <textarea id="exText" dir="auto" rows="9" readonly>${esc(text)}</textarea>
     ${canShare?`<button class="btn primary" id="exShare">📲 Send… <small>WhatsApp, Email, Telegram…</small></button>`:""}
     <div class="exgrid">
       <a class="btn secondary exb" id="exWa" href="https://wa.me/?text=${encodeURIComponent(text)}" target="_blank" rel="noopener">💬 WhatsApp</a>
-      <a class="btn secondary exb" id="exMail" href="mailto:?subject=${encodeURIComponent("PonteTalk – "+(i<0?"Game summary":"Review "+name))}&body=${encodeURIComponent(text)}">✉️ Email</a>
+      <a class="btn secondary exb" id="exMail" href="mailto:?subject=${encodeURIComponent("PonteTalk – "+subject)}&body=${encodeURIComponent(text)}">✉️ Email</a>
       <button class="btn secondary exb" id="exCopy">📋 Copy</button>
       <button class="btn secondary exb" id="exDl">⬇️ Save .txt</button>
     </div>
@@ -1095,6 +1116,7 @@ function onlineConnect(role, code, resumeG){
   go("lobby");
 }
 function onlineLeave(){
+  O.chatOpen=false; O.chatSeen=0; O.chatDraft="";
   if(O.tr){ O.tr.close(); O.tr=null; }
   if(O.hostTimeout){ clearTimeout(O.hostTimeout); O.hostTimeout=null; }
   stopOnlineTick(); clearSession();
@@ -1201,6 +1223,9 @@ function applyAction(from, a){
   if(oCApply(from, a, isActive, isHost)){ pushState(); return; }
   switch(a.type){
     case "lock": if(isHost){ G.locked=!G.locked; } break;
+    case "chat": if(a.text && String(a.text).trim()){ const pl=G.players.find(p=>p.id===from); if(pl){
+        G.chat=(G.chat||[]).concat([{id:uid(), pid:from, by:pl.name, text:String(a.text).trim().slice(0,300), t:Date.now()}]).slice(-100); } } break;
+    case "chatdel": if(isHost){ G.chat=(G.chat||[]).filter(m=>m.id!==a.id); } break;
     case "accept": if(isHost && G.pending){ const q=G.pending.find(x=>x.id===a.id); if(q){ G.pending=G.pending.filter(x=>x.id!==a.id); if(!G.players.some(p=>p.id===q.id) && G.players.length<10) G.players.push(newPlayer(q)); } } break;
     case "decline": if(isHost && G.pending){ G.pending=G.pending.filter(x=>x.id!==a.id); G.declined=[...(G.declined||[]), a.id]; } break;
     case "settings": if(isHost && G.phase==="lobby"){ if(a.cat) G.cat=a.cat; if(a.rounds) G.rounds=Math.min(10,Math.max(1,a.rounds)); if(a.time) G.time=a.time;
@@ -1541,6 +1566,7 @@ function hostMenu(){
 function renderOnline(force){
   if(S.screen!=="lobby") return;
   const G=O.G;
+  renderChat();
   // During feedback, update only the live part so typing in the note boxes isn't interrupted.
   const key = G ? `${G.phase}|${G.round}|${G.turn}|${(G.pending||[]).length}|${G.locked?1:0}|${oOutsider()?1:0}` : "none";
   if(!force && G && G.phase==="feedback" && O.viewKey===key && $("odyn")){
@@ -1863,6 +1889,57 @@ function oEmojiGuesser(G,a,tp,timer,myLang){
       <button class="btn primary" style="margin:0;width:auto;padding:12px 16px" onclick="sendGuess()">➤</button></div>
       <p class="note" style="margin:4px 0 0">Type it in <b>${T[myLang].flag} ${T[myLang].name}</b> — small typos and missing accents are OK.</p>`:""}
     ${oGuessFeed(tp,G)}${last}`;
+}
+
+/* ---------- ROOM CHAT (only players who joined with the code) ---------- */
+function chatAllowed(){ return S.screen==="lobby" && O.G && O.status!=="idle" && !oOutsider() && O.G.players.some(p=>p.id===O.me.id); }
+function renderChat(){
+  let box=$("ochat");
+  document.body.classList.toggle("has-chat", chatAllowed());
+  if(!chatAllowed()){ if(box) box.remove(); return; }
+  if(!box){ box=document.createElement("div"); box.id="ochat"; document.body.appendChild(box); }
+  const msgs=O.G.chat||[], unread=Math.max(0, msgs.length-(O.chatSeen||0));
+  if(O.chatOpen){ O.chatSeen=msgs.length; }
+  const keepVal = ($("chatin")||{}).value || O.chatDraft || "", hadFocus = document.activeElement && document.activeElement.id==="chatin";
+  const list = msgs.length ? msgs.map(m=>{
+      const mine=m.pid===O.me.id, idx=O.G.players.findIndex(p=>p.id===m.pid), col=COLORS[(idx<0?0:idx)%COLORS.length];
+      return `<div class="cm ${mine?"me":""}">${mine?"":`<div class="cmn" style="color:${col}">${esc(m.by)}</div>`}
+        <div class="cmb" dir="auto">${esc(m.text)}</div>
+        ${O.role==="host"&&!mine?`<button class="cmdel" onclick="act({type:'chatdel',id:'${m.id}'})" aria-label="Delete">🗑️</button>`:""}</div>`; }).join("")
+    : `<p class="note center" style="margin:30px 0">No messages yet. Say hi! 👋<br><span class="de">Noch keine Nachrichten.</span></p>`;
+  box.innerHTML = O.chatOpen ? `
+    <div class="chatpanel">
+      <div class="chathead"><b>💬 Room chat · ${esc(O.code)}</b><span style="display:flex;gap:6px">${msgs.length?`<button class="chip" id="chatExport" onclick="exportChat()" aria-label="Export chat">📤 Export</button>`:""}<button class="chip" onclick="toggleChat()" aria-label="Close chat">✕</button></span></div>
+      <p class="note" style="margin:0 12px 6px">Only players in this game can see it. Messages disappear when the game ends.</p>
+      <div class="chatlist" id="chatlist">${list}</div>
+      <div class="chatquick">${["👋","👍","😂","❤️","🎉","👏","🙏"].map(e=>`<button onclick="sendChat('${e}')">${e}</button>`).join("")}</div>
+      <div class="chatinrow"><input type="text" id="chatin" dir="auto" maxlength="300" placeholder="Write a message… · Nachricht…" autocomplete="off"
+        oninput="O.chatDraft=this.value" onkeydown="if(event.key==='Enter')sendChat()"><button class="btn primary" onclick="sendChat()">➤</button></div>
+    </div>`
+    : `<button class="chatfab" onclick="toggleChat()" aria-label="Open chat">💬${unread?`<span class="chatbadge">${unread>9?"9+":unread}</span>`:""}</button>`;
+  if(O.chatOpen){
+    const inp=$("chatin"); if(inp){ inp.value=keepVal; if(hadFocus) inp.focus({preventScroll:true}); }
+    const l=$("chatlist"); if(l) l.scrollTop=l.scrollHeight;
+  }
+}
+function chatText(){
+  const msgs=(O.G&&O.G.chat)||[], pad=n=>String(n).padStart(2,"0");
+  let out=`💬 PonteTalk – Room chat ${O.code} · ${today()}\n`;
+  out+=`Players · Spieler: ${O.G.players.map(p=>p.name).join(", ")}\n\n`;
+  msgs.forEach(m=>{ const d=new Date(m.t||Date.now()); out+=`[${pad(d.getHours())}:${pad(d.getMinutes())}] ${m.by}: ${m.text}\n`; });
+  out+=`\n${appLink()}`;
+  return out;
+}
+function exportChat(){
+  if(!(O.G&&(O.G.chat||[]).length)) return;
+  openExport(-1, null, {text:chatText(), name:"chat-"+O.code, heading:"Room chat · "+esc(O.code), subject:"Room chat "+O.code});
+}
+function toggleChat(){ O.chatOpen=!O.chatOpen; if(O.chatOpen) O.chatSeen=(O.G.chat||[]).length; renderChat(); if(O.chatOpen){ const i=$("chatin"); if(i) i.focus(); } }
+function sendChat(text){
+  const inp=$("chatin"), t=(text!==undefined?text:(inp?inp.value:"")).trim();
+  if(!t) return;
+  act({type:"chat", text:t.slice(0,300)});
+  if(text===undefined){ O.chatDraft=""; if(inp){ inp.value=""; inp.focus(); } }
 }
 
 render();
