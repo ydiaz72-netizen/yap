@@ -25,11 +25,11 @@
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
-  html,body{overflow-x:hidden}
+  /* keep decorative shapes from causing sideways scrolling, without trapping the page scroll */
   html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Nunito,system-ui,sans-serif;font-size:17px;line-height:1.45;overscroll-behavior-y:none}
   button,.chip,.react,.face,.step{touch-action:manipulation;-webkit-user-select:none;user-select:none}
   body{-webkit-touch-callout:none}
-  .wrap{max-width:560px;margin:0 auto;padding:calc(20px + env(safe-area-inset-top)) calc(18px + env(safe-area-inset-right)) calc(32px + env(safe-area-inset-bottom)) calc(18px + env(safe-area-inset-left));min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
+  .wrap{overflow-x:hidden;overflow-x:clip;overflow-y:visible;max-width:560px;margin:0 auto;padding:calc(20px + env(safe-area-inset-top)) calc(18px + env(safe-area-inset-right)) calc(32px + env(safe-area-inset-bottom)) calc(18px + env(safe-area-inset-left));min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
   @media (max-width:360px){ h1{font-size:30px} .prompt{font-size:21px} .big-name{font-size:38px} .timer{font-size:56px} .chip{padding:8px 12px;font-size:14px} }
   h1,h2,h3{font-family:Fredoka,Nunito,sans-serif;margin:0 0 6px;line-height:1.15}
   h1{font-size:34px} h2{font-size:26px} h3{font-size:19px}
@@ -179,8 +179,10 @@
   .cword{font:700 34px Fredoka,system-ui,sans-serif;margin:4px 0;line-height:1.15}
   .cardword{border:3px solid var(--coral)}
   .cguessers{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-  .cg{display:flex;align-items:center;gap:8px;background:#fff;border:2px solid var(--line);border-radius:16px;padding:10px;font:700 16px Nunito,system-ui,sans-serif;color:var(--ink);cursor:pointer;text-align:left}
-  .cg:active{transform:scale(.97)} .cg .avatar{width:32px;height:32px;font-size:15px}
+  .cg{display:flex;align-items:center;gap:10px;background:var(--teal-soft);border:2px solid var(--teal);border-radius:16px;padding:12px;font:600 15px Nunito,system-ui,sans-serif;color:#0F5F56;cursor:pointer;text-align:left;box-shadow:0 3px 0 #178A7D}
+  .cg b{font-weight:800;color:#0B4A43} .cg:active{transform:translateY(2px);box-shadow:0 1px 0 #178A7D}
+  .cgck{flex:none;width:30px;height:30px;border-radius:50%;background:var(--teal);color:#fff;display:grid;place-items:center;font-weight:800;font-size:17px}
+  .cgde{font-size:12px;opacity:.8}
   .cline{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px dashed var(--line)} .cline:last-child{border-bottom:none}
   .cemo{font-size:30px;line-height:1.2}
   .clue{min-height:52px;font-size:34px;letter-spacing:4px;text-align:center;background:#fff;border:2px dashed var(--plum);border-radius:16px;padding:8px;line-height:1.3;word-break:break-all}
@@ -1646,8 +1648,8 @@ VIEWS.cturn = function(){
   </div>
   <div id="clive" class="hidden">
     <div class="card center cardword" id="cbox"></div>
-    <h3 style="margin:4px 0 8px">🙋 Who guessed it? <span class="de">· Wer hat's erraten?</span></h3>
-    <div class="cguessers">${guessers.map(x=>`<button class="cg" style="border-color:${COLORS[x.i%COLORS.length]}" onclick="cGuess(${x.i})"><span class="avatar" style="background:${COLORS[x.i%COLORS.length]}">${esc(x.p.name.charAt(0).toUpperCase())}</span>${esc(x.p.name)}</button>`).join("")}</div>
+    <h3 style="margin:4px 0 8px">🙋 Tap who guessed it <span class="de">· Wer hat's erraten?</span></h3>
+    <div class="cguessers">${guessers.map(x=>`<button class="cg" onclick="cGuess(${x.i})"><span class="cgck">✓</span><span><b>${esc(x.p.name)}</b> got it!<br><span class="cgde">hat's erraten</span></span></button>`).join("")}</div>
     <div class="exgrid" style="margin-top:6px">
       <button class="btn secondary exb" onclick="cSkip()">⏭️ Skip</button>
       <button class="btn ghost exb" onclick="cEndEarly()">🏁 End turn</button>
@@ -1742,8 +1744,8 @@ function oCTurnView(){
       const guessers=G.players.map((p,i)=>({p,i})).filter(x=>x.i!==G.turn);
       body=`${timer}<div class="card center cardword"><div class="cemoji">${CW[tp.w][0]}</div><div class="cword" dir="${T[a.lang].dir}">${esc(cWord(tp.w,a.lang))}</div>
         <div class="note" style="margin-top:8px">Accept these answers · Diese Antworten zählen:</div><div>${cAnswerChips(tp.w, cGuesserLangs(G.players, G.turn))}</div></div>
-        <h3 style="margin:4px 0 8px">🙋 Who guessed it? <span class="de">· Wer hat's erraten?</span></h3>
-        <div class="cguessers">${guessers.map(x=>`<button class="cg" style="border-color:${COLORS[x.i%COLORS.length]}" onclick="act({type:'cguess',by:${x.i}})"><span class="avatar" style="background:${COLORS[x.i%COLORS.length]}">${esc(x.p.name.charAt(0).toUpperCase())}</span>${esc(x.p.name)}</button>`).join("")}</div>
+        <h3 style="margin:4px 0 8px">🙋 Tap who guessed it <span class="de">· Wer hat's erraten?</span></h3>
+        <div class="cguessers">${guessers.map(x=>`<button class="cg" onclick="act({type:'cguess',by:${x.i}})"><span class="cgck">✓</span><span><b>${esc(x.p.name)}</b> got it!<br><span class="cgde">hat's erraten</span></span></button>`).join("")}</div>
         <div class="exgrid" style="margin-top:6px"><button class="btn secondary exb" onclick="act({type:'cskip'})">⏭️ Skip</button><button class="btn ghost exb" onclick="act({type:'cend'})">🏁 End turn</button></div>`;
     }
   } else {
@@ -1815,7 +1817,7 @@ function oEmojiActor(G,a,tp,timer){
     <div class="ekeys">${EKEYS[tab].list.map((e,j)=>`<button onclick="eTap(${tab},${j})">${e}</button>`).join("")}</div>
     ${oGuessFeed(tp,G)}
     <p class="note" style="margin:10px 0 4px">Typed guesses are checked automatically. Guessed out loud? Tap the name: · Laut geraten? Name antippen:</p>
-    <div class="cguessers">${guessers.map(x=>`<button class="cg" style="border-color:${COLORS[x.i%COLORS.length]}" onclick="act({type:'cguess',by:${x.i}})"><span class="avatar" style="background:${COLORS[x.i%COLORS.length]}">${esc(x.p.name.charAt(0).toUpperCase())}</span>${esc(x.p.name)}</button>`).join("")}</div>
+    <div class="cguessers">${guessers.map(x=>`<button class="cg" onclick="act({type:'cguess',by:${x.i}})"><span class="cgck">✓</span><span><b>${esc(x.p.name)}</b> got it!<br><span class="cgde">hat's erraten</span></span></button>`).join("")}</div>
     <div class="exgrid" style="margin-top:6px"><button class="btn secondary exb" onclick="act({type:'cskip'})">⏭️ Skip</button><button class="btn ghost exb" onclick="act({type:'cend'})">🏁 End turn</button></div>`;
 }
 function oGuessFeed(tp,G){
