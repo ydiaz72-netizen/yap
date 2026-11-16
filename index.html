@@ -1670,7 +1670,7 @@ const A0_FMTS = {
   a0new:   {e:"🌱", en:"New word", de:"Neues Wort",
             howEn:"Your coach says it first. Repeat it 3 times, slowly.", howDe:"Dein Coach sagt es vor. Sprich es 3-mal langsam nach."},
   a0recall:{e:"🧠", en:"Remember?", de:"Weißt du es noch?",
-            howEn:"Say the word for this picture. Stuck? Tap help.", howDe:"Sag das Wort zum Bild. Hängst du? Tippe auf Hilfe."},
+            howEn:"How do you say this in the language you're learning? You learned it earlier. Stuck? Tap help.", howDe:"Wie sagt man das in der Sprache, die du lernst? Du hast es vorhin gelernt. Hängst du? Tippe auf Hilfe."},
   a0sent:  {e:"🧩", en:"Mini sentence", de:"Mini-Satz",
             howEn:"Read it out loud. Then say it again with another word you know.", howDe:"Lies es laut vor. Dann sag es nochmal mit einem anderen Wort, das du kennst."}
 };
@@ -1719,7 +1719,7 @@ function a0Prompt(p){
   const meaning = it => (L==="en" ? [it.meanDe] : L==="de" ? [it.meanEn] : [`${it.meanEn} · ${it.meanDe}`]);
   if(stage===1 && st.seen.length){
     const id=pick(st.seen), it=a0Item(id,L);
-    return {f:"a0recall", c:"everyday", id:`${L}-a0-r-${id}-${st.n}`, t:`${it.e}  = ?`, r:"", w:[it.w], wr:[it.r]};
+    return {f:"a0recall", c:"everyday", id:`${L}-a0-r-${id}-${st.n}`, t:`${it.e}  ${meaning(it)[0]}  →  ?`, r:"", w:[it.w], wr:[it.r]};
   }
   const learned=st.seen.filter(id=>id[0]==="n");
   if(stage===2 && learned.length){
