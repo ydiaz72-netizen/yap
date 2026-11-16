@@ -1362,7 +1362,7 @@ VIEWS.online = function(){
   </div>`;
 };
 function oCheckName(){ const n=($("oname")||{}).value; if(n!==undefined) S.draft.name=n; if(!S.draft.name.trim()){ O.err="Please type your name · Bitte Namen eingeben"; render(); return false; } O.err=""; return true; }
-function hostOnline(){ if(!oCheckName()) return; onlineConnect("host", newCode(), null); }
+function hostOnline(){ if(!oCheckName()) return; onlineConnect("host", newCode(), null); logUsage("room_created", {mode:"online", langs:[S.draft.lang], levels:[S.draft.level], players:1}); }
 function joinOnline(){
   if(!oCheckName()) return;
   const c=(O.codeInput||"").toUpperCase(); if(c.length!==4){ O.err="Type the 4-letter room code · 4-stelligen Code eingeben"; render(); return; }
@@ -2293,6 +2293,7 @@ function pendingGame(){ const p=lsGet("pt_pending",null); if(!p || Date.now()-p.
 
 /* Card shown on the in-person results screen */
 function saveCardInperson(){
+  logInpersonFinished();
   if(!S.gid) return "";
   if(!A.user) return `<div class="card acard">
       <h3>🔐 Keep your scores <span class="de">· Punkte behalten</span></h3>
@@ -2312,6 +2313,7 @@ function saveCardInperson(){
 }
 /* Card shown on the online results screen */
 function saveCardOnline(){
+  logOnlineFinished();
   if(O.G.players.findIndex(p=>p.id===O.me.id)<0) return "";
   if(!A.user) return `<div class="card acard">
       <h3>🔐 Keep your scores <span class="de">· Punkte behalten</span></h3>
@@ -2501,7 +2503,7 @@ VIEWS.privacy = function(){
     <p class="note">Stand: November 2026 · English summary below.</p>
     <h3>1. Verantwortlich</h3><p>${who}</p>
     <h3>2. Ohne Konto spielen</h3>
-    <p>Du kannst PonteTalk ohne Konto nutzen. Spielstände, Einstellungen und Ton-Einstellung werden nur lokal auf deinem Gerät gespeichert (Local Storage). Das ist technisch notwendig (§ 25 Abs. 2 TDDDG). Wir verwenden <b>keine Tracking-Cookies, keine Analyse-Tools und keine Werbung</b>. Schriften werden von unserem eigenen Server geladen, nicht von Google.</p>
+    <p>Du kannst PonteTalk ohne Konto nutzen. Spielstände, Einstellungen und Ton-Einstellung werden nur lokal auf deinem Gerät gespeichert (Local Storage). Das ist technisch notwendig (§ 25 Abs. 2 TDDDG). Wir verwenden <b>keine Tracking-Cookies, keine Analyse-Tools und keine Werbung</b>. Damit wir sehen, ob PonteTalk genutzt wird, zählen wir anonym, wenn ein Online-Raum erstellt oder ein Spiel beendet wird (Spielart, Sprachen, Niveaus, Anzahl Spieler, Runden) – <b>ohne Namen, ohne IP-Adresse, ohne Geräte-Kennung</b> (Art. 6 Abs. 1 lit. f DSGVO). Diese Zahlen werden bei Supabase (Frankfurt, EU) gespeichert. Schriften werden von unserem eigenen Server geladen, nicht von Google.</p>
     <h3>3. Hosting</h3>
     <p>Die Website wird bei Vercel Inc. (USA) gehostet. Beim Aufruf werden technisch notwendige Server-Logdaten (z. B. IP-Adresse, Zeitpunkt, Browser) kurzzeitig verarbeitet, um die Seite sicher auszuliefern (Art. 6 Abs. 1 lit. f DSGVO). Vercel ist unter dem EU-US Data Privacy Framework zertifiziert; zusätzlich gelten Standardvertragsklauseln.</p>
     <h3>4. Online-Spiele</h3>
@@ -2515,10 +2517,32 @@ VIEWS.privacy = function(){
     <h3>7. Alter</h3><p>Ein Konto darfst du ab 16 Jahren erstellen.</p>
     <hr>
     <h3>English summary</h3>
-    <p>You can play without an account; then everything stays on your device. No tracking, no analytics, no ads. Online games run through Supabase (Frankfurt, EU) and are not stored. If you create an account, we store your email, game name, language, level and the games you save, only so you can see your history. Only you can see them. Login codes are sent via Resend (USA); "Continue with Google" shares your email and name from Google. You can delete your account and all data anytime in the app. Questions or data requests: ${esc(LEGAL.email)}. Accounts are for ages 16+.</p>
+    <p>You can play without an account; then everything stays on your device. No tracking, no analytics, no ads. We only count anonymously when a room is created or a game ends (game type, languages, levels, number of players), with no names, IP addresses or device IDs. Online games run through Supabase (Frankfurt, EU) and are not stored. If you create an account, we store your email, game name, language, level and the games you save, only so you can see your history. Only you can see them. Login codes are sent via Resend (USA); "Continue with Google" shares your email and name from Google. You can delete your account and all data anytime in the app. Questions or data requests: ${esc(LEGAL.email)}. Accounts are for ages 16+.</p>
   </div>
   ${legalLinks()}`;
 };
+
+
+/* ---- anonymous usage counts for the owner stats: no names, no IP, no device id ---- */
+function logUsage(kind, d){
+  try{
+    if(/transport=local/.test(location.search)) return;
+    const sb=authClient(); if(!sb || !navigator.onLine) return;
+    const row={ kind, mode:d.mode, game:d.game, langs:(d.langs||[]).slice(0,10), levels:(d.levels||[]).slice(0,10),
+                players:Math.max(1,Math.min(10,d.players||1)), rounds:Math.max(0,Math.min(50,d.rounds||0)), signed_in:!!A.user };
+    sb.from("usage_events").insert(row).then(()=>{}, ()=>{});
+  }catch(e){}
+}
+const LOGGED={};
+function logInpersonFinished(){
+  if(!S.gid || LOGGED["ip-"+S.gid]) return; LOGGED["ip-"+S.gid]=1;
+  logUsage("game_finished", {mode:"inperson", game:S.game||"speak", langs:S.players.map(p=>p.lang), levels:S.players.map(p=>p.level), players:S.players.length, rounds:S.rounds});
+}
+function logOnlineFinished(){
+  const G=O.G; if(!G || O.role!=="host" || G.phase!=="results") return;
+  const k="on-"+(G.gid||O.code)+"-"+G.round; if(LOGGED[k]) return; LOGGED[k]=1;
+  logUsage("game_finished", {mode:"online", game:G.game==="charades"?"emoji":"speak", langs:G.players.map(p=>p.lang), levels:G.players.map(p=>p.level), players:G.players.length, rounds:G.rounds});
+}
 
 /* Start: remember where to return after Google sign-in, then connect */
 try{ const u=new URL(location.href); if(u.searchParams.get("auth")==="google" || u.searchParams.has("code")){ S.screen="account"; A.ret=sessionStorage.getItem("pt_ret")||"home"; sessionStorage.removeItem("pt_ret"); if(A.ret==="results"||A.ret==="lobby") A.ret="home"; } }catch(e){}
