@@ -241,7 +241,7 @@
   .legaltext hr{border:none;border-top:2px solid var(--line);margin:16px 0}
   .chatfab{position:fixed;right:calc(16px + env(safe-area-inset-right));bottom:calc(18px + env(safe-area-inset-bottom));width:58px;height:58px;border-radius:50%;border:none;background:var(--plum);color:#fff;font-size:26px;box-shadow:0 6px 16px rgba(108,74,182,.35);cursor:pointer;z-index:15}
   .chatbadge{position:absolute;top:-4px;right:-4px;background:var(--coral);color:#fff;font:800 12px Nunito,system-ui,sans-serif;border-radius:999px;padding:3px 7px;border:2px solid #fff}
-  .chatpanel{position:fixed;left:0;right:0;bottom:0;margin:0 auto;max-width:560px;height:min(72vh,560px);background:var(--bg);border-radius:22px 22px 0 0;box-shadow:0 -8px 30px rgba(43,33,64,.25);display:flex;flex-direction:column;z-index:16;padding-bottom:env(safe-area-inset-bottom)}
+  .chatpanel{position:fixed;left:0;right:0;bottom:0;margin:0 auto;max-width:560px;height:min(46vh,420px);background:var(--bg);border-radius:22px 22px 0 0;box-shadow:0 -8px 30px rgba(43,33,64,.25);display:flex;flex-direction:column;z-index:16;padding-bottom:env(safe-area-inset-bottom)}
   .chathead{display:flex;justify-content:space-between;align-items:center;padding:12px 12px 6px;font-family:Fredoka,system-ui,sans-serif;font-size:18px}
   .chatlist{flex:1;overflow-y:auto;padding:6px 12px;display:flex;flex-direction:column;gap:8px}
   .cm{max-width:80%;align-self:flex-start;position:relative}
@@ -255,6 +255,13 @@
   .chatinrow{display:flex;gap:8px;padding:8px 12px 12px}
   .chatinrow input{flex:1;border:2px solid var(--line);border-radius:14px;padding:10px 12px;font:600 16px Nunito,system-ui,sans-serif}
   .chatinrow .btn{margin:0;width:auto;padding:10px 16px}
+  /* Chat never covers the game: phones get a short bottom panel and extra scroll room; wide screens a side panel */
+  body.chat-open .wrap{padding-bottom:calc(min(46vh,420px) + 24px)}
+  @media (min-width:960px){
+    body.chat-open{padding-right:392px}
+    body.chat-open .wrap{padding-bottom:40px}
+    .chatpanel{left:auto;right:16px;top:16px;bottom:16px;width:360px;max-width:none;height:auto;margin:0;border-radius:22px;box-shadow:0 8px 30px rgba(43,33,64,.18);border:2px solid var(--line)}
+  }
   .hidden{display:none !important}
   .err{color:var(--coral);font-weight:700;font-size:14px;min-height:18px;margin-top:6px}
 </style>
@@ -609,6 +616,7 @@ function beepOld(){ try{ if(!audio) return; const o=audio.createOscillator(), g=
 let wake=null;
 async function keepAwake(){ try{ if('wakeLock' in navigator && !wake){ wake = await navigator.wakeLock.request('screen'); } }catch(e){} }
 
+function nextPrompt(p){ return p.level===4 ? a0Prompt(p) : choosePrompt(p.lang, p.level); }
 function choosePrompt(lang, level){
   const pool = level===0 ? P1 : P, tag = level===0 ? "a1" : "std";
   const fmtKeys = ["role","quick","wwyd"];
@@ -723,7 +731,7 @@ setup(){
       ${LANG_KEYS.map(k=>`<button class="chip lang ${d.lang===k?"on":""}" onclick="setDraft('lang','${k}')">${T[k].flag} ${T[k].name}</button>`).join("")}
     </div>
     <label class="lbl">My level · Mein Niveau</label>
-    <div class="row">${LEVELS.map((l,i)=>`<button class="chip ${d.level===i?"on":""}" onclick="setDraft('level',${i})">${l.code} · ${T[d.lang].levels[i]}</button>`).join("")}</div>
+    <div class="row">${LVL_ORDER.map(i=>[LEVELS[i],i]).map(([l,i])=>`<button class="chip ${d.level===i?"on":""}" onclick="setDraft('level',${i})">${l.code} · ${T[d.lang].levels[i]}</button>`).join("")}</div>
     <div class="err" id="err">${esc(S.err)}</div>
     <button class="btn secondary" onclick="addPlayer()">+ Add player<small>Spieler hinzufügen</small></button>
   </div>
@@ -928,8 +936,8 @@ function startGame(){
   if(S.game==="charades"){ cStartGame(); return; }
   bump("started"); go("handoff");
 }
-function showChallenge(){ keepAwake(); S.current=choosePrompt(S.players[S.turn].lang, S.players[S.turn].level); S.rerolled=false; S.hintsUsed=false; S.timeUp=false; go("challenge"); }
-function reroll(){ S.current=choosePrompt(S.players[S.turn].lang, S.players[S.turn].level); S.rerolled=true; S.hintsUsed=false; render(); }
+function showChallenge(){ keepAwake(); S.current=nextPrompt(S.players[S.turn]); S.rerolled=false; S.hintsUsed=false; S.timeUp=false; go("challenge"); }
+function reroll(){ S.current=nextPrompt(S.players[S.turn]); S.rerolled=true; S.hintsUsed=false; render(); }
 function openHints(){
   S.hintsUsed=true;
   const h=$("hints"); if(h) h.classList.add("show");
@@ -1230,7 +1238,7 @@ function oPick(lang, level){
 }
 function oNewTurn(){
   const G=O.G, p=G.players[G.turn];
-  G.current = oPick(p.lang, p.level);
+  G.current = p.level===4 ? a0Prompt(p) : oPick(p.lang, p.level);
   G.tp = { hintsUsed:false, rerolled:false, timer:null, timeUp:false, kept:false, reactsBy:{}, rating:0, ratedBy:null, notes:[] };
   G.phase = "turn";
 }
@@ -1279,7 +1287,7 @@ function applyAction(from, a){
     case "lobby": if(isHost){ G.phase="lobby"; G.tp=null; } break;
     case "kick": if(isHost && G.phase==="lobby" && a.id!==G.hostId){ G.players=G.players.filter(p=>p.id!==a.id); G.declined=[...(G.declined||[]), a.id]; } break;
     case "hint": if(G.phase==="turn" && isActive) tp.hintsUsed=true; break;
-    case "reroll": if(G.phase==="turn" && isActive && !tp.rerolled && !tp.timer){ G.current=oPick(active.lang, active.level); tp.rerolled=true; tp.hintsUsed=false; } break;
+    case "reroll": if(G.phase==="turn" && isActive && !tp.rerolled && !tp.timer){ G.current=active.level===4 ? a0Prompt(active) : oPick(active.lang, active.level); tp.rerolled=true; tp.hintsUsed=false; } break;
     case "timer": if(G.phase==="turn" && (isActive||isHost) && !tp.timer){
         const total = G.current.f==="quick" ? Math.round(G.time/2) : G.time;
         tp.timer={ id:uid(), total, endsAt:Date.now()+total*1000, remainMs:total*1000 };
@@ -1329,7 +1337,7 @@ function oForm(){
     <label class="lbl">I'm practicing · Ich übe</label>
     <div class="row">${LANG_KEYS.map(k=>`<button class="chip lang ${d.lang===k?"on":""}" onclick="setDraft('lang','${k}')">${T[k].flag} ${T[k].name}</button>`).join("")}</div>
     <label class="lbl">My level · Mein Niveau</label>
-    <div class="row">${LEVELS.map((l,i)=>`<button class="chip ${d.level===i?"on":""}" onclick="setDraft('level',${i})">${l.code} · ${T[d.lang].levels[i]}</button>`).join("")}</div>`;
+    <div class="row">${LVL_ORDER.map(i=>[LEVELS[i],i]).map(([l,i])=>`<button class="chip ${d.level===i?"on":""}" onclick="setDraft('level',${i})">${l.code} · ${T[d.lang].levels[i]}</button>`).join("")}</div>`;
 }
 VIEWS.online = function(){
   const ses = loadSession();
@@ -1648,8 +1656,81 @@ CW.forEach((x,i)=>x[2].push(["کتا","بلی","ہاتھی","بندر","سانپ
 const CW_R = { ar:["kalb","qitta","fiil","qird","thu'baan","dajaaja","samaka","asad","arnab","batta","mawza","tuffaaha","biitza","buuza","qahwa","ma'karuuna","bayda","haatif","sayyaara","darraaja","taa'ira","mizalla","nazzaara","giitaar","kurat al-qadam","furshaat asnaan","sariir","miftaah","tifl radii'","matar","as-sibaaha","ar-raqs","an-nawm","at-tabkh","al-istihmaam","tanziif al-asnaan","al-qiraa'a","al-ghinaa'","al-jary","rukuub ad-darraaja","al-ittisaal bil-haatif","iltiqaat suurat selfie","at-tanziif","al-kayy","at-tasawwuq","qiyaadat as-sayyaara","sayd as-samak","mumaarasat al-yooga","at-taswiir","al-akl","at-tathaa'ub","al-'uts","al-'azf 'ala al-piyaano","at-tasalluq","raf' al-athqaal","ar-rasm","tahdiir al-haqiiba","at-tazalluj","al-bastana","tamshiyat al-kalb","tabbaakh","tabiib","shurti","musaffif sha'r","mu'allim","rajul itfaa'","tabiib asnaan","tayyaar","naadil","musawwir","'aamil binaa'","muusiiqi","fawaat al-haafila","fuqdaan al-mafaatiih","haflat 'iid miilaad","hafl zifaaf","adh-dhahaab ila at-tabiib","tasjiil al-wusuul fi al-mataar","adh-dhahaab ila as-siinama","al-maw'id al-awwal","at-taballul bil-matar","daf' al-faatuura","ash-shu'uur bil-bard","al-khawf","al-isaaba bil-humma","iiqaaf sayyaarat ujra","al-inzilaaq 'ala al-jaliid","fath hadiyya","at-takhyiim","idtiraab ar-rahalaat al-jawwiyya","al-wuquu' fi al-hubb","al-ghayra","al-ihraaj","at-tawattur","al-fawz bil-yaanasiib","zoombi","batal khaariq","qursaan","huuriyyat al-bahr","shabah","muhaqqiq","roobot","saahir","raa'id fadaa'","diinaasuur","qitaar al-malaahi","burkaan","i'saar","kitmaan as-sirr","an-nawm akthar min al-laazim","al-kadhib","muqaabalat 'amal","al-intiqaal ila manzil jadiid","ta'allum lugha","as-safar hawl al-'aalam","haflat shiwaa'","tarkiib uhjiya","at-ta'ammul","hafla mufaaji'a","mawjat harr"], ur:["kutta","billi","haathi","bandar","saanp","murghi","machhli","sher","khargosh","batakh","kela","seb","pizza","ice cream","coffee","spaghetti","anda","mobile phone","gaari","cycle","hawaai jahaaz","chhatri","ainak","guitar","football","toothbrush","bistar","chaabi","bachcha","baarish","tairaaki","naachna","sona","khaana pakaana","nahaana","daant saaf karna","parhna","gaana gaana","daurna","cycle chalaana","phone karna","selfie lena","safaai karna","istri karna","khareedaari karna","gaari chalaana","machhli pakarna","yoga karna","tasveer khainchna","khaana khaana","jamaai lena","chheenkna","piano bajaana","charhaai karna","wazan uthaana","painting karna","suitcase pack karna","skiing karna","baaghbaani","kutte ko sair karaana","baawarchi","doctor","police waala","hajjaam / beautician","ustaad / ustaani","fire fighter","daanton ka doctor","pilot","waiter","photographer","mazdoor","mauseeqaar","bus chhoot jaana","chaabiyaan gum karna","saalgirah ki party","shaadi","doctor ke paas jaana","airport par check-in karna","cinema jaana","pehli mulaaqaat","baarish mein bheeg jaana","bill ada karna","sardi lagna","dar lagna","bukhaar hona","taxi rokna","barf par phisalna","tohfa kholna","camping","jet lag","mohabbat ho jaana","hasad karna","sharminda hona","zehni dabaao","lottery jeetna","zombie","superhero","behri qazzaaq","jal pari","bhoot","jaasoos","robot","jaadugar","khalaabaaz","dinosaur","roller coaster","aatish fishaan","toofaan","raaz rakhna","der tak sote rehna","jhooth bolna","naukri ka interview","ghar badalna","zabaan seekhna","duniya ki sair","barbecue","puzzle jorna","muraaqaba","surprise party","shadeed garmi"] };
 function cWord(i, lang){ const x=CW[i]; return x ? x[2][CW_LANGS.indexOf(lang)] : ""; }
 function cRoman(i, lang){ return (CW_R[lang]||[])[i]||""; }
-function cAutoDiff(players){ if(!players.length) return 0; return Math.min(3, Math.min(...players.map(p=>p.level))); }
+function cAutoDiff(players){ if(!players.length) return 0; return Math.min(3, Math.min(...players.map(p=>p.level===4?0:p.level))); }
 function cResolveDiff(d, players){ return d==="auto" ? cAutoDiff(players) : d; }
+/* ===================== A0 · FIRST WORDS (no previous knowledge) ===================== */
+LEVELS.push({code:"A0", en:"First words", de:"Erste Wörter"});
+const LVL_ORDER = [4,0,1,2,3];          // show A0 first in level pickers
+const A0_LEVEL_NAME = {en:"First words", de:"Erste Wörter", es:"Primeras palabras", pt:"Primeiras palavras", pl:"Pierwsze słowa", uk:"Перші слова", ar:"الكلمات الأولى", ur:"پہلے الفاظ"};
+const A0_FMTS = {
+  a0new:   {e:"🌱", en:"New word", de:"Neues Wort",
+            howEn:"Your coach says it first. Repeat it 3 times, slowly.", howDe:"Dein Coach sagt es vor. Sprich es 3-mal langsam nach."},
+  a0recall:{e:"🧠", en:"Remember?", de:"Weißt du es noch?",
+            howEn:"Say the word for this picture. Stuck? Tap help.", howDe:"Sag das Wort zum Bild. Hängst du? Tippe auf Hilfe."},
+  a0sent:  {e:"🧩", en:"Mini sentence", de:"Mini-Satz",
+            howEn:"Read it out loud. Then say it again with another word you know.", howDe:"Lies es laut vor. Dann sag es nochmal mit einem anderen Wort, das du kennst."}
+};
+Object.entries(A0_FMTS).forEach(([k,f])=>{ FMTS[k]={en:f.en, de:f.de, e:f.e, howEn:f.howEn, howDe:f.howDe}; });
+LANG_KEYS.forEach(L=>{
+  const X=T[L];
+  if(X.levels && X.levels.length<5) X.levels.push(A0_LEVEL_NAME[L]);
+  if(X.tasks && X.tasks.length<5) X.tasks.push("Say it out loud — slowly and clearly. Mistakes are welcome! · Sag es laut – langsam und deutlich. Fehler sind willkommen!");
+  if(X.tasksR && X.tasksR.length<5) X.tasksR.push("");
+  X.fmt=X.fmt||{}; X.how=X.how||{};
+  Object.entries(A0_FMTS).forEach(([k,f])=>{ X.fmt[k]=`${f.en} · ${f.de}`; X.how[k]=`${f.howEn}<br><span class="de">${f.howDe}</span>`; });
+});
+
+/* Survival phrases first: [emoji, meaning EN, meaning DE, {lang:[text, romanization]}] */
+const A0_PHRASES = [
+  ["👋","Hello","Hallo",{en:["Hello"],de:["Hallo"],es:["Hola"],pt:["Oi"],pl:["Cześć"],uk:["Привіт","pryvit"],ar:["مرحبا","marhaban"],ur:["السلام علیکم","assalaam-o-alaikum"]}],
+  ["😊","Thank you","Danke",{en:["Thank you"],de:["Danke"],es:["Gracias"],pt:["Obrigado / Obrigada"],pl:["Dziękuję"],uk:["Дякую","diakuiu"],ar:["شكرا","shukran"],ur:["شکریہ","shukriya"]}],
+  ["🙏","Please","Bitte",{en:["Please"],de:["Bitte"],es:["Por favor"],pt:["Por favor"],pl:["Proszę"],uk:["Будь ласка","bud laska"],ar:["من فضلك","min fadlak"],ur:["براہ کرم","baraah-e-karam"]}],
+  ["👍","Yes","Ja",{en:["Yes"],de:["Ja"],es:["Sí"],pt:["Sim"],pl:["Tak"],uk:["Так","tak"],ar:["نعم","na'am"],ur:["جی ہاں","jee haan"]}],
+  ["👎","No","Nein",{en:["No"],de:["Nein"],es:["No"],pt:["Não"],pl:["Nie"],uk:["Ні","ni"],ar:["لا","laa"],ur:["نہیں","nahin"]}],
+  ["🙋","My name is …","Ich heiße …",{en:["My name is …"],de:["Ich heiße …"],es:["Me llamo …"],pt:["Meu nome é …"],pl:["Mam na imię …"],uk:["Мене звати …","mene zvaty …"],ar:["اسمي …","ismii …"],ur:["میرا نام … ہے","mera naam … hai"]}],
+  ["🤗","How are you?","Wie geht's?",{en:["How are you?"],de:["Wie geht's?"],es:["¿Qué tal?"],pt:["Tudo bem?"],pl:["Jak się masz?"],uk:["Як справи?","yak spravy?"],ar:["كيف حالك؟","kayfa haaluk?"],ur:["آپ کیسے ہیں؟","aap kaise hain?"]}],
+  ["🌅","Good morning","Guten Morgen",{en:["Good morning"],de:["Guten Morgen"],es:["Buenos días"],pt:["Bom dia"],pl:["Dzień dobry"],uk:["Доброго ранку","dobroho ranku"],ar:["صباح الخير","sabaah al-khayr"],ur:["صبح بخیر","subah bakhair"]}],
+  ["😬","Sorry","Entschuldigung",{en:["Sorry"],de:["Entschuldigung"],es:["Perdón"],pt:["Desculpa"],pl:["Przepraszam"],uk:["Вибачте","vybachte"],ar:["آسف","aasif"],ur:["معاف کیجیے","maaf kijiye"]}],
+  ["🖐️","Goodbye","Tschüss",{en:["Goodbye"],de:["Tschüss"],es:["Adiós"],pt:["Tchau"],pl:["Do widzenia"],uk:["До побачення","do pobachennia"],ar:["مع السلامة","ma'a as-salaama"],ur:["خدا حافظ","khuda haafiz"]}]
+];
+/* Everyday picture words from the Charades list (single things; plurals and abstract words left out) */
+const A0_SKIP = ["🍝","👓","🍦","⚽","🌧️"];
+const A0_NOUNS = CW.map((x,i)=>i).filter(i=>CW[i][1]===0 && !A0_SKIP.includes(CW[i][0]));
+const A0_FRAME = { en:["Here is the {w}.",""], de:["Hier ist {w}.",""], es:["Aquí está {w}.",""], pt:["Aqui está {w}.",""], pl:["Tu jest {w}.",""],
+                   uk:["Ось {w}.","os {r}."], ar:["هنا {w}.","huna {r}."], ur:["یہ {w} ہے۔","yeh {r} hai."] };
+
+const UK_LAT = {"а":"a","б":"b","в":"v","г":"h","ґ":"g","д":"d","е":"e","є":"ie","ж":"zh","з":"z","и":"y","і":"i","ї":"i","й":"i","к":"k","л":"l","м":"m","н":"n","о":"o","п":"p","р":"r","с":"s","т":"t","у":"u","ф":"f","х":"kh","ц":"ts","ч":"ch","ш":"sh","щ":"shch","ь":"","ю":"iu","я":"ia","'":"","’":""};
+function ukLatin(t){ return String(t||"").toLowerCase().split("").map(ch=>UK_LAT[ch]!==undefined?UK_LAT[ch]:ch).join(""); }
+function a0Item(id, L){
+  // id "p3" = phrase 3, "n12" = picture word with CW index 12
+  if(id[0]==="p"){ const x=A0_PHRASES[+id.slice(1)], v=x[3][L]||x[3].en; return {e:x[0], w:v[0], r:v[1]||"", meanEn:x[1], meanDe:x[2]}; }
+  const i=+id.slice(1), w=cWord(i,L); return {e:CW[i][0], w, r:cRoman(i,L) || (L==="uk" ? ukLatin(w) : ""), meanEn:CW[i][2][0], meanDe:CW[i][2][1], noun:i};
+}
+function a0Prompt(p){
+  const L=p.lang, st=p.a0||(p.a0={n:0, seen:[], next:0});
+  const order=[]; for(let k=0;k<Math.max(A0_PHRASES.length, A0_NOUNS.length);k++){ if(k<A0_PHRASES.length) order.push("p"+k); if(k<A0_NOUNS.length) order.push("n"+A0_NOUNS[k]); }
+  const stage = st.n % 3;   // 0 new · 1 remember · 2 mini sentence
+  st.n++;
+  const fresh = () => { const id=order[st.next % order.length]; st.next++; if(!st.seen.includes(id)) st.seen.push(id); return id; };
+  const meaning = it => (L==="en" ? [it.meanDe] : L==="de" ? [it.meanEn] : [`${it.meanEn} · ${it.meanDe}`]);
+  if(stage===1 && st.seen.length){
+    const id=pick(st.seen), it=a0Item(id,L);
+    return {f:"a0recall", c:"everyday", id:`${L}-a0-r-${id}-${st.n}`, t:`${it.e}  = ?`, r:"", w:[it.w], wr:[it.r]};
+  }
+  const learned=st.seen.filter(id=>id[0]==="n");
+  if(stage===2 && learned.length){
+    // only words already learned: the newest one, unless it was in the last sentence
+    const others=learned.filter(id=>id!==st.lastSent);
+    const id = others.length ? others[others.length-1] : learned[learned.length-1];
+    st.lastSent=id;
+    const it=a0Item(id,L), fr=A0_FRAME[L]||A0_FRAME.en;
+    const t=fr[0].replace("{w}", it.w), r=(fr[1] && it.r) ? fr[1].replace("{r}", it.r) : "";
+    return {f:"a0sent", c:"everyday", id:`${L}-a0-s-${id}-${st.n}`, t:`${it.e}  ${t}`, r, w:[it.w, ...meaning(it)], wr:[it.r]};
+  }
+  const id=fresh(), it=a0Item(id,L);
+  return {f:"a0new", c:"everyday", id:`${L}-a0-n-${id}-${st.n}`, t:`${it.e}  ${it.w}`, r:it.r, w:meaning(it), wr:[]};
+}
+
 function cPick(diff, used){
   let pool = CW.map((x,i)=>i).filter(i => diff==="mix" || CW[i][1]===diff);
   let free = pool.filter(i=>!used.includes(i));
@@ -1940,6 +2021,7 @@ function chatAllowed(){ return S.screen==="lobby" && O.G && O.status!=="idle" &&
 function renderChat(){
   let box=$("ochat");
   document.body.classList.toggle("has-chat", chatAllowed());
+  document.body.classList.toggle("chat-open", !!(chatAllowed() && O.chatOpen));
   if(!chatAllowed()){ if(box) box.remove(); return; }
   if(!box){ box=document.createElement("div"); box.id="ochat"; document.body.appendChild(box); }
   const msgs=O.G.chat||[], unread=Math.max(0, msgs.length-(O.chatSeen||0));
@@ -2358,7 +2440,7 @@ VIEWS.account = function(){
       <label class="lbl">I'm practicing · Ich übe</label>
       <div class="row">${LANG_KEYS.map(k=>`<button class="chip lang ${pf.lang===k?"on":""}" onclick="setPf('lang','${k}')">${T[k].flag} ${T[k].name}</button>`).join("")}</div>
       <label class="lbl">My level · Mein Niveau</label>
-      <div class="row">${LEVELS.map((l,i)=>`<button class="chip ${pf.level===i?"on":""}" onclick="setPf('level',${i})">${l.code} · ${T[pf.lang].levels[i]}</button>`).join("")}</div>
+      <div class="row">${LVL_ORDER.map(i=>[LEVELS[i],i]).map(([l,i])=>`<button class="chip ${pf.level===i?"on":""}" onclick="setPf('level',${i})">${l.code} · ${T[pf.lang].levels[i]}</button>`).join("")}</div>
       ${msg}
       <button class="btn primary" onclick="saveProfile()" ${A.busy?"disabled":""}>💾 Save · Speichern</button>
       ${A.editing?`<button class="btn ghost" onclick="A.editing=false;A.pf=null;A.err='';render()">Cancel · Abbrechen</button>`:""}
