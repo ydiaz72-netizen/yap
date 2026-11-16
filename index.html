@@ -223,10 +223,14 @@
   .sbox{background:var(--plum-soft);border-radius:14px;padding:10px 6px;text-align:center;display:flex;flex-direction:column}
   .sbox b{font:700 24px Fredoka,Nunito,sans-serif;color:var(--plum)}
   .sbox span{font-size:12px;color:#6b6178;line-height:1.2}
-  .bars{display:flex;align-items:flex-end;gap:6px;height:110px;padding-top:6px}
-  .bar{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:2px}
-  .bar i{display:block;width:100%;background:var(--coral);border-radius:8px 8px 3px 3px;min-height:6px}
-  .bar span{font-size:12px;font-weight:700;color:#6b6178}
+  .pchart{display:flex;justify-content:space-around;gap:4px;margin-top:8px}
+  .pcol{flex:1;max-width:44px;display:flex;flex-direction:column;align-items:center;gap:4px}
+  .pval{font:600 14px Fredoka,Nunito,sans-serif;color:#5e566e}
+  .ptrack{width:14px;height:84px;border-radius:999px;background:var(--plum-soft);display:flex;align-items:flex-end;overflow:hidden}
+  .pfill{display:block;width:100%;border-radius:999px;background:var(--coral);min-height:6px}
+  .pcol.best .pfill{background:var(--plum)}
+  .pcol.best .pval{color:var(--plum)}
+  .pdate{font-size:11px;font-weight:700;color:#6e6680;white-space:nowrap}
   .hrow{display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;border-top:1px solid var(--line);padding:10px 2px;text-align:left;font:inherit;color:var(--ink);cursor:pointer}
   .hrow:first-of-type{border-top:none}
   .hico{font-size:26px}
@@ -2343,7 +2347,8 @@ function acctStats(gs){
       <div class="sbox"><b>${R?R.e:"–"}</b><span>${R?esc(R.en):"coach rating"}</span></div>
     </div>
     ${last.length>1?`<h3 style="margin-top:14px">📈 Last ${last.length} games <span class="de">· Letzte Spiele</span></h3>
-    <div class="bars">${last.map(g=>`<div class="bar" title="${g.score}"><i style="height:${Math.max(6,Math.round((g.score||0)/mx*100))}%"></i><span>${g.score||0}</span></div>`).join("")}</div>`:""}
+    <div class="pchart" role="img" aria-label="Scores of your last ${last.length} games">${last.map(g=>`<div class="pcol ${(g.score||0)===mx?"best":""}" title="${g.score||0} · ${fmtDate(g.played_at)}"><span class="pval">${g.score||0}</span><span class="ptrack"><i class="pfill" style="height:${Math.max(7,Math.round((g.score||0)/mx*100))}%"></i></span><span class="pdate">${fmtDate(g.played_at).slice(0,5)}</span></div>`).join("")}</div>
+    <p class="note center" style="margin:6px 0 0">💜 = your best · dein bester Wert</p>`:""}
     <div class="row" style="margin-top:10px">${Object.entries(langs).map(([l,n])=>T[l]?`<span class="feat">${T[l].flag} ${T[l].name} · ${n}</span>`:"").join("")}</div>`;
 }
 function acctHistory(gs){
