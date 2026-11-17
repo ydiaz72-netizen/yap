@@ -276,6 +276,16 @@
   .shrow .shico{width:42px;height:42px;font-size:20px;border-radius:12px}
   .shrow .rt{font-weight:800;line-height:1.25}
   .shrow .btn{width:auto;margin:0;padding:9px 14px;font-size:14px;flex:none}
+  .pvov{position:fixed;inset:0;z-index:200;background:rgba(27,42,65,.55);display:flex;align-items:center;justify-content:center;padding:16px}
+  .pvbox{background:var(--bg);border-radius:20px;width:100%;max-width:880px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+  .pvhd{display:flex;align-items:center;gap:10px;justify-content:space-between;padding:12px 14px;background:#fff;border-bottom:1px solid var(--line)}
+  .pvhd b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pvbody{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;align-items:center;gap:12px}
+  .pvpage{display:block;background:#fff;border-radius:6px;box-shadow:0 2px 10px rgba(27,42,65,.15);max-width:100%;height:auto}
+  .pvtxt{white-space:pre-wrap;background:#fff;border-radius:10px;padding:14px;width:100%;margin:0;font-size:14px}
+  .pvft{padding:10px 14px;background:#fff;border-top:1px solid var(--line)}
+  .pvft .btn{margin:0}
+  @media (max-width:699px){ .pvov{padding:0} .pvbox{max-height:100vh;height:100%;border-radius:0} .pvbody{padding:10px} }
   .shacts{display:flex;gap:8px;margin-top:10px}
   .shacts .btn{margin:0}
   .shacts .shpv{width:auto;flex:none;background:#fff;color:var(--ink);border:1.5px solid var(--line)}
@@ -4710,22 +4720,64 @@ async function shLoad(){
 
 const SH_PREVIEW=/\.(pdf|png|jpe?g|webp|gif|mp3|m4a|wav|txt)$/i;
 function shCanPreview(it){ return !it.has_link && SH_PREVIEW.test(it.file_name||""); }
+/* In-app preview: shows the pages inside PonteTalk (doesn't depend on the browser's PDF settings) */
+let PDFJS=null;
+async function shPdfjs(){
+  if(PDFJS) return PDFJS;
+  const m=await import("/pdfjs/pdf.min.js");
+  m.GlobalWorkerOptions.workerSrc="/pdfjs/pdf.worker.min.js";
+  return PDFJS=m;
+}
+function shPvClose(){
+  const o=document.getElementById("pvov"); if(!o) return;
+  (o._urls||[]).forEach(u=>URL.revokeObjectURL(u)); o.remove();
+  document.body.style.overflow=""; document.removeEventListener("keydown", shPvKey);
+}
+function shPvKey(e){ if(e.key==="Escape") shPvClose(); }
 async function shPreview(id){
   if(!A.user){ A.ret=S.screen==='shopitem'?'shopitem':'shop'; A.err=""; A.msg=""; go("account"); return; }
-  const w=window.open("", "_blank");   // open now so the browser doesn't block it
-  if(w){ try{ w.document.title="PonteTalk"; w.document.body.style.cssText="font:16px sans-serif;display:grid;place-items:center;height:100vh;margin:0;color:#1B2A41;background:#FAF7F2"; w.document.body.textContent="Loading preview… · Vorschau lädt…"; }catch(e){} }
-  SH.err="";
+  const it=(SH.list||[]).concat(SH.one?[SH.one]:[]).find(x=>x.id===id) || {};
+  shPvClose();
+  const o=document.createElement("div"); o.id="pvov"; o.className="pvov"; o._urls=[];
+  o.innerHTML=`<div class="pvbox" role="dialog" aria-modal="true" aria-label="Preview">
+    <div class="pvhd"><b>👁 ${esc(it.title||"Preview")}</b><button class="chip" onclick="shPvClose()" aria-label="Close">✕</button></div>
+    <div class="pvbody" id="pvbody"><p class="note center" style="margin:40px 0">Loading preview… · Vorschau lädt…</p></div>
+    <div class="pvft"><button class="btn primary" onclick="shPvClose();shGet('${id}')">⬇ Download</button></div></div>`;
+  o.addEventListener("click", e=>{ if(e.target===o) shPvClose(); });
+  document.body.appendChild(o); document.body.style.overflow="hidden"; document.addEventListener("keydown", shPvKey);
+  const body=document.getElementById("pvbody");
+  const fail=msg=>{ if(document.getElementById("pvov")===o) body.innerHTML=`<div class="err">${esc(msg)}</div>`; };
   try{
     const r=await A.sb.rpc("pt_shop_preview",{ p_item:id });
     if(r.error) throw r.error;
-    let url=r.data.url;
-    if(!url){
-      const u=await A.sb.storage.from("shop").createSignedUrl(r.data.path, 600);
-      if(u.error) throw u.error;
-      url=u.data.signedUrl;
+    const u=await A.sb.storage.from("shop").createSignedUrl(r.data.path, 600);
+    if(u.error) throw u.error;
+    const res=await fetch(u.data.signedUrl); if(!res.ok) throw new Error("Could not load the file ("+res.status+")");
+    const name=(r.data.name||it.file_name||"").toLowerCase();
+    if(document.getElementById("pvov")!==o) return;
+    if(/\.pdf$/.test(name)){
+      const pdfjs=await shPdfjs();
+      const doc=await pdfjs.getDocument({ data:new Uint8Array(await res.arrayBuffer()) }).promise;
+      const MAX=10, n=Math.min(doc.numPages, MAX);
+      body.innerHTML="";
+      const w=Math.min(body.clientWidth-4, 820), dpr=Math.min(window.devicePixelRatio||1, 2);
+      for(let i=1;i<=n;i++){
+        if(document.getElementById("pvov")!==o) return;
+        const pg=await doc.getPage(i), vp0=pg.getViewport({ scale:1 }), sc=w/vp0.width, vp=pg.getViewport({ scale:sc*dpr });
+        const c=document.createElement("canvas"); c.width=vp.width; c.height=vp.height; c.style.width=w+"px"; c.className="pvpage";
+        body.appendChild(c);
+        await pg.render({ canvasContext:c.getContext("2d"), viewport:vp }).promise;
+      }
+      const note=document.createElement("p"); note.className="note center";
+      note.textContent = doc.numPages>MAX ? `Showing ${MAX} of ${doc.numPages} pages. Download to see everything.` : `${doc.numPages} page${doc.numPages>1?"s":""}`;
+      body.appendChild(note);
+    }else{
+      const blob=await res.blob(), url=URL.createObjectURL(blob); o._urls.push(url);
+      if(/\.(png|jpe?g|webp|gif)$/.test(name)) body.innerHTML=`<img src="${url}" alt="" class="pvpage" style="max-width:100%">`;
+      else if(/\.(mp3|m4a|wav)$/.test(name)) body.innerHTML=`<div class="center" style="padding:30px 0"><div style="font-size:44px">🎧</div><audio controls src="${url}" style="width:100%;margin-top:10px"></audio></div>`;
+      else { const t=await blob.text(); body.innerHTML=`<pre class="pvtxt">${esc(t.slice(0,20000))}${t.length>20000?"\n…":""}</pre>`; }
     }
-    if(w){ try{ w.opener=null; }catch(e){} w.location.href=url; } else { window.open(url, "_blank", "noopener"); }
-  }catch(e){ if(w) w.close(); SH.err=shErr(e); xr(); }
+  }catch(e){ fail(/pt_shop_preview/.test(String(e&&e.message))?"Preview isn't switched on yet (step 30). · Vorschau noch nicht aktiv.":shErr(e)); }
 }
 function shCard(it){
   const k=shKind(it.kind), t=T[it.language];
