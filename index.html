@@ -113,6 +113,13 @@
   #bnav button svg{width:22px;height:22px}
   #bnav{gap:2px;padding-left:6px;padding-right:6px}
   #bnav button{font-size:12px}
+  /* ---- Session materials ---- */
+  .mrow{display:grid;grid-template-columns:1fr auto;gap:6px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px;margin-top:8px}
+  .mrow input{font-size:15px;padding:9px 12px;grid-column:1;min-width:0}
+  .mrow .mx{grid-column:2;grid-row:1 / span 2;align-self:center}
+  .mrow .mshop{grid-column:1;font-weight:800;padding:8px 4px}
+  .mats{margin-top:8px;display:flex;flex-direction:column;gap:6px}
+  .mats a,.mats button.mlink{display:flex;align-items:center;gap:8px;background:var(--plum-soft);color:var(--plum);border:none;border-radius:12px;padding:10px 12px;font:700 14px 'Plus Jakarta Sans',sans-serif;text-decoration:none;cursor:pointer;text-align:left}
   /* ---- Profile photos ---- */
   img.pav{object-fit:cover;padding:0;background:var(--plum-soft)}
   .avs{width:22px;height:22px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:2px}
@@ -2905,6 +2912,70 @@ function langsLine(arr){
 
 
 
+
+/* ===================== SESSION MATERIALS ===================== */
+const ML = {};   // activity_id -> [{label,url,shop_item}]  (only host / joined people get rows)
+async function mLoad(){
+  if(!A.user || !A.sb) return;
+  try{
+    const { data, error } = await A.sb.from("activity_materials").select("activity_id,position,label,url,shop_item").order("position");
+    if(error) return;
+    Object.keys(ML).forEach(k=>delete ML[k]);
+    (data||[]).forEach(r=>{ (ML[r.activity_id]=ML[r.activity_id]||[]).push({ label:r.label, url:r.url, shop_item:r.shop_item }); });
+    if(["board","session","home"].includes(S.screen)) xr();
+  }catch(e){}
+}
+function mList(s){
+  const id=s.activity_id, L=ML[id]||[];
+  if(!L.length || !A.user || !(s.is_host || s.my_status==="joined")) return "";
+  return `<div class="mats"><div class="note" style="margin:0;font-weight:800">📎 Materials · Materialien</div>
+    ${L.map(m=>m.shop_item
+      ? `<button class="mlink" onclick="shGet('${m.shop_item}')">🛍 ${esc(m.label)} <span class="note" style="margin:0 0 0 auto">PonteShop ⬇</span></button>`
+      : `<a href="${esc(m.url)}" target="_blank" rel="noopener noreferrer">📄 ${esc(m.label)} <span style="margin-left:auto">↗</span></a>`).join("")}</div>`;
+}
+function hMatAdd(){ if((H.mats||[]).length>=3) return; H.mats=(H.mats||[]).concat([{ label:"", url:"", shop_item:null }]); xr(); }
+function hMatDel(i){ H.mats.splice(i,1); xr(); }
+async function hMatShop(){
+  if((H.mats||[]).length>=3) return;
+  if(!SH.list){ await shLoad(); }
+  const list=(SH.list||[]).filter(it=>it.published);
+  const box=document.createElement("div"); box.className="sheet-bg"; box.id="matShop";
+  box.innerHTML=`<div class="sheet" role="dialog" aria-label="Pick from PonteShop">
+    <div class="nbhead"><h3 style="margin:0">🛍 Pick from PonteShop</h3><button class="chip" aria-label="Close" onclick="document.getElementById('matShop').remove()">✕</button></div>
+    ${list.length ? list.map(it=>{ const k=shKind(it.kind), t=T[it.language];
+        return `<button class="mlink" style="width:100%;margin-top:6px;display:flex;gap:8px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font:700 14px 'Plus Jakarta Sans',sans-serif;cursor:pointer;text-align:left" onclick="hMatPick('${it.id}')">${k[1]} ${esc(it.title)}<span class="note" style="margin:0 0 0 auto">${t?t.flag:"🌍"} ${it.level==null?"":RANKS[it.level]}</span></button>`; }).join("")
+      : `<p class="note center">No resources in PonteShop yet · Noch keine Materialien</p>`}
+  </div>`;
+  box.addEventListener("click",e=>{ if(e.target===box) box.remove(); });
+  document.body.appendChild(box);
+}
+function hMatPick(id){
+  const it=(SH.list||[]).find(x=>x.id===id); const b=document.getElementById("matShop"); if(b) b.remove();
+  if(!it || (H.mats||[]).length>=3) return;
+  H.mats=(H.mats||[]).concat([{ label:it.title.slice(0,60), url:null, shop_item:it.id }]); xr();
+}
+function hMatsClean(){
+  const out=[], L=H.mats||[];
+  for(let i=0;i<L.length;i++){
+    const m=L[i], label=(m.label||"").trim().slice(0,60);
+    if(m.shop_item){ out.push({ label:label||"PonteShop resource", url:null, shop_item:m.shop_item }); continue; }
+    const url=vClean(m.url);
+    if(!url && !label) continue;
+    if(!vValid(url)) return { err:`Material ${i+1}: please paste the full link (https://…) · Bitte vollständigen Link einfügen` };
+    out.push({ label:label||`Material ${out.length+1}`, url, shop_item:null });
+  }
+  return { list:out.slice(0,3) };
+}
+async function hSaveMats(id, list, was){
+  if(JSON.stringify(list)===JSON.stringify(was||[])) return;
+  const d=await A.sb.from("activity_materials").delete().eq("activity_id",id); if(d.error) throw d.error;
+  if(list.length){
+    const r=await A.sb.from("activity_materials").insert(list.map((m,i)=>({ activity_id:id, position:i, label:m.label, url:m.url, shop_item:m.shop_item })));
+    if(r.error) throw r.error;
+  }
+  ML[id]=list.slice();
+}
+
 /* ===================== PROFILE PHOTOS ===================== */
 const AV = {};   // user_id -> photo URL ("" = none)
 function avUrl(uid){ if(A.user && uid===A.user.id) return (A.profile&&A.profile.avatar_url)||""; return AV[uid]||""; }
@@ -3301,7 +3372,7 @@ async function vLoad(){
     if(error) return;
     Object.keys(VL).forEach(k=>delete VL[k]);
     (data||[]).forEach(r=>{ VL[r.activity_id]={ url:r.url, provider:r.provider }; });
-    ciLoad(); avCollect();
+    ciLoad(); avCollect(); mLoad();
     if(["board","session","home"].includes(S.screen)) xr();
   }catch(e){}
 }
@@ -3451,6 +3522,7 @@ function bCard(s){
     ${act}
     ${ciBtn(s)}
     ${vLine(s)}
+    ${mList(s)}
     <div class="row" style="justify-content:center;margin-top:8px">${s.is_host && !started ? `<button class="chip" onclick="hEdit('${id}')">✏️ Edit · Bearbeiten</button>` : ""}<button class="chip" onclick="sShare('${id}')">🔗 ${s.is_host?"Share invite link":"Share"}</button></div>
     ${s.is_host && !started ? `<p class="center" style="margin:10px 0 0"><button class="linkbtn dangertext" style="font-size:13px" onclick="bCancel('${id}')">Cancel session · Absagen</button></p>` : ""}
   </div>`;
@@ -3544,7 +3616,7 @@ function hOpen(){
     const d=new Date(Date.now()+86400000);
     Object.assign(H,{ bal:false, sa:2, sb:2, type:"conversation", game:"speak", title:"", a:"", b:"", min:1, max:3,
       date:`${d.getFullYear()}-${hPad(d.getMonth()+1)}-${hPad(d.getDate())}`, time:"19:00",
-      dur:45, seats:4, mode:"instant", topics:[], note:"", video:"", started:true });
+      dur:45, seats:4, mode:"instant", topics:[], note:"", video:"", mats:[], matsWas:[], started:true });
   }
   go("host"); hPrefill();
 }
@@ -3588,7 +3660,8 @@ function hEdit(id){
     min:s.level_min, max:s.level_max, date:`${d.getFullYear()}-${hPad(d.getMonth()+1)}-${hPad(d.getDate())}`,
     time:`${hPad(d.getHours())}:${hPad(d.getMinutes())}`, dur:s.duration_min, seats:s.seats, mode:s.join_mode,
     myLangs:(s.host_languages||[]).map(x=>({ code:x.code, role:x.role })),
-    topics:(s.topics||[]).slice(), note:s.note||"", video:VL[id]?VL[id].url:"", videoWas:VL[id]?VL[id].url:"", started:true, checked:true, adult:true, err:"", busy:false,
+    topics:(s.topics||[]).slice(), note:s.note||"", video:VL[id]?VL[id].url:"", videoWas:VL[id]?VL[id].url:"",
+    mats:(ML[id]||[]).map(m=>Object.assign({},m)), matsWas:(ML[id]||[]).map(m=>Object.assign({},m)), started:true, checked:true, adult:true, err:"", busy:false,
     bal:!!s.balanced, sa:s.seats_a||Math.max(1,Math.floor(s.seats/2)), sb:s.seats_b||Math.max(1,Math.ceil(s.seats/2)) });
   go("host");
 }
@@ -3624,6 +3697,8 @@ async function hPost(){
   if(H.editId && H.seats < (H.editTaken||0)){ H.err=BERR.seats_below_joined; xr(); return; }
   const title=((H.title||"").trim() || hDefaultTitle()).slice(0,80);
   if(title.length<3){ H.err="Add a short title · Gib einen kurzen Titel ein"; xr(); return; }
+  const mc=hMatsClean();
+  if(mc.err){ H.err=mc.err; xr(); return; }
   const video=vClean(H.video);
   if(video && !vValid(video)){ H.err="The video link doesn't look right. It should start with https:// · Der Video-Link sieht falsch aus"; xr(); return; }
   H.busy=true; xr();
@@ -3638,15 +3713,16 @@ async function hPost(){
       const { error } = await A.sb.from("activities").update(row).eq("id",H.editId);
       if(error) throw error;
       await hSaveLink(H.editId, video, H.videoWas);
+      await hSaveMats(H.editId, mc.list, H.matsWas);
       H.editId=null; H.started=false; H.busy=false;
       bToast("✅ Changes saved. People in the session are told about time changes · Gespeichert");
       bOpen(); return;
     }
     const { data:made, error } = await A.sb.from("activities").insert(row).select("id").single();
     if(error) throw error;
-    if(video && made && made.id){
-      try{ await hSaveLink(made.id, video, ""); }
-      catch(e){ H.started=false; H.busy=false; bToast("📣 Session posted, but the video link didn't save. Tap ✏️ Edit to add it · Link nicht gespeichert"); bOpen(); return; }
+    if((video || mc.list.length) && made && made.id){
+      try{ await hSaveLink(made.id, video, ""); await hSaveMats(made.id, mc.list, []); }
+      catch(e){ H.started=false; H.busy=false; bToast("📣 Session posted, but the video link or materials didn't save. Tap ✏️ Edit to add them · Nicht alles gespeichert"); bOpen(); return; }
     }
     H.started=false; H.busy=false;
     bToast("📣 Your session is on the board! · Deine Session ist online!");
@@ -3721,6 +3797,14 @@ VIEWS.host = function(){
       <p class="note" style="margin:8px 0 0">🔒 Only people who joined see the link. It's also in their reminder emails and calendar file. · Nur Teilnehmende sehen den Link.</p>
       ${vProvider(H.video)==="jitsi"?`<p class="note" style="margin:6px 0 0">Jitsi is free and people join without an account. As the host, you sign in once (Google or GitHub) to start the room. Free rooms last up to 95 minutes. · Jitsi ist kostenlos; als Host meldest du dich kurz an. Räume laufen bis zu 95 Minuten.</p>`:""}
     </div>
+    <label class="lbl">📎 Materials (optional) · Materialien</label>
+    ${(H.mats||[]).map((m,i)=>`<div class="mrow">
+      ${m.shop_item ? `<div class="mshop">🛍 ${esc(m.label)} <span class="note" style="margin:0">· PonteShop</span></div>`
+        : `<input type="text" maxlength="60" placeholder="Label, e.g. Vocabulary list" value="${esc(m.label||"")}" oninput="H.mats[${i}].label=this.value" aria-label="Material ${i+1} label">
+           <input type="text" inputmode="url" maxlength="500" placeholder="https://docs.google.com/…" value="${esc(m.url||"")}" oninput="H.mats[${i}].url=this.value" aria-label="Material ${i+1} link">`}
+      <button class="chip mx" aria-label="Remove material ${i+1}" onclick="hMatDel(${i})">✕</button></div>`).join("")}
+    ${(H.mats||[]).length<3?`<div class="row" style="margin-top:8px"><button class="chip" onclick="hMatAdd()">＋ Add a link</button><button class="chip" onclick="hMatShop()">🛍 Pick from PonteShop</button></div>`:""}
+    <p class="note" style="margin:6px 0 0">Up to 3. Only people who joined see them. Tip: set Google Docs to <b>"Viewer"</b> before sharing, so nobody can change your file. · Nur Teilnehmende sehen sie.</p>
     ${H.err?`<div class="err">${esc(H.err)}</div>`:""}
     <button class="btn primary" onclick="hPost()" ${H.busy?"disabled":""}>${H.busy?"Saving… · Speichert…":H.editId?"💾 Save changes · Speichern":"📣 Post session · Veröffentlichen"}</button>
     ${H.editId?`<button class="btn ghost" onclick="hCancelEdit()">Cancel · Abbrechen</button>`:""}
@@ -4114,7 +4198,7 @@ function icsFor(s){
   return ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//PonteTalk//EN","BEGIN:VEVENT",
     "UID:"+s.activity_id+"@pontetalk","DTSTAMP:"+f(new Date()),"DTSTART:"+f(s.starts_at),"DTEND:"+f(end),
     "SUMMARY:"+txt("PonteTalk: "+s.title),
-    "DESCRIPTION:"+txt((vid?"Video call: "+vid+"\n\n":"")+"Session on PonteTalk: "+url),
+    "DESCRIPTION:"+txt((vid?"Video call: "+vid+"\n\n":"")+((ML[s.activity_id]||[]).length?"Materials:\n"+(ML[s.activity_id]||[]).map(m=>"- "+m.label+": "+(m.url||(url.split("?")[0]+"?shop"))).join("\n")+"\n\n":"")+"Session on PonteTalk: "+url),
     ...(vid?["LOCATION:"+txt(vid)]:[]), "URL:"+(vid||url),
     "BEGIN:VALARM","TRIGGER:-PT15M","ACTION:DISPLAY","DESCRIPTION:"+txt(s.title),"END:VALARM",
     "END:VEVENT","END:VCALENDAR"].join("\r\n");
@@ -4561,6 +4645,7 @@ try{ const u=new URL(location.href); if(u.searchParams.get("auth")==="google" ||
 // supabase.js loads with 'defer', so it is ready only once the page has finished loading
 if(window.supabase) authInit(); else document.addEventListener("DOMContentLoaded", authInit);
 try{ const sid=new URLSearchParams(location.search).get("s"); if(sid && /^[0-9a-f-]{36}$/i.test(sid)){ S.sid=sid; S.screen="session"; document.addEventListener("DOMContentLoaded", ()=>bLoad()); } }catch(e){}
+try{ if(new URLSearchParams(location.search).has("shop")){ S.screen="shop"; document.addEventListener("DOMContentLoaded", ()=>shLoad()); } }catch(e){}
 try{ if(new URLSearchParams(location.search).has("cafes")){ S.screen="cafes"; document.addEventListener("DOMContentLoaded", ()=>cfLoad()); } }catch(e){}
 try{ if(new URLSearchParams(location.search).has("board")){ S.screen="board"; document.addEventListener("DOMContentLoaded", ()=>bLoad()); } }catch(e){}
 
