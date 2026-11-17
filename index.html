@@ -113,6 +113,28 @@
   #bnav button svg{width:22px;height:22px}
   #bnav{gap:2px;padding-left:6px;padding-right:6px}
   #bnav button{font-size:12px}
+  /* ---- Session views + private ---- */
+  .bbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:4px 0 10px}
+  .bbar .note{margin:0}
+  .vsw{display:flex;gap:2px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:3px}
+  .vsw button{border:none;background:none;border-radius:9px;padding:7px 10px;font:800 13px 'Plus Jakarta Sans',Nunito,sans-serif;color:var(--muted);cursor:pointer}
+  .vsw button.on{background:var(--plum);color:#fff}
+  .blist{display:flex;flex-direction:column;gap:8px}
+  .brow{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 12px;width:100%;text-align:left;cursor:pointer;font:inherit;color:inherit}
+  .brow:hover{border-color:var(--plum)}
+  .brow.mine{border-color:var(--teal);border-width:2px}
+  .brow .bt{flex:none;min-width:58px;text-align:center;background:var(--bg);border-radius:10px;padding:6px 4px}
+  .brow .bt i{display:block;font-style:normal;font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase}
+  .brow .bt b{font-size:16px}
+  .brow .bm{flex:1;min-width:0}
+  .brow .brt{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .brow .bs{flex:none;font-size:12px;font-weight:800;border-radius:999px;padding:4px 9px;background:var(--plum-soft);color:var(--plum);white-space:nowrap}
+  .brow .bs.ok{background:var(--teal-soft);color:#1F6B63}
+  .brow .bs.full{background:#F1EEE8;color:var(--muted)}
+  .brow .chev{flex:none;color:var(--muted);font-size:20px}
+  .dayh{margin:16px 0 8px;font-size:15px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+  .dayh:first-child{margin-top:4px}
+  .pvbox{background:var(--plum-soft);border-radius:14px;padding:10px 12px;margin-top:6px}
   /* ---- Session materials ---- */
   .mrow{display:grid;grid-template-columns:1fr auto;gap:6px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px;margin-top:8px}
   .mrow input{font-size:15px;padding:9px 12px;grid-column:1;min-width:0}
@@ -2913,6 +2935,49 @@ function langsLine(arr){
 
 
 
+
+/* ===================== SESSION VIEWS (cards · list · by day) ===================== */
+function bView(){ if(!B.view){ try{ B.view=localStorage.getItem("pt_bview"); }catch(e){} B.view=["cards","list","day"].includes(B.view)?B.view:"cards"; } return B.view; }
+function bSetView(v){ B.view=v; try{ localStorage.setItem("pt_bview",v); }catch(e){} xr(); }
+function bViewSwitch(){
+  const v=bView(), b=(k,l,t)=>`<button class="${v===k?"on":""}" aria-pressed="${v===k}" title="${t}" onclick="bSetView('${k}')">${l}</button>`;
+  return `<div class="vsw" role="group" aria-label="View">${b("cards","▦ Cards","Cards")}${b("list","☰ List","List")}${b("day","📅 By day","By day")}</div>`;
+}
+function bStatus(s){
+  if(s.is_host) return ["⭐ Hosting","ok"];
+  if(s.my_status==="joined") return ["✅ You're in","ok"];
+  if(s.my_status==="offered") return ["🎉 Seat for you","ok"];
+  if(s.my_status==="pending") return ["⏳ Requested",""];
+  if(s.my_status==="waitlisted") return [`🕒 #${s.my_position||"?"}`,""];
+  return s.seats_open>0 ? [`${s.seats_open} left`,""] : ["Full","full"];
+}
+function bRow(s, dayMode){
+  const d=new Date(s.starts_at), st=bStatus(s), g=s.type==="game";
+  const t=d.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
+  const day=d.toLocaleDateString("en-GB",{weekday:"short",day:"numeric"});
+  return `<button class="brow ${s.is_host||s.my_status==="joined"?"mine":""}" onclick="sOpen('${s.activity_id}')" aria-label="${esc(s.title)}, ${esc(fmtWhen(s.starts_at))}">
+    <div class="bt">${dayMode?"":`<i>${esc(day)}</i>`}<b>${t}</b></div>
+    <div class="bm"><div class="brt">${s.visibility==="private"?"🔒 ":""}${g?"🎲 ":""}${esc(s.title)}</div>
+      <div class="note" style="margin:0">${codesPair(s.language_a,s.language_b)} · ${lvlRange(s.level_min,s.level_max)} · ${s.duration_min} min</div></div>
+    <span class="bs ${st[1]}">${st[0]}</span><span class="chev" aria-hidden="true">›</span></button>`;
+}
+function bDayLabel(iso){
+  const d=new Date(iso), t0=new Date(); t0.setHours(0,0,0,0);
+  const d0=new Date(d); d0.setHours(0,0,0,0); const n=Math.round((d0-t0)/864e5);
+  const lab=d.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"});
+  return n===0?`Today · ${lab}`:n===1?`Tomorrow · ${lab}`:lab;
+}
+function bListHtml(shown){
+  const v=bView();
+  if(v==="list") return `<div class="blist">${shown.map(x=>bRow(x,false)).join("")}</div>`;
+  if(v==="day"){
+    let out="", last="";
+    shown.forEach(x=>{ const k=new Date(x.starts_at).toDateString(); if(k!==last){ if(last) out+=`</div>`; out+=`<h3 class="dayh">${esc(bDayLabel(x.starts_at))}</h3><div class="blist">`; last=k; } out+=bRow(x,true); });
+    return out+(last?`</div>`:"");
+  }
+  return `<div class="bgrid">${shown.map(bCard).join("")}</div>`;
+}
+
 /* ===================== SESSION MATERIALS ===================== */
 const ML = {};   // activity_id -> [{label,url,shop_item}]  (only host / joined people get rows)
 async function mLoad(){
@@ -3393,7 +3458,7 @@ async function bLoad(){
   B.err="";
   try{
     const sb=authClient(); if(!sb) throw new Error("offline");
-    const { data, error } = await sb.rpc("pt_board_sessions");
+    const { data, error } = await sb.rpc("pt_board_sessions", (S.screen==="session" && S.sid) ? { p_include:S.sid } : {});
     if(error) throw error;
     B.list=data||[];
     hostPeopleLoad(); vLoad();
@@ -3511,7 +3576,7 @@ function bCard(s){
       }
   }
   return `<div class="card bcard ${s.is_host||s.my_status==="joined"?"mine":""} ${s.my_status==="offered"?"offer":""}">
-    <div class="btop"><span class="feat">${g?`🎲 ${g[1]} ${g[2]}`:"💬 Conversation"}${s.balanced?" · ⚖️ Balanced":""}</span><span class="note" style="margin:0;font-weight:800">${seatsTxt}</span></div>
+    <div class="btop"><span class="feat">${g?`🎲 ${g[1]} ${g[2]}`:"💬 Conversation"}${s.balanced?" · ⚖️ Balanced":""}${s.visibility==="private"?" · 🔒 Private":""}</span><span class="note" style="margin:0;font-weight:800">${seatsTxt}</span></div>
     <div class="btitle">${esc(s.title)}</div>${sidesHtml?"":""}
     <div class="note" style="margin:0">${langPair(s.language_a,s.language_b)} · ${lvlRange(s.level_min,s.level_max)}</div>
     ${sidesHtml}
@@ -3530,20 +3595,20 @@ function bCard(s){
 VIEWS.board = function(){
   const top=`<div class="topline"><button class="chip" onclick="goHome()">← Back</button><span>Sessions</span></div>`;
   const list=B.list;
-  const shown=(list||[]).filter(s=>!B.lang || s.language_a===B.lang || s.language_b===B.lang);
+  const shown=(list||[]).filter(s=>s.visibility!=="private" || s.is_host || s.my_status).filter(s=>!B.lang || s.language_a===B.lang || s.language_b===B.lang);
   return `${top}
   <h2>${bi("Sessions","Sessions")}</h2>
   ${sessTabs("online")}
   <p class="sub" style="margin-top:0">${bi("Find a language exchange or game, or host your own.","Finde ein Sprachtreffen oder Spiel, oder biete selbst eins an.")}</p>
   <button class="btn primary" onclick="hOpen()">＋ Host a session · Session anbieten</button>
   <div class="row" style="margin:14px 0 6px">${[["","🌍 All"]].concat(LANG_KEYS.map(k=>[k,`${T[k].flag} ${esc(T[k].nameEn)}`])).map(([k,l])=>`<button class="chip ${B.lang===k?"on":""}" aria-pressed="${B.lang===k}" onclick="B.lang='${k}';xr()">${l}</button>`).join("")}</div>
-  <p class="note">🕒 Times are in your time zone (${esc(detectTz())}) · Zeiten in deiner Zeitzone</p>
+  <div class="bbar"><p class="note">🕒 Times are in your time zone (${esc(detectTz())}) · Zeiten in deiner Zeitzone</p>${bViewSwitch()}</div>
   ${B.err?`<div class="err">${esc(B.err)}</div>`:""}
   ${list===null ? `<p class="note center" style="margin-top:30px">Loading… · Lädt…</p>`
     : !shown.length ? `<div class="card center"><div style="font-size:40px">🌱</div><h3>No sessions yet · Noch keine Sessions</h3>
         <p class="note">Be the first! Host a session and others can join.<br><span class="de">Sei die/der Erste und biete eine Session an!</span></p>
         <button class="btn secondary" onclick="hOpen()">＋ Host a session · Session anbieten</button></div>`
-    : `<div class="bgrid">${shown.map(bCard).join("")}</div>`}
+    : bListHtml(shown)}
   <button class="chip" style="display:block;margin:12px auto" onclick="B.list=null;xr();bLoad()">🔄 Refresh · Aktualisieren</button>
   ${legalLinks()}`;
 };
@@ -3616,7 +3681,7 @@ function hOpen(){
     const d=new Date(Date.now()+86400000);
     Object.assign(H,{ bal:false, sa:2, sb:2, type:"conversation", game:"speak", title:"", a:"", b:"", min:1, max:3,
       date:`${d.getFullYear()}-${hPad(d.getMonth()+1)}-${hPad(d.getDate())}`, time:"19:00",
-      dur:45, seats:4, mode:"instant", topics:[], note:"", video:"", mats:[], matsWas:[], started:true });
+      dur:45, seats:4, mode:"instant", topics:[], note:"", video:"", mats:[], matsWas:[], vis:"public", started:true });
   }
   go("host"); hPrefill();
 }
@@ -3659,6 +3724,7 @@ function hEdit(id){
   Object.assign(H,{ editId:id, editTaken:s.seats-s.seats_open, type:s.type, game:s.game||"speak", title:s.title, a:s.language_a, b:s.language_b||"",
     min:s.level_min, max:s.level_max, date:`${d.getFullYear()}-${hPad(d.getMonth()+1)}-${hPad(d.getDate())}`,
     time:`${hPad(d.getHours())}:${hPad(d.getMinutes())}`, dur:s.duration_min, seats:s.seats, mode:s.join_mode,
+    vis:s.visibility||"public",
     myLangs:(s.host_languages||[]).map(x=>({ code:x.code, role:x.role })),
     topics:(s.topics||[]).slice(), note:s.note||"", video:VL[id]?VL[id].url:"", videoWas:VL[id]?VL[id].url:"",
     mats:(ML[id]||[]).map(m=>Object.assign({},m)), matsWas:(ML[id]||[]).map(m=>Object.assign({},m)), started:true, checked:true, adult:true, err:"", busy:false,
@@ -3707,7 +3773,7 @@ async function hPost(){
       note:(H.note||"").trim().slice(0,200)||null, language_a:H.a, language_b:H.b||null,
       level_min:Math.min(H.min,H.max), level_max:Math.max(H.min,H.max), seats:(H.b&&H.bal)?H.sa+H.sb:H.seats,
       balanced:!!(H.b&&H.bal), seats_a:(H.b&&H.bal)?H.sa:null, seats_b:(H.b&&H.bal)?H.sb:null,
-      starts_at:start.toISOString(), host_time_zone:detectTz(), duration_min:H.dur, join_mode:H.mode, topics:H.topics };
+      starts_at:start.toISOString(), host_time_zone:detectTz(), duration_min:H.dur, join_mode:H.mode, topics:H.topics, visibility:H.vis==="private"?"private":"public" };
     if(H.editId){
       delete row.host_id;
       const { error } = await A.sb.from("activities").update(row).eq("id",H.editId);
@@ -3725,7 +3791,7 @@ async function hPost(){
       catch(e){ H.started=false; H.busy=false; bToast("📣 Session posted, but the video link or materials didn't save. Tap ✏️ Edit to add them · Nicht alles gespeichert"); bOpen(); return; }
     }
     H.started=false; H.busy=false;
-    bToast("📣 Your session is on the board! · Deine Session ist online!");
+    bToast(H.vis==="private" ? "🔒 Private session created. Tap 🔗 Share invite link to send it · Private Session erstellt" : "📣 Your session is on the board! · Deine Session ist online!");
     bOpen();
   }catch(e){ H.busy=false; H.err=bErr(e); xr(); }
 }
@@ -3778,7 +3844,11 @@ VIEWS.host = function(){
           ? `${H.sa+H.sb} people incl. you → ${H[hs]-1} more ${esc(hl?hl.nameEn:"")} speaker${H[hs]-1===1?"":"s"} + ${H[hs==="sa"?"sb":"sa"]} ${esc((T[hs==="sa"?H.b:H.a]||{}).nameEn||"")} speaker${H[hs==="sa"?"sb":"sa"]===1?"":"s"} can join (max 6)`
           : `Total: ${H.sa+H.sb} seats (max 6). You don't count on a side, because your exchange profile doesn't list ${esc((T[H.a]||{}).nameEn||"")} or ${esc((T[H.b]||{}).nameEn||"")} as native/fluent.`}</p>`; })():""}` : ""}
     ${H.b && H.bal ? "" : `<label class="lbl">Seats (people besides you) · Plätze</label>
-    <div class="row">${[2,3,4,5,6].map(n=>H.editId&&n<(H.editTaken||0)?`<button class="chip" disabled style="opacity:.35" title="${H.editTaken} already in">${n}</button>`:chip(H.seats===n,`hSet('seats',${n})`,String(n))).join("")}</div>`}
+    <div class="row">${[1,2,3,4,5,6].map(n=>H.editId&&n<(H.editTaken||0)?`<button class="chip" disabled style="opacity:.35" title="${H.editTaken} already in">${n}</button>`:chip(H.seats===n,`hSet('seats',${n})`,n===1?"1 · one-to-one":String(n))).join("")}</div>`}
+    <label class="lbl">Who can see it · Wer kann sie sehen</label>
+    <div class="row">${chip((H.vis||"public")==="public","hSet('vis','public')","🌍 Everyone on PonteTalk")}${chip(H.vis==="private","hSet('vis','private')","🔒 Private: only people I invite")}</div>
+    ${H.vis==="private"?`<div class="pvbox"><p class="note" style="margin:0">🔒 It won't appear in the session list or suggestions. After posting, tap <b>🔗 Share invite link</b> and send it to your student or friends. Only people with the link can see and join it.<br><span class="de">Erscheint nicht in der Liste. Teile den Einladungslink.</span></p>
+      <p class="note" style="margin:6px 0 0">💡 Teaching one student? Set <b>1 seat</b>, or choose <b>"I approve each person"</b> below, so nobody else can get in if the link is forwarded.</p></div>`:""}
     <label class="lbl">Who can join · Wer kann teilnehmen</label>
     <div class="row">${chip(H.mode==="instant","hSet('mode','instant')","⚡ Anyone, instantly")}${chip(H.mode==="approval","hSet('mode','approval')","✋ I approve each person")}</div>
   </div>
@@ -4358,7 +4428,8 @@ function sLink(id){ return (location.protocol.startsWith("http") ? location.orig
 async function sShare(id){
   const s=(B.list||[]).concat(R.list||[], D.board||[]).find(x=>x.activity_id===id);
   const url=sLink(id);
-  const text = s ? `${s.is_host?"Join my":"Join"} ${s.title} on PonteTalk · ${fmtWhen(s.starts_at)} (${detectTz().split("/").pop().replace(/_/g," ")} time)` : "Join this session on PonteTalk";
+  const text = s && s.visibility==="private" ? `You're invited to my private PonteTalk session "${s.title}" · ${fmtWhen(s.starts_at)} (${detectTz().split("/").pop().replace(/_/g," ")} time)`
+    : s ? `${s.is_host?"Join my":"Join"} ${s.title} on PonteTalk · ${fmtWhen(s.starts_at)} (${detectTz().split("/").pop().replace(/_/g," ")} time)` : "Join this session on PonteTalk";
   try{ if(navigator.share){ await navigator.share({ title:"PonteTalk", text, url }); return; } }catch(e){ if(e && e.name==="AbortError") return; }
   try{ await navigator.clipboard.writeText(`${text}\n${url}`); bToast("🔗 Link copied. Paste it in WhatsApp, email… · Link kopiert"); }
   catch(e){ window.prompt("Copy this link · Link kopieren:", url); }
