@@ -4317,7 +4317,10 @@ function hSet(k,v){
   if(k==="max" && H.min>v) H.min=v;
   xr();
 }
-function hSide(k,d){ const v=(H[k]||1)+d; if(v<1 || (d>0 && H.sa+H.sb>=6)) return; H[k]=v; xr(); }
+const H_MAX_GUESTS=15, H_MAX_SIDES=16;   // 15 guests + host = 16 people = 8 pairs
+function hSide(k,d){ const v=(H[k]||1)+d; if(v<1 || (d>0 && H.sa+H.sb>=H_MAX_SIDES)) return; H[k]=v; xr(); }
+function hSeats(d){ const v=(H.seats||1)+d; if(v<Math.max(1,H.editId?(H.editTaken||0):1) || v>H_MAX_GUESTS) return; H.seats=v; xr(); }
+function hPairTip(people){ return people>8 ? `<p class="note" style="margin:6px 0 0">💡 Big group (${people} people incl. you)? Try pairs or small groups so everyone gets to talk. · Große Gruppe? Arbeitet in Paaren.</p>` : ""; }
 function hTopic(k){ const i=H.topics.indexOf(k); if(i>=0) H.topics.splice(i,1); else if(H.topics.length<3) H.topics.push(k); xr(); }
 function hDefaultTitle(){
   if(H.type==="game"){ const g=GAMES_BOARD.find(x=>x[0]===H.game); return `${g?g[2]:"Game"}${H.a&&T[H.a]?" · "+T[H.a].nameEn:""}`; }
@@ -4480,12 +4483,15 @@ VIEWS.host = function(){
       ${H.bal?(()=>{ const hs=hHostSide(), hl=hs?T[hs==="sa"?H.a:H.b]:null;
         return `<p class="note" style="margin:6px 0 0">People per language: those who speak it natively or fluently${hs?", <b>you included</b>":""}. · Personen pro Sprache${hs?", du zählst mit":""}.</p>
         ${[["sa",H.a],["sb",H.b]].map(([k,l])=>`<div class="stepper2"><button aria-label="Fewer" onclick="hSide('${k}',-1)" ${H[k]<=1?"disabled":""}>−</button><b>${H[k]}</b>
-          <button aria-label="More" onclick="hSide('${k}',1)" ${H.sa+H.sb>=6?"disabled":""}>+</button><span>${T[l]?`${T[l].flag} ${esc(T[l].nameEn)}`:l} speakers${hs===k?" (incl. you)":""}</span></div>`).join("")}
+          <button aria-label="More" onclick="hSide('${k}',1)" ${H.sa+H.sb>=H_MAX_SIDES?"disabled":""}>+</button><span>${T[l]?`${T[l].flag} ${esc(T[l].nameEn)}`:l} speakers${hs===k?" (incl. you)":""}</span></div>`).join("")}
         <p class="note" style="margin:2px 0 0">${hs
-          ? `${H.sa+H.sb} people incl. you → ${H[hs]-1} more ${esc(hl?hl.nameEn:"")} speaker${H[hs]-1===1?"":"s"} + ${H[hs==="sa"?"sb":"sa"]} ${esc((T[hs==="sa"?H.b:H.a]||{}).nameEn||"")} speaker${H[hs==="sa"?"sb":"sa"]===1?"":"s"} can join (max 6)`
-          : `Total: ${H.sa+H.sb} seats (max 6). You don't count on a side, because your exchange profile doesn't list ${esc((T[H.a]||{}).nameEn||"")} or ${esc((T[H.b]||{}).nameEn||"")} as native/fluent.`}</p>`; })():""}` : ""}
+          ? `${H.sa+H.sb} people incl. you → ${H[hs]-1} more ${esc(hl?hl.nameEn:"")} speaker${H[hs]-1===1?"":"s"} + ${H[hs==="sa"?"sb":"sa"]} ${esc((T[hs==="sa"?H.b:H.a]||{}).nameEn||"")} speaker${H[hs==="sa"?"sb":"sa"]===1?"":"s"} can join (max 16)`
+          : `Total: ${H.sa+H.sb} seats (max 16). You don't count on a side, because your exchange profile doesn't list ${esc((T[H.a]||{}).nameEn||"")} or ${esc((T[H.b]||{}).nameEn||"")} as native/fluent.`}</p>${hPairTip(H.sa+H.sb+(hs?0:1))}`; })():""}` : ""}
     ${H.b && H.bal ? "" : `<label class="lbl">Seats (people besides you) · Plätze</label>
-    <div class="row">${[1,2,3,4,5,6].map(n=>H.editId&&n<(H.editTaken||0)?`<button class="chip" disabled style="opacity:.35" title="${H.editTaken} already in">${n}</button>`:chip(H.seats===n,`hSet('seats',${n})`,n===1?"1 · one-to-one":String(n))).join("")}</div>`}
+    <div class="stepper2"><button aria-label="Fewer" onclick="hSeats(-1)" ${H.seats<=Math.max(1,H.editId?(H.editTaken||0):1)?"disabled":""}>−</button><b>${H.seats}</b>
+      <button aria-label="More" onclick="hSeats(1)" ${H.seats>=H_MAX_GUESTS?"disabled":""}>+</button><span>${H.seats===1?"one-to-one":`${H.seats+1} people incl. you`} · max ${H_MAX_GUESTS}</span></div>
+    <div class="row" style="margin-top:6px">${[1,3,5,7,11,15].map(n=>H.editId&&n<(H.editTaken||0)?"":chip(H.seats===n,`hSet('seats',${n})`,n===1?"1 · one-to-one":`${n} → ${(n+1)/2} pairs`)).join("")}</div>
+    ${hPairTip(H.seats+1)}`}
     <label class="lbl">Who can see it · Wer kann sie sehen</label>
     <div class="row">${chip((H.vis||"public")==="public","hSet('vis','public')","🌍 Everyone on PonteTalk")}${chip(H.vis==="private","hSet('vis','private')","🔒 Private: only people I invite")}</div>
     ${H.vis==="private"?`<div class="pvbox"><p class="note" style="margin:0">🔒 It won't appear in the session list or suggestions. After posting, tap <b>🔗 Share invite link</b> and send it to your student or friends. Only people with the link can see and join it.<br><span class="de">Erscheint nicht in der Liste. Teile den Einladungslink.</span></p>
