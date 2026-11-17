@@ -191,6 +191,14 @@
   .pav{flex:none;width:34px;height:34px;border-radius:17px;background:var(--plum-soft);color:var(--plum);display:grid;place-items:center;font-weight:800;font-size:14px}
   .prow.pend{background:#FFF9EC;border-radius:12px;padding:8px}
   .pl{font-size:13px;color:var(--muted);line-height:1.4}
+  .sides{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 0}
+  .sidepill{font-size:13px;font-weight:800;padding:5px 10px;border-radius:999px;background:var(--teal-soft);color:#1F6B63}
+  .sidepill.full{background:#FCE6DF;color:#B54530}
+  .stepper2{display:flex;align-items:center;gap:10px;margin:6px 0}
+  .stepper2 b{min-width:22px;text-align:center;font-size:18px}
+  .stepper2 button{width:44px;height:44px;border-radius:12px;border:1.5px solid var(--line);background:#fff;font:800 20px 'Plus Jakarta Sans',sans-serif;cursor:pointer;color:var(--ink)}
+  .stepper2 button:disabled{opacity:.35;cursor:default}
+  .sidetag{display:inline-block;font-size:11px;font-weight:800;padding:2px 7px;border-radius:999px;background:var(--teal-soft);color:#1F6B63;margin-left:6px;vertical-align:middle}
   .ptoast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 18px;border-radius:14px;font-weight:700;z-index:9999;max-width:92vw;box-shadow:0 8px 24px rgba(0,0,0,.25);text-align:center}
   .player{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line)}
   .player:last-child{border-bottom:none}
@@ -2776,7 +2784,10 @@ const BERR = {
   not_game:"This session isn't a game · Diese Session ist kein Spiel",
   seats_below_joined:"You can't have fewer seats than people already in · Weniger Plätze als Teilnehmende geht nicht",
   too_many_seats:"That's more seats than allowed · Zu viele Plätze",
-  not_future:"Pick a time in the future · Wähle eine Zeit in der Zukunft"
+  not_future:"Pick a time in the future · Wähle eine Zeit in der Zukunft",
+  no_side:"This session is for speakers of its two languages. Add one of them as native or fluent in your exchange profile to join · Füge eine der Sprachen als Mutter- oder fließende Sprache hinzu",
+  balanced_needs_two_languages:"A balanced exchange needs two languages · Ausgewogener Austausch braucht zwei Sprachen",
+  balanced_needs_seats:"Each side needs at least 1 seat · Jede Seite braucht mindestens 1 Platz"
 };
 function bErr(e){
   const m=String((e&&e.message)||e||"");
@@ -2827,9 +2838,10 @@ async function bAct(fn,id){
     const { data, error } = await A.sb.rpc(fn,{ p_activity:id });
     if(error) throw error;
     const st=data&&data.status;
-    bToast( st==="joined" ? "✅ You're in! · Du bist dabei!"
+    const sideTxt = data && data.side ? (()=>{ const x=(B.list||[]).concat(R.list||[]).find(q=>q.activity_id===id); const k=x?(data.side==="a"?x.language_a:x.language_b):null; return k&&T[k]?` (${T[k].nameEn} speakers)`:""; })() : "";
+    bToast( st==="joined" ? `✅ You're in${sideTxt}! · Du bist dabei!`
           : st==="pending" ? "⏳ Request sent. The host will reply · Anfrage gesendet"
-          : st==="waitlisted" ? `🕒 You're #${data.position} on the waitlist · Platz ${data.position} auf der Warteliste`
+          : st==="waitlisted" ? `🕒 You're #${data.position} on the waitlist${sideTxt} · Platz ${data.position} auf der Warteliste`
           : st==="expired" ? "Sorry, the offer ran out · Das Angebot ist abgelaufen"
           : st==="cancelled" ? (data.late ? "Done. Leaving less than 2h before start counts as a late cancel · Spät abgesagt" : "Done · Erledigt")
           : "Done · Erledigt");
@@ -2892,6 +2904,8 @@ function bCard(s){
   const hostT=fmtHostTime(s.starts_at, s.host_time_zone);
   const rel=s.host_reliability&&s.host_reliability.percent!=null ? ` · ${s.host_reliability.percent}% shows up` : "";
   const seatsTxt = s.seats_open>0 ? `${s.seats_open} of ${s.seats} open` : `Full${s.waitlisted?` · ${s.waitlisted} waiting`:""}`;
+  const sidesHtml = s.balanced ? `<div class="sides" aria-label="Seats per language">${[["a",s.language_a,s.taken_a,s.seats_a],["b",s.language_b,s.taken_b,s.seats_b]].map(([k,l,t,n])=>
+      `<span class="sidepill ${t>=n?"full":""}">${T[l]?T[l].flag:""} ${T[l]?esc(T[l].nameEn):l} speakers ${t} of ${n}${t>=n?" · full":""}${s.my_side===k?" · you":""}</span>`).join("")}</div>` : "";
   let act="";
   const isGame=s.type==="game", nowMs=Date.now(), startMs=new Date(s.starts_at).getTime();
   const roomWindow = isGame && nowMs >= startMs-30*60000 && nowMs < startMs+s.duration_min*60000;
@@ -2925,9 +2939,10 @@ function bCard(s){
       }
   }
   return `<div class="card bcard ${s.is_host||s.my_status==="joined"?"mine":""} ${s.my_status==="offered"?"offer":""}">
-    <div class="btop"><span class="feat">${g?`🎲 ${g[1]} ${g[2]}`:"💬 Conversation"}</span><span class="note" style="margin:0;font-weight:800">${seatsTxt}</span></div>
-    <div class="btitle">${esc(s.title)}</div>
+    <div class="btop"><span class="feat">${g?`🎲 ${g[1]} ${g[2]}`:"💬 Conversation"}${s.balanced?" · ⚖️ Balanced":""}</span><span class="note" style="margin:0;font-weight:800">${seatsTxt}</span></div>
+    <div class="btitle">${esc(s.title)}</div>${sidesHtml?"":""}
     <div class="note" style="margin:0">${langPair(s.language_a,s.language_b)} · ${lvlRange(s.level_min,s.level_max)}</div>
+    ${sidesHtml}
     <div class="bwhen">🗓️ ${fmtWhen(s.starts_at)} · ${s.duration_min} min${hostT?`<small>${esc(hostT)}</small>`:""}</div>
     <div class="note" style="margin:0">👤 ${esc(s.host_name||"Host")}${rel}${s.host_languages&&s.host_languages.length?` · ${langsLine(s.host_languages)}`:""}</div>
     ${(s.topics||[]).length?`<div class="row" style="margin-top:8px">${s.topics.map(k=>{ const it=INTERESTS.find(x=>x[0]===k); return it?`<span class="feat">${it[1]} ${esc(it[2])}</span>`:""; }).join("")}</div>`:""}
@@ -3002,7 +3017,7 @@ function hostList(s){
   if(!ps) return `<div class="plist"><h4>Who's coming · ${taken} of ${s.seats}</h4><p class="note" style="margin:0">Loading… · Lädt…</p></div>`;
   const pend=ps.filter(p=>p.status==="pending"), inn=ps.filter(p=>p.status==="joined"||p.status==="offered"), wait=ps.filter(p=>p.status==="waitlisted");
   const row=(p,extra,cls)=>`<div class="prow ${cls||""}"><span class="pav" aria-hidden="true">${esc((p.name||"?").charAt(0).toUpperCase())}</span>
-      <div style="flex:1;min-width:0"><b>${esc(p.name||"Member")}</b>${p.reliability&&p.reliability.percent!=null?` <span class="pl">· ${p.reliability.percent}% shows up</span>`:""}
+      <div style="flex:1;min-width:0"><b>${esc(p.name||"Member")}</b>${s.balanced&&p.side?`<span class="sidetag">${(()=>{ const l=p.side==="a"?s.language_a:s.language_b; return T[l]?`${T[l].flag} ${esc(T[l].nameEn)} side`:""; })()}</span>`:""}${p.reliability&&p.reliability.percent!=null?` <span class="pl">· ${p.reliability.percent}% shows up</span>`:""}
       <div class="pl">${speaksLearns(p.languages)}</div>${extra||""}</div></div>`;
   return `<div class="plist">
     ${pend.length?`<h4>🔔 Asking to join · ${pend.length}</h4>${pend.map(p=>row(p,`<div class="row" style="margin-top:6px">
@@ -3022,7 +3037,7 @@ function hOpen(){
   if(H.editId){ H.editId=null; H.started=false; }
   if(!H.started){
     const d=new Date(Date.now()+86400000);
-    Object.assign(H,{ type:"conversation", game:"speak", title:"", a:"", b:"", min:1, max:3,
+    Object.assign(H,{ bal:false, sa:2, sb:2, type:"conversation", game:"speak", title:"", a:"", b:"", min:1, max:3,
       date:`${d.getFullYear()}-${hPad(d.getMonth()+1)}-${hPad(d.getDate())}`, time:"19:00",
       dur:45, seats:4, mode:"instant", topics:[], note:"", started:true });
   }
@@ -3053,6 +3068,7 @@ function hSet(k,v){
   if(k==="max" && H.min>v) H.min=v;
   xr();
 }
+function hSide(k,d){ const v=(H[k]||1)+d; if(v<1 || (d>0 && H.sa+H.sb>=6)) return; H[k]=v; xr(); }
 function hTopic(k){ const i=H.topics.indexOf(k); if(i>=0) H.topics.splice(i,1); else if(H.topics.length<3) H.topics.push(k); xr(); }
 function hDefaultTitle(){
   if(H.type==="game"){ const g=GAMES_BOARD.find(x=>x[0]===H.game); return `${g?g[2]:"Game"}${H.a&&T[H.a]?" · "+T[H.a].nameEn:""}`; }
@@ -3065,7 +3081,8 @@ function hEdit(id){
   Object.assign(H,{ editId:id, editTaken:s.seats-s.seats_open, type:s.type, game:s.game||"speak", title:s.title, a:s.language_a, b:s.language_b||"",
     min:s.level_min, max:s.level_max, date:`${d.getFullYear()}-${hPad(d.getMonth()+1)}-${hPad(d.getDate())}`,
     time:`${hPad(d.getHours())}:${hPad(d.getMinutes())}`, dur:s.duration_min, seats:s.seats, mode:s.join_mode,
-    topics:(s.topics||[]).slice(), note:s.note||"", started:true, checked:true, adult:true, err:"", busy:false });
+    topics:(s.topics||[]).slice(), note:s.note||"", started:true, checked:true, adult:true, err:"", busy:false,
+    bal:!!s.balanced, sa:s.seats_a||Math.max(1,Math.floor(s.seats/2)), sb:s.seats_b||Math.max(1,Math.ceil(s.seats/2)) });
   go("host");
 }
 function hCancelEdit(){ H.editId=null; H.started=false; bOpen(); }
@@ -3082,7 +3099,8 @@ async function hPost(){
   try{
     const row={ host_id:A.user.id, type:H.type, game:H.type==="game"?H.game:null, title,
       note:(H.note||"").trim().slice(0,200)||null, language_a:H.a, language_b:H.b||null,
-      level_min:Math.min(H.min,H.max), level_max:Math.max(H.min,H.max), seats:H.seats,
+      level_min:Math.min(H.min,H.max), level_max:Math.max(H.min,H.max), seats:(H.b&&H.bal)?H.sa+H.sb:H.seats,
+      balanced:!!(H.b&&H.bal), seats_a:(H.b&&H.bal)?H.sa:null, seats_b:(H.b&&H.bal)?H.sb:null,
       starts_at:start.toISOString(), host_time_zone:detectTz(), duration_min:H.dur, join_mode:H.mode, topics:H.topics };
     if(H.editId){
       delete row.host_id;
@@ -3138,8 +3156,14 @@ VIEWS.host = function(){
     <input type="time" id="htime" class="xsel" value="${esc(H.time)}" oninput="H.time=this.value">
     <label class="lbl">Length · Dauer</label>
     <div class="row">${[30,45,60,90].map(m=>chip(H.dur===m,`hSet('dur',${m})`,m+" min")).join("")}</div>
-    <label class="lbl">Seats (people besides you) · Plätze</label>
-    <div class="row">${[2,3,4,5,6].map(n=>H.editId&&n<(H.editTaken||0)?`<button class="chip" disabled style="opacity:.35" title="${H.editTaken} already in">${n}</button>`:chip(H.seats===n,`hSet('seats',${n})`,String(n))).join("")}</div>
+    ${H.b ? `<label class="lbl">How should seats work? · Plätze</label>
+      <div class="row">${chip(!H.bal,"hSet('bal',false)","👥 Any mix")}${chip(!!H.bal,"hSet('bal',true)","⚖️ Balanced exchange")}</div>
+      ${H.bal?`<p class="note" style="margin:6px 0 0">Seats per language: people who speak it natively or fluently. · Plätze pro Sprache.</p>
+        ${[["sa",H.a],["sb",H.b]].map(([k,l])=>`<div class="stepper2"><button aria-label="Fewer" onclick="hSide('${k}',-1)" ${H[k]<=1?"disabled":""}>−</button><b>${H[k]}</b>
+          <button aria-label="More" onclick="hSide('${k}',1)" ${H.sa+H.sb>=6?"disabled":""}>+</button><span>${T[l]?`${T[l].flag} ${esc(T[l].nameEn)}`:l} speakers</span></div>`).join("")}
+        <p class="note" style="margin:2px 0 0">Total: ${H.sa+H.sb} seats (max 6)</p>`:""}` : ""}
+    ${H.b && H.bal ? "" : `<label class="lbl">Seats (people besides you) · Plätze</label>
+    <div class="row">${[2,3,4,5,6].map(n=>H.editId&&n<(H.editTaken||0)?`<button class="chip" disabled style="opacity:.35" title="${H.editTaken} already in">${n}</button>`:chip(H.seats===n,`hSet('seats',${n})`,String(n))).join("")}</div>`}
     <label class="lbl">Who can join · Wer kann teilnehmen</label>
     <div class="row">${chip(H.mode==="instant","hSet('mode','instant')","⚡ Anyone, instantly")}${chip(H.mode==="approval","hSet('mode','approval')","✋ I approve each person")}</div>
   </div>
