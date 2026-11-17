@@ -200,6 +200,17 @@
   .cfcard a.btn{text-decoration:none;display:flex;align-items:center;justify-content:center;margin-top:4px;padding:11px 14px;font-size:15px}
   .cfadm{background:var(--sun-soft);border-radius:16px;padding:12px 14px;margin-bottom:14px}
   .cfsearch{margin:0 0 8px}
+  .cfbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 0 8px}
+  .cfbar input{flex:1;min-width:180px;margin:0}
+  .cflist{display:flex;flex-direction:column;gap:8px}
+  .cfrow{display:flex;gap:12px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+  .cfrow.off{opacity:.65;border-style:dashed}
+  .cfrow .ci{flex:none;width:40px;height:40px;border-radius:12px;background:var(--sun-soft);display:grid;place-items:center;font-size:20px}
+  .cfrow .rt{font-weight:800;line-height:1.25}
+  .cfrow a.btn,.cfrow .btn{width:auto;margin:0;padding:9px 12px;font-size:14px;flex:none;text-decoration:none}
+  .cfcity{margin:16px 0 8px;font-size:15px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+  .cfcity:first-child{margin-top:4px}
+  @media (max-width:420px){ .cfrow .hidesm{display:none} .cfbar .vsw button{padding:7px 8px} }
   /* ---- Reliability badges + attendance ---- */
   .rbg{display:inline-block;margin-left:6px;font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--sun-soft);color:#7A5200;vertical-align:middle;white-space:nowrap}
   .rbg.new{background:var(--teal-soft);color:#1F6B63}
@@ -3634,7 +3645,7 @@ async function cfLoad(){
 function cfShown(){
   const q=cfNorm(CF.q).trim();
   return (CF.list||[]).filter(c=>c.status==="approved")
-    .filter(c=>!q || cfNorm(`${c.name} ${c.city||""} ${c.country||""}`).includes(q))
+    .filter(c=>!q || cfNorm(`${c.name} ${c.city||""} ${c.country||""} ${c.address||""} ${c.note||""}`).includes(q))
     .filter(c=>!CF.lang || (c.languages||[]).includes(CF.lang) || (c.languages||[]).includes("multi"))
     .filter(c=>!CF.online || c.online);
 }
@@ -3646,7 +3657,10 @@ function cfCard(c){
     <div class="note" style="margin:0">${where}</div>
     ${(c.languages||[]).length?`<div class="cfflags">${c.languages.map(k=>{ const l=cfLang(k); return `<span>${l[0]} ${esc(l[1])}</span>`; }).join("")}</div>`:""}
     ${c.note?`<p class="note" style="margin:0">🗓️ ${esc(c.note)}</p>`:""}
-    <a class="btn secondary" href="${esc(c.url)}" target="_blank" rel="noopener nofollow ugc">Visit their page ↗</a>
+    ${c.address?`<p class="note" style="margin:0">📍 ${esc(c.address)}</p>`:""}
+    ${c.url?`<a class="btn secondary" href="${esc(c.url)}" target="_blank" rel="noopener nofollow ugc">Visit their page ↗</a>`:""}
+    ${!c.online&&(c.address||!c.url)?`<a class="btn ${c.url?"ghost":"secondary"}" href="${esc(cfMaps(c))}" target="_blank" rel="noopener noreferrer">📍 Open in Maps</a>`:""}
+    ${!c.url?`<p class="note" style="margin:0;font-size:12px">No website. Details come from the community. · Keine Website.</p>`:""}
     ${CF.admin ? `<div class="row" style="margin:4px 0 0;gap:6px">
         ${rep.length?`<span class="feat" style="background:#FBE3DF">🚩 ${rep.length} flag${rep.length>1?"s":""}: ${esc([...new Set(rep)].join(", "))}</span>`:""}
         ${c.status!=="approved"?`<span class="feat">${c.status==="pending"?"⏳ Waiting":c.status==="hidden"?"🙈 Hidden":"✗ Rejected"}</span>`:""}
@@ -3658,7 +3672,7 @@ function cfCard(c){
         <button class="chip" onclick="cfEdit('${c.id}')">✏️ Edit</button>
         ${rep.length?`<button class="chip" onclick="cfClear('${c.id}')">✓ Link is fine</button>`:""}
         <button class="chip" onclick="cfDel('${c.id}')">🗑</button></div>`
-      : `<p class="center" style="margin:2px 0 0"><button class="linkbtn" style="font-size:12px" onclick="cfReport('${c.id}')">Link broken or café closed?</button></p>`}
+      : `<p class="center" style="margin:2px 0 0"><button class="linkbtn" style="font-size:12px" onclick="cfReport('${c.id}')">${c.url?"Link broken or café closed?":"Café closed or details wrong?"}</button></p>`}
   </div>`;
 }
 function cfListHtml(){
@@ -3669,7 +3683,27 @@ function cfListHtml(){
       <p class="note">Know a language café? Suggest it below and help others find it.<br><span class="de">Kennst du ein Sprachcafé? Schlag es vor!</span></p></div>`;
   if(!sh.length) return `<div class="card center"><p class="note">No café found${CF.q?` for "${esc(CF.q)}"`:""} · Nichts gefunden</p>
       <p class="note">Try another city, or practise online: <button class="linkbtn" onclick="bOpen()">see online sessions</button></p></div>`;
-  return `<p class="note" style="margin:0 0 8px">${sh.length} café${sh.length>1?"s":""}</p><div class="cfgrid">${sh.map(cfCard).join("")}</div>`;
+  const v=cfView(), head=`<p class="note" style="margin:0 0 8px">${sh.length} café${sh.length>1?"s":""}</p>`;
+  if(v==="list") return head+`<div class="cflist">${sh.map(cfRow).join("")}</div>`;
+  if(v==="city"){
+    const groups={}; sh.forEach(c=>{ const k=c.online?"🌐 Online":`${c.city||"?"}${c.country?`, ${c.country}`:""}`; (groups[k]=groups[k]||[]).push(c); });
+    const keys=Object.keys(groups).sort((a,b)=>a.startsWith("🌐")?1:b.startsWith("🌐")?-1:a.localeCompare(b));
+    return head+keys.map(k=>`<h3 class="cfcity">${k.startsWith("🌐")?"":"📍 "}${esc(k)} · ${groups[k].length}</h3><div class="cflist">${groups[k].map(c=>cfRow(c,true)).join("")}</div>`).join("");
+  }
+  return head+`<div class="cfgrid">${sh.map(cfCard).join("")}</div>`;
+}
+function cfView(){ if(!CF.view){ try{ CF.view=localStorage.getItem("pt_cfview"); }catch(e){} CF.view=["grid","list","city"].includes(CF.view)?CF.view:"grid"; } return CF.view; }
+function cfSetView(v){ CF.view=v; try{ localStorage.setItem("pt_cfview",v); }catch(e){} cfPaint(); xr(); }
+function cfMaps(c){ return "https://www.google.com/maps/search/?api=1&query="+encodeURIComponent([c.address||c.name, c.city, c.country].filter(Boolean).join(", ")); }
+function cfRow(c, noCity){
+  const flags=(c.languages||[]).map(k=>cfLang(k)[0]).join(" ");
+  const where=c.online?"🌐 Online":`📍 ${esc(c.city||"")}${c.country&&!noCity?`, ${esc(c.country)}`:""}`;
+  const go = c.url ? `<a class="btn secondary" href="${esc(c.url)}" target="_blank" rel="noopener nofollow ugc" aria-label="Visit ${esc(c.name)}">↗<span class="hidesm"> Visit</span></a>`
+                   : `<a class="btn secondary" href="${esc(cfMaps(c))}" target="_blank" rel="noopener noreferrer" aria-label="Map for ${esc(c.name)}">📍<span class="hidesm"> Map</span></a>`;
+  return `<div class="cfrow ${c.status!=="approved"?"off":""}"><div class="ci">☕</div>
+    <div style="flex:1;min-width:0"><div class="rt">${esc(c.name)}</div>
+      <div class="note" style="margin:2px 0 0">${noCity&&!c.online?"":where+" · "}${flags}${c.note?` · ${esc(c.note)}`:""}${c.address&&noCity?` · ${esc(c.address)}`:""}</div></div>
+    ${CF.admin?`<button class="chip" style="flex:none" onclick="cfEdit('${c.id}')" aria-label="Edit">✏️</button>`:""}${go}</div>`;
 }
 function cfPaint(){ const el=document.getElementById("cflist"); if(el) el.innerHTML=cfListHtml(); }
 VIEWS.cafes = function(){
@@ -3680,7 +3714,7 @@ VIEWS.cafes = function(){
   return `<div class="topline"><button class="chip" onclick="goHome()">← Back</button><span>Language cafés</span></div>
   <h2>${bi("Sessions","Sessions")}</h2>
   ${sessTabs("cafes")}
-  <p class="sub" style="margin-top:0">Language cafés around the world, in person and online. Tap a café to see its own page with the latest dates.<br><span class="de">Sprachcafés weltweit. Aktuelle Termine findest du auf der Seite des Cafés.</span></p>
+  <p class="sub" style="margin-top:0">Language cafés around the world, in person and online. Check each café's page or details for the latest dates.<br><span class="de">Sprachcafés weltweit. Aktuelle Termine findest du auf der Seite des Cafés.</span></p>
   ${CF.msg?`<div class="card center" style="padding:10px;margin-bottom:10px;background:var(--teal-soft)">${esc(CF.msg)}</div>`:""}
   ${CF.admin?`<div class="cfadm"><b>🛠 Admin</b> · ${pend.length} waiting · ${flagged.length} flagged
       <button class="btn primary" style="margin-top:8px" onclick="cfNew()">＋ Add a café · Café hinzufügen</button>
@@ -3688,12 +3722,13 @@ VIEWS.cafes = function(){
       ${flagged.filter(c=>c.status==="approved").length?`<h4 style="margin:12px 0 6px">🚩 Flagged links</h4><div class="cfgrid">${flagged.filter(c=>c.status==="approved").map(cfCard).join("")}</div>`:""}
       ${other.length?`<details style="margin-top:10px"><summary class="note">Hidden / rejected (${other.length})</summary><div class="cfgrid" style="margin-top:8px">${other.map(cfCard).join("")}</div></details>`:""}
     </div>`:""}
-  <input type="text" id="cfq" class="cfsearch" placeholder="🔍 City or café name · Stadt oder Name" value="${esc(CF.q)}" oninput="CF.q=this.value;cfPaint()" autocomplete="off">
+  <div class="cfbar"><input type="text" id="cfq" placeholder="🔍 City or café name · Stadt oder Name" value="${esc(CF.q)}" oninput="CF.q=this.value;cfPaint()" autocomplete="off">
+    <div class="vsw" role="group" aria-label="View"><button class="${cfView()==="grid"?"on":""}" onclick="cfSetView('grid')">▦ Grid</button><button class="${cfView()==="list"?"on":""}" onclick="cfSetView('list')">☰ List</button><button class="${cfView()==="city"?"on":""}" onclick="cfSetView('city')">🏙️ By city</button></div></div>
   <div class="shfl">${chip(!CF.lang&&!CF.online,"CF.lang='';CF.online=false;xr()","🌍 All")}${chip(CF.online,"CF.online=!CF.online;xr()","🌐 Online")}${used.map(k=>{ const l=cfLang(k); return chip(CF.lang===k,`CF.lang=CF.lang==='${k}'?'':'${k}';xr()`,`${l[0]} ${esc(l[1])}`); }).join("")}</div>
   ${CF.err?`<div class="err">${esc(CF.err)}</div>`:""}
   <div id="cflist">${cfListHtml()}</div>
   <div class="card center" style="margin-top:16px"><h3 style="margin:0 0 4px">Know a language café? · Kennst du ein Sprachcafé?</h3>
-    <p class="note" style="margin:0 0 10px">Suggest it with a link to its page. We check it before it goes live.</p>
+    <p class="note" style="margin:0 0 10px">Suggest it, with a link if it has one, or the address. We check it before it goes live.</p>
     <button class="btn secondary" onclick="cfNew()">＋ Suggest a café · Café vorschlagen</button></div>
   <p class="note center" style="margin-top:10px">We only link to each café's own page and aren't responsible for its content. · Wir verlinken nur auf die Seiten der Cafés.</p>
   ${legalLinks()}`;
@@ -3722,11 +3757,11 @@ async function cfDel(id){
 }
 function cfNew(){
   if(!A.user){ A.ret="cafes"; A.err=""; A.msg="Sign in to suggest a café · Melde dich an, um ein Café vorzuschlagen"; go("account"); return; }
-  CF.err=""; CF.msg=""; CF.f={ id:null, name:"", city:"", country:"", online:false, languages:[], url:"", note:"" }; go("cafeedit");
+  CF.err=""; CF.msg=""; CF.f={ id:null, name:"", city:"", country:"", online:false, languages:[], url:"", note:"", address:"" }; go("cafeedit");
 }
 function cfEdit(id){
   const c=(CF.list||[]).find(x=>x.id===id); if(!c) return;
-  CF.err=""; CF.msg=""; CF.f={ id:c.id, name:c.name, city:c.city||"", country:c.country||"", online:!!c.online, languages:(c.languages||[]).slice(), url:c.url, note:c.note||"" };
+  CF.err=""; CF.msg=""; CF.f={ id:c.id, name:c.name, city:c.city||"", country:c.country||"", online:!!c.online, languages:(c.languages||[]).slice(), url:c.url||"", note:c.note||"", address:c.address||"" };
   go("cafeedit");
 }
 function cfToggleLang(k){ const L=CF.f.languages, i=L.indexOf(k); if(i>=0) L.splice(i,1); else if(L.length<10) L.push(k); xr(); }
@@ -3740,10 +3775,13 @@ VIEWS.cafeedit = function(){
   <div class="card">
     <label class="lbl" for="cfname">Name · Name</label>
     <input type="text" id="cfname" maxlength="100" placeholder="e.g. Sprachcafé Erfurt" value="${esc(f.name)}" oninput="CF.f.name=this.value">
-    <label class="lbl" for="cfurl">Link to their page · Link zur Seite</label>
+    <label class="lbl" for="cfurl">Link to their page${f.online?"":" (optional)"} · Link zur Seite</label>
     <input type="text" id="cfurl" inputmode="url" maxlength="500" placeholder="Website, Meetup, Instagram, Facebook…" value="${esc(f.url)}" oninput="CF.f.url=this.value">
     <label class="lbl">Where · Wo</label>
     <div class="row">${chip(!f.online,"CF.f.online=false;xr()","📍 In person")}${chip(f.online,"CF.f.online=true;xr()","🌐 Online")}</div>
+    ${f.online?"":`<label class="lbl" for="cfaddr">Address (optional) · Adresse</label>
+    <input type="text" id="cfaddr" maxlength="200" placeholder="e.g. Krämerbrücke 5, Erfurt" value="${esc(f.address||"")}" oninput="CF.f.address=this.value">
+    <p class="note" style="margin:4px 0 0">No website? Then add the address or a note on when and where they meet. · Keine Website? Dann Adresse oder Notiz.</p>`}
     <label class="lbl" for="cfcity">City${f.online?" (optional)":""} · Stadt</label>
     <input type="text" id="cfcity" maxlength="80" placeholder="e.g. Erfurt" value="${esc(f.city)}" oninput="CF.f.city=this.value">
     <label class="lbl" for="cfcountry">Country · Land</label>
@@ -3764,23 +3802,25 @@ const CF_ERR = { already_listed:"This café is already listed (or waiting for ap
   too_many_suggestions:"Thanks for all the suggestions! Please try again tomorrow · Bitte morgen wieder" };
 async function cfSave(){
   const f=CF.f; if(!f || CF.busy) return;
-  const name=f.name.trim(), url=vClean(f.url), city=f.city.trim(), country=f.country.trim();
+  const name=f.name.trim(), url=vClean(f.url), city=f.city.trim(), country=f.country.trim(), address=f.online?"":(f.address||"").trim().slice(0,200);
   CF.err="";
   if(name.length<2) CF.err="Please add the café's name · Bitte Namen eingeben";
-  else if(!vValid(url)) CF.err="Please paste the full link to their page (https://…) · Bitte vollständigen Link einfügen";
+  else if(url && !vValid(url)) CF.err="Please paste the full link to their page (https://…) · Bitte vollständigen Link einfügen";
+  else if(f.online && !url) CF.err="Online cafés need a link, so people can join · Online-Cafés brauchen einen Link";
+  else if(!f.online && !url && !address && !f.note.trim()) CF.err="No website? Please add the address or a short note (when / where) · Bitte Adresse oder Notiz";
   else if(!f.online && !city) CF.err="Please add the city · Bitte Stadt eingeben";
   else if(!f.languages.length) CF.err="Pick at least one language · Mindestens eine Sprache wählen";
   if(CF.err){ xr(); return; }
   CF.busy=true; xr();
   try{
-    const row={ name, url, city:city||null, country:country||null, online:!!f.online, languages:f.languages, note:f.note.trim()||null };
+    const row={ name, url:url||null, address:address||null, city:city||null, country:country||null, online:!!f.online, languages:f.languages, note:f.note.trim()||null };
     if(CF.admin){
       const r = f.id ? await A.sb.from("cafes").update(row).eq("id",f.id)
                      : await A.sb.from("cafes").insert(Object.assign({ status:"approved", submitted_by:A.user.id }, row));
       if(r.error) throw r.error;
       CF.msg = f.id ? "✓ Saved · Gespeichert" : "✓ Added and live · Veröffentlicht";
     }else{
-      const { error } = await A.sb.rpc("pt_suggest_cafe",{ p_name:name, p_city:city, p_country:country, p_online:!!f.online, p_languages:f.languages, p_url:url, p_note:f.note.trim() });
+      const { error } = await A.sb.rpc("pt_suggest_cafe",{ p_name:name, p_city:city, p_country:country, p_online:!!f.online, p_languages:f.languages, p_url:url||null, p_note:f.note.trim(), p_address:address||null });
       if(error) throw error;
       CF.msg="🙏 Thanks! Your suggestion is waiting for a quick check · Danke! Wir prüfen deinen Vorschlag.";
     }
