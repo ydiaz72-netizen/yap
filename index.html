@@ -113,6 +113,22 @@
   #bnav button svg{width:22px;height:22px}
   #bnav{gap:2px;padding-left:6px;padding-right:6px}
   #bnav button{font-size:12px}
+  /* ---- Session chat ---- */
+  .chhead{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .chsafe{background:var(--sun-soft);border-radius:12px;padding:8px 12px;font-size:13px;color:#6B4A00;margin-bottom:8px}
+  .chlist{display:flex;flex-direction:column;gap:6px;min-height:240px;max-height:calc(100vh - 330px);overflow-y:auto;padding:8px 2px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:12px}
+  .cm{max-width:82%;align-self:flex-start;background:var(--bg);border-radius:16px 16px 16px 4px;padding:8px 12px;line-height:1.4;word-wrap:break-word;overflow-wrap:anywhere}
+  .cm.me{align-self:flex-end;background:var(--plum);color:#fff;border-radius:16px 16px 4px 16px}
+  .cm.me a{color:#fff}
+  .cm .who{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:800;color:var(--muted);margin-bottom:2px}
+  .cm .who .avs{width:18px;height:18px}
+  .cm .tm{font-size:11px;opacity:.65;margin-left:8px;white-space:nowrap}
+  .cm .cx{border:none;background:none;color:inherit;opacity:.5;cursor:pointer;font-size:12px;padding:0 0 0 6px}
+  .chday{align-self:center;font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;margin:6px 0 2px}
+  .chin{display:flex;gap:8px;align-items:flex-end;margin-top:10px}
+  .chin textarea{flex:1;min-width:0;resize:none;font-size:16px;padding:10px 14px;border-radius:16px;max-height:120px}
+  .chin .btn{width:auto;margin:0;padding:12px 18px}
+  @media (max-width:899px){ .chlist{max-height:calc(100vh - 360px)} }
   /* ---- In-person meetups ---- */
   .ipbox{background:var(--sun-soft);border-radius:14px;padding:12px;margin-top:8px}
   .ipbox .lbl:first-child{margin-top:0}
@@ -2966,6 +2982,107 @@ function langsLine(arr){
 
 
 
+
+/* ===================== SESSION CHAT ===================== */
+const CH = { id:null, list:[], last:0, err:"", busy:false, chan:null, timer:null, draft:"" };
+const CU = {};   // activity_id -> unread messages
+async function chUnreadLoad(){
+  if(!A.user || !A.sb) return;
+  try{ const { data, error } = await A.sb.rpc("pt_chat_unread"); if(error) return;
+    Object.keys(CU).forEach(k=>delete CU[k]); (data||[]).forEach(r=>{ CU[r.activity_id]=r.unread; });
+    if(["board","session","home"].includes(S.screen)) xr();
+  }catch(e){}
+}
+function chWindow(s){ return s && s.status!=="cancelled" && Date.now() < new Date(s.starts_at).getTime() + (s.duration_min||60)*60000 + 24*3600000; }
+function chBtn(s){
+  if(!A.user || !(s.is_host || s.my_status==="joined") || !chWindow(s)) return "";
+  const n=CU[s.activity_id]||0;
+  return `<button class="btn secondary" style="margin-top:8px" onclick="chOpen('${s.activity_id}')">💬 Chat${n?` · <b>${n} new</b>`:""} · Gruppenchat</button>`;
+}
+function chOpen(id){
+  chStop(); CH.id=id; CH.list=[]; CH.last=0; CH.err=""; CH.draft="";
+  go("chat"); chFetch(true); chStart();
+}
+function chStop(){
+  if(CH.timer){ clearInterval(CH.timer); CH.timer=null; }
+  if(CH.chan && A.sb){ try{ A.sb.removeChannel(CH.chan); }catch(e){} CH.chan=null; }
+}
+function chStart(){
+  try{
+    CH.chan=A.sb.channel("chat-"+CH.id)
+      .on("postgres_changes",{ event:"INSERT", schema:"public", table:"session_messages", filter:`activity_id=eq.${CH.id}` }, ()=>chFetch(false))
+      .subscribe();
+  }catch(e){ CH.chan=null; }
+  CH.timer=setInterval(()=>{ if(S.screen!=="chat"){ chStop(); return; } chFetch(false); }, 15000);
+}
+async function chFetch(first){
+  if(!CH.id || !A.sb) return;
+  try{
+    const { data, error } = await A.sb.rpc("pt_chat_messages",{ p_activity:CH.id, p_after:first?0:CH.last });
+    if(error) throw error;
+    const add=(data||[]).filter(m=>!CH.list.some(x=>x.id===m.id));
+    if(first) CH.list=data||[]; else CH.list=CH.list.concat(add);
+    if(CH.list.length) CH.last=CH.list[CH.list.length-1].id;
+    if(S.screen==="chat"){ if(first) xr(); else if(add.length) chPaint(); }
+    if(CH.last && S.screen==="chat"){
+      CU[CH.id]=0;
+      A.sb.rpc("pt_chat_mark_read",{ p_activity:CH.id, p_last:CH.last }).then(()=>{ if(typeof nbFresh==="function") nbFresh(); },()=>{});
+    }
+  }catch(e){ CH.err=/not_in_session/.test(String(e&&e.message))?"Only people in this session can see the chat · Nur für Teilnehmende":bErr(e); if(S.screen==="chat") xr(); }
+}
+function chLinkify(t){ return esc(t).replace(/(https:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener nofollow">$1</a>').replace(/\n/g,"<br>"); }
+function chListHtml(){
+  if(!CH.list.length) return `<p class="note center" style="margin:auto">No messages yet. Say hi 👋 · Noch keine Nachrichten</p>`;
+  const s=bRowOf({ activity_id:CH.id })||{}; let lastDay="";
+  return CH.list.map(m=>{
+    const d=new Date(m.created_at), day=d.toDateString(), mine=A.user&&m.user_id===A.user.id;
+    const sep = day!==lastDay ? `<div class="chday">${esc(bDayLabel(m.created_at).split(" · ")[0])}</div>` : ""; lastDay=day;
+    const t=d.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
+    const canDel = mine || s.is_host;
+    return `${sep}<div class="cm ${mine?"me":""}">${mine?"":`<div class="who">${m.avatar_url?`<img class="avs" src="${esc(m.avatar_url)}" alt="">`:""}${esc(m.name||"Member")}${m.is_host?" · ⭐ host":""}</div>`}
+      ${chLinkify(m.body)}<span class="tm">${t}</span>${canDel?`<button class="cx" aria-label="Delete message" title="Delete" onclick="chDel(${m.id})">✕</button>`:""}</div>`;
+  }).join("");
+}
+function chPaint(){
+  const el=document.getElementById("chlist"); if(!el) return;
+  const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+  el.innerHTML=chListHtml();
+  if(atBottom) el.scrollTop=el.scrollHeight;
+}
+VIEWS.chat = function(){
+  const s=bRowOf({ activity_id:CH.id })||{};
+  const open=chWindow(s.starts_at?s:{ starts_at:new Date().toISOString(), duration_min:60 });
+  return `<div class="topline"><button class="chip" onclick="chStop();sOpen('${CH.id}')">← Session</button><span>💬 Chat</span></div>
+  <div class="chhead"><div style="flex:1;min-width:0"><h2 style="margin:0;font-size:20px">${esc(s.title||"Session chat")}</h2>
+    ${s.starts_at?`<p class="note" style="margin:0">${fmtWhen(s.starts_at)}${s.format==="in_person"&&s.place_name?` · 📍 ${esc(s.place_name)}`:""}</p>`:""}</div></div>
+  <div class="chsafe">🔒 Only the host and people who joined can read this. Keep it here: no need to share phone numbers or home addresses.${s.format==="in_person"?" Meet at the public place from the session.":""} · Nur für Teilnehmende.</div>
+  ${CH.err?`<div class="err">${esc(CH.err)}</div>`:""}
+  <div class="chlist" id="chlist" aria-live="polite">${chListHtml()}</div>
+  ${open?`<div class="chin"><textarea id="chtxt" rows="1" maxlength="500" placeholder="Message · Nachricht…" oninput="CH.draft=this.value;this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();chSend();}">${esc(CH.draft)}</textarea>
+      <button class="btn primary" ${CH.busy?"disabled":""} onclick="chSend()" aria-label="Send">Send</button></div>`
+    : `<p class="note center" style="margin-top:10px">This chat is closed. Chats close 24 hours after the session. · Chat geschlossen.</p>`}`;
+};
+AFTER.chat = function(){ const el=document.getElementById("chlist"); if(el) el.scrollTop=el.scrollHeight; };
+async function chSend(){
+  const ta=document.getElementById("chtxt"); const body=((ta&&ta.value)||"").trim();
+  if(!body || CH.busy) return;
+  CH.busy=true;
+  try{
+    const { error } = await A.sb.from("session_messages").insert({ activity_id:CH.id, user_id:A.user.id, body:body.slice(0,500) });
+    if(error) throw error;
+    CH.draft=""; if(ta){ ta.value=""; ta.style.height="auto"; ta.focus(); }
+    await chFetch(false);
+    const el=document.getElementById("chlist"); if(el) el.scrollTop=el.scrollHeight;
+  }catch(e){ const m=String((e&&e.message)||e); bToast(/chat_slow_down/.test(m)?"Slow down a little 🙂 Try again in a minute · Bitte kurz warten":/row-level/.test(m)?"The chat is closed, or you're not in this session · Chat geschlossen":bErr(e)); }
+  CH.busy=false;
+}
+async function chDel(id){
+  if(!window.confirm("Delete this message? · Nachricht löschen?")) return;
+  const { error } = await A.sb.from("session_messages").delete().eq("id",id);
+  if(error){ bToast(bErr(error)); return; }
+  CH.list=CH.list.filter(m=>m.id!==id); chPaint();
+}
+
 /* ===================== IN-PERSON MEETUPS ===================== */
 const PL = {};   // activity_id -> { address, directions }  (only host / joined people get rows)
 let MYCITY;      // my city from the exchange profile (for local suggestions)
@@ -3643,7 +3760,7 @@ async function vLoad(){
     if(error) return;
     Object.keys(VL).forEach(k=>delete VL[k]);
     (data||[]).forEach(r=>{ VL[r.activity_id]={ url:r.url, provider:r.provider }; });
-    ciLoad(); avCollect(); mLoad(); pLoad(); pCityLoad();
+    ciLoad(); avCollect(); mLoad(); pLoad(); pCityLoad(); chUnreadLoad();
     if(["board","session","home"].includes(S.screen)) xr();
   }catch(e){}
 }
@@ -3810,6 +3927,7 @@ function bCard(s){
     ${ciBtn(s)}
     ${vLine(s)}
     ${mList(s)}
+    ${chBtn(s)}
     <div class="row" style="justify-content:center;margin-top:8px">${s.is_host && !started ? `<button class="chip" onclick="hEdit('${id}')">✏️ Edit · Bearbeiten</button>` : ""}<button class="chip" onclick="sShare('${id}')">🔗 ${s.is_host?"Share invite link":"Share"}</button></div>
     ${s.is_host && !started ? `<p class="center" style="margin:10px 0 0"><button class="linkbtn dangertext" style="font-size:13px" onclick="bCancel('${id}')">Cancel session · Absagen</button></p>` : ""}
   </div>`;
@@ -4263,7 +4381,7 @@ const NAV_ITEMS = [
   ["shop","Shop","Shop","shOpen()"],
   ["profile","Profile","Profil","A.ret='home';A.err='';A.msg='';go('account')"]
 ];
-NAV_TAB.shop="shop"; NAV_TAB.shopedit="shop"; NAV_TAB.cafes="sessions"; NAV_TAB.cafeedit="sessions";
+NAV_TAB.shop="shop"; NAV_TAB.shopedit="shop"; NAV_TAB.cafes="sessions"; NAV_TAB.cafeedit="sessions"; NAV_TAB.chat="sessions"; WIDE.chat="md";
 WIDE.cafes="xl"; WIDE.cafeedit="md";
 WIDE.shop="xl"; WIDE.shopedit="md";
 ICO.shop='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>';
@@ -4577,6 +4695,7 @@ function nextCard(){
       <button class="btn ${roomNow?"secondary":"primary"}" style="${roomNow?"":"background:var(--plum);box-shadow:none"}" onclick="bOpen()">${s.is_host?"Manage":"Details"}</button>
     </div>
     <button class="linkbtn" onclick="sShare('${s.activity_id}')">🔗 ${s.is_host?"Share invite link":"Share with a friend"}</button>
+    ${s.my_status!=="offered" && chWindow(s) ? `<button class="linkbtn" style="margin-left:14px" onclick="chOpen('${s.activity_id}')">💬 Chat${CU[s.activity_id]?` (${CU[s.activity_id]} new)`:""}</button>` : ""}
     ${(()=>{ const n=(D.board||[]).filter(x=>x.is_host || ["joined","offered"].includes(x.my_status)).length;
        return n>1 ? `<button class="linkbtn" style="margin-left:14px" onclick="bOpenMine()">⭐ All my sessions (${n})</button>` : ""; })()}</div>`;
 }
@@ -4826,6 +4945,7 @@ function nbText(n){
   switch(n.kind){
     case "seat_offer":   return `🎉 A seat is free for you in ${t}.${d.expires_at?` Accept by ${nbClock(d.expires_at)}.`:""}`;
     case "join_request": return `🔔 ${who} wants to join ${t}. Tap to approve or decline.`;
+    case "chat":         return `💬 ${d.count>1?`${d.count} new messages`:`New message${n.from_name?` from ${who}`:""}`} in ${t}.`;
     case "invited":      return `📩 ${who} invited you to ${t}. Tap to accept or decline.`;
     case "new_joiner":   return `👋 ${who} joined ${t}.`;
     case "approved":     return d.waitlist_position ? `🕒 Approved for ${t}. You're #${d.waitlist_position} on the waitlist.` : `✅ You're in: ${t}.`;
@@ -4875,7 +4995,7 @@ async function nbTap(id){
   const n=NB.list.find(x=>x.id===id); if(!n) return;
   if(!n.read_at){ n.read_at=new Date().toISOString(); NB.unread=Math.max(0,NB.unread-1); bellSync(); try{ await A.sb.rpc("pt_mark_read",{ p_id:id }); }catch(e){} }
   const sh=document.getElementById("nbSheet"); if(sh) sh.remove();
-  if(n.activity_id) sOpen(n.activity_id);
+  if(n.activity_id){ if(n.kind==="chat") chOpen(n.activity_id); else sOpen(n.activity_id); }
 }
 function nbTools(){
   if(!NB.list.length) return "";
