@@ -3214,7 +3214,7 @@ function navSync(){
   if(!t){ t=document.createElement("header"); t.id="tnav"; document.body.appendChild(t); }
   cl.add("has-nav");
   n.innerHTML = NAV_ITEMS.map(([k,en,de,fn])=>`<button class="${tab===k?"on":""}" ${tab===k?'aria-current="page"':""} onclick="${fn}">${ICO[k]}${en}<small>${de}</small></button>`).join("");
-  if(A.user) nbStart(); else if(NB.timer){ clearInterval(NB.timer); NB.timer=null; NB.list=[]; NB.unread=0; }
+  if(A.user){ nbStart(); nbFresh(); } else if(NB.timer){ clearInterval(NB.timer); NB.timer=null; NB.list=[]; NB.unread=0; }
   const me = A.user ? `${bellBtn()}<button class="tme" aria-label="Profile" onclick="${NAV_ITEMS[3][3]}">${esc((meName()||"?").charAt(0).toUpperCase())}</button>`
                     : `<button class="tsign" onclick="${NAV_ITEMS[3][3]}">Sign in · Anmelden</button>`;
   t.innerHTML = `<div class="tin"><button class="tlogo" onclick="goHome()"><span class="plogo">${ICO.logo}</span>PonteTalk</button>
@@ -3512,8 +3512,12 @@ function bellBtn(){
   return `<button class="nbbell" aria-label="Notifications${n?` (${n} unread)`:""}" onclick="nbOpen()">${ICO.bell}${n?`<span class="nbdot">${n>9?"9+":n}</span>`:""}</button>`;
 }
 function bellSync(){ document.querySelectorAll(".nbbell").forEach(b=>{ b.outerHTML=bellBtn(); }); }
+function nbFresh(){ if(A.user && NB.timer && NP.v.in_app && Date.now()-(NB.at||0) > 10000) nbLoad(); }
+document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState==="visible") nbFresh(); });
+window.addEventListener("focus", nbFresh);
 async function nbLoad(){
   if(!A.user || !A.sb) return;
+  NB.at=Date.now();
   try{
     const { data, error } = await A.sb.rpc("pt_my_notifications",{ p_limit:30 });
     if(error) throw error;
@@ -3526,7 +3530,7 @@ async function nbLoad(){
 function nbStart(){
   if(NB.timer || !A.user) return;
   npLoad(); nbLoad();
-  NB.timer=setInterval(()=>{ if(A.user && NP.v.in_app && document.visibilityState==="visible") nbLoad(); }, 60000);
+  NB.timer=setInterval(()=>{ if(A.user && NP.v.in_app && document.visibilityState==="visible") nbLoad(); }, 30000);
 }
 function nbAgo(iso){
   const m=Math.max(0,Math.round((Date.now()-new Date(iso).getTime())/60000));
