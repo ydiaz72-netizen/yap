@@ -3611,11 +3611,24 @@ function nbText(n){
     case "approved":     return d.waitlist_position ? `🕒 Approved for ${t}. You're #${d.waitlist_position} on the waitlist.` : `✅ You're in: ${t}.`;
     case "declined":     return `Your request for ${t} wasn't accepted this time.`;
     case "cancelled":    return `❌ ${t} was cancelled by the host.`;
-    case "changed":      return d.time_changed ? `📝 ${t} moved to a new time: ${n.starts_at?fmtWhen(n.starts_at):""}.` : `📝 The host updated ${t}.`;
+    case "changed":      return `📝 ${t}: ${nbChanges(d)}`;
     case "reminder_24h": return `⏰ Tomorrow: ${t}${n.starts_at?` at ${nbClock(n.starts_at)}`:""}.`;
     case "reminder_15m": return `⏰ ${t} starts in 15 minutes.`;
     default:             return `Update for ${t}.`;
   }
+}
+function nbChanges(d){
+  const ch=Array.isArray(d.changes)?d.changes:[];
+  if(!ch.length) return "updated by the host.";
+  const day=iso=>{ try{ return new Date(iso).toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"}); }catch(e){ return ""; } };
+  const one=c=>{
+    if(c.field==="time") return day(c.from)===day(c.to) ? `${nbClock(c.from)} → ${nbClock(c.to)} (${day(c.to)})` : `${fmtWhen(c.from)} → ${fmtWhen(c.to)}`;
+    if(c.field==="length") return `${c.from} → ${c.to} min`;
+    if(c.field==="title") return `new title "${esc(c.to)}"`;
+    if(c.field==="languages") return `languages now ${(c.to||[]).filter(Boolean).map(k=>T[k]?T[k].nameEn:k).join(" ⇄ ")}`;
+    return "";
+  };
+  return ch.map(one).filter(Boolean).join(" · ")+".";
 }
 function nbItems(){
   if(!NB.list.length) return `<p class="note center" style="margin:24px 0">No notifications yet · Noch keine Benachrichtigungen</p>`;
