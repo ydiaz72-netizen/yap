@@ -56,6 +56,12 @@
   label.lbl{display:block;font-weight:800;font-size:14px;margin:14px 0 6px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
   input[type=text],textarea{width:100%;border:2px solid var(--line);border-radius:14px;padding:12px 14px;font:600 17px Nunito,sans-serif;color:var(--ink);background:#fff}
   input:focus,textarea:focus{outline:none;border-color:var(--coral)}
+  select.xsel{width:100%;border:2px solid var(--line);border-radius:14px;padding:12px 14px;font:600 16px Nunito,sans-serif;color:var(--ink);background:#fff}
+  .xlang{padding:10px 0;border-top:1px solid var(--line)}
+  .xrole{gap:6px;flex-wrap:nowrap}
+  .xrole .chip{padding:7px 11px;font-size:14px}
+  .xgrid{display:grid;grid-template-columns:auto repeat(3,1fr);gap:6px;align-items:center}
+  .xslot{min-height:44px;padding:6px;border-radius:12px;justify-content:center}
   .player{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line)}
   .player:last-child{border-bottom:none}
   .avatar{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font:700 18px Fredoka,system-ui,sans-serif;color:#fff;flex:none}
@@ -2464,6 +2470,9 @@ VIEWS.account = function(){
     <button class="chip" onclick="editProfile()">✏️ Edit</button>
   </div>
   ${msg}
+  <div class="card"><h3>🌍 Language exchange <span class="de">· Sprachtandem</span></h3>
+    <p class="note" style="margin-top:0">Add your languages and free times to get matched with partners and sessions.<br><span class="de">Trage Sprachen und Zeiten ein, um passende Partner und Sessions zu finden.</span></p>
+    <button class="btn secondary" onclick="xOpen()">🗣️ My exchange profile · Mein Tandem-Profil</button></div>
   ${pend ? `<div class="card acard"><h3>💾 Save your last game? <span class="de">· Letztes Spiel speichern?</span></h3>
      ${pend.recs.length>1?`<p class="note">Which player were you? · Wer warst du?</p><div class="row">${pend.names.map((n,i)=>`<button class="chip ${i===meIdx?"on":""}" onclick="savePending(${i})">${i===meIdx?"⭐ ":""}${esc(n)}</button>`).join("")}</div>`
        :`<button class="btn primary" onclick="savePending(0)">💾 Save · Speichern</button>`}
@@ -2480,6 +2489,131 @@ VIEWS.account = function(){
 AFTER.account = function(){
   const n=$("pfname"); if(n) n.addEventListener("input",e=>{ A.pf=A.pf||{}; A.pf.name=e.target.value; });
   const f=$("acode")||$("aemail"); if(f && !A.busy && S.screen==="account" && window.innerWidth>700) f.focus({preventScroll:true});
+};
+
+/* ===================== EXCHANGE PROFILE (board & matching) ===================== */
+// The board stores levels in natural order (CEFR rank): 0=A0 1=A1 2=A2 3=B1 4=B2+
+// The game's own level numbers are: 0=A1 1=A2 2=B1 3=B2+ 4=A0
+function lvlRank(i){ return i===4 ? 0 : i+1; }
+function rankLvl(r){ return r===0 ? 4 : r-1; }
+const INTERESTS = [
+  ["food","🍲","Food","Essen"],["travel","✈️","Travel","Reisen"],["music","🎵","Music","Musik"],
+  ["movies","🎬","Movies & series","Filme & Serien"],["sports","⚽","Sports","Sport"],["work","💼","Work & careers","Arbeit & Karriere"],
+  ["culture","🎭","Culture & traditions","Kultur & Traditionen"],["tech","💻","Tech","Technik"],["books","📚","Books","Bücher"],
+  ["family","👨‍👩‍👧","Family","Familie"],["nature","🌿","Nature","Natur"],["gaming","🎮","Gaming","Gaming"],
+  ["germany","🏠","Life in Germany","Leben in Deutschland"]
+];
+const DAYS = [["Mon","Mo"],["Tue","Di"],["Wed","Mi"],["Thu","Do"],["Fri","Fr"],["Sat","Sa"],["Sun","So"]];
+const SLOTS = [
+  ["morning","🌅","08:00","12:00","Morning","Vormittag"],
+  ["afternoon","☀️","12:00","17:00","Afternoon","Nachmittag"],
+  ["evening","🌙","17:00","22:00","Evening","Abend"]
+];
+const X = { loaded:false, busy:false, err:"", msg:"", langs:{}, slots:{}, interests:[], tz:"", city:"", adult:false, adultAt:null };
+function detectTz(){ try{ return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"; }catch(e){ return "UTC"; } }
+function xr(){ const y=window.scrollY; render(); window.scrollTo(0,y); }   // re-draw without jumping to the top
+async function xLoad(){
+  if(!A.user) return;
+  X.loaded=false; X.err=""; X.msg="";
+  try{
+    const uid=A.user.id;
+    const [p,l,a] = await Promise.all([
+      A.sb.from("profiles").select("time_zone,city,interests,adult_confirmed_at").eq("id",uid).maybeSingle(),
+      A.sb.from("user_languages").select("language_code,role,level").eq("user_id",uid),
+      A.sb.from("availability").select("weekday,start_time,end_time").eq("user_id",uid)
+    ]);
+    if(p.error) throw p.error; if(l.error) throw l.error; if(a.error) throw a.error;
+    const P=p.data||{};
+    X.tz=P.time_zone||detectTz(); X.city=P.city||""; X.interests=(P.interests||[]).slice();
+    X.adultAt=P.adult_confirmed_at||null; X.adult=!!X.adultAt;
+    X.langs={}; (l.data||[]).forEach(r=>{ if(T[r.language_code]) X.langs[r.language_code]={role:r.role, level:r.level==null?null:rankLvl(r.level)}; });
+    X.slots={}; (a.data||[]).forEach(r=>{ const s=SLOTS.find(s=>s[2]===String(r.start_time).slice(0,5)); if(s) X.slots[r.weekday+"-"+s[0]]=true; });
+    // First time: start from what the game profile already knows
+    if(!Object.keys(X.langs).length && A.profile && T[A.profile.practicing])
+      X.langs[A.profile.practicing]={role:"learning", level:A.profile.level!=null?A.profile.level:null};
+  }catch(e){ X.err=authErr(e); }
+  X.loaded=true;
+  if(S.screen==="xprofile") render();
+}
+function xOpen(){ X.loaded=false; go("xprofile"); xLoad(); }
+function xRole(k,role){
+  const cur=X.langs[k];
+  if(!role) delete X.langs[k];
+  else X.langs[k]={ role, level: role==="learning" ? (cur&&cur.level!=null ? cur.level : (A.profile&&A.profile.level!=null ? A.profile.level : 4)) : null };
+  xr();
+}
+function xLevel(k,i){ if(X.langs[k]) X.langs[k].level=i; xr(); }
+function xSlot(key){ if(X.slots[key]) delete X.slots[key]; else X.slots[key]=true; xr(); }
+function xInterest(k){ const i=X.interests.indexOf(k); if(i>=0) X.interests.splice(i,1); else if(X.interests.length<6) X.interests.push(k); xr(); }
+async function xSave(){
+  if(!Object.keys(X.langs).length){ X.err="Pick at least one language · Wähle mindestens eine Sprache"; xr(); return; }
+  if(!X.adult){ X.err="Please confirm you are 18 or older · Bitte bestätige, dass du mindestens 18 bist"; xr(); return; }
+  X.busy=true; X.err=""; X.msg=""; xr();
+  try{
+    const uid=A.user.id, adultAt=X.adultAt||new Date().toISOString();
+    let r = await A.sb.from("profiles").update({ time_zone:X.tz||detectTz(), city:(X.city||"").trim().slice(0,60)||null, interests:X.interests, adult_confirmed_at:adultAt }).eq("id",uid);
+    if(r.error) throw r.error;
+    r = await A.sb.from("user_languages").delete().eq("user_id",uid); if(r.error) throw r.error;
+    const langs = Object.entries(X.langs).map(([k,v])=>({ user_id:uid, language_code:k, role:v.role, level: v.role==="learning" && v.level!=null ? lvlRank(v.level) : null }));
+    if(langs.length){ r = await A.sb.from("user_languages").insert(langs); if(r.error) throw r.error; }
+    r = await A.sb.from("availability").delete().eq("user_id",uid); if(r.error) throw r.error;
+    const av = Object.keys(X.slots).map(key=>{ const [d,sk]=key.split("-"); const s=SLOTS.find(s=>s[0]===sk); return { user_id:uid, weekday:+d, start_time:s[2], end_time:s[3] }; });
+    if(av.length){ r = await A.sb.from("availability").insert(av); if(r.error) throw r.error; }
+    X.adultAt=adultAt;
+    X.msg="Saved! · Gespeichert! ✅";
+  }catch(e){ X.err=authErr(e); }
+  X.busy=false; xr();
+}
+VIEWS.xprofile = function(){
+  const top=`<div class="topline"><button class="chip" onclick="go('account')">← Back</button><span>🌍 Exchange profile</span></div>`;
+  if(!A.user) return `${top}<p class="note center" style="margin-top:40px">Please sign in first · Bitte zuerst anmelden</p>`;
+  if(!X.loaded) return `${top}<p class="note center" style="margin-top:40px">Loading… · Lädt…</p>`;
+  const lvls=LVL_ORDER.map(i=>[LEVELS[i],i]);
+  const roleBtn=(k,role,label)=>`<button class="chip ${((X.langs[k]||{}).role||null)===role?"on":""}" aria-pressed="${((X.langs[k]||{}).role||null)===role}" onclick="xRole('${k}',${role?`'${role}'`:"null"})">${label}</button>`;
+  let tzs=null; try{ tzs=Intl.supportedValuesOf("timeZone"); if(tzs && X.tz && !tzs.includes(X.tz)) tzs=[X.tz,...tzs]; }catch(e){}
+  return `${top}
+  <h2>${bi("Your exchange profile","Dein Tandem-Profil")}</h2>
+  <p class="sub">${bi("This helps us find the right partners and sessions for you.","So finden wir passende Partner und Sessions für dich.")}</p>
+
+  <div class="card"><h3>🗣️ My languages <span class="de">· Meine Sprachen</span></h3>
+    <p class="note" style="margin-top:0"><b>Native / Fluent</b> = you can help others. <b>Learning</b> = you want to practice.<br><span class="de">Native = Muttersprache · Fluent = fließend (du kannst helfen) · Learning = lerne ich (du willst üben)</span></p>
+    ${LANG_KEYS.map(k=>{ const v=X.langs[k]; return `<div class="xlang">
+      <div style="font-weight:800;margin-bottom:6px">${T[k].flag} ${esc(T[k].nameEn)}${T[k].nameEn!==T[k].name?` <span class="note">· ${esc(T[k].name)}</span>`:""}</div>
+      <div class="row xrole">${roleBtn(k,null,"–")}${roleBtn(k,"native","Native")}${roleBtn(k,"fluent","Fluent")}${roleBtn(k,"learning","Learning")}</div>
+      ${v&&v.role==="learning"?`<div class="row" style="margin-top:8px">${lvls.map(([l,i])=>`<button class="chip ${v.level===i?"on":""}" aria-pressed="${v.level===i}" onclick="xLevel('${k}',${i})">${l.code}</button>`).join("")}</div>`:""}
+    </div>`; }).join("")}
+  </div>
+
+  <div class="card"><h3>🗓️ When I'm usually free <span class="de">· Wann ich meistens Zeit habe</span></h3>
+    <p class="note" style="margin-top:0">Tap the times that usually work for you. Times are in your time zone.<br><span class="de">Tippe auf passende Zeiten (in deiner Zeitzone).</span></p>
+    <div class="xgrid">
+      <span></span>${SLOTS.map(s=>`<span class="note center" style="margin:0;font-size:12px">${s[1]} ${s[4]}<br>${s[2]}–${s[3]}</span>`).join("")}
+      ${DAYS.map((d,di)=>`<b style="font-size:14px">${d[0]} <span class="de">${d[1]}</span></b>${SLOTS.map(s=>{ const key=di+"-"+s[0], on=!!X.slots[key]; return `<button class="chip xslot ${on?"on":""}" aria-pressed="${on}" aria-label="${d[0]} ${s[4]}" onclick="xSlot('${key}')">${on?"✓":""}</button>`; }).join("")}`).join("")}
+    </div>
+  </div>
+
+  <div class="card"><h3>💜 Interests <span class="de">· Interessen</span></h3>
+    <p class="note" style="margin-top:0">Pick up to 6 · Bis zu 6 auswählen</p>
+    <div class="row">${INTERESTS.map(([k,e,en,de])=>`<button class="chip ${X.interests.includes(k)?"on":""}" aria-pressed="${X.interests.includes(k)}" title="${esc(de)}" onclick="xInterest('${k}')">${e} ${esc(en)}</button>`).join("")}</div>
+  </div>
+
+  <div class="card"><h3>📍 Where I am <span class="de">· Wo ich bin</span></h3>
+    <label class="lbl" for="xtz">Time zone · Zeitzone</label>
+    ${tzs?`<select id="xtz" class="xsel" onchange="X.tz=this.value">${tzs.map(z=>`<option ${z===X.tz?"selected":""}>${esc(z)}</option>`).join("")}</select>`
+         :`<input type="text" id="xtz" value="${esc(X.tz)}" oninput="X.tz=this.value">`}
+    <label class="lbl" for="xcity">City (optional) · Stadt (optional)</label>
+    <input type="text" id="xcity" maxlength="60" placeholder="e.g. Erfurt" value="${esc(X.city)}" oninput="X.city=this.value">
+  </div>
+
+  <div class="card">
+    <label style="display:flex;gap:10px;align-items:flex-start;cursor:pointer">
+      <input type="checkbox" ${X.adult?"checked":""} ${X.adultAt?"disabled":""} onchange="X.adult=this.checked" style="width:22px;height:22px;margin-top:2px;flex-shrink:0">
+      <span><b>I am 18 or older.</b> Needed to join or host sessions with other people.<br><span class="de">Ich bin mindestens 18 Jahre alt. Nötig, um an Sessions teilzunehmen oder sie zu leiten.</span></span>
+    </label>
+    ${X.err?`<div class="err">${esc(X.err)}</div>`:""}${X.msg?`<p class="note center okmsg">${esc(X.msg)}</p>`:""}
+    <button class="btn primary" onclick="xSave()" ${X.busy?"disabled":""}>${X.busy?"Saving… · Speichert…":"💾 Save · Speichern"}</button>
+  </div>
+  <p class="note center">Other members only see your languages. Your free times and city stay private.<br><span class="de">Andere sehen nur deine Sprachen. Zeiten und Stadt bleiben privat.</span></p>`;
 };
 
 /* ---- legal pages ---- */
@@ -2512,12 +2646,14 @@ VIEWS.privacy = function(){
     <p>Wenn du ein Konto erstellst, speichern wir bei Supabase (Frankfurt, EU): deine E-Mail-Adresse, deinen Spielnamen, Sprache und Niveau sowie deine gespeicherten Spiele (Punkte, Platz, Fragen, Antworten und Tipps). Zweck: dir deinen Spielverlauf und Fortschritt anzuzeigen (Art. 6 Abs. 1 lit. b DSGVO). Deine Daten sieht nur du. Die Daten bleiben gespeichert, bis du dein Konto löschst. Du kannst dein Konto jederzeit in der App unter „Konto löschen“ selbst löschen – dann werden alle Daten sofort entfernt.</p>
     <p><b>Anmeldung per E-Mail-Code:</b> Den Code versenden wir über Resend, Inc. (USA). Dabei wird deine E-Mail-Adresse übermittelt. Resend ist unter dem EU-US Data Privacy Framework zertifiziert bzw. es gelten Standardvertragsklauseln.</p>
     <p><b>Anmeldung mit Google:</b> Wenn du „Weiter mit Google“ wählst, wirst du zu Google (Google Ireland Ltd. / Google LLC) weitergeleitet. Wir erhalten von Google deine E-Mail-Adresse und deinen Namen. Es gelten zusätzlich die Datenschutzhinweise von Google.</p>
+    <p><b>Tandem-Profil (freiwillig):</b> Wenn du es ausfüllst, speichern wir deine Sprachen und Niveaus, die Zeiten, zu denen du meistens Zeit hast, deine Interessen, deine Zeitzone, optional deine Stadt und deine Bestätigung, mindestens 18 Jahre alt zu sein. Deine Sprachen sind für andere angemeldete Mitglieder sichtbar, damit passende Partner gefunden werden; Zeiten und Stadt bleiben privat und werden nur für Vorschläge genutzt. Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO. Du kannst die Angaben jederzeit ändern; sie werden mit deinem Konto gelöscht.</p>
     <h3>6. Deine Rechte</h3>
     <p>Du hast das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch (Art. 15–21 DSGVO). Schreib uns dazu einfach an ${esc(LEGAL.email)}. Du kannst dich außerdem bei einer Datenschutz-Aufsichtsbehörde beschweren.</p>
     <h3>7. Alter</h3><p>Ein Konto darfst du ab 16 Jahren erstellen.</p>
     <hr>
     <h3>English summary</h3>
     <p>You can play without an account; then everything stays on your device. No tracking, no analytics, no ads. We only count anonymously when a room is created or a game ends (game type, languages, levels, number of players), with no names, IP addresses or device IDs. Online games run through Supabase (Frankfurt, EU) and are not stored. If you create an account, we store your email, game name, language, level and the games you save, only so you can see your history. Only you can see them. Login codes are sent via Resend (USA); "Continue with Google" shares your email and name from Google. You can delete your account and all data anytime in the app. Questions or data requests: ${esc(LEGAL.email)}. Accounts are for ages 16+.</p>
+    <p><b>Exchange profile (optional):</b> if you fill it in, we store your languages and levels, the times you're usually free, your interests, time zone, optionally your city, and your confirmation that you're 18+. Other signed-in members can see your languages so partners can be matched; your times and city stay private and are only used for suggestions. You can change it anytime, and it is deleted with your account.</p>
   </div>
   ${legalLinks()}`;
 };
