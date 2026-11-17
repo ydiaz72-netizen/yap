@@ -2867,8 +2867,22 @@ async function xSave(){
   X.busy=true; X.err=""; X.msg=""; xr();
   try{
     const uid=A.user.id, adultAt=X.adultAt||new Date().toISOString();
-    let r = await A.sb.from("profiles").update({ time_zone:X.tz||detectTz(), city:(X.city||"").trim().slice(0,60)||null, interests:X.interests, adult_confirmed_at:adultAt }).eq("id",uid);
-    if(r.error) throw r.error;
+    const fields={ time_zone:X.tz||detectTz(), city:(X.city||"").trim().slice(0,60)||null, interests:X.interests, adult_confirmed_at:adultAt };
+    let r;
+    if(!(A.profile&&A.profile.display_name)){
+      // No name yet → create the profile now (name + a practice language for games)
+      const name=(X.name||"").trim().slice(0,16);
+      if(!name){ X.busy=false; X.err="Please add your name at the top · Bitte oben deinen Namen eingeben"; xr(); return; }
+      const learn=Object.entries(X.langs).find(([,v])=>v.role==="learning");
+      const row=Object.assign({ id:uid, display_name:name, practicing:learn?learn[0]:(Object.keys(X.langs)[0]||"en"), level:learn&&learn[1].level!=null?learn[1].level:0, updated_at:new Date().toISOString() }, fields);
+      r = await A.sb.from("profiles").upsert(row).select("id");
+      if(r.error) throw r.error;
+      A.profile=Object.assign({}, A.profile||{}, { display_name:row.display_name, practicing:row.practicing, level:row.level });
+    }else{
+      r = await A.sb.from("profiles").update(fields).eq("id",uid).select("id");
+      if(r.error) throw r.error;
+    }
+    if(!r.data || !r.data.length) throw new Error("Your profile wasn't saved. Please try again · Nicht gespeichert");
     r = await A.sb.from("user_languages").delete().eq("user_id",uid); if(r.error) throw r.error;
     const langs = Object.entries(X.langs).map(([k,v])=>({ user_id:uid, language_code:k, role:v.role, level: v.role==="learning" && v.level!=null ? lvlRank(v.level) : null }));
     if(langs.length){ r = await A.sb.from("user_languages").insert(langs); if(r.error) throw r.error; }
@@ -2877,7 +2891,7 @@ async function xSave(){
     if(av.length){ r = await A.sb.from("availability").insert(av); if(r.error) throw r.error; }
     X.adultAt=adultAt;
     X.msg="Saved! · Gespeichert! ✅";
-  }catch(e){ X.err=authErr(e); }
+  }catch(e){ const m=String((e&&e.message)||""); X.err=/wasn't saved/.test(m)?m:/adult|row-level/i.test(m)?"Couldn't save. Please sign out and in again, then retry · Bitte neu anmelden":authErr(e); }
   X.busy=false; xr();
   // Finish the join that sent the person here
   if(!X.err && X.after){
@@ -2903,6 +2917,8 @@ VIEWS.xprofile = function(){
     <p style="margin:0">Add your languages and confirm you're 18 or older, then tap <b>Save</b> at the bottom. <b>We'll join you automatically.</b><br>
     <span class="de">Sprachen eintragen, 18+ bestätigen und speichern. Danach melden wir dich automatisch an.</span></p></div>`:""}
   <h2>${bi("Your exchange profile","Dein Tandem-Profil")}</h2>
+  ${!(A.profile&&A.profile.display_name)?`<div class="card" style="border:2px solid var(--coral)"><label class="lbl" for="xname" style="margin-top:0">Your name (others see it) · Dein Name</label>
+    <input type="text" id="xname" maxlength="16" placeholder="e.g. Ana" value="${esc(X.name||"")}" oninput="X.name=this.value" autocomplete="nickname"></div>`:""}
   <p class="sub">${bi("This helps us find the right partners and sessions for you.","So finden wir passende Partner und Sessions für dich.")}</p>
 
   <div class="card"><h3>🗣️ My languages <span class="de">· Meine Sprachen</span></h3>
