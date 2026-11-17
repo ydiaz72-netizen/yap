@@ -3912,6 +3912,52 @@ function acCard(){
       <button class="btn ${a.confirmed?"secondary":"primary"} qbtn" style="width:auto;margin:0" onclick="attOpen('${a.activity_id}')">${a.confirmed?"Edit · Ändern":"Mark · Eintragen"}</button></div>`).join("")}
   </div>`;
 }
+/* ---- Duplicate a session ("Schedule the next one?") ---- */
+const FU = { list:[] };
+function fuDismissed(){ try{ return JSON.parse(localStorage.getItem("pt_fu_dismiss")||"[]"); }catch(e){ return window._ptFu||[]; } }
+function fuDismiss(id){ const L=fuDismissed().concat([id]).slice(-50); try{ localStorage.setItem("pt_fu_dismiss",JSON.stringify(L)); }catch(e){ window._ptFu=L; } xr(); }
+async function fuLoad(){
+  if(!A.user || !A.sb) return;
+  try{ const { data, error } = await A.sb.rpc("pt_host_followups"); if(!error) FU.list=data||[]; }catch(e){}
+  if(S.screen==="home") xr();
+}
+function fuCard(){
+  const gone=fuDismissed(), L=(FU.list||[]).filter(x=>!gone.includes(x.activity_id));
+  if(!L.length) return "";
+  const a=L[0];
+  return `<div class="card" style="margin:0;border:2px solid var(--teal)">
+    <h3 style="margin:0 0 4px">🔁 Schedule the next one? · Nächster Termin?</h3>
+    <p class="note" style="margin:0 0 10px">Your session <b>“${esc(a.title)}”</b> ended${a.people?` · ${a.people} ${a.people===1?"person":"people"} took part`:""}. Copy it to a new date in a few seconds.<br><span class="de">Kopiere sie auf ein neues Datum.</span></p>
+    <div class="row" style="margin:0"><button class="btn primary qbtn" style="width:auto;margin:0" onclick="hDup('${a.activity_id}')">⧉ Duplicate · Kopieren</button>
+      <button class="chip" onclick="fuDismiss('${a.activity_id}')">Not now · Nicht jetzt</button></div></div>`;
+}
+function hNextWeek(iso){
+  let d=new Date(iso); do{ d=new Date(d.getTime()+7*86400000); }while(d.getTime() < Date.now()+3600000);
+  return d;
+}
+async function hDup(id){
+  if(!A.user){ go("account"); return; }
+  try{
+    const [a,l,m,p] = await Promise.all([
+      A.sb.from("activities").select("*").eq("id",id).single(),
+      A.sb.from("activity_links").select("url").eq("activity_id",id).maybeSingle(),
+      A.sb.from("activity_materials").select("position,label,url,shop_item").eq("activity_id",id).order("position"),
+      A.sb.from("activity_places").select("address,directions").eq("activity_id",id).maybeSingle()
+    ]);
+    if(a.error || !a.data) throw (a.error||new Error("not_found"));
+    const s=a.data, d=hNextWeek(s.starts_at);
+    Object.assign(H,{ editId:null, dupFrom:id, dupTitle:s.title, inviteAgain:true, type:s.type, game:s.game||"speak", title:s.title, a:s.language_a, b:s.language_b||"",
+      min:s.level_min, max:s.level_max, date:`${d.getFullYear()}-${hPad(d.getMonth()+1)}-${hPad(d.getDate())}`,
+      time:`${hPad(d.getHours())}:${hPad(d.getMinutes())}`, dur:s.duration_min, seats:s.seats, mode:s.join_mode, vis:s.visibility||"public",
+      fmt:s.format||"online", city:s.city||"", place:s.place_name||"", area:s.area||"", cafe:s.cafe_id||null,
+      addr:(p.data&&p.data.address)||"", dirs:(p.data&&p.data.directions)||"", pub:s.format==="in_person", placeWas:null,
+      topics:(s.topics||[]).slice(), note:s.note||"", video:(l.data&&l.data.url)||"", videoWas:"",
+      mats:(m.data||[]).map(x=>({ label:x.label, url:x.url, shop_item:x.shop_item })), matsWas:[],
+      bal:!!s.balanced, sa:s.seats_a||Math.max(1,Math.floor(s.seats/2)), sb:s.seats_b||Math.max(1,Math.ceil(s.seats/2)),
+      started:true, checked:false, err:"", busy:false });
+    go("host"); hPrefill();
+  }catch(e){ bToast(bErr(e)); }
+}
 const AT = { id:null, list:null, marks:{}, busy:false, err:"" };
 async function attOpen(id){
   AT.id=id; AT.list=null; AT.marks={}; AT.err=""; AT.busy=false;
@@ -4182,7 +4228,7 @@ function bCard(s){
     ${vLine(s)}
     ${mList(s)}
     ${chBtn(s)}
-    <div class="row" style="justify-content:center;margin-top:8px">${s.is_host && !started ? `<button class="chip" onclick="hEdit('${id}')">✏️ Edit · Bearbeiten</button>` : ""}<button class="chip" onclick="sShare('${id}')">🔗 ${s.is_host?"Share invite link":"Share"}</button></div>
+    <div class="row" style="justify-content:center;margin-top:8px">${s.is_host && !started ? `<button class="chip" onclick="hEdit('${id}')">✏️ Edit · Bearbeiten</button>` : ""}${s.is_host ? `<button class="chip" onclick="hDup('${id}')">⧉ Duplicate · Kopieren</button>` : ""}<button class="chip" onclick="sShare('${id}')">🔗 ${s.is_host?"Share invite link":"Share"}</button></div>
     ${s.is_host && !started ? `<p class="center" style="margin:10px 0 0"><button class="linkbtn dangertext" style="font-size:13px" onclick="bCancel('${id}')">Cancel session · Absagen</button></p>` : ""}
     ${A.user && !s.is_host ? `<p class="center" style="margin:8px 0 0"><button class="linkbtn" style="font-size:12px;color:var(--muted)" onclick="repOpen('session',null,'${id}')">🚩 Report this session · Melden</button></p>` : ""}
   </div>`;
@@ -4281,7 +4327,7 @@ function hPad(n){ return String(n).padStart(2,"0"); }
 function hOpen(){
   if(!A.user){ A.ret="board"; A.err=""; A.msg="Sign in to host a session · Melde dich an, um eine Session anzubieten"; go("account"); return; }
   H.err=""; H.busy=false; H.checked=false;
-  if(H.editId){ H.editId=null; H.started=false; }
+  if(H.editId || H.dupFrom){ H.editId=null; H.dupFrom=null; H.started=false; }
   if(!H.started){
     const d=new Date(Date.now()+86400000);
     Object.assign(H,{ bal:false, sa:2, sb:2, type:"conversation", game:"speak", title:"", a:"", b:"", min:1, max:3,
@@ -4365,7 +4411,7 @@ function hHostSide(){
   const sp=k=>(H.myLangs||[]).some(x=>x.code===k && (x.role==="native"||x.role==="fluent"));
   return sp(H.a) ? "sa" : (H.b && sp(H.b)) ? "sb" : "";
 }
-function hCancelEdit(){ H.editId=null; H.started=false; bOpen(); }
+function hCancelEdit(){ H.editId=null; H.dupFrom=null; H.started=false; bOpen(); }
 async function hPost(){
   H.err="";
   if(!H.a){ H.err="Pick the main language · Wähle die Hauptsprache"; xr(); return; }
@@ -4414,13 +4460,19 @@ async function hPost(){
       try{ await hSaveLink(made.id, video, ""); await hSaveMats(made.id, mc.list, []); await hSavePlace(made.id, null); }
       catch(e){ H.started=false; H.busy=false; bToast("📣 Session posted, but the video link or materials didn't save. Tap ✏️ Edit to add them · Nicht alles gespeichert"); bOpen(); return; }
     }
+    let again=0;
+    if(H.dupFrom && H.inviteAgain && made && made.id){
+      try{ const r=await A.sb.rpc("pt_invite_again",{ p_from:H.dupFrom, p_to:made.id }); if(!r.error) again=r.data||0; }catch(e){}
+    }
+    if(H.dupFrom){ FU.list=(FU.list||[]).filter(x=>x.activity_id!==H.dupFrom); const was=H.dupFrom; H.dupFrom=null; H.started=false; H.busy=false;
+      bToast(`⧉ Copied to the new date!${again?` ${again} ${again===1?"person":"people"} invited again`:""} · Kopiert!`); bOpen(); return; }
     H.started=false; H.busy=false;
     bToast(H.vis==="private" ? "🔒 Private session created. Tap 🔗 Share invite link to send it · Private Session erstellt" : "📣 Your session is on the board! · Deine Session ist online!");
     bOpen();
   }catch(e){ H.busy=false; H.err=bErr(e); xr(); }
 }
 VIEWS.host = function(){
-  const top=`<div class="topline"><button class="chip" onclick="${H.editId?"hCancelEdit()":"bOpen()"}">← Sessions</button><span>${H.editId?"✏️ Edit session":"＋ Host a session"}</span></div>`;
+  const top=`<div class="topline"><button class="chip" onclick="${H.editId?"hCancelEdit()":"bOpen()"}">← Sessions</button><span>${H.editId?"✏️ Edit session":H.dupFrom?"⧉ Duplicate session":"＋ Host a session"}</span></div>`;
   if(!A.user) return `${top}<p class="note center" style="margin-top:40px">Please sign in first · Bitte zuerst anmelden</p>`;
   if(!H.checked) return `${top}<p class="note center" style="margin-top:40px">Loading… · Lädt…</p>`;
   if(!H.adult) return `${top}<div class="card center" style="margin-top:20px"><div style="font-size:40px">🪪</div>
@@ -4523,9 +4575,12 @@ VIEWS.host = function(){
       <button class="chip mx" aria-label="Remove material ${i+1}" onclick="hMatDel(${i})">✕</button></div>`).join("")}
     ${(H.mats||[]).length<3?`<div class="row" style="margin-top:8px"><button class="chip" onclick="hMatAdd()">＋ Add a link</button><button class="chip" onclick="hMatShop()">🛍 Pick from PonteShop</button></div>`:""}
     <p class="note" style="margin:6px 0 0">Up to 3. Only people who joined see them. Tip: set Google Docs to <b>"Viewer"</b> before sharing, so nobody can change your file. · Nur Teilnehmende sehen sie.</p>
+    ${H.dupFrom?`<label style="display:flex;gap:10px;align-items:flex-start;margin-top:14px;padding:12px;border-radius:14px;background:var(--teal-soft);cursor:pointer">
+      <input type="checkbox" ${H.inviteAgain?"checked":""} onchange="H.inviteAgain=this.checked" style="width:22px;height:22px;margin-top:2px;flex-shrink:0">
+      <span><b>👥 Invite the same people again</b><br><span class="note" style="margin:0">Everyone from “${esc(H.dupTitle||"")}” gets an invite to accept. · Alle von damals werden eingeladen.</span></span></label>`:""}
     ${H.err?`<div class="err">${esc(H.err)}</div>`:""}
-    <button class="btn primary" onclick="hPost()" ${H.busy?"disabled":""}>${H.busy?"Saving… · Speichert…":H.editId?"💾 Save changes · Speichern":"📣 Post session · Veröffentlichen"}</button>
-    ${H.editId?`<button class="btn ghost" onclick="hCancelEdit()">Cancel · Abbrechen</button>`:""}
+    <button class="btn primary" onclick="hPost()" ${H.busy?"disabled":""}>${H.busy?"Saving… · Speichert…":H.editId?"💾 Save changes · Speichern":H.dupFrom?"⧉ Post the copy · Kopie veröffentlichen":"📣 Post session · Veröffentlichen"}</button>
+    ${H.editId||H.dupFrom?`<button class="btn ghost" onclick="hCancelEdit()">Cancel · Abbrechen</button>`:""}
   </div>`;
 };
 
@@ -5098,7 +5153,7 @@ rLoad = async function(){
     A.sb.from("participants").select("status,activities(starts_at,status)").eq("user_id",uid).in("status",["joined","offered","attended"]).then(r=>r, e=>({error:e})),
     A.sb.from("activities").select("starts_at,status").eq("host_id",uid).neq("status","cancelled").then(r=>r, e=>({error:e}))
   ]);
-  if(!b.error){ D.board=b.data||[]; vLoad(); acLoad(); }
+  if(!b.error){ D.board=b.data||[]; vLoad(); acLoad(); fuLoad(); }
   if(!p.error && !h.error){
     const times=[].concat((p.data||[]).filter(x=>x.activities && x.activities.status!=="cancelled").map(x=>x.activities.starts_at), (h.data||[]).map(x=>x.starts_at));
     D.week=weekStats(times);
@@ -5246,6 +5301,7 @@ function homeDash(){
       <div class="card" style="margin:0"><div class="dhead"><h1 class="dhi">Hi ${esc(name)}</h1>${bellBtn()}</div>
         <p class="sub" style="margin:2px 0 14px">Here's what's next for you. · Das steht als Nächstes an.</p>${nextCard()}</div>
       ${acCard()}
+      ${fuCard()}
       ${invCard()}
       <div><div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px">
         <h2 style="margin:0;font-size:20px">Suggested for you · Für dich</h2>
