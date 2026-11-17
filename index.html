@@ -184,6 +184,13 @@
   .nbx:hover{background:#F1F4F9;color:var(--ink)}
   .npoff{opacity:.45;pointer-events:none}
   .nplabel{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:14px 0 2px}
+  .plist{margin:12px 0 4px;border-top:1px solid var(--line);padding-top:10px}
+  .plist h4{margin:0 0 6px;font-size:13px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+  .prow{display:flex;gap:10px;align-items:flex-start;padding:8px 0}
+  .prow+.prow{border-top:1px dashed var(--line)}
+  .pav{flex:none;width:34px;height:34px;border-radius:17px;background:var(--plum-soft);color:var(--plum);display:grid;place-items:center;font-weight:800;font-size:14px}
+  .prow.pend{background:#FFF9EC;border-radius:12px;padding:8px}
+  .pl{font-size:13px;color:var(--muted);line-height:1.4}
   .ptoast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 18px;border-radius:14px;font-weight:700;z-index:9999;max-width:92vw;box-shadow:0 8px 24px rgba(0,0,0,.25);text-align:center}
   .player{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line)}
   .player:last-child{border-bottom:none}
@@ -2804,6 +2811,7 @@ async function bLoad(){
     const { data, error } = await sb.rpc("pt_board_sessions");
     if(error) throw error;
     B.list=data||[];
+    hostPeopleLoad();
   }catch(e){ B.err=bErr(e); if(!B.list) B.list=[]; }
   if(S.screen==="board" || S.screen==="session") xr();
 }
@@ -2846,7 +2854,7 @@ async function bRespond(id,uid,yes){
     if(error) throw error;
     bToast(!yes ? "Declined · Abgelehnt" : data.status==="joined" ? "Approved ✅ · Angenommen" : "Approved. The session is full, so they're on the waitlist · Warteliste");
   }catch(e){ bToast(bErr(e)); }
-  B.open=null; await bLoad(); bPeople(id);
+  await bLoad();
 }
 async function bCancel(id){
   if(!window.confirm("Cancel this session for everyone? · Session für alle absagen?")) return;
@@ -2856,6 +2864,11 @@ async function bCancel(id){
     bToast("Session cancelled · Session abgesagt");
   }catch(e){ bToast(bErr(e)); }
   bLoad();
+}
+function speaksLearns(arr){
+  const L=arr||[], nm=k=>T[k]?`${T[k].flag} ${esc(T[k].nameEn)}`:esc(k);
+  const sp=L.filter(l=>l.role!=="learning").map(l=>nm(l.code)), le=L.filter(l=>l.role==="learning").map(l=>`${nm(l.code)}${l.level!=null?` (${RANKS[l.level]})`:""}`);
+  return [sp.length?`Speaks ${sp.join(", ")}`:"", le.length?`Learning ${le.join(", ")}`:""].filter(Boolean).join(" · ") || "No languages set yet";
 }
 function bPeopleHtml(s){
   const ps=B.people[s.activity_id];
@@ -2884,8 +2897,7 @@ function bCard(s){
     act = (roomWindow ? `<button class="btn primary" onclick="bRoom('${id}',true)">🎮 Open game room · Spielraum öffnen</button>`
           : roomSoon ? `<p class="note" style="margin:8px 0 0">🎮 You can open the game room 30 min before the start. · Spielraum ab 30 Min. vorher.</p>` : "");
     act+=`<div class="row" style="margin-top:6px"><span class="feat">⭐ You're hosting · Du leitest</span>${s.pending?`<span class="feat" style="background:#FFF1C2">🔔 ${s.pending} request${s.pending>1?"s":""}</span>`:""}</div>
-      <button class="btn secondary" onclick="bPeople('${id}')">👥 People · Teilnehmende ${B.open===id?"▲":"▼"}</button>
-      ${B.open===id?bPeopleHtml(s):""}
+      ${hostList(s)}
 `;
   } else if(!A.user){
     act=`<button class="btn primary" onclick="A.ret='board';go('account')">Sign in to join · Anmelden</button>`;
@@ -2971,6 +2983,32 @@ async function bRoom(id, asHost){
       onlineConnect("guest", code, null);
     }
   }catch(e){ B.busy=false; bToast(bErr(e)); }
+}
+
+/* ---- Host: who's coming (always visible on the host's card) ---- */
+async function hostPeopleLoad(){
+  const mine=(B.list||[]).filter(x=>x.is_host); if(!mine.length || !A.sb) return;
+  await Promise.all(mine.map(async x=>{
+    try{ const { data, error } = await A.sb.rpc("pt_session_people",{ p_activity:x.activity_id }); if(!error) B.people[x.activity_id]=data||[]; }catch(e){}
+  }));
+  if(S.screen==="board" || S.screen==="session") xr();
+}
+function hostList(s){
+  const ps=B.people[s.activity_id];
+  const taken=s.seats-s.seats_open;
+  if(!ps) return `<div class="plist"><h4>Who's coming · ${taken} of ${s.seats}</h4><p class="note" style="margin:0">Loading… · Lädt…</p></div>`;
+  const pend=ps.filter(p=>p.status==="pending"), inn=ps.filter(p=>p.status==="joined"||p.status==="offered"), wait=ps.filter(p=>p.status==="waitlisted");
+  const row=(p,extra,cls)=>`<div class="prow ${cls||""}"><span class="pav" aria-hidden="true">${esc((p.name||"?").charAt(0).toUpperCase())}</span>
+      <div style="flex:1;min-width:0"><b>${esc(p.name||"Member")}</b>${p.reliability&&p.reliability.percent!=null?` <span class="pl">· ${p.reliability.percent}% shows up</span>`:""}
+      <div class="pl">${speaksLearns(p.languages)}</div>${extra||""}</div></div>`;
+  return `<div class="plist">
+    ${pend.length?`<h4>🔔 Asking to join · ${pend.length}</h4>${pend.map(p=>row(p,`<div class="row" style="margin-top:6px">
+        <button class="chip on" onclick="bRespond('${s.activity_id}','${p.user_id}',true)">✓ Approve · Annehmen</button>
+        <button class="chip" onclick="bRespond('${s.activity_id}','${p.user_id}',false)">✕ Decline · Ablehnen</button></div>`,"pend")).join("")}`:""}
+    <h4 style="${pend.length?"margin-top:10px":""}">Who's coming · ${taken} of ${s.seats}</h4>
+    ${inn.length?inn.map(p=>row(p,p.status==="offered"?`<div class="pl">🎁 Seat offered, waiting for reply</div>`:"")).join(""):`<p class="note" style="margin:0">Nobody yet. Share your invite link! · Noch niemand. Teile deinen Link!</p>`}
+    ${wait.length?`<h4 style="margin-top:10px">🕒 Waitlist · ${wait.length}</h4>${wait.map(p=>row(p,`<div class="pl">#${p.wait_position||"?"}</div>`)).join("")}`:""}
+  </div>`;
 }
 
 /* ---- Host a session ---- */
