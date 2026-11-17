@@ -113,6 +113,15 @@
   #bnav button svg{width:22px;height:22px}
   #bnav{gap:2px;padding-left:6px;padding-right:6px}
   #bnav button{font-size:12px}
+  /* ---- Reliability badges + attendance ---- */
+  .rbg{display:inline-block;margin-left:6px;font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--sun-soft);color:#7A5200;vertical-align:middle;white-space:nowrap}
+  .rbg.new{background:var(--teal-soft);color:#1F6B63}
+  .rbg.regular{background:var(--coral-soft);color:#A8361B}
+  .atrow{padding:10px 0;border-top:1px solid var(--line)}
+  .atrow .row{margin:6px 0 0;gap:6px}
+  .atrow .chip{font-size:13px;padding:6px 10px}
+  .atrow .chip.on.ns{border-color:#C0392B;background:#FBE3DF}
+  .mrel{background:var(--bg);border-radius:14px;padding:12px;margin:0 0 12px}
   /* ---- Video call link ---- */
   .vbtn{display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;background:var(--teal);color:#fff;margin-top:8px}
   .vline{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px;font-size:13px;color:var(--muted);font-weight:700}
@@ -2661,6 +2670,7 @@ VIEWS.account = function(){
        :`<button class="btn primary" onclick="savePending(0)">💾 Save · Speichern</button>`}
      <button class="btn ghost" onclick="lsSet('pt_pending',null);render()">No thanks · Nein danke</button></div>` : ""}
   <div class="card"><h3>📊 My stats <span class="de">· Meine Statistik</span></h3>
+    ${mrHtml()}
     ${A.games===null?`<p class="note center">Loading your games… <button class="linkbtn" onclick="loadGames()">Retry</button></p>`:acctStats(gs)}</div>
   ${acctHistory(gs)}
   <p class="note center">Tap a game to see its questions, answers &amp; tips · Tippe auf ein Spiel für Details</p>
@@ -2674,6 +2684,7 @@ VIEWS.account = function(){
   ${legalLinks()}`;
 };
 AFTER.account = function(){
+  if(A.user && A.status==="in" && !MR.data && !MR.loading) mrLoad();
   const n=$("pfname"); if(n) n.addEventListener("input",e=>{ A.pf=A.pf||{}; A.pf.name=e.target.value; });
   const f=$("acode")||$("aemail"); if(f && !A.busy && S.screen==="account" && window.innerWidth>700) f.focus({preventScroll:true});
 };
@@ -2861,6 +2872,124 @@ function langsLine(arr){
   return (arr||[]).map(l=>T[l.code] ? `${T[l.code].flag} ${l.role==="learning" ? "learning"+(l.level!=null?" "+RANKS[l.level]:"") : l.role}` : "").filter(Boolean).join(" · ");
 }
 
+
+/* ===================== RELIABILITY BADGES + ATTENDANCE ===================== */
+const RB = { reliable:["⭐","Reliable","Zuverlässig"], regular:["🔥","Regular","Stammgast"], new:["🌱","New","Neu"] };
+function relBadges(rel){
+  if(!rel || !rel.badges) return "";
+  return ["reliable","regular","new"].filter(b=>rel.badges.includes(b))
+    .map(b=>`<span class="rbg ${b}" title="${b==="reliable"?"Shows up and is on time":b==="regular"?"4+ sessions in the last 30 days":"Fewer than 3 sessions so far"}">${RB[b][0]} ${RB[b][1]}</span>`).join("");
+}
+const CI = {};   // my check-ins: activity_id -> { on_time }
+async function ciLoad(){
+  if(!A.user || !A.sb) return;
+  try{ const { data, error } = await A.sb.rpc("pt_my_checkins"); if(error) return;
+    (data||[]).forEach(r=>{ CI[r.activity_id]={ on_time:r.on_time }; });
+    if(["board","session","home"].includes(S.screen)) xr();
+  }catch(e){}
+}
+function ciOpen(s){
+  const st=new Date(s.starts_at).getTime(), now=Date.now();
+  return now>=st-10*60000 && now<=st+s.duration_min*60000;
+}
+function ciBtn(s, small){
+  if(!A.user || s.my_status!=="joined" || !ciOpen(s)) return "";
+  const c=CI[s.activity_id];
+  if(c) return `<p class="okmsg" style="margin:8px 0 0">✓ Checked in${c.on_time?" · on time 👏":""} · Eingecheckt</p>`;
+  return `<button class="btn primary ${small?"qbtn":""}" onclick="ciGo('${s.activity_id}')">🙋 I'm here · Ich bin da</button>`;
+}
+const CI_ERR = { too_early:"Check-in opens 10 minutes before the start · Check-in ab 10 Min. vorher",
+  too_late:"This session is over · Die Session ist vorbei", not_joined:"Only people in this session can check in · Nur Teilnehmende" };
+async function ciGo(id){
+  try{
+    const { data, error } = await A.sb.rpc("pt_check_in",{ p_activity:id }); if(error) throw error;
+    CI[id]={ on_time:!!(data&&data.on_time) };
+    bToast(data&&data.on_time ? "🙋 You're checked in, right on time! · Pünktlich eingecheckt!" : "🙋 You're checked in · Eingecheckt");
+  }catch(e){ const m=String((e&&e.message)||e); bToast(Object.keys(CI_ERR).find(k=>m.includes(k)) ? CI_ERR[Object.keys(CI_ERR).find(k=>m.includes(k))] : bErr(e)); }
+  xr();
+}
+
+/* Host: "Who came?" */
+const AC = { list:null };
+async function acLoad(){
+  if(!A.user || !A.sb) return;
+  try{ const { data, error } = await A.sb.rpc("pt_host_to_confirm"); if(!error) AC.list=data||[]; }catch(e){}
+  if(S.screen==="home") xr();
+}
+function acCard(){
+  const L=(AC.list||[]); if(!L.length) return "";
+  return `<div class="card" style="margin:0;border:2px solid var(--sun)"><h3 style="margin:0 0 4px">📋 Who came? · Wer war da?</h3>
+    <p class="note" style="margin:0 0 8px">Takes 10 seconds and builds everyone's reliability badge. · Dauert 10 Sekunden.</p>
+    ${L.map(a=>`<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 0;border-top:1px solid var(--line)">
+      <div style="flex:1;min-width:160px"><b>${esc(a.title)}</b><div class="note" style="margin:0">${fmtWhen(a.starts_at)} · ${a.confirmed} of ${a.people} marked</div></div>
+      <button class="btn ${a.confirmed?"secondary":"primary"} qbtn" style="width:auto;margin:0" onclick="attOpen('${a.activity_id}')">${a.confirmed?"Edit · Ändern":"Mark · Eintragen"}</button></div>`).join("")}
+  </div>`;
+}
+const AT = { id:null, list:null, marks:{}, busy:false, err:"" };
+async function attOpen(id){
+  AT.id=id; AT.list=null; AT.marks={}; AT.err=""; AT.busy=false;
+  attShow();
+  try{
+    const { data, error } = await A.sb.rpc("pt_attendance_list",{ p_activity:id }); if(error) throw error;
+    AT.list=data||[];
+    AT.list.forEach(p=>{
+      if(p.status==="no_show") AT.marks[p.user_id]="no_show";
+      else if(p.status==="attended" || p.checked_in_at) AT.marks[p.user_id] = p.on_time===false ? "late" : "on_time";
+    });
+  }catch(e){ AT.err=bErr(e); AT.list=[]; }
+  attShow();
+}
+function attMark(uid,m){ AT.marks[uid] = AT.marks[uid]===m ? undefined : m; attShow(); }
+function attShow(){
+  let box=document.getElementById("attSheet");
+  if(!box){ box=document.createElement("div"); box.className="sheet-bg"; box.id="attSheet";
+    box.addEventListener("click",e=>{ if(e.target===box) box.remove(); }); document.body.appendChild(box); }
+  const s=(B.list||[]).concat(D.board||[]).find(x=>x.activity_id===AT.id) || (AC.list||[]).find(x=>x.activity_id===AT.id) || {};
+  const t=d=>new Date(d).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
+  const chip=(p,m,label)=>`<button class="chip ${AT.marks[p.user_id]===m?"on":""} ${m==="no_show"?"ns":""}" aria-pressed="${AT.marks[p.user_id]===m}" onclick="attMark('${p.user_id}','${m}')">${label}</button>`;
+  box.innerHTML=`<div class="sheet" role="dialog" aria-label="Who came?">
+    <div class="nbhead"><h3 style="margin:0">📋 Who came? · Wer war da?</h3><button class="chip" aria-label="Close" onclick="document.getElementById('attSheet').remove()">✕</button></div>
+    ${s.title?`<p class="note" style="margin:0 0 6px"><b>${esc(s.title)}</b>${s.starts_at?` · ${fmtWhen(s.starts_at)}`:""}</p>`:""}
+    ${AT.list===null ? `<p class="note center">Loading… · Lädt…</p>`
+      : !AT.list.length ? `<p class="note center">Nobody joined this session. · Niemand war angemeldet.</p>`
+      : AT.list.map(p=>`<div class="atrow"><b>${esc(p.name||"Member")}</b>${relBadges(p.reliability)}
+          <div class="note" style="margin:2px 0 0">${p.checked_in_at?`🙋 Checked in at ${t(p.checked_in_at)}${p.on_time?" (on time)":" (late)"}`:"Didn't check in · Nicht eingecheckt"}</div>
+          <div class="row">${chip(p,"on_time","✓ On time")}${chip(p,"late","⏰ Late")}${chip(p,"no_show","✗ No-show")}</div></div>`).join("")}
+    ${AT.list&&AT.list.length?`<p class="note" style="margin:10px 0 0">People you don't mark aren't counted either way. Be fair: a no-show lowers their score. · Unmarkierte zählen nicht.</p>`:""}
+    ${AT.err?`<div class="err">${esc(AT.err)}</div>`:""}
+    ${AT.list&&AT.list.length?`<button class="btn primary" ${AT.busy?"disabled":""} onclick="attSave()">${AT.busy?"Saving… · Speichert…":"💾 Save · Speichern"}</button>`:""}
+  </div>`;
+}
+async function attSave(){
+  if(AT.busy) return;
+  const marks=Object.entries(AT.marks).filter(([,m])=>m).map(([user_id,mark])=>({ user_id, mark }));
+  AT.busy=true; AT.err=""; attShow();
+  try{
+    const { error } = await A.sb.rpc("pt_save_attendance",{ p_activity:AT.id, p_marks:marks }); if(error) throw error;
+    const b=document.getElementById("attSheet"); if(b) b.remove();
+    bToast("✅ Thanks! Attendance saved · Danke, gespeichert!");
+    acLoad(); if(S.screen==="board"||S.screen==="session") bLoad(); else if(S.screen==="home"){ R.at=0; rLoad(); }
+  }catch(e){ AT.busy=false; AT.err=bErr(e); attShow(); }
+}
+
+/* Profile: my own reliability */
+const MR = { data:null, loading:false };
+async function mrLoad(){
+  if(!A.user || !A.sb || MR.loading) return; MR.loading=true;
+  try{ const { data, error } = await A.sb.rpc("pt_my_reliability"); if(!error) MR.data=data||{}; }catch(e){}
+  MR.loading=false; if(S.screen==="account") xr();
+}
+function mrHtml(){
+  const r=MR.data; if(!r) return "";
+  const parts=[];
+  if(r.percent!=null) parts.push(`Shows up <b>${r.percent}%</b>`);
+  if(r.on_time!=null) parts.push(`on time <b>${r.on_time}%</b>`);
+  parts.push(`<b>${r.recent||0}</b> session${r.recent===1?"":"s"} in the last 30 days`);
+  return `<div class="mrel"><div style="font-weight:800;margin-bottom:4px">🤝 My reliability · Zuverlässigkeit ${relBadges(r)}</div>
+    <div class="note" style="margin:0">${(r.badges||[]).includes("new")?`Come to 3 sessions to get your score. Tap <b>🙋 I'm here</b> when a session starts. · Nach 3 Sessions bekommst du deinen Wert.<br>`:""}${parts.join(" · ")}</div>
+    <div class="note" style="margin:6px 0 0;font-size:12px">⭐ Reliable: shows up 90%+ and on time 80%+ · 🔥 Regular: 4+ sessions in 30 days</div></div>`;
+}
+
 /* ===================== VIDEO CALL LINKS ===================== */
 const VL = {};   // activity_id -> { url, provider } (only host / joined people get rows back)
 const V_PROV = { jitsi:"Jitsi", zoom:"Zoom", meet:"Google Meet", whatsapp:"WhatsApp", teams:"Teams", other:"video call" };
@@ -2883,6 +3012,7 @@ async function vLoad(){
     if(error) return;
     Object.keys(VL).forEach(k=>delete VL[k]);
     (data||[]).forEach(r=>{ VL[r.activity_id]={ url:r.url, provider:r.provider }; });
+    ciLoad();
     if(["board","session","home"].includes(S.screen)) xr();
   }catch(e){}
 }
@@ -2972,7 +3102,7 @@ function bPeopleHtml(s){
   if(!ps.length) return `<p class="note center">Nobody yet · Noch niemand</p>`;
   const lab={ pending:"🔔 Asks to join", joined:"✅ In", offered:"🎁 Seat offered", waitlisted:"🕒 Waitlist" };
   return `<div style="margin:6px 0 4px">${ps.map(p=>`<div style="padding:8px 0;border-top:1px solid var(--line)">
-      <b>${esc(p.name||"Member")}</b> <span class="note">${lab[p.status]||""}${p.wait_position?" #"+p.wait_position:""}${p.reliability&&p.reliability.percent!=null?` · ${p.reliability.percent}% shows up`:""}</span>
+      <b>${esc(p.name||"Member")}</b>${relBadges(p.reliability)} <span class="note">${lab[p.status]||""}${p.wait_position?" #"+p.wait_position:""}${p.reliability&&p.reliability.percent!=null?` · ${p.reliability.percent}% shows up`:""}</span>
       <br><span class="note">${langsLine(p.languages)||"No languages set yet"}</span>
       ${p.status==="pending"?`<div class="row" style="margin-top:6px">
         <button class="chip on" onclick="bRespond('${s.activity_id}','${p.user_id}',true)">✓ Approve · Annehmen</button>
@@ -2996,6 +3126,7 @@ function bCard(s){
           : roomSoon ? `<p class="note" style="margin:8px 0 0">🎮 You can open the game room 30 min before the start. · Spielraum ab 30 Min. vorher.</p>` : "");
     act+=`<div class="row" style="margin-top:6px"><span class="feat">⭐ You're hosting · Du leitest</span>${s.pending?`<span class="feat" style="background:#FFF1C2">🔔 ${s.pending} request${s.pending>1?"s":""}</span>`:""}</div>
       ${hostList(s)}
+      ${started?`<button class="btn secondary" onclick="attOpen('${id}')">📋 Who came? · Wer war da?</button>`:""}
 `;
   } else if(!A.user){
     act=`<button class="btn primary" onclick="A.ret='board';go('account')">Sign in to join · Anmelden</button>`;
@@ -3025,10 +3156,11 @@ function bCard(s){
     <div class="note" style="margin:0">${langPair(s.language_a,s.language_b)} · ${lvlRange(s.level_min,s.level_max)}</div>
     ${sidesHtml}
     <div class="bwhen">🗓️ ${fmtWhen(s.starts_at)} · ${s.duration_min} min${hostT?`<small>${esc(hostT)}</small>`:""}</div>
-    <div class="note" style="margin:0">👤 ${esc(s.host_name||"Host")}${rel}${s.host_languages&&s.host_languages.length?` · ${langsLine(s.host_languages)}`:""}</div>
+    <div class="note" style="margin:0">👤 ${esc(s.host_name||"Host")}${relBadges(s.host_reliability)}${rel}${s.host_languages&&s.host_languages.length?` · ${langsLine(s.host_languages)}`:""}</div>
     ${(s.topics||[]).length?`<div class="row" style="margin-top:8px">${s.topics.map(k=>{ const it=INTERESTS.find(x=>x[0]===k); return it?`<span class="feat">${it[1]} ${esc(it[2])}</span>`:""; }).join("")}</div>`:""}
     ${s.note?`<p class="note" style="margin:8px 0 0">💬 ${esc(s.note)}</p>`:""}
     ${act}
+    ${ciBtn(s)}
     ${vLine(s)}
     <div class="row" style="justify-content:center;margin-top:8px">${s.is_host && !started ? `<button class="chip" onclick="hEdit('${id}')">✏️ Edit · Bearbeiten</button>` : ""}<button class="chip" onclick="sShare('${id}')">🔗 ${s.is_host?"Share invite link":"Share"}</button></div>
     ${s.is_host && !started ? `<p class="center" style="margin:10px 0 0"><button class="linkbtn dangertext" style="font-size:13px" onclick="bCancel('${id}')">Cancel session · Absagen</button></p>` : ""}
@@ -3099,7 +3231,7 @@ function hostList(s){
   if(!ps) return `<div class="plist"><h4>Who's coming · ${taken} of ${s.seats}</h4><p class="note" style="margin:0">Loading… · Lädt…</p></div>`;
   const pend=ps.filter(p=>p.status==="pending"), inn=ps.filter(p=>p.status==="joined"||p.status==="offered"), wait=ps.filter(p=>p.status==="waitlisted");
   const row=(p,extra,cls)=>`<div class="prow ${cls||""}"><span class="pav" aria-hidden="true">${esc((p.name||"?").charAt(0).toUpperCase())}</span>
-      <div style="flex:1;min-width:0"><b>${esc(p.name||"Member")}</b>${s.balanced&&p.side?`<span class="sidetag">${(()=>{ const l=p.side==="a"?s.language_a:s.language_b; return T[l]?`${T[l].flag} ${esc(T[l].nameEn)} side`:""; })()}</span>`:""}${p.reliability&&p.reliability.percent!=null?` <span class="pl">· ${p.reliability.percent}% shows up</span>`:""}
+      <div style="flex:1;min-width:0"><b>${esc(p.name||"Member")}</b>${relBadges(p.reliability)}${s.balanced&&p.side?`<span class="sidetag">${(()=>{ const l=p.side==="a"?s.language_a:s.language_b; return T[l]?`${T[l].flag} ${esc(T[l].nameEn)} side`:""; })()}</span>`:""}${p.reliability&&p.reliability.percent!=null?` <span class="pl">· ${p.reliability.percent}% shows up</span>`:""}
       <div class="pl">${speaksLearns(p.languages)}</div>${extra||""}</div></div>`;
   return `<div class="plist">
     ${pend.length?`<h4>🔔 Asking to join · ${pend.length}</h4>${pend.map(p=>row(p,`<div class="row" style="margin-top:6px">
@@ -3365,7 +3497,7 @@ function rCard(s){
     <div class="btitle">${g?`${g[1]} `:""}${esc(s.title)}</div>
     <div class="note" style="margin:0">${langPair(s.language_a,s.language_b)} · ${lvlRange(s.level_min,s.level_max)}${g?` · ${esc(g[2])}`:""}</div>
     <div class="rsec">Who speaks what · Wer spricht was</div>
-    <div style="font-size:14px">👤 <b>${esc(s.host_name||"Host")}</b>${s.host_reliability&&s.host_reliability.percent!=null?` <span class="note">(${s.host_reliability.percent}% shows up)</span>`:""}: ${langsLine(s.host_languages)||"–"}</div>
+    <div style="font-size:14px">👤 <b>${esc(s.host_name||"Host")}</b>${relBadges(s.host_reliability)}${s.host_reliability&&s.host_reliability.percent!=null?` <span class="note">(${s.host_reliability.percent}% shows up)</span>`:""}: ${langsLine(s.host_languages)||"–"}</div>
     <div style="font-size:14px;margin-top:2px">🙂 <b>You</b>: ${langsLine(R.mine)||"–"}</div>
     ${(s.reasons||[]).length?`<div class="rsec">Why this matches you · Warum es passt</div>
       <ul class="rwhy">${s.reasons.map(r=>`<li>✅ ${esc(r)}</li>`).join("")}</ul>`:""}
@@ -3650,7 +3782,7 @@ rLoad = async function(){
     A.sb.from("participants").select("status,activities(starts_at,status)").eq("user_id",uid).in("status",["joined","offered","attended"]).then(r=>r, e=>({error:e})),
     A.sb.from("activities").select("starts_at,status").eq("host_id",uid).neq("status","cancelled").then(r=>r, e=>({error:e}))
   ]);
-  if(!b.error){ D.board=b.data||[]; vLoad(); }
+  if(!b.error){ D.board=b.data||[]; vLoad(); acLoad(); }
   if(!p.error && !h.error){
     const times=[].concat((p.data||[]).filter(x=>x.activities && x.activities.status!=="cancelled").map(x=>x.activities.starts_at), (h.data||[]).map(x=>x.starts_at));
     D.week=weekStats(times);
@@ -3717,6 +3849,7 @@ function nextCard(){
       <p style="margin:2px 0;font-weight:800;font-size:17px">${esc(s.title)}</p>
       <p class="note" style="margin:0">${t1}–${t2} · ${codesPair(s.language_a,s.language_b)} · ${taken} of ${s.seats} joined · ${role}</p></div>
     <div class="dbtns">
+      ${ciBtn(s,true)}
       ${VL[s.activity_id] && s.my_status!=="offered" ? vBtn(s.activity_id, nowMs>=st-15*60000).replace("btn ","btn qbtn ").replace(" · Videoanruf","") : ""}
       ${roomNow ? `<button class="btn primary" onclick="bRoom('${s.activity_id}',${!!s.is_host})">🎮 ${s.is_host?"Open":"Enter"} game room</button>`
                 : `<button class="btn secondary qbtn" onclick="addToCal('${s.activity_id}')">${ICO.cal} Add to calendar</button>`}
@@ -3789,6 +3922,7 @@ function homeDash(){
     <div style="min-width:0;display:flex;flex-direction:column;gap:18px">
       <div class="card" style="margin:0"><div class="dhead"><h1 class="dhi">Hi ${esc(name)}</h1>${bellBtn()}</div>
         <p class="sub" style="margin:2px 0 14px">Here's what's next for you. · Das steht als Nächstes an.</p>${nextCard()}</div>
+      ${acCard()}
       <div><div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px">
         <h2 style="margin:0;font-size:20px">Suggested for you · Für dich</h2>
         ${(R.mine||[]).length?`<span class="note" style="margin:0;font-size:14px">${speak.length?`I speak <b>${esc(speak.join(", "))}</b> · `:""}${learn.length?`I practise <b>${esc(learn.join(", "))}</b> · `:""}<button class="linkbtn" onclick="xOpen()">Change</button></span>`:""}
@@ -4086,6 +4220,7 @@ VIEWS.privacy = function(){
     <p><b>Anmeldung per E-Mail-Code:</b> Den Code versenden wir über Resend, Inc. (USA). Dabei wird deine E-Mail-Adresse übermittelt. Resend ist unter dem EU-US Data Privacy Framework zertifiziert bzw. es gelten Standardvertragsklauseln.</p>
     <p><b>Anmeldung mit Google:</b> Wenn du „Weiter mit Google“ wählst, wirst du zu Google (Google Ireland Ltd. / Google LLC) weitergeleitet. Wir erhalten von Google deine E-Mail-Adresse und deinen Namen. Es gelten zusätzlich die Datenschutzhinweise von Google.</p>
     <p><b>Tandem-Profil (freiwillig):</b> Wenn du es ausfüllst, speichern wir deine Sprachen und Niveaus, die Zeiten, zu denen du meistens Zeit hast, deine Interessen, deine Zeitzone, optional deine Stadt und deine Bestätigung, mindestens 18 Jahre alt zu sein. Deine Sprachen sind für andere angemeldete Mitglieder sichtbar, damit passende Partner gefunden werden; Zeiten und Stadt bleiben privat und werden nur für Vorschläge genutzt. Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO. Du kannst die Angaben jederzeit ändern; sie werden mit deinem Konto gelöscht.</p>
+    <p><b>Teilnahme &amp; Zuverlässigkeit:</b> Wenn du an Sessions teilnimmst, speichern wir, ob und wann du eingecheckt hast und ob du laut Host da, zu spät oder nicht da warst. Daraus berechnen wir deine Zuverlässigkeit (z. B. „92 % erscheint“, Abzeichen wie „Zuverlässig“). Andere angemeldete Mitglieder sehen diesen Wert und die Abzeichen. Zweck: verlässliche Treffen und Schutz vor No-Shows (Art. 6 Abs. 1 lit. b und f DSGVO).</p>
     <p><b>PonteShop:</b> Zum Herunterladen von Materialien brauchst du ein Konto. Wir speichern bei Supabase (Frankfurt, EU), welches Material du wann heruntergeladen hast. Zweck: zählen, welche Materialien genutzt werden, und dir die Datei bereitstellen (Art. 6 Abs. 1 lit. b und f DSGVO). Nur die Betreiberin sieht diese Zahlen.</p>
     <h3>6. Deine Rechte</h3>
     <p>Du hast das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch (Art. 15–21 DSGVO). Schreib uns dazu einfach an ${esc(LEGAL.email)}. Du kannst dich außerdem bei einer Datenschutz-Aufsichtsbehörde beschweren.</p>
@@ -4094,6 +4229,7 @@ VIEWS.privacy = function(){
     <h3>English summary</h3>
     <p>You can play without an account; then everything stays on your device. No tracking, no analytics, no ads. We only count anonymously when a room is created or a game ends (game type, languages, levels, number of players), with no names, IP addresses or device IDs. Online games run through Supabase (Frankfurt, EU) and are not stored. If you create an account, we store your email, game name, language, level and the games you save, only so you can see your history. Only you can see them. Login codes are sent via Resend (USA); "Continue with Google" shares your email and name from Google. You can delete your account and all data anytime in the app. Questions or data requests: ${esc(LEGAL.email)}. Accounts are for ages 16+.</p>
     <p><b>Exchange profile (optional):</b> if you fill it in, we store your languages and levels, the times you're usually free, your interests, time zone, optionally your city, and your confirmation that you're 18+. Other signed-in members can see your languages so partners can be matched; your times and city stay private and are only used for suggestions. You can change it anytime, and it is deleted with your account.</p>
+    <p><b>Attendance &amp; reliability:</b> when you take part in sessions, we store whether and when you checked in and whether the host marked you as on time, late or a no-show. From this we show your reliability (e.g. "92% shows up" and badges like "Reliable") to other signed-in members, so sessions stay dependable.</p>
     <p><b>Email notifications:</b> if you join or host sessions, we email you (seat offers, approvals, reminders, cancellations) via Resend, Inc. (USA), sending your email address, name, time zone and session details. You can turn each type off in Profile → Notifications.</p>
     <p><b>PonteShop:</b> downloading needs an account. We store which resource you downloaded and when (Supabase, Frankfurt, EU) to count how resources are used and to give you the file. Only the operator sees these numbers.</p>
   </div>
