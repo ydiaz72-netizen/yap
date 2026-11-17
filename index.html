@@ -113,6 +113,16 @@
   #bnav button svg{width:22px;height:22px}
   #bnav{gap:2px;padding-left:6px;padding-right:6px}
   #bnav button{font-size:12px}
+  /* ---- Profile photos ---- */
+  img.pav{object-fit:cover;padding:0;background:var(--plum-soft)}
+  .avs{width:22px;height:22px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:2px}
+  .pfav{position:relative;width:64px;height:64px;border-radius:50%;flex:none;cursor:pointer;display:block}
+  .pfav img,.pfav .pfin{width:64px;height:64px;border-radius:50%;object-fit:cover;display:grid;place-items:center;background:var(--plum);color:#fff;font:800 26px 'Plus Jakarta Sans',sans-serif}
+  .pfav .pfcam{position:absolute;right:-4px;bottom:-4px;width:28px;height:28px;border-radius:50%;background:#fff;border:2px solid var(--line);display:grid;place-items:center;font-size:14px}
+  .pfav input{display:none}
+  .pfav.busy{opacity:.5;pointer-events:none}
+  #tnav .tme{padding:0;overflow:hidden}
+  #tnav .tme img{width:100%;height:100%;object-fit:cover;display:block}
   /* ---- Language cafés ---- */
   .stabs{display:flex;gap:6px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:4px;margin:6px 0 14px}
   .stabs button{flex:1;border:none;background:none;border-radius:10px;padding:10px 8px;font:800 14px 'Plus Jakarta Sans',Nunito,sans-serif;color:var(--muted);cursor:pointer}
@@ -2336,7 +2346,7 @@ function authRefreshView(){
 }
 async function loadProfile(){
   try{
-    const { data, error } = await A.sb.from("profiles").select("display_name,practicing,level").eq("id", A.user.id).maybeSingle();
+    const { data, error } = await A.sb.from("profiles").select("display_name,practicing,level,avatar_url").eq("id", A.user.id).maybeSingle();
     if(error) throw error;
     A.profile = data || null;
     if(A.profile && A.profile.display_name && !S.draft.name){
@@ -2430,7 +2440,7 @@ async function saveProfile(){
   try{
     const { error } = await A.sb.from("profiles").upsert(row);
     if(error) throw error;
-    A.profile={display_name:row.display_name, practicing:row.practicing, level:row.level};
+    A.profile={display_name:row.display_name, practicing:row.practicing, level:row.level, avatar_url:(A.profile&&A.profile.avatar_url)||null};
     S.draft.name=row.display_name; S.draft.lang=row.practicing; S.draft.level=row.level;
     const wasEditing=A.editing; A.editing=false; A.pf=null; A.busy=false;
     if(!wasEditing && (A.ret==="results"||A.ret==="lobby")){ authReturn(); return; }
@@ -2600,6 +2610,7 @@ function confirmDelete(){
   $("delYes").onclick=async()=>{
     $("delYes").disabled=true; $("delMsg").textContent="Deleting… · Wird gelöscht…";
     try{
+      try{ if(A.profile && A.profile.avatar_url) await avRemoveFile(A.profile.avatar_url); }catch(e){}
       const { error } = await A.sb.rpc("delete_my_account");
       if(error) throw error;
       try{ await A.sb.auth.signOut(); }catch(e){}
@@ -2675,8 +2686,9 @@ VIEWS.account = function(){
   const meIdx = pend ? pend.names.findIndex(n=>n.toLowerCase()===P.display_name.toLowerCase()) : -1;
   return `${top}
   <div class="card prof">
-    <div class="avatar" style="background:var(--plum);width:52px;height:52px;font-size:24px">${esc(P.display_name.charAt(0).toUpperCase())}</div>
+    <label class="pfav ${AV_BUSY?"busy":""}" title="Change photo · Foto ändern" aria-label="Change profile photo">${P.avatar_url?`<img src="${esc(P.avatar_url)}" alt="">`:`<span class="pfin">${esc(P.display_name.charAt(0).toUpperCase())}</span>`}<span class="pfcam" aria-hidden="true">📷</span><input type="file" accept="image/*" onchange="avPick(this)"></label>
     <div style="flex:1"><div class="pname" style="font-size:20px">${esc(P.display_name)}</div>
+      <div class="pmeta" style="margin:2px 0 4px">${AV_BUSY?"Saving photo… · Speichert…":P.avatar_url?`<button class="linkbtn" style="font-size:13px" onclick="avRemove()">Remove photo · Foto entfernen</button>`:`<label class="linkbtn" style="font-size:13px;cursor:pointer">📷 Add a photo · Foto hinzufügen<input type="file" accept="image/*" style="display:none" onchange="avPick(this)"></label>`}</div>
       <div class="pmeta">${T[P.practicing]?`${T[P.practicing].flag} ${T[P.practicing].name}`:""} · ${LEVELS[P.level]?LEVELS[P.level].code:""}</div></div>
     <button class="chip" onclick="editProfile()">✏️ Edit</button>
   </div>
@@ -2889,6 +2901,81 @@ function langsLine(arr){
 }
 
 
+
+
+/* ===================== PROFILE PHOTOS ===================== */
+const AV = {};   // user_id -> photo URL ("" = none)
+function avUrl(uid){ if(A.user && uid===A.user.id) return (A.profile&&A.profile.avatar_url)||""; return AV[uid]||""; }
+function avSpan(uid,name){ const u=avUrl(uid); return u ? `<img class="pav" src="${esc(u)}" alt="" loading="lazy">` : `<span class="pav" aria-hidden="true">${esc((name||"?").charAt(0).toUpperCase())}</span>`; }
+function avSmall(uid){ const u=avUrl(uid); return u ? `<img class="avs" src="${esc(u)}" alt="" loading="lazy">` : "👤"; }
+let AV_T=null;
+function avCollect(){
+  if(!A.user || !A.sb) return;
+  const ids=new Set();
+  (B.list||[]).concat(D.board||[], R.list||[]).forEach(x=>{ if(x.host_id) ids.add(x.host_id); });
+  Object.values(B.people||{}).forEach(L=>(L||[]).forEach(p=>ids.add(p.user_id)));
+  (AT.list||[]).forEach(p=>ids.add(p.user_id));
+  const need=[...ids].filter(id=>id && !(id in AV) && id!==A.user.id);
+  if(!need.length) return;
+  need.forEach(id=>AV[id]="");
+  clearTimeout(AV_T);
+  AV_T=setTimeout(async()=>{
+    try{
+      const { data, error } = await A.sb.rpc("pt_avatars",{ p_ids:need.slice(0,200) });
+      if(error) return;
+      let any=false; (data||[]).forEach(r=>{ if(r.avatar_url){ AV[r.id]=r.avatar_url; any=true; } });
+      if(any){ if(["board","session","home"].includes(S.screen)) xr(); if(document.getElementById("attSheet")) attShow(); }
+    }catch(e){}
+  },60);
+}
+function avPathFromUrl(u){ const m=String(u||"").match(/\/avatars\/(.+)$/); return m?decodeURIComponent(m[1].split("?")[0]):""; }
+async function avRemoveFile(u){ const p=avPathFromUrl(u); if(p) await A.sb.storage.from("avatars").remove([p]); }
+function avShrink(file){
+  return new Promise((ok,bad)=>{
+    const img=new Image(), url=URL.createObjectURL(file);
+    img.onload=()=>{
+      const n=Math.min(img.naturalWidth,img.naturalHeight), sx=(img.naturalWidth-n)/2, sy=(img.naturalHeight-n)/2;
+      const c=document.createElement("canvas"); c.width=c.height=256;
+      const g=c.getContext("2d"); g.fillStyle="#fff"; g.fillRect(0,0,256,256);
+      g.drawImage(img,sx,sy,n,n,0,0,256,256);
+      URL.revokeObjectURL(url);
+      c.toBlob(b=>b?ok(b):bad(new Error("convert")),"image/jpeg",0.85);
+    };
+    img.onerror=()=>{ URL.revokeObjectURL(url); bad(new Error("not_image")); };
+    img.src=url;
+  });
+}
+let AV_BUSY=false;
+async function avPick(inp){
+  const f=inp.files&&inp.files[0]; inp.value=""; if(!f || AV_BUSY) return;
+  if(!/^image\//.test(f.type||"image/")){ bToast("Please pick a photo · Bitte ein Foto wählen"); return; }
+  if(f.size>20*1024*1024){ bToast("That photo is too big · Foto zu groß"); return; }
+  AV_BUSY=true; xr();
+  try{
+    const blob=await avShrink(f), uid=A.user.id, path=`${uid}/${Date.now()}.jpg`;
+    const up=await A.sb.storage.from("avatars").upload(path, blob, { contentType:"image/jpeg", upsert:false, cacheControl:"31536000" });
+    if(up.error) throw up.error;
+    const url=A.sb.storage.from("avatars").getPublicUrl(path).data.publicUrl;
+    const old=A.profile&&A.profile.avatar_url;
+    const r=await A.sb.from("profiles").update({ avatar_url:url }).eq("id",uid); if(r.error) throw r.error;
+    A.profile.avatar_url=url;
+    if(old) avRemoveFile(old).catch(()=>{});
+    bToast("📷 Photo saved · Foto gespeichert");
+  }catch(e){ bToast(/not_image|convert/.test(String(e&&e.message))?"This file can't be used as a photo. Try a JPG or PNG · Bitte JPG oder PNG":bErr(e)); }
+  AV_BUSY=false; render();
+}
+async function avRemove(){
+  if(!A.profile || !A.profile.avatar_url || AV_BUSY) return;
+  if(!window.confirm("Remove your photo? · Foto entfernen?")) return;
+  AV_BUSY=true; xr();
+  try{
+    const old=A.profile.avatar_url;
+    const r=await A.sb.from("profiles").update({ avatar_url:null }).eq("id",A.user.id); if(r.error) throw r.error;
+    A.profile.avatar_url=null; avRemoveFile(old).catch(()=>{});
+    bToast("Photo removed · Foto entfernt");
+  }catch(e){ bToast(bErr(e)); }
+  AV_BUSY=false; render();
+}
 
 /* ===================== LANGUAGE CAFÉS (directory of links) ===================== */
 const CF = { list:null, q:"", lang:"", online:false, admin:false, reports:{}, err:"", msg:"", f:null, busy:false };
@@ -3131,7 +3218,7 @@ async function attOpen(id){
   attShow();
   try{
     const { data, error } = await A.sb.rpc("pt_attendance_list",{ p_activity:id }); if(error) throw error;
-    AT.list=data||[];
+    AT.list=data||[]; avCollect();
     AT.list.forEach(p=>{
       if(p.status==="no_show") AT.marks[p.user_id]="no_show";
       else if(p.status==="attended" || p.checked_in_at) AT.marks[p.user_id] = p.on_time===false ? "late" : "on_time";
@@ -3152,7 +3239,7 @@ function attShow(){
     ${s.title?`<p class="note" style="margin:0 0 6px"><b>${esc(s.title)}</b>${s.starts_at?` · ${fmtWhen(s.starts_at)}`:""}</p>`:""}
     ${AT.list===null ? `<p class="note center">Loading… · Lädt…</p>`
       : !AT.list.length ? `<p class="note center">Nobody joined this session. · Niemand war angemeldet.</p>`
-      : AT.list.map(p=>`<div class="atrow"><b>${esc(p.name||"Member")}</b>${relBadges(p.reliability)}
+      : AT.list.map(p=>`<div class="atrow">${avSmall(p.user_id)} <b>${esc(p.name||"Member")}</b>${relBadges(p.reliability)}
           <div class="note" style="margin:2px 0 0">${p.checked_in_at?`🙋 Checked in at ${t(p.checked_in_at)}${p.on_time?" (on time)":" (late)"}`:"Didn't check in · Nicht eingecheckt"}</div>
           <div class="row">${chip(p,"on_time","✓ On time")}${chip(p,"late","⏰ Late")}${chip(p,"no_show","✗ No-show")}</div></div>`).join("")}
     ${AT.list&&AT.list.length?`<p class="note" style="margin:10px 0 0">People you don't mark aren't counted either way. Be fair: a no-show lowers their score. · Unmarkierte zählen nicht.</p>`:""}
@@ -3212,7 +3299,7 @@ async function vLoad(){
     if(error) return;
     Object.keys(VL).forEach(k=>delete VL[k]);
     (data||[]).forEach(r=>{ VL[r.activity_id]={ url:r.url, provider:r.provider }; });
-    ciLoad();
+    ciLoad(); avCollect();
     if(["board","session","home"].includes(S.screen)) xr();
   }catch(e){}
 }
@@ -3356,7 +3443,7 @@ function bCard(s){
     <div class="note" style="margin:0">${langPair(s.language_a,s.language_b)} · ${lvlRange(s.level_min,s.level_max)}</div>
     ${sidesHtml}
     <div class="bwhen">🗓️ ${fmtWhen(s.starts_at)} · ${s.duration_min} min${hostT?`<small>${esc(hostT)}</small>`:""}</div>
-    <div class="note" style="margin:0">👤 ${esc(s.host_name||"Host")}${relBadges(s.host_reliability)}${rel}${s.host_languages&&s.host_languages.length?` · ${langsLine(s.host_languages)}`:""}</div>
+    <div class="note" style="margin:0">${avSmall(s.host_id)} ${esc(s.host_name||"Host")}${relBadges(s.host_reliability)}${rel}${s.host_languages&&s.host_languages.length?` · ${langsLine(s.host_languages)}`:""}</div>
     ${(s.topics||[]).length?`<div class="row" style="margin-top:8px">${s.topics.map(k=>{ const it=INTERESTS.find(x=>x[0]===k); return it?`<span class="feat">${it[1]} ${esc(it[2])}</span>`:""; }).join("")}</div>`:""}
     ${s.note?`<p class="note" style="margin:8px 0 0">💬 ${esc(s.note)}</p>`:""}
     ${act}
@@ -3424,6 +3511,7 @@ async function hostPeopleLoad(){
   await Promise.all(mine.map(async x=>{
     try{ const { data, error } = await A.sb.rpc("pt_session_people",{ p_activity:x.activity_id }); if(!error) B.people[x.activity_id]=data||[]; }catch(e){}
   }));
+  avCollect();
   if(S.screen==="board" || S.screen==="session") xr();
 }
 function hostList(s){
@@ -3431,7 +3519,7 @@ function hostList(s){
   const taken=s.seats-s.seats_open;
   if(!ps) return `<div class="plist"><h4>Who's coming · ${taken} of ${s.seats}</h4><p class="note" style="margin:0">Loading… · Lädt…</p></div>`;
   const pend=ps.filter(p=>p.status==="pending"), inn=ps.filter(p=>p.status==="joined"||p.status==="offered"), wait=ps.filter(p=>p.status==="waitlisted");
-  const row=(p,extra,cls)=>`<div class="prow ${cls||""}"><span class="pav" aria-hidden="true">${esc((p.name||"?").charAt(0).toUpperCase())}</span>
+  const row=(p,extra,cls)=>`<div class="prow ${cls||""}">${avSpan(p.user_id,p.name)}
       <div style="flex:1;min-width:0"><b>${esc(p.name||"Member")}</b>${relBadges(p.reliability)}${s.balanced&&p.side?`<span class="sidetag">${(()=>{ const l=p.side==="a"?s.language_a:s.language_b; return T[l]?`${T[l].flag} ${esc(T[l].nameEn)} side`:""; })()}</span>`:""}${p.reliability&&p.reliability.percent!=null?` <span class="pl">· ${p.reliability.percent}% shows up</span>`:""}
       <div class="pl">${speaksLearns(p.languages)}</div>${extra||""}</div></div>`;
   return `<div class="plist">
@@ -3698,7 +3786,7 @@ function rCard(s){
     <div class="btitle">${g?`${g[1]} `:""}${esc(s.title)}</div>
     <div class="note" style="margin:0">${langPair(s.language_a,s.language_b)} · ${lvlRange(s.level_min,s.level_max)}${g?` · ${esc(g[2])}`:""}</div>
     <div class="rsec">Who speaks what · Wer spricht was</div>
-    <div style="font-size:14px">👤 <b>${esc(s.host_name||"Host")}</b>${relBadges(s.host_reliability)}${s.host_reliability&&s.host_reliability.percent!=null?` <span class="note">(${s.host_reliability.percent}% shows up)</span>`:""}: ${langsLine(s.host_languages)||"–"}</div>
+    <div style="font-size:14px">${avSmall(s.host_id)} <b>${esc(s.host_name||"Host")}</b>${relBadges(s.host_reliability)}${s.host_reliability&&s.host_reliability.percent!=null?` <span class="note">(${s.host_reliability.percent}% shows up)</span>`:""}: ${langsLine(s.host_languages)||"–"}</div>
     <div style="font-size:14px;margin-top:2px">🙂 <b>You</b>: ${langsLine(R.mine)||"–"}</div>
     ${(s.reasons||[]).length?`<div class="rsec">Why this matches you · Warum es passt</div>
       <ul class="rwhy">${s.reasons.map(r=>`<li>✅ ${esc(r)}</li>`).join("")}</ul>`:""}
@@ -3768,7 +3856,7 @@ function navSync(){
   cl.add("has-nav");
   n.innerHTML = NAV_ITEMS.map(([k,en,de,fn])=>`<button class="${tab===k?"on":""}" ${tab===k?'aria-current="page"':""} onclick="${fn}">${ICO[k]}${en}<small>${de}</small></button>`).join("");
   if(A.user){ nbStart(); nbFresh(); } else if(NB.timer){ clearInterval(NB.timer); NB.timer=null; NB.list=[]; NB.unread=0; }
-  const me = A.user ? `${bellBtn()}<button class="tme" aria-label="Profile" onclick="${NAV_ITEMS[4][3]}">${esc((meName()||"?").charAt(0).toUpperCase())}</button>`
+  const me = A.user ? `${bellBtn()}<button class="tme" aria-label="Profile" onclick="${NAV_ITEMS[4][3]}">${A.profile&&A.profile.avatar_url?`<img src="${esc(A.profile.avatar_url)}" alt="">`:esc((meName()||"?").charAt(0).toUpperCase())}</button>`
                     : `<button class="tsign" onclick="${NAV_ITEMS[4][3]}">Sign in · Anmelden</button>`;
   t.innerHTML = `<div class="tin"><button class="tlogo" onclick="goHome()"><span class="plogo">${ICO.logo}</span>PonteTalk</button>
     <nav class="tlinks" aria-label="Main">${NAV_ITEMS.slice(0,4).map(([k,en,de,fn])=>`<button class="${tab===k?"on":""}" ${tab===k?'aria-current="page"':""} onclick="${fn}">${ICO[k]}${en}</button>`).join("")}</nav>${me}</div>`;
@@ -3992,6 +4080,7 @@ rLoad = async function(){
     D.week=weekStats(times);
   }
   await _rLoadOrig();
+  avCollect();
 };
 function weekStart(d){ const x=new Date(d); x.setHours(0,0,0,0); const wd=(x.getDay()+6)%7; x.setDate(x.getDate()-wd); return x; }
 function weekStats(isoList){
@@ -4427,6 +4516,7 @@ VIEWS.privacy = function(){
     <p><b>Teilnahme &amp; Zuverlässigkeit:</b> Wenn du an Sessions teilnimmst, speichern wir, ob und wann du eingecheckt hast und ob du laut Host da, zu spät oder nicht da warst. Daraus berechnen wir deine Zuverlässigkeit (z. B. „92 % erscheint“, Abzeichen wie „Zuverlässig“). Andere angemeldete Mitglieder sehen diesen Wert und die Abzeichen. Zweck: verlässliche Treffen und Schutz vor No-Shows (Art. 6 Abs. 1 lit. b und f DSGVO).</p>
     <p><b>PonteShop:</b> Zum Herunterladen von Materialien brauchst du ein Konto. Wir speichern bei Supabase (Frankfurt, EU), welches Material du wann heruntergeladen hast. Zweck: zählen, welche Materialien genutzt werden, und dir die Datei bereitstellen (Art. 6 Abs. 1 lit. b und f DSGVO). Nur die Betreiberin sieht diese Zahlen.</p>
     <p><b>Sprachcafés:</b> Wenn du ein Sprachcafé vorschlägst oder einen Link meldest, speichern wir deinen Vorschlag bzw. deine Meldung zusammen mit deinem Konto, damit wir sie prüfen können. Wir verlinken nur auf externe Seiten und sind für deren Inhalte nicht verantwortlich.</p>
+    <p><b>Profilfoto (freiwillig):</b> Wenn du ein Foto hochlädst, verkleinern wir es auf deinem Gerät und speichern es bei Supabase (Frankfurt, EU). Angemeldete Mitglieder sehen es neben deinem Namen. Die Bilddatei liegt unter einer zufälligen Adresse und ist für jeden abrufbar, der diese Adresse kennt. Du kannst das Foto jederzeit entfernen; beim Löschen deines Kontos wird es mitgelöscht (Art. 6 Abs. 1 lit. a DSGVO).</p>
     <h3>6. Deine Rechte</h3>
     <p>Du hast das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch (Art. 15–21 DSGVO). Schreib uns dazu einfach an ${esc(LEGAL.email)}. Du kannst dich außerdem bei einer Datenschutz-Aufsichtsbehörde beschweren.</p>
     <h3>7. Alter</h3><p>Ein Konto darfst du ab 16 Jahren erstellen.</p>
@@ -4434,6 +4524,7 @@ VIEWS.privacy = function(){
     <h3>English summary</h3>
     <p>You can play without an account; then everything stays on your device. No tracking, no analytics, no ads. We only count anonymously when a room is created or a game ends (game type, languages, levels, number of players), with no names, IP addresses or device IDs. Online games run through Supabase (Frankfurt, EU) and are not stored. If you create an account, we store your email, game name, language, level and the games you save, only so you can see your history. Only you can see them. Login codes are sent via Resend (USA); "Continue with Google" shares your email and name from Google. You can delete your account and all data anytime in the app. Questions or data requests: ${esc(LEGAL.email)}. Accounts are for ages 16+.</p>
     <p><b>Exchange profile (optional):</b> if you fill it in, we store your languages and levels, the times you're usually free, your interests, time zone, optionally your city, and your confirmation that you're 18+. Other signed-in members can see your languages so partners can be matched; your times and city stay private and are only used for suggestions. You can change it anytime, and it is deleted with your account.</p>
+    <p><b>Profile photo (optional):</b> if you upload a photo, it's shrunk on your device and stored with Supabase (Frankfurt, EU). Signed-in members see it next to your name. The image file has a random web address that anyone who has the address can open. You can remove it anytime, and it's deleted with your account.</p>
     <p><b>Attendance &amp; reliability:</b> when you take part in sessions, we store whether and when you checked in and whether the host marked you as on time, late or a no-show. From this we show your reliability (e.g. "92% shows up" and badges like "Reliable") to other signed-in members, so sessions stay dependable.</p>
     <p><b>Email notifications:</b> if you join or host sessions, we email you (seat offers, approvals, reminders, cancellations) via Resend, Inc. (USA), sending your email address, name, time zone and session details. You can turn each type off in Profile → Notifications.</p>
     <p><b>PonteShop:</b> downloading needs an account. We store which resource you downloaded and when (Supabase, Frankfurt, EU) to count how resources are used and to give you the file. Only the operator sees these numbers.</p>
