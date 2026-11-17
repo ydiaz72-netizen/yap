@@ -289,6 +289,7 @@
   .shacts{display:flex;gap:8px;margin-top:10px}
   .shacts .btn{margin:0}
   .shacts .shpv{width:auto;flex:none;background:#fff;color:var(--ink);border:1.5px solid var(--line)}
+  .fitb{display:inline-block;background:var(--teal-soft);color:var(--teal);border-radius:999px;padding:3px 10px;font-size:12px;font-weight:800;margin:4px 0 0;white-space:nowrap}
   .vlock{opacity:.55;filter:grayscale(.6);cursor:not-allowed;box-shadow:none}
   .shract{display:flex;gap:8px;align-items:center;flex:none}
   .shrpv{flex:none}
@@ -3489,7 +3490,7 @@ function bRow(s, dayMode){
   const day=d.toLocaleDateString("en-GB",{weekday:"short",day:"numeric"});
   return `<button class="brow ${s.is_host||s.my_status==="joined"?"mine":""}" onclick="sOpen('${s.activity_id}')" aria-label="${esc(s.title)}, ${esc(fmtWhen(s.starts_at))}">
     <div class="bt">${dayMode?"":`<i>${esc(day)}</i>`}<b>${t}</b></div>
-    <div class="bm"><div class="brt">${s.visibility==="private"?"🔒 ":""}${g?"🎲 ":""}${esc(s.title)}</div>
+    <div class="bm"><div class="brt">${s.visibility==="private"?"🔒 ":""}${g?"🎲 ":""}${esc(s.title)}</div>${fitsBadge(s)}
       <div class="note" style="margin:0">${s.format==="in_person"?`📍 ${esc(s.city||"")} · `:""}${codesPair(s.language_a,s.language_b)} · ${lvlRange(s.level_min,s.level_max)} · ${s.duration_min} min</div></div>
     ${CU[s.activity_id]?`<span title="Unread chat messages">💬${chBadge(s.activity_id)}</span>`:""}<span class="bs ${st[1]}">${st[0]}</span><span class="chev" aria-hidden="true">›</span></button>`;
 }
@@ -3919,7 +3920,18 @@ function fuDismiss(id){ const L=fuDismissed().concat([id]).slice(-50); try{ loca
 async function fuLoad(){
   if(!A.user || !A.sb) return;
   try{ const { data, error } = await A.sb.rpc("pt_host_followups"); if(!error) FU.list=data||[]; }catch(e){}
+  try{ const h=await A.sb.rpc("pt_has_availability"); if(!h.error) FIT.has=!!h.data; }catch(e){}
   if(S.screen==="home") xr();
+}
+function avNudge(){
+  if(FIT.has!==false) return "";
+  let off=false; try{ off=localStorage.getItem("pt_av_nudge")==="off"; }catch(e){ off=!!window._ptAvOff; }
+  if(off) return "";
+  return `<div class="card" style="margin:0;background:var(--teal-soft);border:0">
+    <h3 style="margin:0 0 4px">🗓️ When are you usually free?</h3>
+    <p class="note" style="margin:0 0 10px">Tap your free times once and we'll show you sessions that fit, in your own time zone.<br><span class="de">Trag deine freien Zeiten ein, dann zeigen wir dir passende Sessions.</span></p>
+    <div class="row" style="margin:0"><button class="btn primary qbtn" style="width:auto;margin:0" onclick="xOpen()">Set my free times · Zeiten eintragen</button>
+    <button class="chip" onclick="try{localStorage.setItem('pt_av_nudge','off')}catch(e){window._ptAvOff=1};xr()">Later · Später</button></div></div>`;
 }
 function fuCard(){
   const gone=fuDismissed(), L=(FU.list||[]).filter(x=>!gone.includes(x.activity_id));
@@ -4085,11 +4097,24 @@ async function bLoad(){
     const { data, error } = await sb.rpc("pt_board_sessions", (S.screen==="session" && S.sid) ? { p_include:S.sid } : {});
     if(error) throw error;
     B.list=data||[];
-    hostPeopleLoad(); vLoad();
+    hostPeopleLoad(); vLoad(); fitsLoad();
   }catch(e){ B.err=bErr(e); if(!B.list) B.list=[]; }
   if(S.screen==="board" || S.screen==="session") xr();
 }
 function bOpen(){ B.err=""; B.open=null; go("board"); bLoad(); }
+/* ---- "Fits your free time" (uses the free times on the exchange profile, in your own time zone) ---- */
+const FIT = { ids:new Set(), has:null };
+async function fitsLoad(){
+  if(!A.user || !A.sb || !B.list) return;
+  try{
+    const ids=B.list.filter(x=>new Date(x.starts_at)>new Date()).map(x=>x.activity_id);
+    const [f,h]=await Promise.all([ ids.length?A.sb.rpc("pt_fits_my_time",{ p_ids:ids }):{data:[]}, A.sb.rpc("pt_has_availability") ]);
+    if(!f.error) FIT.ids=new Set((f.data||[]).map(r=>typeof r==="string"?r:(r.pt_fits_my_time||Object.values(r)[0])));
+    if(!h.error) FIT.has=!!h.data;
+  }catch(e){}
+  if(["board","session","home"].includes(S.screen)) xr();
+}
+function fitsBadge(s){ return FIT.ids.has(s.activity_id) ? `<span class="fitb" title="Fits the free times on your profile">🕒 Fits your free time</span>` : ""; }
 
 async function bAct(fn,id){
   if(["pt_join_activity","pt_accept_invite","pt_accept_offer"].includes(fn) && !safetyOk()){
@@ -4215,7 +4240,7 @@ function bCard(s){
   }
   return `<div class="card bcard ${s.is_host||s.my_status==="joined"?"mine":""} ${s.my_status==="offered"?"offer":""}">
     <div class="btop"><span class="feat">${s.format==="in_person"?"📍 In person · ":""}${g?`🎲 ${g[1]} ${g[2]}`:"💬 Conversation"}${s.balanced?" · ⚖️ Balanced":""}${s.visibility==="private"?" · 🔒 Private":""}</span><span class="note" style="margin:0;font-weight:800">${seatsTxt}</span></div>
-    <div class="btitle">${esc(s.title)}</div>${sidesHtml?"":""}
+    <div class="btitle">${esc(s.title)}</div>${fitsBadge(s)}${sidesHtml?"":""}
     <div class="note" style="margin:0">${langPair(s.language_a,s.language_b)} · ${lvlRange(s.level_min,s.level_max)}</div>
     ${sidesHtml}
     <div class="bwhen">🗓️ ${fmtWhen(s.starts_at)} · ${s.duration_min} min${hostT?`<small>${esc(hostT)}</small>`:""}</div>
@@ -4236,7 +4261,7 @@ function bCard(s){
 VIEWS.board = function(){
   const top=`<div class="topline"><button class="chip" onclick="goHome()">← Back</button><span>Sessions</span></div>`;
   const list=B.list;
-  const shown=(list||[]).filter(s=>s.visibility!=="private" || isMine(s)).filter(s=>!B.mine || isMine(s)).filter(s=>B.mine || (s.format||"online")===(B.fmt||"online")).filter(s=>B.mine || B.fmt!=="in_person" || !B.city || cfNorm(s.city).includes(cfNorm(B.city).trim())).filter(s=>!B.lang || s.language_a===B.lang || s.language_b===B.lang);
+  const shown=(list||[]).filter(s=>s.visibility!=="private" || isMine(s)).filter(s=>!B.mine || isMine(s)).filter(s=>B.mine || (s.format||"online")===(B.fmt||"online")).filter(s=>B.mine || B.fmt!=="in_person" || !B.city || cfNorm(s.city).includes(cfNorm(B.city).trim())).filter(s=>!B.lang || s.language_a===B.lang || s.language_b===B.lang).filter(s=>!B.fit || FIT.ids.has(s.activity_id));
   return `${top}
   <h2>${bi("Sessions","Sessions")}</h2>
   ${sessTabs(B.fmt==="in_person"?"in_person":"online")}
@@ -4249,12 +4274,18 @@ VIEWS.board = function(){
   ${B.mine?`<p class="note" style="margin:10px 0 0">⭐ Showing all your sessions, online and in person. · Alle deine Sessions.</p>`:""}
   ${B.fmt==="in_person"&&!B.mine?`<input type="text" class="cfsearch" style="margin-top:12px" placeholder="🔍 City · Stadt (press Enter)" value="${esc(B.city||"")}" onchange="B.city=this.value;xr()" onkeydown="if(event.key==='Enter'){B.city=this.value;xr();}">`:""}
   <div class="row" style="margin:14px 0 6px">${[["","🌍 All"]].concat(LANG_KEYS.map(k=>[k,`${T[k].flag} ${esc(T[k].nameEn)}`])).map(([k,l])=>`<button class="chip ${B.lang===k?"on":""}" aria-pressed="${B.lang===k}" onclick="B.lang='${k}';xr()">${l}</button>`).join("")}</div>
+  ${A.user?(FIT.has===false?`<button class="chip" style="margin:0 0 8px" onclick="xOpen()">🗓️ Add your free times to see what fits · Zeiten eintragen</button>`
+    :`<div class="row" style="margin:0 0 8px"><button class="chip ${B.fit?"on":""}" aria-pressed="${!!B.fit}" onclick="B.fit=!B.fit;xr()">🕒 Fits my free time${FIT.ids.size?` (${FIT.ids.size})`:""}</button>
+      <button class="linkbtn" style="font-size:13px" onclick="xOpen()">Edit my free times</button></div>`):""}
   <div class="bbar"><p class="note">🕒 Times are in your time zone (${esc(detectTz())}) · Zeiten in deiner Zeitzone</p>${bViewSwitch()}</div>
   ${B.err?`<div class="err">${esc(B.err)}</div>`:""}
   ${list===null ? `<p class="note center" style="margin-top:30px">Loading… · Lädt…</p>`
     : (!shown.length && B.mine) ? `<div class="card center"><div style="font-size:40px">⭐</div><h3>No sessions yet · Noch keine eigenen Sessions</h3>
         <p class="note">Sessions you join or host show up here, private ones too.<br><span class="de">Hier erscheinen Sessions, an denen du teilnimmst oder die du leitest.</span></p>
         <button class="btn secondary" onclick="B.mine=false;xr()">See all sessions · Alle Sessions</button></div>`
+    : (!shown.length && B.fit) ? `<div class="card center"><div style="font-size:40px">🕒</div><h3>Nothing fits your free times yet</h3>
+        <p class="note">Try other days, add more free times, or host a session at a time that suits you.<br><span class="de">Noch nichts zu deinen Zeiten. Biete selbst eine Session an!</span></p>
+        <button class="btn secondary" onclick="B.fit=false;xr()">See all sessions · Alle Sessions</button></div>`
     : !shown.length ? `<div class="card center"><div style="font-size:40px">🌱</div><h3>No sessions yet · Noch keine Sessions</h3>
         <p class="note">Be the first! Host a session and others can join.<br><span class="de">Sei die/der Erste und biete eine Session an!</span></p>
         <button class="btn secondary" onclick="hOpen()">＋ Host a session · Session anbieten</button></div>`
@@ -5302,6 +5333,7 @@ function homeDash(){
         <p class="sub" style="margin:2px 0 14px">Here's what's next for you. · Das steht als Nächstes an.</p>${nextCard()}</div>
       ${acCard()}
       ${fuCard()}
+      ${avNudge()}
       ${invCard()}
       <div><div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px">
         <h2 style="margin:0;font-size:20px">Suggested for you · Für dich</h2>
