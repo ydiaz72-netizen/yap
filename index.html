@@ -5413,19 +5413,20 @@ VIEWS.session = function(){
 };
 
 /* ===================== NOTIFICATION SETTINGS ===================== */
-const NP = { loaded:false, busy:false, v:{ all_emails:true, in_app:true, seat_offers:true, approvals:true, join_requests:true, reminders:true, cancellations:true } };
+const NP = { loaded:false, busy:false, v:{ all_emails:true, in_app:true, seat_offers:true, approvals:true, join_requests:true, reminders:true, cancellations:true, session_matches:true } };
 const NP_ITEMS = [
   ["seat_offers","🎉 Seat offers from the waitlist","Freie Plätze von der Warteliste"],
   ["approvals","✅ Host approved / declined my request","Zu- oder Absage vom Host"],
   ["join_requests","🔔 Someone asks to join my session","Jemand möchte teilnehmen"],
   ["reminders","⏰ Reminders (1 day and 15 min before)","Erinnerungen (1 Tag und 15 Min. vorher)"],
-  ["cancellations","❌ A session I joined was cancelled","Eine Session wurde abgesagt"]
+  ["cancellations","❌ A session I joined was cancelled","Eine Session wurde abgesagt"],
+  ["session_matches","✨ New sessions that fit my languages and free time (max 1 email a day)","Neue passende Sessions (max. 1 E-Mail pro Tag)"]
 ];
 async function npLoad(){
   if(!A.user || NP.loaded || NP.busy) return;
   NP.busy=true;
   try{
-    const { data } = await A.sb.from("notification_prefs").select("all_emails,in_app,seat_offers,approvals,join_requests,reminders,cancellations").eq("user_id",A.user.id).maybeSingle();
+    const { data } = await A.sb.from("notification_prefs").select("*").eq("user_id",A.user.id).maybeSingle();
     if(data) NP.v=data;
     NP.loaded=true;
   }catch(e){}
@@ -5516,6 +5517,7 @@ function nbText(n){
     case "report":       return `🚩 New report (${esc((RP_REASONS.find(r=>r[0]===d.reason)||[0,"other"])[1])}). Tap to review.`;
     case "chat":         return `💬 ${d.count>1?`${d.count} new messages`:`New message${n.from_name?` from ${who}`:""}`} in ${t}.`;
     case "invited":      return `📩 ${who} invited you to ${t}. Tap to accept or decline.`;
+    case "session_match": return `✨ New session that fits you: ${t}${n.starts_at?` · ${esc(fmtWhen(n.starts_at))}`:""}${d.lang&&T[d.lang]?` · practise ${T[d.lang].flag} ${esc(T[d.lang].nameEn)}`:""}. Tap to sign up.`;
     case "new_joiner":   return `👋 ${who} joined ${t}.`;
     case "approved":     return d.waitlist_position ? `🕒 Approved for ${t}. You're #${d.waitlist_position} on the waitlist.` : `✅ You're in: ${t}.`;
     case "declined":     return `Your request for ${t} wasn't accepted this time.`;
@@ -5651,7 +5653,7 @@ VIEWS.privacy = function(){
     <p><b>Exchange profile (optional):</b> if you fill it in, we store your languages and levels, the times you're usually free, your interests, time zone, optionally your city, and your confirmation that you're 18+. Other signed-in members can see your languages so partners can be matched; your times and city stay private and are only used for suggestions. You can change it anytime, and it is deleted with your account.</p>
     <p><b>Profile photo (optional):</b> if you upload a photo, it's shrunk on your device and stored with Supabase (Frankfurt, EU). Signed-in members see it next to your name. The image file has a random web address that anyone who has the address can open. You can remove it anytime, and it's deleted with your account.</p>
     <p><b>Attendance &amp; reliability:</b> when you take part in sessions, we store whether and when you checked in and whether the host marked you as on time, late or a no-show. From this we show your reliability (e.g. "92% shows up" and badges like "Reliable") to other signed-in members, so sessions stay dependable.</p>
-    <p><b>Email notifications:</b> if you join or host sessions, we email you (seat offers, approvals, reminders, cancellations) via Resend, Inc. (USA), sending your email address, name, time zone and session details. You can turn each type off in Profile → Notifications.</p>
+    <p><b>Email notifications:</b> if you join or host sessions, we email you (seat offers, approvals, reminders, cancellations, and at most one a day about new sessions that fit your languages and free time) via Resend, Inc. (USA), sending your email address, name, time zone and session details. You can turn each type off in Profile → Notifications.</p>
     <p><b>PonteShop:</b> downloading needs an account. We store which resource you downloaded and when (Supabase, Frankfurt, EU) to count how resources are used and to give you the file. Only the operator sees these numbers.</p>
   </div>
   ${legalLinks()}`;
