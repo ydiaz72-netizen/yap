@@ -113,6 +113,14 @@
   #bnav button svg{width:22px;height:22px}
   #bnav{gap:2px;padding-left:6px;padding-right:6px}
   #bnav button{font-size:12px}
+  /* ---- Reports ---- */
+  .repf{flex:none;border:none;background:none;cursor:pointer;font-size:14px;opacity:.55;padding:4px;align-self:flex-start}
+  .repf:hover{opacity:1}
+  .repcard{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+  .repcard.closed{opacity:.7}
+  .repcard blockquote{margin:8px 0;padding:8px 12px;background:var(--bg);border-left:3px solid var(--coral);border-radius:8px;font-size:14px}
+  .repcard .row{gap:6px;margin-top:8px}
+  .repcard .chip{font-size:13px;padding:6px 10px}
   /* ---- Session chat ---- */
   .chhead{display:flex;align-items:center;gap:10px;margin-bottom:8px}
   .chsafe{background:var(--sun-soft);border-radius:12px;padding:8px 12px;font-size:13px;color:#6B4A00;margin-bottom:8px}
@@ -2470,6 +2478,7 @@ function authReturn(){
   else if(r==="lobby" && O.G) go("lobby");
   else if(r==="shop") shOpen();
   else if(r==="cafes") cfOpen();
+  else if(r==="reports") raOpen();
   else if(r==="board") bOpen();
   else if(r==="session" && S.sid) sOpen(S.sid);
   else if(r==="account") go("account");
@@ -2752,6 +2761,7 @@ VIEWS.account = function(){
     <button class="chip" onclick="editProfile()">✏️ Edit</button>
   </div>
   ${msg}
+  ${raCard()}
   ${pend ? `<div class="card acard"><h3>💾 Save your last game? <span class="de">· Letztes Spiel speichern?</span></h3>
      ${pend.recs.length>1?`<p class="note">Which player were you? · Wer warst du?</p><div class="row">${pend.names.map((n,i)=>`<button class="chip ${i===meIdx?"on":""}" onclick="savePending(${i})">${i===meIdx?"⭐ ":""}${esc(n)}</button>`).join("")}</div>`
        :`<button class="btn primary" onclick="savePending(0)">💾 Save · Speichern</button>`}
@@ -2771,6 +2781,7 @@ VIEWS.account = function(){
   ${legalLinks()}`;
 };
 AFTER.account = function(){
+  if(A.user && A.status==="in" && !RA._checked){ RA._checked=true; raCheck(); }
   if(A.user && A.status==="in" && !MR.data && !MR.loading) mrLoad();
   const n=$("pfname"); if(n) n.addEventListener("input",e=>{ A.pf=A.pf||{}; A.pf.name=e.target.value; });
   const f=$("acode")||$("aemail"); if(f && !A.busy && S.screen==="account" && window.innerWidth>700) f.focus({preventScroll:true});
@@ -2984,6 +2995,125 @@ function langsLine(arr){
 
 
 
+
+/* ===================== REPORTS ===================== */
+const RP_REASONS = [
+  ["inappropriate","😕 Inappropriate behaviour","Unangemessenes Verhalten"],
+  ["harassment","🛑 Harassment or bullying","Belästigung"],
+  ["unsafe","⚠️ I felt unsafe","Ich habe mich unsicher gefühlt"],
+  ["spam","📢 Spam or advertising","Spam oder Werbung"],
+  ["fake","🎭 Fake or misleading","Fake oder irreführend"],
+  ["no_show","🙈 Didn't show up","Nicht erschienen"],
+  ["other","💬 Something else","Etwas anderes"]
+];
+const RPT = { t:null, reason:"", busy:false, err:"" };
+function repOpen(type, user, activity, message){
+  if(!A.user){ bToast("Please sign in to report · Bitte anmelden"); return; }
+  RPT.t={ type, user:user||null, activity:activity||null, message:message||null }; RPT.reason=""; RPT.err=""; RPT.busy=false;
+  repShow();
+}
+function repShow(){
+  let box=document.getElementById("repSheet");
+  if(!box){ box=document.createElement("div"); box.className="sheet-bg"; box.id="repSheet";
+    box.addEventListener("click",e=>{ if(e.target===box) box.remove(); }); document.body.appendChild(box); }
+  const t=RPT.t, what={ user:"this person", session:"this session", message:"this message" }[t.type];
+  const reasons=RP_REASONS.filter(r=>r[0]!=="no_show" || t.type!=="message");
+  const det=(document.getElementById("repDet")||{}).value||"";
+  box.innerHTML=`<div class="sheet" role="dialog" aria-label="Report">
+    <div class="nbhead"><h3 style="margin:0">🚩 Report ${what} · Melden</h3><button class="chip" aria-label="Close" onclick="document.getElementById('repSheet').remove()">✕</button></div>
+    <p class="note" style="margin:0 0 10px">Only the PonteTalk team sees this. <b>They won't know it was you.</b> · Nur das Team sieht das, anonym.</p>
+    <label class="lbl">What happened? · Was ist passiert?</label>
+    <div class="row">${reasons.map(r=>`<button class="chip ${RPT.reason===r[0]?"on":""}" aria-pressed="${RPT.reason===r[0]}" onclick="RPT.reason='${r[0]}';repShow()">${r[1]}</button>`).join("")}</div>
+    <label class="lbl" for="repDet">Anything else? (optional) · Details</label>
+    <textarea id="repDet" rows="3" maxlength="500" placeholder="A few words help us understand · Ein paar Worte helfen uns">${esc(det)}</textarea>
+    ${RPT.err?`<div class="err">${esc(RPT.err)}</div>`:""}
+    <button class="btn primary" ${RPT.busy?"disabled":""} onclick="repSend()">${RPT.busy?"Sending… · Sendet…":"Send report · Melden"}</button>
+    <p class="note center" style="margin:8px 0 0">⚠️ In danger right now? Call <b>112</b> (EU emergency number). · Akute Gefahr? Ruf 112 an.</p>
+  </div>`;
+}
+const RP_ERR = { already_reported:"You already reported this. We're on it · Schon gemeldet", too_many_reports:"Thanks! Please try again tomorrow · Bitte morgen wieder",
+  not_found:"This can't be reported anymore · Nicht mehr verfügbar" };
+async function repSend(){
+  if(RPT.busy) return;
+  if(!RPT.reason){ RPT.err="Please pick what happened · Bitte einen Grund wählen"; repShow(); return; }
+  const t=RPT.t, details=((document.getElementById("repDet")||{}).value||"").trim();
+  RPT.busy=true; RPT.err=""; repShow();
+  try{
+    const { error } = await A.sb.rpc("pt_report",{ p_type:t.type, p_user:t.user, p_activity:t.activity, p_message:t.message, p_reason:RPT.reason, p_details:details||null });
+    if(error) throw error;
+    const b=document.getElementById("repSheet"); if(b) b.remove();
+    bToast("🙏 Thanks. Your report was sent privately · Danke, Meldung gesendet");
+  }catch(e){ const m=String((e&&e.message)||e); const k=Object.keys(RP_ERR).find(x=>m.includes(x)); RPT.busy=false; RPT.err=k?RP_ERR[k]:bErr(e); repShow(); }
+}
+
+/* Admin: Reports page */
+const RA = { admin:false, count:0, list:null, filter:"open", notes:{} };
+async function raCheck(){
+  if(!A.user || !A.sb) return;
+  try{
+    const [a,c]=await Promise.all([A.sb.rpc("pt_is_admin"), A.sb.rpc("pt_admin_report_count")]);
+    RA.admin=!!(a&&a.data); RA.count=(c&&c.data)||0;
+    if(S.screen==="account") xr();
+  }catch(e){}
+}
+function raCard(){
+  if(!RA.admin) return "";
+  return `<div class="card" style="border:2px solid ${RA.count?"var(--coral)":"var(--line)"}"><h3 style="margin:0 0 4px">🛠 Reports · Meldungen ${RA.count?`<span class="chbadge">${RA.count}</span>`:""}</h3>
+    <p class="note" style="margin:0 0 8px">${RA.count?`${RA.count} open report${RA.count>1?"s":""} to review.`:"No open reports. 🎉"}</p>
+    <button class="btn secondary" onclick="raOpen()">Open reports · Meldungen öffnen</button></div>`;
+}
+function raOpen(){ RA.list=null; go("reports"); raLoad(); }
+async function raLoad(){
+  try{ const { data, error } = await A.sb.rpc("pt_admin_reports",{ p_status:RA.filter }); if(error) throw error; RA.list=data||[]; }
+  catch(e){ RA.list=[]; bToast(/not_admin/.test(String(e&&e.message))?"Only admins · Nur für Admins":bErr(e)); }
+  if(S.screen==="reports") xr();
+}
+VIEWS.reports = function(){
+  const TY={ user:"👤 Person", session:"🗓️ Session", message:"💬 Chat message" };
+  const RS=Object.fromEntries(RP_REASONS.map(r=>[r[0],r[1]]));
+  const chip=(k,l)=>`<button class="chip ${RA.filter===k?"on":""}" onclick="RA.filter='${k}';RA.list=null;xr();raLoad()">${l}</button>`;
+  const L=RA.list;
+  return `<div class="topline"><button class="chip" onclick="go('account')">← Profile</button><span>🛠 Reports</span></div>
+  <h2>${bi("Reports","Meldungen")}</h2>
+  <p class="sub">Reported people are never told who reported them. · Gemeldete erfahren nie, wer gemeldet hat.</p>
+  <div class="row" style="margin-bottom:12px">${chip("open","Open")}${chip("closed","Closed")}${chip("all","All")}</div>
+  ${L===null?`<p class="note center">Loading… · Lädt…</p>`
+   : !L.length?`<div class="card center"><div style="font-size:40px">🎉</div><p class="note">Nothing here · Nichts da</p></div>`
+   : L.map(r=>`<div class="repcard ${r.status==="closed"?"closed":""}">
+      <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><b>${TY[r.target_type]||r.target_type} · ${RS[r.reason]||r.reason}</b>
+        <span class="note" style="margin:0">${new Date(r.created_at).toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})} · ${r.status==="open"?"🟠 open":r.status==="reviewing"?"👀 reviewing":"✓ closed"}</span></div>
+      ${r.target_user?`<p class="note" style="margin:6px 0 0">Reported: <b>${esc(r.target_name||"Member")}</b> ${r.target_email?`(${esc(r.target_email)})`:""}${r.target_reports>1?` · <b style="color:var(--coral)">reported ${r.target_reports}× in total</b>`:""}</p>`:""}
+      ${r.session_title?`<p class="note" style="margin:2px 0 0">Session: <button class="linkbtn" onclick="sOpen('${r.activity_id}')">${esc(r.session_title)}</button>${r.session_starts?` · ${fmtWhen(r.session_starts)}`:""}</p>`:""}
+      ${r.message_body?`<blockquote>${esc(r.message_body)}${r.message_exists?"":` <span class="note">(already deleted)</span>`}</blockquote>`:""}
+      ${r.details?`<p style="margin:6px 0 0">💬 “${esc(r.details)}”</p>`:""}
+      <p class="note" style="margin:6px 0 0">By: ${esc(r.reporter_name||"Member")} ${r.reporter_email?`(${esc(r.reporter_email)})`:""}</p>
+      ${r.admin_note?`<p class="note" style="margin:6px 0 0">📝 Note: ${esc(r.admin_note)}</p>`:""}
+      <input type="text" maxlength="500" placeholder="Note for yourself (optional)" style="margin-top:8px;font-size:14px;padding:8px 12px" value="${esc(RA.notes[r.id]||"")}" oninput="RA.notes[${r.id}]=this.value">
+      <div class="row">
+        ${r.status!=="reviewing"&&r.status!=="closed"?`<button class="chip" onclick="raSet(${r.id},'reviewing')">👀 Reviewing</button>`:""}
+        ${r.status!=="closed"?`<button class="chip on" onclick="raSet(${r.id},'closed')">✓ Close</button>`:`<button class="chip" onclick="raSet(${r.id},'open')">↩ Reopen</button>`}
+        ${r.message_id&&r.message_exists?`<button class="chip" onclick="raDelMsg(${r.id},${r.message_id})">🗑 Delete message</button>`:""}
+        ${r.target_user?`<button class="chip" onclick="raRemovePhoto('${r.target_user}')">🙈 Remove their photo</button>`:""}
+        ${r.target_user?`<a class="chip" style="text-decoration:none" href="mailto:${esc(r.target_email||"")}">✉️ Email them</a>`:""}
+      </div></div>`).join("")}
+  <p class="note" style="margin-top:10px">Serious case? Email the person, and if needed ask the host to cancel the session. Blocking accounts isn't available yet. · Ernster Fall? Person anschreiben; Konten sperren gibt es noch nicht.</p>`;
+};
+async function raSet(id, status){
+  try{ const { error } = await A.sb.rpc("pt_admin_report_set",{ p_id:id, p_status:status, p_note:RA.notes[id]||null }); if(error) throw error;
+    delete RA.notes[id]; bToast(status==="closed"?"✓ Closed · Erledigt":"Updated · Aktualisiert"); raLoad(); raCheck(); }
+  catch(e){ bToast(bErr(e)); }
+}
+async function raDelMsg(rid, mid){
+  if(!window.confirm("Delete this chat message for everyone? · Nachricht für alle löschen?")) return;
+  const { error } = await A.sb.from("session_messages").delete().eq("id",mid);
+  if(error){ bToast(bErr(error)); return; } bToast("🗑 Message deleted · Gelöscht"); raLoad();
+}
+async function raRemovePhoto(uid){
+  if(!window.confirm("Remove this person's profile photo? · Profilfoto entfernen?")) return;
+  const { error } = await A.sb.rpc("pt_admin_remove_avatar",{ p_user:uid });
+  if(error){ bToast(bErr(error)); return; } bToast("🙈 Photo removed · Foto entfernt"); delete AV[uid];
+}
+
 /* ===================== SESSION CHAT ===================== */
 const CH = { id:null, list:[], last:0, err:"", busy:false, chan:null, timer:null, draft:"" };
 const CU = {};   // activity_id -> unread messages
@@ -3042,7 +3172,7 @@ function chListHtml(){
     const t=d.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
     const canDel = mine || s.is_host;
     return `${sep}<div class="cm ${mine?"me":""}">${mine?"":`<div class="who">${m.avatar_url?`<img class="avs" src="${esc(m.avatar_url)}" alt="">`:""}${esc(m.name||"Member")}${m.is_host?" · ⭐ host":""}</div>`}
-      ${chLinkify(m.body)}<span class="tm">${t}</span>${canDel?`<button class="cx" aria-label="Delete message" title="Delete" onclick="chDel(${m.id})">✕</button>`:""}</div>`;
+      ${chLinkify(m.body)}<span class="tm">${t}</span>${!mine?`<button class="cx" aria-label="Report message" title="Report · Melden" onclick="repOpen('message',null,null,${m.id})">🚩</button>`:""}${canDel?`<button class="cx" aria-label="Delete message" title="Delete" onclick="chDel(${m.id})">✕</button>`:""}</div>`;
   }).join("");
 }
 function chPaint(){
@@ -3932,6 +4062,7 @@ function bCard(s){
     ${chBtn(s)}
     <div class="row" style="justify-content:center;margin-top:8px">${s.is_host && !started ? `<button class="chip" onclick="hEdit('${id}')">✏️ Edit · Bearbeiten</button>` : ""}<button class="chip" onclick="sShare('${id}')">🔗 ${s.is_host?"Share invite link":"Share"}</button></div>
     ${s.is_host && !started ? `<p class="center" style="margin:10px 0 0"><button class="linkbtn dangertext" style="font-size:13px" onclick="bCancel('${id}')">Cancel session · Absagen</button></p>` : ""}
+    ${A.user && !s.is_host ? `<p class="center" style="margin:8px 0 0"><button class="linkbtn" style="font-size:12px;color:var(--muted)" onclick="repOpen('session',null,'${id}')">🚩 Report this session · Melden</button></p>` : ""}
   </div>`;
 }
 VIEWS.board = function(){
@@ -4011,7 +4142,7 @@ function hostList(s){
   const pend=ps.filter(p=>p.status==="pending"), inn=ps.filter(p=>p.status==="joined"||p.status==="offered"), wait=ps.filter(p=>p.status==="waitlisted"), inv=ps.filter(p=>p.status==="invited");
   const row=(p,extra,cls)=>`<div class="prow ${cls||""}">${avSpan(p.user_id,p.name)}
       <div style="flex:1;min-width:0"><b>${esc(p.name||"Member")}</b>${relBadges(p.reliability)}${s.balanced&&p.side?`<span class="sidetag">${(()=>{ const l=p.side==="a"?s.language_a:s.language_b; return T[l]?`${T[l].flag} ${esc(T[l].nameEn)} side`:""; })()}</span>`:""}${p.reliability&&p.reliability.percent!=null?` <span class="pl">· ${p.reliability.percent}% shows up</span>`:""}
-      <div class="pl">${speaksLearns(p.languages)}</div>${extra||""}</div></div>`;
+      <div class="pl">${speaksLearns(p.languages)}</div>${extra||""}</div><button class="repf" title="Report · Melden" aria-label="Report ${esc(p.name||"member")}" onclick="repOpen('user','${p.user_id}','${s.activity_id}')">🚩</button></div>`;
   return `<div class="plist">
     ${pend.length?`<h4>🔔 Asking to join · ${pend.length}</h4>${pend.map(p=>row(p,`<div class="row" style="margin-top:6px">
         <button class="chip on" onclick="bRespond('${s.activity_id}','${p.user_id}',true)">✓ Approve · Annehmen</button>
@@ -4383,7 +4514,7 @@ const NAV_ITEMS = [
   ["shop","Shop","Shop","shOpen()"],
   ["profile","Profile","Profil","A.ret='home';A.err='';A.msg='';go('account')"]
 ];
-NAV_TAB.shop="shop"; NAV_TAB.shopedit="shop"; NAV_TAB.cafes="sessions"; NAV_TAB.cafeedit="sessions"; NAV_TAB.chat="sessions"; WIDE.chat="md";
+NAV_TAB.shop="shop"; NAV_TAB.shopedit="shop"; NAV_TAB.cafes="sessions"; NAV_TAB.cafeedit="sessions"; NAV_TAB.chat="sessions"; WIDE.chat="md"; NAV_TAB.reports="profile"; WIDE.reports="md";
 WIDE.cafes="xl"; WIDE.cafeedit="md";
 WIDE.shop="xl"; WIDE.shopedit="md";
 ICO.shop='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>';
@@ -4947,6 +5078,7 @@ function nbText(n){
   switch(n.kind){
     case "seat_offer":   return `🎉 A seat is free for you in ${t}.${d.expires_at?` Accept by ${nbClock(d.expires_at)}.`:""}`;
     case "join_request": return `🔔 ${who} wants to join ${t}. Tap to approve or decline.`;
+    case "report":       return `🚩 New report (${esc((RP_REASONS.find(r=>r[0]===d.reason)||[0,"other"])[1])}). Tap to review.`;
     case "chat":         return `💬 ${d.count>1?`${d.count} new messages`:`New message${n.from_name?` from ${who}`:""}`} in ${t}.`;
     case "invited":      return `📩 ${who} invited you to ${t}. Tap to accept or decline.`;
     case "new_joiner":   return `👋 ${who} joined ${t}.`;
@@ -4997,6 +5129,7 @@ async function nbTap(id){
   const n=NB.list.find(x=>x.id===id); if(!n) return;
   if(!n.read_at){ n.read_at=new Date().toISOString(); NB.unread=Math.max(0,NB.unread-1); bellSync(); try{ await A.sb.rpc("pt_mark_read",{ p_id:id }); }catch(e){} }
   const sh=document.getElementById("nbSheet"); if(sh) sh.remove();
+  if(n.kind==="report"){ raOpen(); return; }
   if(n.activity_id){ if(n.kind==="chat") chOpen(n.activity_id); else sOpen(n.activity_id); }
 }
 function nbTools(){
@@ -5116,6 +5249,7 @@ try{ const u=new URL(location.href); if(u.searchParams.get("auth")==="google" ||
 // supabase.js loads with 'defer', so it is ready only once the page has finished loading
 if(window.supabase) authInit(); else document.addEventListener("DOMContentLoaded", authInit);
 try{ const sid=new URLSearchParams(location.search).get("s"); if(sid && /^[0-9a-f-]{36}$/i.test(sid)){ S.sid=sid; S.screen="session"; document.addEventListener("DOMContentLoaded", ()=>bLoad()); } }catch(e){}
+try{ if(new URLSearchParams(location.search).has("reports")){ S.screen="reports"; let n=0; const w=setInterval(()=>{ n++; if(A.status==="in"&&A.user){ clearInterval(w); raLoad(); } else if((A.status==="out"&&n>2)||n>20){ clearInterval(w); A.ret="reports"; A.msg="Sign in to see reports · Bitte anmelden"; go("account"); } },500); } }catch(e){}
 try{ if(new URLSearchParams(location.search).has("shop")){ S.screen="shop"; document.addEventListener("DOMContentLoaded", ()=>shLoad()); } }catch(e){}
 try{ if(new URLSearchParams(location.search).has("cafes")){ S.screen="cafes"; document.addEventListener("DOMContentLoaded", ()=>cfLoad()); } }catch(e){}
 try{ if(new URLSearchParams(location.search).has("board")){ S.screen="board"; document.addEventListener("DOMContentLoaded", ()=>bLoad()); } }catch(e){}
