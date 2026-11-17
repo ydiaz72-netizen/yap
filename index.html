@@ -162,6 +162,8 @@
   .stabs{display:flex;gap:6px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:4px;margin:6px 0 14px}
   .stabs button{flex:1;border:none;background:none;border-radius:10px;padding:10px 8px;font:800 14px 'Plus Jakarta Sans',Nunito,sans-serif;color:var(--muted);cursor:pointer}
   .stabs button.on{background:var(--plum);color:#fff}
+  .stabs .showsm{display:none}
+  @media (max-width:420px){ .stabs .hidesm{display:none} .stabs .showsm{display:inline} .stabs button{font-size:13px;padding:10px 4px} }
   .cfgrid{display:grid;grid-template-columns:1fr;gap:12px;align-items:start}
   @media (min-width:640px){ .cfgrid{grid-template-columns:1fr 1fr} }
   @media (min-width:1100px){ body.xl .cfgrid{grid-template-columns:1fr 1fr 1fr} }
@@ -3326,10 +3328,11 @@ const CF_LANGS = LANG_KEYS.concat(Object.keys(CF_EXTRA));
 function cfLang(k){ return T[k] ? [T[k].flag, T[k].nameEn] : (CF_EXTRA[k] || ["🗣️", k]); }
 function cfNorm(x){ return String(x||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase(); }
 function sessTabs(which){
+  const t=(k,l,click)=>`<button role="tab" aria-selected="${which===k}" class="${which===k?"on":""}" onclick="${click}">${l}</button>`;
   return `<div class="stabs" role="tablist">
-    <button role="tab" aria-selected="${which==="online"}" class="${which==="online"?"on":""}" onclick="bOpen()">💬 Online sessions</button>
-    <button role="tab" aria-selected="${which==="cafes"}" class="${which==="cafes"?"on":""}" onclick="cfOpen()">🗺️ Language cafés</button></div>`;
+    ${t("online","💻 Online","bTab('online')")}${t("in_person","📍 In person","bTab('in_person')")}${t("cafes","☕ <span class='hidesm'>Language cafés</span><span class='showsm'>Cafés</span>","cfOpen()")}</div>`;
 }
+function bTab(f){ B.fmt=f; if(S.screen!=="board") bOpen(); else xr(); }
 function cfOpen(){ CF.err=""; CF.msg=""; CF.f=null; go("cafes"); cfLoad(); }
 async function cfLoad(){
   try{
@@ -3814,18 +3817,18 @@ function bCard(s){
 VIEWS.board = function(){
   const top=`<div class="topline"><button class="chip" onclick="goHome()">← Back</button><span>Sessions</span></div>`;
   const list=B.list;
-  const shown=(list||[]).filter(s=>s.visibility!=="private" || isMine(s)).filter(s=>!B.mine || isMine(s)).filter(s=>!B.fmt || (s.format||"online")===B.fmt).filter(s=>!B.city || cfNorm(s.city).includes(cfNorm(B.city).trim())).filter(s=>!B.lang || s.language_a===B.lang || s.language_b===B.lang);
+  const shown=(list||[]).filter(s=>s.visibility!=="private" || isMine(s)).filter(s=>!B.mine || isMine(s)).filter(s=>B.mine || (s.format||"online")===(B.fmt||"online")).filter(s=>B.mine || B.fmt!=="in_person" || !B.city || cfNorm(s.city).includes(cfNorm(B.city).trim())).filter(s=>!B.lang || s.language_a===B.lang || s.language_b===B.lang);
   return `${top}
   <h2>${bi("Sessions","Sessions")}</h2>
-  ${sessTabs("online")}
+  ${sessTabs(B.fmt==="in_person"?"in_person":"online")}
   <p class="sub" style="margin-top:0">${bi("Find a language exchange or game, or host your own.","Finde ein Sprachtreffen oder Spiel, oder biete selbst eins an.")}</p>
   <button class="btn primary" onclick="hOpen()">＋ Host a session · Session anbieten</button>
   ${A.user?(()=>{ const n=(list||[]).filter(isMine).length;
     return `<div class="vsw" role="group" aria-label="Which sessions" style="margin:14px 0 0;width:fit-content">
       <button class="${!B.mine?"on":""}" aria-pressed="${!B.mine}" onclick="B.mine=false;xr()">All sessions</button>
       <button class="${B.mine?"on":""}" aria-pressed="${!!B.mine}" onclick="B.mine=true;xr()">⭐ My sessions${n?` (${n})`:""}</button></div>`; })():""}
-  <div class="row" style="margin:12px 0 0">${[["","All formats"],["online","💻 Online"],["in_person","📍 In person"]].map(([k,l])=>`<button class="chip ${(B.fmt||"")===k?"on":""}" aria-pressed="${(B.fmt||"")===k}" onclick="B.fmt='${k}';xr()">${l}</button>`).join("")}</div>
-  ${B.fmt==="in_person"?`<input type="text" class="cfsearch" style="margin-top:8px" placeholder="🔍 City · Stadt (press Enter)" value="${esc(B.city||"")}" onchange="B.city=this.value;xr()" onkeydown="if(event.key==='Enter'){B.city=this.value;xr();}">`:""}
+  ${B.mine?`<p class="note" style="margin:10px 0 0">⭐ Showing all your sessions, online and in person. · Alle deine Sessions.</p>`:""}
+  ${B.fmt==="in_person"&&!B.mine?`<input type="text" class="cfsearch" style="margin-top:12px" placeholder="🔍 City · Stadt (press Enter)" value="${esc(B.city||"")}" onchange="B.city=this.value;xr()" onkeydown="if(event.key==='Enter'){B.city=this.value;xr();}">`:""}
   <div class="row" style="margin:14px 0 6px">${[["","🌍 All"]].concat(LANG_KEYS.map(k=>[k,`${T[k].flag} ${esc(T[k].nameEn)}`])).map(([k,l])=>`<button class="chip ${B.lang===k?"on":""}" aria-pressed="${B.lang===k}" onclick="B.lang='${k}';xr()">${l}</button>`).join("")}</div>
   <div class="bbar"><p class="note">🕒 Times are in your time zone (${esc(detectTz())}) · Zeiten in deiner Zeitzone</p>${bViewSwitch()}</div>
   ${B.err?`<div class="err">${esc(B.err)}</div>`:""}
@@ -3910,7 +3913,7 @@ function hOpen(){
     const d=new Date(Date.now()+86400000);
     Object.assign(H,{ bal:false, sa:2, sb:2, type:"conversation", game:"speak", title:"", a:"", b:"", min:1, max:3,
       date:`${d.getFullYear()}-${hPad(d.getMonth()+1)}-${hPad(d.getDate())}`, time:"19:00",
-      dur:45, seats:4, mode:"instant", topics:[], note:"", video:"", mats:[], matsWas:[], vis:"public", fmt:"online", city:"", place:"", area:"", cafe:null, addr:"", dirs:"", pub:false, placeWas:null, started:true });
+      dur:45, seats:4, mode:"instant", topics:[], note:"", video:"", mats:[], matsWas:[], vis:"public", fmt:(S.screen==="board"&&B.fmt==="in_person")?"in_person":"online", city:"", place:"", area:"", cafe:null, addr:"", dirs:"", pub:false, placeWas:null, started:true });
   }
   go("host"); hPrefill();
 }
