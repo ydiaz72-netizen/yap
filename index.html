@@ -111,6 +111,41 @@
   }
   .plogo{width:34px;height:34px;border-radius:10px;background:var(--coral);display:grid;place-items:center;flex:none}
   #bnav button svg{width:22px;height:22px}
+  #bnav{gap:2px;padding-left:6px;padding-right:6px}
+  #bnav button{font-size:12px}
+  /* ---- Video call link ---- */
+  .vbtn{display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;background:var(--teal);color:#fff;margin-top:8px}
+  .vline{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px;font-size:13px;color:var(--muted);font-weight:700}
+  .vbox{background:var(--teal-soft);border-radius:14px;padding:12px;margin-top:6px}
+  .vbox .chip{background:#fff}
+  /* ---- PonteShop ---- */
+  .shhero{background:linear-gradient(135deg,var(--plum) 0%,#3E5F93 100%);color:#fff;border-radius:22px;padding:20px 20px 18px;margin-bottom:14px}
+  .shhero h2{color:#fff;margin:0 0 4px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .shhero p{margin:0;opacity:.92;font-weight:600}
+  .shhero .de{color:#fff;opacity:.75}
+  .shfree{display:inline-block;background:var(--teal);color:#fff;font-weight:800;font-size:11px;letter-spacing:.05em;padding:3px 9px;border-radius:999px;text-transform:uppercase;vertical-align:middle}
+  .shhero .shfree{background:var(--sun);color:var(--ink);font-size:12px}
+  .shfl{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none}
+  .shfl::-webkit-scrollbar{display:none}
+  .shfl .chip{flex:none}
+  .shgrid{display:grid;grid-template-columns:1fr;gap:14px;align-items:start}
+  @media (min-width:640px){ .shgrid{grid-template-columns:1fr 1fr} }
+  @media (min-width:1100px){ body.xl .shgrid{grid-template-columns:1fr 1fr 1fr} }
+  .shcard{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:10px}
+  .shcard.off{opacity:.6;border-style:dashed}
+  .shtop{display:flex;gap:12px;align-items:flex-start}
+  .shico{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;font-size:26px;flex:none;background:var(--plum-soft)}
+  .shcard h3{margin:0 0 4px;font-size:17px;line-height:1.25}
+  .shmeta{display:flex;flex-wrap:wrap;gap:6px;font-size:12px;font-weight:700;color:var(--muted)}
+  .shmeta span{background:var(--bg);border-radius:999px;padding:3px 9px}
+  .shmeta .shfree{background:var(--teal);color:#fff;font-size:10px;padding:3px 8px}
+  .shcard .btn{padding:12px 14px;font-size:16px}
+  .shdesc{margin:0;color:var(--ink);font-size:14px;line-height:1.45}
+  .shstats{background:var(--plum-soft);color:var(--plum);border-radius:12px;padding:8px 10px;font-size:13px;font-weight:700}
+  .shadm{display:flex;gap:6px;flex-wrap:wrap}
+  .shadm .chip{font-size:13px;padding:6px 10px}
+  .shfile{display:flex;align-items:center;gap:10px;border:2px dashed var(--line);border-radius:14px;padding:14px;background:#fff;cursor:pointer;font-weight:700}
+  .shfile input{display:none}
   .dash{display:grid;gap:18px}
   @media (min-width:1024px){ .dash{grid-template-columns:minmax(0,2fr) minmax(260px,1fr);align-items:start} }
   .dhi{font-size:28px;font-weight:800;letter-spacing:-.02em;margin:0}
@@ -177,6 +212,10 @@
   .nbitem .nbu{width:8px;height:8px;border-radius:4px;background:var(--coral);flex:none;margin-top:7px}
   .nbitem .nbu.r{background:transparent}
   .nbitem small{display:block;font-weight:500;color:var(--muted);font-size:12px;margin-top:2px}
+  #nbSheet{align-items:flex-start}
+  #nbSheet .sheet{border-radius:0 0 24px 24px;max-height:80vh;padding-top:calc(16px + env(safe-area-inset-top));animation:nbDrop .18s ease-out}
+  @keyframes nbDrop{from{transform:translateY(-24px);opacity:0}to{transform:none;opacity:1}}
+  @media (prefers-reduced-motion:reduce){ #nbSheet .sheet{animation:none} }
   @media (min-width:900px){ #nbSheet{align-items:flex-start;justify-content:flex-end;background:rgba(27,42,65,.12)} #nbSheet .sheet{margin:70px max(24px,calc((100vw - 1000px)/2 + 24px)) 0 0;width:400px;max-width:400px;border-radius:18px;max-height:72vh;box-shadow:0 16px 40px rgba(27,42,65,.18)} }
   .nbrow{display:flex;align-items:stretch;border-top:1px solid var(--line)}
   .nbrow .nbitem{border-top:none;flex:1}
@@ -2336,7 +2375,11 @@ function authReturn(){
   const r=A.ret||"home";
   if(r==="results" && S.players.length && S.gid) go("results");
   else if(r==="lobby" && O.G) go("lobby");
-  else go("account");
+  else if(r==="shop") shOpen();
+  else if(r==="board") bOpen();
+  else if(r==="session" && S.sid) sOpen(S.sid);
+  else if(r==="account") go("account");
+  else goHome();
 }
 function authErr(e){
   const m=String((e&&e.message)||e||"").toLowerCase();
@@ -2613,10 +2656,6 @@ VIEWS.account = function(){
     <button class="chip" onclick="editProfile()">✏️ Edit</button>
   </div>
   ${msg}
-  <div class="card"><h3>🌍 Language exchange <span class="de">· Sprachtandem</span></h3>
-    <p class="note" style="margin-top:0">Add your languages and free times to get matched with partners and sessions.<br><span class="de">Trage Sprachen und Zeiten ein, um passende Partner und Sessions zu finden.</span></p>
-    <button class="btn secondary" onclick="xOpen()">🗣️ My exchange profile · Mein Tandem-Profil</button></div>
-  ${npCard()}
   ${pend ? `<div class="card acard"><h3>💾 Save your last game? <span class="de">· Letztes Spiel speichern?</span></h3>
      ${pend.recs.length>1?`<p class="note">Which player were you? · Wer warst du?</p><div class="row">${pend.names.map((n,i)=>`<button class="chip ${i===meIdx?"on":""}" onclick="savePending(${i})">${i===meIdx?"⭐ ":""}${esc(n)}</button>`).join("")}</div>`
        :`<button class="btn primary" onclick="savePending(0)">💾 Save · Speichern</button>`}
@@ -2625,6 +2664,10 @@ VIEWS.account = function(){
     ${A.games===null?`<p class="note center">Loading your games… <button class="linkbtn" onclick="loadGames()">Retry</button></p>`:acctStats(gs)}</div>
   ${acctHistory(gs)}
   <p class="note center">Tap a game to see its questions, answers &amp; tips · Tippe auf ein Spiel für Details</p>
+  <div class="card"><h3>🌍 Language exchange <span class="de">· Sprachtandem</span></h3>
+    <p class="note" style="margin-top:0">Add your languages and free times to get matched with partners and sessions.<br><span class="de">Trage Sprachen und Zeiten ein, um passende Partner und Sessions zu finden.</span></p>
+    <button class="btn secondary" onclick="xOpen()">🗣️ My exchange profile · Mein Tandem-Profil</button></div>
+  <div id="npc">${npCard()}</div>
   <button class="btn secondary" onclick="signOut()">🚪 Sign out · Abmelden</button>
   <button class="btn ghost dangertext" onclick="confirmDelete()">🗑️ Delete my account · Konto löschen</button>
   <p class="note center">Signed in as ${esc(A.user.email||"")}</p>
@@ -2818,6 +2861,44 @@ function langsLine(arr){
   return (arr||[]).map(l=>T[l.code] ? `${T[l.code].flag} ${l.role==="learning" ? "learning"+(l.level!=null?" "+RANKS[l.level]:"") : l.role}` : "").filter(Boolean).join(" · ");
 }
 
+/* ===================== VIDEO CALL LINKS ===================== */
+const VL = {};   // activity_id -> { url, provider } (only host / joined people get rows back)
+const V_PROV = { jitsi:"Jitsi", zoom:"Zoom", meet:"Google Meet", whatsapp:"WhatsApp", teams:"Teams", other:"video call" };
+function vProvider(u){
+  const h=String(u||"").toLowerCase();
+  return /meet\.jit\.si|jitsi/.test(h)?"jitsi" : /zoom\.us|zoom\.com/.test(h)?"zoom" : /meet\.google/.test(h)?"meet"
+       : /whatsapp/.test(h)?"whatsapp" : /teams\.microsoft|teams\.live/.test(h)?"teams" : "other";
+}
+function vClean(u){
+  let x=String(u||"").trim(); if(!x) return "";
+  if(!/^https?:\/\//i.test(x) && /^[\w-]+(\.[\w-]+)+(\/|$)/.test(x)) x="https://"+x;
+  x=x.replace(/^http:\/\//i,"https://");
+  return x;
+}
+function vValid(u){ return /^https:\/\/[^\s<>"]+\.[^\s<>"]+$/i.test(u) && u.length>=12 && u.length<=500; }
+async function vLoad(){
+  if(!A.user || !A.sb) return;
+  try{
+    const { data, error } = await A.sb.from("activity_links").select("activity_id,url,provider");
+    if(error) return;
+    Object.keys(VL).forEach(k=>delete VL[k]);
+    (data||[]).forEach(r=>{ VL[r.activity_id]={ url:r.url, provider:r.provider }; });
+    if(["board","session","home"].includes(S.screen)) xr();
+  }catch(e){}
+}
+function vBtn(id, primary){
+  const v=VL[id]; if(!v) return "";
+  return `<a class="btn ${primary?"primary":""} vbtn" href="${esc(v.url)}" target="_blank" rel="noopener noreferrer">🎥 Join ${esc(V_PROV[v.provider]||"video call")} · Videoanruf</a>`;
+}
+function vLine(s){
+  const id=s.activity_id, v=VL[id];
+  if(!A.user || !(s.is_host || s.my_status==="joined")) return "";
+  if(v) return vBtn(id, false) + `<p class="note center" style="margin:4px 0 0">🔒 Only people in this session see this link · Nur Teilnehmende sehen den Link</p>`;
+  if(s.is_host && new Date(s.starts_at)>new Date()) return `<div class="vline">🎥 No video link yet · <button class="linkbtn" onclick="hEdit('${id}')">Add one · Hinzufügen</button></div>`;
+  if(!s.is_host) return `<div class="vline">🎥 The host hasn't added a video link yet · Noch kein Video-Link</div>`;
+  return "";
+}
+
 async function bLoad(){
   B.err="";
   try{
@@ -2825,7 +2906,7 @@ async function bLoad(){
     const { data, error } = await sb.rpc("pt_board_sessions");
     if(error) throw error;
     B.list=data||[];
-    hostPeopleLoad();
+    hostPeopleLoad(); vLoad();
   }catch(e){ B.err=bErr(e); if(!B.list) B.list=[]; }
   if(S.screen==="board" || S.screen==="session") xr();
 }
@@ -2948,6 +3029,7 @@ function bCard(s){
     ${(s.topics||[]).length?`<div class="row" style="margin-top:8px">${s.topics.map(k=>{ const it=INTERESTS.find(x=>x[0]===k); return it?`<span class="feat">${it[1]} ${esc(it[2])}</span>`:""; }).join("")}</div>`:""}
     ${s.note?`<p class="note" style="margin:8px 0 0">💬 ${esc(s.note)}</p>`:""}
     ${act}
+    ${vLine(s)}
     <div class="row" style="justify-content:center;margin-top:8px">${s.is_host && !started ? `<button class="chip" onclick="hEdit('${id}')">✏️ Edit · Bearbeiten</button>` : ""}<button class="chip" onclick="sShare('${id}')">🔗 ${s.is_host?"Share invite link":"Share"}</button></div>
     ${s.is_host && !started ? `<p class="center" style="margin:10px 0 0"><button class="linkbtn dangertext" style="font-size:13px" onclick="bCancel('${id}')">Cancel session · Absagen</button></p>` : ""}
   </div>`;
@@ -3039,7 +3121,7 @@ function hOpen(){
     const d=new Date(Date.now()+86400000);
     Object.assign(H,{ bal:false, sa:2, sb:2, type:"conversation", game:"speak", title:"", a:"", b:"", min:1, max:3,
       date:`${d.getFullYear()}-${hPad(d.getMonth()+1)}-${hPad(d.getDate())}`, time:"19:00",
-      dur:45, seats:4, mode:"instant", topics:[], note:"", started:true });
+      dur:45, seats:4, mode:"instant", topics:[], note:"", video:"", started:true });
   }
   go("host"); hPrefill();
 }
@@ -3081,9 +3163,27 @@ function hEdit(id){
   Object.assign(H,{ editId:id, editTaken:s.seats-s.seats_open, type:s.type, game:s.game||"speak", title:s.title, a:s.language_a, b:s.language_b||"",
     min:s.level_min, max:s.level_max, date:`${d.getFullYear()}-${hPad(d.getMonth()+1)}-${hPad(d.getDate())}`,
     time:`${hPad(d.getHours())}:${hPad(d.getMinutes())}`, dur:s.duration_min, seats:s.seats, mode:s.join_mode,
-    topics:(s.topics||[]).slice(), note:s.note||"", started:true, checked:true, adult:true, err:"", busy:false,
+    topics:(s.topics||[]).slice(), note:s.note||"", video:VL[id]?VL[id].url:"", videoWas:VL[id]?VL[id].url:"", started:true, checked:true, adult:true, err:"", busy:false,
     bal:!!s.balanced, sa:s.seats_a||Math.max(1,Math.floor(s.seats/2)), sb:s.seats_b||Math.max(1,Math.ceil(s.seats/2)) });
   go("host");
+}
+function hJitsi(){
+  const abc="abcdefghjkmnpqrstuvwxyz23456789"; let r="";
+  const rnd=(window.crypto&&crypto.getRandomValues)?crypto.getRandomValues(new Uint32Array(12)):Array.from({length:12},()=>Math.floor(Math.random()*1e9));
+  for(let i=0;i<12;i++) r+=abc[rnd[i]%abc.length];
+  H.video=`https://meet.jit.si/PonteTalk-${r}`; xr();
+}
+async function hSaveLink(id, url, was){
+  if((url||"")===(was||"")) return;
+  if(url){
+    const { error } = await A.sb.from("activity_links").upsert({ activity_id:id, url, provider:vProvider(url) }, { onConflict:"activity_id" });
+    if(error) throw error;
+    VL[id]={ url, provider:vProvider(url) };
+  }else{
+    const { error } = await A.sb.from("activity_links").delete().eq("activity_id",id);
+    if(error) throw error;
+    delete VL[id];
+  }
 }
 function hCancelEdit(){ H.editId=null; H.started=false; bOpen(); }
 async function hPost(){
@@ -3095,6 +3195,8 @@ async function hPost(){
   if(H.editId && H.seats < (H.editTaken||0)){ H.err=BERR.seats_below_joined; xr(); return; }
   const title=((H.title||"").trim() || hDefaultTitle()).slice(0,80);
   if(title.length<3){ H.err="Add a short title · Gib einen kurzen Titel ein"; xr(); return; }
+  const video=vClean(H.video);
+  if(video && !vValid(video)){ H.err="The video link doesn't look right. It should start with https:// · Der Video-Link sieht falsch aus"; xr(); return; }
   H.busy=true; xr();
   try{
     const row={ host_id:A.user.id, type:H.type, game:H.type==="game"?H.game:null, title,
@@ -3106,12 +3208,17 @@ async function hPost(){
       delete row.host_id;
       const { error } = await A.sb.from("activities").update(row).eq("id",H.editId);
       if(error) throw error;
+      await hSaveLink(H.editId, video, H.videoWas);
       H.editId=null; H.started=false; H.busy=false;
       bToast("✅ Changes saved. People in the session are told about time changes · Gespeichert");
       bOpen(); return;
     }
-    const { error } = await A.sb.from("activities").insert(row);
+    const { data:made, error } = await A.sb.from("activities").insert(row).select("id").single();
     if(error) throw error;
+    if(video && made && made.id){
+      try{ await hSaveLink(made.id, video, ""); }
+      catch(e){ H.started=false; H.busy=false; bToast("📣 Session posted, but the video link didn't save. Tap ✏️ Edit to add it · Link nicht gespeichert"); bOpen(); return; }
+    }
     H.started=false; H.busy=false;
     bToast("📣 Your session is on the board! · Deine Session ist online!");
     bOpen();
@@ -3172,6 +3279,16 @@ VIEWS.host = function(){
     <div class="row">${INTERESTS.map(([k,e,en])=>chip(H.topics.includes(k),`hTopic('${k}')`,`${e} ${esc(en)}`)).join("")}</div>
     <label class="lbl" for="hnote">Note (optional) · Notiz (optional)</label>
     <input type="text" id="hnote" maxlength="200" placeholder="e.g. Beginners welcome! · Anfänger willkommen!" value="${esc(H.note)}" oninput="H.note=this.value">
+    <label class="lbl" for="hvideo">🎥 Video call link (optional) · Videoanruf-Link</label>
+    <input type="text" id="hvideo" inputmode="url" autocomplete="off" maxlength="500" placeholder="Paste a Zoom, Meet, WhatsApp or Teams link" value="${esc(H.video||"")}" oninput="H.video=this.value">
+    <div class="vbox">
+      <div class="row" style="margin:0">
+        <button class="chip" onclick="hJitsi()">✨ Create a free video room for me</button>
+        ${H.video?`<button class="chip" onclick="H.video='';xr()">✕ Remove link</button>`:""}
+      </div>
+      <p class="note" style="margin:8px 0 0">🔒 Only people who joined see the link. It's also in their reminder emails and calendar file. · Nur Teilnehmende sehen den Link.</p>
+      ${vProvider(H.video)==="jitsi"?`<p class="note" style="margin:6px 0 0">Jitsi is free and people join without an account. As the host, you may be asked to sign in (Google or GitHub) to start the room. · Jitsi ist kostenlos; als Host musst du dich evtl. kurz anmelden.</p>`:""}
+    </div>
     ${H.err?`<div class="err">${esc(H.err)}</div>`:""}
     <button class="btn primary" onclick="hPost()" ${H.busy?"disabled":""}>${H.busy?"Saving… · Speichert…":H.editId?"💾 Save changes · Speichern":"📣 Post session · Veröffentlichen"}</button>
     ${H.editId?`<button class="btn ghost" onclick="hCancelEdit()">Cancel · Abbrechen</button>`:""}
@@ -3287,8 +3404,12 @@ const NAV_ITEMS = [
   ["home","Home","Start","goHome()"],
   ["sessions","Sessions","Sessions","bOpen()"],
   ["games","Games","Spiele","go('games')"],
+  ["shop","Shop","Shop","shOpen()"],
   ["profile","Profile","Profil","A.ret='home';A.err='';A.msg='';go('account')"]
 ];
+NAV_TAB.shop="shop"; NAV_TAB.shopedit="shop";
+WIDE.shop="xl"; WIDE.shopedit="md";
+ICO.shop='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>';
 function navSync(){
   const tab=NAV_TAB[S.screen], w=WIDE[S.screen], cl=document.body.classList;
   [...cl].filter(c=>c.startsWith("scr-")).forEach(c=>cl.remove(c));
@@ -3302,10 +3423,211 @@ function navSync(){
   cl.add("has-nav");
   n.innerHTML = NAV_ITEMS.map(([k,en,de,fn])=>`<button class="${tab===k?"on":""}" ${tab===k?'aria-current="page"':""} onclick="${fn}">${ICO[k]}${en}<small>${de}</small></button>`).join("");
   if(A.user){ nbStart(); nbFresh(); } else if(NB.timer){ clearInterval(NB.timer); NB.timer=null; NB.list=[]; NB.unread=0; }
-  const me = A.user ? `${bellBtn()}<button class="tme" aria-label="Profile" onclick="${NAV_ITEMS[3][3]}">${esc((meName()||"?").charAt(0).toUpperCase())}</button>`
-                    : `<button class="tsign" onclick="${NAV_ITEMS[3][3]}">Sign in · Anmelden</button>`;
+  const me = A.user ? `${bellBtn()}<button class="tme" aria-label="Profile" onclick="${NAV_ITEMS[4][3]}">${esc((meName()||"?").charAt(0).toUpperCase())}</button>`
+                    : `<button class="tsign" onclick="${NAV_ITEMS[4][3]}">Sign in · Anmelden</button>`;
   t.innerHTML = `<div class="tin"><button class="tlogo" onclick="goHome()"><span class="plogo">${ICO.logo}</span>PonteTalk</button>
-    <nav class="tlinks" aria-label="Main">${NAV_ITEMS.slice(0,3).map(([k,en,de,fn])=>`<button class="${tab===k?"on":""}" ${tab===k?'aria-current="page"':""} onclick="${fn}">${ICO[k]}${en}</button>`).join("")}</nav>${me}</div>`;
+    <nav class="tlinks" aria-label="Main">${NAV_ITEMS.slice(0,4).map(([k,en,de,fn])=>`<button class="${tab===k?"on":""}" ${tab===k?'aria-current="page"':""} onclick="${fn}">${ICO[k]}${en}</button>`).join("")}</nav>${me}</div>`;
+}
+
+
+/* ===================== PONTESHOP ===================== */
+const SH = { list:null, lang:"", lvl:-1, err:"", msg:"", busy:false, admin:false, f:null };
+const SH_KINDS = [
+  ["worksheet","📝","Worksheet","Arbeitsblatt"],
+  ["flashcards","🃏","Flashcards","Karteikarten"],
+  ["guide","📘","Guide","Leitfaden"],
+  ["game","🎲","Game","Spiel"],
+  ["audio","🎧","Audio","Audio"],
+  ["other","📦","Other","Sonstiges"]
+];
+const SH_MAX = 50*1024*1024;
+function shKind(k){ return SH_KINDS.find(x=>x[0]===k) || SH_KINDS[5]; }
+function shSize(b){ if(!b) return ""; return b<1024*1024 ? Math.max(1,Math.round(b/1024))+" KB" : (b/1048576).toFixed(1).replace(/\.0$/,"")+" MB"; }
+function shErr(e){
+  const m=String((e&&e.message)||e||"");
+  if(/sign in/i.test(m)) return "Please sign in to download · Bitte anmelden";
+  if(/not found/i.test(m)) return "This resource isn't available any more · Nicht mehr verfügbar";
+  if(/row-level security|violates row|Unauthorized|403/i.test(m)) return "Only admins can do this · Nur für Admins";
+  if(/exceeded|too large|413/i.test(m)) return "File too big (max 50 MB) · Datei zu groß";
+  if(/fetch|network|offline/i.test(m)) return "No connection. Try again · Keine Verbindung";
+  return m || "Something went wrong · Etwas ist schiefgelaufen";
+}
+function shOpen(){ SH.err=""; SH.msg=""; SH.f=null; go("shop"); shLoad(); }
+async function shLoad(){
+  SH.err="";
+  try{
+    const sb=authClient(); if(!sb) throw new Error("offline");
+    const [r,a] = await Promise.all([
+      sb.rpc("pt_shop_items"),
+      A.user ? sb.rpc("pt_is_admin").then(x=>x, ()=>({data:false})) : Promise.resolve({data:false})
+    ]);
+    if(r.error) throw r.error;
+    SH.list=r.data||[]; SH.admin=!!a.data;
+  }catch(e){ SH.err=shErr(e); if(!SH.list) SH.list=[]; }
+  if(S.screen==="shop") xr();
+}
+
+function shCard(it){
+  const k=shKind(it.kind), t=T[it.language];
+  const lvl = it.level==null ? "All levels · Alle Niveaus" : RANKS[it.level];
+  const busy = SH.busy===it.id;
+  const act = !A.user
+    ? `<button class="btn secondary" onclick="A.ret='shop';A.err='';A.msg='Sign in to download free resources · Melde dich an, um kostenlose Materialien zu laden';go('account')">Sign in to download</button>`
+    : `<button class="btn primary" ${busy?"disabled":""} onclick="shGet('${it.id}')">${busy?"Preparing… · Lädt…":(it.mine?"⬇ Download again":"⬇ Download")}</button>`;
+  const admin = SH.admin ? `
+    <div class="shstats">⬇ ${it.downloads||0} download${it.downloads==1?"":"s"} · 👤 ${it.people||0} ${it.people==1?"person":"people"}${it.published?"":" · 🙈 hidden"}</div>
+    <div class="shadm">
+      <button class="chip" onclick="shEdit('${it.id}')">✏️ Edit</button>
+      <button class="chip" onclick="shToggle('${it.id}',${!it.published})">${it.published?"🙈 Hide":"👁 Show"}</button>
+      <button class="chip" onclick="shDel('${it.id}')">🗑 Delete</button>
+    </div>` : "";
+  return `<div class="shcard ${it.published?"":"off"}">
+    <div class="shtop">
+      <div class="shico" style="${t?`background:${t.color}1F`:""}">${k[1]}</div>
+      <div style="min-width:0;flex:1">
+        <h3>${esc(it.title)}</h3>
+        <div class="shmeta"><span class="shfree">${it.price_cents>0?"Paid":"Free"}</span><span>${t?`${t.flag} ${esc(t.nameEn)}`:"🌍 Any language"}</span><span>${lvl}</span><span>${k[2]}</span></div>
+      </div>
+    </div>
+    ${it.description?`<p class="shdesc">${esc(it.description)}</p>`:""}
+    <p class="note" style="margin:0">📄 ${esc(it.file_name||"")}${it.file_size?` · ${shSize(it.file_size)}`:""}${it.mine&&A.user?" · ✓ You have this":""}</p>
+    ${act}${admin}
+  </div>`;
+}
+
+VIEWS.shop = function(){
+  const list=SH.list;
+  const shown=(list||[]).filter(it=>(!SH.lang || it.language===SH.lang || !it.language) && (SH.lvl<0 || it.level==null || it.level===SH.lvl));
+  const chip=(on,click,label)=>`<button class="chip ${on?"on":""}" aria-pressed="${on}" onclick="${click}">${label}</button>`;
+  const langs=LANG_KEYS.filter(k=>(list||[]).some(it=>it.language===k));
+  return `<div class="topline"><button class="chip" onclick="goHome()">← Back</button><span>PonteShop</span></div>
+  <div class="shhero">
+    <h2>PonteShop <span class="shfree">Free</span></h2>
+    <p>Free worksheets, flashcards and guides to practise between sessions.<br><span class="de">Kostenlose Materialien zum Üben zwischen den Sessions.</span></p>
+  </div>
+  ${SH.admin?`<button class="btn primary" style="margin-bottom:12px" onclick="shNew()">＋ Add resource · Material hinzufügen</button>`:""}
+  ${SH.msg?`<div class="card center" style="padding:10px;margin-bottom:10px;background:var(--teal-soft)">${esc(SH.msg)}</div>`:""}
+  ${(list&&list.length>1)?`
+  <div class="shfl">${chip(!SH.lang,"SH.lang='';xr()","🌍 All")}${langs.map(k=>chip(SH.lang===k,`SH.lang='${k}';xr()`,`${T[k].flag} ${esc(T[k].nameEn)}`)).join("")}</div>
+  <div class="shfl">${chip(SH.lvl<0,"SH.lvl=-1;xr()","All levels")}${RANKS.map((r,i)=>chip(SH.lvl===i,`SH.lvl=${i};xr()`,r)).join("")}</div>`:""}
+  ${SH.err?`<div class="err">${esc(SH.err)}</div>`:""}
+  ${list===null ? `<p class="note center" style="margin-top:30px">Loading… · Lädt…</p>`
+    : !list.length ? `<div class="card center"><div style="font-size:44px">🎁</div>
+        <h3>First resources coming soon · Bald gibt's die ersten Materialien</h3>
+        <p class="note">Worksheets, flashcards and conversation guides, made by PonteTalk. Free for members.<br><span class="de">Arbeitsblätter, Karteikarten und Gesprächsleitfäden – kostenlos für Mitglieder.</span></p>
+        ${A.user?"":`<button class="btn secondary" onclick="A.ret='shop';A.err='';A.msg='';go('account')">Create a free account · Kostenloses Konto</button>`}</div>`
+    : !shown.length ? `<div class="card center"><p class="note">Nothing for this filter yet · Für diesen Filter noch nichts</p><button class="chip" onclick="SH.lang='';SH.lvl=-1;xr()">Show all · Alle zeigen</button></div>`
+    : `<div class="shgrid">${shown.map(shCard).join("")}</div>`}
+  <p class="note center" style="margin-top:16px">Ideas for a resource you'd love? Tell us · Wünsche? Schreib uns: <a href="mailto:${esc(LEGAL.email)}">${esc(LEGAL.email)}</a></p>
+  ${legalLinks()}`;
+};
+
+async function shGet(id){
+  if(!A.user){ A.ret="shop"; A.err=""; A.msg=""; go("account"); return; }
+  if(SH.busy) return;
+  SH.busy=id; SH.err=""; SH.msg=""; xr();
+  try{
+    const r=await A.sb.rpc("pt_shop_download",{ p_item:id });
+    if(r.error) throw r.error;
+    const u=await A.sb.storage.from("shop").createSignedUrl(r.data.path, 120, { download: r.data.name || true });
+    if(u.error) throw u.error;
+    const a=document.createElement("a"); a.href=u.data.signedUrl; a.rel="noopener"; a.download=r.data.name||"";
+    document.body.appendChild(a); a.click(); a.remove();
+    const it=(SH.list||[]).find(x=>x.id===id);
+    if(it){ if(SH.admin){ it.downloads=(it.downloads||0)+1; if(!it.mine) it.people=(it.people||0)+1; } it.mine=true; }
+    SH.msg="✓ Download started. Happy practising! · Download gestartet. Viel Spaß beim Üben!";
+  }catch(e){ SH.err=shErr(e); }
+  SH.busy=false; xr();
+}
+
+/* ---- Admin: add / edit / hide / delete ---- */
+function shNew(){ SH.err=""; SH.msg=""; SH.f={ id:null, title:"", desc:"", lang:"", lvl:-1, kind:"worksheet", published:true, file:null, path:"", fileName:"", size:0 }; go("shopedit"); }
+async function shEdit(id){
+  SH.err=""; SH.msg="";
+  const r=await A.sb.from("shop_items").select("*").eq("id",id).single();
+  if(r.error){ SH.err=shErr(r.error); xr(); return; }
+  const d=r.data;
+  SH.f={ id:d.id, title:d.title, desc:d.description||"", lang:d.language||"", lvl:d.level==null?-1:d.level, kind:d.kind, published:d.published, file:null, path:d.file_path, fileName:d.file_name, size:d.file_size||0 };
+  go("shopedit");
+}
+function shPick(inp){
+  const f=inp.files && inp.files[0]; if(!f) return;
+  if(f.size>SH_MAX){ SH.err="File too big (max 50 MB) · Datei zu groß (max. 50 MB)"; inp.value=""; xr(); return; }
+  SH.err=""; SH.f.file=f;
+  if(!SH.f.title.trim()) SH.f.title=f.name.replace(/\.[^.]+$/,"").replace(/[_-]+/g," ").slice(0,120);
+  xr();
+}
+VIEWS.shopedit = function(){
+  const f=SH.f, top=`<div class="topline"><button class="chip" onclick="shOpen()">← PonteShop</button><span>${f&&f.id?"✏️ Edit resource":"＋ Add resource"}</span></div>`;
+  if(!f || !SH.admin) return `${top}<p class="note center" style="margin-top:40px">Only admins can add resources · Nur für Admins</p>`;
+  const chip=(on,click,label)=>`<button class="chip ${on?"on":""}" aria-pressed="${on}" onclick="${click}">${label}</button>`;
+  const fileLabel = f.file ? `${esc(f.file.name)} · ${shSize(f.file.size)}` : (f.fileName ? `${esc(f.fileName)} · ${shSize(f.size)} <span class="de">(tap to replace · ersetzen)</span>` : "Choose a file (PDF, image, audio, ZIP… max 50 MB)");
+  return `${top}
+  <h2>${f.id?bi("Edit resource","Material bearbeiten"):bi("Add resource","Material hinzufügen")}</h2>
+  <div class="card">
+    <label class="lbl">File · Datei</label>
+    <label class="shfile">📎 <span>${fileLabel}</span><input type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.zip,.mp3,.m4a,.wav,.docx,.pptx,.xlsx,.txt" onchange="shPick(this)"></label>
+    <label class="lbl" for="shtitle">Title · Titel</label>
+    <input type="text" id="shtitle" maxlength="120" placeholder="e.g. Café German: 20 phrases" value="${esc(f.title)}" oninput="SH.f.title=this.value">
+    <label class="lbl" for="shdesc">Short description · Kurzbeschreibung</label>
+    <textarea id="shdesc" rows="3" maxlength="1000" placeholder="What's inside and who it's for · Was drin ist und für wen" oninput="SH.f.desc=this.value">${esc(f.desc)}</textarea>
+  </div>
+  <div class="card">
+    <label class="lbl">Type · Art</label>
+    <div class="row">${SH_KINDS.map(k=>chip(f.kind===k[0],`SH.f.kind='${k[0]}';xr()`,`${k[1]} ${k[2]}`)).join("")}</div>
+    <label class="lbl">Language · Sprache</label>
+    <div class="row">${chip(!f.lang,"SH.f.lang='';xr()","🌍 Any")}${LANG_KEYS.map(k=>chip(f.lang===k,`SH.f.lang='${k}';xr()`,`${T[k].flag} ${esc(T[k].nameEn)}`)).join("")}</div>
+    <label class="lbl">Level · Niveau</label>
+    <div class="row">${chip(f.lvl<0,"SH.f.lvl=-1;xr()","All levels")}${RANKS.map((r,i)=>chip(f.lvl===i,`SH.f.lvl=${i};xr()`,r)).join("")}</div>
+    <label class="lbl">Visible · Sichtbar</label>
+    <div class="row">${chip(f.published,"SH.f.published=true;xr()","👁 Visible to everyone")}${chip(!f.published,"SH.f.published=false;xr()","🙈 Hidden (draft)")}</div>
+    <p class="note">Price: Free · Preis: kostenlos. Only upload material you made yourself or have the rights to share. · Nur eigene Materialien hochladen.</p>
+  </div>
+  ${SH.err?`<div class="err">${esc(SH.err)}</div>`:""}
+  <button class="btn primary" ${SH.busy?"disabled":""} onclick="shSave()">${SH.busy?"Uploading… · Lädt hoch…":(f.id?"💾 Save changes · Speichern":"⬆ Publish · Veröffentlichen")}</button>
+  <button class="btn ghost" onclick="shOpen()">Cancel · Abbrechen</button>`;
+};
+async function shSave(){
+  const f=SH.f; if(!f || SH.busy) return;
+  const title=(f.title||"").trim();
+  if(title.length<2){ SH.err="Please add a title · Bitte einen Titel eingeben"; xr(); return; }
+  if(!f.id && !f.file){ SH.err="Please choose a file · Bitte eine Datei wählen"; xr(); return; }
+  SH.busy=true; SH.err=""; xr();
+  try{
+    let path=f.path, name=f.fileName, size=f.size, oldPath=null;
+    if(f.file){
+      const safe=f.file.name.normalize("NFKD").replace(/[^\w.\-]+/g,"_").replace(/_+/g,"_").slice(-80) || "file";
+      const key=(window.crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now().toString(36)+Math.random().toString(36).slice(2));
+      const newPath=`${key}/${safe}`;
+      const up=await A.sb.storage.from("shop").upload(newPath, f.file, { contentType:f.file.type||"application/octet-stream", upsert:false });
+      if(up.error) throw up.error;
+      if(f.id) oldPath=f.path;
+      path=newPath; name=f.file.name; size=f.file.size;
+    }
+    const row={ title, description:(f.desc||"").trim()||null, language:f.lang||null, level:f.lvl<0?null:f.lvl, kind:f.kind, published:!!f.published, file_path:path, file_name:name, file_size:size };
+    if(f.id){
+      const r=await A.sb.from("shop_items").update(row).eq("id",f.id); if(r.error) throw r.error;
+      if(oldPath) A.sb.storage.from("shop").remove([oldPath]).catch(()=>{});
+    }else{
+      row.created_by=A.user.id;
+      const r=await A.sb.from("shop_items").insert(row); if(r.error) throw r.error;
+    }
+    SH.busy=false; SH.f=null; go("shop"); SH.msg=f.id?"✓ Saved · Gespeichert":"✓ Published · Veröffentlicht"; SH.list=null; xr(); shLoad();
+  }catch(e){ SH.busy=false; SH.err=shErr(e); xr(); }
+}
+async function shToggle(id,on){
+  const r=await A.sb.from("shop_items").update({ published:on }).eq("id",id);
+  if(r.error){ SH.err=shErr(r.error); xr(); return; }
+  SH.msg = on ? "👁 Visible again · Wieder sichtbar" : "🙈 Hidden. Only you can see it · Versteckt"; shLoad();
+}
+async function shDel(id){
+  const it=(SH.list||[]).find(x=>x.id===id); if(!it) return;
+  if(!window.confirm(`Delete "${it.title}"? Download counts are deleted too. · Wirklich löschen?`)) return;
+  const d=await A.sb.from("shop_items").select("file_path").eq("id",id).single();
+  const r=await A.sb.from("shop_items").delete().eq("id",id);
+  if(r.error){ SH.err=shErr(r.error); xr(); return; }
+  if(d.data && d.data.file_path) A.sb.storage.from("shop").remove([d.data.file_path]).catch(()=>{});
+  SH.msg="🗑 Deleted · Gelöscht"; shLoad();
 }
 
 /* ===================== SIGNED-IN HOME DASHBOARD ===================== */
@@ -3319,7 +3641,7 @@ rLoad = async function(){
     A.sb.from("participants").select("status,activities(starts_at,status)").eq("user_id",uid).in("status",["joined","offered","attended"]).then(r=>r, e=>({error:e})),
     A.sb.from("activities").select("starts_at,status").eq("host_id",uid).neq("status","cancelled").then(r=>r, e=>({error:e}))
   ]);
-  if(!b.error) D.board=b.data||[];
+  if(!b.error){ D.board=b.data||[]; vLoad(); }
   if(!p.error && !h.error){
     const times=[].concat((p.data||[]).filter(x=>x.activities && x.activities.status!=="cancelled").map(x=>x.activities.starts_at), (h.data||[]).map(x=>x.starts_at));
     D.week=weekStats(times);
@@ -3350,11 +3672,14 @@ function inDays(iso){
 function icsFor(s){
   const f=d=>new Date(d).toISOString().replace(/[-:]/g,"").replace(/\.\d{3}/,"");
   const end=new Date(new Date(s.starts_at).getTime()+s.duration_min*60000);
-  const url=(location.protocol.startsWith("http")?location.origin:"https://pontetalk.setzio.com")+"/?board";
+  const url=(location.protocol.startsWith("http")?location.origin:"https://pontetalk.setzio.com")+"/?s="+s.activity_id;
+  const vid=VL[s.activity_id] ? VL[s.activity_id].url : "";
   const txt=x=>String(x||"").replace(/[\\,;]/g,m=>"\\"+m).replace(/\n/g,"\\n");
   return ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//PonteTalk//EN","BEGIN:VEVENT",
     "UID:"+s.activity_id+"@pontetalk","DTSTAMP:"+f(new Date()),"DTSTART:"+f(s.starts_at),"DTEND:"+f(end),
-    "SUMMARY:"+txt("PonteTalk: "+s.title),"DESCRIPTION:"+txt("Open PonteTalk to join: "+url),"URL:"+url,
+    "SUMMARY:"+txt("PonteTalk: "+s.title),
+    "DESCRIPTION:"+txt((vid?"Video call: "+vid+"\n\n":"")+"Session on PonteTalk: "+url),
+    ...(vid?["LOCATION:"+txt(vid)]:[]), "URL:"+(vid||url),
     "BEGIN:VALARM","TRIGGER:-PT15M","ACTION:DISPLAY","DESCRIPTION:"+txt(s.title),"END:VALARM",
     "END:VEVENT","END:VCALENDAR"].join("\r\n");
 }
@@ -3383,6 +3708,7 @@ function nextCard(){
       <p style="margin:2px 0;font-weight:800;font-size:17px">${esc(s.title)}</p>
       <p class="note" style="margin:0">${t1}–${t2} · ${codesPair(s.language_a,s.language_b)} · ${taken} of ${s.seats} joined · ${role}</p></div>
     <div class="dbtns">
+      ${VL[s.activity_id] && s.my_status!=="offered" ? vBtn(s.activity_id, nowMs>=st-15*60000).replace("btn ","btn qbtn ").replace(" · Videoanruf","") : ""}
       ${roomNow ? `<button class="btn primary" onclick="bRoom('${s.activity_id}',${!!s.is_host})">🎮 ${s.is_host?"Open":"Enter"} game room</button>`
                 : `<button class="btn secondary qbtn" onclick="addToCal('${s.activity_id}')">${ICO.cal} Add to calendar</button>`}
       <button class="btn ${roomNow?"secondary":"primary"}" style="${roomNow?"":"background:var(--plum);box-shadow:none"}" onclick="bOpen()">${s.is_host?"Manage":"Details"}</button>
@@ -3649,6 +3975,7 @@ function nbChanges(d){
     if(c.field==="time") return day(c.from)===day(c.to) ? `${nbClock(c.from)} → ${nbClock(c.to)} (${day(c.to)})` : `${fmtWhen(c.from)} → ${fmtWhen(c.to)}`;
     if(c.field==="length") return `${c.from} → ${c.to} min`;
     if(c.field==="title") return `new title "${esc(c.to)}"`;
+    if(c.field==="video") return "new video call link 🎥";
     if(c.field==="languages") return `languages now ${(c.to||[]).filter(Boolean).map(k=>T[k]?T[k].nameEn:k).join(" ⇄ ")}`;
     return "";
   };
@@ -3668,7 +3995,7 @@ function nbOpen(){
       <button class="chip" aria-label="Close" onclick="document.getElementById('nbSheet').remove()">✕</button></div>
     <div id="nbTools" class="row" style="gap:16px;margin:0 0 6px">${nbTools()}</div>
     <div id="nbList">${nbItems()}</div>
-    <p class="note center" style="margin:10px 0 0"><button class="linkbtn" onclick="document.getElementById('nbSheet').remove();A.ret='home';go('account')">Notification settings · Einstellungen</button></p></div>`;
+    <p class="note center" style="margin:10px 0 0"><button class="linkbtn" onclick="document.getElementById('nbSheet').remove();A.ret='home';go('account');setTimeout(()=>{const e=document.getElementById('npc');if(e)e.scrollIntoView({behavior:'smooth',block:'start'})},80)">Notification settings · Einstellungen</button></p></div>`;
   box.addEventListener("click",e=>{ if(e.target===box) box.remove(); });
   document.body.appendChild(box);
   nbLoad();
@@ -3750,6 +4077,7 @@ VIEWS.privacy = function(){
     <p><b>Anmeldung per E-Mail-Code:</b> Den Code versenden wir über Resend, Inc. (USA). Dabei wird deine E-Mail-Adresse übermittelt. Resend ist unter dem EU-US Data Privacy Framework zertifiziert bzw. es gelten Standardvertragsklauseln.</p>
     <p><b>Anmeldung mit Google:</b> Wenn du „Weiter mit Google“ wählst, wirst du zu Google (Google Ireland Ltd. / Google LLC) weitergeleitet. Wir erhalten von Google deine E-Mail-Adresse und deinen Namen. Es gelten zusätzlich die Datenschutzhinweise von Google.</p>
     <p><b>Tandem-Profil (freiwillig):</b> Wenn du es ausfüllst, speichern wir deine Sprachen und Niveaus, die Zeiten, zu denen du meistens Zeit hast, deine Interessen, deine Zeitzone, optional deine Stadt und deine Bestätigung, mindestens 18 Jahre alt zu sein. Deine Sprachen sind für andere angemeldete Mitglieder sichtbar, damit passende Partner gefunden werden; Zeiten und Stadt bleiben privat und werden nur für Vorschläge genutzt. Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO. Du kannst die Angaben jederzeit ändern; sie werden mit deinem Konto gelöscht.</p>
+    <p><b>PonteShop:</b> Zum Herunterladen von Materialien brauchst du ein Konto. Wir speichern bei Supabase (Frankfurt, EU), welches Material du wann heruntergeladen hast. Zweck: zählen, welche Materialien genutzt werden, und dir die Datei bereitstellen (Art. 6 Abs. 1 lit. b und f DSGVO). Nur die Betreiberin sieht diese Zahlen.</p>
     <h3>6. Deine Rechte</h3>
     <p>Du hast das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch (Art. 15–21 DSGVO). Schreib uns dazu einfach an ${esc(LEGAL.email)}. Du kannst dich außerdem bei einer Datenschutz-Aufsichtsbehörde beschweren.</p>
     <h3>7. Alter</h3><p>Ein Konto darfst du ab 16 Jahren erstellen.</p>
@@ -3758,6 +4086,7 @@ VIEWS.privacy = function(){
     <p>You can play without an account; then everything stays on your device. No tracking, no analytics, no ads. We only count anonymously when a room is created or a game ends (game type, languages, levels, number of players), with no names, IP addresses or device IDs. Online games run through Supabase (Frankfurt, EU) and are not stored. If you create an account, we store your email, game name, language, level and the games you save, only so you can see your history. Only you can see them. Login codes are sent via Resend (USA); "Continue with Google" shares your email and name from Google. You can delete your account and all data anytime in the app. Questions or data requests: ${esc(LEGAL.email)}. Accounts are for ages 16+.</p>
     <p><b>Exchange profile (optional):</b> if you fill it in, we store your languages and levels, the times you're usually free, your interests, time zone, optionally your city, and your confirmation that you're 18+. Other signed-in members can see your languages so partners can be matched; your times and city stay private and are only used for suggestions. You can change it anytime, and it is deleted with your account.</p>
     <p><b>Email notifications:</b> if you join or host sessions, we email you (seat offers, approvals, reminders, cancellations) via Resend, Inc. (USA), sending your email address, name, time zone and session details. You can turn each type off in Profile → Notifications.</p>
+    <p><b>PonteShop:</b> downloading needs an account. We store which resource you downloaded and when (Supabase, Frankfurt, EU) to count how resources are used and to give you the file. Only the operator sees these numbers.</p>
   </div>
   ${legalLinks()}`;
 };
