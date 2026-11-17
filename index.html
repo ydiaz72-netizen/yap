@@ -2773,7 +2773,10 @@ const BERR = {
   too_early:"The game room opens 30 min before the start · Der Spielraum öffnet 30 Min. vor Beginn",
   not_open_yet:"The host hasn't opened the game room yet. Try again in a moment · Der Host hat den Raum noch nicht geöffnet",
   not_allowed:"Only people who joined this session can enter · Nur Teilnehmende können rein",
-  not_game:"This session isn't a game · Diese Session ist kein Spiel"
+  not_game:"This session isn't a game · Diese Session ist kein Spiel",
+  seats_below_joined:"You can't have fewer seats than people already in · Weniger Plätze als Teilnehmende geht nicht",
+  too_many_seats:"That's more seats than allowed · Zu viele Plätze",
+  not_future:"Pick a time in the future · Wähle eine Zeit in der Zukunft"
 };
 function bErr(e){
   const m=String((e&&e.message)||e||"");
@@ -2930,7 +2933,7 @@ function bCard(s){
     ${(s.topics||[]).length?`<div class="row" style="margin-top:8px">${s.topics.map(k=>{ const it=INTERESTS.find(x=>x[0]===k); return it?`<span class="feat">${it[1]} ${esc(it[2])}</span>`:""; }).join("")}</div>`:""}
     ${s.note?`<p class="note" style="margin:8px 0 0">💬 ${esc(s.note)}</p>`:""}
     ${act}
-    <div class="row" style="justify-content:center;margin-top:8px"><button class="chip" onclick="sShare('${id}')">🔗 ${s.is_host?"Share invite link":"Share"}</button></div>
+    <div class="row" style="justify-content:center;margin-top:8px">${s.is_host && !started ? `<button class="chip" onclick="hEdit('${id}')">✏️ Edit · Bearbeiten</button>` : ""}<button class="chip" onclick="sShare('${id}')">🔗 ${s.is_host?"Share invite link":"Share"}</button></div>
     ${s.is_host && !started ? `<p class="center" style="margin:10px 0 0"><button class="linkbtn dangertext" style="font-size:13px" onclick="bCancel('${id}')">Cancel session · Absagen</button></p>` : ""}
   </div>`;
 }
@@ -3016,6 +3019,7 @@ function hPad(n){ return String(n).padStart(2,"0"); }
 function hOpen(){
   if(!A.user){ A.ret="board"; A.err=""; A.msg="Sign in to host a session · Melde dich an, um eine Session anzubieten"; go("account"); return; }
   H.err=""; H.busy=false; H.checked=false;
+  if(H.editId){ H.editId=null; H.started=false; }
   if(!H.started){
     const d=new Date(Date.now()+86400000);
     Object.assign(H,{ type:"conversation", game:"speak", title:"", a:"", b:"", min:1, max:3,
@@ -3055,12 +3059,23 @@ function hDefaultTitle(){
   if(H.a && T[H.a]) return `${T[H.a].nameEn}${H.b&&T[H.b]?" ⇄ "+T[H.b].nameEn:""} chat`;
   return "e.g. Weekend plans";
 }
+function hEdit(id){
+  const s=(B.list||[]).concat(D.board||[]).find(x=>x.activity_id===id); if(!s) return;
+  const d=new Date(s.starts_at);
+  Object.assign(H,{ editId:id, editTaken:s.seats-s.seats_open, type:s.type, game:s.game||"speak", title:s.title, a:s.language_a, b:s.language_b||"",
+    min:s.level_min, max:s.level_max, date:`${d.getFullYear()}-${hPad(d.getMonth()+1)}-${hPad(d.getDate())}`,
+    time:`${hPad(d.getHours())}:${hPad(d.getMinutes())}`, dur:s.duration_min, seats:s.seats, mode:s.join_mode,
+    topics:(s.topics||[]).slice(), note:s.note||"", started:true, checked:true, adult:true, err:"", busy:false });
+  go("host");
+}
+function hCancelEdit(){ H.editId=null; H.started=false; bOpen(); }
 async function hPost(){
   H.err="";
   if(!H.a){ H.err="Pick the main language · Wähle die Hauptsprache"; xr(); return; }
   const start=new Date(`${H.date}T${H.time}`);
   if(isNaN(start.getTime())){ H.err="Check the date and time · Prüfe Datum und Uhrzeit"; xr(); return; }
-  if(start.getTime() <= Date.now()+5*60000){ H.err="Pick a time in the future · Wähle eine Zeit in der Zukunft"; xr(); return; }
+  if(start.getTime() <= Date.now()+(H.editId?60000:5*60000)){ H.err="Pick a time in the future · Wähle eine Zeit in der Zukunft"; xr(); return; }
+  if(H.editId && H.seats < (H.editTaken||0)){ H.err=BERR.seats_below_joined; xr(); return; }
   const title=((H.title||"").trim() || hDefaultTitle()).slice(0,80);
   if(title.length<3){ H.err="Add a short title · Gib einen kurzen Titel ein"; xr(); return; }
   H.busy=true; xr();
@@ -3069,6 +3084,14 @@ async function hPost(){
       note:(H.note||"").trim().slice(0,200)||null, language_a:H.a, language_b:H.b||null,
       level_min:Math.min(H.min,H.max), level_max:Math.max(H.min,H.max), seats:H.seats,
       starts_at:start.toISOString(), host_time_zone:detectTz(), duration_min:H.dur, join_mode:H.mode, topics:H.topics };
+    if(H.editId){
+      delete row.host_id;
+      const { error } = await A.sb.from("activities").update(row).eq("id",H.editId);
+      if(error) throw error;
+      H.editId=null; H.started=false; H.busy=false;
+      bToast("✅ Changes saved. People in the session are told about time changes · Gespeichert");
+      bOpen(); return;
+    }
     const { error } = await A.sb.from("activities").insert(row);
     if(error) throw error;
     H.started=false; H.busy=false;
@@ -3077,7 +3100,7 @@ async function hPost(){
   }catch(e){ H.busy=false; H.err=bErr(e); xr(); }
 }
 VIEWS.host = function(){
-  const top=`<div class="topline"><button class="chip" onclick="bOpen()">← Board</button><span>＋ Host a session</span></div>`;
+  const top=`<div class="topline"><button class="chip" onclick="${H.editId?"hCancelEdit()":"bOpen()"}">← Sessions</button><span>${H.editId?"✏️ Edit session":"＋ Host a session"}</span></div>`;
   if(!A.user) return `${top}<p class="note center" style="margin-top:40px">Please sign in first · Bitte zuerst anmelden</p>`;
   if(!H.checked) return `${top}<p class="note center" style="margin-top:40px">Loading… · Lädt…</p>`;
   if(!H.adult) return `${top}<div class="card center" style="margin-top:20px"><div style="font-size:40px">🪪</div>
@@ -3086,7 +3109,8 @@ VIEWS.host = function(){
       <button class="btn primary" onclick="xOpen()">🗣️ My exchange profile · Mein Tandem-Profil</button></div>`;
   const chip=(on,click,label)=>`<button class="chip ${on?"on":""}" aria-pressed="${on}" onclick="${click}">${label}</button>`;
   return `${top}
-  <h2>${bi("Host a session","Session anbieten")}</h2>
+  <h2>${H.editId?bi("Edit session","Session bearbeiten"):bi("Host a session","Session anbieten")}</h2>
+  ${H.editId&&H.editTaken?`<p class="note">${H.editTaken} ${H.editTaken===1?"person is":"people are"} already in. If you change the time, length, title or languages, they'll be told by email and in the app. · Teilnehmende werden bei Änderungen informiert.</p>`:""}
   <div class="card">
     <label class="lbl">Type · Art</label>
     <div class="row">${chip(H.type==="conversation","hSet('type','conversation')","💬 Free conversation")}${chip(H.type==="game","hSet('type','game')","🎲 PonteTalk game")}</div>
@@ -3115,7 +3139,7 @@ VIEWS.host = function(){
     <label class="lbl">Length · Dauer</label>
     <div class="row">${[30,45,60,90].map(m=>chip(H.dur===m,`hSet('dur',${m})`,m+" min")).join("")}</div>
     <label class="lbl">Seats (people besides you) · Plätze</label>
-    <div class="row">${[2,3,4,5,6].map(n=>chip(H.seats===n,`hSet('seats',${n})`,String(n))).join("")}</div>
+    <div class="row">${[2,3,4,5,6].map(n=>H.editId&&n<(H.editTaken||0)?`<button class="chip" disabled style="opacity:.35" title="${H.editTaken} already in">${n}</button>`:chip(H.seats===n,`hSet('seats',${n})`,String(n))).join("")}</div>
     <label class="lbl">Who can join · Wer kann teilnehmen</label>
     <div class="row">${chip(H.mode==="instant","hSet('mode','instant')","⚡ Anyone, instantly")}${chip(H.mode==="approval","hSet('mode','approval')","✋ I approve each person")}</div>
   </div>
@@ -3125,7 +3149,8 @@ VIEWS.host = function(){
     <label class="lbl" for="hnote">Note (optional) · Notiz (optional)</label>
     <input type="text" id="hnote" maxlength="200" placeholder="e.g. Beginners welcome! · Anfänger willkommen!" value="${esc(H.note)}" oninput="H.note=this.value">
     ${H.err?`<div class="err">${esc(H.err)}</div>`:""}
-    <button class="btn primary" onclick="hPost()" ${H.busy?"disabled":""}>${H.busy?"Posting… · Wird veröffentlicht…":"📣 Post session · Veröffentlichen"}</button>
+    <button class="btn primary" onclick="hPost()" ${H.busy?"disabled":""}>${H.busy?"Saving… · Speichert…":H.editId?"💾 Save changes · Speichern":"📣 Post session · Veröffentlichen"}</button>
+    ${H.editId?`<button class="btn ghost" onclick="hCancelEdit()">Cancel · Abbrechen</button>`:""}
   </div>`;
 };
 
@@ -3586,6 +3611,7 @@ function nbText(n){
     case "approved":     return d.waitlist_position ? `🕒 Approved for ${t}. You're #${d.waitlist_position} on the waitlist.` : `✅ You're in: ${t}.`;
     case "declined":     return `Your request for ${t} wasn't accepted this time.`;
     case "cancelled":    return `❌ ${t} was cancelled by the host.`;
+    case "changed":      return d.time_changed ? `📝 ${t} moved to a new time: ${n.starts_at?fmtWhen(n.starts_at):""}.` : `📝 The host updated ${t}.`;
     case "reminder_24h": return `⏰ Tomorrow: ${t}${n.starts_at?` at ${nbClock(n.starts_at)}`:""}.`;
     case "reminder_15m": return `⏰ ${t} starts in 15 minutes.`;
     default:             return `Update for ${t}.`;
