@@ -3034,6 +3034,8 @@ const BERR = {
 };
 function bErr(e){
   const m=String((e&&e.message)||e||"");
+  const tc=m.match(/time_clash:\s*(.+)/);
+  if(tc) return `⏰ You already have “${tc[1].trim()}” at this time. You can't be in two sessions at once. · Du hast zu dieser Zeit schon „${tc[1].trim()}“.`;
   for(const k in BERR) if(m.includes(k)) return BERR[k];
   if(/row-level security|violates row/i.test(m)) return "Not allowed. Check your exchange profile (18+) and pick a future time · Nicht erlaubt";
   const g=authErr(e);
