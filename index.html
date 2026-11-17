@@ -113,6 +113,21 @@
   #bnav button svg{width:22px;height:22px}
   #bnav{gap:2px;padding-left:6px;padding-right:6px}
   #bnav button{font-size:12px}
+  /* ---- Language cafés ---- */
+  .stabs{display:flex;gap:6px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:4px;margin:6px 0 14px}
+  .stabs button{flex:1;border:none;background:none;border-radius:10px;padding:10px 8px;font:800 14px 'Plus Jakarta Sans',Nunito,sans-serif;color:var(--muted);cursor:pointer}
+  .stabs button.on{background:var(--plum);color:#fff}
+  .cfgrid{display:grid;grid-template-columns:1fr;gap:12px;align-items:start}
+  @media (min-width:640px){ .cfgrid{grid-template-columns:1fr 1fr} }
+  @media (min-width:1100px){ body.xl .cfgrid{grid-template-columns:1fr 1fr 1fr} }
+  .cfcard{background:#fff;border:1px solid var(--line);border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+  .cfcard.off{opacity:.65;border-style:dashed}
+  .cfname{font-weight:800;font-size:17px;line-height:1.25}
+  .cfflags{display:flex;flex-wrap:wrap;gap:4px}
+  .cfflags span{background:var(--bg);border-radius:999px;padding:2px 8px;font-size:12px;font-weight:700;color:var(--muted)}
+  .cfcard a.btn{text-decoration:none;display:flex;align-items:center;justify-content:center;margin-top:4px;padding:11px 14px;font-size:15px}
+  .cfadm{background:var(--sun-soft);border-radius:16px;padding:12px 14px;margin-bottom:14px}
+  .cfsearch{margin:0 0 8px}
   /* ---- Reliability badges + attendance ---- */
   .rbg{display:inline-block;margin-left:6px;font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px;background:var(--sun-soft);color:#7A5200;vertical-align:middle;white-space:nowrap}
   .rbg.new{background:var(--teal-soft);color:#1F6B63}
@@ -2385,6 +2400,7 @@ function authReturn(){
   if(r==="results" && S.players.length && S.gid) go("results");
   else if(r==="lobby" && O.G) go("lobby");
   else if(r==="shop") shOpen();
+  else if(r==="cafes") cfOpen();
   else if(r==="board") bOpen();
   else if(r==="session" && S.sid) sOpen(S.sid);
   else if(r==="account") go("account");
@@ -2873,6 +2889,190 @@ function langsLine(arr){
 }
 
 
+
+/* ===================== LANGUAGE CAFÉS (directory of links) ===================== */
+const CF = { list:null, q:"", lang:"", online:false, admin:false, reports:{}, err:"", msg:"", f:null, busy:false };
+const CF_EXTRA = { fr:["🇫🇷","French"], it:["🇮🇹","Italian"], nl:["🇳🇱","Dutch"], ru:["🇷🇺","Russian"], tr:["🇹🇷","Turkish"],
+                   zh:["🇨🇳","Chinese"], ja:["🇯🇵","Japanese"], ko:["🇰🇷","Korean"], hi:["🇮🇳","Hindi"], multi:["🌍","Many languages"] };
+const CF_LANGS = LANG_KEYS.concat(Object.keys(CF_EXTRA));
+function cfLang(k){ return T[k] ? [T[k].flag, T[k].nameEn] : (CF_EXTRA[k] || ["🗣️", k]); }
+function cfNorm(x){ return String(x||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase(); }
+function sessTabs(which){
+  return `<div class="stabs" role="tablist">
+    <button role="tab" aria-selected="${which==="online"}" class="${which==="online"?"on":""}" onclick="bOpen()">💬 Online sessions</button>
+    <button role="tab" aria-selected="${which==="cafes"}" class="${which==="cafes"?"on":""}" onclick="cfOpen()">🗺️ Language cafés</button></div>`;
+}
+function cfOpen(){ CF.err=""; CF.msg=""; CF.f=null; go("cafes"); cfLoad(); }
+async function cfLoad(){
+  try{
+    const sb=authClient(); if(!sb) throw new Error("offline");
+    const r=await sb.from("cafes").select("*").order("country",{ascending:true}).order("city",{ascending:true}).order("name",{ascending:true});
+    if(r.error) throw r.error;
+    CF.list=r.data||[];
+    if(A.user){
+      const a=await sb.rpc("pt_is_admin").then(x=>x,()=>({data:false})); CF.admin=!!a.data;
+      if(CF.admin){ const rr=await sb.from("cafe_reports").select("cafe_id,reason"); CF.reports={}; (rr.data||[]).forEach(x=>{ (CF.reports[x.cafe_id]=CF.reports[x.cafe_id]||[]).push(x.reason); }); }
+    }
+  }catch(e){ CF.err=/fetch|offline/i.test(String(e&&e.message||e))?"No connection. Try again · Keine Verbindung":String((e&&e.message)||e); if(!CF.list) CF.list=[]; }
+  if(S.screen==="cafes") xr();
+}
+function cfShown(){
+  const q=cfNorm(CF.q).trim();
+  return (CF.list||[]).filter(c=>c.status==="approved")
+    .filter(c=>!q || cfNorm(`${c.name} ${c.city||""} ${c.country||""}`).includes(q))
+    .filter(c=>!CF.lang || (c.languages||[]).includes(CF.lang) || (c.languages||[]).includes("multi"))
+    .filter(c=>!CF.online || c.online);
+}
+function cfCard(c){
+  const rep=CF.reports[c.id]||[];
+  const where = c.online ? `🌐 Online${c.city?` · based in ${esc(c.city)}`:""}` : `📍 ${esc(c.city||"")}${c.country?`, ${esc(c.country)}`:""}`;
+  return `<div class="cfcard ${c.status!=="approved"?"off":""}">
+    <div class="cfname">${esc(c.name)}</div>
+    <div class="note" style="margin:0">${where}</div>
+    ${(c.languages||[]).length?`<div class="cfflags">${c.languages.map(k=>{ const l=cfLang(k); return `<span>${l[0]} ${esc(l[1])}</span>`; }).join("")}</div>`:""}
+    ${c.note?`<p class="note" style="margin:0">🗓️ ${esc(c.note)}</p>`:""}
+    <a class="btn secondary" href="${esc(c.url)}" target="_blank" rel="noopener nofollow ugc">Visit their page ↗</a>
+    ${CF.admin ? `<div class="row" style="margin:4px 0 0;gap:6px">
+        ${rep.length?`<span class="feat" style="background:#FBE3DF">🚩 ${rep.length} flag${rep.length>1?"s":""}: ${esc([...new Set(rep)].join(", "))}</span>`:""}
+        ${c.status!=="approved"?`<span class="feat">${c.status==="pending"?"⏳ Waiting":c.status==="hidden"?"🙈 Hidden":"✗ Rejected"}</span>`:""}
+      </div>
+      <div class="row" style="margin:4px 0 0;gap:6px">
+        ${c.status!=="approved"?`<button class="chip on" onclick="cfSet('${c.id}','approved')">✓ Approve</button>`:""}
+        ${c.status==="pending"?`<button class="chip" onclick="cfSet('${c.id}','rejected')">✗ Reject</button>`:""}
+        ${c.status==="approved"?`<button class="chip" onclick="cfSet('${c.id}','hidden')">🙈 Hide</button>`:""}
+        <button class="chip" onclick="cfEdit('${c.id}')">✏️ Edit</button>
+        ${rep.length?`<button class="chip" onclick="cfClear('${c.id}')">✓ Link is fine</button>`:""}
+        <button class="chip" onclick="cfDel('${c.id}')">🗑</button></div>`
+      : `<p class="center" style="margin:2px 0 0"><button class="linkbtn" style="font-size:12px" onclick="cfReport('${c.id}')">Link broken or café closed?</button></p>`}
+  </div>`;
+}
+function cfListHtml(){
+  if(CF.list===null) return `<p class="note center" style="margin-top:30px">Loading… · Lädt…</p>`;
+  const sh=cfShown();
+  if(!(CF.list||[]).some(c=>c.status==="approved")) return `<div class="card center"><div style="font-size:40px">☕</div>
+      <h3>First cafés coming soon · Bald die ersten Sprachcafés</h3>
+      <p class="note">Know a language café? Suggest it below and help others find it.<br><span class="de">Kennst du ein Sprachcafé? Schlag es vor!</span></p></div>`;
+  if(!sh.length) return `<div class="card center"><p class="note">No café found${CF.q?` for "${esc(CF.q)}"`:""} · Nichts gefunden</p>
+      <p class="note">Try another city, or practise online: <button class="linkbtn" onclick="bOpen()">see online sessions</button></p></div>`;
+  return `<p class="note" style="margin:0 0 8px">${sh.length} café${sh.length>1?"s":""}</p><div class="cfgrid">${sh.map(cfCard).join("")}</div>`;
+}
+function cfPaint(){ const el=document.getElementById("cflist"); if(el) el.innerHTML=cfListHtml(); }
+VIEWS.cafes = function(){
+  const chip=(on,click,label)=>`<button class="chip ${on?"on":""}" aria-pressed="${on}" onclick="${click}">${label}</button>`;
+  const used=CF_LANGS.filter(k=>k!=="multi" && (CF.list||[]).some(c=>c.status==="approved" && (c.languages||[]).includes(k)));
+  const pend=(CF.list||[]).filter(c=>c.status==="pending"), flagged=(CF.list||[]).filter(c=>(CF.reports[c.id]||[]).length);
+  const other=(CF.list||[]).filter(c=>c.status==="hidden"||c.status==="rejected");
+  return `<div class="topline"><button class="chip" onclick="goHome()">← Back</button><span>Language cafés</span></div>
+  <h2>${bi("Sessions","Sessions")}</h2>
+  ${sessTabs("cafes")}
+  <p class="sub" style="margin-top:0">Language cafés around the world, in person and online. Tap a café to see its own page with the latest dates.<br><span class="de">Sprachcafés weltweit. Aktuelle Termine findest du auf der Seite des Cafés.</span></p>
+  ${CF.msg?`<div class="card center" style="padding:10px;margin-bottom:10px;background:var(--teal-soft)">${esc(CF.msg)}</div>`:""}
+  ${CF.admin?`<div class="cfadm"><b>🛠 Admin</b> · ${pend.length} waiting · ${flagged.length} flagged
+      <button class="btn primary" style="margin-top:8px" onclick="cfNew()">＋ Add a café · Café hinzufügen</button>
+      ${pend.length?`<h4 style="margin:12px 0 6px">⏳ Waiting for approval</h4><div class="cfgrid">${pend.map(cfCard).join("")}</div>`:""}
+      ${flagged.filter(c=>c.status==="approved").length?`<h4 style="margin:12px 0 6px">🚩 Flagged links</h4><div class="cfgrid">${flagged.filter(c=>c.status==="approved").map(cfCard).join("")}</div>`:""}
+      ${other.length?`<details style="margin-top:10px"><summary class="note">Hidden / rejected (${other.length})</summary><div class="cfgrid" style="margin-top:8px">${other.map(cfCard).join("")}</div></details>`:""}
+    </div>`:""}
+  <input type="text" id="cfq" class="cfsearch" placeholder="🔍 City or café name · Stadt oder Name" value="${esc(CF.q)}" oninput="CF.q=this.value;cfPaint()" autocomplete="off">
+  <div class="shfl">${chip(!CF.lang&&!CF.online,"CF.lang='';CF.online=false;xr()","🌍 All")}${chip(CF.online,"CF.online=!CF.online;xr()","🌐 Online")}${used.map(k=>{ const l=cfLang(k); return chip(CF.lang===k,`CF.lang=CF.lang==='${k}'?'':'${k}';xr()`,`${l[0]} ${esc(l[1])}`); }).join("")}</div>
+  ${CF.err?`<div class="err">${esc(CF.err)}</div>`:""}
+  <div id="cflist">${cfListHtml()}</div>
+  <div class="card center" style="margin-top:16px"><h3 style="margin:0 0 4px">Know a language café? · Kennst du ein Sprachcafé?</h3>
+    <p class="note" style="margin:0 0 10px">Suggest it with a link to its page. We check it before it goes live.</p>
+    <button class="btn secondary" onclick="cfNew()">＋ Suggest a café · Café vorschlagen</button></div>
+  <p class="note center" style="margin-top:10px">We only link to each café's own page and aren't responsible for its content. · Wir verlinken nur auf die Seiten der Cafés.</p>
+  ${legalLinks()}`;
+};
+async function cfReport(id){
+  if(!A.user){ bToast("Sign in to flag a link · Zum Melden bitte anmelden"); return; }
+  try{ const { error } = await A.sb.rpc("pt_report_cafe",{ p_cafe:id, p_reason:"broken" }); if(error) throw error;
+    bToast("🙏 Thanks! We'll check it · Danke, wir prüfen das"); }catch(e){ bToast(bErr(e)); }
+}
+async function cfSet(id,status){
+  const { error } = await A.sb.from("cafes").update({ status }).eq("id",id);
+  if(error){ bToast(bErr(error)); return; }
+  CF.msg = status==="approved" ? "✓ Approved: it's live · Freigegeben" : status==="hidden" ? "🙈 Hidden · Versteckt" : "✗ Rejected · Abgelehnt"; cfLoad();
+}
+async function cfClear(id){
+  const { error } = await A.sb.from("cafe_reports").delete().eq("cafe_id",id);
+  if(error){ bToast(bErr(error)); return; }
+  CF.msg="✓ Flags cleared · Meldungen gelöscht"; cfLoad();
+}
+async function cfDel(id){
+  const c=(CF.list||[]).find(x=>x.id===id); if(!c) return;
+  if(!window.confirm(`Delete "${c.name}"? · Wirklich löschen?`)) return;
+  const { error } = await A.sb.from("cafes").delete().eq("id",id);
+  if(error){ bToast(bErr(error)); return; }
+  CF.msg="🗑 Deleted · Gelöscht"; cfLoad();
+}
+function cfNew(){
+  if(!A.user){ A.ret="cafes"; A.err=""; A.msg="Sign in to suggest a café · Melde dich an, um ein Café vorzuschlagen"; go("account"); return; }
+  CF.err=""; CF.msg=""; CF.f={ id:null, name:"", city:"", country:"", online:false, languages:[], url:"", note:"" }; go("cafeedit");
+}
+function cfEdit(id){
+  const c=(CF.list||[]).find(x=>x.id===id); if(!c) return;
+  CF.err=""; CF.msg=""; CF.f={ id:c.id, name:c.name, city:c.city||"", country:c.country||"", online:!!c.online, languages:(c.languages||[]).slice(), url:c.url, note:c.note||"" };
+  go("cafeedit");
+}
+function cfToggleLang(k){ const L=CF.f.languages, i=L.indexOf(k); if(i>=0) L.splice(i,1); else if(L.length<10) L.push(k); xr(); }
+VIEWS.cafeedit = function(){
+  const f=CF.f, top=`<div class="topline"><button class="chip" onclick="cfOpen()">← Language cafés</button><span>${f&&f.id?"✏️ Edit café":CF.admin?"＋ Add café":"＋ Suggest a café"}</span></div>`;
+  if(!f) return `${top}<p class="note center">–</p>`;
+  const chip=(on,click,label)=>`<button class="chip ${on?"on":""}" aria-pressed="${on}" onclick="${click}">${label}</button>`;
+  return `${top}
+  <h2>${f.id?bi("Edit café","Café bearbeiten"):CF.admin?bi("Add a café","Café hinzufügen"):bi("Suggest a café","Café vorschlagen")}</h2>
+  ${CF.admin?"":`<p class="sub">We check every suggestion before it goes live. · Wir prüfen jeden Vorschlag.</p>`}
+  <div class="card">
+    <label class="lbl" for="cfname">Name · Name</label>
+    <input type="text" id="cfname" maxlength="100" placeholder="e.g. Sprachcafé Erfurt" value="${esc(f.name)}" oninput="CF.f.name=this.value">
+    <label class="lbl" for="cfurl">Link to their page · Link zur Seite</label>
+    <input type="text" id="cfurl" inputmode="url" maxlength="500" placeholder="Website, Meetup, Instagram, Facebook…" value="${esc(f.url)}" oninput="CF.f.url=this.value">
+    <label class="lbl">Where · Wo</label>
+    <div class="row">${chip(!f.online,"CF.f.online=false;xr()","📍 In person")}${chip(f.online,"CF.f.online=true;xr()","🌐 Online")}</div>
+    <label class="lbl" for="cfcity">City${f.online?" (optional)":""} · Stadt</label>
+    <input type="text" id="cfcity" maxlength="80" placeholder="e.g. Erfurt" value="${esc(f.city)}" oninput="CF.f.city=this.value">
+    <label class="lbl" for="cfcountry">Country · Land</label>
+    <input type="text" id="cfcountry" maxlength="60" placeholder="e.g. Germany" value="${esc(f.country)}" oninput="CF.f.country=this.value">
+  </div>
+  <div class="card">
+    <label class="lbl">Languages · Sprachen</label>
+    <div class="row">${CF_LANGS.map(k=>{ const l=cfLang(k); return chip(f.languages.includes(k),`cfToggleLang('${k}')`,`${l[0]} ${esc(l[1])}`); }).join("")}</div>
+    <label class="lbl" for="cfnote">Short note (optional) · Kurze Notiz</label>
+    <input type="text" id="cfnote" maxlength="140" placeholder="e.g. Weekly, usually Thursday evenings" value="${esc(f.note)}" oninput="CF.f.note=this.value">
+    <p class="note">Keep it general. Their own page has the exact dates. · Genaue Termine stehen auf ihrer Seite.</p>
+  </div>
+  ${CF.err?`<div class="err">${esc(CF.err)}</div>`:""}
+  <button class="btn primary" ${CF.busy?"disabled":""} onclick="cfSave()">${CF.busy?"Saving… · Speichert…":f.id?"💾 Save · Speichern":CF.admin?"✓ Add and publish · Veröffentlichen":"📨 Send suggestion · Vorschlag senden"}</button>
+  <button class="btn ghost" onclick="cfOpen()">Cancel · Abbrechen</button>`;
+};
+const CF_ERR = { already_listed:"This café is already listed (or waiting for approval) · Schon eingetragen",
+  too_many_suggestions:"Thanks for all the suggestions! Please try again tomorrow · Bitte morgen wieder" };
+async function cfSave(){
+  const f=CF.f; if(!f || CF.busy) return;
+  const name=f.name.trim(), url=vClean(f.url), city=f.city.trim(), country=f.country.trim();
+  CF.err="";
+  if(name.length<2) CF.err="Please add the café's name · Bitte Namen eingeben";
+  else if(!vValid(url)) CF.err="Please paste the full link to their page (https://…) · Bitte vollständigen Link einfügen";
+  else if(!f.online && !city) CF.err="Please add the city · Bitte Stadt eingeben";
+  else if(!f.languages.length) CF.err="Pick at least one language · Mindestens eine Sprache wählen";
+  if(CF.err){ xr(); return; }
+  CF.busy=true; xr();
+  try{
+    const row={ name, url, city:city||null, country:country||null, online:!!f.online, languages:f.languages, note:f.note.trim()||null };
+    if(CF.admin){
+      const r = f.id ? await A.sb.from("cafes").update(row).eq("id",f.id)
+                     : await A.sb.from("cafes").insert(Object.assign({ status:"approved", submitted_by:A.user.id }, row));
+      if(r.error) throw r.error;
+      CF.msg = f.id ? "✓ Saved · Gespeichert" : "✓ Added and live · Veröffentlicht";
+    }else{
+      const { error } = await A.sb.rpc("pt_suggest_cafe",{ p_name:name, p_city:city, p_country:country, p_online:!!f.online, p_languages:f.languages, p_url:url, p_note:f.note.trim() });
+      if(error) throw error;
+      CF.msg="🙏 Thanks! Your suggestion is waiting for a quick check · Danke! Wir prüfen deinen Vorschlag.";
+    }
+    CF.busy=false; CF.f=null; go("cafes"); cfLoad();
+  }catch(e){ CF.busy=false; const m=String((e&&e.message)||e); const k=Object.keys(CF_ERR).find(x=>m.includes(x)); CF.err=k?CF_ERR[k]:bErr(e); xr(); }
+}
+
 /* ===================== RELIABILITY BADGES + ATTENDANCE ===================== */
 const RB = { reliable:["⭐","Reliable","Zuverlässig"], regular:["🔥","Regular","Stammgast"], new:["🌱","New","Neu"] };
 function relBadges(rel){
@@ -3172,7 +3372,8 @@ VIEWS.board = function(){
   const shown=(list||[]).filter(s=>!B.lang || s.language_a===B.lang || s.language_b===B.lang);
   return `${top}
   <h2>${bi("Sessions","Sessions")}</h2>
-  <p class="sub">${bi("Find a language exchange or game, or host your own.","Finde ein Sprachtreffen oder Spiel, oder biete selbst eins an.")}</p>
+  ${sessTabs("online")}
+  <p class="sub" style="margin-top:0">${bi("Find a language exchange or game, or host your own.","Finde ein Sprachtreffen oder Spiel, oder biete selbst eins an.")}</p>
   <button class="btn primary" onclick="hOpen()">＋ Host a session · Session anbieten</button>
   <div class="row" style="margin:14px 0 6px">${[["","🌍 All"]].concat(LANG_KEYS.map(k=>[k,`${T[k].flag} ${esc(T[k].nameEn)}`])).map(([k,l])=>`<button class="chip ${B.lang===k?"on":""}" aria-pressed="${B.lang===k}" onclick="B.lang='${k}';xr()">${l}</button>`).join("")}</div>
   <p class="note">🕒 Times are in your time zone (${esc(detectTz())}) · Zeiten in deiner Zeitzone</p>
@@ -3428,7 +3629,7 @@ VIEWS.host = function(){
         ${H.video?`<button class="chip" onclick="H.video='';xr()">✕ Remove link</button>`:""}
       </div>
       <p class="note" style="margin:8px 0 0">🔒 Only people who joined see the link. It's also in their reminder emails and calendar file. · Nur Teilnehmende sehen den Link.</p>
-      ${vProvider(H.video)==="jitsi"?`<p class="note" style="margin:6px 0 0">Jitsi is free and people join without an account. As the host, you may be asked to sign in (Google or GitHub) to start the room. · Jitsi ist kostenlos; als Host musst du dich evtl. kurz anmelden.</p>`:""}
+      ${vProvider(H.video)==="jitsi"?`<p class="note" style="margin:6px 0 0">Jitsi is free and people join without an account. As the host, you sign in once (Google or GitHub) to start the room. Free rooms last up to 95 minutes. · Jitsi ist kostenlos; als Host meldest du dich kurz an. Räume laufen bis zu 95 Minuten.</p>`:""}
     </div>
     ${H.err?`<div class="err">${esc(H.err)}</div>`:""}
     <button class="btn primary" onclick="hPost()" ${H.busy?"disabled":""}>${H.busy?"Saving… · Speichert…":H.editId?"💾 Save changes · Speichern":"📣 Post session · Veröffentlichen"}</button>
@@ -3548,7 +3749,8 @@ const NAV_ITEMS = [
   ["shop","Shop","Shop","shOpen()"],
   ["profile","Profile","Profil","A.ret='home';A.err='';A.msg='';go('account')"]
 ];
-NAV_TAB.shop="shop"; NAV_TAB.shopedit="shop";
+NAV_TAB.shop="shop"; NAV_TAB.shopedit="shop"; NAV_TAB.cafes="sessions"; NAV_TAB.cafeedit="sessions";
+WIDE.cafes="xl"; WIDE.cafeedit="md";
 WIDE.shop="xl"; WIDE.shopedit="md";
 ICO.shop='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>';
 function navSync(){
@@ -3556,7 +3758,9 @@ function navSync(){
   [...cl].filter(c=>c.startsWith("scr-")).forEach(c=>cl.remove(c));
   cl.add("scr-"+S.screen);
   cl.toggle("wide", !!w); cl.toggle("xl", w==="xl");
-  try{ if(S.screen!=="session" && /[?&]s=/.test(location.search)) history.replaceState(null,"",location.pathname); }catch(e){}
+  try{ if(S.screen!=="session" && /[?&]s=/.test(location.search)) history.replaceState(null,"",location.pathname);
+       if(S.screen==="cafes" && !/[?&]cafes/.test(location.search)) history.replaceState(null,"",location.pathname+"?cafes");
+       else if(S.screen!=="cafes" && /[?&]cafes/.test(location.search)) history.replaceState(null,"",location.pathname); }catch(e){}
   let n=document.getElementById("bnav"), t=document.getElementById("tnav");
   if(!tab){ if(n) n.remove(); if(t) t.remove(); cl.remove("has-nav"); return; }
   if(!n){ n=document.createElement("nav"); n.id="bnav"; n.setAttribute("aria-label","Main · Hauptmenü"); document.body.appendChild(n); }
@@ -4222,6 +4426,7 @@ VIEWS.privacy = function(){
     <p><b>Tandem-Profil (freiwillig):</b> Wenn du es ausfüllst, speichern wir deine Sprachen und Niveaus, die Zeiten, zu denen du meistens Zeit hast, deine Interessen, deine Zeitzone, optional deine Stadt und deine Bestätigung, mindestens 18 Jahre alt zu sein. Deine Sprachen sind für andere angemeldete Mitglieder sichtbar, damit passende Partner gefunden werden; Zeiten und Stadt bleiben privat und werden nur für Vorschläge genutzt. Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO. Du kannst die Angaben jederzeit ändern; sie werden mit deinem Konto gelöscht.</p>
     <p><b>Teilnahme &amp; Zuverlässigkeit:</b> Wenn du an Sessions teilnimmst, speichern wir, ob und wann du eingecheckt hast und ob du laut Host da, zu spät oder nicht da warst. Daraus berechnen wir deine Zuverlässigkeit (z. B. „92 % erscheint“, Abzeichen wie „Zuverlässig“). Andere angemeldete Mitglieder sehen diesen Wert und die Abzeichen. Zweck: verlässliche Treffen und Schutz vor No-Shows (Art. 6 Abs. 1 lit. b und f DSGVO).</p>
     <p><b>PonteShop:</b> Zum Herunterladen von Materialien brauchst du ein Konto. Wir speichern bei Supabase (Frankfurt, EU), welches Material du wann heruntergeladen hast. Zweck: zählen, welche Materialien genutzt werden, und dir die Datei bereitstellen (Art. 6 Abs. 1 lit. b und f DSGVO). Nur die Betreiberin sieht diese Zahlen.</p>
+    <p><b>Sprachcafés:</b> Wenn du ein Sprachcafé vorschlägst oder einen Link meldest, speichern wir deinen Vorschlag bzw. deine Meldung zusammen mit deinem Konto, damit wir sie prüfen können. Wir verlinken nur auf externe Seiten und sind für deren Inhalte nicht verantwortlich.</p>
     <h3>6. Deine Rechte</h3>
     <p>Du hast das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch (Art. 15–21 DSGVO). Schreib uns dazu einfach an ${esc(LEGAL.email)}. Du kannst dich außerdem bei einer Datenschutz-Aufsichtsbehörde beschweren.</p>
     <h3>7. Alter</h3><p>Ein Konto darfst du ab 16 Jahren erstellen.</p>
@@ -4263,6 +4468,7 @@ try{ const u=new URL(location.href); if(u.searchParams.get("auth")==="google" ||
 // supabase.js loads with 'defer', so it is ready only once the page has finished loading
 if(window.supabase) authInit(); else document.addEventListener("DOMContentLoaded", authInit);
 try{ const sid=new URLSearchParams(location.search).get("s"); if(sid && /^[0-9a-f-]{36}$/i.test(sid)){ S.sid=sid; S.screen="session"; document.addEventListener("DOMContentLoaded", ()=>bLoad()); } }catch(e){}
+try{ if(new URLSearchParams(location.search).has("cafes")){ S.screen="cafes"; document.addEventListener("DOMContentLoaded", ()=>cfLoad()); } }catch(e){}
 try{ if(new URLSearchParams(location.search).has("board")){ S.screen="board"; document.addEventListener("DOMContentLoaded", ()=>bLoad()); } }catch(e){}
 
 render();
