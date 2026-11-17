@@ -2875,7 +2875,9 @@ function bErr(e){
   const m=String((e&&e.message)||e||"");
   for(const k in BERR) if(m.includes(k)) return BERR[k];
   if(/row-level security|violates row/i.test(m)) return "Not allowed. Check your exchange profile (18+) and pick a future time · Nicht erlaubt";
-  return authErr(e);
+  const g=authErr(e);
+  // Unknown problem: show the database's own words too, so it can be fixed
+  return (g.startsWith("Something went wrong") && m) ? `${g} (${m.slice(0,160)})` : g;
 }
 function bToast(msg){
   const old=document.querySelector(".ptoast"); if(old) old.remove();
