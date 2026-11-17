@@ -2936,6 +2936,10 @@ function langsLine(arr){
 
 
 
+/* ===================== MY SESSIONS ===================== */
+function isMine(s){ return !!(s && (s.is_host || ["joined","offered","pending","waitlisted"].includes(s.my_status))); }
+function bOpenMine(){ B.mine=true; bOpen(); }
+
 /* ===================== SESSION VIEWS (cards · list · by day) ===================== */
 function bView(){ if(!B.view){ try{ B.view=localStorage.getItem("pt_bview"); }catch(e){} B.view=["cards","list","day"].includes(B.view)?B.view:"cards"; } return B.view; }
 function bSetView(v){ B.view=v; try{ localStorage.setItem("pt_bview",v); }catch(e){} xr(); }
@@ -3595,16 +3599,23 @@ function bCard(s){
 VIEWS.board = function(){
   const top=`<div class="topline"><button class="chip" onclick="goHome()">← Back</button><span>Sessions</span></div>`;
   const list=B.list;
-  const shown=(list||[]).filter(s=>s.visibility!=="private" || s.is_host || s.my_status).filter(s=>!B.lang || s.language_a===B.lang || s.language_b===B.lang);
+  const shown=(list||[]).filter(s=>s.visibility!=="private" || isMine(s)).filter(s=>!B.mine || isMine(s)).filter(s=>!B.lang || s.language_a===B.lang || s.language_b===B.lang);
   return `${top}
   <h2>${bi("Sessions","Sessions")}</h2>
   ${sessTabs("online")}
   <p class="sub" style="margin-top:0">${bi("Find a language exchange or game, or host your own.","Finde ein Sprachtreffen oder Spiel, oder biete selbst eins an.")}</p>
   <button class="btn primary" onclick="hOpen()">＋ Host a session · Session anbieten</button>
+  ${A.user?(()=>{ const n=(list||[]).filter(isMine).length;
+    return `<div class="vsw" role="group" aria-label="Which sessions" style="margin:14px 0 0;width:fit-content">
+      <button class="${!B.mine?"on":""}" aria-pressed="${!B.mine}" onclick="B.mine=false;xr()">All sessions</button>
+      <button class="${B.mine?"on":""}" aria-pressed="${!!B.mine}" onclick="B.mine=true;xr()">⭐ My sessions${n?` (${n})`:""}</button></div>`; })():""}
   <div class="row" style="margin:14px 0 6px">${[["","🌍 All"]].concat(LANG_KEYS.map(k=>[k,`${T[k].flag} ${esc(T[k].nameEn)}`])).map(([k,l])=>`<button class="chip ${B.lang===k?"on":""}" aria-pressed="${B.lang===k}" onclick="B.lang='${k}';xr()">${l}</button>`).join("")}</div>
   <div class="bbar"><p class="note">🕒 Times are in your time zone (${esc(detectTz())}) · Zeiten in deiner Zeitzone</p>${bViewSwitch()}</div>
   ${B.err?`<div class="err">${esc(B.err)}</div>`:""}
   ${list===null ? `<p class="note center" style="margin-top:30px">Loading… · Lädt…</p>`
+    : (!shown.length && B.mine) ? `<div class="card center"><div style="font-size:40px">⭐</div><h3>No sessions yet · Noch keine eigenen Sessions</h3>
+        <p class="note">Sessions you join or host show up here, private ones too.<br><span class="de">Hier erscheinen Sessions, an denen du teilnimmst oder die du leitest.</span></p>
+        <button class="btn secondary" onclick="B.mine=false;xr()">See all sessions · Alle Sessions</button></div>`
     : !shown.length ? `<div class="card center"><div style="font-size:40px">🌱</div><h3>No sessions yet · Noch keine Sessions</h3>
         <p class="note">Be the first! Host a session and others can join.<br><span class="de">Sei die/der Erste und biete eine Session an!</span></p>
         <button class="btn secondary" onclick="hOpen()">＋ Host a session · Session anbieten</button></div>`
@@ -4304,7 +4315,9 @@ function nextCard(){
                 : `<button class="btn secondary qbtn" onclick="addToCal('${s.activity_id}')">${ICO.cal} Add to calendar</button>`}
       <button class="btn ${roomNow?"secondary":"primary"}" style="${roomNow?"":"background:var(--plum);box-shadow:none"}" onclick="bOpen()">${s.is_host?"Manage":"Details"}</button>
     </div>
-    <button class="linkbtn" onclick="sShare('${s.activity_id}')">🔗 ${s.is_host?"Share invite link":"Share with a friend"}</button></div>`;
+    <button class="linkbtn" onclick="sShare('${s.activity_id}')">🔗 ${s.is_host?"Share invite link":"Share with a friend"}</button>
+    ${(()=>{ const n=(D.board||[]).filter(x=>x.is_host || ["joined","offered"].includes(x.my_status)).length;
+       return n>1 ? `<button class="linkbtn" style="margin-left:14px" onclick="bOpenMine()">⭐ All my sessions (${n})</button>` : ""; })()}</div>`;
 }
 function sCard(s){
   const g=s.type==="game"?GAMES_BOARD.find(x=>x[0]===s.game):null, full=s.seats_open<=0;
