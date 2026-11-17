@@ -2446,7 +2446,7 @@ function saveCardOnline(){
 const GAME_ICON = { speak:"🗣️", charades:"🎭", emoji:"😀" };
 const GAME_NAME = { speak:"Speak Up", charades:"Charades", emoji:"Emoji Charades" };
 function fmtDate(iso){ try{ const d=new Date(iso); return `${String(d.getDate()).padStart(2,"0")}.${String(d.getMonth()+1).padStart(2,"0")}.${d.getFullYear()}`; }catch(e){ return ""; } }
-function acctBack(){ const r=A.ret||"home"; A.ret="home"; A.editing=false; if(r==="results" && S.players.length && S.gid) go("results"); else if(r==="lobby" && O.G) go("lobby"); else if(r==="board") bOpen(); else go("home"); }
+function acctBack(){ const r=A.ret||"home"; A.ret="home"; A.editing=false; if(r==="results" && S.players.length && S.gid) go("results"); else if(r==="lobby" && O.G) go("lobby"); else if(r==="board") bOpen(); else if(r==="session") sOpen(S.sid); else go("home"); }
 
 function acctStats(gs){
   if(!gs.length) return `<p class="note center" style="margin:10px 0">No games yet. Finish a game and tap <b>Save</b> on the results screen!<br><span class="de">Noch keine Spiele gespeichert.</span></p>`;
@@ -2787,7 +2787,7 @@ async function bLoad(){
     if(error) throw error;
     B.list=data||[];
   }catch(e){ B.err=bErr(e); if(!B.list) B.list=[]; }
-  if(S.screen==="board") xr();
+  if(S.screen==="board" || S.screen==="session") xr();
 }
 function bOpen(){ B.err=""; B.open=null; go("board"); bLoad(); }
 
@@ -2900,6 +2900,7 @@ function bCard(s){
     ${(s.topics||[]).length?`<div class="row" style="margin-top:8px">${s.topics.map(k=>{ const it=INTERESTS.find(x=>x[0]===k); return it?`<span class="feat">${it[1]} ${esc(it[2])}</span>`:""; }).join("")}</div>`:""}
     ${s.note?`<p class="note" style="margin:8px 0 0">💬 ${esc(s.note)}</p>`:""}
     ${act}
+    <div class="row" style="justify-content:center;margin-top:8px"><button class="chip" onclick="sShare('${id}')">🔗 ${s.is_host?"Share invite link":"Share"}</button></div>
   </div>`;
 }
 VIEWS.board = function(){
@@ -3142,7 +3143,7 @@ function rCard(s){
     <button class="btn ${full?"secondary":"primary"}" onclick="rAct('pt_join_activity','${id}')" ${B.busy?"disabled":""}>${label}</button>
     <div class="row" style="justify-content:center;margin-top:8px">
       <button class="chip" onclick="rHide('${id}')">🙈 Not interested</button>
-      <button class="chip" aria-label="Share" onclick="rShare('${id}')">↗ Share</button>
+      <button class="chip" aria-label="Share" onclick="sShare('${id}')">🔗 Share</button>
     </div>
   </div>`;
 }
@@ -3164,8 +3165,8 @@ function homeRecs(){
 }
 
 /* ===================== BOTTOM BAR ===================== */
-const NAV_TAB = { home:"home", board:"sessions", host:"sessions", games:"games", account:"profile", xprofile:"profile" };
-const WIDE = { home:"xl", board:"xl", host:"md", account:"md", xprofile:"md", games:"md" };
+const NAV_TAB = { home:"home", board:"sessions", host:"sessions", session:"sessions", games:"games", account:"profile", xprofile:"profile" };
+const WIDE = { home:"xl", board:"xl", host:"md", session:"md", account:"md", xprofile:"md", games:"md" };
 const ICO = {
   home:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10l9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>',
   sessions:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>',
@@ -3187,6 +3188,7 @@ function navSync(){
   [...cl].filter(c=>c.startsWith("scr-")).forEach(c=>cl.remove(c));
   cl.add("scr-"+S.screen);
   cl.toggle("wide", !!w); cl.toggle("xl", w==="xl");
+  try{ if(S.screen!=="session" && /[?&]s=/.test(location.search)) history.replaceState(null,"",location.pathname); }catch(e){}
   let n=document.getElementById("bnav"), t=document.getElementById("tnav");
   if(!tab){ if(n) n.remove(); if(t) t.remove(); cl.remove("has-nav"); return; }
   if(!n){ n=document.createElement("nav"); n.id="bnav"; n.setAttribute("aria-label","Main · Hauptmenü"); document.body.appendChild(n); }
@@ -3277,7 +3279,8 @@ function nextCard(){
       ${roomNow ? `<button class="btn primary" onclick="bRoom('${s.activity_id}',${!!s.is_host})">🎮 ${s.is_host?"Open":"Enter"} game room</button>`
                 : `<button class="btn secondary qbtn" onclick="addToCal('${s.activity_id}')">${ICO.cal} Add to calendar</button>`}
       <button class="btn ${roomNow?"secondary":"primary"}" style="${roomNow?"":"background:var(--plum);box-shadow:none"}" onclick="bOpen()">${s.is_host?"Manage":"Details"}</button>
-    </div></div>`;
+    </div>
+    <button class="linkbtn" onclick="sShare('${s.activity_id}')">🔗 ${s.is_host?"Share invite link":"Share with a friend"}</button></div>`;
 }
 function sCard(s){
   const g=s.type==="game"?GAMES_BOARD.find(x=>x[0]===s.game):null, full=s.seats_open<=0;
@@ -3395,6 +3398,31 @@ VIEWS.home = function(){ return (A.user && A.status==="in") ? homeDash() : landi
 const _afterHome = AFTER.home;
 AFTER.home = function(){ if(_afterHome) _afterHome(); if(!A.user && !B.landOk && window.supabase){ B.landOk=true; bLoad().then(()=>{ if(S.screen==="home") xr(); }); } };
 
+/* ===================== SHARE A SESSION ===================== */
+function sLink(id){ return (location.protocol.startsWith("http") ? location.origin : "https://pontetalk.setzio.com") + "/?s=" + id; }
+async function sShare(id){
+  const s=(B.list||[]).concat(R.list||[], D.board||[]).find(x=>x.activity_id===id);
+  const url=sLink(id);
+  const text = s ? `${s.is_host?"Join my":"Join"} ${s.title} on PonteTalk · ${fmtWhen(s.starts_at)} (${detectTz().split("/").pop().replace(/_/g," ")} time)` : "Join this session on PonteTalk";
+  try{ if(navigator.share){ await navigator.share({ title:"PonteTalk", text, url }); return; } }catch(e){ if(e && e.name==="AbortError") return; }
+  try{ await navigator.clipboard.writeText(`${text}\n${url}`); bToast("🔗 Link copied. Paste it in WhatsApp, email… · Link kopiert"); }
+  catch(e){ window.prompt("Copy this link · Link kopieren:", url); }
+}
+function sOpen(id){ if(!id) return bOpen(); S.sid=id; go("session"); bLoad(); }
+VIEWS.session = function(){
+  const top=`<div class="topline"><button class="chip" onclick="bOpen()">← All sessions</button><span>Session</span></div>`;
+  if(B.list===null) return `${top}<p class="note center" style="margin-top:40px">Loading… · Lädt…</p>`;
+  const s=(B.list||[]).find(x=>x.activity_id===S.sid);
+  if(!s) return `${top}<div class="card center" style="margin-top:16px"><h3>This session isn't available anymore</h3>
+      <p class="note">It may have ended or been cancelled. · Die Session ist vorbei oder wurde abgesagt.</p>
+      <button class="btn primary" onclick="bOpen()">Find another session · Andere Session finden</button></div>`;
+  return `${top}
+    ${!A.user?`<p class="sub">You're invited to a PonteTalk session! Sign in (free) to join. · Du bist eingeladen!</p>`:""}
+    ${bCard(s).replace("A.ret='board'","A.ret='session'")}
+    <p class="center"><button class="linkbtn" onclick="bOpen()">See all sessions →</button></p>
+    ${legalLinks()}`;
+};
+
 /* ===================== GAMES ===================== */
 VIEWS.games = function(){
   return `<h2>${bi("Games","Spiele")}</h2>
@@ -3478,6 +3506,7 @@ function logOnlineFinished(){
 try{ const u=new URL(location.href); if(u.searchParams.get("auth")==="google" || u.searchParams.has("code")){ S.screen="account"; A.ret=sessionStorage.getItem("pt_ret")||"home"; sessionStorage.removeItem("pt_ret"); if(A.ret==="results"||A.ret==="lobby") A.ret="home"; } }catch(e){}
 // supabase.js loads with 'defer', so it is ready only once the page has finished loading
 if(window.supabase) authInit(); else document.addEventListener("DOMContentLoaded", authInit);
+try{ const sid=new URLSearchParams(location.search).get("s"); if(sid && /^[0-9a-f-]{36}$/i.test(sid)){ S.sid=sid; S.screen="session"; document.addEventListener("DOMContentLoaded", ()=>bLoad()); } }catch(e){}
 try{ if(new URLSearchParams(location.search).has("board")){ S.screen="board"; document.addEventListener("DOMContentLoaded", ()=>bLoad()); } }catch(e){}
 
 render();
