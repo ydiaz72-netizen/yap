@@ -2956,8 +2956,89 @@ function langsLine(arr){
 
 
 
+
+/* ===================== INVITES ===================== */
+const INV = { id:null, contacts:null, email:"", busy:false, err:"", done:{} };
+function invCard(){
+  const L=(D.board||[]).filter(x=>x.my_status==="invited"); if(!L.length) return "";
+  return `<div class="card" style="margin:0;border:2px solid var(--teal)"><h3 style="margin:0 0 4px">📩 You're invited · Einladungen</h3>
+    ${L.map(x=>`<div style="padding:8px 0;border-top:1px solid var(--line)">
+      <b>${x.visibility==="private"?"🔒 ":""}${esc(x.title)}</b><div class="note" style="margin:0">${fmtWhen(x.starts_at)} · from ${esc(x.host_name||"the host")}</div>
+      <div class="row" style="margin-top:6px"><button class="btn primary qbtn" style="width:auto;margin:0" onclick="rAct('pt_accept_invite','${x.activity_id}')">Accept · Annehmen</button>
+      <button class="btn ghost" style="width:auto;margin:0" onclick="rAct('pt_decline_invite','${x.activity_id}')">Decline</button>
+      <button class="linkbtn" onclick="sOpen('${x.activity_id}')">Details</button></div></div>`).join("")}</div>`;
+}
+const INV_ERR = {
+  no_account:"No PonteTalk account with that email. Send them your invite link instead (🔗 Share invite link) · Kein Konto mit dieser E-Mail",
+  not_contact:"You can only pick people you've been in a session with · Nur Personen aus früheren Sessions",
+  cannot_invite_self:"That's you 🙂 · Das bist du",
+  too_many_invites:"Max 20 open invites per session · Maximal 20 offene Einladungen",
+  kicked_user:"This person was removed from your sessions · Diese Person wurde entfernt",
+  not_open:"This session already started or was cancelled · Session läuft schon oder ist abgesagt"
+};
+function invErr(e){ const m=String((e&&e.message)||e); const k=Object.keys(INV_ERR).find(x=>m.includes(x)); return k?INV_ERR[k]:bErr(e); }
+async function invOpen(id){
+  INV.id=id; INV.err=""; INV.email=""; INV.busy=false; INV.done={};
+  invShow();
+  if(INV.contacts===null){
+    try{ const { data, error } = await A.sb.rpc("pt_my_contacts"); if(error) throw error; INV.contacts=data||[]; }
+    catch(e){ INV.contacts=[]; INV.err=invErr(e); }
+    invShow();
+  }
+}
+function invShow(){
+  let box=document.getElementById("invSheet");
+  if(!box){ box=document.createElement("div"); box.className="sheet-bg"; box.id="invSheet";
+    box.addEventListener("click",e=>{ if(e.target===box){ box.remove(); bLoad(); } }); document.body.appendChild(box); }
+  const s=(B.list||[]).concat(D.board||[]).find(x=>x.activity_id===INV.id)||{};
+  const ps=(B.people||{})[INV.id]||[];
+  const stOf=uid=>{ if(INV.done[uid]) return INV.done[uid]; const p=ps.find(x=>x.user_id===uid); return p?p.status:""; };
+  const lab={ invited:"✓ Invited", joined:"✓ In", pending:"✓ Asked to join", waitlisted:"✓ Waitlist", offered:"✓ Seat offered" };
+  const prevEmail=(document.getElementById("invEmail")||{}).value;
+  if(prevEmail!==undefined) INV.email=prevEmail;
+  box.innerHTML=`<div class="sheet" role="dialog" aria-label="Invite people">
+    <div class="nbhead"><h3 style="margin:0">📩 Invite people · Einladen</h3><button class="chip" aria-label="Close" onclick="document.getElementById('invSheet').remove();bLoad()">✕</button></div>
+    ${s.title?`<p class="note" style="margin:0 0 8px"><b>${esc(s.title)}</b>${s.starts_at?` · ${fmtWhen(s.starts_at)}`:""}</p>`:""}
+    <p class="note" style="margin:0 0 10px">They'll see it in their sessions with <b>Accept / Decline</b> and get an email. Accepting skips "I approve each person". · Sie bekommen eine E-Mail und können annehmen.</p>
+    <label class="lbl" for="invEmail">By email · Per E-Mail</label>
+    <div style="display:flex;gap:8px"><input type="text" id="invEmail" inputmode="email" autocomplete="off" placeholder="their email address" value="${esc(INV.email)}" style="flex:1;min-width:0" onkeydown="if(event.key==='Enter')invSend(null)">
+      <button class="btn primary" style="width:auto;margin:0;padding:0 16px" ${INV.busy?"disabled":""} onclick="invSend(null)">Invite</button></div>
+    <p class="note" style="margin:4px 0 0">They need a PonteTalk account with this email. · Sie brauchen ein Konto mit dieser E-Mail.</p>
+    ${INV.err?`<div class="err">${esc(INV.err)}</div>`:""}
+    <label class="lbl">People you've met · Bekannte aus Sessions</label>
+    ${INV.contacts===null?`<p class="note">Loading… · Lädt…</p>`
+      : !INV.contacts.length?`<p class="note">Nobody yet. After your first sessions, people you met show up here. · Noch niemand.</p>`
+      : INV.contacts.map(c=>{ const st=stOf(c.user_id);
+          return `<div class="prow" style="align-items:center">${c.avatar_url?`<img class="pav" src="${esc(c.avatar_url)}" alt="">`:`<span class="pav" aria-hidden="true">${esc((c.name||"?").charAt(0).toUpperCase())}</span>`}
+            <div style="flex:1;min-width:0"><b>${esc(c.name||"Member")}</b></div>
+            ${st && lab[st] ? `<span class="note" style="margin:0;font-weight:800;color:var(--teal)">${lab[st]}</span>`
+              : `<button class="chip" ${INV.busy?"disabled":""} onclick="invSend('${c.user_id}')">📩 Invite</button>`}</div>`; }).join("")}
+  </div>`;
+}
+async function invSend(uid){
+  if(INV.busy) return;
+  const email=uid?null:((document.getElementById("invEmail")||{}).value||"").trim();
+  if(!uid && !/^\S+@\S+\.\S+$/.test(email)){ INV.err="Please type a full email address · Bitte vollständige E-Mail"; invShow(); return; }
+  INV.busy=true; INV.err=""; invShow();
+  try{
+    const { data, error } = await A.sb.rpc("pt_invite",{ p_activity:INV.id, p_email:email, p_user:uid });
+    if(error) throw error;
+    const st=data&&data.status, nm=(data&&data.name)||"They";
+    if(uid) INV.done[uid]=st;
+    if(!uid){ const el=document.getElementById("invEmail"); if(el) el.value=""; INV.email=""; }
+    bToast(st==="invited" ? `📩 ${nm} is invited · eingeladen` : `${nm} is already in this session · schon dabei`);
+  }catch(e){ INV.err=invErr(e); }
+  INV.busy=false; invShow();
+}
+async function invCancel(aid, uid){
+  if(!window.confirm("Take back this invite? · Einladung zurücknehmen?")) return;
+  try{ const { error } = await A.sb.rpc("pt_cancel_invite",{ p_activity:aid, p_user:uid }); if(error) throw error; bToast("Invite taken back · Zurückgenommen"); }
+  catch(e){ bToast(bErr(e)); }
+  bLoad();
+}
+
 /* ===================== MY SESSIONS ===================== */
-function isMine(s){ return !!(s && (s.is_host || ["joined","offered","pending","waitlisted"].includes(s.my_status))); }
+function isMine(s){ return !!(s && (s.is_host || ["joined","offered","pending","waitlisted","invited"].includes(s.my_status))); }
 function bOpenMine(){ B.mine=true; bOpen(); }
 
 /* ===================== SESSION VIEWS (cards · list · by day) ===================== */
@@ -2971,6 +3052,7 @@ function bStatus(s){
   if(s.is_host) return ["⭐ Hosting","ok"];
   if(s.my_status==="joined") return ["✅ You're in","ok"];
   if(s.my_status==="offered") return ["🎉 Seat for you","ok"];
+  if(s.my_status==="invited") return ["📩 Invited","ok"];
   if(s.my_status==="pending") return ["⏳ Requested",""];
   if(s.my_status==="waitlisted") return [`🕒 #${s.my_position||"?"}`,""];
   return s.seats_open>0 ? [`${s.seats_open} left`,""] : ["Full","full"];
@@ -3502,6 +3584,7 @@ async function bAct(fn,id){
     bToast( st==="joined" ? `✅ You're in${sideTxt}! · Du bist dabei!`
           : st==="pending" ? "⏳ Request sent. The host will reply · Anfrage gesendet"
           : st==="waitlisted" ? `🕒 You're #${data.position} on the waitlist${sideTxt} · Platz ${data.position} auf der Warteliste`
+          : st==="declined_invite" ? "Invite declined · Einladung abgelehnt"
           : st==="expired" ? "Sorry, the offer ran out · Das Angebot ist abgelaufen"
           : st==="cancelled" ? (data.late ? "Done. Leaving less than 2h before start counts as a late cancel · Spät abgesagt" : "Done · Erledigt")
           : "Done · Erledigt");
@@ -3580,6 +3663,7 @@ function bCard(s){
           : roomSoon ? `<p class="note" style="margin:8px 0 0">🎮 You can open the game room 30 min before the start. · Spielraum ab 30 Min. vorher.</p>` : "");
     act+=`<div class="row" style="margin-top:6px"><span class="feat">⭐ You're hosting · Du leitest</span>${s.pending?`<span class="feat" style="background:#FFF1C2">🔔 ${s.pending} request${s.pending>1?"s":""}</span>`:""}</div>
       ${hostList(s)}
+      ${!started?`<button class="btn secondary" onclick="invOpen('${id}')">📩 Invite people · Einladen</button>`:""}
       ${started?`<button class="btn secondary" onclick="attOpen('${id}')">📋 Who came? · Wer war da?</button>`:""}
 `;
   } else if(!A.user){
@@ -3587,6 +3671,10 @@ function bCard(s){
   } else switch(s.my_status){
     case "joined":
       act=`<p class="okmsg">✅ You're in! · Du bist dabei!</p>${roomWindow?`<button class="btn primary" onclick="bRoom('${id}',false)">🎮 Enter game room · Zum Spielraum</button>`:roomSoon?`<p class="note" style="margin:4px 0 0">🎮 The game room opens 30 min before the start. · Spielraum öffnet 30 Min. vorher.</p>`:""}${started?"":`<button class="btn ghost" onclick="bAct('pt_leave_activity','${id}')">Leave · Absagen</button>`}`; break;
+    case "invited":
+      act=`<p class="okmsg">📩 ${esc(s.host_name||"The host")} invited you! · Du bist eingeladen!</p>
+        <div class="brow2"><button class="btn primary" onclick="bAct('pt_accept_invite','${id}')" ${B.busy?"disabled":""}>Accept · Annehmen</button>
+        <button class="btn ghost" onclick="bAct('pt_decline_invite','${id}')">Decline · Ablehnen</button></div>`; break;
     case "pending":
       act=`<p class="note">⏳ Request sent. The host will reply. · Anfrage gesendet.</p><button class="btn ghost" onclick="bAct('pt_leave_activity','${id}')">Withdraw · Zurückziehen</button>`; break;
     case "waitlisted":
@@ -3693,7 +3781,7 @@ function hostList(s){
   const ps=B.people[s.activity_id];
   const taken=s.seats-s.seats_open;
   if(!ps) return `<div class="plist"><h4>Who's coming · ${taken} of ${s.seats}</h4><p class="note" style="margin:0">Loading… · Lädt…</p></div>`;
-  const pend=ps.filter(p=>p.status==="pending"), inn=ps.filter(p=>p.status==="joined"||p.status==="offered"), wait=ps.filter(p=>p.status==="waitlisted");
+  const pend=ps.filter(p=>p.status==="pending"), inn=ps.filter(p=>p.status==="joined"||p.status==="offered"), wait=ps.filter(p=>p.status==="waitlisted"), inv=ps.filter(p=>p.status==="invited");
   const row=(p,extra,cls)=>`<div class="prow ${cls||""}">${avSpan(p.user_id,p.name)}
       <div style="flex:1;min-width:0"><b>${esc(p.name||"Member")}</b>${relBadges(p.reliability)}${s.balanced&&p.side?`<span class="sidetag">${(()=>{ const l=p.side==="a"?s.language_a:s.language_b; return T[l]?`${T[l].flag} ${esc(T[l].nameEn)} side`:""; })()}</span>`:""}${p.reliability&&p.reliability.percent!=null?` <span class="pl">· ${p.reliability.percent}% shows up</span>`:""}
       <div class="pl">${speaksLearns(p.languages)}</div>${extra||""}</div></div>`;
@@ -3703,6 +3791,7 @@ function hostList(s){
         <button class="chip" onclick="bRespond('${s.activity_id}','${p.user_id}',false)">✕ Decline · Ablehnen</button></div>`,"pend")).join("")}`:""}
     <h4 style="${pend.length?"margin-top:10px":""}">Who's coming · ${taken} of ${s.seats}</h4>
     ${inn.length?inn.map(p=>row(p,p.status==="offered"?`<div class="pl">🎁 Seat offered, waiting for reply</div>`:"")).join(""):`<p class="note" style="margin:0">Nobody yet. Share your invite link! · Noch niemand. Teile deinen Link!</p>`}
+    ${inv.length?`<h4 style="margin-top:10px">📩 Invited, not answered yet · ${inv.length}</h4>${inv.map(p=>row(p,`<div class="row" style="margin-top:4px"><button class="chip" style="font-size:12px;padding:4px 10px" onclick="invCancel('${s.activity_id}','${p.user_id}')">✕ Take back invite</button></div>`)).join("")}`:""}
     ${wait.length?`<h4 style="margin-top:10px">🕒 Waitlist · ${wait.length}</h4>${wait.map(p=>row(p,`<div class="pl">#${p.wait_position||"?"}</div>`)).join("")}`:""}
   </div>`;
 }
@@ -4410,6 +4499,7 @@ function homeDash(){
       <div class="card" style="margin:0"><div class="dhead"><h1 class="dhi">Hi ${esc(name)}</h1>${bellBtn()}</div>
         <p class="sub" style="margin:2px 0 14px">Here's what's next for you. · Das steht als Nächstes an.</p>${nextCard()}</div>
       ${acCard()}
+      ${invCard()}
       <div><div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px">
         <h2 style="margin:0;font-size:20px">Suggested for you · Für dich</h2>
         ${(R.mine||[]).length?`<span class="note" style="margin:0;font-size:14px">${speak.length?`I speak <b>${esc(speak.join(", "))}</b> · `:""}${learn.length?`I practise <b>${esc(learn.join(", "))}</b> · `:""}<button class="linkbtn" onclick="xOpen()">Change</button></span>`:""}
@@ -4588,6 +4678,7 @@ function nbText(n){
   switch(n.kind){
     case "seat_offer":   return `🎉 A seat is free for you in ${t}.${d.expires_at?` Accept by ${nbClock(d.expires_at)}.`:""}`;
     case "join_request": return `🔔 ${who} wants to join ${t}. Tap to approve or decline.`;
+    case "invited":      return `📩 ${who} invited you to ${t}. Tap to accept or decline.`;
     case "new_joiner":   return `👋 ${who} joined ${t}.`;
     case "approved":     return d.waitlist_position ? `🕒 Approved for ${t}. You're #${d.waitlist_position} on the waitlist.` : `✅ You're in: ${t}.`;
     case "declined":     return `Your request for ${t} wasn't accepted this time.`;
