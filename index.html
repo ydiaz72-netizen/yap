@@ -4161,7 +4161,7 @@ function bCard(s){
       else {
         const full=s.seats_open<=0;
         const label = full ? `Join waitlist${s.waitlisted?` · you'd be #${s.waitlisted+1}`:""} · Warteliste`
-                    : s.join_mode==="approval" ? "✋ Request to join · Anfragen" : "Join · Teilnehmen";
+                    : s.join_mode==="approval" ? "✋ Request a seat · Anfragen" : "✍️ Sign up · Anmelden";
         act=`<button class="btn ${full?"secondary":"primary"}" onclick="bAct('pt_join_activity','${id}')" ${B.busy?"disabled":""}>${label}</button>`;
       }
   }
@@ -4576,7 +4576,7 @@ function rCard(s){
   const id=s.activity_id, g=s.type==="game"?GAMES_BOARD.find(x=>x[0]===s.game):null;
   const hostT=fmtHostTime(s.starts_at, s.host_time_zone), q=rPrompt(s);
   const full=s.seats_open<=0;
-  const label = full ? `Join waitlist${s.waitlisted?` · #${s.waitlisted+1}`:""}` : s.join_mode==="approval" ? "✋ Request to join · Anfragen" : "Join session · Teilnehmen";
+  const label = full ? `Join waitlist${s.waitlisted?` · #${s.waitlisted+1}`:""}` : s.join_mode==="approval" ? "✋ Request a seat · Anfragen" : "✍️ Sign up · Anmelden";
   return `<div class="card rcard ${s.perfect_match?"perfect":""}">
     <div class="btop"><span class="rbadge">${s.perfect_match?"⭐ Perfect match":"👍 Good match"}</span><span class="note" style="margin:0;font-weight:800">${full?"Full":`${s.seats_open} of ${s.seats} open`}</span></div>
     <div class="btitle">${g?`${g[1]} `:""}${esc(s.title)}</div>
@@ -5175,7 +5175,7 @@ function sCard(s){
   const g=s.type==="game"?GAMES_BOARD.find(x=>x[0]===s.game):null, full=s.seats_open<=0;
   const why=(s.reasons||[])[0]||"";
   const short = why.startsWith("You each teach") ? "You teach each other" : why.replace(/^Fits your /,"Fits your ");
-  const btn = full ? `Join waitlist` : s.join_mode==="approval" ? "Request" : "Join";
+  const btn = full ? `Join waitlist` : s.join_mode==="approval" ? "Request" : "Sign up";
   return `<div class="scard ${s.perfect_match?"perfect":""}">
     <span class="stag ${g&&!s.perfect_match?"game":""}">${s.perfect_match?"Perfect match":g?"Game":"Conversation"}</span>
     <p class="scodes">${codesPair(s.language_a,s.language_b)}</p>
