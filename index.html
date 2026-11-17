@@ -2497,6 +2497,7 @@ function authReturn(){
   else if(r==="shop") shOpen();
   else if(r==="cafes") cfOpen();
   else if(r==="reports") raOpen();
+  else if(r==="shopitem" && SH.oneId){ go("shopitem"); shOneLoad(SH.oneId); }
   else if(r==="board") bOpen();
   else if(r==="session" && S.sid) sOpen(S.sid);
   else if(r==="account") go("account");
@@ -4532,7 +4533,7 @@ const NAV_ITEMS = [
   ["shop","Shop","Shop","shOpen()"],
   ["profile","Profile","Profil","A.ret='home';A.err='';A.msg='';go('account')"]
 ];
-NAV_TAB.shop="shop"; NAV_TAB.shopedit="shop"; NAV_TAB.cafes="sessions"; NAV_TAB.cafeedit="sessions"; NAV_TAB.chat="sessions"; WIDE.chat="md"; NAV_TAB.reports="profile"; WIDE.reports="md";
+NAV_TAB.shop="shop"; NAV_TAB.shopedit="shop"; NAV_TAB.shopitem="shop"; WIDE.shopitem="md"; NAV_TAB.cafes="sessions"; NAV_TAB.cafeedit="sessions"; NAV_TAB.chat="sessions"; WIDE.chat="md"; NAV_TAB.reports="profile"; WIDE.reports="md";
 WIDE.cafes="xl"; WIDE.cafeedit="md";
 WIDE.shop="xl"; WIDE.shopedit="md";
 ICO.shop='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>';
@@ -4574,6 +4575,9 @@ function shFCount(){ return Object.values(SH.fl).reduce((n,a)=>n+a.length,0); }
 function shClear(){ Object.keys(SH.fl).forEach(k=>SH.fl[k]=[]); SH.q=""; xr(); }
 function shMatch(it){
   const F=SH.fl, q=cfNorm(SH.q).trim();
+  if(SH.mineOnly && !it.is_owner) return false;
+  if(!SH.mineOnly && SH.admin && it.approval==="pending" && !it.is_owner) return false;
+  if(!SH.mineOnly && it.visibility==="unlisted") return false;
   if(F.lang.length && it.language && !F.lang.includes(it.language)) return false;
   if(F.base.length && !F.base.includes(it.base_language||"en")) return false;
   if(F.topic.length && !(it.topics||[]).some(t=>F.topic.includes(t))) return false;
@@ -4595,6 +4599,8 @@ function shKind(k){ return SH_KINDS.find(x=>x[0]===k) || SH_KINDS[5]; }
 function shSize(b){ if(!b) return ""; return b<1024*1024 ? Math.max(1,Math.round(b/1024))+" KB" : (b/1048576).toFixed(1).replace(/\.0$/,"")+" MB"; }
 function shErr(e){
   const m=String((e&&e.message)||e||"");
+  if(/adult_required/.test(m)) return "Please confirm you're 18+ in your exchange profile first · Bitte zuerst 18+ bestätigen";
+  if(/too_many_resources/.test(m)) return "You've shared 50 resources. Please delete some first · Maximal 50";
   if(/sign in/i.test(m)) return "Please sign in to download · Bitte anmelden";
   if(/not found/i.test(m)) return "This resource isn't available any more · Nicht mehr verfügbar";
   if(/row-level security|violates row|Unauthorized|403/i.test(m)) return "Only admins can do this · Nur für Admins";
@@ -4603,6 +4609,21 @@ function shErr(e){
   return m || "Something went wrong · Etwas ist schiefgelaufen";
 }
 function shOpen(){ SH.err=""; SH.msg=""; SH.f=null; go("shop"); shLoad(); }
+async function shOneLoad(id){
+  try{ const sb=authClient(); const { data, error } = await sb.rpc("pt_shop_item",{ p_id:id }); if(error) throw error; SH.one=(data&&data[0])||false; }
+  catch(e){ SH.one=false; }
+  if(A.user){ try{ const a=await A.sb.rpc("pt_is_admin"); SH.admin=!!a.data; }catch(e){} }
+  if(S.screen==="shopitem") xr();
+}
+VIEWS.shopitem = function(){
+  const top=`<div class="topline"><button class="chip" onclick="shOpen()">← PonteShop</button><span>Resource</span></div>`;
+  if(SH.one===undefined || SH.one===null) return `${top}<p class="note center" style="margin-top:40px">Loading… · Lädt…</p>`;
+  if(!SH.one) return `${top}<div class="card center"><div style="font-size:40px">🔍</div><h3>This resource isn't available · Nicht verfügbar</h3>
+    <p class="note">It may have been hidden or deleted. · Vielleicht versteckt oder gelöscht.</p><button class="btn secondary" onclick="shOpen()">See all resources · Alle Materialien</button></div>`;
+  return `${top}${!A.user?`<p class="sub">Someone shared a free resource with you. Sign in (free) to open it. · Jemand hat Material mit dir geteilt.</p>`:""}
+    <div class="shgrid" style="grid-template-columns:1fr">${shCard(SH.one)}</div>
+    <p class="center" style="margin-top:12px"><button class="linkbtn" onclick="shOpen()">See all free resources →</button></p>${legalLinks()}`;
+};
 async function shLoad(){
   SH.err="";
   try{
@@ -4622,12 +4643,16 @@ function shCard(it){
   const lvl = it.level==null ? "All levels · Alle Niveaus" : RANKS[it.level];
   const busy = SH.busy===it.id;
   const act = !A.user
-    ? `<button class="btn secondary" onclick="A.ret='shop';A.err='';A.msg='Sign in to download free resources · Melde dich an, um kostenlose Materialien zu laden';go('account')">Sign in to download</button>`
-    : `<button class="btn primary" ${busy?"disabled":""} onclick="shGet('${it.id}')">${busy?"Preparing… · Lädt…":(it.mine?"⬇ Download again":"⬇ Download")}</button>`;
-  const admin = SH.admin ? `
-    <div class="shstats">⬇ ${it.downloads||0} download${it.downloads==1?"":"s"} · 👤 ${it.people||0} ${it.people==1?"person":"people"}${it.published?"":" · 🙈 hidden"}</div>
+    ? `<button class="btn secondary" onclick="A.ret=S.screen==='shopitem'?'shopitem':'shop';A.err='';A.msg='Sign in to open free resources · Melde dich an, um kostenlose Materialien zu öffnen';go('account')">Sign in to ${it.has_link?"open":"download"}</button>`
+    : `<button class="btn primary" ${busy?"disabled":""} onclick="shGet('${it.id}')">${busy?"Preparing… · Lädt…":it.has_link?"↗ Open · Öffnen":(it.mine?"⬇ Download again":"⬇ Download")}</button>`;
+  const manage = SH.admin || it.is_owner;
+  const admin = manage ? `
+    ${shStatus(it)}
+    <div class="shstats">${it.has_link?"↗ opened":"⬇"} ${it.downloads||0}× · 👤 ${it.people||0} ${it.people==1?"person":"people"}${it.published?"":" · 🙈 hidden"}${SH.admin&&!it.is_owner&&it.owner_name?` · by ${esc(it.owner_name)}`:""}</div>
+    ${SH.admin&&it.approval==="pending"?`<div class="shadm"><button class="chip on" onclick="shReview('${it.id}',true)">✓ Approve for the Shop</button><button class="chip" onclick="shReview('${it.id}',false)">✗ Reject</button></div>`:""}
     <div class="shadm">
       <button class="chip" onclick="shEdit('${it.id}')">✏️ Edit</button>
+      <button class="chip" onclick="shShare('${it.id}')">🔗 Share link</button>
       <button class="chip" onclick="shToggle('${it.id}',${!it.published})">${it.published?"🙈 Hide":"👁 Show"}</button>
       <button class="chip" onclick="shDel('${it.id}')">🗑 Delete</button>
     </div>` : "";
@@ -4641,7 +4666,7 @@ function shCard(it){
       </div>
     </div>
     ${it.description?`<p class="shdesc">${esc(it.description)}</p>`:""}
-    <p class="note" style="margin:0">📄 ${esc(it.file_name||"")}${it.file_size?` · ${shSize(it.file_size)}`:""}${it.mine&&A.user?" · ✓ You have this":""}</p>
+    <p class="note" style="margin:0">${it.has_link?"🔗 Link (opens in a new tab)":`📄 ${esc(it.file_name||"")}${it.file_size?` · ${shSize(it.file_size)}`:""}`}${it.mine&&A.user?" · ✓ You have this":""}</p>
     ${act}${admin}
   </div>`;
 }
@@ -4649,12 +4674,12 @@ function shCard(it){
 function shRow(it){
   const k=shKind(it.kind), t=T[it.language], b=T[it.base_language], busy=SH.busy===it.id;
   const btn = !A.user ? `<button class="btn secondary" onclick="A.ret='shop';A.err='';A.msg='';go('account')">Sign in</button>`
-    : `<button class="btn primary" ${busy?"disabled":""} onclick="shGet('${it.id}')">${busy?"…":"⬇"}<span class="hidesm"> Download</span></button>`;
+    : `<button class="btn primary" ${busy?"disabled":""} onclick="shGet('${it.id}')">${busy?"…":it.has_link?"↗":"⬇"}<span class="hidesm"> ${it.has_link?"Open":"Download"}</span></button>`;
   return `<div class="shrow ${it.published?"":"off"}">
     <div class="shico" style="${t?`background:${t.color}1F`:""}">${k[1]}</div>
     <div style="flex:1;min-width:0"><div class="rt">${esc(it.title)}</div>
       <div class="note" style="margin:2px 0 0">${t?`${t.flag} ${esc(t.nameEn)}`:"🌍 Any"} · ${it.level==null?"All levels":RANKS[it.level]} · ${esc(k[2])}${b?` · 📖 in ${esc(b.nameEn)}`:""}${SH.admin?` · ⬇ ${it.downloads||0}`:""}${it.mine&&A.user?" · ✓":""}</div></div>
-    ${SH.admin?`<button class="chip" style="flex:none" onclick="shEdit('${it.id}')" aria-label="Edit">✏️</button>`:""}${btn}</div>`;
+    ${SH.admin||it.is_owner?`<button class="chip" style="flex:none" onclick="shEdit('${it.id}')" aria-label="Edit">✏️</button>`:""}${btn}</div>`;
 }
 function shListHtml(){
   const list=SH.list;
@@ -4685,7 +4710,12 @@ VIEWS.shop = function(){
     <h2>PonteShop <span class="shfree">Free</span></h2>
     <p>Free worksheets, flashcards and guides to practise between sessions.<br><span class="de">Kostenlose Materialien zum Üben zwischen den Sessions.</span></p>
   </div>
-  ${SH.admin?`<button class="btn primary" style="margin-bottom:12px" onclick="shNew()">＋ Add resource · Material hinzufügen</button>`:""}
+  ${A.user?`<button class="btn ${SH.admin?"primary":"secondary"}" style="margin-bottom:12px" onclick="shNew()">＋ ${SH.admin?"Add resource · Material hinzufügen":"Share a resource · Material teilen"}</button>`:""}
+  ${(()=>{ const L=SH.list||[], mineN=L.filter(x=>x.is_owner).length, pend=L.filter(x=>x.approval==="pending");
+     return (mineN?`<div class="vsw" role="group" aria-label="Which resources" style="margin:0 0 12px;width:fit-content">
+        <button class="${!SH.mineOnly?"on":""}" onclick="SH.mineOnly=false;xr()">All resources</button>
+        <button class="${SH.mineOnly?"on":""}" onclick="SH.mineOnly=true;xr()">📂 My resources (${mineN})</button></div>`:"")
+      + (SH.admin&&pend.length&&!SH.mineOnly?`<div class="cfadm"><b>⏳ Waiting for your approval · ${pend.length}</b><p class="note" style="margin:2px 0 8px">Shared by hosts for the public Shop.</p><div class="shgrid">${pend.map(shCard).join("")}</div></div>`:""); })()}
   ${SH.msg?`<div class="card center" style="padding:10px;margin-bottom:10px;background:var(--teal-soft)">${esc(SH.msg)}</div>`:""}
   ${list.length?`
   <div class="shftop">
@@ -4706,32 +4736,67 @@ VIEWS.shop = function(){
   <p class="note center" style="margin-top:16px">Ideas for a resource you'd love? Tell us · Wünsche? Schreib uns: <a href="mailto:${esc(LEGAL.email)}">${esc(LEGAL.email)}</a></p>
   ${legalLinks()}`;
 };
+function shStatus(it){
+  const b=[];
+  if(it.visibility==="unlisted") b.push(`<span class="feat">🔗 Unlisted: only people with the link</span>`);
+  else if(it.approval==="pending") b.push(`<span class="feat" style="background:var(--sun-soft)">⏳ Waiting for approval</span>`);
+  else if(it.approval==="rejected") b.push(`<span class="feat" style="background:#FBE3DF">✗ Not approved for the Shop</span>`);
+  else b.push(`<span class="feat" style="background:var(--teal-soft)">🌍 Public in PonteShop</span>`);
+  return `<div class="row" style="margin:0">${b.join("")}</div>`;
+}
+function shLink(id){ return (location.protocol.startsWith("http")?location.origin:"https://pontetalk.setzio.com")+"/?r="+id; }
+async function shShare(id){
+  const it=(SH.list||[]).concat(SH.one?[SH.one]:[]).find(x=>x.id===id), url=shLink(id), text=it?`${it.title} · PonteTalk`:"PonteTalk resource";
+  try{ if(navigator.share){ await navigator.share({ title:"PonteTalk", text, url }); return; } }catch(e){ if(e && e.name==="AbortError") return; }
+  try{ await navigator.clipboard.writeText(url); bToast("🔗 Link copied. Send it to your students · Link kopiert"); }
+  catch(e){ window.prompt("Copy this link · Link kopieren:", url); }
+}
+async function shReview(id, ok){
+  const { error } = await A.sb.rpc("pt_shop_review",{ p_id:id, p_approve:ok });
+  if(error){ SH.err=shErr(error); xr(); return; }
+  SH.msg = ok ? "✓ Approved. It's now in the Shop · Freigegeben" : "✗ Rejected · Abgelehnt"; shLoad();
+}
 async function shGet(id){
   if(!A.user){ A.ret="shop"; A.err=""; A.msg=""; go("account"); return; }
   if(SH.busy) return;
+  const it=(SH.list||[]).concat(SH.one?[SH.one]:[]).find(x=>x.id===id);
+  const w = it && it.has_link ? window.open("", "_blank") : null;   // open now so the browser doesn't block it
   SH.busy=id; SH.err=""; SH.msg=""; xr();
   try{
     const r=await A.sb.rpc("pt_shop_download",{ p_item:id });
     if(r.error) throw r.error;
-    const u=await A.sb.storage.from("shop").createSignedUrl(r.data.path, 120, { download: r.data.name || true });
-    if(u.error) throw u.error;
-    const a=document.createElement("a"); a.href=u.data.signedUrl; a.rel="noopener"; a.download=r.data.name||"";
-    document.body.appendChild(a); a.click(); a.remove();
-    const it=(SH.list||[]).find(x=>x.id===id);
-    if(it){ if(SH.admin){ it.downloads=(it.downloads||0)+1; if(!it.mine) it.people=(it.people||0)+1; } it.mine=true; }
-    SH.msg="✓ Download started. Happy practising! · Download gestartet. Viel Spaß beim Üben!";
-  }catch(e){ SH.err=shErr(e); }
+    if(r.data.url){
+      if(w){ try{ w.opener=null; }catch(e){} w.location.href=r.data.url; } else { window.location.href=r.data.url; }
+      SH.msg="↗ Opened in a new tab · In neuem Tab geöffnet";
+    }else{
+      if(w) w.close();
+      const u=await A.sb.storage.from("shop").createSignedUrl(r.data.path, 120, { download: r.data.name || true });
+      if(u.error) throw u.error;
+      const a=document.createElement("a"); a.href=u.data.signedUrl; a.rel="noopener"; a.download=r.data.name||"";
+      document.body.appendChild(a); a.click(); a.remove();
+      SH.msg="✓ Download started. Happy practising! · Download gestartet. Viel Spaß beim Üben!";
+    }
+    if(it){ if(SH.admin||it.is_owner){ it.downloads=(it.downloads||0)+1; if(!it.mine) it.people=(it.people||0)+1; } it.mine=true; }
+  }catch(e){ if(w) w.close(); SH.err=shErr(e); }
   SH.busy=false; xr();
 }
 
-/* ---- Admin: add / edit / hide / delete ---- */
-function shNew(){ SH.err=""; SH.msg=""; SH.f={ id:null, title:"", desc:"", lang:"", lvl:-1, kind:"worksheet", published:true, base:"en", topics:[], file:null, path:"", fileName:"", size:0 }; go("shopedit"); }
+/* ---- Add / edit (hosts + admins) ---- */
+function shNew(){
+  if(!A.user){ A.ret="shop"; go("account"); return; }
+  SH.err=""; SH.msg="";
+  SH.f={ id:null, title:"", desc:"", lang:"", lvl:-1, kind:"worksheet", published:true, base:"en", topics:[], src:"file", link:"",
+         vis:SH.admin?"public":"unlisted", rights:false, file:null, path:"", fileName:"", size:0 };
+  go("shopedit");
+}
 async function shEdit(id){
   SH.err=""; SH.msg="";
   const r=await A.sb.from("shop_items").select("*").eq("id",id).single();
   if(r.error){ SH.err=shErr(r.error); xr(); return; }
   const d=r.data;
-  SH.f={ id:d.id, title:d.title, desc:d.description||"", lang:d.language||"", lvl:d.level==null?-1:d.level, kind:d.kind, published:d.published, base:d.base_language||"en", topics:(d.topics||[]).slice(), file:null, path:d.file_path, fileName:d.file_name, size:d.file_size||0 };
+  SH.f={ id:d.id, title:d.title, desc:d.description||"", lang:d.language||"", lvl:d.level==null?-1:d.level, kind:d.kind, published:d.published,
+         base:d.base_language||"en", topics:(d.topics||[]).slice(), src:d.link_url?"link":"file", link:d.link_url||"", vis:d.visibility||"public",
+         rights:true, file:null, path:d.file_path||"", fileName:d.file_name||"", size:d.file_size||0 };
   go("shopedit");
 }
 function shFTopic(k){ const a=SH.f.topics=(SH.f.topics||[]), i=a.indexOf(k); if(i>=0) a.splice(i,1); else a.push(k); xr(); }
@@ -4743,15 +4808,24 @@ function shPick(inp){
   xr();
 }
 VIEWS.shopedit = function(){
-  const f=SH.f, top=`<div class="topline"><button class="chip" onclick="shOpen()">← PonteShop</button><span>${f&&f.id?"✏️ Edit resource":"＋ Add resource"}</span></div>`;
-  if(!f || !SH.admin) return `${top}<p class="note center" style="margin-top:40px">Only admins can add resources · Nur für Admins</p>`;
+  const f=SH.f, top=`<div class="topline"><button class="chip" onclick="shOpen()">← PonteShop</button><span>${f&&f.id?"✏️ Edit resource":"＋ Share a resource"}</span></div>`;
+  if(!f || !A.user) return `${top}<p class="note center" style="margin-top:40px">Please sign in first · Bitte zuerst anmelden</p>`;
   const chip=(on,click,label)=>`<button class="chip ${on?"on":""}" aria-pressed="${on}" onclick="${click}">${label}</button>`;
   const fileLabel = f.file ? `${esc(f.file.name)} · ${shSize(f.file.size)}` : (f.fileName ? `${esc(f.fileName)} · ${shSize(f.size)} <span class="de">(tap to replace · ersetzen)</span>` : "Choose a file (PDF, image, audio, ZIP… max 50 MB)");
   return `${top}
-  <h2>${f.id?bi("Edit resource","Material bearbeiten"):bi("Add resource","Material hinzufügen")}</h2>
+  <h2>${f.id?bi("Edit resource","Material bearbeiten"):bi("Share a resource","Material teilen")}</h2>
   <div class="card">
-    <label class="lbl">File · Datei</label>
-    <label class="shfile">📎 <span>${fileLabel}</span><input type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.zip,.mp3,.m4a,.wav,.docx,.pptx,.xlsx,.txt" onchange="shPick(this)"></label>
+    <label class="lbl">Who can see it · Wer kann es sehen</label>
+    <div class="row">${chip(f.vis==="unlisted","SH.f.vis='unlisted';xr()","🔗 Only people with the link")}${chip(f.vis==="public","SH.f.vis='public';xr()","🌍 Everyone in PonteShop")}</div>
+    <p class="note" style="margin:6px 0 0">${f.vis==="unlisted"
+      ? "Not shown in the Shop. Share the link with your students, or attach it to your sessions (📎 Materials). · Nur mit Link."
+      : SH.admin ? "Goes live in the Shop right away. · Sofort im Shop." : "We'll take a quick look before it appears in the Shop. · Wir prüfen es kurz."}</p>
+    <label class="lbl">What are you sharing · Was teilst du</label>
+    <div class="row">${chip(f.src==="file","SH.f.src='file';xr()","📎 Upload a file")}${chip(f.src==="link","SH.f.src='link';xr()","🔗 Add a link")}</div>
+    ${f.src==="link"
+      ? `<input type="text" id="shlink" inputmode="url" maxlength="500" style="margin-top:8px" placeholder="https://drive.google.com/…" value="${esc(f.link)}" oninput="SH.f.link=this.value">
+         <p class="note" style="margin:6px 0 0">💡 Google Drive / Docs: <b>Share → General access → "Anyone with the link" → Viewer</b>. Otherwise people can't open it. Links use no storage on PonteTalk.</p>`
+      : `<label class="shfile" style="margin-top:8px">📎 <span>${fileLabel}</span><input type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.zip,.mp3,.m4a,.wav,.docx,.pptx,.xlsx,.txt" onchange="shPick(this)"></label>`}
     <label class="lbl" for="shtitle">Title · Titel</label>
     <input type="text" id="shtitle" maxlength="120" placeholder="e.g. Café German: 20 phrases" value="${esc(f.title)}" oninput="SH.f.title=this.value">
     <label class="lbl" for="shdesc">Short description · Kurzbeschreibung</label>
@@ -4769,40 +4843,54 @@ VIEWS.shopedit = function(){
     <p class="note" style="margin:4px 0 0">The language of the translations and tips, e.g. Spanish for "Alemán en el café". · Sprache der Erklärungen.</p>
     <label class="lbl">Topics (pick all that fit) · Themen</label>
     <div class="row">${SH_TOPICS.map(tp=>chip((f.topics||[]).includes(tp[0]),`shFTopic('${tp[0]}')`,`${tp[1]} ${esc(tp[2])}`)).join("")}</div>
-    <label class="lbl">Visible · Sichtbar</label>
-    <div class="row">${chip(f.published,"SH.f.published=true;xr()","👁 Visible to everyone")}${chip(!f.published,"SH.f.published=false;xr()","🙈 Hidden (draft)")}</div>
-    <p class="note">Price: Free · Preis: kostenlos. Only upload material you made yourself or have the rights to share. · Nur eigene Materialien hochladen.</p>
+    <label class="lbl">Show it now? · Jetzt zeigen?</label>
+    <div class="row">${chip(f.published,"SH.f.published=true;xr()","👁 Yes")}${chip(!f.published,"SH.f.published=false;xr()","🙈 Hidden (draft)")}</div>
+    <p class="note">Price: Free · Preis: kostenlos.</p>
+    ${SH.admin?"":`<label style="display:flex;gap:10px;align-items:flex-start;cursor:pointer;margin-top:6px">
+      <input type="checkbox" ${f.rights?"checked":""} onchange="SH.f.rights=this.checked" style="width:22px;height:22px;margin-top:2px;flex-shrink:0">
+      <span><b>I made this myself, or I have the right to share it.</b> No copied book pages or paid materials.<br><span class="de">Selbst erstellt oder ich darf es teilen.</span></span></label>`}
   </div>
   ${SH.err?`<div class="err">${esc(SH.err)}</div>`:""}
-  <button class="btn primary" ${SH.busy?"disabled":""} onclick="shSave()">${SH.busy?"Uploading… · Lädt hoch…":(f.id?"💾 Save changes · Speichern":"⬆ Publish · Veröffentlichen")}</button>
+  <button class="btn primary" ${SH.busy?"disabled":""} onclick="shSave()">${SH.busy?"Saving… · Speichert…":(f.id?"💾 Save changes · Speichern":f.vis==="public"&&!SH.admin?"📨 Share and send for review · Teilen":"⬆ Share · Teilen")}</button>
   <button class="btn ghost" onclick="shOpen()">Cancel · Abbrechen</button>`;
 };
 async function shSave(){
   const f=SH.f; if(!f || SH.busy) return;
-  const title=(f.title||"").trim();
+  const title=(f.title||"").trim(), link=f.src==="link"?vClean(f.link):"";
   if(title.length<2){ SH.err="Please add a title · Bitte einen Titel eingeben"; xr(); return; }
-  if(!f.id && !f.file){ SH.err="Please choose a file · Bitte eine Datei wählen"; xr(); return; }
+  if(f.src==="link" && !vValid(link)){ SH.err="Please paste the full link (https://…) · Bitte vollständigen Link einfügen"; xr(); return; }
+  if(f.src==="file" && !f.file && !f.path){ SH.err="Please choose a file · Bitte eine Datei wählen"; xr(); return; }
+  if(!SH.admin && !f.rights){ SH.err="Please confirm you may share it · Bitte bestätigen"; xr(); return; }
   SH.busy=true; SH.err=""; xr();
   try{
-    let path=f.path, name=f.fileName, size=f.size, oldPath=null;
-    if(f.file){
+    let path=f.src==="file"?f.path:null, name=f.src==="file"?f.fileName:null, size=f.src==="file"?f.size:null, oldPath=null;
+    if(f.src==="file" && f.file){
       const safe=f.file.name.normalize("NFKD").replace(/[^\w.\-]+/g,"_").replace(/_+/g,"_").slice(-80) || "file";
       const key=(window.crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now().toString(36)+Math.random().toString(36).slice(2));
-      const newPath=`${key}/${safe}`;
+      const newPath=`${A.user.id}/${key}/${safe}`;
       const up=await A.sb.storage.from("shop").upload(newPath, f.file, { contentType:f.file.type||"application/octet-stream", upsert:false });
       if(up.error) throw up.error;
-      if(f.id) oldPath=f.path;
+      if(f.id && f.path) oldPath=f.path;
       path=newPath; name=f.file.name; size=f.file.size;
     }
-    const row={ title, description:(f.desc||"").trim()||null, language:f.lang||null, level:f.lvl<0?null:f.lvl, kind:f.kind, published:!!f.published, base_language:f.base||"en", topics:f.topics||[], file_path:path, file_name:name, file_size:size };
+    if(f.src==="link" && f.id && f.path) oldPath=f.path;   // switched from file to link: free the space
+    const row={ title, description:(f.desc||"").trim()||null, language:f.lang||null, level:f.lvl<0?null:f.lvl, kind:f.kind, published:!!f.published,
+                base_language:f.base||"en", topics:f.topics||[], visibility:f.vis==="public"?"public":"unlisted",
+                file_path:path, file_name:name, file_size:size, link_url:f.src==="link"?link:null };
+    let id=f.id;
     if(f.id){
       const r=await A.sb.from("shop_items").update(row).eq("id",f.id); if(r.error) throw r.error;
-      if(oldPath) A.sb.storage.from("shop").remove([oldPath]).catch(()=>{});
     }else{
       row.created_by=A.user.id;
-      const r=await A.sb.from("shop_items").insert(row); if(r.error) throw r.error;
+      const r=await A.sb.from("shop_items").insert(row).select("id").single(); if(r.error) throw r.error; id=r.data&&r.data.id;
     }
-    SH.busy=false; SH.f=null; go("shop"); SH.msg=f.id?"✓ Saved · Gespeichert":"✓ Published · Veröffentlicht"; SH.list=null; xr(); shLoad();
+    if(oldPath) A.sb.storage.from("shop").remove([oldPath]).catch(()=>{});
+    SH.busy=false; SH.f=null; go("shop");
+    SH.msg = row.visibility==="unlisted" ? "✓ Saved. Tap 🔗 Share link on your resource to send it · Gespeichert"
+           : SH.admin ? (f.id?"✓ Saved · Gespeichert":"✓ Published · Veröffentlicht")
+           : "📨 Thanks! We'll take a quick look, then it appears in the Shop · Danke, wir prüfen es kurz";
+    SH.mineOnly = !SH.admin; SH.list=null; xr(); shLoad();
+    if(row.visibility==="unlisted" && id && !f.id) setTimeout(()=>shShare(id), 400);
   }catch(e){ SH.busy=false; SH.err=shErr(e); xr(); }
 }
 async function shToggle(id,on){
@@ -5330,6 +5418,7 @@ try{ const u=new URL(location.href); if(u.searchParams.get("auth")==="google" ||
 if(window.supabase) authInit(); else document.addEventListener("DOMContentLoaded", authInit);
 try{ const sid=new URLSearchParams(location.search).get("s"); if(sid && /^[0-9a-f-]{36}$/i.test(sid)){ S.sid=sid; S.screen="session"; document.addEventListener("DOMContentLoaded", ()=>bLoad()); } }catch(e){}
 try{ if(new URLSearchParams(location.search).has("reports")){ S.screen="reports"; let n=0; const w=setInterval(()=>{ n++; if(A.status==="in"&&A.user){ clearInterval(w); raLoad(); } else if((A.status==="out"&&n>2)||n>20){ clearInterval(w); A.ret="reports"; A.msg="Sign in to see reports · Bitte anmelden"; go("account"); } },500); } }catch(e){}
+try{ const rid=new URLSearchParams(location.search).get("r"); if(rid && /^[0-9a-f-]{36}$/i.test(rid)){ S.screen="shopitem"; SH.one=null; A.ret="shopitem"; SH.oneId=rid; document.addEventListener("DOMContentLoaded", ()=>shOneLoad(rid)); } }catch(e){}
 try{ if(new URLSearchParams(location.search).has("shop")){ S.screen="shop"; document.addEventListener("DOMContentLoaded", ()=>shLoad()); } }catch(e){}
 try{ if(new URLSearchParams(location.search).has("cafes")){ S.screen="cafes"; document.addEventListener("DOMContentLoaded", ()=>cfLoad()); } }catch(e){}
 try{ if(new URLSearchParams(location.search).has("board")){ S.screen="board"; document.addEventListener("DOMContentLoaded", ()=>bLoad()); } }catch(e){}
