@@ -124,6 +124,7 @@
   .cm .who .avs{width:18px;height:18px}
   .cm .tm{font-size:11px;opacity:.65;margin-left:8px;white-space:nowrap}
   .cm .cx{border:none;background:none;color:inherit;opacity:.5;cursor:pointer;font-size:12px;padding:0 0 0 6px}
+  .chbadge{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--coral);color:#fff;font:800 12px 'Plus Jakarta Sans',sans-serif;line-height:1;vertical-align:middle;margin-left:4px;text-decoration:none}
   .chday{align-self:center;font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;margin:6px 0 2px}
   .chin{display:flex;gap:8px;align-items:flex-end;margin-top:10px}
   .chin textarea{flex:1;min-width:0;resize:none;font-size:16px;padding:10px 14px;border-radius:16px;max-height:120px}
@@ -2993,11 +2994,12 @@ async function chUnreadLoad(){
     if(["board","session","home"].includes(S.screen)) xr();
   }catch(e){}
 }
+function chBadge(id){ const n=CU[id]||0; return n?`<span class="chbadge" aria-label="${n} unread">${n>99?"99+":n}</span>`:""; }
+setInterval(()=>{ if(A.user && document.visibilityState==="visible" && ["home","board","session"].includes(S.screen)) chUnreadLoad(); }, 30000);
 function chWindow(s){ return s && s.status!=="cancelled" && Date.now() < new Date(s.starts_at).getTime() + (s.duration_min||60)*60000 + 24*3600000; }
 function chBtn(s){
   if(!A.user || !(s.is_host || s.my_status==="joined") || !chWindow(s)) return "";
-  const n=CU[s.activity_id]||0;
-  return `<button class="btn secondary" style="margin-top:8px" onclick="chOpen('${s.activity_id}')">💬 Chat${n?` · <b>${n} new</b>`:""} · Gruppenchat</button>`;
+  return `<button class="btn secondary" style="margin-top:8px" onclick="chOpen('${s.activity_id}')">💬 Chat · Gruppenchat${chBadge(s.activity_id)}</button>`;
 }
 function chOpen(id){
   chStop(); CH.id=id; CH.list=[]; CH.last=0; CH.err=""; CH.draft="";
@@ -3281,7 +3283,7 @@ function bRow(s, dayMode){
     <div class="bt">${dayMode?"":`<i>${esc(day)}</i>`}<b>${t}</b></div>
     <div class="bm"><div class="brt">${s.visibility==="private"?"🔒 ":""}${g?"🎲 ":""}${esc(s.title)}</div>
       <div class="note" style="margin:0">${s.format==="in_person"?`📍 ${esc(s.city||"")} · `:""}${codesPair(s.language_a,s.language_b)} · ${lvlRange(s.level_min,s.level_max)} · ${s.duration_min} min</div></div>
-    <span class="bs ${st[1]}">${st[0]}</span><span class="chev" aria-hidden="true">›</span></button>`;
+    ${CU[s.activity_id]?`<span title="Unread chat messages">💬${chBadge(s.activity_id)}</span>`:""}<span class="bs ${st[1]}">${st[0]}</span><span class="chev" aria-hidden="true">›</span></button>`;
 }
 function bDayLabel(iso){
   const d=new Date(iso), t0=new Date(); t0.setHours(0,0,0,0);
@@ -4695,7 +4697,7 @@ function nextCard(){
       <button class="btn ${roomNow?"secondary":"primary"}" style="${roomNow?"":"background:var(--plum);box-shadow:none"}" onclick="bOpen()">${s.is_host?"Manage":"Details"}</button>
     </div>
     <button class="linkbtn" onclick="sShare('${s.activity_id}')">🔗 ${s.is_host?"Share invite link":"Share with a friend"}</button>
-    ${s.my_status!=="offered" && chWindow(s) ? `<button class="linkbtn" style="margin-left:14px" onclick="chOpen('${s.activity_id}')">💬 Chat${CU[s.activity_id]?` (${CU[s.activity_id]} new)`:""}</button>` : ""}
+    ${s.my_status!=="offered" && chWindow(s) ? `<button class="linkbtn" style="margin-left:14px" onclick="chOpen('${s.activity_id}')">💬 Chat${chBadge(s.activity_id)}</button>` : ""}
     ${(()=>{ const n=(D.board||[]).filter(x=>x.is_host || ["joined","offered"].includes(x.my_status)).length;
        return n>1 ? `<button class="linkbtn" style="margin-left:14px" onclick="bOpenMine()">⭐ All my sessions (${n})</button>` : ""; })()}</div>`;
 }
