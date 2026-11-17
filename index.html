@@ -219,6 +219,11 @@
   .dlabel{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--teal);margin:0}
   .dbtns{display:flex;gap:8px;width:100%}
   .dbtns .btn{margin:0;padding:12px 10px;font-size:15px;flex:1;white-space:nowrap}
+  @media (max-width:600px){
+    .dbtns{flex-wrap:wrap}
+    .dbtns .btn{flex:1 1 calc(50% - 4px)}
+    .dbtns .vbtn, .dbtns > button.btn.primary.qbtn{flex-basis:100%}
+  }
   .dsg{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;margin-right:-18px;padding:2px 18px 8px 2px}
   .scard{flex:0 0 205px;scroll-snap-align:start;background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:5px;box-shadow:0 6px 18px rgba(27,42,65,.05)}
   .scard.perfect{border:2px solid var(--sun)}
@@ -2791,6 +2796,7 @@ async function xLoad(){
   if(S.screen==="xprofile") render();
 }
 function xOpen(){ X.loaded=false; go("xprofile"); xLoad(); }
+function xBack(){ const a=X.after; X.after=null; if(a && a.back==="session" && a.sid) sOpen(a.sid); else if(a && a.back==="board") bOpen(); else go("account"); }
 function xRole(k,role){
   const cur=X.langs[k];
   if(!role) delete X.langs[k];
@@ -2818,15 +2824,29 @@ async function xSave(){
     X.msg="Saved! · Gespeichert! ✅";
   }catch(e){ X.err=authErr(e); }
   X.busy=false; xr();
+  // Finish the join that sent the person here
+  if(!X.err && X.after){
+    const a=X.after; X.after=null;
+    if(a.back==="session" && a.sid){ S.sid=a.sid; go("session"); }
+    else if(a.back==="home"){ go("home"); }
+    else go("board");
+    await bLoad();
+    await bAct(a.fn, a.id);
+    if(a.back==="home"){ R.at=0; rLoad(); }
+  }
 }
 VIEWS.xprofile = function(){
-  const top=`<div class="topline"><button class="chip" onclick="go('account')">← Back</button><span>🌍 Exchange profile</span></div>`;
+  const top=`<div class="topline"><button class="chip" onclick="xBack()">← Back</button><span>🌍 Exchange profile</span></div>`;
   if(!A.user) return `${top}<p class="note center" style="margin-top:40px">Please sign in first · Bitte zuerst anmelden</p>`;
   if(!X.loaded) return `${top}<p class="note center" style="margin-top:40px">Loading… · Lädt…</p>`;
   const lvls=LVL_ORDER.map(i=>[LEVELS[i],i]);
   const roleBtn=(k,role,label)=>`<button class="chip ${((X.langs[k]||{}).role||null)===role?"on":""}" aria-pressed="${((X.langs[k]||{}).role||null)===role}" onclick="xRole('${k}',${role?`'${role}'`:"null"})">${label}</button>`;
   let tzs=null; try{ tzs=Intl.supportedValuesOf("timeZone"); if(tzs && X.tz && !tzs.includes(X.tz)) tzs=[X.tz,...tzs]; }catch(e){}
   return `${top}
+  ${X.after?`<div class="card" style="border:2px solid var(--coral);background:var(--coral-soft)">
+    <h3 style="margin:0 0 4px">👋 One step before you join${X.after.title?` "${esc(X.after.title)}"`:""}</h3>
+    <p style="margin:0">Add your languages and confirm you're 18 or older, then tap <b>Save</b> at the bottom. <b>We'll join you automatically.</b><br>
+    <span class="de">Sprachen eintragen, 18+ bestätigen und speichern. Danach melden wir dich automatisch an.</span></p></div>`:""}
   <h2>${bi("Your exchange profile","Dein Tandem-Profil")}</h2>
   <p class="sub">${bi("This helps us find the right partners and sessions for you.","So finden wir passende Partner und Sessions für dich.")}</p>
 
@@ -3486,7 +3506,12 @@ async function bAct(fn,id){
           : st==="cancelled" ? (data.late ? "Done. Leaving less than 2h before start counts as a late cancel · Spät abgesagt" : "Done · Erledigt")
           : "Done · Erledigt");
   }catch(e){
-    if(/adult_required/.test(String(e&&e.message))){ B.busy=false; bToast(BERR.adult_required); xOpen(); return; }
+    if(/adult_required/.test(String(e&&e.message))){
+      B.busy=false;
+      const x=(B.list||[]).concat(R.list||[], D.board||[]).find(q=>q.activity_id===id);
+      X.after={ fn, id, back:S.screen, sid:S.sid, title:x?x.title:"" };
+      xOpen(); return;
+    }
     bToast(bErr(e));
   }
   B.busy=false;
