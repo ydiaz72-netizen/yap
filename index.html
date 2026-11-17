@@ -113,6 +113,12 @@
   #bnav button svg{width:22px;height:22px}
   #bnav{gap:2px;padding-left:6px;padding-right:6px}
   #bnav button{font-size:12px}
+  /* ---- In-person meetups ---- */
+  .ipbox{background:var(--sun-soft);border-radius:14px;padding:12px;margin-top:8px}
+  .ipbox .lbl:first-child{margin-top:0}
+  .pline{display:flex;gap:6px;align-items:baseline;font-weight:700;font-size:14px;margin:0 0 6px}
+  .pdet{background:var(--sun-soft);border-radius:14px;padding:10px 12px;margin-top:8px;font-size:14px}
+  .pdet a.btn{text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px;margin:8px 0 0}
   /* ---- Session views + private ---- */
   .bbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:4px 0 10px}
   .bbar .note{margin:0}
@@ -2957,6 +2963,97 @@ function langsLine(arr){
 
 
 
+
+/* ===================== IN-PERSON MEETUPS ===================== */
+const PL = {};   // activity_id -> { address, directions }  (only host / joined people get rows)
+let MYCITY;      // my city from the exchange profile (for local suggestions)
+async function pLoad(){
+  if(!A.user || !A.sb) return;
+  try{
+    const { data, error } = await A.sb.from("activity_places").select("activity_id,address,directions");
+    if(error) return;
+    Object.keys(PL).forEach(k=>delete PL[k]);
+    (data||[]).forEach(r=>{ PL[r.activity_id]={ address:r.address||"", directions:r.directions||"" }; });
+    if(["board","session","home"].includes(S.screen)) xr();
+  }catch(e){}
+}
+async function pCityLoad(){
+  if(MYCITY!==undefined || !A.user || !A.sb) return; MYCITY="";
+  try{ const { data } = await A.sb.from("profiles").select("city").eq("id",A.user.id).maybeSingle(); MYCITY=(data&&data.city)||""; if(S.screen==="home") xr(); }catch(e){}
+}
+function bRowOf(s){ if(s && s.format) return s; return (D.board||[]).concat(B.list||[]).find(x=>x.activity_id===(s&&s.activity_id)) || s; }
+function pMapsUrl(s){
+  const d=PL[s.activity_id]||{}, q=[d.address||s.place_name, s.city].filter(Boolean).join(", ");
+  return "https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(q);
+}
+function placeLine(s0){
+  const s=bRowOf(s0); if(!s || s.format!=="in_person") return "";
+  return `<p class="pline">📍 <span>${esc(s.place_name||"")}${s.area?` · ${esc(s.area)}`:""}, ${esc(s.city||"")}</span></p>`;
+}
+function pMapBtn(s, small){
+  return `<a class="btn ${small?"qbtn":""} vbtn" href="${esc(pMapsUrl(s))}" target="_blank" rel="noopener noreferrer">📍 Open in Maps</a>`;
+}
+function pDetails(s){
+  const d=PL[s.activity_id]||{};
+  return `<div class="pdet"><b>📍 ${esc(s.place_name||"")}</b>${d.address?`<br>${esc(d.address)}`:`<br>${esc([s.area,s.city].filter(Boolean).join(", "))}`}
+    ${d.directions?`<div class="note" style="margin:4px 0 0">🧭 ${esc(d.directions)}</div>`:""}
+    ${s.is_host&&!d.address?`<div class="note" style="margin:4px 0 0">Add the exact address with ✏️ Edit, so people find you.</div>`:""}
+    ${pMapBtn(s,false)}
+    <p class="note center" style="margin:4px 0 0">🔒 Only people in this meetup see the address</p></div>`;
+}
+function rVisible(){
+  return (R.list||[]).filter(x=>{ const b=bRowOf(x); if(!b || b.format!=="in_person") return true;
+    return MYCITY && cfNorm(b.city).trim()===cfNorm(MYCITY).trim(); });
+}
+async function hPickCafe(){
+  if(CF.list===null){ try{ const r=await authClient().from("cafes").select("*").eq("status","approved").order("city"); CF.list=r.data||[]; }catch(e){ CF.list=[]; } }
+  const L=(CF.list||[]).filter(c=>c.status==="approved" && !c.online && c.city);
+  const box=document.createElement("div"); box.className="sheet-bg"; box.id="cafePick";
+  box.innerHTML=`<div class="sheet" role="dialog" aria-label="Pick a café">
+    <div class="nbhead"><h3 style="margin:0">☕ Pick a language café</h3><button class="chip" aria-label="Close" onclick="document.getElementById('cafePick').remove()">✕</button></div>
+    ${L.length?L.map(c=>`<button class="mlink" style="width:100%;margin-top:6px;display:flex;gap:8px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font:700 14px 'Plus Jakarta Sans',sans-serif;cursor:pointer;text-align:left" onclick="hCafeSet('${c.id}')">☕ ${esc(c.name)}<span class="note" style="margin:0 0 0 auto">📍 ${esc(c.city)}</span></button>`).join("")
+      :`<p class="note center">No cafés in the directory yet · Noch keine Cafés</p>`}</div>`;
+  box.addEventListener("click",e=>{ if(e.target===box) box.remove(); });
+  document.body.appendChild(box);
+}
+function hCafeSet(id){
+  const c=(CF.list||[]).find(x=>x.id===id); const b=document.getElementById("cafePick"); if(b) b.remove(); if(!c) return;
+  H.place=c.name.slice(0,100); H.city=(c.city||"").slice(0,80); H.cafe=c.id; xr();
+}
+async function hSavePlace(id, was){
+  const want = H.fmt==="in_person" ? { address:(H.addr||"").trim().slice(0,200), directions:(H.dirs||"").trim().slice(0,200) } : null;
+  const had = was && (was.address || was.directions) ? was : null;
+  if(want && (want.address || want.directions)){
+    if(had && had.address===want.address && had.directions===want.directions) return;
+    const { error } = await A.sb.from("activity_places").upsert(Object.assign({ activity_id:id }, want), { onConflict:"activity_id" });
+    if(error) throw error; PL[id]=want;
+  }else if(had){
+    const { error } = await A.sb.from("activity_places").delete().eq("activity_id",id);
+    if(error) throw error; delete PL[id];
+  }
+}
+function safetyOk(){ try{ return localStorage.getItem("pt_safe_ip")==="1"; }catch(e){ return !!window._ptSafe; } }
+function safetyOpen(fn,id){
+  const box=document.createElement("div"); box.className="sheet-bg"; box.id="safeSheet";
+  box.innerHTML=`<div class="sheet" role="dialog" aria-label="Meeting in person">
+    <h3 style="margin:0 0 6px">📍 Meeting in person · Persönliches Treffen</h3>
+    <p class="note" style="margin:0 0 10px">A few simple tips for your first in-person meetup. · Ein paar Tipps.</p>
+    <div style="display:flex;flex-direction:column;gap:8px;font-size:15px">
+      <div>☕ <b>Public places only.</b> Cafés, libraries, bars. Never a private home. · Nur öffentliche Orte.</div>
+      <div>👋 <b>Tell someone</b> where you're going and when. · Sag jemandem Bescheid.</div>
+      <div>🚶 <b>Get there and back on your own.</b> No need to share your address. · Eigene An- und Abreise.</div>
+      <div>🙅 <b>Leave anytime</b> if something feels off, and tell us. · Du kannst jederzeit gehen.</div>
+      <div>🗓️ <b>Can't make it?</b> Leave the session early so someone else gets your seat. · Rechtzeitig absagen.</div>
+    </div>
+    <button class="btn primary" style="margin-top:14px" id="safeOk">Got it, join · Verstanden</button>
+    <button class="btn ghost" onclick="document.getElementById('safeSheet').remove()">Not now · Jetzt nicht</button></div>`;
+  document.body.appendChild(box);
+  box.querySelector("#safeOk").onclick=async()=>{
+    try{ localStorage.setItem("pt_safe_ip","1"); }catch(e){ window._ptSafe=true; }
+    box.remove(); await bAct(fn,id); if(S.screen==="home"){ R.at=0; rLoad(); }
+  };
+}
+
 /* ===================== INVITES ===================== */
 const INV = { id:null, contacts:null, email:"", busy:false, err:"", done:{} };
 function invCard(){
@@ -3064,7 +3161,7 @@ function bRow(s, dayMode){
   return `<button class="brow ${s.is_host||s.my_status==="joined"?"mine":""}" onclick="sOpen('${s.activity_id}')" aria-label="${esc(s.title)}, ${esc(fmtWhen(s.starts_at))}">
     <div class="bt">${dayMode?"":`<i>${esc(day)}</i>`}<b>${t}</b></div>
     <div class="bm"><div class="brt">${s.visibility==="private"?"🔒 ":""}${g?"🎲 ":""}${esc(s.title)}</div>
-      <div class="note" style="margin:0">${codesPair(s.language_a,s.language_b)} · ${lvlRange(s.level_min,s.level_max)} · ${s.duration_min} min</div></div>
+      <div class="note" style="margin:0">${s.format==="in_person"?`📍 ${esc(s.city||"")} · `:""}${codesPair(s.language_a,s.language_b)} · ${lvlRange(s.level_min,s.level_max)} · ${s.duration_min} min</div></div>
     <span class="bs ${st[1]}">${st[0]}</span><span class="chev" aria-hidden="true">›</span></button>`;
 }
 function bDayLabel(iso){
@@ -3543,7 +3640,7 @@ async function vLoad(){
     if(error) return;
     Object.keys(VL).forEach(k=>delete VL[k]);
     (data||[]).forEach(r=>{ VL[r.activity_id]={ url:r.url, provider:r.provider }; });
-    ciLoad(); avCollect(); mLoad();
+    ciLoad(); avCollect(); mLoad(); pLoad(); pCityLoad();
     if(["board","session","home"].includes(S.screen)) xr();
   }catch(e){}
 }
@@ -3554,6 +3651,7 @@ function vBtn(id, primary){
 function vLine(s){
   const id=s.activity_id, v=VL[id];
   if(!A.user || !(s.is_host || s.my_status==="joined")) return "";
+  if(s.format==="in_person") return pDetails(s);
   if(v) return vBtn(id, false) + `<p class="note center" style="margin:4px 0 0">🔒 Only people in this session see this link · Nur Teilnehmende sehen den Link</p>`;
   if(s.is_host && new Date(s.starts_at)>new Date()) return `<div class="vline">🎥 No video link yet · <button class="linkbtn" onclick="hEdit('${id}')">Add one · Hinzufügen</button></div>`;
   if(!s.is_host) return `<div class="vline">🎥 The host hasn't added a video link yet · Noch kein Video-Link</div>`;
@@ -3574,6 +3672,9 @@ async function bLoad(){
 function bOpen(){ B.err=""; B.open=null; go("board"); bLoad(); }
 
 async function bAct(fn,id){
+  if(["pt_join_activity","pt_accept_invite","pt_accept_offer"].includes(fn) && !safetyOk()){
+    const x=bRowOf({ activity_id:id }); if(x && x.format==="in_person"){ safetyOpen(fn,id); return; }
+  }
   if(B.busy) return;
   B.busy=true; xr();
   try{
@@ -3693,11 +3794,12 @@ function bCard(s){
       }
   }
   return `<div class="card bcard ${s.is_host||s.my_status==="joined"?"mine":""} ${s.my_status==="offered"?"offer":""}">
-    <div class="btop"><span class="feat">${g?`🎲 ${g[1]} ${g[2]}`:"💬 Conversation"}${s.balanced?" · ⚖️ Balanced":""}${s.visibility==="private"?" · 🔒 Private":""}</span><span class="note" style="margin:0;font-weight:800">${seatsTxt}</span></div>
+    <div class="btop"><span class="feat">${s.format==="in_person"?"📍 In person · ":""}${g?`🎲 ${g[1]} ${g[2]}`:"💬 Conversation"}${s.balanced?" · ⚖️ Balanced":""}${s.visibility==="private"?" · 🔒 Private":""}</span><span class="note" style="margin:0;font-weight:800">${seatsTxt}</span></div>
     <div class="btitle">${esc(s.title)}</div>${sidesHtml?"":""}
     <div class="note" style="margin:0">${langPair(s.language_a,s.language_b)} · ${lvlRange(s.level_min,s.level_max)}</div>
     ${sidesHtml}
     <div class="bwhen">🗓️ ${fmtWhen(s.starts_at)} · ${s.duration_min} min${hostT?`<small>${esc(hostT)}</small>`:""}</div>
+    ${placeLine(s)}
     <div class="note" style="margin:0">${avSmall(s.host_id)} ${esc(s.host_name||"Host")}${relBadges(s.host_reliability)}${rel}${s.host_languages&&s.host_languages.length?` · ${langsLine(s.host_languages)}`:""}</div>
     ${(s.topics||[]).length?`<div class="row" style="margin-top:8px">${s.topics.map(k=>{ const it=INTERESTS.find(x=>x[0]===k); return it?`<span class="feat">${it[1]} ${esc(it[2])}</span>`:""; }).join("")}</div>`:""}
     ${s.note?`<p class="note" style="margin:8px 0 0">💬 ${esc(s.note)}</p>`:""}
@@ -3712,7 +3814,7 @@ function bCard(s){
 VIEWS.board = function(){
   const top=`<div class="topline"><button class="chip" onclick="goHome()">← Back</button><span>Sessions</span></div>`;
   const list=B.list;
-  const shown=(list||[]).filter(s=>s.visibility!=="private" || isMine(s)).filter(s=>!B.mine || isMine(s)).filter(s=>!B.lang || s.language_a===B.lang || s.language_b===B.lang);
+  const shown=(list||[]).filter(s=>s.visibility!=="private" || isMine(s)).filter(s=>!B.mine || isMine(s)).filter(s=>!B.fmt || (s.format||"online")===B.fmt).filter(s=>!B.city || cfNorm(s.city).includes(cfNorm(B.city).trim())).filter(s=>!B.lang || s.language_a===B.lang || s.language_b===B.lang);
   return `${top}
   <h2>${bi("Sessions","Sessions")}</h2>
   ${sessTabs("online")}
@@ -3722,6 +3824,8 @@ VIEWS.board = function(){
     return `<div class="vsw" role="group" aria-label="Which sessions" style="margin:14px 0 0;width:fit-content">
       <button class="${!B.mine?"on":""}" aria-pressed="${!B.mine}" onclick="B.mine=false;xr()">All sessions</button>
       <button class="${B.mine?"on":""}" aria-pressed="${!!B.mine}" onclick="B.mine=true;xr()">⭐ My sessions${n?` (${n})`:""}</button></div>`; })():""}
+  <div class="row" style="margin:12px 0 0">${[["","All formats"],["online","💻 Online"],["in_person","📍 In person"]].map(([k,l])=>`<button class="chip ${(B.fmt||"")===k?"on":""}" aria-pressed="${(B.fmt||"")===k}" onclick="B.fmt='${k}';xr()">${l}</button>`).join("")}</div>
+  ${B.fmt==="in_person"?`<input type="text" class="cfsearch" style="margin-top:8px" placeholder="🔍 City · Stadt (press Enter)" value="${esc(B.city||"")}" onchange="B.city=this.value;xr()" onkeydown="if(event.key==='Enter'){B.city=this.value;xr();}">`:""}
   <div class="row" style="margin:14px 0 6px">${[["","🌍 All"]].concat(LANG_KEYS.map(k=>[k,`${T[k].flag} ${esc(T[k].nameEn)}`])).map(([k,l])=>`<button class="chip ${B.lang===k?"on":""}" aria-pressed="${B.lang===k}" onclick="B.lang='${k}';xr()">${l}</button>`).join("")}</div>
   <div class="bbar"><p class="note">🕒 Times are in your time zone (${esc(detectTz())}) · Zeiten in deiner Zeitzone</p>${bViewSwitch()}</div>
   ${B.err?`<div class="err">${esc(B.err)}</div>`:""}
@@ -3806,7 +3910,7 @@ function hOpen(){
     const d=new Date(Date.now()+86400000);
     Object.assign(H,{ bal:false, sa:2, sb:2, type:"conversation", game:"speak", title:"", a:"", b:"", min:1, max:3,
       date:`${d.getFullYear()}-${hPad(d.getMonth()+1)}-${hPad(d.getDate())}`, time:"19:00",
-      dur:45, seats:4, mode:"instant", topics:[], note:"", video:"", mats:[], matsWas:[], vis:"public", started:true });
+      dur:45, seats:4, mode:"instant", topics:[], note:"", video:"", mats:[], matsWas:[], vis:"public", fmt:"online", city:"", place:"", area:"", cafe:null, addr:"", dirs:"", pub:false, placeWas:null, started:true });
   }
   go("host"); hPrefill();
 }
@@ -3815,9 +3919,10 @@ async function hPrefill(){
     const uid=A.user.id;
     const [l,p] = await Promise.all([
       A.sb.from("user_languages").select("language_code,role,level").eq("user_id",uid),
-      A.sb.from("profiles").select("adult_confirmed_at").eq("id",uid).maybeSingle()
+      A.sb.from("profiles").select("adult_confirmed_at,city").eq("id",uid).maybeSingle()
     ]);
     H.adult=!!(p.data&&p.data.adult_confirmed_at);
+    if(!H.city && p.data && p.data.city) H.city=p.data.city;
     const mine=(l.data||[]).filter(x=>T[x.language_code]);
     H.myLangs=mine.map(x=>({ code:x.language_code, role:x.role }));
     if(!H.a){
@@ -3850,6 +3955,9 @@ function hEdit(id){
     min:s.level_min, max:s.level_max, date:`${d.getFullYear()}-${hPad(d.getMonth()+1)}-${hPad(d.getDate())}`,
     time:`${hPad(d.getHours())}:${hPad(d.getMinutes())}`, dur:s.duration_min, seats:s.seats, mode:s.join_mode,
     vis:s.visibility||"public",
+    fmt:s.format||"online", city:s.city||"", place:s.place_name||"", area:s.area||"", cafe:s.cafe_id||null,
+    addr:(PL[id]||{}).address||"", dirs:(PL[id]||{}).directions||"", pub:s.format==="in_person",
+    placeWas:PL[id]?Object.assign({},PL[id]):null,
     myLangs:(s.host_languages||[]).map(x=>({ code:x.code, role:x.role })),
     topics:(s.topics||[]).slice(), note:s.note||"", video:VL[id]?VL[id].url:"", videoWas:VL[id]?VL[id].url:"",
     mats:(ML[id]||[]).map(m=>Object.assign({},m)), matsWas:(ML[id]||[]).map(m=>Object.assign({},m)), started:true, checked:true, adult:true, err:"", busy:false,
@@ -3888,9 +3996,14 @@ async function hPost(){
   if(H.editId && H.seats < (H.editTaken||0)){ H.err=BERR.seats_below_joined; xr(); return; }
   const title=((H.title||"").trim() || hDefaultTitle()).slice(0,80);
   if(title.length<3){ H.err="Add a short title · Gib einen kurzen Titel ein"; xr(); return; }
+  if(H.fmt==="in_person"){
+    if((H.city||"").trim().length<2){ H.err="Add the city · Bitte die Stadt eingeben"; xr(); return; }
+    if((H.place||"").trim().length<2){ H.err="Add the place, e.g. the café's name · Bitte den Ort eingeben"; xr(); return; }
+    if(!H.pub){ H.err="Please confirm it's a public place · Bitte bestätige, dass es ein öffentlicher Ort ist"; xr(); return; }
+  }
   const mc=hMatsClean();
   if(mc.err){ H.err=mc.err; xr(); return; }
-  const video=vClean(H.video);
+  const video=H.fmt==="in_person" ? "" : vClean(H.video);
   if(video && !vValid(video)){ H.err="The video link doesn't look right. It should start with https:// · Der Video-Link sieht falsch aus"; xr(); return; }
   H.busy=true; xr();
   try{
@@ -3898,21 +4011,28 @@ async function hPost(){
       note:(H.note||"").trim().slice(0,200)||null, language_a:H.a, language_b:H.b||null,
       level_min:Math.min(H.min,H.max), level_max:Math.max(H.min,H.max), seats:(H.b&&H.bal)?H.sa+H.sb:H.seats,
       balanced:!!(H.b&&H.bal), seats_a:(H.b&&H.bal)?H.sa:null, seats_b:(H.b&&H.bal)?H.sb:null,
-      starts_at:start.toISOString(), host_time_zone:detectTz(), duration_min:H.dur, join_mode:H.mode, topics:H.topics, visibility:H.vis==="private"?"private":"public" };
+      starts_at:start.toISOString(), host_time_zone:detectTz(), duration_min:H.dur, join_mode:H.mode, topics:H.topics, visibility:H.vis==="private"?"private":"public",
+      format:H.fmt==="in_person"?"in_person":"online",
+      city:H.fmt==="in_person"?(H.city||"").trim().slice(0,80):null,
+      place_name:H.fmt==="in_person"?(H.place||"").trim().slice(0,100):null,
+      area:H.fmt==="in_person"?((H.area||"").trim().slice(0,80)||null):null,
+      cafe_id:H.fmt==="in_person"?(H.cafe||null):null,
+      public_place_ok:H.fmt==="in_person"&&!!H.pub };
     if(H.editId){
       delete row.host_id;
       const { error } = await A.sb.from("activities").update(row).eq("id",H.editId);
       if(error) throw error;
       await hSaveLink(H.editId, video, H.videoWas);
       await hSaveMats(H.editId, mc.list, H.matsWas);
+      await hSavePlace(H.editId, H.placeWas);
       H.editId=null; H.started=false; H.busy=false;
       bToast("✅ Changes saved. People in the session are told about time changes · Gespeichert");
       bOpen(); return;
     }
     const { data:made, error } = await A.sb.from("activities").insert(row).select("id").single();
     if(error) throw error;
-    if((video || mc.list.length) && made && made.id){
-      try{ await hSaveLink(made.id, video, ""); await hSaveMats(made.id, mc.list, []); }
+    if((video || mc.list.length || H.fmt==="in_person") && made && made.id){
+      try{ await hSaveLink(made.id, video, ""); await hSaveMats(made.id, mc.list, []); await hSavePlace(made.id, null); }
       catch(e){ H.started=false; H.busy=false; bToast("📣 Session posted, but the video link or materials didn't save. Tap ✏️ Edit to add them · Nicht alles gespeichert"); bOpen(); return; }
     }
     H.started=false; H.busy=false;
@@ -3933,6 +4053,26 @@ VIEWS.host = function(){
   <h2>${H.editId?bi("Edit session","Session bearbeiten"):bi("Host a session","Session anbieten")}</h2>
   ${H.editId&&H.editTaken?`<p class="note">${H.editTaken} ${H.editTaken===1?"person is":"people are"} already in. If you change the time, length, title or languages, they'll be told by email and in the app. · Teilnehmende werden bei Änderungen informiert.</p>`:""}
   <div class="card">
+    <label class="lbl">Where · Wo</label>
+    <div class="row">${chip((H.fmt||"online")==="online","hSet('fmt','online')","💻 Online")}${chip(H.fmt==="in_person","hSet('fmt','in_person')","📍 In person")}</div>
+    ${H.fmt==="in_person"?`<div class="ipbox">
+      <label class="lbl" for="hcity">City · Stadt</label>
+      <input type="text" id="hcity" maxlength="80" placeholder="e.g. Erfurt" value="${esc(H.city||"")}" oninput="H.city=this.value">
+      <label class="lbl" for="hplace">Place · Ort</label>
+      <input type="text" id="hplace" maxlength="100" placeholder="e.g. Café Wildfang" value="${esc(H.place||"")}" oninput="H.place=this.value;H.cafe=null">
+      <div class="row" style="margin-top:6px"><button class="chip" onclick="hPickCafe()">☕ Pick from Language cafés</button></div>
+      <label class="lbl" for="harea">Area (optional) · Viertel</label>
+      <input type="text" id="harea" maxlength="80" placeholder="e.g. Altstadt" value="${esc(H.area||"")}" oninput="H.area=this.value">
+      <p class="note" style="margin:6px 0 0">👀 Everyone sees city, place and area. · Für alle sichtbar.</p>
+      <label class="lbl" for="haddr">Exact address · Genaue Adresse</label>
+      <input type="text" id="haddr" maxlength="200" placeholder="e.g. Domplatz 1, 99084 Erfurt" value="${esc(H.addr||"")}" oninput="H.addr=this.value">
+      <label class="lbl" for="hdirs">How to find us (optional) · So findet ihr uns</label>
+      <input type="text" id="hdirs" maxlength="200" placeholder="e.g. Table by the window, look for the 🇩🇪🇪🇸 flag" value="${esc(H.dirs||"")}" oninput="H.dirs=this.value">
+      <p class="note" style="margin:6px 0 10px">🔒 Only people who joined see the address and directions. · Nur Teilnehmende.</p>
+      <label style="display:flex;gap:10px;align-items:flex-start;cursor:pointer">
+        <input type="checkbox" ${H.pub?"checked":""} onchange="H.pub=this.checked" style="width:22px;height:22px;margin-top:2px;flex-shrink:0">
+        <span><b>It's a public place</b> (café, library, bar…), not a private home.<br><span class="de">Öffentlicher Ort, keine Privatwohnung.</span></span></label>
+    </div>`:""}
     <label class="lbl">Type · Art</label>
     <div class="row">${chip(H.type==="conversation","hSet('type','conversation')","💬 Free conversation")}${chip(H.type==="game","hSet('type','game')","🎲 PonteTalk game")}</div>
     ${H.type==="game"
@@ -3982,7 +4122,7 @@ VIEWS.host = function(){
     <div class="row">${INTERESTS.map(([k,e,en])=>chip(H.topics.includes(k),`hTopic('${k}')`,`${e} ${esc(en)}`)).join("")}</div>
     <label class="lbl" for="hnote">Note (optional) · Notiz (optional)</label>
     <input type="text" id="hnote" maxlength="200" placeholder="e.g. Beginners welcome! · Anfänger willkommen!" value="${esc(H.note)}" oninput="H.note=this.value">
-    <label class="lbl" for="hvideo">🎥 Video call link (optional) · Videoanruf-Link</label>
+    ${H.fmt==="in_person"?"":`<label class="lbl" for="hvideo">🎥 Video call link (optional) · Videoanruf-Link</label>
     <input type="text" id="hvideo" inputmode="url" autocomplete="off" maxlength="500" placeholder="Paste a Zoom, Meet, WhatsApp or Teams link" value="${esc(H.video||"")}" oninput="H.video=this.value">
     <div class="vbox">
       <div class="row" style="margin:0">
@@ -3992,6 +4132,7 @@ VIEWS.host = function(){
       <p class="note" style="margin:8px 0 0">🔒 Only people who joined see the link. It's also in their reminder emails and calendar file. · Nur Teilnehmende sehen den Link.</p>
       ${vProvider(H.video)==="jitsi"?`<p class="note" style="margin:6px 0 0">Jitsi is free and people join without an account. As the host, you sign in once (Google or GitHub) to start the room. Free rooms last up to 95 minutes. · Jitsi ist kostenlos; als Host meldest du dich kurz an. Räume laufen bis zu 95 Minuten.</p>`:""}
     </div>
+    `}
     <label class="lbl">📎 Materials (optional) · Materialien</label>
     ${(H.mats||[]).map((m,i)=>`<div class="mrow">
       ${m.shop_item ? `<div class="mshop">🛍 ${esc(m.label)} <span class="note" style="margin:0">· PonteShop</span></div>`
@@ -4074,6 +4215,7 @@ function rCard(s){
     ${(s.topics||[]).length?`<div class="row" style="margin-top:10px">${s.topics.map(k=>{ const it=INTERESTS.find(x=>x[0]===k); return it?`<span class="feat">${it[1]} ${esc(it[2])}</span>`:""; }).join("")}</div>`:""}
     ${q?`<div class="rask"><b>💬 Try asking · Frag doch mal</b><span dir="${T[q.lang]?T[q.lang].dir:"ltr"}" lang="${q.lang}">${esc(q.t)}</span></div>`:""}
     <div class="bwhen">🗓️ ${fmtWhen(s.starts_at)} · ${s.duration_min} min${hostT?`<small>${esc(hostT)}</small>`:""}</div>
+    ${placeLine(s)}
     <button class="btn ${full?"secondary":"primary"}" onclick="rAct('pt_join_activity','${id}')" ${B.busy?"disabled":""}>${label}</button>
     <div class="row" style="justify-content:center;margin-top:8px">
       <button class="chip" onclick="rHide('${id}')">🙈 Not interested</button>
@@ -4389,12 +4531,13 @@ function icsFor(s){
   const end=new Date(new Date(s.starts_at).getTime()+s.duration_min*60000);
   const url=(location.protocol.startsWith("http")?location.origin:"https://pontetalk.setzio.com")+"/?s="+s.activity_id;
   const vid=VL[s.activity_id] ? VL[s.activity_id].url : "";
+  const ploc=s.format==="in_person" ? [s.place_name, (PL[s.activity_id]||{}).address || [s.area,s.city].filter(Boolean).join(", ")].filter(Boolean).join(", ") : "";
   const txt=x=>String(x||"").replace(/[\\,;]/g,m=>"\\"+m).replace(/\n/g,"\\n");
   return ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//PonteTalk//EN","BEGIN:VEVENT",
     "UID:"+s.activity_id+"@pontetalk","DTSTAMP:"+f(new Date()),"DTSTART:"+f(s.starts_at),"DTEND:"+f(end),
     "SUMMARY:"+txt("PonteTalk: "+s.title),
     "DESCRIPTION:"+txt((vid?"Video call: "+vid+"\n\n":"")+((ML[s.activity_id]||[]).length?"Materials:\n"+(ML[s.activity_id]||[]).map(m=>"- "+m.label+": "+(m.url||(url.split("?")[0]+"?shop"))).join("\n")+"\n\n":"")+"Session on PonteTalk: "+url),
-    ...(vid?["LOCATION:"+txt(vid)]:[]), "URL:"+(vid||url),
+    ...(ploc?["LOCATION:"+txt(ploc)]:vid?["LOCATION:"+txt(vid)]:[]), "URL:"+(vid||url),
     "BEGIN:VALARM","TRIGGER:-PT15M","ACTION:DISPLAY","DESCRIPTION:"+txt(s.title),"END:VALARM",
     "END:VEVENT","END:VCALENDAR"].join("\r\n");
 }
@@ -4424,6 +4567,7 @@ function nextCard(){
       <p class="note" style="margin:0">${t1}–${t2} · ${codesPair(s.language_a,s.language_b)} · ${taken} of ${s.seats} joined · ${role}</p></div>
     <div class="dbtns">
       ${ciBtn(s,true)}
+      ${s.format==="in_person" && s.my_status!=="offered" ? pMapBtn(s,true) : ""}
       ${VL[s.activity_id] && s.my_status!=="offered" ? vBtn(s.activity_id, nowMs>=st-15*60000).replace("btn ","btn qbtn ").replace(" · Videoanruf","") : ""}
       ${roomNow ? `<button class="btn primary" onclick="bRoom('${s.activity_id}',${!!s.is_host})">🎮 ${s.is_host?"Open":"Enter"} game room</button>`
                 : `<button class="btn secondary qbtn" onclick="addToCal('${s.activity_id}')">${ICO.cal} Add to calendar</button>`}
@@ -4443,6 +4587,7 @@ function sCard(s){
     <p class="scodes">${codesPair(s.language_a,s.language_b)}</p>
     <button class="stitle" onclick="${A.user?`dOpen('${s.activity_id}')`:"bOpen()"}" aria-label="Details: ${esc(s.title)}">${esc(s.title)}</button>
     <p class="swhen">${fmtWhen(s.starts_at)}</p>
+    ${(()=>{ const b=bRowOf(s); return b&&b.format==="in_person"?`<p class="note" style="margin:0">📍 ${esc(b.place_name||"")}, ${esc(b.city||"")}</p>`:""; })()}
     ${short?`<p class="swhy">${esc(short)}</p>`:""}
     <p class="sseats ${full?"full":""}">${full?`Full${s.waitlisted?` · you'd be #${s.waitlisted+1}`:""}`:`${s.seats_open} seat${s.seats_open>1?"s":""} left`}</p>
     ${A.user ? `<button class="btn ${full?"secondary":"primary"}" onclick="rAct('pt_join_activity','${s.activity_id}')" ${B.busy?"disabled":""}>${btn}</button>`
@@ -4487,10 +4632,10 @@ function homeDash(){
   else if(R.noProfile) sugg=`<div class="card center"><h3 style="margin:4px 0">Get matched with language partners</h3>
       <p class="note">Add your languages and free times, and we'll suggest sessions for you.<br><span class="de">Trage Sprachen und Zeiten ein, dann schlagen wir dir Sessions vor.</span></p>
       <button class="btn secondary" onclick="xOpen()">Set up my exchange profile</button></div>`;
-  else if(!R.list.length) sugg=`<div class="card center"><h3 style="margin:4px 0">No matches right now · Gerade nichts Passendes</h3>
+  else if(!rVisible().length) sugg=`<div class="card center"><h3 style="margin:4px 0">No matches right now · Gerade nichts Passendes</h3>
       <p class="note">Host your own session and we'll show it to matching learners.</p>
       <button class="btn secondary" onclick="hOpen()">Host a session · Session anbieten</button></div>`;
-  else sugg=`<div class="dsg">${R.list.slice(0,4).map(sCard).join("")}</div>
+  else sugg=`<div class="dsg">${rVisible().slice(0,4).map(sCard).join("")}</div>
       <p class="note" style="margin:6px 0 0">Tap a title for details · <button class="linkbtn" onclick="bOpen()">See all sessions</button></p>`;
   const learn=(R.mine||[]).filter(m=>m.role==="learning").map(m=>T[m.code]?T[m.code].nameEn:m.code);
   const speak=(R.mine||[]).filter(m=>m.role!=="learning").map(m=>T[m.code]?T[m.code].nameEn:m.code);
@@ -4697,6 +4842,7 @@ function nbChanges(d){
     if(c.field==="time") return day(c.from)===day(c.to) ? `${nbClock(c.from)} → ${nbClock(c.to)} (${day(c.to)})` : `${fmtWhen(c.from)} → ${fmtWhen(c.to)}`;
     if(c.field==="length") return `${c.from} → ${c.to} min`;
     if(c.field==="title") return `new title "${esc(c.to)}"`;
+    if(c.field==="place") return "new meeting place 📍";
     if(c.field==="video") return "new video call link 🎥";
     if(c.field==="languages") return `languages now ${(c.to||[]).filter(Boolean).map(k=>T[k]?T[k].nameEn:k).join(" ⇄ ")}`;
     return "";
