@@ -289,6 +289,7 @@
   .shacts{display:flex;gap:8px;margin-top:10px}
   .shacts .btn{margin:0}
   .shacts .shpv{width:auto;flex:none;background:#fff;color:var(--ink);border:1.5px solid var(--line)}
+  .yt{display:inline-block;background:var(--teal-soft);color:var(--teal);border-radius:6px;padding:0 6px;font-size:.78em;font-weight:800;vertical-align:1px;white-space:nowrap}
   .fitb{display:inline-block;background:var(--teal-soft);color:var(--teal);border-radius:999px;padding:3px 10px;font-size:12px;font-weight:800;margin:4px 0 0;white-space:nowrap}
   .vlock{opacity:.55;filter:grayscale(.6);cursor:not-allowed;box-shadow:none}
   .shract{display:flex;gap:8px;align-items:center;flex:none}
@@ -2476,6 +2477,7 @@ async function loadProfile(){
     const { data, error } = await A.sb.from("profiles").select("display_name,practicing,level,avatar_url").eq("id", A.user.id).maybeSingle();
     if(error) throw error;
     A.profile = data || null;
+    if(!A._tzSynced){ A._tzSynced=true; try{ A.sb.rpc("pt_sync_time_zone",{ p_tz:detectTz() }).then(()=>{},()=>{}); }catch(e){} }
     if(A.profile && A.profile.display_name && !S.draft.name){
       S.draft.name=A.profile.display_name;
       if(A.profile.practicing && T[A.profile.practicing]) S.draft.lang=A.profile.practicing;
@@ -2881,7 +2883,7 @@ async function xLoad(){
     ]);
     if(p.error) throw p.error; if(l.error) throw l.error; if(a.error) throw a.error;
     const P=p.data||{};
-    X.tz=P.time_zone||detectTz(); X.city=P.city||""; X.interests=(P.interests||[]).slice();
+    X.tz=detectTz(); X.city=P.city||""; X.interests=(P.interests||[]).slice();
     X.adultAt=P.adult_confirmed_at||null; X.adult=!!X.adultAt;
     X.langs={}; (l.data||[]).forEach(r=>{ if(T[r.language_code]) X.langs[r.language_code]={role:r.role, level:r.level==null?null:rankLvl(r.level)}; });
     X.slots={}; (a.data||[]).forEach(r=>{ const s=SLOTS.find(s=>s[2]===String(r.start_time).slice(0,5)); if(s) X.slots[r.weekday+"-"+s[0]]=true; });
@@ -2986,9 +2988,9 @@ VIEWS.xprofile = function(){
   </div>
 
   <div class="card"><h3>📍 Where I am <span class="de">· Wo ich bin</span></h3>
-    <label class="lbl" for="xtz">Time zone · Zeitzone</label>
-    ${tzs?`<select id="xtz" class="xsel" onchange="X.tz=this.value">${tzs.map(z=>`<option ${z===X.tz?"selected":""}>${esc(z)}</option>`).join("")}</select>`
-         :`<input type="text" id="xtz" value="${esc(X.tz)}" oninput="X.tz=this.value">`}
+    <p class="lbl" style="margin-top:0">Time zone · Zeitzone</p>
+    <p style="margin:0 0 4px;font-weight:800">🕒 ${esc(tzName(X.tz))} <span class="note" style="font-weight:600">(${esc(X.tz)})</span></p>
+    <p class="note" style="margin:0 0 6px">Set automatically from your phone, so emails and reminders use your time. Travelling? It updates by itself.<br><span class="de">Automatisch vom Handy übernommen.</span></p>
     <label class="lbl" for="xcity">City (optional) · Stadt (optional)</label>
     <input type="text" id="xcity" maxlength="60" placeholder="e.g. Erfurt" value="${esc(X.city)}" oninput="X.city=this.value">
   </div>
@@ -3051,14 +3053,24 @@ function bToast(msg){
 function fmtWhen(iso){
   try{ return new Date(iso).toLocaleString("en-GB",{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}).replace(","," ·"); }catch(e){ return ""; }
 }
+function tzName(tz){ return String(tz||"").split("/").pop().replace(/_/g," "); }
+function timeIn(iso,tz){ try{ return new Date(iso).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit",timeZone:tz}); }catch(e){ return ""; } }
 function fmtHostTime(iso,tz){
   try{
     if(!tz || tz===detectTz()) return "";
-    const o={hour:"2-digit",minute:"2-digit"};
-    const t=new Date(iso).toLocaleTimeString("en-GB",{...o,timeZone:tz});
-    if(t===new Date(iso).toLocaleTimeString("en-GB",o)) return "";   // same clock time, no need to show
-    return `${t} for the host (${tz.split("/").pop().replace(/_/g," ")})`;
+    const t=timeIn(iso,tz);
+    if(t===new Date(iso).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})) return "";   // same clock time, no need to show
+    return `🌍 ${t} in ${tzName(tz)} (host's time)`;
   }catch(e){ return ""; }
+}
+function hostShort(iso,tz){ const h=fmtHostTime(iso,tz); return h ? `${timeIn(iso,tz)} ${tzName(tz)} (host)` : ""; }
+/* host: where are my people? */
+const ZN = {};
+function zonesLine(s){
+  const z=ZN[s.activity_id]; if(!s.is_host || !z || !z.length) return "";
+  const me=detectTz(); if(z.every(r=>r.time_zone===me)) return "";
+  const parts=z.map(r=>`${esc(tzName(r.time_zone))} ${timeIn(s.starts_at,r.time_zone)}${r.people>1?` (${r.people})`:""}`);
+  return `<p class="note" style="margin:6px 0 0">👥 People join from: ${parts.join(" · ")}</p>`;
 }
 function langPair(a,b){ const f=k=>T[k]?`${T[k].flag} ${esc(T[k].nameEn)}`:esc(k); return b ? `${f(a)} ⇄ ${f(b)}` : f(a); }
 function lvlRange(a,b){ return a===b ? RANKS[a] : `${RANKS[a]}–${RANKS[b]}`; }
@@ -3491,6 +3503,7 @@ function bRow(s, dayMode){
   return `<button class="brow ${s.is_host||s.my_status==="joined"?"mine":""}" onclick="sOpen('${s.activity_id}')" aria-label="${esc(s.title)}, ${esc(fmtWhen(s.starts_at))}">
     <div class="bt">${dayMode?"":`<i>${esc(day)}</i>`}<b>${t}</b></div>
     <div class="bm"><div class="brt">${s.visibility==="private"?"🔒 ":""}${g?"🎲 ":""}${esc(s.title)}</div>${fitsBadge(s)}
+      <div class="note" style="margin:0;font-size:12px">🕒 your time${hostShort(s.starts_at,s.host_time_zone)?` · ${esc(hostShort(s.starts_at,s.host_time_zone))}`:""}</div>
       <div class="note" style="margin:0">${s.format==="in_person"?`📍 ${esc(s.city||"")} · `:""}${codesPair(s.language_a,s.language_b)} · ${lvlRange(s.level_min,s.level_max)} · ${s.duration_min} min</div></div>
     ${CU[s.activity_id]?`<span title="Unread chat messages">💬${chBadge(s.activity_id)}</span>`:""}<span class="bs ${st[1]}">${st[0]}</span><span class="chev" aria-hidden="true">›</span></button>`;
 }
@@ -4243,7 +4256,7 @@ function bCard(s){
     <div class="btitle">${esc(s.title)}</div>${fitsBadge(s)}${sidesHtml?"":""}
     <div class="note" style="margin:0">${langPair(s.language_a,s.language_b)} · ${lvlRange(s.level_min,s.level_max)}</div>
     ${sidesHtml}
-    <div class="bwhen">🗓️ ${fmtWhen(s.starts_at)} · ${s.duration_min} min${hostT?`<small>${esc(hostT)}</small>`:""}</div>
+    <div class="bwhen">🗓️ ${fmtWhen(s.starts_at)} <span class="yt">your time</span> · ${s.duration_min} min${hostT?`<small>${esc(hostT)}</small>`:""}</div>${zonesLine(s)}
     ${placeLine(s)}
     <div class="note" style="margin:0">${avSmall(s.host_id)} ${esc(s.host_name||"Host")}${relBadges(s.host_reliability)}${rel}${s.host_languages&&s.host_languages.length?` · ${langsLine(s.host_languages)}`:""}</div>
     ${(s.topics||[]).length?`<div class="row" style="margin-top:8px">${s.topics.map(k=>{ const it=INTERESTS.find(x=>x[0]===k); return it?`<span class="feat">${it[1]} ${esc(it[2])}</span>`:""; }).join("")}</div>`:""}
@@ -4277,7 +4290,7 @@ VIEWS.board = function(){
   ${A.user?(FIT.has===false?`<button class="chip" style="margin:0 0 8px" onclick="xOpen()">🗓️ Add your free times to see what fits · Zeiten eintragen</button>`
     :`<div class="row" style="margin:0 0 8px"><button class="chip ${B.fit?"on":""}" aria-pressed="${!!B.fit}" onclick="B.fit=!B.fit;xr()">🕒 Fits my free time${FIT.ids.size?` (${FIT.ids.size})`:""}</button>
       <button class="linkbtn" style="font-size:13px" onclick="xOpen()">Edit my free times</button></div>`):""}
-  <div class="bbar"><p class="note">🕒 Times are in your time zone (${esc(detectTz())}) · Zeiten in deiner Zeitzone</p>${bViewSwitch()}</div>
+  <div class="bbar"><p class="note">🕒 All times are <b>your time</b>, from your phone (${esc(tzName(detectTz()))}). Everyone sees sessions in their own time automatically. · Zeiten in deiner Zeitzone.</p>${bViewSwitch()}</div>
   ${B.err?`<div class="err">${esc(B.err)}</div>`:""}
   ${list===null ? `<p class="note center" style="margin-top:30px">Loading… · Lädt…</p>`
     : (!shown.length && B.mine) ? `<div class="card center"><div style="font-size:40px">⭐</div><h3>No sessions yet · Noch keine eigenen Sessions</h3>
@@ -4330,6 +4343,7 @@ async function hostPeopleLoad(){
   const mine=(B.list||[]).filter(x=>x.is_host); if(!mine.length || !A.sb) return;
   await Promise.all(mine.map(async x=>{
     try{ const { data, error } = await A.sb.rpc("pt_session_people",{ p_activity:x.activity_id }); if(!error) B.people[x.activity_id]=data||[]; }catch(e){}
+    try{ const z = await A.sb.rpc("pt_session_zones",{ p_activity:x.activity_id }); if(!z.error) ZN[x.activity_id]=z.data||[]; }catch(e){}
   }));
   avCollect();
   if(S.screen==="board" || S.screen==="session") xr();
@@ -4682,7 +4696,7 @@ function rCard(s){
       <ul class="rwhy">${s.reasons.map(r=>`<li>✅ ${esc(r)}</li>`).join("")}</ul>`:""}
     ${(s.topics||[]).length?`<div class="row" style="margin-top:10px">${s.topics.map(k=>{ const it=INTERESTS.find(x=>x[0]===k); return it?`<span class="feat">${it[1]} ${esc(it[2])}</span>`:""; }).join("")}</div>`:""}
     ${q?`<div class="rask"><b>💬 Try asking · Frag doch mal</b><span dir="${T[q.lang]?T[q.lang].dir:"ltr"}" lang="${q.lang}">${esc(q.t)}</span></div>`:""}
-    <div class="bwhen">🗓️ ${fmtWhen(s.starts_at)} · ${s.duration_min} min${hostT?`<small>${esc(hostT)}</small>`:""}</div>
+    <div class="bwhen">🗓️ ${fmtWhen(s.starts_at)} <span class="yt">your time</span> · ${s.duration_min} min${hostT?`<small>${esc(hostT)}</small>`:""}</div>${zonesLine(s)}
     ${placeLine(s)}
     <button class="btn ${full?"secondary":"primary"}" onclick="rAct('pt_join_activity','${id}')" ${B.busy?"disabled":""}>${label}</button>
     <div class="row" style="justify-content:center;margin-top:8px">
@@ -5274,7 +5288,7 @@ function sCard(s){
     <span class="stag ${g&&!s.perfect_match?"game":""}">${s.perfect_match?"Perfect match":g?"Game":"Conversation"}</span>
     <p class="scodes">${codesPair(s.language_a,s.language_b)}</p>
     <button class="stitle" onclick="${A.user?`dOpen('${s.activity_id}')`:"bOpen()"}" aria-label="Details: ${esc(s.title)}">${esc(s.title)}</button>
-    <p class="swhen">${fmtWhen(s.starts_at)}</p>
+    <p class="swhen">${fmtWhen(s.starts_at)} <span class="yt">your time</span></p>${fmtHostTime(s.starts_at,s.host_time_zone)?`<p class="note" style="margin:0 0 4px;font-size:13px">${esc(fmtHostTime(s.starts_at,s.host_time_zone))}</p>`:""}
     ${(()=>{ const b=bRowOf(s); return b&&b.format==="in_person"?`<p class="note" style="margin:0">📍 ${esc(b.place_name||"")}, ${esc(b.city||"")}</p>`:""; })()}
     ${short?`<p class="swhy">${esc(short)}</p>`:""}
     <p class="sseats ${full?"full":""}">${full?`Full${s.waitlisted?` · you'd be #${s.waitlisted+1}`:""}`:`${s.seats_open} seat${s.seats_open>1?"s":""} left`}</p>
