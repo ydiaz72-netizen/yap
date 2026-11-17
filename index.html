@@ -240,6 +240,24 @@
   .shstats{background:var(--plum-soft);color:var(--plum);border-radius:12px;padding:8px 10px;font-size:13px;font-weight:700}
   .shadm{display:flex;gap:6px;flex-wrap:wrap}
   .shadm .chip{font-size:13px;padding:6px 10px}
+  .shfgrp{margin:0 0 10px}
+  .shfgrp .lbl{margin:0 0 6px}
+  .shfgrp .row{gap:6px;margin:0}
+  .shfgrp .chip{font-size:13px;padding:6px 11px}
+  .shftop{display:flex;gap:8px;align-items:center;margin:0 0 10px;flex-wrap:wrap}
+  .shftop input{flex:1;min-width:180px;margin:0}
+  .shftog{display:none}
+  .shfwrap{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 14px 4px;margin-bottom:12px}
+  @media (max-width:699px){ .shftog{display:inline-flex} .shfwrap{display:none} .shfwrap.open{display:block} }
+  .shtopics{display:flex;flex-wrap:wrap;gap:4px}
+  .shtopics span{font-size:11px;font-weight:700;color:var(--plum);background:var(--plum-soft);border-radius:999px;padding:2px 8px}
+  .shlist{display:flex;flex-direction:column;gap:8px}
+  .shrow{display:flex;gap:12px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+  .shrow.off{opacity:.6;border-style:dashed}
+  .shrow .shico{width:42px;height:42px;font-size:20px;border-radius:12px}
+  .shrow .rt{font-weight:800;line-height:1.25}
+  .shrow .btn{width:auto;margin:0;padding:9px 14px;font-size:14px;flex:none}
+  @media (max-width:420px){ .shrow .hidesm{display:none} }
   .shfile{display:flex;align-items:center;gap:10px;border:2px dashed var(--line);border-radius:14px;padding:14px;background:#fff;cursor:pointer;font-weight:700}
   .shfile input{display:none}
   .dash{display:grid;gap:18px}
@@ -4541,7 +4559,29 @@ function navSync(){
 
 
 /* ===================== PONTESHOP ===================== */
-const SH = { list:null, lang:"", lvl:-1, err:"", msg:"", busy:false, admin:false, f:null };
+const SH = { list:null, lang:"", lvl:-1, err:"", msg:"", busy:false, admin:false, f:null,
+  fl:{ lang:[], base:[], topic:[], lvl:[], kind:[] }, q:"", view:null, showF:false };
+const SH_TOPICS = [
+  ["grammar","📐","Grammar","Grammatik"],["vocabulary","📚","Vocabulary","Wortschatz"],["conversation","💬","Conversation","Gespräch"],
+  ["pronunciation","🔊","Pronunciation","Aussprache"],["culture","🌍","Culture","Kultur"],["everyday","🏠","Everyday life","Alltag"],
+  ["travel","✈️","Travel","Reisen"],["work","💼","Work","Arbeit"],["exams","🎓","Exams","Prüfungen"]
+];
+function shTopic(k){ return SH_TOPICS.find(x=>x[0]===k)||[k,"🏷️",k,k]; }
+function shView(){ if(!SH.view){ try{ SH.view=localStorage.getItem("pt_shview"); }catch(e){} SH.view=SH.view==="list"?"list":"grid"; } return SH.view; }
+function shSetView(v){ SH.view=v; try{ localStorage.setItem("pt_shview",v); }catch(e){} xr(); }
+function shToggle(g,v){ const a=SH.fl[g], i=a.indexOf(v); if(i>=0) a.splice(i,1); else a.push(v); xr(); }
+function shFCount(){ return Object.values(SH.fl).reduce((n,a)=>n+a.length,0); }
+function shClear(){ Object.keys(SH.fl).forEach(k=>SH.fl[k]=[]); SH.q=""; xr(); }
+function shMatch(it){
+  const F=SH.fl, q=cfNorm(SH.q).trim();
+  if(F.lang.length && it.language && !F.lang.includes(it.language)) return false;
+  if(F.base.length && !F.base.includes(it.base_language||"en")) return false;
+  if(F.topic.length && !(it.topics||[]).some(t=>F.topic.includes(t))) return false;
+  if(F.lvl.length && it.level!=null && !F.lvl.includes(it.level)) return false;
+  if(F.kind.length && !F.kind.includes(it.kind)) return false;
+  if(q && !cfNorm(`${it.title} ${it.description||""}`).includes(q)) return false;
+  return true;
+}
 const SH_KINDS = [
   ["worksheet","📝","Worksheet","Arbeitsblatt"],
   ["flashcards","🃏","Flashcards","Karteikarten"],
@@ -4596,7 +4636,8 @@ function shCard(it){
       <div class="shico" style="${t?`background:${t.color}1F`:""}">${k[1]}</div>
       <div style="min-width:0;flex:1">
         <h3>${esc(it.title)}</h3>
-        <div class="shmeta"><span class="shfree">${it.price_cents>0?"Paid":"Free"}</span><span>${t?`${t.flag} ${esc(t.nameEn)}`:"🌍 Any language"}</span><span>${lvl}</span><span>${k[2]}</span></div>
+        <div class="shmeta"><span class="shfree">${it.price_cents>0?"Paid":"Free"}</span><span>${t?`${t.flag} ${esc(t.nameEn)}`:"🌍 Any language"}</span><span>${lvl}</span><span>${k[2]}</span>${T[it.base_language]?`<span title="Explanations are in ${esc(T[it.base_language].nameEn)}">📖 in ${esc(T[it.base_language].nameEn)}</span>`:""}</div>
+        ${(it.topics||[]).length?`<div class="shtopics" style="margin-top:6px">${it.topics.map(x=>{ const tp=shTopic(x); return `<span>${tp[1]} ${esc(tp[2])}</span>`; }).join("")}</div>`:""}
       </div>
     </div>
     ${it.description?`<p class="shdesc">${esc(it.description)}</p>`:""}
@@ -4605,11 +4646,40 @@ function shCard(it){
   </div>`;
 }
 
-VIEWS.shop = function(){
+function shRow(it){
+  const k=shKind(it.kind), t=T[it.language], b=T[it.base_language], busy=SH.busy===it.id;
+  const btn = !A.user ? `<button class="btn secondary" onclick="A.ret='shop';A.err='';A.msg='';go('account')">Sign in</button>`
+    : `<button class="btn primary" ${busy?"disabled":""} onclick="shGet('${it.id}')">${busy?"…":"⬇"}<span class="hidesm"> Download</span></button>`;
+  return `<div class="shrow ${it.published?"":"off"}">
+    <div class="shico" style="${t?`background:${t.color}1F`:""}">${k[1]}</div>
+    <div style="flex:1;min-width:0"><div class="rt">${esc(it.title)}</div>
+      <div class="note" style="margin:2px 0 0">${t?`${t.flag} ${esc(t.nameEn)}`:"🌍 Any"} · ${it.level==null?"All levels":RANKS[it.level]} · ${esc(k[2])}${b?` · 📖 in ${esc(b.nameEn)}`:""}${SH.admin?` · ⬇ ${it.downloads||0}`:""}${it.mine&&A.user?" · ✓":""}</div></div>
+    ${SH.admin?`<button class="chip" style="flex:none" onclick="shEdit('${it.id}')" aria-label="Edit">✏️</button>`:""}${btn}</div>`;
+}
+function shListHtml(){
   const list=SH.list;
-  const shown=(list||[]).filter(it=>(!SH.lang || it.language===SH.lang || !it.language) && (SH.lvl<0 || it.level==null || it.level===SH.lvl));
-  const chip=(on,click,label)=>`<button class="chip ${on?"on":""}" aria-pressed="${on}" onclick="${click}">${label}</button>`;
-  const langs=LANG_KEYS.filter(k=>(list||[]).some(it=>it.language===k));
+  if(list===null) return `<p class="note center" style="margin-top:30px">Loading… · Lädt…</p>`;
+  if(!list.length) return `<div class="card center"><div style="font-size:44px">🎁</div>
+        <h3>First resources coming soon · Bald gibt's die ersten Materialien</h3>
+        <p class="note">Worksheets, flashcards and conversation guides, made by PonteTalk. Free for members.<br><span class="de">Arbeitsblätter, Karteikarten und Gesprächsleitfäden – kostenlos für Mitglieder.</span></p>
+        ${A.user?"":`<button class="btn secondary" onclick="A.ret='shop';A.err='';A.msg='';go('account')">Create a free account · Kostenloses Konto</button>`}</div>`;
+  const shown=list.filter(shMatch);
+  if(!shown.length) return `<div class="card center"><p class="note">Nothing matches these filters yet · Nichts gefunden</p>
+      <p class="note">Missing something? Tell us: <a href="mailto:${esc(LEGAL.email)}">${esc(LEGAL.email)}</a></p>
+      <button class="chip" onclick="shClear()">✕ Clear filters · Filter löschen</button></div>`;
+  return `<p class="note" style="margin:0 0 8px">${shown.length} resource${shown.length>1?"s":""}${shown.length<list.length?` of ${list.length}`:""}</p>`
+    + (shView()==="list" ? `<div class="shlist">${shown.map(shRow).join("")}</div>` : `<div class="shgrid">${shown.map(shCard).join("")}</div>`);
+}
+function shPaint(){ const el=document.getElementById("shlist"); if(el) el.innerHTML=shListHtml(); }
+VIEWS.shop = function(){
+  const list=SH.list||[], F=SH.fl, n=shFCount();
+  const chip=(g,v,label)=>`<button class="chip ${F[g].includes(v)?"on":""}" aria-pressed="${F[g].includes(v)}" onclick="shToggle('${g}',${typeof v==="number"?v:`'${v}'`})">${label}</button>`;
+  const langs=LANG_KEYS.filter(k=>list.some(it=>it.language===k));
+  const bases=LANG_KEYS.filter(k=>list.some(it=>(it.base_language||"en")===k));
+  const topics=SH_TOPICS.filter(tp=>list.some(it=>(it.topics||[]).includes(tp[0])));
+  const kinds=SH_KINDS.filter(kd=>list.some(it=>it.kind===kd[0]));
+  const grp=(title,de,html)=>html?`<div class="shfgrp"><div class="lbl">${title} · ${de}</div><div class="row">${html}</div></div>`:"";
+  const v=shView(), vb=(k,l)=>`<button class="${v===k?"on":""}" aria-pressed="${v===k}" onclick="shSetView('${k}')">${l}</button>`;
   return `<div class="topline"><button class="chip" onclick="goHome()">← Back</button><span>PonteShop</span></div>
   <div class="shhero">
     <h2>PonteShop <span class="shfree">Free</span></h2>
@@ -4617,21 +4687,25 @@ VIEWS.shop = function(){
   </div>
   ${SH.admin?`<button class="btn primary" style="margin-bottom:12px" onclick="shNew()">＋ Add resource · Material hinzufügen</button>`:""}
   ${SH.msg?`<div class="card center" style="padding:10px;margin-bottom:10px;background:var(--teal-soft)">${esc(SH.msg)}</div>`:""}
-  ${(list&&list.length>1)?`
-  <div class="shfl">${chip(!SH.lang,"SH.lang='';xr()","🌍 All")}${langs.map(k=>chip(SH.lang===k,`SH.lang='${k}';xr()`,`${T[k].flag} ${esc(T[k].nameEn)}`)).join("")}</div>
-  <div class="shfl">${chip(SH.lvl<0,"SH.lvl=-1;xr()","All levels")}${RANKS.map((r,i)=>chip(SH.lvl===i,`SH.lvl=${i};xr()`,r)).join("")}</div>`:""}
+  ${list.length?`
+  <div class="shftop">
+    <input type="text" placeholder="🔍 Search · Suchen" value="${esc(SH.q)}" oninput="SH.q=this.value;shPaint()" autocomplete="off">
+    <button class="chip shftog ${n?"on":""}" onclick="SH.showF=!SH.showF;xr()">🔎 Filters${n?` (${n})`:""}</button>
+    <div class="vsw" role="group" aria-label="View">${vb("grid","▦ Grid")}${vb("list","☰ List")}</div>
+  </div>
+  <div class="shfwrap ${SH.showF?"open":""}">
+    ${grp("I want to learn","Ich lerne",langs.map(k=>chip("lang",k,`${T[k].flag} ${esc(T[k].nameEn)}`)).join(""))}
+    ${grp("Explained in","Erklärt auf",bases.map(k=>chip("base",k,`${T[k].flag} ${esc(T[k].nameEn)}`)).join(""))}
+    ${grp("Topic","Thema",topics.map(tp=>chip("topic",tp[0],`${tp[1]} ${esc(tp[2])}`)).join(""))}
+    ${grp("Level","Niveau",RANKS.map((r,i)=>chip("lvl",i,r)).join(""))}
+    ${grp("Type","Art",kinds.map(kd=>chip("kind",kd[0],`${kd[1]} ${esc(kd[2])}`)).join(""))}
+    ${n?`<p style="margin:0 0 10px"><button class="linkbtn" onclick="shClear()">✕ Clear all filters · Alle Filter löschen</button></p>`:""}
+  </div>`:""}
   ${SH.err?`<div class="err">${esc(SH.err)}</div>`:""}
-  ${list===null ? `<p class="note center" style="margin-top:30px">Loading… · Lädt…</p>`
-    : !list.length ? `<div class="card center"><div style="font-size:44px">🎁</div>
-        <h3>First resources coming soon · Bald gibt's die ersten Materialien</h3>
-        <p class="note">Worksheets, flashcards and conversation guides, made by PonteTalk. Free for members.<br><span class="de">Arbeitsblätter, Karteikarten und Gesprächsleitfäden – kostenlos für Mitglieder.</span></p>
-        ${A.user?"":`<button class="btn secondary" onclick="A.ret='shop';A.err='';A.msg='';go('account')">Create a free account · Kostenloses Konto</button>`}</div>`
-    : !shown.length ? `<div class="card center"><p class="note">Nothing for this filter yet · Für diesen Filter noch nichts</p><button class="chip" onclick="SH.lang='';SH.lvl=-1;xr()">Show all · Alle zeigen</button></div>`
-    : `<div class="shgrid">${shown.map(shCard).join("")}</div>`}
+  <div id="shlist">${shListHtml()}</div>
   <p class="note center" style="margin-top:16px">Ideas for a resource you'd love? Tell us · Wünsche? Schreib uns: <a href="mailto:${esc(LEGAL.email)}">${esc(LEGAL.email)}</a></p>
   ${legalLinks()}`;
 };
-
 async function shGet(id){
   if(!A.user){ A.ret="shop"; A.err=""; A.msg=""; go("account"); return; }
   if(SH.busy) return;
@@ -4651,15 +4725,16 @@ async function shGet(id){
 }
 
 /* ---- Admin: add / edit / hide / delete ---- */
-function shNew(){ SH.err=""; SH.msg=""; SH.f={ id:null, title:"", desc:"", lang:"", lvl:-1, kind:"worksheet", published:true, file:null, path:"", fileName:"", size:0 }; go("shopedit"); }
+function shNew(){ SH.err=""; SH.msg=""; SH.f={ id:null, title:"", desc:"", lang:"", lvl:-1, kind:"worksheet", published:true, base:"en", topics:[], file:null, path:"", fileName:"", size:0 }; go("shopedit"); }
 async function shEdit(id){
   SH.err=""; SH.msg="";
   const r=await A.sb.from("shop_items").select("*").eq("id",id).single();
   if(r.error){ SH.err=shErr(r.error); xr(); return; }
   const d=r.data;
-  SH.f={ id:d.id, title:d.title, desc:d.description||"", lang:d.language||"", lvl:d.level==null?-1:d.level, kind:d.kind, published:d.published, file:null, path:d.file_path, fileName:d.file_name, size:d.file_size||0 };
+  SH.f={ id:d.id, title:d.title, desc:d.description||"", lang:d.language||"", lvl:d.level==null?-1:d.level, kind:d.kind, published:d.published, base:d.base_language||"en", topics:(d.topics||[]).slice(), file:null, path:d.file_path, fileName:d.file_name, size:d.file_size||0 };
   go("shopedit");
 }
+function shFTopic(k){ const a=SH.f.topics=(SH.f.topics||[]), i=a.indexOf(k); if(i>=0) a.splice(i,1); else a.push(k); xr(); }
 function shPick(inp){
   const f=inp.files && inp.files[0]; if(!f) return;
   if(f.size>SH_MAX){ SH.err="File too big (max 50 MB) · Datei zu groß (max. 50 MB)"; inp.value=""; xr(); return; }
@@ -4689,6 +4764,11 @@ VIEWS.shopedit = function(){
     <div class="row">${chip(!f.lang,"SH.f.lang='';xr()","🌍 Any")}${LANG_KEYS.map(k=>chip(f.lang===k,`SH.f.lang='${k}';xr()`,`${T[k].flag} ${esc(T[k].nameEn)}`)).join("")}</div>
     <label class="lbl">Level · Niveau</label>
     <div class="row">${chip(f.lvl<0,"SH.f.lvl=-1;xr()","All levels")}${RANKS.map((r,i)=>chip(f.lvl===i,`SH.f.lvl=${i};xr()`,r)).join("")}</div>
+    <label class="lbl">Explained in · Erklärt auf</label>
+    <div class="row">${LANG_KEYS.map(k=>chip((f.base||"en")===k,`SH.f.base='${k}';xr()`,`${T[k].flag} ${esc(T[k].nameEn)}`)).join("")}</div>
+    <p class="note" style="margin:4px 0 0">The language of the translations and tips, e.g. Spanish for "Alemán en el café". · Sprache der Erklärungen.</p>
+    <label class="lbl">Topics (pick all that fit) · Themen</label>
+    <div class="row">${SH_TOPICS.map(tp=>chip((f.topics||[]).includes(tp[0]),`shFTopic('${tp[0]}')`,`${tp[1]} ${esc(tp[2])}`)).join("")}</div>
     <label class="lbl">Visible · Sichtbar</label>
     <div class="row">${chip(f.published,"SH.f.published=true;xr()","👁 Visible to everyone")}${chip(!f.published,"SH.f.published=false;xr()","🙈 Hidden (draft)")}</div>
     <p class="note">Price: Free · Preis: kostenlos. Only upload material you made yourself or have the rights to share. · Nur eigene Materialien hochladen.</p>
@@ -4714,7 +4794,7 @@ async function shSave(){
       if(f.id) oldPath=f.path;
       path=newPath; name=f.file.name; size=f.file.size;
     }
-    const row={ title, description:(f.desc||"").trim()||null, language:f.lang||null, level:f.lvl<0?null:f.lvl, kind:f.kind, published:!!f.published, file_path:path, file_name:name, file_size:size };
+    const row={ title, description:(f.desc||"").trim()||null, language:f.lang||null, level:f.lvl<0?null:f.lvl, kind:f.kind, published:!!f.published, base_language:f.base||"en", topics:f.topics||[], file_path:path, file_name:name, file_size:size };
     if(f.id){
       const r=await A.sb.from("shop_items").update(row).eq("id",f.id); if(r.error) throw r.error;
       if(oldPath) A.sb.storage.from("shop").remove([oldPath]).catch(()=>{});
