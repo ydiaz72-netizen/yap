@@ -230,7 +230,7 @@
   .shhero h2{color:#fff;margin:0 0 4px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
   .shhero p{margin:0;opacity:.92;font-weight:600}
   .shhero .de{color:#fff;opacity:.75}
-  .shfree{display:inline-block;background:var(--teal);color:#fff;font-weight:800;font-size:11px;letter-spacing:.05em;padding:3px 9px;border-radius:999px;text-transform:uppercase;vertical-align:middle}
+  .shfree{white-space:nowrap;display:inline-block;background:var(--teal);color:#fff;font-weight:800;font-size:11px;letter-spacing:.05em;padding:3px 9px;border-radius:999px;text-transform:uppercase;vertical-align:middle}
   .shhero .shfree{background:var(--sun);color:var(--ink);font-size:12px}
   .shfl{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none}
   .shfl::-webkit-scrollbar{display:none}
@@ -4802,7 +4802,7 @@ function shCard(it){
       <div class="shico" style="${t?`background:${t.color}1F`:""}">${k[1]}</div>
       <div style="min-width:0;flex:1">
         <h3>${esc(it.title)}</h3>
-        <div class="shmeta"><span class="shfree">${it.price_cents>0?"Paid":"Free"}</span><span>${t?`${t.flag} ${esc(t.nameEn)}`:"🌍 Any language"}</span><span>${lvl}</span><span>${k[2]}</span>${T[it.base_language]?`<span title="Explanations are in ${esc(T[it.base_language].nameEn)}">📖 in ${esc(T[it.base_language].nameEn)}</span>`:""}</div>
+        <div class="shmeta"><span class="shfree">${it.price_cents>0?"Paid":"Free · Gratis"}</span><span>${t?`${t.flag} ${esc(t.nameEn)}`:"🌍 Any language"}</span><span>${lvl}</span><span>${k[2]}</span>${T[it.base_language]?`<span title="Explanations are in ${esc(T[it.base_language].nameEn)}">📖 in ${esc(T[it.base_language].nameEn)}</span>`:""}</div>
         ${(it.topics||[]).length?`<div class="shtopics" style="margin-top:6px">${it.topics.map(x=>{ const tp=shTopic(x); return `<span>${tp[1]} ${esc(tp[2])}</span>`; }).join("")}</div>`:""}
       </div>
     </div>
@@ -4818,7 +4818,7 @@ function shRow(it){
     : `<button class="btn primary" ${busy?"disabled":""} onclick="shGet('${it.id}')">${busy?"…":it.has_link?"↗":"⬇"}<span class="hidesm"> ${it.has_link?"Open":"Download"}</span></button>`;
   return `<div class="shrow ${it.published?"":"off"}">
     <div class="shico" style="${t?`background:${t.color}1F`:""}">${k[1]}</div>
-    <div style="flex:1;min-width:0"><div class="rt">${esc(it.title)}</div>
+    <div style="flex:1;min-width:0"><div class="rt">${esc(it.title)}${it.price_cents>0?"":` <span class="shfree" style="margin-left:6px;vertical-align:2px">Free · Gratis</span>`}</div>
       <div class="note" style="margin:2px 0 0">${t?`${t.flag} ${esc(t.nameEn)}`:"🌍 Any"} · ${it.level==null?"All levels":RANKS[it.level]} · ${esc(k[2])}${b?` · 📖 in ${esc(b.nameEn)}`:""}${SH.admin?` · ⬇ ${it.downloads||0}`:""}${it.mine&&A.user?" · ✓":""}</div></div>
     ${SH.admin||it.is_owner?`<button class="chip" style="flex:none" onclick="shEdit('${it.id}')" aria-label="Edit">✏️</button>`:""}${A.user&&shCanPreview(it)?`<button class="chip" style="flex:none" onclick="shPreview('${it.id}')" aria-label="Preview" title="Preview · Vorschau">👁<span class="hidesm"> Preview</span></button>`:""}${btn}</div>`;
 }
