@@ -177,6 +177,13 @@
   .nbitem .nbu{width:8px;height:8px;border-radius:4px;background:var(--coral);flex:none;margin-top:7px}
   .nbitem .nbu.r{background:transparent}
   .nbitem small{display:block;font-weight:500;color:var(--muted);font-size:12px;margin-top:2px}
+  @media (min-width:900px){ #nbSheet{align-items:flex-start;justify-content:flex-end;background:rgba(27,42,65,.12)} #nbSheet .sheet{margin:70px max(24px,calc((100vw - 1000px)/2 + 24px)) 0 0;width:400px;max-width:400px;border-radius:18px;max-height:72vh;box-shadow:0 16px 40px rgba(27,42,65,.18)} }
+  .nbrow{display:flex;align-items:stretch;border-top:1px solid var(--line)}
+  .nbrow .nbitem{border-top:none;flex:1}
+  .nbx{flex:none;width:44px;background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;border-radius:10px}
+  .nbx:hover{background:#F1F4F9;color:var(--ink)}
+  .npoff{opacity:.45;pointer-events:none}
+  .nplabel{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:14px 0 2px}
   .ptoast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 18px;border-radius:14px;font-weight:700;z-index:9999;max-width:92vw;box-shadow:0 8px 24px rgba(0,0,0,.25);text-align:center}
   .player{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line)}
   .player:last-child{border-bottom:none}
@@ -3437,7 +3444,7 @@ VIEWS.session = function(){
 };
 
 /* ===================== NOTIFICATION SETTINGS ===================== */
-const NP = { loaded:false, busy:false, v:{ seat_offers:true, approvals:true, join_requests:true, reminders:true, cancellations:true } };
+const NP = { loaded:false, busy:false, v:{ all_emails:true, in_app:true, seat_offers:true, approvals:true, join_requests:true, reminders:true, cancellations:true } };
 const NP_ITEMS = [
   ["seat_offers","🎉 Seat offers from the waitlist","Freie Plätze von der Warteliste"],
   ["approvals","✅ Host approved / declined my request","Zu- oder Absage vom Host"],
@@ -3449,34 +3456,50 @@ async function npLoad(){
   if(!A.user || NP.loaded || NP.busy) return;
   NP.busy=true;
   try{
-    const { data } = await A.sb.from("notification_prefs").select("seat_offers,approvals,join_requests,reminders,cancellations").eq("user_id",A.user.id).maybeSingle();
+    const { data } = await A.sb.from("notification_prefs").select("all_emails,in_app,seat_offers,approvals,join_requests,reminders,cancellations").eq("user_id",A.user.id).maybeSingle();
     if(data) NP.v=data;
     NP.loaded=true;
   }catch(e){}
   NP.busy=false;
-  if(S.screen==="account") xr();
+  if(S.screen==="account") xr(); else navSync();
 }
 async function npToggle(k){
   const on=!NP.v[k];
   if(k==="seat_offers" && !on && !window.confirm("Turn off seat offers? You only have 30 minutes to accept a free seat, so you may miss it. · Wirklich abschalten?")) return;
+  if(k==="all_emails" && !on && !window.confirm("Turn off ALL emails, including seat offers and reminders? · ALLE E-Mails abschalten?")) return;
   NP.v[k]=on; xr();
+  if(k==="in_app"){ if(on){ nbLoad(); } navSync(); }
   try{
     const { error } = await A.sb.from("notification_prefs").upsert({ user_id:A.user.id, ...NP.v, updated_at:new Date().toISOString() });
     if(error) throw error;
     bToast(on?"Turned on · Eingeschaltet":"Turned off · Ausgeschaltet");
   }catch(e){ NP.v[k]=!on; xr(); bToast(bErr(e)); }
 }
+function npSwitch(k,en,de,extra){
+  return `<button class="bonus" style="margin-top:8px" role="switch" aria-checked="${!!NP.v[k]}" onclick="npToggle('${k}')" ${extra||""}>
+      <span style="text-align:left"><b style="font-size:15px">${en}</b><br><span class="note" style="font-size:13px">${de}</span></span>
+      <span style="flex:none;width:46px;height:28px;border-radius:14px;background:${NP.v[k]?"var(--teal)":"#D7DCE4"};position:relative;transition:background .15s">
+        <span style="position:absolute;top:3px;left:${NP.v[k]?"21px":"3px"};width:22px;height:22px;border-radius:11px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:left .15s"></span></span>
+    </button>`;
+}
 function npCard(){
   if(!A.user) return "";
   if(!NP.loaded){ setTimeout(npLoad,0); }
-  return `<div class="card"><h3>📧 Email notifications <span class="de">· Benachrichtigungen</span></h3>
-    <p class="note" style="margin-top:0">Sent to ${esc(A.user.email||"your email")}. Tap to turn on or off.</p>
+  const v=NP.v;
+  return `<div class="card"><h3>🔔 Notifications <span class="de">· Benachrichtigungen</span></h3>
+    ${npSwitch("in_app","🔔 Bell in the app","Glocke in der App: Hinweise direkt in PonteTalk")}
+    ${npSwitch("all_emails","📧 Emails",`An ${esc(A.user.email||"deine E-Mail")} · to your email`)}
+    ${!v.all_emails && !v.in_app?`<p class="note" style="color:#B54530;margin:8px 0 0">⚠️ All notifications are off. You may miss free seats, approvals and reminders. · Alle Benachrichtigungen sind aus.</p>`:""}
+    <p class="nplabel">Emails for · E-Mails bei</p>
+    <div class="${v.all_emails?"":"npoff"}" aria-disabled="${!v.all_emails}">
     ${NP_ITEMS.map(([k,en,de])=>`<button class="bonus" style="margin-top:8px" role="switch" aria-checked="${!!NP.v[k]}" onclick="npToggle('${k}')">
       <span style="text-align:left"><b style="font-size:15px">${en}</b><br><span class="note" style="font-size:13px">${de}</span></span>
       <span style="flex:none;width:46px;height:28px;border-radius:14px;background:${NP.v[k]?"var(--teal)":"#D7DCE4"};position:relative;transition:background .15s">
         <span style="position:absolute;top:3px;left:${NP.v[k]?"21px":"3px"};width:22px;height:22px;border-radius:11px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:left .15s"></span></span>
     </button>`).join("")}
-    ${!NP.v.seat_offers?`<p class="note" style="color:#B54530;margin:8px 0 0">⚠️ With seat offers off, you may miss free seats from the waitlist.</p>`:""}
+    </div>
+    ${v.all_emails && !v.seat_offers?`<p class="note" style="color:#B54530;margin:8px 0 0">⚠️ With seat offers off, you may miss free seats from the waitlist.</p>`:""}
+    ${!v.all_emails?`<p class="note" style="margin:8px 0 0">Emails are off. Turn on 📧 Emails above to choose which ones you get.</p>`:""}
   </div>`;
 }
 
@@ -3484,7 +3507,7 @@ function npCard(){
 const NB = { list:[], unread:0, timer:null };
 ICO.bell = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>';
 function bellBtn(){
-  if(!A.user) return "";
+  if(!A.user || (NP.loaded && !NP.v.in_app)) return "";
   const n=NB.unread;
   return `<button class="nbbell" aria-label="Notifications${n?` (${n} unread)`:""}" onclick="nbOpen()">${ICO.bell}${n?`<span class="nbdot">${n>9?"9+":n}</span>`:""}</button>`;
 }
@@ -3497,13 +3520,13 @@ async function nbLoad(){
     NB.list=data||[];
     NB.unread=NB.list.filter(n=>!n.read_at).length;
     bellSync();
-    const open=document.getElementById("nbList"); if(open) open.innerHTML=nbItems();
+    if(document.getElementById("nbList")) nbRefreshPanel();
   }catch(e){}
 }
 function nbStart(){
   if(NB.timer || !A.user) return;
-  nbLoad();
-  NB.timer=setInterval(()=>{ if(A.user && document.visibilityState==="visible") nbLoad(); }, 60000);
+  npLoad(); nbLoad();
+  NB.timer=setInterval(()=>{ if(A.user && NP.v.in_app && document.visibilityState==="visible") nbLoad(); }, 60000);
 }
 function nbAgo(iso){
   const m=Math.max(0,Math.round((Date.now()-new Date(iso).getTime())/60000));
@@ -3528,8 +3551,9 @@ function nbText(n){
 }
 function nbItems(){
   if(!NB.list.length) return `<p class="note center" style="margin:24px 0">No notifications yet · Noch keine Benachrichtigungen</p>`;
-  return NB.list.map(n=>`<button class="nbitem ${n.read_at?"":"unread"}" onclick="nbTap(${n.id})">
-      <span class="nbu ${n.read_at?"r":""}"></span><span>${nbText(n)}<small>${nbAgo(n.created_at)}</small></span></button>`).join("");
+  return NB.list.map(n=>`<div class="nbrow"><button class="nbitem ${n.read_at?"":"unread"}" onclick="nbTap(${n.id})">
+      <span class="nbu ${n.read_at?"r":""}"></span><span>${nbText(n)}<small>${nbAgo(n.created_at)}</small></span></button>
+      <button class="nbx" aria-label="Clear this notification" title="Clear · Entfernen" onclick="nbClear(${n.id})">✕</button></div>`).join("");
 }
 function nbOpen(){
   const old=document.getElementById("nbSheet"); if(old) old.remove();
@@ -3537,8 +3561,9 @@ function nbOpen(){
   box.innerHTML=`<div class="sheet" role="dialog" aria-label="Notifications">
     <div class="nbhead"><h3 style="margin:0">Notifications · Benachrichtigungen</h3>
       <button class="chip" aria-label="Close" onclick="document.getElementById('nbSheet').remove()">✕</button></div>
-    ${NB.unread?`<button class="linkbtn" style="margin:0 0 6px" onclick="nbReadAll()">Mark all as read · Alle gelesen</button>`:""}
-    <div id="nbList">${nbItems()}</div></div>`;
+    <div id="nbTools" class="row" style="gap:16px;margin:0 0 6px">${nbTools()}</div>
+    <div id="nbList">${nbItems()}</div>
+    <p class="note center" style="margin:10px 0 0"><button class="linkbtn" onclick="document.getElementById('nbSheet').remove();A.ret='home';go('account')">Notification settings · Einstellungen</button></p></div>`;
   box.addEventListener("click",e=>{ if(e.target===box) box.remove(); });
   document.body.appendChild(box);
   nbLoad();
@@ -3549,9 +3574,27 @@ async function nbTap(id){
   const sh=document.getElementById("nbSheet"); if(sh) sh.remove();
   if(n.activity_id) sOpen(n.activity_id);
 }
-async function nbReadAll(){
-  NB.list.forEach(n=>{ if(!n.read_at) n.read_at=new Date().toISOString(); }); NB.unread=0; bellSync();
+function nbTools(){
+  if(!NB.list.length) return "";
+  return `${NB.unread?`<button class="linkbtn" onclick="nbReadAll()">Mark all as read · Alle gelesen</button>`:""}
+    <button class="linkbtn" onclick="nbClearAll()">Clear all · Alle entfernen</button>`;
+}
+function nbRefreshPanel(){
   const l=document.getElementById("nbList"); if(l) l.innerHTML=nbItems();
+  const t=document.getElementById("nbTools"); if(t) t.innerHTML=nbTools();
+  bellSync();
+}
+async function nbClear(id){
+  NB.list=NB.list.filter(n=>n.id!==id); NB.unread=NB.list.filter(n=>!n.read_at).length; nbRefreshPanel();
+  try{ await A.sb.rpc("pt_clear_notifications",{ p_id:id }); }catch(e){}
+}
+async function nbClearAll(){
+  if(!window.confirm("Clear all notifications? · Alle Benachrichtigungen entfernen?")) return;
+  NB.list=[]; NB.unread=0; nbRefreshPanel();
+  try{ await A.sb.rpc("pt_clear_notifications",{ p_id:null }); }catch(e){}
+}
+async function nbReadAll(){
+  NB.list.forEach(n=>{ if(!n.read_at) n.read_at=new Date().toISOString(); }); NB.unread=0; nbRefreshPanel();
   try{ await A.sb.rpc("pt_mark_read",{ p_id:null }); }catch(e){}
 }
 
