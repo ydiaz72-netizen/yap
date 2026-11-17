@@ -70,6 +70,21 @@
   .bwhen small{display:block;font-weight:600;color:var(--muted,#6b6280);font-size:12px}
   .btop{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
   .brow2{display:flex;gap:8px}.brow2 .btn{margin-top:8px}
+  #bnav{position:fixed;left:0;right:0;bottom:0;margin:0 auto;max-width:560px;display:flex;gap:4px;background:#fff;border-top:1px solid var(--line);padding:6px 10px calc(8px + env(safe-area-inset-bottom));z-index:50;box-shadow:0 -4px 16px rgba(43,33,64,.07)}
+  #bnav button{flex:1;background:none;border:none;font:800 13px Nunito,sans-serif;color:#6b6280;display:flex;flex-direction:column;align-items:center;gap:0;min-height:54px;cursor:pointer;border-radius:14px;padding:4px 0}
+  #bnav button span{font-size:22px;line-height:1.2}
+  #bnav button small{font-size:10px;font-weight:600;opacity:.8}
+  #bnav button.on{color:var(--plum);background:#F3EEFF}
+  body.has-nav .wrap{padding-bottom:calc(100px + env(safe-area-inset-bottom))}
+  body.has-nav .ptoast{bottom:96px}
+  .rhead{display:flex;justify-content:space-between;align-items:baseline;margin:6px 0 4px}
+  .rcard.perfect{border:2px solid #F5B700}
+  .rbadge{display:inline-block;border-radius:999px;padding:4px 10px;font-weight:800;font-size:12px;background:#F3EEFF;color:var(--plum)}
+  .rcard.perfect .rbadge{background:#FFC93C;color:#3A2A00}
+  .rsec{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#6b6280;margin:12px 0 4px}
+  .rwhy{margin:0;padding:0;list-style:none}.rwhy li{font-size:14px;margin:3px 0}
+  .rask{background:#FFF7DC;border-radius:12px;padding:10px 12px;margin-top:8px}
+  .rask b{display:block;font-size:11px;color:#6B5200}
   .ptoast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#2A1D4E;color:#fff;padding:12px 18px;border-radius:14px;font-weight:700;z-index:9999;max-width:92vw;box-shadow:0 8px 24px rgba(0,0,0,.25);text-align:center}
   .player{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line)}
   .player:last-child{border-bottom:none}
@@ -682,6 +697,7 @@ function render(){
   app.innerHTML = v;
   window.scrollTo(0,0);
   if(AFTER[S.screen]) AFTER[S.screen]();
+  if(typeof navSync==="function") navSync();
 }
 function go(s){ S.screen=s; render(); }
 
@@ -705,6 +721,7 @@ home(){
     <div class="flagrow">${LANG_KEYS.map(k=>`<span title="${T[k].name}">${T[k].flag}</span>`).join("")}</div>
   </div>
 
+  ${homeRecs()}
   <button class="btn primary big-cta" onclick="go('setup')">▶ Play together<small>One phone, passed around · Ein Handy für alle</small></button>
   <button class="btn secondary big-cta2" onclick="O.err='';go('online')">🌐 Play online<small>Everyone on their own phone · Jede/r am eigenen Handy</small></button>
   <button class="btn secondary big-cta2" onclick="bOpen()">📋 Session board<small>Find or host a language exchange · Sprachtreffen finden oder anbieten</small></button>
@@ -929,6 +946,7 @@ stats(){
 }
 };
 const AFTER = {
+  home(){ if(typeof rMaybeLoad==="function") rMaybeLoad(); },
   lobby(){ renderChat(); },
   setup(){ const i=$("pname"); if(i){ i.addEventListener("input",e=>S.draft.name=e.target.value); i.addEventListener("keydown",e=>{ if(e.key==="Enter") addPlayer(); }); } }
 };
@@ -2971,6 +2989,112 @@ VIEWS.host = function(){
   </div>`;
 };
 
+/* ===================== HOME: RECOMMENDED FOR YOU ===================== */
+const R = { list:null, mine:[], at:0, uid:null, noProfile:false };
+const TOPIC_CAT = { work:"work", travel:"travel", food:"social", culture:"social", family:"social", music:"social", movies:"social", sports:"social", books:"social", gaming:"social" };
+function rMaybeLoad(){
+  if(!A.user){ R.list=null; R.uid=null; return; }
+  if(R.uid!==A.user.id){ R.uid=A.user.id; R.list=null; R.at=0; }
+  if(Date.now()-R.at > 60000) rLoad();
+}
+async function rLoad(){
+  if(!A.user || !A.sb) return;
+  R.at=Date.now();
+  try{
+    const [r,l] = await Promise.all([
+      A.sb.rpc("pt_recommended_sessions",{ p_limit:5 }),
+      A.sb.from("user_languages").select("language_code,role,level").eq("user_id",A.user.id)
+    ]);
+    if(r.error) throw r.error;
+    R.mine=(l.data||[]).map(x=>({code:x.language_code, role:x.role, level:x.level}));
+    R.noProfile=!R.mine.length;
+    R.list=r.data||[];
+  }catch(e){ R.list=R.list||[]; }
+  if(S.screen==="home") xr();
+}
+function rHash(str){ let h=0; for(const c of String(str)) h=(h*31+c.charCodeAt(0))|0; return Math.abs(h); }
+function rPrompt(s){
+  // a starter question from the game's own question bank, in the language I'd practice
+  try{
+    const mineL=R.mine.find(m=>m.role==="learning" && (m.code===s.language_a||m.code===s.language_b));
+    const lang=mineL ? mineL.code : s.language_a;
+    const lowLevel=mineL && mineL.level!=null && mineL.level<=1;
+    const pool=(lowLevel?P1:P)[lang]; if(!pool) return null;
+    const cat=TOPIC_CAT[(s.topics||[])[0]] || "everyday";
+    const list=(pool[cat]&&pool[cat].quick) || (pool.everyday&&pool.everyday.quick) || [];
+    if(!list.length) return null;
+    const q=list[rHash(s.activity_id)%list.length];
+    return { lang, t:q.t };
+  }catch(e){ return null; }
+}
+async function rAct(fn,id){ await bAct(fn,id); R.at=0; rLoad(); }
+async function rHide(id){
+  try{ const { error } = await A.sb.rpc("pt_hide_session",{ p_activity:id }); if(error) throw error;
+    R.list=(R.list||[]).filter(x=>x.activity_id!==id); bToast("Hidden. We won't show it again · Ausgeblendet"); xr();
+  }catch(e){ bToast(bErr(e)); }
+}
+async function rShare(id){
+  const s=(R.list||[]).find(x=>x.activity_id===id); if(!s) return;
+  const url=(location.protocol.startsWith("http")?location.origin:"https://pontetalk.setzio.com")+"/?board";
+  const text=`${s.title} · ${fmtWhen(s.starts_at)} on PonteTalk`;
+  try{ if(navigator.share){ await navigator.share({ title:"PonteTalk", text, url }); return; } }catch(e){ return; }
+  try{ await navigator.clipboard.writeText(text+" "+url); bToast("Link copied · Link kopiert 📋"); }catch(e){ bToast(url); }
+}
+function rCard(s){
+  const id=s.activity_id, g=s.type==="game"?GAMES_BOARD.find(x=>x[0]===s.game):null;
+  const hostT=fmtHostTime(s.starts_at, s.host_time_zone), q=rPrompt(s);
+  const full=s.seats_open<=0;
+  const label = full ? `Join waitlist${s.waitlisted?` · #${s.waitlisted+1}`:""}` : s.join_mode==="approval" ? "✋ Request to join · Anfragen" : "Join session · Teilnehmen";
+  return `<div class="card rcard ${s.perfect_match?"perfect":""}">
+    <div class="btop"><span class="rbadge">${s.perfect_match?"⭐ Perfect match":"👍 Good match"}</span><span class="note" style="margin:0;font-weight:800">${full?"Full":`${s.seats_open} of ${s.seats} open`}</span></div>
+    <div class="btitle">${g?`${g[1]} `:""}${esc(s.title)}</div>
+    <div class="note" style="margin:0">${langPair(s.language_a,s.language_b)} · ${lvlRange(s.level_min,s.level_max)}${g?` · ${esc(g[2])}`:""}</div>
+    <div class="rsec">Who speaks what · Wer spricht was</div>
+    <div style="font-size:14px">👤 <b>${esc(s.host_name||"Host")}</b>${s.host_reliability&&s.host_reliability.percent!=null?` <span class="note">(${s.host_reliability.percent}% shows up)</span>`:""}: ${langsLine(s.host_languages)||"–"}</div>
+    <div style="font-size:14px;margin-top:2px">🙂 <b>You</b>: ${langsLine(R.mine)||"–"}</div>
+    ${(s.reasons||[]).length?`<div class="rsec">Why this matches you · Warum es passt</div>
+      <ul class="rwhy">${s.reasons.map(r=>`<li>✅ ${esc(r)}</li>`).join("")}</ul>`:""}
+    ${(s.topics||[]).length?`<div class="row" style="margin-top:10px">${s.topics.map(k=>{ const it=INTERESTS.find(x=>x[0]===k); return it?`<span class="feat">${it[1]} ${esc(it[2])}</span>`:""; }).join("")}</div>`:""}
+    ${q?`<div class="rask"><b>💬 Try asking · Frag doch mal</b><span dir="${T[q.lang]?T[q.lang].dir:"ltr"}" lang="${q.lang}">${esc(q.t)}</span></div>`:""}
+    <div class="bwhen">🗓️ ${fmtWhen(s.starts_at)} · ${s.duration_min} min${hostT?`<small>${esc(hostT)}</small>`:""}</div>
+    <button class="btn ${full?"secondary":"primary"}" onclick="rAct('pt_join_activity','${id}')" ${B.busy?"disabled":""}>${label}</button>
+    <div class="row" style="justify-content:center;margin-top:8px">
+      <button class="chip" onclick="rHide('${id}')">🙈 Not interested</button>
+      <button class="chip" aria-label="Share" onclick="rShare('${id}')">↗ Share</button>
+    </div>
+  </div>`;
+}
+function homeRecs(){
+  if(!A.user) return "";
+  if(R.list===null) return `<div class="rhead"><h3 style="margin:0">⭐ Recommended for you</h3></div><p class="note">Finding sessions for you… · Suche passende Sessions…</p>`;
+  if(R.noProfile) return `<div class="card center" style="margin-bottom:14px"><div style="font-size:36px">🌍</div>
+      <h3 style="margin:4px 0">Get matched with language partners</h3>
+      <p class="note">Add your languages and free times, and we'll suggest sessions for you.<br><span class="de">Trage Sprachen und Zeiten ein, dann schlagen wir dir Sessions vor.</span></p>
+      <button class="btn secondary" onclick="xOpen()">🗣️ Set up my exchange profile</button></div>`;
+  if(!R.list.length) return `<div class="card center" style="margin-bottom:14px"><div style="font-size:36px">🌱</div>
+      <h3 style="margin:4px 0">No matches right now · Gerade nichts Passendes</h3>
+      <p class="note">Host your own session and we'll show it to matching learners.<br><span class="de">Biete selbst eine Session an, wir zeigen sie passenden Lernenden.</span></p>
+      <button class="btn secondary" onclick="hOpen()">＋ Host a session · Session anbieten</button>
+      <button class="linkbtn" style="margin-top:10px" onclick="bOpen()">See the board →</button></div>`;
+  return `<div class="rhead"><h3 style="margin:0">⭐ Recommended for you <span class="de">· Für dich</span></h3></div>
+    ${R.list.slice(0,3).map(rCard).join("")}
+    <p class="center" style="margin:4px 0 16px"><button class="linkbtn" onclick="bOpen()">See all on the board →</button></p>`;
+}
+
+/* ===================== BOTTOM BAR ===================== */
+const NAV_TAB = { home:"home", board:"board", host:"board", account:"profile", xprofile:"profile" };
+function navSync(){
+  let n=document.getElementById("bnav");
+  const tab=NAV_TAB[S.screen];
+  if(!tab){ if(n) n.remove(); document.body.classList.remove("has-nav"); return; }
+  if(!n){ n=document.createElement("nav"); n.id="bnav"; n.setAttribute("aria-label","Main · Hauptmenü"); document.body.appendChild(n); }
+  document.body.classList.add("has-nav");
+  const it=(k,ic,en,de,fn)=>`<button class="${tab===k?"on":""}" ${tab===k?'aria-current="page"':""} onclick="${fn}"><span aria-hidden="true">${ic}</span>${en}<small>${de}</small></button>`;
+  n.innerHTML = it("home","🏠","Home","Start","goHome()")
+              + it("board","📋","Board","Board","bOpen()")
+              + it("profile","👤","Profile","Profil","A.ret='home';A.err='';A.msg='';go('account')");
+}
+
 /* ---- legal pages ---- */
 VIEWS.impressum = function(){
   return `<div class="topline"><button class="chip" onclick="legalBack()">← Back</button><span>Impressum</span></div>
@@ -3039,6 +3163,7 @@ function logOnlineFinished(){
 try{ const u=new URL(location.href); if(u.searchParams.get("auth")==="google" || u.searchParams.has("code")){ S.screen="account"; A.ret=sessionStorage.getItem("pt_ret")||"home"; sessionStorage.removeItem("pt_ret"); if(A.ret==="results"||A.ret==="lobby") A.ret="home"; } }catch(e){}
 // supabase.js loads with 'defer', so it is ready only once the page has finished loading
 if(window.supabase) authInit(); else document.addEventListener("DOMContentLoaded", authInit);
+try{ if(new URLSearchParams(location.search).has("board")){ S.screen="board"; document.addEventListener("DOMContentLoaded", ()=>bLoad()); } }catch(e){}
 
 render();
 /* Offline support + installable app (only works on the real website, safely skipped elsewhere) */
