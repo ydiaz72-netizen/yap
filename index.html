@@ -1169,7 +1169,7 @@ function makeTransport(code, me, h){
 function onlineConnect(role, code, resumeG){
   if(O.tr){ O.tr.close(); O.tr=null; }
   O.role=role; O.code=code; O.status="connecting"; O.err=""; O.online=[]; O.viewKey="";
-  O.me={ id:myId(), name:S.draft.name.trim(), lang:S.draft.lang, level:S.draft.level, host:role==="host" };
+  O.me={ id:myId(), name:S.draft.name.trim(), lang:S.draft.lang, level:S.draft.level, host:role==="host", uid:(A.user&&A.user.id)||null };
   if(role==="host"){
     O.G = resumeG || { v:0, phase:"lobby", hostId:O.me.id, players:[], cat:"mix", rounds:2, time:90 };
     O.G.hostId = O.me.id;
@@ -1227,6 +1227,7 @@ function hostPresence(list){
     if(!ex){
       G.pending=G.pending||[]; G.declined=G.declined||[];
       if(G.locked || G.declined.includes(m.id) || G.pending.some(q=>q.id===m.id)) return;
+      if(G.allow && G.allow.length && !G.allow.includes(m.uid)){ G.pending.push({id:m.id, name:m.name, lang:m.lang, level:m.level}); changed=true; return; }
       if(G.phase==="lobby"){ G.players.push(newPlayer(m)); changed=true; }
       else { G.pending.push({id:m.id, name:m.name, lang:m.lang, level:m.level}); changed=true; }
     }
@@ -2643,7 +2644,11 @@ const BERR = {
   no_offer:"This seat offer isn't available anymore · Dieses Angebot gilt nicht mehr",
   not_host:"Only the host can do this · Nur der Host kann das",
   no_request:"That request was already answered · Die Anfrage wurde schon beantwortet",
-  not_found:"Session not found · Session nicht gefunden"
+  not_found:"Session not found · Session nicht gefunden",
+  too_early:"The game room opens 30 min before the start · Der Spielraum öffnet 30 Min. vor Beginn",
+  not_open_yet:"The host hasn't opened the game room yet. Try again in a moment · Der Host hat den Raum noch nicht geöffnet",
+  not_allowed:"Only people who joined this session can enter · Nur Teilnehmende können rein",
+  not_game:"This session isn't a game · Diese Session ist kein Spiel"
 };
 function bErr(e){
   const m=String((e&&e.message)||e||"");
@@ -2754,8 +2759,13 @@ function bCard(s){
   const rel=s.host_reliability&&s.host_reliability.percent!=null ? ` · ${s.host_reliability.percent}% shows up` : "";
   const seatsTxt = s.seats_open>0 ? `${s.seats_open} of ${s.seats} open` : `Full${s.waitlisted?` · ${s.waitlisted} waiting`:""}`;
   let act="";
+  const isGame=s.type==="game", nowMs=Date.now(), startMs=new Date(s.starts_at).getTime();
+  const roomWindow = isGame && nowMs >= startMs-30*60000 && nowMs < startMs+s.duration_min*60000;
+  const roomSoon = isGame && nowMs < startMs-30*60000;
   if(s.is_host){
-    act=`<div class="row" style="margin-top:6px"><span class="feat">⭐ You're hosting · Du leitest</span>${s.pending?`<span class="feat" style="background:#FFF1C2">🔔 ${s.pending} request${s.pending>1?"s":""}</span>`:""}</div>
+    act = (roomWindow ? `<button class="btn primary" onclick="bRoom('${id}',true)">🎮 Open game room · Spielraum öffnen</button>`
+          : roomSoon ? `<p class="note" style="margin:8px 0 0">🎮 You can open the game room 30 min before the start. · Spielraum ab 30 Min. vorher.</p>` : "");
+    act+=`<div class="row" style="margin-top:6px"><span class="feat">⭐ You're hosting · Du leitest</span>${s.pending?`<span class="feat" style="background:#FFF1C2">🔔 ${s.pending} request${s.pending>1?"s":""}</span>`:""}</div>
       <button class="btn secondary" onclick="bPeople('${id}')">👥 People · Teilnehmende ${B.open===id?"▲":"▼"}</button>
       ${B.open===id?bPeopleHtml(s):""}
       ${!started?`<button class="btn ghost dangertext" onclick="bCancel('${id}')">Cancel session · Absagen</button>`:""}`;
@@ -2763,7 +2773,7 @@ function bCard(s){
     act=`<button class="btn primary" onclick="A.ret='board';go('account')">Sign in to join · Anmelden</button>`;
   } else switch(s.my_status){
     case "joined":
-      act=`<p class="okmsg">✅ You're in! · Du bist dabei!</p>${started?"":`<button class="btn ghost" onclick="bAct('pt_leave_activity','${id}')">Leave · Absagen</button>`}`; break;
+      act=`<p class="okmsg">✅ You're in! · Du bist dabei!</p>${roomWindow?`<button class="btn primary" onclick="bRoom('${id}',false)">🎮 Enter game room · Zum Spielraum</button>`:roomSoon?`<p class="note" style="margin:4px 0 0">🎮 The game room opens 30 min before the start. · Spielraum öffnet 30 Min. vorher.</p>`:""}${started?"":`<button class="btn ghost" onclick="bAct('pt_leave_activity','${id}')">Leave · Absagen</button>`}`; break;
     case "pending":
       act=`<p class="note">⏳ Request sent. The host will reply. · Anfrage gesendet.</p><button class="btn ghost" onclick="bAct('pt_leave_activity','${id}')">Withdraw · Zurückziehen</button>`; break;
     case "waitlisted":
@@ -2811,6 +2821,37 @@ VIEWS.board = function(){
   <button class="chip" style="display:block;margin:12px auto" onclick="B.list=null;xr();bLoad()">🔄 Refresh · Aktualisieren</button>
   ${legalLinks()}`;
 };
+
+/* ---- Board game sessions → private game room ---- */
+async function bRoom(id, asHost){
+  const s=(B.list||[]).find(x=>x.activity_id===id); if(!s || B.busy) return;
+  B.busy=true;
+  try{
+    if(asHost){
+      const r=await A.sb.rpc("pt_open_room",{ p_activity:id, p_code:newCode() });
+      if(r.error) throw r.error;
+    }
+    const r2=await A.sb.rpc("pt_session_room",{ p_activity:id });
+    if(r2.error) throw r2.error;
+    const code=r2.data.code, allow=r2.data.allow||[];
+    S.draft.name=(meName()||S.draft.name||"Player").slice(0,16);
+    if(A.profile){ if(T[A.profile.practicing]) S.draft.lang=A.profile.practicing; if(A.profile.level!=null) S.draft.level=A.profile.level; }
+    B.busy=false;
+    if(asHost){
+      const prev=loadSession();
+      if(prev && prev.role==="host" && prev.code===code && prev.G){ onlineConnect("host", code, prev.G); O.G.allow=[A.user.id].concat(allow); saveSession(); return; }
+      onlineConnect("host", code, null);
+      O.G.game = s.game==="speak" ? "speak" : "charades";
+      if(s.game!=="speak") O.G.cmode = s.game==="emoji" ? "emoji" : "camera";
+      O.G.allow = [A.user.id].concat(allow);
+      O.G.session = id;
+      saveSession();
+      logUsage("room_created", {mode:"online", game:s.game, langs:[S.draft.lang], levels:[S.draft.level], players:1});
+    } else {
+      onlineConnect("guest", code, null);
+    }
+  }catch(e){ B.busy=false; bToast(bErr(e)); }
+}
 
 /* ---- Host a session ---- */
 function hPad(n){ return String(n).padStart(2,"0"); }
@@ -2893,7 +2934,7 @@ VIEWS.host = function(){
     <div class="row">${chip(H.type==="conversation","hSet('type','conversation')","💬 Free conversation")}${chip(H.type==="game","hSet('type','game')","🎲 PonteTalk game")}</div>
     ${H.type==="game"
       ? `<label class="lbl">Game · Spiel</label><div class="row">${GAMES_BOARD.map(g=>chip(H.game===g[0],`hSet('game','${g[0]}')`,`${g[1]} ${g[2]}`)).join("")}</div>
-         <p class="note">Everyone who joins gets into the game room. · Alle Teilnehmenden kommen in den Spielraum.</p>`
+         <p class="note">${H.game==="charades"?"🎥 Acting on camera: everyone needs a video call (Zoom, WhatsApp…). · Alle brauchen einen Videoanruf.<br>":""}Everyone who joins gets into the game room. · Alle Teilnehmenden kommen in den Spielraum.</p>`
       : `<p class="note">Open chat on any topic, with starter questions. · Freies Gespräch mit Einstiegsfragen.</p>`}
     <label class="lbl" for="htitle">Title · Titel</label>
     <input type="text" id="htitle" maxlength="80" placeholder="${esc(hDefaultTitle())}" value="${esc(H.title)}" oninput="H.title=this.value">
