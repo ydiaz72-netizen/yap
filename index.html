@@ -289,7 +289,15 @@
   .shacts{display:flex;gap:8px;margin-top:10px}
   .shacts .btn{margin:0}
   .shacts .shpv{width:auto;flex:none;background:#fff;color:var(--ink);border:1.5px solid var(--line)}
-  @media (max-width:420px){ .shrow .hidesm{display:none} }
+  .shract{display:flex;gap:8px;align-items:center;flex:none}
+  .shrpv{flex:none}
+  .shract .chip,.shract .btn{white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:4px}
+  @media (max-width:699px){
+    .shrow{flex-wrap:wrap;align-items:flex-start;padding:12px}
+    .shrow>div[style*="flex:1"]{flex:1 1 0;min-width:0}
+    .shract{width:100%;padding-left:0}
+    .shract .shrpv,.shract .btn{flex:1 1 0;min-width:0;padding:9px 10px}
+  }
   .shfile{display:flex;align-items:center;gap:10px;border:2px dashed var(--line);border-radius:14px;padding:14px;background:#fff;cursor:pointer;font-weight:700}
   .shfile input{display:none}
   .dash{display:grid;gap:18px}
@@ -4815,12 +4823,12 @@ function shCard(it){
 function shRow(it){
   const k=shKind(it.kind), t=T[it.language], b=T[it.base_language], busy=SH.busy===it.id;
   const btn = !A.user ? `<button class="btn secondary" onclick="A.ret='shop';A.err='';A.msg='';go('account')">Sign in</button>`
-    : `<button class="btn primary" ${busy?"disabled":""} onclick="shGet('${it.id}')">${busy?"…":it.has_link?"↗":"⬇"}<span class="hidesm"> ${it.has_link?"Open":"Download"}</span></button>`;
+    : `<button class="btn primary" ${busy?"disabled":""} onclick="shGet('${it.id}')">${busy?"…":it.has_link?"↗":"⬇"}<span> ${it.has_link?"Open":"Download"}</span></button>`;
   return `<div class="shrow ${it.published?"":"off"}">
     <div class="shico" style="${t?`background:${t.color}1F`:""}">${k[1]}</div>
     <div style="flex:1;min-width:0"><div class="rt">${esc(it.title)}${it.price_cents>0?"":` <span class="shfree" style="margin-left:6px;vertical-align:2px">Free · Gratis</span>`}</div>
       <div class="note" style="margin:2px 0 0">${t?`${t.flag} ${esc(t.nameEn)}`:"🌍 Any"} · ${it.level==null?"All levels":RANKS[it.level]} · ${esc(k[2])}${b?` · 📖 in ${esc(b.nameEn)}`:""}${SH.admin?` · ⬇ ${it.downloads||0}`:""}${it.mine&&A.user?" · ✓":""}</div></div>
-    ${SH.admin||it.is_owner?`<button class="chip" style="flex:none" onclick="shEdit('${it.id}')" aria-label="Edit">✏️</button>`:""}${A.user&&shCanPreview(it)?`<button class="chip" style="flex:none" onclick="shPreview('${it.id}')" aria-label="Preview" title="Preview · Vorschau">👁<span class="hidesm"> Preview</span></button>`:""}${btn}</div>`;
+    <div class="shract">${SH.admin||it.is_owner?`<button class="chip" style="flex:none" onclick="shEdit('${it.id}')" aria-label="Edit">✏️</button>`:""}${A.user&&shCanPreview(it)?`<button class="chip shrpv" onclick="shPreview('${it.id}')" aria-label="Preview" title="Preview · Vorschau">👁 Preview</button>`:""}${btn}</div></div>`;
 }
 function shListHtml(){
   const list=SH.list;
