@@ -167,6 +167,16 @@
   .lstep b.n{flex:none;width:32px;height:32px;border-radius:16px;background:var(--plum-soft);color:var(--plum);display:grid;place-items:center;font-size:15px}
   .lstep h3{font-size:16px;margin:2px 0 2px}
   .lstep p{margin:0;font-size:14px;color:var(--muted)}
+  .nbbell{position:relative;width:44px;height:44px;border-radius:22px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;cursor:pointer;color:var(--ink);flex:none;padding:0}
+  .nbdot{position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;border-radius:10px;background:var(--coral);color:#fff;font:800 11px 'Plus Jakarta Sans',sans-serif;display:grid;place-items:center;padding:0 5px;box-sizing:border-box}
+  .dhead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  @media (min-width:900px){ .dhead .nbbell{display:none} }
+  .nbhead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+  .nbitem{display:flex;gap:10px;width:100%;text-align:left;background:none;border:none;border-top:1px solid var(--line);padding:12px 4px;cursor:pointer;font:500 15px 'Plus Jakarta Sans',Nunito,sans-serif;color:var(--ink);line-height:1.35}
+  .nbitem.unread{font-weight:700;background:#FFF9F6}
+  .nbitem .nbu{width:8px;height:8px;border-radius:4px;background:var(--coral);flex:none;margin-top:7px}
+  .nbitem .nbu.r{background:transparent}
+  .nbitem small{display:block;font-weight:500;color:var(--muted);font-size:12px;margin-top:2px}
   .ptoast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 18px;border-radius:14px;font-weight:700;z-index:9999;max-width:92vw;box-shadow:0 8px 24px rgba(0,0,0,.25);text-align:center}
   .player{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line)}
   .player:last-child{border-bottom:none}
@@ -2584,6 +2594,7 @@ VIEWS.account = function(){
   <div class="card"><h3>🌍 Language exchange <span class="de">· Sprachtandem</span></h3>
     <p class="note" style="margin-top:0">Add your languages and free times to get matched with partners and sessions.<br><span class="de">Trage Sprachen und Zeiten ein, um passende Partner und Sessions zu finden.</span></p>
     <button class="btn secondary" onclick="xOpen()">🗣️ My exchange profile · Mein Tandem-Profil</button></div>
+  ${npCard()}
   ${pend ? `<div class="card acard"><h3>💾 Save your last game? <span class="de">· Letztes Spiel speichern?</span></h3>
      ${pend.recs.length>1?`<p class="note">Which player were you? · Wer warst du?</p><div class="row">${pend.names.map((n,i)=>`<button class="chip ${i===meIdx?"on":""}" onclick="savePending(${i})">${i===meIdx?"⭐ ":""}${esc(n)}</button>`).join("")}</div>`
        :`<button class="btn primary" onclick="savePending(0)">💾 Save · Speichern</button>`}
@@ -2868,7 +2879,7 @@ function bCard(s){
     act+=`<div class="row" style="margin-top:6px"><span class="feat">⭐ You're hosting · Du leitest</span>${s.pending?`<span class="feat" style="background:#FFF1C2">🔔 ${s.pending} request${s.pending>1?"s":""}</span>`:""}</div>
       <button class="btn secondary" onclick="bPeople('${id}')">👥 People · Teilnehmende ${B.open===id?"▲":"▼"}</button>
       ${B.open===id?bPeopleHtml(s):""}
-      ${!started?`<button class="btn ghost dangertext" onclick="bCancel('${id}')">Cancel session · Absagen</button>`:""}`;
+`;
   } else if(!A.user){
     act=`<button class="btn primary" onclick="A.ret='board';go('account')">Sign in to join · Anmelden</button>`;
   } else switch(s.my_status){
@@ -2901,6 +2912,7 @@ function bCard(s){
     ${s.note?`<p class="note" style="margin:8px 0 0">💬 ${esc(s.note)}</p>`:""}
     ${act}
     <div class="row" style="justify-content:center;margin-top:8px"><button class="chip" onclick="sShare('${id}')">🔗 ${s.is_host?"Share invite link":"Share"}</button></div>
+    ${s.is_host && !started ? `<p class="center" style="margin:10px 0 0"><button class="linkbtn dangertext" style="font-size:13px" onclick="bCancel('${id}')">Cancel session · Absagen</button></p>` : ""}
   </div>`;
 }
 VIEWS.board = function(){
@@ -3195,7 +3207,8 @@ function navSync(){
   if(!t){ t=document.createElement("header"); t.id="tnav"; document.body.appendChild(t); }
   cl.add("has-nav");
   n.innerHTML = NAV_ITEMS.map(([k,en,de,fn])=>`<button class="${tab===k?"on":""}" ${tab===k?'aria-current="page"':""} onclick="${fn}">${ICO[k]}${en}<small>${de}</small></button>`).join("");
-  const me = A.user ? `<button class="tme" aria-label="Profile" onclick="${NAV_ITEMS[3][3]}">${esc((meName()||"?").charAt(0).toUpperCase())}</button>`
+  if(A.user) nbStart(); else if(NB.timer){ clearInterval(NB.timer); NB.timer=null; NB.list=[]; NB.unread=0; }
+  const me = A.user ? `${bellBtn()}<button class="tme" aria-label="Profile" onclick="${NAV_ITEMS[3][3]}">${esc((meName()||"?").charAt(0).toUpperCase())}</button>`
                     : `<button class="tsign" onclick="${NAV_ITEMS[3][3]}">Sign in · Anmelden</button>`;
   t.innerHTML = `<div class="tin"><button class="tlogo" onclick="goHome()"><span class="plogo">${ICO.logo}</span>PonteTalk</button>
     <nav class="tlinks" aria-label="Main">${NAV_ITEMS.slice(0,3).map(([k,en,de,fn])=>`<button class="${tab===k?"on":""}" ${tab===k?'aria-current="page"':""} onclick="${fn}">${ICO[k]}${en}</button>`).join("")}</nav>${me}</div>`;
@@ -3345,7 +3358,7 @@ function homeDash(){
   const speak=(R.mine||[]).filter(m=>m.role!=="learning").map(m=>T[m.code]?T[m.code].nameEn:m.code);
   return `<div class="dash">
     <div style="min-width:0;display:flex;flex-direction:column;gap:18px">
-      <div class="card" style="margin:0"><h1 class="dhi">Hi ${esc(name)}</h1>
+      <div class="card" style="margin:0"><div class="dhead"><h1 class="dhi">Hi ${esc(name)}</h1>${bellBtn()}</div>
         <p class="sub" style="margin:2px 0 14px">Here's what's next for you. · Das steht als Nächstes an.</p>${nextCard()}</div>
       <div><div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px">
         <h2 style="margin:0;font-size:20px">Suggested for you · Für dich</h2>
@@ -3423,6 +3436,125 @@ VIEWS.session = function(){
     ${legalLinks()}`;
 };
 
+/* ===================== NOTIFICATION SETTINGS ===================== */
+const NP = { loaded:false, busy:false, v:{ seat_offers:true, approvals:true, join_requests:true, reminders:true, cancellations:true } };
+const NP_ITEMS = [
+  ["seat_offers","🎉 Seat offers from the waitlist","Freie Plätze von der Warteliste"],
+  ["approvals","✅ Host approved / declined my request","Zu- oder Absage vom Host"],
+  ["join_requests","🔔 Someone asks to join my session","Jemand möchte teilnehmen"],
+  ["reminders","⏰ Reminders (1 day and 15 min before)","Erinnerungen (1 Tag und 15 Min. vorher)"],
+  ["cancellations","❌ A session I joined was cancelled","Eine Session wurde abgesagt"]
+];
+async function npLoad(){
+  if(!A.user || NP.loaded || NP.busy) return;
+  NP.busy=true;
+  try{
+    const { data } = await A.sb.from("notification_prefs").select("seat_offers,approvals,join_requests,reminders,cancellations").eq("user_id",A.user.id).maybeSingle();
+    if(data) NP.v=data;
+    NP.loaded=true;
+  }catch(e){}
+  NP.busy=false;
+  if(S.screen==="account") xr();
+}
+async function npToggle(k){
+  const on=!NP.v[k];
+  if(k==="seat_offers" && !on && !window.confirm("Turn off seat offers? You only have 30 minutes to accept a free seat, so you may miss it. · Wirklich abschalten?")) return;
+  NP.v[k]=on; xr();
+  try{
+    const { error } = await A.sb.from("notification_prefs").upsert({ user_id:A.user.id, ...NP.v, updated_at:new Date().toISOString() });
+    if(error) throw error;
+    bToast(on?"Turned on · Eingeschaltet":"Turned off · Ausgeschaltet");
+  }catch(e){ NP.v[k]=!on; xr(); bToast(bErr(e)); }
+}
+function npCard(){
+  if(!A.user) return "";
+  if(!NP.loaded){ setTimeout(npLoad,0); }
+  return `<div class="card"><h3>📧 Email notifications <span class="de">· Benachrichtigungen</span></h3>
+    <p class="note" style="margin-top:0">Sent to ${esc(A.user.email||"your email")}. Tap to turn on or off.</p>
+    ${NP_ITEMS.map(([k,en,de])=>`<button class="bonus" style="margin-top:8px" role="switch" aria-checked="${!!NP.v[k]}" onclick="npToggle('${k}')">
+      <span style="text-align:left"><b style="font-size:15px">${en}</b><br><span class="note" style="font-size:13px">${de}</span></span>
+      <span style="flex:none;width:46px;height:28px;border-radius:14px;background:${NP.v[k]?"var(--teal)":"#D7DCE4"};position:relative;transition:background .15s">
+        <span style="position:absolute;top:3px;left:${NP.v[k]?"21px":"3px"};width:22px;height:22px;border-radius:11px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:left .15s"></span></span>
+    </button>`).join("")}
+    ${!NP.v.seat_offers?`<p class="note" style="color:#B54530;margin:8px 0 0">⚠️ With seat offers off, you may miss free seats from the waitlist.</p>`:""}
+  </div>`;
+}
+
+/* ===================== IN-APP NOTIFICATIONS (bell) ===================== */
+const NB = { list:[], unread:0, timer:null };
+ICO.bell = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>';
+function bellBtn(){
+  if(!A.user) return "";
+  const n=NB.unread;
+  return `<button class="nbbell" aria-label="Notifications${n?` (${n} unread)`:""}" onclick="nbOpen()">${ICO.bell}${n?`<span class="nbdot">${n>9?"9+":n}</span>`:""}</button>`;
+}
+function bellSync(){ document.querySelectorAll(".nbbell").forEach(b=>{ b.outerHTML=bellBtn(); }); }
+async function nbLoad(){
+  if(!A.user || !A.sb) return;
+  try{
+    const { data, error } = await A.sb.rpc("pt_my_notifications",{ p_limit:30 });
+    if(error) throw error;
+    NB.list=data||[];
+    NB.unread=NB.list.filter(n=>!n.read_at).length;
+    bellSync();
+    const open=document.getElementById("nbList"); if(open) open.innerHTML=nbItems();
+  }catch(e){}
+}
+function nbStart(){
+  if(NB.timer || !A.user) return;
+  nbLoad();
+  NB.timer=setInterval(()=>{ if(A.user && document.visibilityState==="visible") nbLoad(); }, 60000);
+}
+function nbAgo(iso){
+  const m=Math.max(0,Math.round((Date.now()-new Date(iso).getTime())/60000));
+  if(m<1) return "just now · gerade eben"; if(m<60) return `${m} min ago`;
+  const h=Math.round(m/60); if(h<24) return `${h} h ago`;
+  const d=Math.round(h/24); return d===1?"yesterday · gestern":`${d} days ago`;
+}
+function nbClock(iso){ try{ return new Date(iso).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}); }catch(e){ return ""; } }
+function nbText(n){
+  const t=`<b>${esc(n.title||"a session")}</b>`, who=esc(n.from_name||"Someone"), d=n.data||{};
+  switch(n.kind){
+    case "seat_offer":   return `🎉 A seat is free for you in ${t}.${d.expires_at?` Accept by ${nbClock(d.expires_at)}.`:""}`;
+    case "join_request": return `🔔 ${who} wants to join ${t}. Tap to approve or decline.`;
+    case "new_joiner":   return `👋 ${who} joined ${t}.`;
+    case "approved":     return d.waitlist_position ? `🕒 Approved for ${t}. You're #${d.waitlist_position} on the waitlist.` : `✅ You're in: ${t}.`;
+    case "declined":     return `Your request for ${t} wasn't accepted this time.`;
+    case "cancelled":    return `❌ ${t} was cancelled by the host.`;
+    case "reminder_24h": return `⏰ Tomorrow: ${t}${n.starts_at?` at ${nbClock(n.starts_at)}`:""}.`;
+    case "reminder_15m": return `⏰ ${t} starts in 15 minutes.`;
+    default:             return `Update for ${t}.`;
+  }
+}
+function nbItems(){
+  if(!NB.list.length) return `<p class="note center" style="margin:24px 0">No notifications yet · Noch keine Benachrichtigungen</p>`;
+  return NB.list.map(n=>`<button class="nbitem ${n.read_at?"":"unread"}" onclick="nbTap(${n.id})">
+      <span class="nbu ${n.read_at?"r":""}"></span><span>${nbText(n)}<small>${nbAgo(n.created_at)}</small></span></button>`).join("");
+}
+function nbOpen(){
+  const old=document.getElementById("nbSheet"); if(old) old.remove();
+  const box=document.createElement("div"); box.className="sheet-bg"; box.id="nbSheet";
+  box.innerHTML=`<div class="sheet" role="dialog" aria-label="Notifications">
+    <div class="nbhead"><h3 style="margin:0">Notifications · Benachrichtigungen</h3>
+      <button class="chip" aria-label="Close" onclick="document.getElementById('nbSheet').remove()">✕</button></div>
+    ${NB.unread?`<button class="linkbtn" style="margin:0 0 6px" onclick="nbReadAll()">Mark all as read · Alle gelesen</button>`:""}
+    <div id="nbList">${nbItems()}</div></div>`;
+  box.addEventListener("click",e=>{ if(e.target===box) box.remove(); });
+  document.body.appendChild(box);
+  nbLoad();
+}
+async function nbTap(id){
+  const n=NB.list.find(x=>x.id===id); if(!n) return;
+  if(!n.read_at){ n.read_at=new Date().toISOString(); NB.unread=Math.max(0,NB.unread-1); bellSync(); try{ await A.sb.rpc("pt_mark_read",{ p_id:id }); }catch(e){} }
+  const sh=document.getElementById("nbSheet"); if(sh) sh.remove();
+  if(n.activity_id) sOpen(n.activity_id);
+}
+async function nbReadAll(){
+  NB.list.forEach(n=>{ if(!n.read_at) n.read_at=new Date().toISOString(); }); NB.unread=0; bellSync();
+  const l=document.getElementById("nbList"); if(l) l.innerHTML=nbItems();
+  try{ await A.sb.rpc("pt_mark_read",{ p_id:null }); }catch(e){}
+}
+
 /* ===================== GAMES ===================== */
 VIEWS.games = function(){
   return `<h2>${bi("Games","Spiele")}</h2>
@@ -3466,6 +3598,7 @@ VIEWS.privacy = function(){
     <p>Für Online-Spiele nutzen wir Supabase (Server in Frankfurt, EU). Dabei werden dein eingegebener Spielname, Sprache, Niveau, Spielzüge und Chat-Nachrichten in Echtzeit an die Mitspielenden übertragen. Diese Daten werden <b>nicht dauerhaft gespeichert</b> und sind nach dem Spiel weg (Art. 6 Abs. 1 lit. b DSGVO).</p>
     <h3>5. Konto</h3>
     <p>Wenn du ein Konto erstellst, speichern wir bei Supabase (Frankfurt, EU): deine E-Mail-Adresse, deinen Spielnamen, Sprache und Niveau sowie deine gespeicherten Spiele (Punkte, Platz, Fragen, Antworten und Tipps). Zweck: dir deinen Spielverlauf und Fortschritt anzuzeigen (Art. 6 Abs. 1 lit. b DSGVO). Deine Daten sieht nur du. Die Daten bleiben gespeichert, bis du dein Konto löschst. Du kannst dein Konto jederzeit in der App unter „Konto löschen“ selbst löschen – dann werden alle Daten sofort entfernt.</p>
+    <p><b>Benachrichtigungen per E-Mail:</b> Wenn du an Sessions teilnimmst oder sie leitest, schicken wir dir E-Mails (z. B. freier Platz, Zusage, Erinnerung, Absage) über Resend, Inc. (USA). Dafür werden deine E-Mail-Adresse, dein Name, deine Zeitzone und Angaben zur Session übermittelt. Du kannst jede Art von E-Mail unter Profil → Benachrichtigungen abschalten. Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO.</p>
     <p><b>Anmeldung per E-Mail-Code:</b> Den Code versenden wir über Resend, Inc. (USA). Dabei wird deine E-Mail-Adresse übermittelt. Resend ist unter dem EU-US Data Privacy Framework zertifiziert bzw. es gelten Standardvertragsklauseln.</p>
     <p><b>Anmeldung mit Google:</b> Wenn du „Weiter mit Google“ wählst, wirst du zu Google (Google Ireland Ltd. / Google LLC) weitergeleitet. Wir erhalten von Google deine E-Mail-Adresse und deinen Namen. Es gelten zusätzlich die Datenschutzhinweise von Google.</p>
     <p><b>Tandem-Profil (freiwillig):</b> Wenn du es ausfüllst, speichern wir deine Sprachen und Niveaus, die Zeiten, zu denen du meistens Zeit hast, deine Interessen, deine Zeitzone, optional deine Stadt und deine Bestätigung, mindestens 18 Jahre alt zu sein. Deine Sprachen sind für andere angemeldete Mitglieder sichtbar, damit passende Partner gefunden werden; Zeiten und Stadt bleiben privat und werden nur für Vorschläge genutzt. Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO. Du kannst die Angaben jederzeit ändern; sie werden mit deinem Konto gelöscht.</p>
@@ -3476,6 +3609,7 @@ VIEWS.privacy = function(){
     <h3>English summary</h3>
     <p>You can play without an account; then everything stays on your device. No tracking, no analytics, no ads. We only count anonymously when a room is created or a game ends (game type, languages, levels, number of players), with no names, IP addresses or device IDs. Online games run through Supabase (Frankfurt, EU) and are not stored. If you create an account, we store your email, game name, language, level and the games you save, only so you can see your history. Only you can see them. Login codes are sent via Resend (USA); "Continue with Google" shares your email and name from Google. You can delete your account and all data anytime in the app. Questions or data requests: ${esc(LEGAL.email)}. Accounts are for ages 16+.</p>
     <p><b>Exchange profile (optional):</b> if you fill it in, we store your languages and levels, the times you're usually free, your interests, time zone, optionally your city, and your confirmation that you're 18+. Other signed-in members can see your languages so partners can be matched; your times and city stay private and are only used for suggestions. You can change it anytime, and it is deleted with your account.</p>
+    <p><b>Email notifications:</b> if you join or host sessions, we email you (seat offers, approvals, reminders, cancellations) via Resend, Inc. (USA), sending your email address, name, time zone and session details. You can turn each type off in Profile → Notifications.</p>
   </div>
   ${legalLinks()}`;
 };
