@@ -289,6 +289,7 @@
   .shacts{display:flex;gap:8px;margin-top:10px}
   .shacts .btn{margin:0}
   .shacts .shpv{width:auto;flex:none;background:#fff;color:var(--ink);border:1.5px solid var(--line)}
+  .vlock{opacity:.55;filter:grayscale(.6);cursor:not-allowed;box-shadow:none}
   .shract{display:flex;gap:8px;align-items:center;flex:none}
   .shrpv{flex:none}
   .shract .chip,.shract .btn{white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:4px}
@@ -4000,15 +4001,30 @@ async function vLoad(){
     if(["board","session","home"].includes(S.screen)) xr();
   }catch(e){}
 }
-function vBtn(id, primary){
+const V_EARLY=30;   // minutes before the start when guests can open the video link
+function vBtn(id, primary, s){
   const v=VL[id]; if(!v) return "";
-  return `<a class="btn ${primary?"primary":""} vbtn" href="${esc(v.url)}" target="_blank" rel="noopener noreferrer">🎥 Join ${esc(V_PROV[v.provider]||"video call")} · Videoanruf</a>`;
+  const name=esc(V_PROV[v.provider]||"video call");
+  if(s && !s.is_host && s.starts_at){
+    const st=new Date(s.starts_at).getTime(), open=st-V_EARLY*60000, end=st+(s.duration_min||60)*60000+30*60000, now=Date.now();
+    if(now>=end) return `<span class="btn vbtn vlock" aria-disabled="true">🎥 Session ended · Vorbei</span>`;
+    if(now<open){
+      const t=new Date(open).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
+      return `<a class="btn ${primary?"primary":""} vbtn vlock" data-open="${open}" href="${esc(v.url)}" target="_blank" rel="noopener noreferrer" onclick="return vLockClick(this)">🎥 Opens at ${t} · öffnet um ${t}</a>`;
+    }
+  }
+  return `<a class="btn ${primary?"primary":""} vbtn" href="${esc(v.url)}" target="_blank" rel="noopener noreferrer">🎥 Join ${name} · Videoanruf</a>`;
 }
+function vLockClick(a){
+  const open=+a.dataset.open; if(!open || Date.now()>=open) return true;
+  bToast(`🎥 The video link opens ${V_EARLY} min before the start · Der Link öffnet ${V_EARLY} Min. vorher`); return false;
+}
+setInterval(()=>{ if(document.querySelector(".vlock[data-open]") && [...document.querySelectorAll(".vlock[data-open]")].some(a=>Date.now()>=+a.dataset.open)) xr(); }, 30000);
 function vLine(s){
   const id=s.activity_id, v=VL[id];
   if(!A.user || !(s.is_host || s.my_status==="joined")) return "";
   if(s.format==="in_person") return pDetails(s);
-  if(v) return vBtn(id, false) + `<p class="note center" style="margin:4px 0 0">🔒 Only people in this session see this link · Nur Teilnehmende sehen den Link</p>`;
+  if(v) return vBtn(id, false, s) + `<p class="note center" style="margin:4px 0 0">🔒 Only people in this session see this link · Nur Teilnehmende sehen den Link</p>`;
   if(s.is_host && new Date(s.starts_at)>new Date()) return `<div class="vline">🎥 No video link yet · <button class="linkbtn" onclick="hEdit('${id}')">Add one · Hinzufügen</button></div>`;
   if(!s.is_host) return `<div class="vline">🎥 The host hasn't added a video link yet · Noch kein Video-Link</div>`;
   return "";
@@ -5145,7 +5161,7 @@ function nextCard(){
     <div class="dbtns">
       ${ciBtn(s,true)}
       ${s.format==="in_person" && s.my_status!=="offered" ? pMapBtn(s,true) : ""}
-      ${VL[s.activity_id] && s.my_status!=="offered" ? vBtn(s.activity_id, nowMs>=st-15*60000).replace("btn ","btn qbtn ").replace(" · Videoanruf","") : ""}
+      ${VL[s.activity_id] && s.my_status!=="offered" ? vBtn(s.activity_id, nowMs>=st-15*60000, s).replace("btn ","btn qbtn ").replace(" · Videoanruf","") : ""}
       ${roomNow ? `<button class="btn primary" onclick="bRoom('${s.activity_id}',${!!s.is_host})">🎮 ${s.is_host?"Open":"Enter"} game room</button>`
                 : `<button class="btn secondary qbtn" onclick="addToCal('${s.activity_id}')">${ICO.cal} Add to calendar</button>`}
       <button class="btn ${roomNow?"secondary":"primary"}" style="${roomNow?"":"background:var(--plum);box-shadow:none"}" onclick="bOpen()">${s.is_host?"Manage":"Details"}</button>
