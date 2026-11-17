@@ -2986,7 +2986,7 @@ function bCard(s){
   const rel=s.host_reliability&&s.host_reliability.percent!=null ? ` · ${s.host_reliability.percent}% shows up` : "";
   const seatsTxt = s.seats_open>0 ? `${s.seats_open} of ${s.seats} open` : `Full${s.waitlisted?` · ${s.waitlisted} waiting`:""}`;
   const sidesHtml = s.balanced ? `<div class="sides" aria-label="Seats per language">${[["a",s.language_a,s.taken_a,s.seats_a],["b",s.language_b,s.taken_b,s.seats_b]].map(([k,l,t,n])=>
-      `<span class="sidepill ${t>=n?"full":""}">${T[l]?T[l].flag:""} ${T[l]?esc(T[l].nameEn):l} speakers ${t} of ${n}${t>=n?" · full":""}${s.my_side===k?" · you":""}</span>`).join("")}</div>` : "";
+      `<span class="sidepill ${t>=n?"full":""}">${T[l]?T[l].flag:""} ${T[l]?esc(T[l].nameEn):l} speakers ${t} of ${n}${t>=n?" · full":""}${s.host_side===k?(s.is_host?" · incl. you":" · incl. host"):""}${s.my_side===k?" · you":""}</span>`).join("")}</div>` : "";
   let act="";
   const isGame=s.type==="game", nowMs=Date.now(), startMs=new Date(s.starts_at).getTime();
   const roomWindow = isGame && nowMs >= startMs-30*60000 && nowMs < startMs+s.duration_min*60000;
@@ -3134,6 +3134,7 @@ async function hPrefill(){
     ]);
     H.adult=!!(p.data&&p.data.adult_confirmed_at);
     const mine=(l.data||[]).filter(x=>T[x.language_code]);
+    H.myLangs=mine.map(x=>({ code:x.language_code, role:x.role }));
     if(!H.a){
       const speak=mine.find(x=>x.role!=="learning"), learn=mine.find(x=>x.role==="learning");
       if(speak){ H.a=speak.language_code; if(learn) H.b=learn.language_code; }
@@ -3163,6 +3164,7 @@ function hEdit(id){
   Object.assign(H,{ editId:id, editTaken:s.seats-s.seats_open, type:s.type, game:s.game||"speak", title:s.title, a:s.language_a, b:s.language_b||"",
     min:s.level_min, max:s.level_max, date:`${d.getFullYear()}-${hPad(d.getMonth()+1)}-${hPad(d.getDate())}`,
     time:`${hPad(d.getHours())}:${hPad(d.getMinutes())}`, dur:s.duration_min, seats:s.seats, mode:s.join_mode,
+    myLangs:(s.host_languages||[]).map(x=>({ code:x.code, role:x.role })),
     topics:(s.topics||[]).slice(), note:s.note||"", video:VL[id]?VL[id].url:"", videoWas:VL[id]?VL[id].url:"", started:true, checked:true, adult:true, err:"", busy:false,
     bal:!!s.balanced, sa:s.seats_a||Math.max(1,Math.floor(s.seats/2)), sb:s.seats_b||Math.max(1,Math.ceil(s.seats/2)) });
   go("host");
@@ -3184,6 +3186,10 @@ async function hSaveLink(id, url, was){
     if(error) throw error;
     delete VL[id];
   }
+}
+function hHostSide(){
+  const sp=k=>(H.myLangs||[]).some(x=>x.code===k && (x.role==="native"||x.role==="fluent"));
+  return sp(H.a) ? "sa" : (H.b && sp(H.b)) ? "sb" : "";
 }
 function hCancelEdit(){ H.editId=null; H.started=false; bOpen(); }
 async function hPost(){
@@ -3265,10 +3271,13 @@ VIEWS.host = function(){
     <div class="row">${[30,45,60,90].map(m=>chip(H.dur===m,`hSet('dur',${m})`,m+" min")).join("")}</div>
     ${H.b ? `<label class="lbl">How should seats work? · Plätze</label>
       <div class="row">${chip(!H.bal,"hSet('bal',false)","👥 Any mix")}${chip(!!H.bal,"hSet('bal',true)","⚖️ Balanced exchange")}</div>
-      ${H.bal?`<p class="note" style="margin:6px 0 0">Seats per language: people who speak it natively or fluently. · Plätze pro Sprache.</p>
+      ${H.bal?(()=>{ const hs=hHostSide(), hl=hs?T[hs==="sa"?H.a:H.b]:null;
+        return `<p class="note" style="margin:6px 0 0">People per language: those who speak it natively or fluently${hs?", <b>you included</b>":""}. · Personen pro Sprache${hs?", du zählst mit":""}.</p>
         ${[["sa",H.a],["sb",H.b]].map(([k,l])=>`<div class="stepper2"><button aria-label="Fewer" onclick="hSide('${k}',-1)" ${H[k]<=1?"disabled":""}>−</button><b>${H[k]}</b>
-          <button aria-label="More" onclick="hSide('${k}',1)" ${H.sa+H.sb>=6?"disabled":""}>+</button><span>${T[l]?`${T[l].flag} ${esc(T[l].nameEn)}`:l} speakers</span></div>`).join("")}
-        <p class="note" style="margin:2px 0 0">Total: ${H.sa+H.sb} seats (max 6)</p>`:""}` : ""}
+          <button aria-label="More" onclick="hSide('${k}',1)" ${H.sa+H.sb>=6?"disabled":""}>+</button><span>${T[l]?`${T[l].flag} ${esc(T[l].nameEn)}`:l} speakers${hs===k?" (incl. you)":""}</span></div>`).join("")}
+        <p class="note" style="margin:2px 0 0">${hs
+          ? `${H.sa+H.sb} people incl. you → ${H[hs]-1} more ${esc(hl?hl.nameEn:"")} speaker${H[hs]-1===1?"":"s"} + ${H[hs==="sa"?"sb":"sa"]} ${esc((T[hs==="sa"?H.b:H.a]||{}).nameEn||"")} speaker${H[hs==="sa"?"sb":"sa"]===1?"":"s"} can join (max 6)`
+          : `Total: ${H.sa+H.sb} seats (max 6). You don't count on a side, because your exchange profile doesn't list ${esc((T[H.a]||{}).nameEn||"")} or ${esc((T[H.b]||{}).nameEn||"")} as native/fluent.`}</p>`; })():""}` : ""}
     ${H.b && H.bal ? "" : `<label class="lbl">Seats (people besides you) · Plätze</label>
     <div class="row">${[2,3,4,5,6].map(n=>H.editId&&n<(H.editTaken||0)?`<button class="chip" disabled style="opacity:.35" title="${H.editTaken} already in">${n}</button>`:chip(H.seats===n,`hSet('seats',${n})`,String(n))).join("")}</div>`}
     <label class="lbl">Who can join · Wer kann teilnehmen</label>
