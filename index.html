@@ -289,6 +289,16 @@
   .shacts{display:flex;gap:8px;margin-top:10px}
   .shacts .btn{margin:0}
   .shacts .shpv{width:auto;flex:none;background:#fff;color:var(--ink);border:1.5px solid var(--line)}
+  .stgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+  .sttile{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px}
+  .sttile b{display:block;font-size:28px;font-weight:800;color:var(--plum)}
+  .sttile span{display:block;font-weight:800;font-size:14px}
+  .sttile small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+  .sttable{overflow-x:auto;background:#fff;border:1px solid var(--line);border-radius:16px}
+  .sttable table{width:100%;border-collapse:collapse;font-size:14px}
+  .sttable th{text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+  .sttable td{padding:10px 12px;border-bottom:1px solid #F0EBE3;vertical-align:top}
+  .sttable tr.on td{background:var(--teal-soft)}
   .yt{display:inline-block;background:var(--teal-soft);color:var(--teal);border-radius:6px;padding:0 6px;font-size:.78em;font-weight:800;vertical-align:1px;white-space:nowrap}
   .fitb{display:inline-block;background:var(--teal-soft);color:var(--teal);border-radius:999px;padding:3px 10px;font-size:12px;font-weight:800;margin:4px 0 0;white-space:nowrap}
   .vlock{opacity:.55;filter:grayscale(.6);cursor:not-allowed;box-shadow:none}
@@ -2541,6 +2551,7 @@ function authReturn(){
   else if(r==="shop") shOpen();
   else if(r==="cafes") cfOpen();
   else if(r==="reports") raOpen();
+  else if(r==="stats") stOpen();
   else if(r==="shopitem" && SH.oneId){ go("shopitem"); shOneLoad(SH.oneId); }
   else if(r==="board") bOpen();
   else if(r==="session" && S.sid) sOpen(S.sid);
@@ -3151,9 +3162,60 @@ function raCard(){
   if(!RA.admin) return "";
   return `<div class="card" style="border:2px solid ${RA.count?"var(--coral)":"var(--line)"}"><h3 style="margin:0 0 4px">🛠 Reports · Meldungen ${RA.count?`<span class="chbadge">${RA.count}</span>`:""}</h3>
     <p class="note" style="margin:0 0 8px">${RA.count?`${RA.count} open report${RA.count>1?"s":""} to review.`:"No open reports. 🎉"}</p>
-    <button class="btn secondary" onclick="raOpen()">Open reports · Meldungen öffnen</button></div>`;
+    <button class="btn secondary" onclick="raOpen()">Open reports · Meldungen öffnen</button>
+    <button class="btn secondary" onclick="stOpen()">📊 Stats · Statistiken</button></div>`;
 }
 function raOpen(){ RA.list=null; go("reports"); raLoad(); }
+/* Admin: Stats page */
+const ST = { k:null, items:null, who:null, item:null };
+function stOpen(){ ST.k=null; ST.items=null; ST.who=null; ST.item=null; go("stats"); stLoad(); }
+async function stLoad(){
+  try{
+    const [k,i,w]=await Promise.all([A.sb.rpc("pt_admin_stats"), A.sb.rpc("pt_admin_shop_stats"), A.sb.rpc("pt_admin_shop_downloads",{ p_item:ST.item, p_limit:200 })]);
+    for(const r of [k,i,w]) if(r.error) throw r.error;
+    ST.k=k.data||{}; ST.items=i.data||[]; ST.who=w.data||[];
+  }catch(e){ ST.k={}; ST.items=[]; ST.who=[]; bToast(/not_admin/.test(String(e&&e.message))?"Only admins · Nur für Admins":bErr(e)); }
+  if(S.screen==="stats") xr();
+}
+async function stPick(id){ ST.item = ST.item===id ? null : id; ST.who=null; xr();
+  try{ const w=await A.sb.rpc("pt_admin_shop_downloads",{ p_item:ST.item, p_limit:200 }); if(w.error) throw w.error; ST.who=w.data||[]; }catch(e){ ST.who=[]; bToast(bErr(e)); }
+  if(S.screen==="stats") xr(); }
+function stCsv(){
+  const rows=[["Name","Email","Resource","Downloads","Last download"]].concat((ST.who||[]).map(r=>[r.name||"",r.email||"",r.title||"",r.times,r.last_download]));
+  const csv=rows.map(r=>r.map(v=>`"${String(v==null?"":v).replace(/"/g,'""')}"`).join(",")).join("\n");
+  const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob(["﻿"+csv],{type:"text/csv"})); a.download="pontetalk-downloads.csv"; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+}
+VIEWS.stats = function(){
+  const k=ST.k, D=d=>d?new Date(d).toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"–";
+  const tile=(n,l,sub)=>`<div class="sttile"><b>${n==null?"…":n}</b><span>${l}</span>${sub?`<small>${sub}</small>`:""}</div>`;
+  const sel=ST.item && (ST.items||[]).find(x=>x.item_id===ST.item);
+  return `<div class="topline"><button class="chip" onclick="go('account')">← Profile</button><span>📊 Stats</span></div>
+  <h2>${bi("Stats","Statistiken")}</h2>
+  <p class="sub">Only admins see this page. · Nur für Admins sichtbar. <button class="linkbtn" onclick="stLoad()">↻ Refresh</button></p>
+  ${!k?`<p class="note center">Loading… · Lädt…</p>`:`
+  <div class="stgrid">
+    ${tile(k.members,"Members",`+${k.members_7d||0} this week · +${k.members_30d||0} in 30 days`)}
+    ${tile(k.sessions_upcoming,"Upcoming sessions",`${k.sessions_held_30d||0} held in 30 days`)}
+    ${tile(k.seats_taken_30d,"Seats taken","last 30 days")}
+    ${tile(k.downloads,"Downloads",`+${k.downloads_7d||0} this week · ${k.downloaders||0} people`)}
+    ${tile(k.with_languages,"Set languages",k.members?`${Math.round(100*(k.with_languages||0)/k.members)}% of members`:"")}
+    ${tile(k.with_free_times,"Set free times",k.members?`${Math.round(100*(k.with_free_times||0)/k.members)}% of members`:"")}
+  </div>
+  <h3 style="margin:18px 0 8px">📥 Downloads per resource</h3>
+  ${!(ST.items||[]).length?`<p class="note">No resources yet.</p>`:`<div class="sttable"><table>
+    <tr><th>Resource</th><th>Downloads</th><th>People</th><th>This week</th><th>Last</th></tr>
+    ${ST.items.map(r=>`<tr class="${ST.item===r.item_id?"on":""}" onclick="stPick('${r.item_id}')" style="cursor:pointer" title="Show who downloaded this">
+      <td><b>${esc(r.title)}</b><br><span class="note" style="margin:0">${T[r.language]?T[r.language].flag+" "+esc(T[r.language].nameEn):esc(r.language||"")}${r.level!=null&&RANKS[r.level]?` · ${RANKS[r.level]}`:""}${r.visibility==="unlisted"?" · 🔗 private":""}${r.approval==="pending"?" · ⏳ pending":""}</span></td>
+      <td>${r.downloads}</td><td>${r.people}</td><td>${r.downloads_7d}</td><td class="note">${D(r.last_download)}</td></tr>`).join("")}
+  </table></div><p class="note" style="margin:6px 0 0">Tap a resource to see who downloaded it. Previews are not counted.</p>`}
+  <h3 style="margin:18px 0 8px">👥 Who downloaded ${sel?`“${esc(sel.title)}”`:"(all resources)"} ${sel?`<button class="linkbtn" onclick="stPick('${sel.item_id}')">show all</button>`:""}</h3>
+  ${ST.who===null?`<p class="note">Loading… · Lädt…</p>`:!ST.who.length?`<p class="note">Nobody yet.</p>`:`<div class="sttable"><table>
+    <tr><th>Person</th><th>Resource</th><th>×</th><th>Last</th></tr>
+    ${ST.who.map(r=>`<tr><td><b>${esc(r.name||"Member")}</b><br><span class="note" style="margin:0">${esc(r.email||"")}</span></td><td>${esc(r.title)}</td><td>${r.times}</td><td class="note">${D(r.last_download)}</td></tr>`).join("")}
+  </table></div>
+  <button class="btn secondary" style="margin-top:10px" onclick="stCsv()">⬇ Download as CSV (Excel)</button>
+  <p class="note">Tip: invite these people to a matching session from the app. Only email them if they agreed to emails.</p>`}`}`;
+};
 async function raLoad(){
   try{ const { data, error } = await A.sb.rpc("pt_admin_reports",{ p_status:RA.filter }); if(error) throw error; RA.list=data||[]; }
   catch(e){ RA.list=[]; bToast(/not_admin/.test(String(e&&e.message))?"Only admins · Nur für Admins":bErr(e)); }
@@ -5700,6 +5762,7 @@ try{ const u=new URL(location.href); if(u.searchParams.get("auth")==="google" ||
 // supabase.js loads with 'defer', so it is ready only once the page has finished loading
 if(window.supabase) authInit(); else document.addEventListener("DOMContentLoaded", authInit);
 try{ const sid=new URLSearchParams(location.search).get("s"); if(sid && /^[0-9a-f-]{36}$/i.test(sid)){ S.sid=sid; S.screen="session"; document.addEventListener("DOMContentLoaded", ()=>bLoad()); } }catch(e){}
+try{ if(new URLSearchParams(location.search).has("stats")){ S.screen="stats"; let n=0; const w=setInterval(()=>{ n++; if(A.status==="in"&&A.user){ clearInterval(w); stLoad(); } else if((A.status==="out"&&n>2)||n>20){ clearInterval(w); A.ret="stats"; A.msg="Sign in to see stats · Bitte anmelden"; go("account"); } },500); } }catch(e){}
 try{ if(new URLSearchParams(location.search).has("reports")){ S.screen="reports"; let n=0; const w=setInterval(()=>{ n++; if(A.status==="in"&&A.user){ clearInterval(w); raLoad(); } else if((A.status==="out"&&n>2)||n>20){ clearInterval(w); A.ret="reports"; A.msg="Sign in to see reports · Bitte anmelden"; go("account"); } },500); } }catch(e){}
 try{ const rid=new URLSearchParams(location.search).get("r"); if(rid && /^[0-9a-f-]{36}$/i.test(rid)){ S.screen="shopitem"; SH.one=null; A.ret="shopitem"; SH.oneId=rid; document.addEventListener("DOMContentLoaded", ()=>shOneLoad(rid)); } }catch(e){}
 try{ if(new URLSearchParams(location.search).has("shop")){ S.screen="shop"; document.addEventListener("DOMContentLoaded", ()=>shLoad()); } }catch(e){}
