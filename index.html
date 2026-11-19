@@ -4,7 +4,32 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#FAF7F2">
-<meta name="description" content="PonteTalk – a speaking game for language learners: English, German, Spanish, Portuguese, Polish, Ukrainian, Arabic and Urdu. Pass the phone, speak, connect.">
+<meta name="description" content="Free language exchange in small groups. Practise English, German, Spanish, Arabic and more with native speakers, online or in person. Sprachaustausch · Intercambio de idiomas.">
+<link rel="canonical" href="https://pontetalk.setzio.com/">
+<meta name="robots" content="index, follow">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="PonteTalk">
+<meta property="og:url" content="https://pontetalk.setzio.com/">
+<meta property="og:title" content="PonteTalk · Free language exchange in small groups">
+<meta property="og:description" content="Teach your language, learn another. Small-group sessions online or in person, a free video room, games and free learning materials.">
+<meta property="og:image" content="https://pontetalk.setzio.com/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="en_GB">
+<meta property="og:locale:alternate" content="de_DE">
+<meta property="og:locale:alternate" content="es_ES">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="PonteTalk · Free language exchange in small groups">
+<meta name="twitter:description" content="Teach your language, learn another. Online or in person. Free.">
+<meta name="twitter:image" content="https://pontetalk.setzio.com/og-image.png">
+<!-- Google Search Console: paste your verification tag on the next line -->
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+ {"@type":"WebSite","@id":"https://pontetalk.setzio.com/#site","url":"https://pontetalk.setzio.com/","name":"PonteTalk","alternateName":["PonteTalk Language Exchange","PonteTalk Sprachaustausch"],"inLanguage":["en","de","es"]},
+ {"@type":"Organization","@id":"https://pontetalk.setzio.com/#org","name":"PonteTalk","url":"https://pontetalk.setzio.com/","logo":"https://pontetalk.setzio.com/icon-512.png","email":"yvette@setzio.com","address":{"@type":"PostalAddress","addressLocality":"Erfurt","addressCountry":"DE"}},
+ {"@type":"WebApplication","name":"PonteTalk","url":"https://pontetalk.setzio.com/","applicationCategory":"EducationalApplication","operatingSystem":"Web, iOS, Android","description":"Free language exchange in small groups: teach your language, learn another. Online or in person, with a free video room, conversation games and free learning materials.","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"},"publisher":{"@id":"https://pontetalk.setzio.com/#org"},"inLanguage":["en","de","es"]}
+]}
+</script>
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -13,7 +38,7 @@
 <script src="supabase.js" defer></script>
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<title>PonteTalk · Speak. Connect. Play.</title>
+<title>PonteTalk · Free Language Exchange · Sprachaustausch · Intercambio de idiomas</title>
 <style>
   /* Fonts are served from this site (no Google connection) */
   @font-face{font-family:'Plus Jakarta Sans';font-style:normal;font-display:swap;font-weight:200 800;src:url(fonts/plus-jakarta-sans-latin-wght-normal.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
@@ -626,6 +651,13 @@
 </style>
 </head>
 <body>
+<noscript><div style="max-width:640px;margin:40px auto;padding:0 20px;font-family:sans-serif;color:#1B2A41">
+<h1>PonteTalk · Free language exchange in small groups</h1>
+<p>Teach your language, learn another. Join small-group sessions online or in person: half the time in one language, half in the other. English, German, Spanish, Arabic, Portuguese, Polish, Ukrainian, Urdu and more.</p>
+<p><b>Deutsch:</b> Kostenloser Sprachaustausch in kleinen Gruppen, online oder vor Ort in Erfurt.</p>
+<p><b>Español:</b> Intercambio de idiomas gratis en grupos pequeños: practica inglés o alemán con hablantes nativos.</p>
+<p>Free video room, waitlist, reminders, conversation games and free learning materials. Adults only (18+). Please enable JavaScript to use the app.</p>
+</div></noscript>
 <div class="wrap" id="app"></div>
 
 <script>
@@ -3545,6 +3577,76 @@ function bOpenMine(){ B.mine=true; bOpen(); }
 /* ===================== SESSION VIEWS (cards · list · by day) ===================== */
 function bView(){ if(!B.view){ try{ B.view=localStorage.getItem("pt_bview"); }catch(e){} B.view=["cards","list","day"].includes(B.view)?B.view:"cards"; } return B.view; }
 function bSetView(v){ B.view=v; try{ localStorage.setItem("pt_bview",v); }catch(e){} xr(); }
+/* ---- Export upcoming public sessions as a clickable PDF (print → Save as PDF) ---- */
+const EXP_TZ=[["","Only my time"],["America/Puerto_Rico","+ Puerto Rico"],["America/New_York","+ New York"],["America/Mexico_City","+ Mexico City"],["America/Bogota","+ Colombia"],["America/Sao_Paulo","+ Brazil"],["Europe/London","+ UK"],["Europe/Madrid","+ Spain"],["Europe/Berlin","+ Germany"],["Asia/Karachi","+ Pakistan"],["Asia/Riyadh","+ Saudi Arabia"]];
+function bExportPanel(){
+  if(!B.exp) return "";
+  const o=B.expO||(B.expO={days:7,tz2:"",lang:B.lang||""});
+  const langs=[...new Set((B.list||[]).flatMap(s=>[s.language_a,s.language_b]).filter(Boolean))];
+  return `<div class="card" style="margin:0 0 12px;border:2px solid var(--teal)">
+    <h3 style="margin:0 0 4px">📄 Export sessions as PDF</h3>
+    <p class="note" style="margin:0 0 10px">A PonteTalk page with every upcoming public session. Each one has a <b>Sign up</b> link, so people tap and join. Private sessions are never included.</p>
+    <div class="row" style="margin:0 0 8px;gap:8px;flex-wrap:wrap">
+      <select class="xsel" style="width:auto" onchange="B.expO.days=+this.value">${[[3,"Next 3 days"],[7,"Next 7 days"],[14,"Next 14 days"],[30,"Next 30 days"]].map(([v,l])=>`<option value="${v}" ${o.days===v?"selected":""}>${l}</option>`).join("")}</select>
+      <select class="xsel" style="width:auto" onchange="B.expO.lang=this.value"><option value="">All languages</option>${langs.map(k=>`<option value="${k}" ${o.lang===k?"selected":""}>${T[k]?T[k].flag+" "+esc(T[k].nameEn):k}</option>`).join("")}</select>
+      <select class="xsel" style="width:auto" onchange="B.expO.tz2=this.value">${EXP_TZ.filter(z=>z[0]!==detectTz()).map(([v,l])=>`<option value="${v}" ${o.tz2===v?"selected":""}>${l}</option>`).join("")}</select>
+    </div>
+    <div class="row" style="margin:0"><button class="btn primary qbtn" style="width:auto;margin:0" onclick="bExport()">Create PDF · PDF erstellen</button><button class="chip" onclick="B.exp=false;xr()">Close</button></div>
+    <p class="note" style="margin:8px 0 0">A new tab opens with the page. Choose <b>Save as PDF</b> (on a phone: Share → Print → pinch out → Save).</p></div>`;
+}
+function bExport(){
+  const o=B.expO||{days:7,tz2:"",lang:""}, now=Date.now(), until=now+o.days*86400000, me=detectTz();
+  const L=(B.list||[]).filter(s=>s.visibility!=="private" && new Date(s.starts_at).getTime()>now && new Date(s.starts_at).getTime()<until && (!o.lang||s.language_a===o.lang||s.language_b===o.lang))
+    .sort((a,b)=>new Date(a.starts_at)-new Date(b.starts_at));
+  const w=window.open("","_blank"); if(!w){ bToast("Please allow pop-ups for this site · Pop-ups erlauben"); return; }
+  const origin=location.protocol.startsWith("http")?location.origin:"https://pontetalk.setzio.com";
+  const t=(iso,tz)=>new Date(iso).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit",...(tz?{timeZone:tz}:{})});
+  const dayKey=iso=>new Date(iso).toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"});
+  const fl=k=>T[k]?`${T[k].flag} ${esc(T[k].nameEn)}`:esc(k||"");
+  const lv=s=>(RANKS[s.level_min]||"")+(s.level_max!=null&&s.level_max!==s.level_min?"–"+(RANKS[s.level_max]||""):"");
+  const days={}; L.forEach(s=>{ (days[dayKey(s.starts_at)] ||= []).push(s); });
+  const z2=o.tz2?tzName(o.tz2):"";
+  const rows=Object.entries(days).map(([d,ss])=>`<h2>${esc(d)}</h2>`+ss.map(s=>{
+    const g=s.type==="game"?(GAMES_BOARD.find(x=>x[0]===s.game)||[])[2]:"";
+    const place=s.format==="in_person"?`📍 ${esc(s.city||"")}${s.place_name?" · "+esc(s.place_name):""}`:"🎥 Online";
+    const fl2=k=>T[k]?`${T[k].flag} ${esc(T[k].nameEn)}`:esc(k||"");
+    const want=`🙋 Looking for ${fl2(s.language_a)}${s.language_b?` + ${fl2(s.language_b)}`:""} speakers`;
+    const left=s.seats_open<=0?"Full · join the waitlist":s.seats_open<=2?`🔥 Only ${s.seats_open} seat${s.seats_open>1?"s":""} left!`:"";
+    return `<div class="s"><div class="tm"><b>${t(s.starts_at)}</b><span>${s.duration_min} min</span>${o.tz2?`<i>${t(s.starts_at,o.tz2)} ${esc(z2)}</i>`:""}</div>
+      <div class="mid"><div class="ti">${g?"🎲 ":""}${esc(s.title)}</div><div class="me">${fl(s.language_a)}${s.language_b?` ⇄ ${fl(s.language_b)}`:""} · ${esc(lv(s))}</div>
+      <div class="me">${place}${s.host_name?` · with ${esc(s.host_name)}`:""}</div>
+      <div class="want ${s.seats_open<=0?"full":""}">${s.seats_open<=0?left:want}${s.seats_open>0&&left?` · <b>${left}</b>`:""}</div></div>
+      <a class="go" href="${origin}/?s=${s.activity_id}">Sign up →</a></div>`; }).join("")).join("");
+  const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>PonteTalk sessions</title><style>
+  @font-face{font-family:PJS;src:url(${origin}/fonts/plus-jakarta-sans-latin-wght-normal.woff2) format('woff2');font-weight:200 800}
+  @font-face{font-family:PJS;src:url(${origin}/fonts/plus-jakarta-sans-latin-ext-wght-normal.woff2) format('woff2');font-weight:200 800;unicode-range:U+0100-02BA}
+  @page{size:A4;margin:12mm}
+  *{box-sizing:border-box}body{font-family:PJS,system-ui,sans-serif;color:#1B2A41;margin:0;background:#FAF7F2;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .wrap{max-width:780px;margin:0 auto;padding:18px}
+  .hd{background:linear-gradient(135deg,#1B2A41,#2F4B7C 70%,#2A8C82);color:#fff;border-radius:20px;padding:22px 24px;display:flex;justify-content:space-between;align-items:center;gap:16px}
+  .br{display:flex;align-items:center;gap:10px;font-weight:800;font-size:22px}.br span{width:40px;height:40px;border-radius:12px;background:#F25C3B;display:grid;place-items:center}
+  .hd h1{margin:10px 0 2px;font-size:26px;line-height:1.15}.hd p{margin:0;opacity:.85;font-size:13px}
+  .free{background:#F2B544;color:#1B2A41;border-radius:999px;padding:6px 14px;font-weight:800;font-size:13px;white-space:nowrap}
+  h2{font-size:15px;text-transform:uppercase;letter-spacing:.05em;color:#2A8C82;margin:20px 0 8px;break-after:avoid}
+  .s{display:flex;gap:14px;align-items:center;background:#fff;border:1px solid #E6E0D7;border-radius:14px;padding:12px 14px;margin-bottom:8px;break-inside:avoid}
+  .tm{flex:none;width:92px;text-align:center;background:#E7EDF6;border-radius:10px;padding:8px 4px}.tm b{display:block;font-size:22px;color:#2F4B7C}.tm span{display:block;font-size:11px;color:#5B6474}.tm i{display:block;font-style:normal;font-size:11px;color:#2A8C82;font-weight:700;margin-top:3px}
+  .mid{flex:1;min-width:0}.ti{font-weight:800;font-size:16px;margin-bottom:3px}.me{font-size:12.5px;color:#5B6474;margin-top:2px}
+  .want{display:inline-block;margin-top:6px;background:#DDEFEC;color:#2A8C82;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:700}.want.full{background:#FDE3DC;color:#C2410C}.want b{color:#C2410C}
+  .go{flex:none;background:#F25C3B;color:#fff;text-decoration:none;font-weight:800;border-radius:999px;padding:10px 16px;font-size:14px}
+  .ft{margin-top:18px;text-align:center;font-size:12.5px;color:#5B6474;line-height:1.6}.ft a{color:#F25C3B;font-weight:800}
+  .empty{text-align:center;padding:40px;color:#5B6474}
+  .tbar{position:sticky;top:0;background:#FAF7F2;padding:10px 0;text-align:center}.tbar button{font:inherit;font-weight:800;background:#2A8C82;color:#fff;border:0;border-radius:999px;padding:10px 22px;cursor:pointer}
+  @media print{.tbar{display:none}.wrap{padding:0}}
+  </style></head><body><div class="wrap">
+  <div class="tbar"><button onclick="print()">📄 Save as PDF</button></div>
+  <div class="hd"><div><div class="br"><span><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15c3-5 15-5 18 0"/><path d="M6 15v4M18 15v4"/><circle cx="8" cy="7" r="2"/><circle cx="16" cy="7" r="2"/></svg></span>PonteTalk</div>
+    <h1>Language exchange sessions${o.lang&&T[o.lang]?` · ${T[o.lang].flag} ${esc(T[o.lang].nameEn)}`:""}</h1>
+    <p>Next ${o.days} days · times in ${esc(tzName(me))}${o.tz2?` and ${esc(z2)}`:""} · tap <b>Sign up</b> to join</p></div><div class="free">Free · Gratis · Kostenlos</div></div>
+  ${L.length?rows:`<div class="empty">No public sessions in the next ${o.days} days.</div>`}
+  <div class="ft">Sign up free (18+) · Kostenlos anmelden · Apúntate gratis<br><a href="${origin}/?board">pontetalk.setzio.com</a> · Updated ${new Date().toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})} ${esc(tzName(me))} time</div>
+  </div></body></html>`;
+  w.document.open(); w.document.write(html); w.document.close();
+}
 function bViewSwitch(){
   const v=bView(), b=(k,l,t)=>`<button class="${v===k?"on":""}" aria-pressed="${v===k}" title="${t}" onclick="bSetView('${k}')">${l}</button>`;
   return `<div class="vsw" role="group" aria-label="View">${b("cards","▦ Cards","Cards")}${b("list","☰ List","List")}${b("day","📅 By day","By day")}</div>`;
@@ -4352,6 +4454,8 @@ VIEWS.board = function(){
   ${A.user?(FIT.has===false?`<button class="chip" style="margin:0 0 8px" onclick="xOpen()">🗓️ Add your free times to see what fits · Zeiten eintragen</button>`
     :`<div class="row" style="margin:0 0 8px"><button class="chip ${B.fit?"on":""}" aria-pressed="${!!B.fit}" onclick="B.fit=!B.fit;xr()">🕒 Fits my free time${FIT.ids.size?` (${FIT.ids.size})`:""}</button>
       <button class="linkbtn" style="font-size:13px" onclick="xOpen()">Edit my free times</button></div>`):""}
+  ${(B.list||[]).length?`<div style="margin:0 0 8px"><button class="chip ${B.exp?"on":""}" onclick="B.exp=!B.exp;xr()" title="Export the session list as a PDF to share">📄 Export as PDF · Als PDF teilen</button></div>`:""}
+  ${bExportPanel()}
   <div class="bbar"><p class="note">🕒 All times are <b>your time</b>, from your phone (${esc(tzName(detectTz()))}). Everyone sees sessions in their own time automatically. · Zeiten in deiner Zeitzone.</p>${bViewSwitch()}</div>
   ${B.err?`<div class="err">${esc(B.err)}</div>`:""}
   ${list===null ? `<p class="note center" style="margin-top:30px">Loading… · Lädt…</p>`
