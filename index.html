@@ -3970,7 +3970,7 @@ function cfRow(c, noCity){
   return `<div class="cfrow ${c.status!=="approved"?"off":""}"><div class="ci">☕</div>
     <div style="flex:1;min-width:0"><div class="rt">${esc(c.name)}</div>
       <div class="note" style="margin:2px 0 0">${noCity&&!c.online?"":where+" · "}${flags}${c.note?` · ${esc(c.note)}`:""}${c.address&&noCity?` · ${esc(c.address)}`:""}</div></div>
-    ${CF.admin?`<button class="chip" style="flex:none" onclick="cfEdit('${c.id}')" aria-label="Edit">✏️</button>`:""}${go}</div>`;
+    ${CF.admin?`<button class="chip" style="flex:none" onclick="cfEdit('${c.id}')" aria-label="Edit">✏️</button><button class="chip" style="flex:none;color:#B54530" onclick="cfDel('${c.id}')" aria-label="Delete ${esc(c.name)}" title="Delete · Löschen">🗑</button>`:""}${go}</div>`;
 }
 function cfPaint(){ const el=document.getElementById("cflist"); if(el) el.innerHTML=cfListHtml(); }
 VIEWS.cafes = function(){
@@ -4028,7 +4028,7 @@ async function cfDel(id){
   if(error){ bToast(bErr(error)); return; }
   CF.list=(CF.list||[]).filter(x=>x.id!==id);
   CF.msg=`🗑 "${c.name}" deleted · Gelöscht`;
-  if(S.screen!=="cafes") go("cafes");
+  if(S.screen!=="cafes") go("cafes"); else xr();
   cfLoad();
 }
 function cfNew(){
