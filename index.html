@@ -3615,7 +3615,10 @@ function bExport(){
     return `<div class="s"><div class="tm"><b>${t(s.starts_at)}</b><span>${s.duration_min} min</span>${o.tz2?`<i>${t(s.starts_at,o.tz2)} ${esc(z2)}</i>`:""}</div>
       <div class="mid"><div class="ti">${g?"🎲 ":""}${esc(s.title)}</div><div class="me">${fl(s.language_a)}${s.language_b?` ⇄ ${fl(s.language_b)}`:""} · ${esc(lv(s))}</div>
       <div class="me">${place}${s.host_name?` · with ${esc(s.host_name)}`:""}</div>
-      <div class="want ${s.seats_open<=0?"full":""}">${s.seats_open<=0?left:want}${s.seats_open>0&&left?` · <b>${left}</b>`:""}</div></div>
+      ${s.balanced&&s.language_b ? (()=>{ const side=(k,n,t)=>{ const o=Math.max(0,(n||0)-(t||0)); const nm=T[k]?`${T[k].flag} ${esc(T[k].nameEn)}`:esc(k);
+          return o>0 ? `<span class="want">🙋 ${o} ${nm}-speaker seat${o>1?"s":""} available</span>` : `<span class="want full">${nm}-speaker seats full · waitlist</span>`; };
+          return `<div class="sides2">${side(s.language_a,s.seats_a,s.taken_a)}${side(s.language_b,s.seats_b,s.taken_b)}</div>`; })()
+        : `<div class="want ${s.seats_open<=0?"full":""}">${s.seats_open<=0?left:want}${s.seats_open>0&&left?` · <b>${left}</b>`:""}</div>`}</div>
       <a class="go" href="${origin}/?s=${s.activity_id}">Sign up →</a></div>`; }).join("")).join("");
   const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>PonteTalk sessions</title><style>
   @font-face{font-family:PJS;src:url(${origin}/fonts/plus-jakarta-sans-latin-wght-normal.woff2) format('woff2');font-weight:200 800}
@@ -3631,6 +3634,7 @@ function bExport(){
   .s{display:flex;gap:14px;align-items:center;background:#fff;border:1px solid #E6E0D7;border-radius:14px;padding:12px 14px;margin-bottom:8px;break-inside:avoid}
   .tm{flex:none;width:92px;text-align:center;background:#E7EDF6;border-radius:10px;padding:8px 4px}.tm b{display:block;font-size:22px;color:#2F4B7C}.tm span{display:block;font-size:11px;color:#5B6474}.tm i{display:block;font-style:normal;font-size:11px;color:#2A8C82;font-weight:700;margin-top:3px}
   .mid{flex:1;min-width:0}.ti{font-weight:800;font-size:16px;margin-bottom:3px}.me{font-size:12.5px;color:#5B6474;margin-top:2px}
+  .sides2{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}.sides2 .want{margin-top:0}
   .want{display:inline-block;margin-top:6px;background:#DDEFEC;color:#2A8C82;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:700}.want.full{background:#FDE3DC;color:#C2410C}.want b{color:#C2410C}
   .go{flex:none;background:#F25C3B;color:#fff;text-decoration:none;font-weight:800;border-radius:999px;padding:10px 16px;font-size:14px}
   .ft{margin-top:18px;text-align:center;font-size:12.5px;color:#5B6474;line-height:1.6}.ft a{color:#F25C3B;font-weight:800}
