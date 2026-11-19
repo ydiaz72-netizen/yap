@@ -325,6 +325,8 @@
   .sttable td{padding:10px 12px;border-bottom:1px solid #F0EBE3;vertical-align:top}
   .sttable tr.on td{background:var(--teal-soft)}
   .yt{display:inline-block;background:var(--teal-soft);color:var(--teal);border-radius:6px;padding:0 6px;font-size:.78em;font-weight:800;vertical-align:1px;white-space:nowrap}
+  .rsbox{margin-top:8px;background:var(--plum-soft);border-radius:14px;padding:12px 14px;font-size:14px}
+  .rsbox.in{background:var(--sun-soft);border:2px solid var(--sun)}
   .fitb{display:inline-block;background:var(--teal-soft);color:var(--teal);border-radius:999px;padding:3px 10px;font-size:12px;font-weight:800;margin:4px 0 0;white-space:nowrap}
   .vlock{opacity:.55;filter:grayscale(.6);cursor:not-allowed;box-shadow:none}
   .shract{display:flex;gap:8px;align-items:center;flex:none}
@@ -3312,6 +3314,57 @@ async function chUnreadLoad(){
 function chBadge(id){ const n=CU[id]||0; return n?`<span class="chbadge" aria-label="${n} unread">${n>99?"99+":n}</span>`:""; }
 setInterval(()=>{ if(A.user && document.visibilityState==="visible" && ["home","board","session"].includes(S.screen)) chUnreadLoad(); }, 30000);
 function chWindow(s){ return s && s.status!=="cancelled" && Date.now() < new Date(s.starts_at).getTime() + (s.duration_min||60)*60000 + 24*3600000; }
+/* ---- Reschedule (one-on-one sessions only) ---- */
+const RS = { list:[], form:null, busy:false };
+async function rsLoad(){
+  if(!A.user || !A.sb) return;
+  try{ const { data, error } = await A.sb.rpc("pt_my_reschedules"); if(!error){ RS.list=data||[]; if(["board","session","home"].includes(S.screen)) xr(); } }catch(e){}
+}
+function rsBlock(s){
+  if(!A.user || s.seats!==1 || !(s.is_host || s.my_status==="joined") || new Date(s.starts_at)<=new Date()) return "";
+  const id=s.activity_id, r=(RS.list||[]).find(x=>x.activity_id===id);
+  const W=d=>fmtWhen(d);
+  if(r && r.mine) return `<div class="rsbox"><b>🔁 You suggested ${esc(W(r.proposed_at))}</b> <span class="yt">your time</span><br><span class="note" style="margin:0">Waiting for an answer · Warten auf Antwort</span>
+    <div class="row" style="margin:6px 0 0"><button class="chip" onclick="rsCancel(${r.id})">Withdraw · Zurückziehen</button></div></div>`;
+  if(r) return `<div class="rsbox in"><b>🔁 ${esc(r.from_name||"Your partner")} suggests a new time</b><br>${esc(W(s.starts_at))} → <b>${esc(W(r.proposed_at))}</b> <span class="yt">your time</span>
+    ${r.note?`<p class="note" style="margin:6px 0 0">💬 “${esc(r.note)}”</p>`:""}
+    <div class="row" style="margin:8px 0 0"><button class="chip on" onclick="rsAnswer(${r.id},true)" ${RS.busy?"disabled":""}>✓ Accept · Annehmen</button><button class="chip" onclick="rsAnswer(${r.id},false)" ${RS.busy?"disabled":""}>✕ Decline · Ablehnen</button></div></div>`;
+  if(RS.form && RS.form.id===id){
+    const f=RS.form;
+    return `<div class="rsbox"><b>🔁 Suggest a new time · Neuen Termin vorschlagen</b>
+      <div class="row" style="margin:8px 0 0;gap:8px"><input type="date" value="${esc(f.date)}" min="${new Date().toISOString().slice(0,10)}" oninput="RS.form.date=this.value" style="width:auto">
+      <input type="time" value="${esc(f.time)}" step="900" oninput="RS.form.time=this.value" style="width:auto"></div>
+      <input type="text" maxlength="300" placeholder="Short note (optional) · Kurze Nachricht" value="${esc(f.note)}" oninput="RS.form.note=this.value" style="margin-top:8px">
+      <p class="note" style="margin:6px 0 0">Your time (${esc(tzName(detectTz()))}). They see it in their own time.</p>
+      <div class="row" style="margin:8px 0 0"><button class="chip on" onclick="rsSend()" ${RS.busy?"disabled":""}>Send · Senden</button><button class="chip" onclick="RS.form=null;xr()">Cancel</button></div></div>`;
+  }
+  return `<button class="btn secondary" style="margin-top:8px" onclick="rsStart('${id}')">🔁 Suggest a new time · Neuen Termin vorschlagen</button>`;
+}
+function rsStart(id){
+  const s=(B.list||[]).find(x=>x.activity_id===id); const d=new Date(s?s.starts_at:Date.now()+86400000);
+  const p=n=>String(n).padStart(2,"0");
+  RS.form={ id, date:`${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`, time:`${p(d.getHours())}:${p(d.getMinutes())}`, note:"" }; xr();
+}
+async function rsSend(){
+  const f=RS.form; if(!f||!f.date||!f.time){ bToast("Pick a date and time · Datum und Uhrzeit wählen"); return; }
+  const when=new Date(`${f.date}T${f.time}:00`); if(isNaN(when)){ bToast("Pick a date and time · Datum und Uhrzeit wählen"); return; }
+  RS.busy=true; xr();
+  try{ const { error } = await A.sb.rpc("pt_request_reschedule",{ p_activity:f.id, p_when:when.toISOString(), p_note:f.note||null }); if(error) throw error;
+    RS.form=null; bToast("🔁 Suggestion sent · Vorschlag gesendet"); await rsLoad(); }
+  catch(e){ bToast(/not_future/.test(String(e&&e.message))?"Pick a time at least 1 hour from now · Mindestens 1 Stunde im Voraus":bErr(e)); }
+  RS.busy=false; xr();
+}
+async function rsAnswer(rid, ok){
+  RS.busy=true; xr();
+  try{ const { error } = await A.sb.rpc("pt_answer_reschedule",{ p_id:rid, p_accept:ok }); if(error) throw error;
+    bToast(ok?"✅ New time confirmed · Neue Zeit bestätigt":"Declined · Abgelehnt"); await rsLoad(); if(ok) bLoad(); }
+  catch(e){ bToast(bErr(e)); }
+  RS.busy=false; xr();
+}
+async function rsCancel(rid){
+  try{ const { error } = await A.sb.rpc("pt_cancel_reschedule",{ p_id:rid }); if(error) throw error; bToast("Withdrawn · Zurückgezogen"); await rsLoad(); }
+  catch(e){ bToast(bErr(e)); }
+}
 function chBtn(s){
   if(!A.user || !(s.is_host || s.my_status==="joined") || !chWindow(s)) return "";
   return `<button class="btn secondary" style="margin-top:8px" onclick="chOpen('${s.activity_id}')">💬 Chat · Gruppenchat${chBadge(s.activity_id)}</button>`;
@@ -4278,7 +4331,7 @@ async function bLoad(){
     const { data, error } = await sb.rpc("pt_board_sessions", (S.screen==="session" && S.sid) ? { p_include:S.sid } : {});
     if(error) throw error;
     B.list=data||[];
-    hostPeopleLoad(); vLoad(); fitsLoad();
+    hostPeopleLoad(); vLoad(); fitsLoad(); rsLoad();
   }catch(e){ B.err=bErr(e); if(!B.list) B.list=[]; }
   if(S.screen==="board" || S.screen==="session") xr();
 }
@@ -4434,6 +4487,7 @@ function bCard(s){
     ${vLine(s)}
     ${mList(s)}
     ${chBtn(s)}
+    ${rsBlock(s)}
     <div class="row" style="justify-content:center;margin-top:8px">${s.is_host && !started ? `<button class="chip" onclick="hEdit('${id}')">✏️ Edit · Bearbeiten</button>` : ""}${s.is_host ? `<button class="chip" onclick="hDup('${id}')">⧉ Duplicate · Kopieren</button>` : ""}<button class="chip" onclick="sShare('${id}')">🔗 ${s.is_host?"Share invite link":"Share"}</button></div>
     ${s.is_host && !started ? `<p class="center" style="margin:10px 0 0"><button class="linkbtn dangertext" style="font-size:13px" onclick="bCancel('${id}')">Cancel session · Absagen</button></p>` : ""}
     ${A.user && !s.is_host ? `<p class="center" style="margin:8px 0 0"><button class="linkbtn" style="font-size:12px;color:var(--muted)" onclick="repOpen('session',null,'${id}')">🚩 Report this session · Melden</button></p>` : ""}
@@ -5701,6 +5755,9 @@ function nbText(n){
     case "report":       return `🚩 New report (${esc((RP_REASONS.find(r=>r[0]===d.reason)||[0,"other"])[1])}). Tap to review.`;
     case "chat":         return `💬 ${d.count>1?`${d.count} new messages`:`New message${n.from_name?` from ${who}`:""}`} in ${t}.`;
     case "invited":      return `📩 ${who} invited you to ${t}. Tap to accept or decline.`;
+    case "reschedule":   return d.answer==="accepted" ? `✅ ${who} accepted the new time for ${t}: ${d.proposed_at?esc(fmtWhen(d.proposed_at)):""}.`
+                              : d.answer==="declined" ? `↩️ ${who} can't make the new time for ${t}. It stays as planned.`
+                              : `🔁 ${who} suggests moving ${t} to ${d.proposed_at?esc(fmtWhen(d.proposed_at)):"a new time"}. Tap to answer.`;
     case "session_match": return `✨ New session that fits you: ${t}${n.starts_at?` · ${esc(fmtWhen(n.starts_at))}`:""}${d.lang&&T[d.lang]?` · practise ${T[d.lang].flag} ${esc(T[d.lang].nameEn)}`:""}. Tap to sign up.`;
     case "new_joiner":   return `👋 ${who} joined ${t}.`;
     case "approved":     return d.waitlist_position ? `🕒 Approved for ${t}. You're #${d.waitlist_position} on the waitlist.` : `✅ You're in: ${t}.`;
