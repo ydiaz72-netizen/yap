@@ -3938,7 +3938,7 @@ function cfCard(c){
         ${c.status==="approved"?`<button class="chip" onclick="cfSet('${c.id}','hidden')">🙈 Hide</button>`:""}
         <button class="chip" onclick="cfEdit('${c.id}')">✏️ Edit</button>
         ${rep.length?`<button class="chip" onclick="cfClear('${c.id}')">✓ Link is fine</button>`:""}
-        <button class="chip" onclick="cfDel('${c.id}')">🗑</button></div>`
+        <button class="chip" style="color:#B54530" onclick="cfDel('${c.id}')">🗑 Delete · Löschen</button></div>`
       : `<p class="center" style="margin:2px 0 0"><button class="linkbtn" style="font-size:12px" onclick="cfReport('${c.id}')">${c.url?"Link broken or café closed?":"Café closed or details wrong?"}</button></p>`}
   </div>`;
 }
@@ -4017,10 +4017,19 @@ async function cfClear(id){
 }
 async function cfDel(id){
   const c=(CF.list||[]).find(x=>x.id===id); if(!c) return;
-  if(!window.confirm(`Delete "${c.name}"? · Wirklich löschen?`)) return;
-  const { error } = await A.sb.from("cafes").delete().eq("id",id);
+  if(!window.confirm(`Delete "${c.name}" for good? · "${c.name}" wirklich löschen?`)) return;
+  let { error } = await A.sb.rpc("pt_admin_delete_cafe",{ p_cafe:id });
+  if(error && /pt_admin_delete_cafe|PGRST202|does not exist/i.test(String(error.message||error.code||""))){
+    // Database function not installed yet (sql/cafe_delete.sql): try a plain delete and check it really happened
+    await A.sb.from("cafe_reports").delete().eq("cafe_id",id);
+    const r=await A.sb.from("cafes").delete().eq("id",id).select("id");
+    error = r.error || (!(r.data||[]).length ? new Error("The database didn't allow the delete. Run sql/cafe_delete.sql in Supabase · Löschen nicht erlaubt") : null);
+  }
   if(error){ bToast(bErr(error)); return; }
-  CF.msg="🗑 Deleted · Gelöscht"; cfLoad();
+  CF.list=(CF.list||[]).filter(x=>x.id!==id);
+  CF.msg=`🗑 "${c.name}" deleted · Gelöscht`;
+  if(S.screen!=="cafes") go("cafes");
+  cfLoad();
 }
 function cfNew(){
   if(!A.user){ A.ret="cafes"; A.err=""; A.msg="Sign in to suggest a café · Melde dich an, um ein Café vorzuschlagen"; go("account"); return; }
@@ -4063,7 +4072,8 @@ VIEWS.cafeedit = function(){
   </div>
   ${CF.err?`<div class="err">${esc(CF.err)}</div>`:""}
   <button class="btn primary" ${CF.busy?"disabled":""} onclick="cfSave()">${CF.busy?"Saving… · Speichert…":f.id?"💾 Save · Speichern":CF.admin?"✓ Add and publish · Veröffentlichen":"📨 Send suggestion · Vorschlag senden"}</button>
-  <button class="btn ghost" onclick="cfOpen()">Cancel · Abbrechen</button>`;
+  <button class="btn ghost" onclick="cfOpen()">Cancel · Abbrechen</button>
+  ${f.id && CF.admin ? `<p class="center" style="margin:10px 0 0"><button class="linkbtn dangertext" style="font-size:14px" onclick="cfDel('${f.id}')">🗑 Delete this café · Café löschen</button></p>` : ""}`;
 };
 const CF_ERR = { already_listed:"This café is already listed (or waiting for approval) · Schon eingetragen",
   too_many_suggestions:"Thanks for all the suggestions! Please try again tomorrow · Bitte morgen wieder" };
