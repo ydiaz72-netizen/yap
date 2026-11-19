@@ -191,6 +191,29 @@
   .dayh{margin:16px 0 8px;font-size:15px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
   .dayh:first-child{margin-top:4px}
   .pvbox{background:var(--plum-soft);border-radius:14px;padding:10px 12px;margin-top:6px}
+  /* ---- Pop quiz ---- */
+  .qzb.live{animation:qzpulse 1.6s ease-in-out infinite}
+  @keyframes qzpulse{0%,100%{box-shadow:0 0 0 0 rgba(42,140,130,.45)}50%{box-shadow:0 0 0 8px rgba(42,140,130,0)}}
+  @media (prefers-reduced-motion:reduce){.qzb.live{animation:none}}
+  .qzq{margin-bottom:12px}
+  .qzq input[type=text]{margin-top:6px}
+  .qzn{font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+  .qzorow{display:flex;gap:8px;align-items:center;margin-top:6px}
+  .qzorow input{flex:1;margin:0!important}
+  .qzr{flex:none;width:30px;height:30px;border-radius:50%;border:2px solid var(--line);background:#fff;color:#fff;font-weight:800;cursor:pointer}
+  .qzr.on{background:var(--teal);border-color:var(--teal)}
+  .qzopts{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+  .qzo{display:flex;gap:8px;align-items:center;border-radius:12px;padding:8px 12px;background:#F6F4EF;font-weight:600}
+  .qzo.right{background:var(--teal-soft);color:#1d6a62;font-weight:800}
+  .qzo.wrong{background:#FBE3DE;color:#B54530}
+  .qzpick{display:block;width:100%;text-align:left;margin-top:8px;padding:14px 16px;border-radius:14px;border:2px solid var(--line);background:#fff;font:700 16px 'Plus Jakarta Sans',sans-serif;cursor:pointer}
+  .qzpick.on{border-color:var(--teal);background:var(--teal-soft)}
+  .qzdots{display:flex;gap:6px;justify-content:center;margin:0 0 12px}
+  .qzdots span{width:10px;height:10px;border-radius:50%;background:var(--line)}
+  .qzdots span.done{background:var(--teal)}
+  .qzdots span.cur{outline:2px solid var(--plum);outline-offset:2px}
+  .qzrow{display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+  .qzrow:last-child{border-bottom:none}
   /* ---- Session materials ---- */
   .mrow{display:grid;grid-template-columns:1fr auto;gap:6px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px;margin-top:8px}
   .mrow input{font-size:15px;padding:9px 12px;grid-column:1;min-width:0}
@@ -3808,6 +3831,234 @@ async function hSaveMats(id, list, was){
   ML[id]=list.slice();
 }
 
+/* ===================== POP QUIZ ===================== */
+/* Host writes a multiple-choice quiz before the session, then taps "Start quiz" during it.
+   Attendees answer once; scoring happens in the database (pt_quiz_* functions, sql/pop_quiz.sql). */
+const QZS = {};  // activity_id -> { status, n, answered, mine }  (my sessions only)
+const QZ = { id:null, data:null, edit:null, res:null, pick:[], step:0, busy:false, err:"", timer:null };
+const QZ_MAXQ = 15;
+async function qzLoad(){
+  if(!A.user || !A.sb) return;
+  try{
+    const { data, error } = await A.sb.rpc("pt_quiz_status_list"); if(error) return;
+    const was=JSON.stringify(QZS);
+    Object.keys(QZS).forEach(k=>delete QZS[k]);
+    (data||[]).forEach(r=>{ QZS[r.activity_id]={ status:r.status, n:r.n, answered:r.answered, mine:r.mine }; });
+    if(was!==JSON.stringify(QZS) && ["board","session"].includes(S.screen)) xr();
+  }catch(e){}
+}
+// While I'm in a session that is about to start or running, check every 20 s whether the host started a quiz
+setInterval(()=>{
+  if(!A.user || !["board","session"].includes(S.screen)) return;
+  const now=Date.now();
+  const live=(B.list||[]).some(s=>(s.is_host||s.my_status==="joined") && s.status!=="cancelled"
+    && now > new Date(s.starts_at).getTime()-30*60000 && now < new Date(s.starts_at).getTime()+(s.duration_min||60)*60000);
+  if(live) qzLoad();
+}, 20000);
+function qzBtn(s){
+  if(!A.user || s.status==="cancelled") return "";
+  const id=s.activity_id, q=QZS[id];
+  if(s.is_host){
+    if(!chWindow(s)) return "";
+    const lbl = !q ? "📝 Add a pop quiz · Quiz erstellen"
+      : q.status==="live" ? `🔴 Quiz is live · ${q.answered} answered`
+      : q.status==="closed" ? "📝 Quiz results · Ergebnisse"
+      : `📝 Pop quiz ready (${q.n} question${q.n===1?"":"s"}) · Quiz bereit`;
+    return `<button class="btn secondary qzb ${q&&q.status==="live"?"live":""}" style="margin-top:8px" onclick="qzOpen('${id}')">${lbl}</button>`;
+  }
+  if(s.my_status!=="joined" && s.my_status!=="attended") return "";
+  if(!q || q.status==="draft") return "";
+  if(q.status==="live" && !q.mine) return `<button class="btn primary qzb live" style="margin-top:8px" onclick="qzOpen('${id}')">📝 Pop quiz! Take it now · Jetzt mitmachen</button>`;
+  return `<button class="btn secondary qzb" style="margin-top:8px" onclick="qzOpen('${id}')">📝 ${q.status==="closed"?"See quiz answers · Lösungen":"Quiz sent ✓ · Gesendet"}</button>`;
+}
+function qzErr(e){
+  const m=String((e&&e.message)||e||"");
+  if(/quiz_live/.test(m)) return "Stop the quiz before you change it · Erst das Quiz beenden";
+  if(/quiz_not_live/.test(m)) return "The host already closed this quiz · Das Quiz ist schon beendet";
+  if(/quiz_already_sent/.test(m)) return "You already sent your answers · Schon gesendet";
+  if(/quiz_invalid/.test(m)) return "Each question needs text, 2–4 answers and one right answer · Jede Frage braucht Text, 2–4 Antworten und eine richtige";
+  if(/quiz_missing/.test(m)) return "Save the quiz first · Erst speichern";
+  return bErr(e);
+}
+function qzStopPoll(){ if(QZ.timer){ clearInterval(QZ.timer); QZ.timer=null; } }
+async function qzOpen(id){
+  qzStopPoll();
+  Object.assign(QZ,{ id, data:null, edit:null, res:null, pick:[], step:0, busy:false, err:"" });
+  go("quiz"); await qzFetch();
+  QZ.timer=setInterval(()=>{ if(S.screen!=="quiz"){ qzStopPoll(); return; }
+    const d=QZ.data; if(!d || QZ.edit) return;
+    if(d.role==="host" && d.status==="live") qzFetch(true);                 // live scoreboard
+    else if(d.role==="guest" && d.status!=="closed" && (d.mine || d.status==="none")) qzFetch(true); // wait for start / answers
+  }, 5000);
+}
+async function qzFetch(quiet){
+  try{
+    const { data, error } = await A.sb.rpc("pt_quiz_get",{ p_activity:QZ.id }); if(error) throw error;
+    const before=JSON.stringify(QZ.data);
+    QZ.data=data||{};
+    if(QZ.data.role==="host" && QZ.data.status!=="none" && QZ.data.status!=="draft"){
+      const r=await A.sb.rpc("pt_quiz_results",{ p_activity:QZ.id }); if(!r.error) QZ.res=r.data;
+    }
+    if(QZ.data.role==="host" && QZ.data.status==="none" && !QZ.edit) QZ.edit=[qzBlank()];
+    if(QZ.data.role==="guest" && QZ.pick.length!==(QZ.data.questions||[]).length) QZ.pick=(QZ.data.questions||[]).map(()=>-1);
+    const q=QZS[QZ.id]; if(q){ q.status=QZ.data.status; if(QZ.data.mine) q.mine=true; }
+    if(!quiet || before!==JSON.stringify(QZ.data)) { if(S.screen==="quiz") xr(); }
+  }catch(e){ QZ.err=qzErr(e); if(S.screen==="quiz") xr(); }
+}
+function qzBlank(){ return { q:"", o:["",""], a:0 }; }
+function qzBack(){ qzStopPoll(); qzLoad(); sOpen(QZ.id); }
+
+/* ---- host: build ---- */
+function qzEditStart(){ QZ.edit=JSON.parse(JSON.stringify((QZ.data&&QZ.data.questions)||[qzBlank()])); QZ.err=""; xr(); }
+function qzAddQ(){ if(QZ.edit.length<QZ_MAXQ){ QZ.edit.push(qzBlank()); xr(); } }
+function qzDelQ(i){ QZ.edit.splice(i,1); if(!QZ.edit.length) QZ.edit.push(qzBlank()); xr(); }
+function qzMoveQ(i,d){ const j=i+d; if(j<0||j>=QZ.edit.length) return; const t=QZ.edit[i]; QZ.edit[i]=QZ.edit[j]; QZ.edit[j]=t; xr(); }
+function qzAddO(i){ const q=QZ.edit[i]; if(q.o.length<4){ q.o.push(""); xr(); } }
+function qzDelO(i,k){ const q=QZ.edit[i]; if(q.o.length<=2) return; q.o.splice(k,1); if(q.a>=q.o.length) q.a=0; else if(q.a>k) q.a--; else if(q.a===k) q.a=0; xr(); }
+function qzSetA(i,k){ QZ.edit[i].a=k; xr(); }
+function qzClean(){
+  const out=[];
+  for(let i=0;i<QZ.edit.length;i++){
+    const x=QZ.edit[i], q=(x.q||"").trim().slice(0,200);
+    const o=x.o.map(s=>(s||"").trim().slice(0,80));
+    if(!q && o.every(s=>!s)) continue;              // empty question: skip it
+    if(!q) return { err:`Question ${i+1}: write the question · Frage ${i+1}: Text fehlt` };
+    if(o.filter(Boolean).length<2) return { err:`Question ${i+1}: add at least 2 answers · Frage ${i+1}: mindestens 2 Antworten` };
+    if(!o[x.a]) return { err:`Question ${i+1}: the right answer is empty · Frage ${i+1}: richtige Antwort ist leer` };
+    const keep=o.map((s,k)=>[s,k]).filter(p=>p[0]);
+    out.push({ q, o:keep.map(p=>p[0]), a:keep.findIndex(p=>p[1]===x.a) });
+  }
+  if(!out.length) return { err:"Add at least one question · Mindestens eine Frage" };
+  return { list:out };
+}
+async function qzSave(thenStart){
+  const c=qzClean(); if(c.err){ QZ.err=c.err; xr(); return; }
+  if(QZ.data && QZ.data.status==="closed" && (QZ.data.answered||0)>0 && !window.confirm("Saving clears the old answers so you can run it again. OK? · Alte Antworten werden gelöscht. OK?")) return;
+  QZ.busy=true; QZ.err=""; xr();
+  try{
+    const { error } = await A.sb.rpc("pt_quiz_save",{ p_activity:QZ.id, p_questions:c.list }); if(error) throw error;
+    QZ.edit=null; QZ.busy=false;
+    QZS[QZ.id]={ status:"draft", n:c.list.length, answered:0, mine:false };
+    if(thenStart) return qzStart();
+    bToast("💾 Quiz saved. Start it during the session · Gespeichert"); await qzFetch();
+  }catch(e){ QZ.busy=false; QZ.err=qzErr(e); xr(); }
+}
+async function qzStatus(st){
+  QZ.busy=true; QZ.err=""; xr();
+  try{
+    const { error } = await A.sb.rpc("pt_quiz_set_status",{ p_activity:QZ.id, p_status:st }); if(error) throw error;
+    QZ.busy=false; if(QZS[QZ.id]) QZS[QZ.id].status=st;
+    await qzFetch(); return true;
+  }catch(e){ QZ.busy=false; QZ.err=qzErr(e); xr(); return false; }
+}
+async function qzStart(){
+  if(!await qzStatus("live")) return;
+  bToast("🚀 Quiz started! · Quiz gestartet!");
+  // Let everyone know in the session chat (they also see a button on the session)
+  try{ await A.sb.from("session_messages").insert({ activity_id:QZ.id, user_id:A.user.id, body:"📝 Pop quiz time! Open the session and tap “Take it now”. · Quiz-Zeit! Öffne die Session." }); }catch(e){}
+}
+async function qzStop(){ if(await qzStatus("closed")) bToast("✅ Answers are now shown to everyone · Lösungen sind sichtbar"); }
+async function qzReset(){
+  if(!window.confirm("Run it again? This clears everyone's answers. · Nochmal? Alle Antworten werden gelöscht.")) return;
+  await qzStatus("draft");
+}
+async function qzDelete(){
+  if(!window.confirm("Delete this quiz? · Quiz löschen?")) return;
+  try{ const { error } = await A.sb.rpc("pt_quiz_delete",{ p_activity:QZ.id }); if(error) throw error;
+    delete QZS[QZ.id]; bToast("🗑 Quiz deleted · Gelöscht"); qzBack(); }
+  catch(e){ QZ.err=qzErr(e); xr(); }
+}
+
+/* ---- attendee: answer ---- */
+function qzPick(k){ QZ.pick[QZ.step]=k; xr(); }
+function qzGo(d){ const n=(QZ.data.questions||[]).length; QZ.step=Math.max(0,Math.min(n-1,QZ.step+d)); xr(); }
+async function qzSubmit(){
+  const skipped=QZ.pick.filter(x=>x<0).length;
+  if(skipped && !window.confirm(`${skipped} question${skipped===1?"":"s"} without an answer. Send anyway? · Trotzdem senden?`)) return;
+  QZ.busy=true; QZ.err=""; xr();
+  try{
+    const { data, error } = await A.sb.rpc("pt_quiz_submit",{ p_activity:QZ.id, p_answers:QZ.pick }); if(error) throw error;
+    QZ.busy=false; if(QZS[QZ.id]) QZS[QZ.id].mine=true;
+    bToast(`🎉 ${data.score} of ${data.total} right! · ${data.score} von ${data.total} richtig!`);
+    await qzFetch();
+  }catch(e){ QZ.busy=false; QZ.err=qzErr(e); await qzFetch(); }
+}
+
+/* ---- screens ---- */
+function qzReview(qs, mine){
+  return qs.map((x,i)=>`<div class="qzq"><div class="qzn">Question ${i+1} · Frage ${i+1}</div><b>${esc(x.q)}</b>
+    <div class="qzopts">${x.o.map((o,k)=>{ const right=k===x.a, me=mine&&mine[i]===k;
+      return `<div class="qzo ${right?"right":""} ${me&&!right?"wrong":""}">${right?"✅":me?"❌":"▫️"} ${esc(o)}${me?' <span class="note" style="margin:0 0 0 auto">your answer</span>':""}</div>`; }).join("")}</div></div>`).join("");
+}
+function qzHostView(d, s){
+  const st=d.status;
+  if(QZ.edit){
+    return `<p class="note" style="margin:0 0 10px">Write it now, start it during the session. Nobody sees the questions until you tap <b>Start quiz</b>. · Niemand sieht das Quiz, bis du es startest.</p>
+    ${QZ.edit.map((x,i)=>`<div class="card qzq">
+      <div class="row" style="margin:0;justify-content:space-between"><span class="qzn">Question ${i+1} · Frage ${i+1}</span>
+        <span><button class="chip" aria-label="Move up" onclick="qzMoveQ(${i},-1)" ${i===0?"disabled":""}>↑</button><button class="chip" aria-label="Move down" onclick="qzMoveQ(${i},1)" ${i===QZ.edit.length-1?"disabled":""}>↓</button><button class="chip" aria-label="Delete question" onclick="qzDelQ(${i})">🗑</button></span></div>
+      <input type="text" maxlength="200" placeholder="e.g. Which article goes with “Haus”?" value="${esc(x.q)}" oninput="QZ.edit[${i}].q=this.value" aria-label="Question ${i+1}">
+      ${x.o.map((o,k)=>`<div class="qzorow"><button class="qzr ${x.a===k?"on":""}" onclick="qzSetA(${i},${k})" aria-pressed="${x.a===k}" title="Mark as the right answer">${x.a===k?"✓":""}</button>
+        <input type="text" maxlength="80" placeholder="Answer ${k+1}" value="${esc(o)}" oninput="QZ.edit[${i}].o[${k}]=this.value" aria-label="Question ${i+1} answer ${k+1}">
+        ${x.o.length>2?`<button class="chip" aria-label="Remove answer" onclick="qzDelO(${i},${k})">✕</button>`:""}</div>`).join("")}
+      <div class="row" style="margin:6px 0 0;justify-content:space-between">${x.o.length<4?`<button class="chip" onclick="qzAddO(${i})">＋ Answer</button>`:"<span></span>"}<span class="note" style="margin:0">Tap the circle to mark the right one ✓</span></div>
+    </div>`).join("")}
+    ${QZ.edit.length<QZ_MAXQ?`<button class="btn secondary" onclick="qzAddQ()">＋ Add a question · Frage hinzufügen</button>`:""}
+    ${QZ.err?`<div class="err">${esc(QZ.err)}</div>`:""}
+    <button class="btn primary" ${QZ.busy?"disabled":""} onclick="qzSave(false)">${QZ.busy?"Saving… · Speichert…":"💾 Save for later · Speichern"}</button>
+    ${s && new Date(s.starts_at).getTime()-30*60000<=Date.now() ? `<button class="btn secondary" ${QZ.busy?"disabled":""} onclick="qzSave(true)">🚀 Save and start now · Jetzt starten</button>`:""}
+    ${st!=="none"?`<button class="btn ghost" onclick="QZ.edit=null;QZ.err='';xr()">Cancel · Abbrechen</button>`:""}`;
+  }
+  const res=QZ.res||{ people:[], right:[] }, qs=d.questions||[];
+  const board = res.people.length ? `<div class="card"><h3 style="margin:0 0 6px">🏆 Scores · Punkte</h3>${res.people.map((p,i)=>`<div class="qzrow">${["🥇","🥈","🥉"][i]||"▫️"} ${avSmall(p.user_id)} <b>${esc(p.name)}</b><span style="margin-left:auto;font-weight:800">${p.score} / ${p.total}</span></div>`).join("")}</div>`
+    : `<p class="note center">No answers yet · Noch keine Antworten</p>`;
+  const perQ = qs.map((x,i)=>`<div class="qzq"><div class="qzn">Question ${i+1} · ${res.right[i]||0} of ${res.people.length} right</div><b>${esc(x.q)}</b>
+      <div class="qzopts">${x.o.map((o,k)=>`<div class="qzo ${k===x.a?"right":""}">${k===x.a?"✅":"▫️"} ${esc(o)}</div>`).join("")}</div></div>`).join("");
+  if(st==="draft") return `<div class="card"><h3 style="margin:0 0 4px">📝 Ready · Bereit</h3><p class="note" style="margin:0">${qs.length} question${qs.length===1?"":"s"}. Hidden until you start it. · Versteckt bis zum Start.</p></div>
+    <button class="btn primary" ${QZ.busy?"disabled":""} onclick="qzStart()">🚀 Start quiz now · Quiz starten</button>
+    <button class="btn secondary" onclick="qzEditStart()">✏️ Edit questions · Bearbeiten</button>
+    ${QZ.err?`<div class="err">${esc(QZ.err)}</div>`:""}
+    <details class="card" style="margin-top:10px"><summary style="cursor:pointer;font-weight:800">👀 Preview with answers</summary>${qzReview(qs,null)}</details>
+    <p class="center"><button class="linkbtn dangertext" style="font-size:13px" onclick="qzDelete()">Delete quiz · Löschen</button></p>`;
+  if(st==="live") return `<div class="obanner">🔴 Live · <b>${res.people.length}</b> answered so far. Updates by itself. · Läuft</div>
+    ${board}
+    <button class="btn primary" ${QZ.busy?"disabled":""} onclick="qzStop()">✅ Stop and show answers · Beenden & Lösungen zeigen</button>
+    ${QZ.err?`<div class="err">${esc(QZ.err)}</div>`:""}`;
+  return `<div class="obanner">✅ Finished · Everyone can see the answers now. · Beendet</div>
+    ${board}<div class="card">${perQ}</div>
+    <button class="btn secondary" onclick="qzReset()">🔁 Run it again · Nochmal</button>
+    <button class="btn ghost" onclick="qzEditStart()">✏️ Edit for next time · Bearbeiten</button>
+    ${QZ.err?`<div class="err">${esc(QZ.err)}</div>`:""}`;
+}
+function qzGuestView(d){
+  const qs=d.questions||[];
+  if(d.status==="none") return `<div class="card center"><div style="font-size:40px">⏳</div><h3>No quiz yet · Noch kein Quiz</h3><p class="note">When the host starts one, it shows up here. · Erscheint hier, wenn der Host startet.</p></div>`;
+  if(d.status==="closed") return `<div class="card center"><div style="font-size:40px">${d.mine?"🎉":"📝"}</div>
+      <h3 style="margin:0">${d.mine?`You got ${d.mine.score} of ${d.mine.total} · ${d.mine.score} von ${d.mine.total}`:"Quiz finished · Quiz beendet"}</h3></div>
+    <div class="card">${qzReview(qs, d.mine&&d.mine.answers)}</div>`;
+  if(d.mine) return `<div class="card center"><div style="font-size:40px">✅</div><h3 style="margin:0">Sent! ${d.mine.score} of ${d.mine.total} right</h3>
+    <p class="note">The right answers show up when the host ends the quiz. · Lösungen kommen, wenn der Host beendet.</p></div>`;
+  const i=QZ.step, x=qs[i]; if(!x) return "";
+  const last=i===qs.length-1;
+  return `<div class="qzdots" aria-label="Progress">${qs.map((_,k)=>`<span class="${k===i?"cur":""} ${QZ.pick[k]>=0?"done":""}"></span>`).join("")}</div>
+    <div class="card"><div class="qzn">Question ${i+1} of ${qs.length} · Frage ${i+1}/${qs.length}</div>
+      <h3 style="margin:4px 0 10px">${esc(x.q)}</h3>
+      ${x.o.map((o,k)=>`<button class="qzpick ${QZ.pick[i]===k?"on":""}" aria-pressed="${QZ.pick[i]===k}" onclick="qzPick(${k})">${esc(o)}</button>`).join("")}
+    </div>
+    ${QZ.err?`<div class="err">${esc(QZ.err)}</div>`:""}
+    <div class="brow2">${i>0?`<button class="btn ghost" onclick="qzGo(-1)">← Back</button>`:"<span></span>"}
+      ${last?`<button class="btn primary" ${QZ.busy?"disabled":""} onclick="qzSubmit()">${QZ.busy?"Sending… · Sendet…":"📨 Send answers · Senden"}</button>`
+            :`<button class="btn primary" onclick="qzGo(1)">Next · Weiter →</button>`}</div>`;
+}
+VIEWS.quiz = function(){
+  const s=bRowOf({ activity_id:QZ.id })||{}, d=QZ.data;
+  return `<div class="topline"><button class="chip" onclick="qzBack()">← Session</button><span>📝 Pop quiz</span></div>
+    <h2 style="margin-bottom:2px">${esc(s.title||"Pop quiz")}</h2>
+    ${s.starts_at?`<p class="note" style="margin:0 0 12px">${fmtWhen(s.starts_at)}</p>`:""}
+    ${!d ? (QZ.err?`<div class="err">${esc(QZ.err)}</div>`:`<p class="note center" style="margin-top:30px">Loading… · Lädt…</p>`)
+      : d.role==="host" ? qzHostView(d, s) : qzGuestView(d)}`;
+};
+
 /* ===================== PROFILE PHOTOS ===================== */
 const AV = {};   // user_id -> photo URL ("" = none)
 function avUrl(uid){ if(A.user && uid===A.user.id) return (A.profile&&A.profile.avatar_url)||""; return AV[uid]||""; }
@@ -4291,7 +4542,7 @@ async function vLoad(){
     if(error) return;
     Object.keys(VL).forEach(k=>delete VL[k]);
     (data||[]).forEach(r=>{ VL[r.activity_id]={ url:r.url, provider:r.provider }; });
-    ciLoad(); avCollect(); mLoad(); pLoad(); pCityLoad(); chUnreadLoad();
+    ciLoad(); avCollect(); mLoad(); qzLoad(); pLoad(); pCityLoad(); chUnreadLoad();
     if(["board","session","home"].includes(S.screen)) xr();
   }catch(e){}
 }
@@ -4487,6 +4738,7 @@ function bCard(s){
     ${vLine(s)}
     ${mList(s)}
     ${chBtn(s)}
+    ${qzBtn(s)}
     ${rsBlock(s)}
     <div class="row" style="justify-content:center;margin-top:8px">${s.is_host && !started ? `<button class="chip" onclick="hEdit('${id}')">✏️ Edit · Bearbeiten</button>` : ""}${s.is_host ? `<button class="chip" onclick="hDup('${id}')">⧉ Duplicate · Kopieren</button>` : ""}<button class="chip" onclick="sShare('${id}')">🔗 ${s.is_host?"Share invite link":"Share"}</button></div>
     ${s.is_host && !started ? `<p class="center" style="margin:10px 0 0"><button class="linkbtn dangertext" style="font-size:13px" onclick="bCancel('${id}')">Cancel session · Absagen</button></p>` : ""}
