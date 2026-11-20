@@ -238,6 +238,7 @@
   .luflags{display:flex;align-items:center;gap:6px;font-size:30px;line-height:1}
   .luflags span{font-size:14px;color:var(--muted);font-weight:800}
   .lufree{color:#1d6a62}
+  .luq [lang=ur]{font-family:"Noto Nastaliq Urdu","Jameel Noori Nastaleeq",serif;line-height:2.1;text-align:right}
   .luq{background:var(--teal-soft);border-radius:14px;padding:10px 14px;display:flex;flex-direction:column;gap:2px}
   .lufind .lurow{display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
   .lufind .lurow:last-of-type{border-bottom:none}
@@ -4077,28 +4078,28 @@ VIEWS.quiz = function(){
 /* One open chat per language pair + "Find a time". Database: sql/lounges.sql (pt_lounge_* functions). */
 const LU = { list:null, id:null, msgs:[], last:0, free:[], busy:false, err:"", draft:"", chan:null, timer:null,
   admin:false, canPost:null, findOpen:false, pickDay:null, pickHour:19 };
-const LU_NAMES = { es:"Spanish", en:"English", de:"German", it:"Italian", fr:"French", pt:"Portuguese" };
+const LU_NAMES = { ur:"Urdu", es:"Spanish", en:"English", de:"German", it:"Italian", fr:"French", pt:"Portuguese" };
 const LU_QS = [
-  { en:"What did you eat today?", es:"¿Qué comiste hoy?", de:"Was hast du heute gegessen?", it:"Cosa hai mangiato oggi?" },
-  { en:"What's the weather like where you are?", es:"¿Qué tiempo hace donde estás?", de:"Wie ist das Wetter bei dir?", it:"Che tempo fa dove sei?" },
-  { en:"What are you doing this weekend?", es:"¿Qué vas a hacer este fin de semana?", de:"Was machst du am Wochenende?", it:"Cosa fai questo fine settimana?" },
-  { en:"Why are you learning this language?", es:"¿Por qué aprendes este idioma?", de:"Warum lernst du diese Sprache?", it:"Perché impari questa lingua?" },
-  { en:"What's your favorite word in the language you're learning?", es:"¿Cuál es tu palabra favorita en el idioma que aprendes?", de:"Was ist dein Lieblingswort in der Sprache, die du lernst?", it:"Qual è la tua parola preferita nella lingua che impari?" },
-  { en:"Describe your city in three words.", es:"Describe tu ciudad en tres palabras.", de:"Beschreibe deine Stadt in drei Wörtern.", it:"Descrivi la tua città in tre parole." },
-  { en:"What music are you listening to lately?", es:"¿Qué música escuchas últimamente?", de:"Welche Musik hörst du gerade?", it:"Che musica ascolti ultimamente?" },
-  { en:"What's a typical dish from your country?", es:"¿Cuál es un plato típico de tu país?", de:"Was ist ein typisches Gericht aus deinem Land?", it:"Qual è un piatto tipico del tuo paese?" },
-  { en:"Coffee or tea? Why?", es:"¿Café o té? ¿Por qué?", de:"Kaffee oder Tee? Warum?", it:"Caffè o tè? Perché?" },
-  { en:"What was the best part of your week?", es:"¿Qué fue lo mejor de tu semana?", de:"Was war das Beste an deiner Woche?", it:"Qual è stata la parte migliore della tua settimana?" },
-  { en:"Which place would you love to visit?", es:"¿Qué lugar te encantaría visitar?", de:"Welchen Ort würdest du gern besuchen?", it:"Quale posto ti piacerebbe visitare?" },
-  { en:"What do you do to relax?", es:"¿Qué haces para relajarte?", de:"Was machst du, um dich zu entspannen?", it:"Cosa fai per rilassarti?" },
-  { en:"Recommend a movie or series.", es:"Recomienda una película o serie.", de:"Empfiehl einen Film oder eine Serie.", it:"Consiglia un film o una serie." },
-  { en:"What's a funny mistake you made in another language?", es:"¿Qué error gracioso cometiste en otro idioma?", de:"Welchen lustigen Fehler hast du in einer anderen Sprache gemacht?", it:"Che errore divertente hai fatto in un'altra lingua?" },
-  { en:"Morning person or night owl?", es:"¿Madrugador o noctámbulo?", de:"Frühaufsteher oder Nachteule?", it:"Mattiniero o nottambulo?" },
-  { en:"What's something you learned recently?", es:"¿Qué aprendiste recientemente?", de:"Was hast du kürzlich gelernt?", it:"Cosa hai imparato di recente?" },
-  { en:"What holiday do you love most?", es:"¿Qué fiesta te gusta más?", de:"Welchen Feiertag magst du am liebsten?", it:"Quale festa ti piace di più?" },
-  { en:"Do you have a pet? Tell us about it!", es:"¿Tienes mascota? ¡Cuéntanos!", de:"Hast du ein Haustier? Erzähl uns davon!", it:"Hai un animale? Raccontaci!" },
-  { en:"What's your dream job?", es:"¿Cuál es el trabajo de tus sueños?", de:"Was ist dein Traumjob?", it:"Qual è il lavoro dei tuoi sogni?" },
-  { en:"What makes you smile?", es:"¿Qué te hace sonreír?", de:"Was bringt dich zum Lächeln?", it:"Cosa ti fa sorridere?" }
+  { en:"What did you eat today?", es:"¿Qué comiste hoy?", de:"Was hast du heute gegessen?", it:"Cosa hai mangiato oggi?", ur:"آج آپ نے کیا کھایا؟" },
+  { en:"What's the weather like where you are?", es:"¿Qué tiempo hace donde estás?", de:"Wie ist das Wetter bei dir?", it:"Che tempo fa dove sei?", ur:"آپ کے ہاں موسم کیسا ہے؟" },
+  { en:"What are you doing this weekend?", es:"¿Qué vas a hacer este fin de semana?", de:"Was machst du am Wochenende?", it:"Cosa fai questo fine settimana?", ur:"اس ہفتے کے آخر میں آپ کیا کریں گے؟" },
+  { en:"Why are you learning this language?", es:"¿Por qué aprendes este idioma?", de:"Warum lernst du diese Sprache?", it:"Perché impari questa lingua?", ur:"آپ یہ زبان کیوں سیکھ رہے ہیں؟" },
+  { en:"What's your favorite word in the language you're learning?", es:"¿Cuál es tu palabra favorita en el idioma que aprendes?", de:"Was ist dein Lieblingswort in der Sprache, die du lernst?", it:"Qual è la tua parola preferita nella lingua che impari?", ur:"جو زبان آپ سیکھ رہے ہیں اس میں آپ کا پسندیدہ لفظ کون سا ہے؟" },
+  { en:"Describe your city in three words.", es:"Describe tu ciudad en tres palabras.", de:"Beschreibe deine Stadt in drei Wörtern.", it:"Descrivi la tua città in tre parole.", ur:"اپنے شہر کو تین لفظوں میں بیان کریں۔" },
+  { en:"What music are you listening to lately?", es:"¿Qué música escuchas últimamente?", de:"Welche Musik hörst du gerade?", it:"Che musica ascolti ultimamente?", ur:"آج کل آپ کون سی موسیقی سن رہے ہیں؟" },
+  { en:"What's a typical dish from your country?", es:"¿Cuál es un plato típico de tu país?", de:"Was ist ein typisches Gericht aus deinem Land?", it:"Qual è un piatto tipico del tuo paese?", ur:"آپ کے ملک کا کوئی روایتی کھانا کون سا ہے؟" },
+  { en:"Coffee or tea? Why?", es:"¿Café o té? ¿Por qué?", de:"Kaffee oder Tee? Warum?", it:"Caffè o tè? Perché?", ur:"چائے یا کافی؟ کیوں؟" },
+  { en:"What was the best part of your week?", es:"¿Qué fue lo mejor de tu semana?", de:"Was war das Beste an deiner Woche?", it:"Qual è stata la parte migliore della tua settimana?", ur:"اس ہفتے کی سب سے اچھی بات کیا تھی؟" },
+  { en:"Which place would you love to visit?", es:"¿Qué lugar te encantaría visitar?", de:"Welchen Ort würdest du gern besuchen?", it:"Quale posto ti piacerebbe visitare?", ur:"آپ کون سی جگہ دیکھنا چاہیں گے؟" },
+  { en:"What do you do to relax?", es:"¿Qué haces para relajarte?", de:"Was machst du, um dich zu entspannen?", it:"Cosa fai per rilassarti?", ur:"آرام کرنے کے لیے آپ کیا کرتے ہیں؟" },
+  { en:"Recommend a movie or series.", es:"Recomienda una película o serie.", de:"Empfiehl einen Film oder eine Serie.", it:"Consiglia un film o una serie.", ur:"کوئی فلم یا ڈرامہ تجویز کریں۔" },
+  { en:"What's a funny mistake you made in another language?", es:"¿Qué error gracioso cometiste en otro idioma?", de:"Welchen lustigen Fehler hast du in einer anderen Sprache gemacht?", it:"Che errore divertente hai fatto in un'altra lingua?", ur:"کسی دوسری زبان میں آپ سے کون سی مزے کی غلطی ہوئی؟" },
+  { en:"Morning person or night owl?", es:"¿Madrugador o noctámbulo?", de:"Frühaufsteher oder Nachteule?", it:"Mattiniero o nottambulo?", ur:"آپ صبح جلدی اٹھنے والے ہیں یا رات کو جاگنے والے؟" },
+  { en:"What's something you learned recently?", es:"¿Qué aprendiste recientemente?", de:"Was hast du kürzlich gelernt?", it:"Cosa hai imparato di recente?", ur:"آپ نے حال ہی میں کیا نیا سیکھا؟" },
+  { en:"What holiday do you love most?", es:"¿Qué fiesta te gusta más?", de:"Welchen Feiertag magst du am liebsten?", it:"Quale festa ti piace di più?", ur:"آپ کو کون سا تہوار سب سے زیادہ پسند ہے؟" },
+  { en:"Do you have a pet? Tell us about it!", es:"¿Tienes mascota? ¡Cuéntanos!", de:"Hast du ein Haustier? Erzähl uns davon!", it:"Hai un animale? Raccontaci!", ur:"کیا آپ کے پاس کوئی پالتو جانور ہے؟ ہمیں بتائیں!" },
+  { en:"What's your dream job?", es:"¿Cuál es el trabajo de tus sueños?", de:"Was ist dein Traumjob?", it:"Qual è il lavoro dei tuoi sogni?", ur:"آپ کی خوابوں کی نوکری کون سی ہے؟" },
+  { en:"What makes you smile?", es:"¿Qué te hace sonreír?", de:"Was bringt dich zum Lächeln?", it:"Cosa ti fa sorridere?", ur:"آپ کو کیا چیز مسکرانے پر مجبور کرتی ہے؟" }
 ];
 function luFlag(k){ return cfLang(k)[0]; }
 function luName(l){ return `${LU_NAMES[l.lang_a]||cfLang(l.lang_a)[1]} ⇄ ${LU_NAMES[l.lang_b]||cfLang(l.lang_b)[1]}`; }
@@ -4197,7 +4198,7 @@ function luListHtml(){
         <span class="tm">${t}</span>${tools}</div>`;
     }
     return `${sep}<div class="cm ${mine?"me":""}">${mine?"":`<div class="who">${m.avatar_url?`<img class="avs" src="${esc(m.avatar_url)}" alt="">`:""}${esc(m.name||"Member")}</div>`}
-      ${chLinkify(m.body)}<span class="tm">${t}</span>${tools}</div>`;
+      <span dir="auto">${chLinkify(m.body)}</span><span class="tm">${t}</span>${tools}</div>`;
   }).join("");
 }
 function luPaint(){
@@ -4209,7 +4210,7 @@ function luQuestion(l){
   const day=Math.floor(Date.now()/86400000), q=LU_QS[day % LU_QS.length];
   const a=q[l.lang_a], b=q[l.lang_b];
   return `<div class="luq"><span class="note" style="margin:0">💡 Question of the day · Frage des Tages</span>
-    ${a?`<div><b>${luFlag(l.lang_a)} ${esc(a)}</b></div>`:""}${b?`<div><b>${luFlag(l.lang_b)} ${esc(b)}</b></div>`:""}
+    ${a?`<div lang="${l.lang_a}" dir="auto" class="luql"><b>${luFlag(l.lang_a)} ${esc(a)}</b></div>`:""}${b?`<div lang="${l.lang_b}" dir="auto" class="luql"><b>${luFlag(l.lang_b)} ${esc(b)}</b></div>`:""}
     ${!a&&!b?`<div><b>🇬🇧 ${esc(q.en)}</b></div>`:""}</div>`;
 }
 VIEWS.lounge = function(){
