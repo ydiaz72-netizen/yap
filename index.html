@@ -213,6 +213,23 @@
   .qzdots span.done{background:var(--teal)}
   .qzdots span.cur{outline:2px solid var(--plum);outline-offset:2px}
   .qzrow{display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+  /* ---- Words I learned ---- */
+  .wditem{background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:10px}
+  .wditem.editing{border-color:var(--plum);background:var(--plum-soft)}
+  .wdtop{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .wdlang{font-size:12px;font-weight:800;color:var(--plum)}
+  .wdtools{display:flex;gap:6px}
+  .wdtools .chip{padding:6px 10px;font-size:14px}
+  .wdword{font-size:19px;font-weight:800;margin-top:4px}
+  .wdmean{font-size:15px;font-weight:600;color:var(--ink)}
+  .wdex{margin:4px 0 0;font-style:italic}
+  .wdold{margin:4px 0 0}
+  .wdtag{display:inline-block;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:800;background:#F1EEE8;color:var(--muted)}
+  .wdtag.ok{background:var(--teal-soft);color:#1d6a62}
+  .wdtag.fix{background:var(--sun-soft);color:#6E4E00}
+  .wdbadge{display:inline-block;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:800;background:var(--coral);color:#fff;vertical-align:middle}
+  .chip.wdok{border-color:var(--teal);background:var(--teal-soft);color:#1d6a62}
+  .wdfix{margin-top:8px;border-top:1px solid var(--line);padding-top:4px}
   .qzrow:last-child{border-bottom:none}
   /* ---- Session materials ---- */
   .mrow{display:grid;grid-template-columns:1fr auto;gap:6px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px;margin-top:8px}
@@ -2971,6 +2988,9 @@ VIEWS.account = function(){
   <div class="card"><h3>📊 My stats <span class="de">· Meine Statistik</span></h3>
     ${mrHtml()}
     ${A.games===null?`<p class="note center">Loading your games… <button class="linkbtn" onclick="loadGames()">Retry</button></p>`:acctStats(gs)}</div>
+  <div class="card"><h3>📚 My words <span class="de">· Meine Wörter</span></h3>
+    <p class="note" style="margin-top:0">Words and phrases you saved in your sessions, checked by your partners.<br><span class="de">Wörter aus deinen Sessions, geprüft von deinen Partnern.</span></p>
+    <button class="btn secondary" onclick="wdAllOpen()">📚 See my words · Meine Wörter</button></div>
   ${acctHistory(gs)}
   <p class="note center">Tap a game to see its questions, answers &amp; tips · Tippe auf ein Spiel für Details</p>
   <div id="npc">${npCard()}</div>
@@ -4191,6 +4211,227 @@ VIEWS.quiz = function(){
       : d.role==="host" ? qzHostView(d, s) : qzGuestView(d)}`;
 };
 
+/* ===================== WORDS I LEARNED ===================== */
+/* Learning loop, step 1. During or after a session people save words they learned.
+   The partner can optionally check them: ✓ looks good, or ✏️ fix. Words feed the review quiz later.
+   Database: sql/session_words.sql (pt_words_* functions). Only the host and joined people see a session's words. */
+const WDS = {};  // activity_id -> { n, mine, to_check }  (my sessions only)
+const WD = { id:null, data:null, all:null, busy:false, err:"", form:{ lang:"", word:"", meaning:"", example:"" }, edit:null, fix:null, fixv:{ word:"", meaning:"", note:"" } };
+const WD_MAX = 30;
+async function wdLoad(){
+  if(!A.user || !A.sb) return;
+  try{
+    const { data, error } = await A.sb.rpc("pt_words_status_list"); if(error) return;
+    const was=JSON.stringify(WDS);
+    Object.keys(WDS).forEach(k=>delete WDS[k]);
+    (data||[]).forEach(r=>{ WDS[r.activity_id]={ n:r.n, mine:r.mine, to_check:r.to_check }; });
+    if(was!==JSON.stringify(WDS) && ["board","session"].includes(S.screen)) xr();
+  }catch(e){}
+}
+function wdLang(k){ return T[k] ? `${T[k].flag} ${T[k].nameEn}` : (typeof LU_NAMES!=="undefined" && LU_NAMES[k]) || String(k||"").toUpperCase(); }
+function wdBtn(s){
+  if(!A.user || s.status==="cancelled") return "";
+  if(!(s.is_host || s.my_status==="joined" || s.my_status==="attended")) return "";
+  if(Date.now() < new Date(s.starts_at).getTime()-30*60000) return "";
+  const w=WDS[s.activity_id]||{ n:0, mine:0, to_check:0 };
+  const lbl = w.mine ? `📚 My words from this session (${w.mine}) · Meine Wörter` : "📚 Save words I learned · Wörter speichern";
+  const chk = w.to_check ? ` <span class="wdbadge">${w.to_check} to check</span>` : "";
+  return `<button class="btn secondary" style="margin-top:8px" onclick="wdOpen('${s.activity_id}')">${lbl}${chk}</button>`;
+}
+function wdErr(e){
+  const m=String((e&&e.message)||e||"");
+  if(/words_not_open/.test(m)) return "You can add words from 30 minutes before the session · Ab 30 Min. vor Beginn";
+  if(/words_limit/.test(m)) return `Max ${WD_MAX} words per session · Höchstens ${WD_MAX} Wörter pro Session`;
+  if(/words_invalid/.test(m)) return "Add the word and what it means (word up to 80, meaning up to 120 characters) · Wort und Bedeutung eingeben";
+  if(/words_own/.test(m)) return "You can't check your own words · Eigene Wörter kannst du nicht prüfen";
+  if(/not_yours/.test(m)) return "That's not your word · Nicht dein Wort";
+  if(/not_in_session/.test(m)) return "Only people in this session can see its words · Nur für Teilnehmende";
+  return bErr(e);
+}
+function wdBlankForm(langs){
+  const L=(langs||[]).filter(Boolean);
+  const p=A.profile&&A.profile.practicing;
+  return { lang: L.includes(p) ? p : (L[1]||L[0]||""), word:"", meaning:"", example:"" };
+}
+async function wdOpen(id){
+  Object.assign(WD,{ id, data:null, busy:false, err:"", edit:null, fix:null });
+  go("words"); await wdFetch();
+}
+async function wdFetch(){
+  try{
+    const { data, error } = await A.sb.rpc("pt_words_get",{ p_activity:WD.id }); if(error) throw error;
+    WD.data=data||{ words:[], langs:[] };
+    const L=(WD.data.langs||[]).filter(Boolean);
+    if(!WD.edit && (!WD.form.lang || !L.includes(WD.form.lang))) WD.form=wdBlankForm(L);
+    const ws=WD.data.words||[];
+    WDS[WD.id]={ n:ws.length, mine:ws.filter(w=>w.mine).length, to_check:ws.filter(w=>!w.mine && w.status==="unchecked").length };
+  }catch(e){ WD.err=wdErr(e); }
+  if(S.screen==="words") xr();
+}
+function wdBack(){ if(WD.id==="all"){ go("account"); return; } wdLoad(); sOpen(WD.id); }
+
+/* ---- my words: add / edit / delete ---- */
+async function wdSave(){
+  const f=WD.form, word=(f.word||"").trim(), meaning=(f.meaning||"").trim();
+  if(!word || !meaning){ WD.err="Add the word and what it means · Wort und Bedeutung eingeben"; xr(); return; }
+  WD.busy=true; WD.err=""; xr();
+  try{
+    const args={ p_lang:f.lang, p_word:word, p_meaning:meaning, p_example:(f.example||"").trim()||null };
+    const r = WD.edit ? await A.sb.rpc("pt_words_edit",{ p_id:WD.edit, ...args })
+                      : await A.sb.rpc("pt_words_add",{ p_activity:WD.id, ...args });
+    if(r.error) throw r.error;
+    bToast(WD.edit?"💾 Saved · Gespeichert":"📚 Word saved! · Wort gespeichert!");
+    WD.busy=false; WD.edit=null; WD.form=Object.assign(wdBlankForm(WD.data.langs), { lang:f.lang });
+    await wdFetch();
+    setTimeout(()=>{ const e=$("wdword"); if(e && window.innerWidth>700) e.focus({preventScroll:true}); },0);
+  }catch(e){ WD.busy=false; WD.err=wdErr(e); xr(); }
+}
+function wdEditStart(id){
+  const w=(WD.data.words||[]).find(x=>x.id===id); if(!w) return;
+  WD.edit=id; WD.fix=null; WD.err="";
+  WD.form={ lang:w.lang, word:w.word, meaning:w.meaning, example:w.example||"" };
+  xr(); setTimeout(()=>{ const e=$("wdword"); if(e){ e.scrollIntoView({behavior:"smooth",block:"center"}); } },0);
+}
+function wdEditCancel(){ WD.edit=null; WD.err=""; WD.form=wdBlankForm(WD.data.langs); xr(); }
+async function wdDelete(id){
+  if(!window.confirm("Delete this word? · Wort löschen?")) return;
+  try{ const { error } = await A.sb.rpc("pt_words_delete",{ p_id:id }); if(error) throw error;
+    if(WD.edit===id) WD.edit=null;
+    bToast("🗑 Deleted · Gelöscht");
+    if(WD.id==="all") await wdAllFetch(); else await wdFetch();
+  }catch(e){ WD.err=wdErr(e); xr(); }
+}
+async function wdAsk(){
+  const n=(WD.data.words||[]).filter(w=>w.mine && w.status==="unchecked").length; if(!n) return;
+  try{
+    const { error } = await A.sb.from("session_messages").insert({ activity_id:WD.id, user_id:A.user.id,
+      body:`📚 I saved ${n} word${n===1?"":"s"} from our session. Can you check ${n===1?"it":"them"}? Open the session and tap “My words”. · Kannst du meine Wörter prüfen?` });
+    if(error) throw error;
+    bToast("📨 Asked in the session chat · Im Chat gefragt");
+  }catch(e){ WD.err=bErr(e); xr(); }
+}
+
+/* ---- partner: check ---- */
+async function wdCheckOk(id){
+  try{ const { error } = await A.sb.rpc("pt_words_check",{ p_id:id, p_ok:true }); if(error) throw error;
+    bToast("✓ Thanks for checking! · Danke!"); await wdFetch();
+  }catch(e){ WD.err=wdErr(e); xr(); }
+}
+function wdFixStart(id){
+  const w=(WD.data.words||[]).find(x=>x.id===id); if(!w) return;
+  WD.fix=id; WD.edit=null; WD.err=""; WD.fixv={ word:w.word, meaning:w.meaning, note:"" }; xr();
+}
+async function wdFixSave(){
+  const v=WD.fixv, word=(v.word||"").trim(), meaning=(v.meaning||"").trim();
+  if(!word || !meaning){ WD.err="Add the word and what it means · Wort und Bedeutung eingeben"; xr(); return; }
+  WD.busy=true; WD.err=""; xr();
+  try{ const { error } = await A.sb.rpc("pt_words_check",{ p_id:WD.fix, p_ok:false, p_word:word, p_meaning:meaning, p_note:(v.note||"").trim()||null });
+    if(error) throw error;
+    WD.busy=false; WD.fix=null; bToast("✏️ Fixed. Thanks! · Korrigiert. Danke!"); await wdFetch();
+  }catch(e){ WD.busy=false; WD.err=wdErr(e); xr(); }
+}
+
+/* ---- all my words (from Account) ---- */
+async function wdAllOpen(){
+  Object.assign(WD,{ id:"all", all:null, err:"", edit:null, fix:null });
+  go("words"); await wdAllFetch();
+}
+async function wdAllFetch(){
+  try{ const { data, error } = await A.sb.rpc("pt_words_mine"); if(error) throw error; WD.all=data||[]; }
+  catch(e){ WD.err=wdErr(e); if(!WD.all) WD.all=[]; }
+  if(S.screen==="words") xr();
+}
+
+/* ---- screens ---- */
+function wdStatus(w){
+  if(w.status==="confirmed") return `<span class="wdtag ok">✓ Checked${w.checked_by_name?` by ${esc(w.checked_by_name)}`:""}</span>`;
+  if(w.status==="fixed") return `<span class="wdtag fix">✏️ Fixed${w.checked_by_name?` by ${esc(w.checked_by_name)}`:""}</span>`;
+  return `<span class="wdtag">Not checked yet · Noch nicht geprüft</span>`;
+}
+function wdItem(w, mode){
+  const fixed = w.status==="fixed" && (w.original_word||w.original_meaning)
+    ? `<p class="note wdold">Was · War: <s>${esc(w.original_word||w.word)}</s> = <s>${esc(w.original_meaning||w.meaning)}</s></p>` : "";
+  const note = w.check_note ? `<p class="note" style="margin:4px 0 0">💬 ${esc(w.check_note)}</p>` : "";
+  let tools="";
+  if(mode==="mine") tools=`<span class="wdtools"><button class="chip" aria-label="Edit ${esc(w.word)}" onclick="wdEditStart('${w.id}')">✏️</button><button class="chip" aria-label="Delete ${esc(w.word)}" onclick="wdDelete('${w.id}')">🗑</button></span>`;
+  if(mode==="all") tools=`<span class="wdtools"><button class="chip" aria-label="Delete ${esc(w.word)}" onclick="wdDelete('${w.id}')">🗑</button></span>`;
+  let check="";
+  if(mode==="other"){
+    if(WD.fix===w.id){
+      check=`<div class="wdfix">
+        <label class="lbl" for="wdfw">Correct word · Richtiges Wort</label>
+        <input type="text" id="wdfw" dir="auto" maxlength="80" value="${esc(WD.fixv.word)}" oninput="WD.fixv.word=this.value">
+        <label class="lbl" for="wdfm">Meaning · Bedeutung</label>
+        <input type="text" id="wdfm" dir="auto" maxlength="120" value="${esc(WD.fixv.meaning)}" oninput="WD.fixv.meaning=this.value">
+        <label class="lbl" for="wdfn">Short tip (optional) · Tipp (optional)</label>
+        <input type="text" id="wdfn" dir="auto" maxlength="200" placeholder="e.g. It's “die”, not “der”" value="${esc(WD.fixv.note)}" oninput="WD.fixv.note=this.value">
+        <div class="brow2"><button class="btn ghost" onclick="WD.fix=null;WD.err='';xr()">Cancel</button>
+          <button class="btn primary" ${WD.busy?"disabled":""} onclick="wdFixSave()">${WD.busy?"Saving…":"💾 Save fix"}</button></div></div>`;
+    } else if(w.status==="unchecked"){
+      check=`<div class="row" style="margin:8px 0 0;gap:8px"><button class="chip wdok" onclick="wdCheckOk('${w.id}')">✓ Looks good · Passt</button><button class="chip" onclick="wdFixStart('${w.id}')">✏️ Fix · Korrigieren</button></div>`;
+    }
+  }
+  return `<div class="wditem ${WD.edit===w.id?"editing":""}">
+    <div class="wdtop"><span class="wdlang">${wdLang(w.lang)}</span>${tools}</div>
+    <div class="wdword" dir="auto">${esc(w.word)}</div>
+    <div class="wdmean" dir="auto">= ${esc(w.meaning)}</div>
+    ${w.example?`<p class="note wdex" dir="auto">“${esc(w.example)}”</p>`:""}
+    ${fixed}${note}
+    <div style="margin-top:6px">${wdStatus(w)}</div>
+    ${check}</div>`;
+}
+function wdForm(d){
+  const L=(d.langs||[]).filter(Boolean), f=WD.form;
+  if(!d.open) return `<div class="card center"><div style="font-size:36px">⏳</div><p class="note" style="margin:6px 0 0">You can add words from 30 minutes before the session. · Ab 30 Min. vor Beginn.</p></div>`;
+  return `<div class="card">
+    <h3 style="margin:0 0 4px">${WD.edit?"✏️ Edit word · Wort bearbeiten":"➕ Add a word · Wort hinzufügen"}</h3>
+    ${WD.edit?"":`<p class="note" style="margin:0 0 6px">2–3 words or phrases per session is perfect. · 2–3 Wörter pro Session reichen.</p>`}
+    <label class="lbl">Language of the word · Sprache</label>
+    <div class="row">${L.map(k=>`<button class="chip ${f.lang===k?"on":""}" aria-pressed="${f.lang===k}" onclick="WD.form.lang='${k}';xr()">${wdLang(k)}</button>`).join("")}</div>
+    <label class="lbl" for="wdword">Word or phrase · Wort oder Ausdruck</label>
+    <input type="text" id="wdword" dir="auto" maxlength="80" placeholder="e.g. die Verabredung" value="${esc(f.word)}" oninput="WD.form.word=this.value">
+    <label class="lbl" for="wdmean">What it means · Bedeutung</label>
+    <input type="text" id="wdmean" dir="auto" maxlength="120" placeholder="e.g. the appointment / date" value="${esc(f.meaning)}" oninput="WD.form.meaning=this.value">
+    <label class="lbl" for="wdex">Example sentence (optional) · Beispielsatz (optional)</label>
+    <input type="text" id="wdex" dir="auto" maxlength="200" placeholder="e.g. Ich habe heute eine Verabredung." value="${esc(f.example)}" oninput="WD.form.example=this.value" onkeydown="if(event.key==='Enter')wdSave()">
+    ${WD.err?`<div class="err">${esc(WD.err)}</div>`:""}
+    <button class="btn primary" ${WD.busy?"disabled":""} onclick="wdSave()">${WD.busy?"Saving… · Speichert…":WD.edit?"💾 Save changes · Speichern":"📚 Save word · Speichern"}</button>
+    ${WD.edit?`<button class="btn ghost" onclick="wdEditCancel()">Cancel · Abbrechen</button>`:""}
+  </div>`;
+}
+function wdSessionView(d, s){
+  const ws=d.words||[], mine=ws.filter(w=>w.mine), others=ws.filter(w=>!w.mine);
+  const unchecked=mine.filter(w=>w.status==="unchecked").length, toCheck=others.filter(w=>w.status==="unchecked").length;
+  const canAsk = unchecked && s && s.activity_id && chWindow(s);
+  return `<p class="note" style="margin:0 0 12px">Save what you learned today. Your partner can check it, and it goes into your practice later. · Speichere, was du gelernt hast.</p>
+    ${wdForm(d)}
+    <h3 style="margin:18px 0 8px">📚 My words <span class="de">· Meine Wörter</span> (${mine.length})</h3>
+    ${mine.length ? mine.map(w=>wdItem(w,"mine")).join("") : `<p class="note">No words yet. Add the first one above! · Noch keine Wörter.</p>`}
+    ${canAsk?`<button class="btn secondary" onclick="wdAsk()">📨 Ask my partner to check (${unchecked}) · Partner fragen</button>`:""}
+    ${others.length?`<h3 style="margin:22px 0 4px">🤝 Help your partners <span class="de">· Hilf deinen Partnern</span>${toCheck?` <span class="wdbadge">${toCheck} to check</span>`:""}</h3>
+      <p class="note" style="margin:0 0 8px">Is it right? Tap ✓, or fix it so they practise the correct version. · Stimmt es? ✓ oder korrigieren.</p>
+      ${others.map(w=>`<p class="qzn" style="margin:10px 0 4px">${esc(w.name)}</p>${wdItem(w,"other")}`).join("")}`:""}`;
+}
+function wdAllView(){
+  if(WD.all===null) return `<p class="note center" style="margin-top:30px">Loading… · Lädt…</p>`;
+  if(!WD.all.length) return `<div class="card center"><div style="font-size:40px">📚</div><h3>No words yet · Noch keine Wörter</h3>
+    <p class="note">In a session you joined, tap “Save words I learned”. · In einer Session auf „Wörter speichern“ tippen.</p></div>`;
+  const groups=[]; WD.all.forEach(w=>{ let g=groups.find(x=>x.id===w.activity_id); if(!g){ g={ id:w.activity_id, title:w.title, at:w.starts_at, list:[] }; groups.push(g); } g.list.push(w); });
+  const ok=WD.all.filter(w=>w.status!=="unchecked").length;
+  return `<div class="card"><b>${WD.all.length}</b> word${WD.all.length===1?"":"s"} saved · <b>${ok}</b> checked by a partner</div>
+    ${WD.err?`<div class="err">${esc(WD.err)}</div>`:""}
+    ${groups.map(g=>`<p class="dayh">${esc(g.title||"Session")} · ${g.at?esc(fmtWhen(g.at)):""}</p>${g.list.map(w=>wdItem(w,"all")).join("")}`).join("")}`;
+}
+VIEWS.words = function(){
+  if(WD.id==="all") return `<div class="topline"><button class="chip" onclick="wdBack()">← Account</button><span>📚 My words</span></div>
+    <h2 style="margin-bottom:12px">${bi("My words","Meine Wörter")}</h2>${wdAllView()}`;
+  const s=bRowOf({ activity_id:WD.id })||{}, d=WD.data;
+  return `<div class="topline"><button class="chip" onclick="wdBack()">← Session</button><span>📚 Words I learned</span></div>
+    <h2 style="margin-bottom:2px">${esc(s.title||"Words I learned")}</h2>
+    ${s.starts_at?`<p class="note" style="margin:0 0 12px">${fmtWhen(s.starts_at)}</p>`:""}
+    ${!d ? (WD.err?`<div class="err">${esc(WD.err)}</div>`:`<p class="note center" style="margin-top:30px">Loading… · Lädt…</p>`) : wdSessionView(d, s)}`;
+};
+
 /* ===================== LANGUAGE LOUNGES ===================== */
 /* One open chat per language pair + "Find a time". Database: sql/lounges.sql (pt_lounge_* functions). */
 const LU = { list:null, id:null, msgs:[], last:0, free:[], busy:false, err:"", draft:"", chan:null, timer:null,
@@ -5244,7 +5485,7 @@ async function vLoad(){
     if(error) return;
     Object.keys(VL).forEach(k=>delete VL[k]);
     (data||[]).forEach(r=>{ VL[r.activity_id]={ url:r.url, provider:r.provider }; });
-    ciLoad(); avCollect(); mLoad(); qzLoad(); blLoad(); pLoad(); pCityLoad(); chUnreadLoad();
+    ciLoad(); avCollect(); mLoad(); qzLoad(); wdLoad(); blLoad(); pLoad(); pCityLoad(); chUnreadLoad();
     if(["board","session","home"].includes(S.screen)) xr();
   }catch(e){}
 }
@@ -5441,6 +5682,7 @@ function bCard(s){
     ${mList(s)}
     ${chBtn(s)}
     ${qzBtn(s)}
+    ${wdBtn(s)}
     ${rsBlock(s)}
     <div class="row" style="justify-content:center;margin-top:8px">${s.is_host && !started ? `<button class="chip" onclick="hEdit('${id}')">✏️ Edit · Bearbeiten</button>` : ""}${s.is_host ? `<button class="chip" onclick="hDup('${id}')">⧉ Duplicate · Kopieren</button>` : ""}<button class="chip" onclick="sShare('${id}')">🔗 ${s.is_host?"Share invite link":"Share"}</button></div>
     ${s.is_host && !started ? `<p class="center" style="margin:10px 0 0"><button class="linkbtn dangertext" style="font-size:13px" onclick="bCancel('${id}')">Cancel session · Absagen</button></p>` : ""}
