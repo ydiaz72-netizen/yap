@@ -238,6 +238,11 @@
   .luflags{display:flex;align-items:center;gap:6px;font-size:30px;line-height:1}
   .luflags span{font-size:14px;color:var(--muted);font-weight:800}
   .lufree{color:#1d6a62}
+  .lucard{position:relative}
+  .lucorner{position:absolute;top:10px;right:10px}
+  .lucorner .lubadge{margin:0;background:var(--teal-soft)}
+  .lubadge.off{color:var(--muted);background:var(--bg)!important;font-weight:700}
+  .lubadge{display:inline-block;margin-left:6px;background:#fff;color:#1d6a62;border-radius:20px;padding:2px 8px;font-size:12px;font-weight:800;vertical-align:1px}
   .lupres{font-size:12px;font-weight:800;color:#1d6a62;white-space:nowrap}
   .luwho{white-space:nowrap}.luwho .avs{width:16px;height:16px;margin-right:3px;vertical-align:-3px}
   .emobox{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:6px;margin-top:8px;box-shadow:0 6px 20px rgba(0,0,0,.08)}
@@ -4173,7 +4178,8 @@ VIEWS.lounges = function(){
   if(!LU.list) return `${top}<p class="note center">Loading… · Lädt…</p>`;
   return `${top}<div class="lugrid">${LU.list.map(l=>`<button class="card lucard" onclick="luEnter('${esc(l.id)}')">
       <div class="luflags">${luFlag(l.lang_a)}<span>⇄</span>${luFlag(l.lang_b)}</div>
-      <b>${esc(luName(l))}</b> <span data-lupres="${esc(l.id)}">${lpHere(l.id)}</span>
+      <span class="lucorner" data-lupres-badge="${esc(l.id)}">${lpBadge(l.id)}</span>
+      <b>${esc(luName(l))}</b>
       <span class="note" style="margin:4px 0 0">${l.msgs_7d?`💬 ${l.msgs_7d} message${l.msgs_7d===1?"":"s"} this week`:"💬 Be the first to say hi"}${l.free_24h?` · <b class="lufree">🙋 ${l.free_24h} free in the next 24 h</b>`:""}</span>
     </button>`).join("")}</div>
     ${luSugHtml()}`;
@@ -4264,7 +4270,11 @@ function lpTrack(){
   try{ if(S.screen==="lounge" && LU.id) LP.chan.track({ lounge:LU.id }); else LP.chan.untrack(); }catch(e){}
 }
 function lpHere(id){ const n=LP.counts[id]||0; return n ? `<span class="lupres">🟢 ${n} here now</span>` : ""; }
-function lpPaint(){ document.querySelectorAll("[data-lupres]").forEach(el=>{ el.innerHTML=lpHere(el.getAttribute("data-lupres")); }); }
+function lpBadge(id){ const n=LP.counts[id]||0; return `<span class="lubadge ${n?"":"off"}" title="People in this lounge right now">${n?"🟢":"⚪"} ${n} online</span>`; }
+function lpAll(){ const n=Object.values(LP.counts).reduce((a,b)=>a+b,0); return n ? `<span class="lubadge" title="People in lounges right now">🟢 ${n} online</span>` : ""; }
+function lpPaint(){ document.querySelectorAll("[data-lupres]").forEach(el=>{ el.innerHTML=lpHere(el.getAttribute("data-lupres")); });
+  document.querySelectorAll("[data-lupres-all]").forEach(el=>{ el.innerHTML=lpAll(); });
+  document.querySelectorAll("[data-lupres-badge]").forEach(el=>{ el.innerHTML=lpBadge(el.getAttribute("data-lupres-badge")); }); }
 
 /* ---- one lounge ---- */
 async function luEnter(id){
@@ -6256,7 +6266,7 @@ function weekCard(){
 function quickCard(){
   return `<div class="card"><h3>Quick start · Schnellstart</h3>
     <button class="btn qbtn" style="background:var(--plum);color:#fff" onclick="hOpen()">${ICO.plus} Host a session</button>
-    <button class="btn secondary qbtn" onclick="luOpen()">🛋️ Chat in a lounge</button>
+    <button class="btn secondary qbtn" onclick="luOpen()">🛋️ Chat in a lounge <span data-lupres-all>${lpAll()}</span></button>
     <button class="btn secondary qbtn" onclick="shOpen()">📘 Free resources</button>
     <button class="btn secondary qbtn" onclick="go('games')">${ICO.play} Play a game now</button></div>`;
 }
@@ -6331,7 +6341,7 @@ function landing(){
 }
 VIEWS.home = function(){ return (A.user && A.status==="in") ? homeDash() : landing(); };
 const _afterHome = AFTER.home;
-AFTER.home = function(){ if(_afterHome) _afterHome(); if(!A.user && !B.landOk && window.supabase){ B.landOk=true; bLoad().then(()=>{ if(S.screen==="home") xr(); }); } };
+AFTER.home = function(){ if(_afterHome) _afterHome(); if(A.user){ lpStart(); lpTrack(); } if(!A.user && !B.landOk && window.supabase){ B.landOk=true; bLoad().then(()=>{ if(S.screen==="home") xr(); }); } };
 
 /* ===================== SHARE A SESSION ===================== */
 function sLink(id){ return (location.protocol.startsWith("http") ? location.origin : "https://pontetalk.setzio.com") + "/?s=" + id; }
