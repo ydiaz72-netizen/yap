@@ -238,6 +238,7 @@
   .luflags{display:flex;align-items:center;gap:6px;font-size:30px;line-height:1}
   .luflags span{font-size:14px;color:var(--muted);font-weight:800}
   .lufree{color:#1d6a62}
+  .lubadge{display:inline-block;margin-left:6px;background:#fff;color:#1d6a62;border-radius:20px;padding:2px 8px;font-size:12px;font-weight:800;vertical-align:1px}
   .lupres{font-size:12px;font-weight:800;color:#1d6a62;white-space:nowrap}
   .luwho{white-space:nowrap}.luwho .avs{width:16px;height:16px;margin-right:3px;vertical-align:-3px}
   .emobox{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:6px;margin-top:8px;box-shadow:0 6px 20px rgba(0,0,0,.08)}
@@ -4264,7 +4265,9 @@ function lpTrack(){
   try{ if(S.screen==="lounge" && LU.id) LP.chan.track({ lounge:LU.id }); else LP.chan.untrack(); }catch(e){}
 }
 function lpHere(id){ const n=LP.counts[id]||0; return n ? `<span class="lupres">🟢 ${n} here now</span>` : ""; }
-function lpPaint(){ document.querySelectorAll("[data-lupres]").forEach(el=>{ el.innerHTML=lpHere(el.getAttribute("data-lupres")); }); }
+function lpAll(){ const n=Object.values(LP.counts).reduce((a,b)=>a+b,0); return n ? `<span class="lubadge" title="People in lounges right now">🟢 ${n} online</span>` : ""; }
+function lpPaint(){ document.querySelectorAll("[data-lupres]").forEach(el=>{ el.innerHTML=lpHere(el.getAttribute("data-lupres")); });
+  document.querySelectorAll("[data-lupres-all]").forEach(el=>{ el.innerHTML=lpAll(); }); }
 
 /* ---- one lounge ---- */
 async function luEnter(id){
@@ -6256,7 +6259,7 @@ function weekCard(){
 function quickCard(){
   return `<div class="card"><h3>Quick start · Schnellstart</h3>
     <button class="btn qbtn" style="background:var(--plum);color:#fff" onclick="hOpen()">${ICO.plus} Host a session</button>
-    <button class="btn secondary qbtn" onclick="luOpen()">🛋️ Chat in a lounge</button>
+    <button class="btn secondary qbtn" onclick="luOpen()">🛋️ Chat in a lounge <span data-lupres-all>${lpAll()}</span></button>
     <button class="btn secondary qbtn" onclick="shOpen()">📘 Free resources</button>
     <button class="btn secondary qbtn" onclick="go('games')">${ICO.play} Play a game now</button></div>`;
 }
@@ -6331,7 +6334,7 @@ function landing(){
 }
 VIEWS.home = function(){ return (A.user && A.status==="in") ? homeDash() : landing(); };
 const _afterHome = AFTER.home;
-AFTER.home = function(){ if(_afterHome) _afterHome(); if(!A.user && !B.landOk && window.supabase){ B.landOk=true; bLoad().then(()=>{ if(S.screen==="home") xr(); }); } };
+AFTER.home = function(){ if(_afterHome) _afterHome(); if(A.user){ lpStart(); lpTrack(); } if(!A.user && !B.landOk && window.supabase){ B.landOk=true; bLoad().then(()=>{ if(S.screen==="home") xr(); }); } };
 
 /* ===================== SHARE A SESSION ===================== */
 function sLink(id){ return (location.protocol.startsWith("http") ? location.origin : "https://pontetalk.setzio.com") + "/?s=" + id; }
