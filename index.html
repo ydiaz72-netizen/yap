@@ -301,6 +301,10 @@
   .shfl{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none}
   .shfl::-webkit-scrollbar{display:none}
   .shfl .chip{flex:none}
+  .shshelf{margin:0 0 18px}
+  .shshelf>h3{margin:0 0 8px;font-size:17px}
+  .shstart{background:var(--plum-soft);border-radius:18px;padding:12px 12px 2px;margin:0 0 18px}
+  .shlearn{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin:0 0 10px}
   .shgrid{display:grid;grid-template-columns:1fr;gap:14px;align-items:start}
   @media (min-width:640px){ .shgrid{grid-template-columns:1fr 1fr} }
   @media (min-width:1100px){ body.xl .shgrid{grid-template-columns:1fr 1fr 1fr} }
@@ -5747,7 +5751,7 @@ function shCard(it){
       <div style="min-width:0;flex:1">
         <h3>${esc(it.title)}</h3>
         <div class="shmeta"><span class="shfree">${it.price_cents>0?"Paid":"Free · Gratis"}</span><span>${t?`${t.flag} ${esc(t.nameEn)}`:"🌍 Any language"}</span><span>${lvl}</span><span>${k[2]}</span>${T[it.base_language]?`<span title="Explanations are in ${esc(T[it.base_language].nameEn)}">📖 in ${esc(T[it.base_language].nameEn)}</span>`:""}</div>
-        ${(it.topics||[]).length?`<div class="shtopics" style="margin-top:6px">${it.topics.map(x=>{ const tp=shTopic(x); return `<span>${tp[1]} ${esc(tp[2])}</span>`; }).join("")}</div>`:""}
+        ${(it.topics||[]).filter(x=>x!==SH_START).length?`<div class="shtopics" style="margin-top:6px">${it.topics.filter(x=>x!==SH_START).map(x=>{ const tp=shTopic(x); return `<span>${tp[1]} ${esc(tp[2])}</span>`; }).join("")}</div>`:""}
       </div>
     </div>
     ${it.description?`<p class="shdesc">${esc(it.description)}</p>`:""}
@@ -5777,10 +5781,47 @@ function shListHtml(){
   if(!shown.length) return `<div class="card center"><p class="note">Nothing matches these filters yet · Nichts gefunden</p>
       <p class="note">Missing something? Tell us: <a href="mailto:${esc(LEGAL.email)}">${esc(LEGAL.email)}</a></p>
       <button class="chip" onclick="shClear()">✕ Clear filters · Filter löschen</button></div>`;
-  return `<p class="note" style="margin:0 0 8px">${shown.length} resource${shown.length>1?"s":""}${shown.length<list.length?` of ${list.length}`:""}</p>`
-    + (shView()==="list" ? `<div class="shlist">${shown.map(shRow).join("")}</div>` : `<div class="shgrid">${shown.map(shCard).join("")}</div>`);
+  return shSections(shown);
 }
 function shPaint(){ const el=document.getElementById("shlist"); if(el) el.innerHTML=shListHtml(); }
+/* ---- Sections: 📘 Start here · "I want to learn…" · shelves by level ---- */
+const SH_START="start";
+function shIsStart(it){ return (it.topics||[]).includes(SH_START); }
+function shLearn(){
+  if(SH.learn===undefined){
+    let v=null; try{ v=localStorage.getItem("pt_shlearn"); }catch(e){}
+    if(v===null){ const pr=A.profile&&A.profile.practicing; v = pr&&T[pr] ? pr : ""; }
+    SH.learn=v||"";
+  }
+  return SH.learn;
+}
+function shSetLearn(k){ SH.learn=k; try{ localStorage.setItem("pt_shlearn",k); }catch(e){} SH.fl.lang=[]; SH.fl.lvl=[]; xr(); }
+function shItems(arr){ return shView()==="list" ? `<div class="shlist">${arr.map(shRow).join("")}</div>` : `<div class="shgrid">${arr.map(shCard).join("")}</div>`; }
+function shShelf(title, arr){ return arr.length ? `<div class="shshelf"><h3>${title} <span class="note" style="margin:0">· ${arr.length}</span></h3>${shItems(arr)}</div>` : ""; }
+function shSections(shown){
+  const searching = !!cfNorm(SH.q).trim() || shFCount()>0;
+  const start = searching ? [] : shown.filter(shIsStart);
+  const rest = shown.filter(it=>searching || !shIsStart(it));
+  const L=shLearn();
+  let out = start.length ? `<div class="shstart">${shShelf("📘 Start here · Hier starten", start)}</div>` : "";
+  if(L){
+    const mine=rest.filter(it=>it.language===L || !it.language);
+    if(!mine.length) return out + `<div class="card center"><p class="note">No ${esc(T[L]?T[L].nameEn:L)} resources yet. More are coming! · Noch nichts hier</p>
+      <button class="chip" onclick="shSetLearn('')">🌍 See all languages</button></div>`;
+    RANKS.forEach((r,i)=>{ out += shShelf(`${r}${i===0?" · Absolute beginner":i===1?" · Beginner":i===2?" · Elementary":i===3?" · Intermediate":" · Advanced"}`, mine.filter(it=>it.level===i)); });
+    out += shShelf("🌈 All levels · Alle Niveaus", mine.filter(it=>it.level==null));
+    return out;
+  }
+  LANG_KEYS.forEach(k=>{ out += shShelf(`${T[k].flag} ${esc(T[k].nameEn)}`, rest.filter(it=>it.language===k)); });
+  out += shShelf("🌍 Any language · Alle Sprachen", rest.filter(it=>!it.language || !LANG_KEYS.includes(it.language)));
+  return out;
+}
+function shLearnBar(list){
+  const langs=LANG_KEYS.filter(k=>list.some(it=>it.language===k && !shIsStart(it)));
+  if(!langs.length) return "";
+  const L=shLearn(), b=(k,l)=>`<button class="chip ${L===k?"on":""}" aria-pressed="${L===k}" onclick="shSetLearn('${k}')">${l}</button>`;
+  return `<div class="shlearn"><b>I want to learn · Ich lerne</b><div class="row" style="margin:6px 0 0">${b("","🌍 All")}${langs.map(k=>b(k,`${T[k].flag} ${esc(T[k].nameEn)}`)).join("")}</div></div>`;
+}
 VIEWS.shop = function(){
   const list=SH.list||[], F=SH.fl, n=shFCount();
   const q=v=>typeof v==="number"?v:`'${v}'`;
@@ -5814,11 +5855,9 @@ VIEWS.shop = function(){
     <input type="text" placeholder="🔍 Search · Suchen" value="${esc(SH.q)}" oninput="SH.q=this.value;shPaint()" autocomplete="off">
     <div class="vsw" role="group" aria-label="View">${vb("grid","▦ Grid")}${vb("list","☰ List")}</div>
   </div>
+  ${shLearnBar(list)}
   <div class="shdd">
-    ${dd("lang","Learn","Ich lerne",[["",langs.map(k=>["lang",k,`${T[k].flag} ${esc(T[k].nameEn)}`])]])}
-    ${dd("lvl","Level","Niveau",[["",RANKS.map((r,i)=>["lvl",i,r])]])}
-    ${dd("topic","Topic","Thema",[["",topics.map(tp=>["topic",tp[0],`${tp[1]} ${esc(tp[2])}`])]])}
-    ${dd("more","More","Mehr",[["Explained in · Erklärt auf",bases.map(k=>["base",k,`${T[k].flag} ${esc(T[k].nameEn)}`])],["Type · Art",kinds.map(kd=>["kind",kd[0],`${kd[1]} ${esc(kd[2])}`])]],true)}
+    ${dd("more","⚙️ More filters","Mehr Filter",[["Topic · Thema",topics.map(tp=>["topic",tp[0],`${tp[1]} ${esc(tp[2])}`])],["Explained in · Erklärt auf",bases.map(k=>["base",k,`${T[k].flag} ${esc(T[k].nameEn)}`])],["Type · Art",kinds.map(kd=>["kind",kd[0],`${kd[1]} ${esc(kd[2])}`])]])}
     ${n?`<button class="linkbtn" onclick="shClear()">✕ Clear · Löschen</button>`:""}
   </div>
   </div>`:""}
@@ -5934,6 +5973,7 @@ VIEWS.shopedit = function(){
     <p class="note" style="margin:4px 0 0">The language of the translations and tips, e.g. Spanish for "Alemán en el café". · Sprache der Erklärungen.</p>
     <label class="lbl">Topics (pick all that fit) · Themen</label>
     <div class="row">${SH_TOPICS.map(tp=>chip((f.topics||[]).includes(tp[0]),`shFTopic('${tp[0]}')`,`${tp[1]} ${esc(tp[2])}`)).join("")}</div>
+    ${SH.admin?`<div class="row" style="margin-top:6px">${chip((f.topics||[]).includes(SH_START),`shFTopic('${SH_START}')`,"📘 Start here (PonteTalk guide, shown at the top)")}</div>`:""}
     <label class="lbl">Show it now? · Jetzt zeigen?</label>
     <div class="row">${chip(f.published,"SH.f.published=true;xr()","👁 Yes")}${chip(!f.published,"SH.f.published=false;xr()","🙈 Hidden (draft)")}</div>
     <p class="note">Price: Free · Preis: kostenlos.</p>
