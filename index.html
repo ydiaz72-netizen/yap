@@ -4606,7 +4606,7 @@ function ptCard(p, solo){
     <div class="row" style="margin:8px 0 0">
       <button class="chip" onclick="ptShare('${p.user_id}','${esc(String(p.name||"").replace(/'/g,""))}')">🔗 Share</button>
       ${me?`<button class="chip" onclick="xOpen()">✏️ Edit my profile</button>`:`<button class="chip" title="Report or block" onclick="repOpen('user','${p.user_id}',null,null,'${p.user_id}','${esc(String(p.name||"").replace(/'/g,""))}')">🚩</button>`}
-      ${!me&&!solo?`<span class="note" style="margin:0 0 0 auto;align-self:center">🤝 "Let's trade?" coming soon</span>`:""}
+      ${!me?`<button class="chip on" style="margin-left:auto" onclick="trOpen('${p.user_id}')">🤝 Let's trade?</button>`:""}
     </div></div>`;
 }
 function ptLink(id){ return (location.protocol.startsWith("http")?location.origin:"https://pontetalk.setzio.com")+"/?partner="+id; }
@@ -4646,6 +4646,75 @@ VIEWS.partners = function(){
     <p class="note center" style="margin-top:14px">🔒 Only signed-in members who also show themselves can see profiles. Never share phone numbers or addresses. Meet in sessions.</p>`;
 };
 function ptLvlT(c){ const a=PT.fl.learnLvl, i=a.indexOf(c); if(i>=0) a.splice(i,1); else a.push(c); xr(); }
+/* ---- 🤝 Let's trade? (creates a private 1:1 session + invites the partner; sql/lets_trade.sql) ---- */
+const TR = { p:null, a:"", b:"", when:"", date:"", time:"", dur:45, busy:false, err:"" };
+function trTimes(p){
+  return (p.both_free||[]).map(f=>{ const [h,m]=String(f.start).split(":").map(Number); const d=luNextLocal((f.weekday+1)%7, h); d.setMinutes(m||0);
+    if(d.getTime()-Date.now()<2*3600000) d.setDate(d.getDate()+7); return d; }).sort((x,y)=>x-y).slice(0,4);
+}
+function trOpen(uid){
+  const p=(PT.list||[]).concat(PT.one?[PT.one]:[]).find(x=>x.user_id===uid); if(!p) return;
+  const my=PT.my||[], iLearn=my.filter(x=>x.role==="learning").map(x=>x.code), iSpeak=my.filter(x=>x.role!=="learning").map(x=>x.code);
+  const L=p.languages||[], theySpeak=L.filter(x=>x.role!=="learning").map(x=>x.code), theyLearn=L.filter(x=>x.role==="learning").map(x=>x.code);
+  const a=theySpeak.find(k=>iLearn.includes(k))||theySpeak[0]||"";
+  const b=theyLearn.find(k=>iSpeak.includes(k)&&k!==a)||"";
+  const t=trTimes(p), d=new Date(Date.now()+86400000);
+  Object.assign(TR,{ p, a, b, when:t.length?t[0].toISOString():"custom", date:`${d.getFullYear()}-${hPad(d.getMonth()+1)}-${hPad(d.getDate())}`, time:"19:00", dur:45, busy:false, err:"" });
+  trShow();
+}
+function trShow(){
+  let box=document.getElementById("trSheet");
+  if(!box){ box=document.createElement("div"); box.className="sheet-bg"; box.id="trSheet"; box.addEventListener("click",e=>{ if(e.target===box) box.remove(); }); document.body.appendChild(box); }
+  const p=TR.p, L=p.languages||[], ch=(on,click,label)=>`<button class="chip ${on?"on":""}" aria-pressed="${on}" onclick="${click}">${label}</button>`;
+  const fl=k=>T[k]?`${T[k].flag} ${esc(T[k].nameEn)}`:k;
+  const theySpeak=L.filter(x=>x.role!=="learning").map(x=>x.code), theyLearn=L.filter(x=>x.role==="learning").map(x=>x.code);
+  const times=trTimes(p);
+  box.innerHTML=`<div class="sheet" role="dialog" aria-label="Let's trade">
+    <div class="nbhead"><h3 style="margin:0">🤝 Trade with ${esc(p.name)}</h3><button class="chip" aria-label="Close" onclick="document.getElementById('trSheet').remove()">✕</button></div>
+    <p class="note" style="margin:0 0 8px">This creates a private one-to-one session and invites ${esc(p.name)}. They can <b>Accept</b> or <b>Decline</b>. · Private Tandem-Session mit Einladung.</p>
+    <label class="lbl">You practice · Du übst</label>
+    <div class="row">${theySpeak.map(k=>ch(TR.a===k,`TR.a='${k}';if(TR.b==='${k}')TR.b='';trShow()`,fl(k))).join("")||`<span class="note">They haven't added a language they speak.</span>`}</div>
+    <label class="lbl">They practice · Sie üben</label>
+    <div class="row">${ch(!TR.b,"TR.b='';trShow()","– None")}${theyLearn.filter(k=>k!==TR.a).map(k=>ch(TR.b===k,`TR.b='${k}';trShow()`,fl(k))).join("")}</div>
+    <label class="lbl">When · Wann <span class="note" style="margin:0">(your time)</span></label>
+    <div class="row">${times.map(d=>ch(TR.when===d.toISOString(),`TR.when='${d.toISOString()}';trShow()`,`🗓️ ${esc(d.toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"}))} ${hPad(d.getHours())}:${hPad(d.getMinutes())}`)).join("")}${ch(TR.when==="custom","TR.when='custom';trShow()","✏️ Other time")}</div>
+    ${times.length?`<p class="note" style="margin:4px 0 0">🗓️ = you're both usually free then</p>`:""}
+    ${TR.when==="custom"?`<div class="row" style="margin:8px 0 0;gap:8px"><input type="date" value="${esc(TR.date)}" min="${new Date().toISOString().slice(0,10)}" oninput="TR.date=this.value" style="width:auto"><input type="time" step="900" value="${esc(TR.time)}" oninput="TR.time=this.value" style="width:auto"></div>`:""}
+    <label class="lbl">Length · Dauer</label>
+    <div class="row">${[30,45,60].map(m=>ch(TR.dur===m,`TR.dur=${m};trShow()`,`${m} min`)).join("")}</div>
+    ${TR.err?`<div class="err">${esc(TR.err)}</div>`:""}
+    <button class="btn primary" ${TR.busy?"disabled":""} onclick="trSend()">${TR.busy?"Sending… · Sendet…":`🤝 Send invitation to ${esc(p.name)}`}</button>
+    <p class="note center" style="margin:8px 0 0">Online by default: add a video link (or a free Jitsi room) in the session after they accept. Up to 5 trade invites a day.</p>
+  </div>`;
+}
+const TR_ERR = { trade_daily_limit:"You've sent 5 trade invites today. Try again tomorrow · Heute schon 5 Einladungen",
+  trade_weekly_limit:"You already invited this person this week · Diese Woche schon eingeladen",
+  trade_not_available:"This person isn't available for trades right now · Gerade nicht verfügbar",
+  partner_optin_needed:"Switch on “Show me in Find partners” in your exchange profile first · Erst im Profil sichtbar machen" };
+async function trSend(){
+  if(TR.busy) return;
+  if(!TR.a){ TR.err="Pick a language to practice · Sprache wählen"; trShow(); return; }
+  const start = TR.when==="custom" ? new Date(`${TR.date}T${TR.time}`) : new Date(TR.when);
+  if(isNaN(start.getTime()) || start.getTime() < Date.now()+30*60000){ TR.err="Pick a time at least 30 minutes from now · Mindestens 30 Minuten im Voraus"; trShow(); return; }
+  TR.busy=true; TR.err=""; trShow();
+  const p=TR.p, nA=T[TR.a]?T[TR.a].nameEn:TR.a, nB=TR.b&&T[TR.b]?T[TR.b].nameEn:"";
+  let made=null;
+  try{
+    const row={ host_id:A.user.id, type:"conversation", game:null, title:`🤝 ${nA}${nB?` ⇄ ${nB}`:""} trade with ${p.name}`.slice(0,80), note:null,
+      language_a:TR.a, language_b:TR.b||null, level_min:0, level_max:4, seats:1, balanced:false, seats_a:null, seats_b:null,
+      starts_at:start.toISOString(), host_time_zone:detectTz(), duration_min:TR.dur, join_mode:"approval", topics:[], visibility:"private",
+      format:"online", city:null, place_name:null, area:null, cafe_id:null, public_place_ok:false };
+    const r=await A.sb.from("activities").insert(row).select("id").single(); if(r.error) throw r.error; made=r.data.id;
+    const { error } = await A.sb.rpc("pt_trade_invite",{ p_activity:made, p_user:p.user_id }); if(error) throw error;
+    const box=document.getElementById("trSheet"); if(box) box.remove();
+    bToast(`🤝 Invitation sent to ${p.name}! You'll be notified when they answer · Einladung gesendet`);
+    TR.busy=false; sOpen(made);
+  }catch(e){
+    if(made){ try{ await A.sb.from("activities").delete().eq("id",made); }catch(x){} }
+    const m=String((e&&e.message)||e); const k=Object.keys(TR_ERR).find(x=>m.includes(x));
+    TR.busy=false; TR.err=k?TR_ERR[k]:bErr(e); trShow();
+  }
+}
 /* one shared profile: /?partner=<id> */
 async function ptOneOpen(id){
   PT.oneId=id; PT.one=undefined; go("partner");
