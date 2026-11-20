@@ -3120,7 +3120,7 @@ VIEWS.xprofile = function(){
     </div>
   </div>
 
-  <div class="card"><h3>💜 Interests <span class="de">· Interessen</span></h3>
+  <div class="card"><h3>💜 Hobbies &amp; interests <span class="de">· Hobbys &amp; Interessen</span></h3>
     <p class="note" style="margin-top:0">Pick up to 6 · Bis zu 6 auswählen</p>
     <div class="row">${INTERESTS.map(([k,e,en,de])=>`<button class="chip ${X.interests.includes(k)?"on":""}" aria-pressed="${X.interests.includes(k)}" title="${esc(de)}" onclick="xInterest('${k}')">${e} ${esc(en)}</button>`).join("")}</div>
   </div>
@@ -3133,14 +3133,14 @@ VIEWS.xprofile = function(){
     <input type="text" id="xcity" maxlength="60" placeholder="e.g. Erfurt" value="${esc(X.city)}" oninput="X.city=this.value">
   </div>
 
-  ${X.noPC?"":`<div class="card"><h3>👥 Find partners <span class="de">· Tandempartner finden</span></h3>
+  ${X.noPC?`<div class="card"><h3>👥 Find partners <span class="de">· Tandempartner finden</span></h3><p class="note" style="margin:0">⏳ Almost ready: switching on in a moment. · Gleich verfügbar.</p></div>`:`<div class="card"><h3>👥 Find partners <span class="de">· Tandempartner finden</span></h3>
     <p class="note" style="margin-top:0">Let other members find you to practice. Off by default. Shown: your first name, photo, country, languages, interests, the text below, and when you're <i>both</i> free. Never your email, city or exact times.<br><span class="de">Andere Mitglieder können dich finden. Standardmäßig aus.</span></p>
     <div class="row">${[[true,"👁 Show me in Find partners"],[false,"🙈 Hidden"]].map(([v,l])=>`<button class="chip ${!!X.pv===v?"on":""}" aria-pressed="${!!X.pv===v}" onclick="X.pv=${v};xr()">${l}</button>`).join("")}</div>
-    ${X.pv?`<label class="lbl" for="xbio">About me (optional, 160 characters) · Über mich</label>
+    ${true?`<label class="lbl" for="xbio">About me (optional, 160 characters) · Über mich</label>
       <textarea id="xbio" rows="2" maxlength="160" placeholder="e.g. Boricua in Erfurt, love cooking and salsa. Happy to help with Spanish!" oninput="X.bio=this.value">${esc(X.bio||"")}</textarea>
       <label class="lbl" for="xcountry">Country (optional) · Land</label>
       <input type="text" id="xcountry" maxlength="40" placeholder="e.g. Germany" value="${esc(X.country||"")}" oninput="X.country=this.value">
-      <div class="row" style="margin-top:8px"><button class="chip" onclick="ptShare('${A.user.id}','${esc(String((A.profile&&A.profile.display_name)||"").replace(/'/g,""))}')">🔗 Share my profile link</button></div>`:""}
+      ${X.pv?`<div class="row" style="margin-top:8px"><button class="chip" onclick="ptShare('${A.user.id}','${esc(String((A.profile&&A.profile.display_name)||"").replace(/'/g,""))}')">🔗 Share my profile link</button></div>`:""}`:""}
   </div>`}
 
   <div class="card">
