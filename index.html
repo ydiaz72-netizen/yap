@@ -238,6 +238,8 @@
   .luflags{display:flex;align-items:center;gap:6px;font-size:30px;line-height:1}
   .luflags span{font-size:14px;color:var(--muted);font-weight:800}
   .lufree{color:#1d6a62}
+  .lusug{border-bottom:1px solid var(--line);padding:8px 0}
+  .lusug:last-child{border-bottom:none}
   .luq [lang=ur]{font-family:"Noto Nastaliq Urdu","Jameel Noori Nastaleeq",serif;line-height:2.1;text-align:right}
   .luq{background:var(--teal-soft);border-radius:14px;padding:10px 14px;display:flex;flex-direction:column;gap:2px}
   .lufind .lurow{display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
@@ -4128,6 +4130,7 @@ function luWhen(d){ return d.toLocaleDateString("en-GB",{ weekday:"short" })+" "
 async function luOpen(){
   LU.err=""; go("lounges");
   if(!A.user) return;
+  A.sb.rpc("pt_is_admin").then(r=>{ const was=LU.admin; LU.admin=!!r.data; if(was!==LU.admin && S.screen==="lounges") xr(); },()=>{});
   try{ const { data, error } = await A.sb.rpc("pt_lounges"); if(error) throw error; LU.list=data||[]; }
   catch(e){ LU.err=luErr(e); }
   if(S.screen==="lounges") xr();
@@ -4145,10 +4148,75 @@ VIEWS.lounges = function(){
       <b>${esc(luName(l))}</b>
       <span class="note" style="margin:4px 0 0">${l.msgs_7d?`💬 ${l.msgs_7d} message${l.msgs_7d===1?"":"s"} this week`:"💬 Be the first to say hi"}${l.free_24h?` · <b class="lufree">🙋 ${l.free_24h} free in the next 24 h</b>`:""}</span>
     </button>`).join("")}</div>
-    <p class="note center" style="margin-top:12px">Want another language pair? Tell us in any lounge. · Andere Sprachen? Schreib uns.</p>`;
+    ${luSugHtml()}`;
 };
 
 AFTER.lounges = function(){ if(A.user && !LU.list && !LU.loading){ LU.loading=true; A.sb.rpc("pt_lounges").then(r=>{ LU.loading=false; if(r.error) LU.err=luErr(r.error); else LU.list=r.data||[]; if(S.screen==="lounges") xr(); },()=>{ LU.loading=false; }); } };
+
+/* ---- suggest a lounge ---- */
+Object.assign(LU,{ sug:null, sugOpen:false, sa:"", sb:"", snote:"", sbusy:false });
+async function luSugLoad(){
+  try{ const { data, error } = await A.sb.rpc("pt_lounge_suggestions"); if(error) throw error; LU.sug=data||[]; }
+  catch(e){ LU.sug=[]; }
+  if(S.screen==="lounges") xr();
+}
+function luSugErr(e){
+  const m=String((e&&e.message)||e||"");
+  if(/lounge_exists/.test(m)) return "That lounge already exists. Find it in the list above 🙂 · Gibt es schon";
+  if(/lounge_bad_pair/.test(m)) return "Pick two different languages · Zwei verschiedene Sprachen wählen";
+  if(/lounge_too_many_suggestions/.test(m)) return "You can have up to 10 suggestions at a time · Maximal 10 Vorschläge";
+  return luErr(e);
+}
+function luPairName(a,b){ return `${luFlag(a)}⇄${luFlag(b)} ${esc(LU_NAMES[a]||cfLang(a)[1])} ⇄ ${esc(LU_NAMES[b]||cfLang(b)[1])}`; }
+function luSugHtml(){
+  if(LU.sug===null){ LU.sug=[]; luSugLoad(); }
+  const langs=CF_LANGS.filter(k=>k!=="multi");
+  const opt=(sel)=>`<option value="">Choose · Wählen</option>`+langs.map(k=>`<option value="${k}" ${sel===k?"selected":""}>${cfLang(k)[0]} ${esc(LU_NAMES[k]||cfLang(k)[1])}</option>`).join("");
+  const form = LU.sugOpen ? `<div class="card" style="margin-top:10px">
+      <h3 style="margin:0 0 8px">＋ Suggest a lounge · Lounge vorschlagen</h3>
+      <div class="row" style="margin:0;gap:8px;align-items:center;flex-wrap:wrap">
+        <select aria-label="First language" onchange="LU.sa=this.value" style="width:auto;flex:1;min-width:140px">${opt(LU.sa)}</select>
+        <b>⇄</b>
+        <select aria-label="Second language" onchange="LU.sb=this.value" style="width:auto;flex:1;min-width:140px">${opt(LU.sb)}</select></div>
+      <input type="text" maxlength="140" placeholder="Why? e.g. lots of Polish speakers in my city (optional)" value="${esc(LU.snote)}" oninput="LU.snote=this.value" style="margin-top:8px">
+      <div class="row" style="margin:8px 0 0"><button class="chip on" ${LU.sbusy?"disabled":""} onclick="luSugSend()">Send suggestion · Senden</button><button class="chip" onclick="LU.sugOpen=false;xr()">Cancel</button></div>
+    </div>` : `<button class="btn secondary" style="margin-top:14px" onclick="LU.sugOpen=true;xr()">💡 Suggest a new lounge · Lounge vorschlagen</button>`;
+  const list = (LU.sug||[]).length ? `<h3 style="margin:16px 0 6px">Suggested by members · Vorschläge</h3>
+    ${LU.sug.map(x=>`<div class="lusug"><div><b>${luPairName(x.lang_a,x.lang_b)}</b>
+        <span class="note" style="margin:0 0 0 6px">👍 ${x.votes} ${x.votes===1?"person wants":"people want"} this</span>
+        ${(x.notes||[]).length?`<div class="note" style="margin:2px 0 0">💬 ${x.notes.map(esc).join(" · ")}</div>`:""}</div>
+      <div class="row" style="margin:6px 0 0">${x.mine?`<button class="chip" onclick="luUnvote('${esc(x.pair)}')" title="Take back">✓ You want this</button>`:`<button class="chip" onclick="luVote('${esc(x.lang_a)}','${esc(x.lang_b)}')">👍 Me too</button>`}
+      ${LU.admin?`<button class="chip on" onclick="luCreate('${esc(x.lang_a)}','${esc(x.lang_b)}')">✅ Create</button><button class="chip" aria-label="Dismiss" onclick="luDismiss('${esc(x.pair)}')">✕</button>`:""}</div>
+    </div>`).join("")}` : "";
+  return form + `<div class="lufind" style="margin-top:4px">${list}</div>`;
+}
+async function luSugSend(){
+  if(!LU.sa || !LU.sb){ bToast("Pick both languages · Beide Sprachen wählen"); return; }
+  LU.sbusy=true; xr();
+  try{ const { error } = await A.sb.rpc("pt_lounge_suggest",{ p_a:LU.sa, p_b:LU.sb, p_note:LU.snote||null }); if(error) throw error;
+    Object.assign(LU,{ sugOpen:false, sa:"", sb:"", snote:"" }); bToast("💡 Thanks! Others can 👍 your idea too · Danke!"); await luSugLoad(); }
+  catch(e){ bToast(luSugErr(e)); }
+  LU.sbusy=false; xr();
+}
+async function luVote(a,b){
+  try{ const { error } = await A.sb.rpc("pt_lounge_suggest",{ p_a:a, p_b:b, p_note:null }); if(error) throw error; await luSugLoad(); }
+  catch(e){ bToast(luSugErr(e)); }
+}
+async function luUnvote(pair){
+  try{ const { error } = await A.sb.rpc("pt_lounge_unsuggest",{ p_pair:pair }); if(error) throw error; await luSugLoad(); }
+  catch(e){ bToast(luSugErr(e)); }
+}
+async function luCreate(a,b){
+  if(!window.confirm(`Create the ${LU_NAMES[a]||cfLang(a)[1]} ⇄ ${LU_NAMES[b]||cfLang(b)[1]} lounge? · Lounge erstellen?`)) return;
+  try{ const { error } = await A.sb.rpc("pt_admin_create_lounge",{ p_a:a, p_b:b }); if(error) throw error;
+    bToast("✅ Lounge created! · Lounge erstellt!"); LU.list=null; LU.sug=null; luOpen(); }
+  catch(e){ bToast(luSugErr(e)); }
+}
+async function luDismiss(pair){
+  if(!window.confirm("Remove this suggestion? · Vorschlag entfernen?")) return;
+  try{ const { error } = await A.sb.rpc("pt_admin_dismiss_lounge_suggestion",{ p_pair:pair }); if(error) throw error; await luSugLoad(); }
+  catch(e){ bToast(luSugErr(e)); }
+}
 
 /* ---- one lounge ---- */
 async function luEnter(id){
