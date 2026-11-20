@@ -2943,6 +2943,9 @@ VIEWS.account = function(){
     <button class="chip" onclick="editProfile()">✏️ Edit</button>
   </div>
   ${msg}
+  <div class="card"><h3>🌍 Language exchange <span class="de">· Sprachtandem</span></h3>
+    <p class="note" style="margin-top:0">Add your languages and free times to get matched with partners and sessions.<br><span class="de">Trage Sprachen und Zeiten ein, um passende Partner und Sessions zu finden.</span></p>
+    <button class="btn secondary" onclick="xOpen()">🗣️ My exchange profile · Mein Tandem-Profil</button></div>
   ${raCard()}
   ${pend ? `<div class="card acard"><h3>💾 Save your last game? <span class="de">· Letztes Spiel speichern?</span></h3>
      ${pend.recs.length>1?`<p class="note">Which player were you? · Wer warst du?</p><div class="row">${pend.names.map((n,i)=>`<button class="chip ${i===meIdx?"on":""}" onclick="savePending(${i})">${i===meIdx?"⭐ ":""}${esc(n)}</button>`).join("")}</div>`
@@ -2953,9 +2956,6 @@ VIEWS.account = function(){
     ${A.games===null?`<p class="note center">Loading your games… <button class="linkbtn" onclick="loadGames()">Retry</button></p>`:acctStats(gs)}</div>
   ${acctHistory(gs)}
   <p class="note center">Tap a game to see its questions, answers &amp; tips · Tippe auf ein Spiel für Details</p>
-  <div class="card"><h3>🌍 Language exchange <span class="de">· Sprachtandem</span></h3>
-    <p class="note" style="margin-top:0">Add your languages and free times to get matched with partners and sessions.<br><span class="de">Trage Sprachen und Zeiten ein, um passende Partner und Sessions zu finden.</span></p>
-    <button class="btn secondary" onclick="xOpen()">🗣️ My exchange profile · Mein Tandem-Profil</button></div>
   <div id="npc">${npCard()}</div>
   <button class="btn secondary" onclick="blOpen()">🚫 Blocked people · Blockierte Personen</button>
   <button class="btn secondary" onclick="signOut()">🚪 Sign out · Abmelden</button>
