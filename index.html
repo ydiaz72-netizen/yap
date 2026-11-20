@@ -242,7 +242,9 @@
   .lucorner{position:absolute;top:10px;right:10px}
   .lucorner .lubadge{margin:0;background:var(--teal-soft)}
   .lubadge.off{color:var(--muted);background:var(--bg)!important;font-weight:700}
-  .lubadge{display:inline-block;margin-left:6px;background:#fff;color:#1d6a62;border-radius:20px;padding:2px 8px;font-size:12px;font-weight:800;vertical-align:1px}
+  .blchk{display:flex;gap:8px;align-items:center;margin:10px 0 0;font-weight:700;cursor:pointer;flex-wrap:wrap}
+  .blchk input{width:20px;height:20px}
+  .lubadge{display:inline-block;white-space:nowrap;margin-left:6px;background:#fff;color:#1d6a62;border-radius:20px;padding:2px 8px;font-size:12px;font-weight:800;vertical-align:1px}
   .lupres{font-size:12px;font-weight:800;color:#1d6a62;white-space:nowrap}
   .luwho{white-space:nowrap}.luwho .avs{width:16px;height:16px;margin-right:3px;vertical-align:-3px}
   .emobox{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:6px;margin-top:8px;box-shadow:0 6px 20px rgba(0,0,0,.08)}
@@ -2941,6 +2943,9 @@ VIEWS.account = function(){
     <button class="chip" onclick="editProfile()">✏️ Edit</button>
   </div>
   ${msg}
+  <div class="card"><h3>🌍 Language exchange <span class="de">· Sprachtandem</span></h3>
+    <p class="note" style="margin-top:0">Add your languages and free times to get matched with partners and sessions.<br><span class="de">Trage Sprachen und Zeiten ein, um passende Partner und Sessions zu finden.</span></p>
+    <button class="btn secondary" onclick="xOpen()">🗣️ My exchange profile · Mein Tandem-Profil</button></div>
   ${raCard()}
   ${pend ? `<div class="card acard"><h3>💾 Save your last game? <span class="de">· Letztes Spiel speichern?</span></h3>
      ${pend.recs.length>1?`<p class="note">Which player were you? · Wer warst du?</p><div class="row">${pend.names.map((n,i)=>`<button class="chip ${i===meIdx?"on":""}" onclick="savePending(${i})">${i===meIdx?"⭐ ":""}${esc(n)}</button>`).join("")}</div>`
@@ -2951,10 +2956,8 @@ VIEWS.account = function(){
     ${A.games===null?`<p class="note center">Loading your games… <button class="linkbtn" onclick="loadGames()">Retry</button></p>`:acctStats(gs)}</div>
   ${acctHistory(gs)}
   <p class="note center">Tap a game to see its questions, answers &amp; tips · Tippe auf ein Spiel für Details</p>
-  <div class="card"><h3>🌍 Language exchange <span class="de">· Sprachtandem</span></h3>
-    <p class="note" style="margin-top:0">Add your languages and free times to get matched with partners and sessions.<br><span class="de">Trage Sprachen und Zeiten ein, um passende Partner und Sessions zu finden.</span></p>
-    <button class="btn secondary" onclick="xOpen()">🗣️ My exchange profile · Mein Tandem-Profil</button></div>
   <div id="npc">${npCard()}</div>
+  <button class="btn secondary" onclick="blOpen()">🚫 Blocked people · Blockierte Personen</button>
   <button class="btn secondary" onclick="signOut()">🚪 Sign out · Abmelden</button>
   <button class="btn ghost dangertext" onclick="confirmDelete()">🗑️ Delete my account · Konto löschen</button>
   <p class="note center">Signed in as ${esc(A.user.email||"")}</p>
@@ -3129,6 +3132,8 @@ const RANKS = ["A0","A1","A2","B1","B2+"];
 const B = { list:null, err:"", busy:false, lang:"", open:null, people:{} };
 const H = { started:false, checked:false };
 const BERR = {
+  blocked_user:"You can't join this session · Du kannst dieser Session nicht beitreten",
+  block_self:"You can't block yourself 🙂 · Du kannst dich nicht selbst blockieren",
   sign_in_required:"Please sign in first · Bitte zuerst anmelden",
   adult_required:"Please confirm you're 18+ in your exchange profile · Bitte bestätige im Tandem-Profil, dass du 18+ bist",
   not_open:"This session already started or was cancelled · Diese Session hat schon begonnen oder wurde abgesagt",
@@ -3215,9 +3220,10 @@ const RP_REASONS = [
   ["other","💬 Something else","Etwas anderes"]
 ];
 const RPT = { t:null, reason:"", busy:false, err:"" };
-function repOpen(type, user, activity, message){
+function repOpen(type, user, activity, message, who, whoName){
   if(!A.user){ bToast("Please sign in to report · Bitte anmelden"); return; }
   RPT.t={ type, user:user||null, activity:activity||null, message:message||null }; RPT.reason=""; RPT.err=""; RPT.busy=false;
+  RPT.who = who || (type==="user" ? user : null); RPT.whoName = whoName || ""; RPT.block = false;
   repShow();
 }
 function repShow(){
@@ -3235,7 +3241,9 @@ function repShow(){
     <label class="lbl" for="repDet">Anything else? (optional) · Details</label>
     <textarea id="repDet" rows="3" maxlength="500" placeholder="A few words help us understand · Ein paar Worte helfen uns">${esc(det)}</textarea>
     ${RPT.err?`<div class="err">${esc(RPT.err)}</div>`:""}
+    ${RPT.who && !(A.user && RPT.who===A.user.id) && !blIs(RPT.who) ? `<label class="blchk"><input type="checkbox" ${RPT.block?"checked":""} onchange="RPT.block=this.checked"> 🚫 Also block ${RPT.whoName?esc(RPT.whoName):"this person"} <span class="note" style="margin:0">(they won't be told · wird nicht informiert)</span></label>`:""}
     <button class="btn primary" ${RPT.busy?"disabled":""} onclick="repSend()">${RPT.busy?"Sending… · Sendet…":"Send report · Melden"}</button>
+    ${RPT.who && !(A.user && RPT.who===A.user.id) && !blIs(RPT.who) ? `<button class="btn ghost" onclick="repBlockOnly()">🚫 Just block, don't report · Nur blockieren</button>`:""}
     <p class="note center" style="margin:8px 0 0">⚠️ In danger right now? Call <b>112</b> (EU emergency number). · Akute Gefahr? Ruf 112 an.</p>
   </div>`;
 }
@@ -3251,7 +3259,52 @@ async function repSend(){
     if(error) throw error;
     const b=document.getElementById("repSheet"); if(b) b.remove();
     bToast("🙏 Thanks. Your report was sent privately · Danke, Meldung gesendet");
+    if(RPT.block && RPT.who) setTimeout(()=>blBlock(RPT.who, RPT.whoName), 1500);
   }catch(e){ const m=String((e&&e.message)||e); const k=Object.keys(RP_ERR).find(x=>m.includes(x)); RPT.busy=false; RPT.err=k?RP_ERR[k]:bErr(e); repShow(); }
+}
+
+/* ===================== BLOCKING ===================== */
+/* Database: sql/blocking.sql. Works both ways: no joining each other's sessions, no lounge messages
+   or names across a block. The blocked person is never told. */
+const BL = { ids:new Set(), list:null, busy:false };
+async function blLoad(){
+  if(!A.user || !A.sb) return;
+  try{ const { data, error } = await A.sb.rpc("pt_my_blocks"); if(error) return; BL.list=data||[]; BL.ids=new Set(BL.list.map(x=>x.user_id)); }catch(e){}
+  if(S.screen==="blocks") xr();
+}
+function blIs(uid){ return !!uid && BL.ids.has(uid); }
+async function blBlock(uid, name){
+  if(!uid || (A.user && uid===A.user.id)) return false;
+  try{ const { error } = await A.sb.rpc("pt_block",{ p_user:uid }); if(error) throw error;
+    BL.ids.add(uid); blLoad();
+    bToast(`🚫 ${name?esc(name)+" is":"They're"} blocked. They won't be told · Blockiert`);
+    if(S.screen==="lounge"){ LU.msgs=LU.msgs.filter(m=>m.user_id!==uid); luPaint(); luFreeLoad(); }
+    if(S.screen==="chat" && typeof chPaint==="function") chPaint();
+    return true;
+  }catch(e){ bToast(bErr(e)); return false; }
+}
+async function blUnblock(uid){
+  if(!window.confirm("Unblock this person? · Blockierung aufheben?")) return;
+  try{ const { error } = await A.sb.rpc("pt_unblock",{ p_user:uid }); if(error) throw error;
+    BL.ids.delete(uid); bToast("Unblocked · Blockierung aufgehoben"); blLoad(); }
+  catch(e){ bToast(bErr(e)); }
+}
+function blOpen(){ go("blocks"); blLoad(); }
+VIEWS.blocks = function(){
+  const top=`<div class="topline"><button class="chip" onclick="A.ret='home';go('account')">← Profile</button><span>🚫 Blocked people</span></div>`;
+  const list=BL.list;
+  return `${top}<h2 style="margin-bottom:4px">🚫 Blocked people <span class="de">· Blockiert</span></h2>
+    <p class="sub" style="margin-top:0">People you block can't join your sessions or invite you, and you won't see each other's lounge messages. They aren't told.<br><span class="de">Blockierte Personen können deinen Sessions nicht beitreten. Sie werden nicht informiert.</span></p>
+    ${list===null?`<p class="note center">Loading… · Lädt…</p>`
+     : !list.length?`<div class="card center"><div style="font-size:36px">🕊️</div><p class="note">You haven't blocked anyone. To block someone, tap 🚩 on their message or name. · Niemand blockiert.</p></div>`
+     : `<div class="card">${list.map(x=>`<div class="qzrow">${x.avatar_url?`<img class="avs" src="${esc(x.avatar_url)}" alt="">`:"👤"} <b>${esc(x.name)}</b>
+         <span class="note" style="margin:0 0 0 auto">${new Date(x.created_at).toLocaleDateString("en-GB",{day:"numeric",month:"short"})}</span>
+         <button class="chip" onclick="blUnblock('${x.user_id}')">Unblock</button></div>`).join("")}</div>`}`;
+};
+
+async function repBlockOnly(){
+  const b=document.getElementById("repSheet"); if(b) b.remove();
+  await blBlock(RPT.who, RPT.whoName);
 }
 
 /* Admin: Reports page */
@@ -3476,13 +3529,13 @@ function chLinkify(t){ return esc(t).replace(/(https:\/\/[^\s<]+)/g,'<a href="$1
 function chListHtml(){
   if(!CH.list.length) return `<p class="note center" style="margin:auto">No messages yet. Say hi 👋 · Noch keine Nachrichten</p>`;
   const s=bRowOf({ activity_id:CH.id })||{}; let lastDay="";
-  return CH.list.map(m=>{
+  return CH.list.filter(m=>!blIs(m.user_id)).map(m=>{
     const d=new Date(m.created_at), day=d.toDateString(), mine=A.user&&m.user_id===A.user.id;
     const sep = day!==lastDay ? `<div class="chday">${esc(bDayLabel(m.created_at).split(" · ")[0])}</div>` : ""; lastDay=day;
     const t=d.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
     const canDel = mine || s.is_host;
     return `${sep}<div class="cm ${mine?"me":""}">${mine?"":`<div class="who">${m.avatar_url?`<img class="avs" src="${esc(m.avatar_url)}" alt="">`:""}${esc(m.name||"Member")}${m.is_host?" · ⭐ host":""}</div>`}
-      ${chLinkify(m.body)}<span class="tm">${t}</span>${!mine?`<button class="cx" aria-label="Report message" title="Report · Melden" onclick="repOpen('message',null,null,${m.id})">🚩</button>`:""}${canDel?`<button class="cx" aria-label="Delete message" title="Delete" onclick="chDel(${m.id})">✕</button>`:""}</div>`;
+      ${chLinkify(m.body)}<span class="tm">${t}</span>${!mine?`<button class="cx" aria-label="Report message" title="Report · Melden" onclick="repOpen('message',null,null,${m.id},'${m.user_id}','${esc(String(m.name||'').replace(/'/g,''))}')">🚩</button>`:""}${canDel?`<button class="cx" aria-label="Delete message" title="Delete" onclick="chDel(${m.id})">✕</button>`:""}</div>`;
   }).join("");
 }
 function chPaint(){
@@ -4314,7 +4367,7 @@ async function luFetch(first){
 function luListHtml(){
   if(!LU.msgs.length) return `<p class="note center" style="margin:auto">No messages yet. Answer today's question to get things going 👋 · Noch nichts hier</p>`;
   let lastDay="";
-  return LU.msgs.map(m=>{
+  return LU.msgs.filter(m=>!blIs(m.user_id)).map(m=>{
     const d=new Date(m.created_at), day=d.toDateString(), mine=A.user&&m.user_id===A.user.id;
     const sep = day!==lastDay ? `<div class="chday">${esc(bDayLabel(m.created_at).split(" · ")[0])}</div>` : ""; lastDay=day;
     const t=d.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
@@ -4407,7 +4460,7 @@ async function luDel(id){
 }
 function luReport(id){
   const m=LU.msgs.find(x=>x.id===id); if(!m) return;
-  repOpen("user", m.user_id, null, null);
+  repOpen("user", m.user_id, null, null, m.user_id, m.name);
   const d=document.getElementById("repDet");
   if(d){ d.value=`Lounge ${LU.id}, message #${m.id}: “${m.body.slice(0,300)}”`; repShow(); }
 }
@@ -4967,7 +5020,7 @@ async function vLoad(){
     if(error) return;
     Object.keys(VL).forEach(k=>delete VL[k]);
     (data||[]).forEach(r=>{ VL[r.activity_id]={ url:r.url, provider:r.provider }; });
-    ciLoad(); avCollect(); mLoad(); qzLoad(); pLoad(); pCityLoad(); chUnreadLoad();
+    ciLoad(); avCollect(); mLoad(); qzLoad(); blLoad(); pLoad(); pCityLoad(); chUnreadLoad();
     if(["board","session","home"].includes(S.screen)) xr();
   }catch(e){}
 }
@@ -5256,7 +5309,7 @@ function hostList(s){
   const pend=ps.filter(p=>p.status==="pending"), inn=ps.filter(p=>p.status==="joined"||p.status==="offered"), wait=ps.filter(p=>p.status==="waitlisted"), inv=ps.filter(p=>p.status==="invited");
   const row=(p,extra,cls)=>`<div class="prow ${cls||""}">${avSpan(p.user_id,p.name)}
       <div style="flex:1;min-width:0"><b>${esc(p.name||"Member")}</b>${relBadges(p.reliability)}${s.balanced&&p.side?`<span class="sidetag">${(()=>{ const l=p.side==="a"?s.language_a:s.language_b; return T[l]?`${T[l].flag} ${esc(T[l].nameEn)} side`:""; })()}</span>`:""}${p.reliability&&p.reliability.percent!=null?` <span class="pl">· ${p.reliability.percent}% shows up</span>`:""}
-      <div class="pl">${speaksLearns(p.languages)}</div>${extra||""}</div><button class="repf" title="Report · Melden" aria-label="Report ${esc(p.name||"member")}" onclick="repOpen('user','${p.user_id}','${s.activity_id}')">🚩</button></div>`;
+      <div class="pl">${speaksLearns(p.languages)}</div>${extra||""}</div><button class="repf" title="Report · Melden" aria-label="Report ${esc(p.name||"member")}" onclick="repOpen('user','${p.user_id}','${s.activity_id}',null,'${p.user_id}','${esc(String(p.name||p.display_name||'').replace(/'/g,''))}')">🚩</button></div>`;
   return `<div class="plist">
     ${pend.length?`<h4>🔔 Asking to join · ${pend.length}</h4>${pend.map(p=>row(p,`<div class="row" style="margin-top:6px">
         <button class="chip on" onclick="bRespond('${s.activity_id}','${p.user_id}',true)">✓ Approve · Annehmen</button>
@@ -5645,7 +5698,7 @@ const NAV_ITEMS = [
   ["shop","Shop","Shop","shOpen()"],
   ["profile","Profile","Profil","A.ret='home';A.err='';A.msg='';go('account')"]
 ];
-NAV_TAB.shop="shop"; NAV_TAB.shopedit="shop"; NAV_TAB.shopitem="shop"; WIDE.shopitem="md"; NAV_TAB.cafes="sessions"; NAV_TAB.cafeedit="sessions"; NAV_TAB.chat="sessions"; WIDE.chat="md"; NAV_TAB.lounges="sessions"; NAV_TAB.lounge="sessions"; WIDE.lounges="xl"; WIDE.lounge="md"; NAV_TAB.reports="profile"; WIDE.reports="md";
+NAV_TAB.shop="shop"; NAV_TAB.shopedit="shop"; NAV_TAB.shopitem="shop"; WIDE.shopitem="md"; NAV_TAB.cafes="sessions"; NAV_TAB.cafeedit="sessions"; NAV_TAB.chat="sessions"; WIDE.chat="md"; NAV_TAB.blocks="profile"; WIDE.blocks="md"; NAV_TAB.lounges="sessions"; NAV_TAB.lounge="sessions"; WIDE.lounges="xl"; WIDE.lounge="md"; NAV_TAB.reports="profile"; WIDE.reports="md";
 WIDE.cafes="xl"; WIDE.cafeedit="md";
 WIDE.shop="xl"; WIDE.shopedit="md";
 ICO.shop='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>';
