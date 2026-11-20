@@ -7006,6 +7006,7 @@ function nbText(n){
     case "changed":      return `📝 ${t}: ${nbChanges(d)}`;
     case "reminder_24h": return `⏰ Tomorrow: ${t}${n.starts_at?` at ${nbClock(n.starts_at)}`:""}.`;
     case "reminder_15m": return `⏰ ${t} starts in 15 minutes.`;
+    case "word_fixed":   return `✏️ ${who} fixed your word <b>“${esc(d.old||"")}”</b>: now <b>“${esc(d.word||"")}”</b> (${t}). Tap to see it.`;
     case "reminder_prep": return `📚 ${t} is in 3 days. ${who==="Someone"?"The host":who} shared materials: have a look before the call. Want to focus on something? Tell them in the chat.`;
     default:             return `Update for ${t}.`;
   }
@@ -7049,7 +7050,7 @@ async function nbTap(id){
   if(!n.read_at){ n.read_at=new Date().toISOString(); NB.unread=Math.max(0,NB.unread-1); bellSync(); try{ await A.sb.rpc("pt_mark_read",{ p_id:id }); }catch(e){} }
   const sh=document.getElementById("nbSheet"); if(sh) sh.remove();
   if(n.kind==="report"){ raOpen(); return; }
-  if(n.activity_id){ if(n.kind==="chat") chOpen(n.activity_id); else sOpen(n.activity_id); }
+  if(n.activity_id){ if(n.kind==="chat") chOpen(n.activity_id); else if(n.kind==="word_fixed") wdOpen(n.activity_id); else sOpen(n.activity_id); }
 }
 function nbTools(){
   if(!NB.list.length) return "";

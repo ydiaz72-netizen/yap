@@ -186,6 +186,13 @@ begin
            status = 'fixed', checked_by = auth.uid(), checked_at = now(),
            check_note = p_note, updated_at = now()
      where id = p_id;
+    -- 🔔 Tell the student (bell only, no email). Needs sql/word_fixed_bell.sql.
+    if exists(select 1 from pg_proc where proname = 'pt_notify') then
+      perform public.pt_notify(w.user_id, 'word_fixed', w.activity_id, 'word_fixed:' || w.id::text || ':' || now()::text,
+                               jsonb_build_object('from_user', auth.uid(), 'word', p_word, 'old', w.word));
+      update public.notifications set email = false
+       where user_id = w.user_id and kind = 'word_fixed' and sent_at is null;
+    end if;
   end if;
 end $$;
 
