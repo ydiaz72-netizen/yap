@@ -4508,7 +4508,7 @@ function wpBuild(chosen, all){
   });
 }
 async function wpOpen(scope){
-  Object.assign(WP,{ scope:scope||null, from:S.screen==="words"&&WD.id!=="all"?"session":"all", words:null, qs:[], step:0, pick:-1, shown:false, res:[], done:null, busy:false, err:"" });
+  Object.assign(WP,{ scope:scope||null, from:S.screen==="words"&&WD.id!=="all"?"session":S.screen==="home"?"home":"all", words:null, qs:[], step:0, pick:-1, shown:false, res:[], done:null, busy:false, err:"" });
   go("practice");
   try{
     const [m]=await Promise.all([ A.sb.rpc("pt_words_mine"), wpProgLoad() ]);
@@ -4541,6 +4541,7 @@ async function wpNext(){
 }
 function wpBack(){
   if(WP.from==="session" && WD.id && WD.id!=="all"){ go("words"); wdFetch(); return; }
+  if(WP.from==="home"){ go("home"); return; }
   wdAllOpen();
 }
 function wpQuestion(q){
@@ -4579,7 +4580,7 @@ function wpResults(){
     <button class="btn ghost" onclick="wpBack()">Done · Fertig</button>`;
 }
 VIEWS.practice = function(){
-  const top=`<div class="topline"><button class="chip" onclick="wpBack()">← ${WP.from==="session"?"Session words":"My words"}</button><span>🎯 Practice</span></div>`;
+  const top=`<div class="topline"><button class="chip" onclick="wpBack()">← ${WP.from==="session"?"Session words":WP.from==="home"?"Home":"My words"}</button><span>🎯 Practice</span></div>`;
   if(WP.words===null) return `${top}<p class="note center" style="margin-top:40px">Building your quiz… · Quiz wird erstellt…</p>`;
   if(!WP.qs.length) return `${top}<div class="card center"><div style="font-size:40px">📚</div><h3>No words to practise yet · Noch keine Wörter</h3>
       <p class="note">Save words in a session first, then come back here. · Erst Wörter in einer Session speichern.</p>
@@ -6944,6 +6945,7 @@ function weekCard(){
 function quickCard(){
   return `<div class="card"><h3>Quick start · Schnellstart</h3>
     <button class="btn qbtn" style="background:var(--plum);color:#fff" onclick="hOpen()">${ICO.plus} Host a session</button>
+    <button class="btn qbtn" style="background:var(--teal);color:#fff" onclick="wpOpen(null)">🎯 Practise my words</button>
     <button class="btn secondary qbtn" onclick="luOpen()">🛋️ Chat in a lounge <span data-lupres-all>${lpAll()}</span></button>
     <button class="btn secondary qbtn" onclick="ptOpen()">👥 Find a partner <span data-ptcount>${ptCountHtml()}</span></button>
     <button class="btn secondary qbtn" onclick="cfOpen()">☕ Find a language café</button>
@@ -6968,6 +6970,7 @@ function homeDash(){
     <div style="min-width:0;display:flex;flex-direction:column;gap:18px">
       <div class="card" style="margin:0"><div class="dhead"><h1 class="dhi">Hi ${esc(name)}</h1>${bellBtn()}</div>
         <p class="sub" style="margin:2px 0 14px">Here's what's next for you. · Das steht als Nächstes an.</p>${nextCard()}</div>
+      ${weekCard().replace('<div class="card">','<div class="card" style="margin:0">')}
       ${acCard()}
       ${fuCard()}
       ${avNudge()}
@@ -6977,7 +6980,7 @@ function homeDash(){
         ${(R.mine||[]).length?`<span class="note" style="margin:0;font-size:14px">${speak.length?`I speak <b>${esc(speak.join(", "))}</b> · `:""}${learn.length?`I practise <b>${esc(learn.join(", "))}</b> · `:""}<button class="linkbtn" onclick="xOpen()">Change</button></span>`:""}
       </div>${sugg}</div>
     </div>
-    <aside style="display:flex;flex-direction:column;gap:14px">${weekCard()}${quickCard()}</aside>
+    <aside style="display:flex;flex-direction:column;gap:14px">${quickCard()}</aside>
   </div>
   ${legalLinks()}`;
 }
