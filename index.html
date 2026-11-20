@@ -4645,6 +4645,23 @@ VIEWS.partners = function(){
       :`<div class="card center"><p class="note">No one matches yet. Try "Any", or share PonteTalk with a friend! · Noch niemand passend.</p></div>`}
     <p class="note center" style="margin-top:14px">🔒 Only signed-in members who also show themselves can see profiles. Never share phone numbers or addresses. Meet in sessions.</p>`;
 };
+/* Home badge: how many good matches are waiting (refreshed at most every 5 minutes) */
+const PTC={ n:null, at:0, busy:false };
+function ptCountHtml(){ return PTC.n ? `<span class="lubadge" title="People who speak what you learn or learn what you speak">⭐ ${PTC.n} ${PTC.n===1?"match":"matches"}</span>` : ""; }
+async function ptCountLoad(){
+  if(!A.user || !A.sb || PTC.busy || Date.now()-PTC.at<300000) return;
+  PTC.busy=true; PTC.at=Date.now();
+  try{
+    const [r,l]=await Promise.all([ A.sb.rpc("pt_partners"), A.sb.from("user_languages").select("language_code,role").eq("user_id",A.user.id) ]);
+    if(!r.error){
+      if(!PT.my) PT.my=(l.data||[]).map(x=>({ code:x.language_code, role:x.role }));
+      const list=(r.data||[]).map(x=>x.pt_partners||x).filter(x=>x && x.user_id && !blIs(x.user_id));
+      PTC.n=list.filter(p=>{ const s=ptScore(p); return s.speaksMine||s.learnsMine; }).length;
+    }else PTC.n=null;   // not showing themselves yet: no badge
+  }catch(e){}
+  PTC.busy=false;
+  document.querySelectorAll("[data-ptcount]").forEach(el=>{ el.innerHTML=ptCountHtml(); });
+}
 function ptLvlT(c){ const a=PT.fl.learnLvl, i=a.indexOf(c); if(i>=0) a.splice(i,1); else a.push(c); xr(); }
 /* ---- 🤝 Let's trade? (creates a private 1:1 session + invites the partner; sql/lets_trade.sql) ---- */
 const TR = { p:null, a:"", b:"", when:"", date:"", time:"", dur:45, busy:false, err:"" };
@@ -6525,7 +6542,7 @@ function quickCard(){
   return `<div class="card"><h3>Quick start · Schnellstart</h3>
     <button class="btn qbtn" style="background:var(--plum);color:#fff" onclick="hOpen()">${ICO.plus} Host a session</button>
     <button class="btn secondary qbtn" onclick="luOpen()">🛋️ Chat in a lounge <span data-lupres-all>${lpAll()}</span></button>
-    <button class="btn secondary qbtn" onclick="ptOpen()">👥 Find a partner</button>
+    <button class="btn secondary qbtn" onclick="ptOpen()">👥 Find a partner <span data-ptcount>${ptCountHtml()}</span></button>
     <button class="btn secondary qbtn" onclick="cfOpen()">☕ Find a language café</button>
     <button class="btn secondary qbtn" onclick="shOpen()">📘 Free resources</button>
     <button class="btn secondary qbtn" onclick="go('games')">${ICO.play} Play a game now</button></div>`;
@@ -6601,7 +6618,7 @@ function landing(){
 }
 VIEWS.home = function(){ return (A.user && A.status==="in") ? homeDash() : landing(); };
 const _afterHome = AFTER.home;
-AFTER.home = function(){ if(_afterHome) _afterHome(); if(A.user){ lpStart(); lpTrack(); } if(!A.user && !B.landOk && window.supabase){ B.landOk=true; bLoad().then(()=>{ if(S.screen==="home") xr(); }); } };
+AFTER.home = function(){ if(_afterHome) _afterHome(); if(A.user){ lpStart(); lpTrack(); ptCountLoad(); } if(!A.user && !B.landOk && window.supabase){ B.landOk=true; bLoad().then(()=>{ if(S.screen==="home") xr(); }); } };
 
 /* ===================== SHARE A SESSION ===================== */
 function sLink(id){ return (location.protocol.startsWith("http") ? location.origin : "https://pontetalk.setzio.com") + "/?s=" + id; }
