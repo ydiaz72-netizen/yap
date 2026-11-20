@@ -310,6 +310,7 @@
   .ptbio{margin:8px 0 0;font-style:italic}
   .ptfree{margin-top:8px;background:var(--teal-soft);border-radius:12px;padding:6px 10px;font-size:13px}
   /* ---- Language cafés ---- */
+  .chip.vchip{text-decoration:none;display:inline-flex;align-items:center}
   .stabs{display:flex;gap:6px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:4px;margin:6px 0 14px}
   .stabs button{flex:1;border:none;background:none;border-radius:10px;padding:10px 8px;font:800 14px 'Plus Jakarta Sans',Nunito,sans-serif;color:var(--muted);cursor:pointer}
   .stabs button.on{background:var(--plum);color:#fff}
@@ -1667,7 +1668,7 @@ function onlineConnect(role, code, resumeG){
   O.role=role; O.code=code; O.status="connecting"; O.err=""; O.online=[]; O.viewKey="";
   O.me={ id:myId(), name:S.draft.name.trim(), lang:S.draft.lang, level:S.draft.level, host:role==="host", uid:(A.user&&A.user.id)||null };
   if(role==="host"){
-    O.G = resumeG || { v:0, phase:"lobby", hostId:O.me.id, players:[], cat:"mix", rounds:2, time:90 };
+    O.G = resumeG || { v:0, phase:"lobby", hostId:O.me.id, players:[], cat:"mix", rounds:2, time:90, video:oJitsi() };
     O.G.hostId = O.me.id;
     if(!O.G.players.some(p=>p.id===O.me.id)) O.G.players.unshift(newPlayer(O.me));
   } else { O.G=null; }
@@ -1791,6 +1792,7 @@ function applyAction(from, a){
   if(oCApply(from, a, isActive, isHost)){ pushState(); return; }
   switch(a.type){
     case "lock": if(isHost){ G.locked=!G.locked; } break;
+    case "video": if(isHost){ const v=vClean(a.url||""); G.video = v && vValid(v) ? v : ""; } break;
     case "chat": if(a.text && String(a.text).trim()){ const pl=G.players.find(p=>p.id===from); if(pl){
         G.chat=(G.chat||[]).concat([{id:uid(), pid:from, by:pl.name, text:String(a.text).trim().slice(0,300), t:Date.now()}]).slice(-100); } } break;
     case "chatdel": if(isHost){ G.chat=(G.chat||[]).filter(m=>m.id!==a.id); } break;
@@ -1861,7 +1863,7 @@ VIEWS.online = function(){
   return `
   <div class="topline"><button class="chip" onclick="go('home')">← Back</button><span>🌐 Online</span></div>
   <h2>${bi("Play online","Online spielen")}</h2>
-  <p class="sub">Everyone joins from their own phone. Talk on a video call (Zoom, WhatsApp, Teams…) while you play.<br><span class="de">Alle spielen am eigenen Handy – sprecht per Videoanruf.</span></p>
+  <p class="sub">Everyone joins from their own phone and talks on a video call while you play. New games get a free Jitsi video link, or the host can add their own (Zoom, WhatsApp, Meet…).<br><span class="de">Alle spielen am eigenen Handy und sprechen per Videoanruf – der Link ist im Spiel.</span></p>
   ${ses && ses.code ? `<div class="card resume"><b>Continue game ${esc(ses.code)}?</b> <span class="de">· Spiel fortsetzen?</span>
      <button class="btn secondary" onclick="resumeOnline()">↩️ Rejoin ${esc(ses.code)}<small>${ses.role==="host"?"You're the host":"As "+esc(ses.me&&ses.me.name||"")}</small></button></div>` : ""}
   <div class="card">${oForm()}
@@ -1932,6 +1934,42 @@ function oLockBtn(){
   const G=O.G; if(O.role!=="host" || !G) return "";
   return `<button class="chip ${G.locked?"on":""}" onclick="act({type:'lock'})">${G.locked?"🔒 Locked":"🔓 Open"}</button>`;
 }
+/* ---- video call link for online games ---- */
+function oJitsi(){
+  const abc="abcdefghjkmnpqrstuvwxyz23456789"; let r="";
+  const rnd=(window.crypto&&crypto.getRandomValues)?crypto.getRandomValues(new Uint32Array(12)):Array.from({length:12},()=>Math.floor(Math.random()*1e9));
+  for(let i=0;i<12;i++) r+=abc[rnd[i]%abc.length];
+  return `https://meet.jit.si/PonteTalk-${r}`;
+}
+function oCallChip(){
+  const G=O.G; if(!G || !G.video || oOutsider()) return "";
+  return `<a class="chip vchip" href="${esc(G.video)}" target="_blank" rel="noopener noreferrer" aria-label="Join the video call">🎥 Call</a>`;
+}
+function oVideoSave(){
+  const v=vClean((($("ovideo")||{}).value)||"");
+  if(v && !vValid(v)){ O.vErr="That doesn't look like a link. Paste the full link, e.g. https://zoom.us/j/123… · Bitte ganzen Link einfügen"; render(); return; }
+  O.vErr=""; O.vEdit=false; act({type:"video", url:v});
+}
+function oVideoCard(){
+  const G=O.G, host=O.role==="host", v=G.video||"", prov=v?(V_PROV[vProvider(v)]||"video call"):"";
+  if(host && (O.vEdit || !v)) return `<div class="card"><h3 style="margin:0 0 4px">🎥 Video call · Videoanruf</h3>
+      <p class="note" style="margin:0 0 6px">Paste your Zoom, WhatsApp, Google Meet or Teams link, or make a free Jitsi link. · Link einfügen oder Jitsi-Link erstellen.</p>
+      <input type="text" id="ovideo" data-keep inputmode="url" autocapitalize="off" spellcheck="false" placeholder="https://…" value="${esc(O.vEdit?v:"")}" autocomplete="off" onkeydown="if(event.key==='Enter')oVideoSave()">
+      ${O.vErr?`<div class="err">${esc(O.vErr)}</div>`:""}
+      <div class="brow2"><button class="btn secondary" onclick="O.vErr='';O.vEdit=false;act({type:'video',url:oJitsi()})">✨ Free Jitsi link</button>
+        <button class="btn primary" onclick="oVideoSave()">💾 Save link</button></div>
+      ${O.vEdit?`<button class="btn ghost" onclick="O.vEdit=false;O.vErr='';render()">Cancel · Abbrechen</button>`:""}</div>`;
+  if(!v) return `<div class="card center"><p class="note" style="margin:0">🎥 No video link yet. The host can add one. · Noch kein Videolink.</p></div>`;
+  return `<div class="card center"><h3 style="margin:0 0 6px">🎥 Talk while you play · Sprecht beim Spielen</h3>
+      <a class="btn primary vbtn" href="${esc(v)}" target="_blank" rel="noopener noreferrer">🎥 Join ${esc(prov)} · Videoanruf</a>
+      <p class="note" style="margin:6px 0 0">Opens in a new tab. Keep this game open too: switch back to play. · Öffnet in neuem Tab. Spiel offen lassen.</p>
+      ${host&&vProvider(v)==="jitsi"?`<p class="note" style="margin:4px 0 0">Jitsi is free; guests join without an account. As the host you may need to sign in once (Google or GitHub) to start the call.</p>`:""}
+      ${host?`<div class="row" style="justify-content:center;margin:8px 0 0">
+        <button class="chip" onclick="O.vEdit=true;O.vErr='';render()">✏️ Change link</button>
+        <button class="chip" onclick="navigator.clipboard&&navigator.clipboard.writeText(O.G.video).then(()=>bToast('📋 Link copied · Kopiert'),()=>{})">📋 Copy</button>
+        <button class="chip" onclick="act({type:'video',url:''})">✕ Remove</button></div>`:""}
+    </div>`;
+}
 VIEWS.lobby = function(){
   const G=O.G;
   if(oOutsider()) return oWaitView();
@@ -1949,6 +1987,7 @@ VIEWS.lobby = function(){
         <button class="btn secondary exb" onclick="copyRoom()">📋 Copy link</button>
       </div><p class="note" id="roomMsg" style="min-height:16px;margin:6px 0 0"></p>`:`<p class="note">You're in! · Du bist drin!</p>`}
     </div>
+    ${G?oVideoCard():""}
     ${G?`<div class="card"><div class="topline" style="margin-bottom:4px"><h3 style="margin:0">Players · Spieler (${G.players.length}/10)</h3>${oLockBtn()}</div>
       ${host&&G.locked?`<p class="note" style="margin:0 0 6px">🔒 Locked — nobody new can join · Gesperrt</p>`:""}${oPlayersList(G)}</div>`:""}
     ${G && host ? `<div class="card">
@@ -1982,7 +2021,7 @@ VIEWS.lobby = function(){
 function oHeader(){
   const G=O.G, a=G.players[G.turn];
   return `<div class="topline"><span>${T[a.lang].round} ${G.round}/${G.rounds} · ${G.turn+1}/${G.players.length}</span>
-    <span class="row" style="gap:6px">${oLockBtn()}${O.role==="host"?`<button class="chip" onclick="hostMenu()">⚙️</button>`:""}<button class="chip" onclick="confirmLeave()">✕</button></span></div>${oStatusBar()}${oRequests()}`;
+    <span class="row" style="gap:6px">${oCallChip()}${oLockBtn()}${O.role==="host"?`<button class="chip" onclick="hostMenu()">⚙️</button>`:""}<button class="chip" onclick="confirmLeave()">✕</button></span></div>${oStatusBar()}${oRequests()}`;
 }
 function oTurnView(){
   const G=O.G, a=G.players[G.turn], tp=G.tp, c=G.current, L=a.lang, X=T[L], me=a.id===O.me.id;
@@ -2072,7 +2111,7 @@ function oResultsView(){
   const meIdx=G.players.findIndex(p=>p.id===O.me.id);
   const avg = p => p.ratings.length ? (()=>{ const a=p.ratings.reduce((x,y)=>x+y,0)/p.ratings.length; const r=RATINGS[Math.min(3,Math.max(0,Math.round(a)-1))]; return `${r.e} ${r.en}`; })() : "";
   return `
-    <div class="topline"><span>🌐 ${esc(O.code)}</span><span class="row" style="gap:6px">${oLockBtn()}<button class="chip" onclick="confirmLeave()">✕ Leave</button></span></div>${oStatusBar()}${oRequests()}
+    <div class="topline"><span>🌐 ${esc(O.code)}</span><span class="row" style="gap:6px">${oCallChip()}${oLockBtn()}<button class="chip" onclick="confirmLeave()">✕ Leave</button></span></div>${oStatusBar()}${oRequests()}
     <h1 class="center">🏆</h1><h2 class="center">${bi("Great game!","Super gespielt!")}</h2>
     <div class="card">${ranked.map((r,n)=>`<div class="rank"><span class="medal">${medals[n]||"⭐"}</span>${avatar(r.p,r.i)}
       <div><div class="pname">${esc(r.p.name)} ${r.p.id===O.me.id?'<span class="note">(you)</span>':""}</div><div class="pmeta">${T[r.p.lang].flag} ${LEVELS[r.p.level].code}${r.p.ratings.length?` · ${avg(r.p)}`:""}</div></div>
