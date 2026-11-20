@@ -262,6 +262,19 @@
   .lusess .tm{font-size:11px;opacity:.65}
   .lusess .cx{border:none;background:none;opacity:.5;cursor:pointer;font-size:12px;padding:0}
   .lulist{max-height:calc(100vh - 420px);min-height:260px}
+  /* ---- Find partners ---- */
+  .ptgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;align-items:start}
+  .ptcard{margin:0}
+  .pttop{display:flex;gap:12px;align-items:center;margin-bottom:8px}
+  .ptav{width:56px;height:56px;border-radius:50%;object-fit:cover;flex:none}
+  .ptav0{background:var(--plum-soft);color:var(--plum);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:22px}
+  .ptmatch{display:inline-block;margin-top:4px;background:var(--sun-soft);color:#6B4A00;border-radius:20px;padding:2px 9px;font-size:12px;font-weight:800}
+  .ptmatch.soft{background:var(--teal-soft);color:#1d6a62}
+  .ptrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:5px 0}
+  .ptk{font-size:12px;font-weight:800;color:var(--muted);min-width:78px}
+  .ptl{background:var(--bg);border-radius:20px;padding:2px 9px;font-size:13px;font-weight:600}
+  .ptbio{margin:8px 0 0;font-style:italic}
+  .ptfree{margin-top:8px;background:var(--teal-soft);border-radius:12px;padding:6px 10px;font-size:13px}
   /* ---- Language cafés ---- */
   .stabs{display:flex;gap:6px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:4px;margin:6px 0 14px}
   .stabs button{flex:1;border:none;background:none;border-radius:10px;padding:10px 8px;font:800 14px 'Plus Jakarta Sans',Nunito,sans-serif;color:var(--muted);cursor:pointer}
@@ -2658,6 +2671,8 @@ function authReturn(){
   else if(r==="cafes") cfOpen();
   else if(r==="lounge"){ let id=LU.pend; try{ id=id||sessionStorage.getItem("pt_lounge"); }catch(e){} if(id) luEnter(id); else luOpen(); }
   else if(r==="lounges") luOpen();
+  else if(r==="partners") ptOpen();
+  else if(r==="partner"){ let id=PT.oneId; try{ id=id||sessionStorage.getItem("pt_partner"); }catch(e){} if(id) ptOneOpen(id); else ptOpen(); }
   else if(r==="reports") raOpen();
   else if(r==="stats") stOpen();
   else if(r==="shopitem" && SH.oneId){ go("shopitem"); shOneLoad(SH.oneId); }
@@ -2693,7 +2708,7 @@ async function saveProfile(){
     A.profile={display_name:row.display_name, practicing:row.practicing, level:row.level, avatar_url:(A.profile&&A.profile.avatar_url)||null};
     S.draft.name=row.display_name; S.draft.lang=row.practicing; S.draft.level=row.level;
     const wasEditing=A.editing; A.editing=false; A.pf=null; A.busy=false;
-    if(!wasEditing && (A.ret==="results"||A.ret==="lobby"||A.ret==="lounge")){ authReturn(); return; }
+    if(!wasEditing && (A.ret==="results"||A.ret==="lobby"||A.ret==="lounge"||A.ret==="partner")){ authReturn(); return; }
   }catch(e){ A.err=authErr(e); }
   A.busy=false; render();
 }
@@ -2997,13 +3012,15 @@ async function xLoad(){
   try{
     const uid=A.user.id;
     const [p,l,a] = await Promise.all([
-      A.sb.from("profiles").select("time_zone,city,interests,adult_confirmed_at").eq("id",uid).maybeSingle(),
+      A.sb.from("profiles").select("time_zone,city,interests,adult_confirmed_at,partner_visible,bio,country").eq("id",uid).maybeSingle()
+        .then(r=>r.error?A.sb.from("profiles").select("time_zone,city,interests,adult_confirmed_at").eq("id",uid).maybeSingle().then(x=>{ X.noPC=true; return x; }):(X.noPC=false,r)),
       A.sb.from("user_languages").select("language_code,role,level").eq("user_id",uid),
       A.sb.from("availability").select("weekday,start_time,end_time").eq("user_id",uid)
     ]);
     if(p.error) throw p.error; if(l.error) throw l.error; if(a.error) throw a.error;
     const P=p.data||{};
     X.tz=detectTz(); X.city=P.city||""; X.interests=(P.interests||[]).slice();
+    X.pv=!!P.partner_visible; X.bio=P.bio||""; X.country=P.country||"";
     X.adultAt=P.adult_confirmed_at||null; X.adult=!!X.adultAt;
     X.langs={}; (l.data||[]).forEach(r=>{ if(T[r.language_code]) X.langs[r.language_code]={role:r.role, level:r.level==null?null:rankLvl(r.level)}; });
     X.slots={}; (a.data||[]).forEach(r=>{ const s=SLOTS.find(s=>s[2]===String(r.start_time).slice(0,5)); if(s) X.slots[r.weekday+"-"+s[0]]=true; });
@@ -3032,6 +3049,7 @@ async function xSave(){
   try{
     const uid=A.user.id, adultAt=X.adultAt||new Date().toISOString();
     const fields={ time_zone:X.tz||detectTz(), city:(X.city||"").trim().slice(0,60)||null, interests:X.interests, adult_confirmed_at:adultAt };
+    if(!X.noPC) Object.assign(fields,{ partner_visible:!!X.pv, bio:(X.bio||"").trim().slice(0,160)||null, country:(X.country||"").trim().slice(0,40)||null });
     let r;
     if(!(A.profile&&A.profile.display_name)){
       // No name yet → create the profile now (name + a practice language for games)
@@ -3114,6 +3132,16 @@ VIEWS.xprofile = function(){
     <label class="lbl" for="xcity">City (optional) · Stadt (optional)</label>
     <input type="text" id="xcity" maxlength="60" placeholder="e.g. Erfurt" value="${esc(X.city)}" oninput="X.city=this.value">
   </div>
+
+  ${X.noPC?"":`<div class="card"><h3>👥 Find partners <span class="de">· Tandempartner finden</span></h3>
+    <p class="note" style="margin-top:0">Let other members find you to practice. Off by default. Shown: your first name, photo, country, languages, interests, the text below, and when you're <i>both</i> free. Never your email, city or exact times.<br><span class="de">Andere Mitglieder können dich finden. Standardmäßig aus.</span></p>
+    <div class="row">${[[true,"👁 Show me in Find partners"],[false,"🙈 Hidden"]].map(([v,l])=>`<button class="chip ${!!X.pv===v?"on":""}" aria-pressed="${!!X.pv===v}" onclick="X.pv=${v};xr()">${l}</button>`).join("")}</div>
+    ${X.pv?`<label class="lbl" for="xbio">About me (optional, 160 characters) · Über mich</label>
+      <textarea id="xbio" rows="2" maxlength="160" placeholder="e.g. Boricua in Erfurt, love cooking and salsa. Happy to help with Spanish!" oninput="X.bio=this.value">${esc(X.bio||"")}</textarea>
+      <label class="lbl" for="xcountry">Country (optional) · Land</label>
+      <input type="text" id="xcountry" maxlength="40" placeholder="e.g. Germany" value="${esc(X.country||"")}" oninput="X.country=this.value">
+      <div class="row" style="margin-top:8px"><button class="chip" onclick="ptShare('${A.user.id}','${esc(String((A.profile&&A.profile.display_name)||"").replace(/'/g,""))}')">🔗 Share my profile link</button></div>`:""}
+  </div>`}
 
   <div class="card">
     <label style="display:flex;gap:10px;align-items:flex-start;cursor:pointer">
@@ -4527,6 +4555,114 @@ async function luAnnounce(lounge, activity){
   try{ await A.sb.rpc("pt_lounge_announce",{ p_lounge:lounge, p_activity:activity }); }catch(e){}
 }
 
+/* ===================== FIND PARTNERS ===================== */
+/* Opt-in member profiles (sql/partners.sql). Only people who show themselves can browse.
+   Shows first name, photo, country, languages + levels, interests, short bio and times you're BOTH free. */
+const PT = { list:null, err:"", my:null, fl:{ speak:"", learnLvl:[] }, onlyBoth:false, one:null, oneId:null };
+function ptLvl(rank){ if(rank==null) return ""; const L=LEVELS[rankLvl(rank)]; return L?L.code:""; }
+function ptErr(e){
+  const m=String((e&&e.message)||e||"");
+  if(/partner_optin_needed/.test(m)) return "optin";
+  return bErr(e);
+}
+async function ptOpen(){
+  PT.err=""; go("partners");
+  if(!A.user) return;
+  try{
+    const [r,l] = await Promise.all([ A.sb.rpc("pt_partners"), A.sb.from("user_languages").select("language_code,role,level").eq("user_id",A.user.id) ]);
+    PT.my=(l.data||[]).map(x=>({ code:x.language_code, role:x.role }));
+    if(r.error) throw r.error;
+    PT.list=(r.data||[]).map(x=>x.pt_partners||x).filter(x=>x && x.user_id && !blIs(x.user_id));
+  }catch(e){ PT.err=ptErr(e); PT.list=[]; }
+  if(S.screen==="partners") xr();
+}
+function ptScore(p){
+  const my=PT.my||[], iLearn=my.filter(x=>x.role==="learning").map(x=>x.code), iSpeak=my.filter(x=>x.role!=="learning").map(x=>x.code);
+  const L=p.languages||[];
+  const speaksMine=L.some(x=>x.role!=="learning" && iLearn.includes(x.code));
+  const learnsMine=L.some(x=>x.role==="learning" && iSpeak.includes(x.code));
+  const myInt=(X.interests&&X.interests.length?X.interests:[]), shared=(p.interests||[]).filter(i=>myInt.includes(i)).length;
+  return { speaksMine, learnsMine, both:speaksMine&&learnsMine, score:(speaksMine?3:0)+(learnsMine?3:0)+shared+((p.both_free||[]).length?1:0) };
+}
+function ptFree(p){
+  const out=(p.both_free||[]).map(f=>{ const s=SLOTS.find(s=>s[2]===f.start); return s?`${DAYS[f.weekday]?DAYS[f.weekday][0]:""} ${s[4].toLowerCase()}`:""; }).filter(Boolean);
+  return out.length ? `<div class="ptfree">🗓️ You're both usually free: <b>${esc(out.slice(0,4).join(" · "))}</b>${out.length>4?"…":""}</div>` : "";
+}
+function ptCard(p, solo){
+  const sc=ptScore(p), L=p.languages||[];
+  const speaks=L.filter(x=>x.role!=="learning"), learns=L.filter(x=>x.role==="learning");
+  const lang=x=>T[x.code]?`<span class="ptl">${T[x.code].flag} ${esc(T[x.code].nameEn)}${x.role==="learning"&&ptLvl(x.level)?` <b>${ptLvl(x.level)}</b>`:""}</span>`:"";
+  const me=A.user&&p.user_id===A.user.id;
+  return `<div class="card ptcard">
+    <div class="pttop">${p.avatar_url?`<img class="ptav" src="${esc(p.avatar_url)}" alt="">`:`<div class="ptav ptav0">${esc((p.name||"?").charAt(0).toUpperCase())}</div>`}
+      <div style="flex:1;min-width:0"><h3 style="margin:0">${esc(p.name)}${me?` <span class="note" style="margin:0">(you)</span>`:""}</h3>
+        ${p.country?`<div class="note" style="margin:0">📍 ${esc(p.country)}</div>`:""}
+        ${!me&&sc.both?`<span class="ptmatch">⭐ Perfect match</span>`:!me&&(sc.speaksMine||sc.learnsMine)?`<span class="ptmatch soft">${sc.speaksMine?"Speaks what you learn":"Learns what you speak"}</span>`:""}</div></div>
+    ${speaks.length?`<div class="ptrow"><span class="ptk">🗣️ Speaks</span>${speaks.map(lang).join("")}</div>`:""}
+    ${learns.length?`<div class="ptrow"><span class="ptk">📖 Learning</span>${learns.map(lang).join("")}</div>`:""}
+    ${(p.interests||[]).length?`<div class="ptrow"><span class="ptk">💜</span>${p.interests.map(k=>{ const i=INTERESTS.find(x=>x[0]===k); return i?`<span class="ptl">${i[1]} ${esc(i[2])}</span>`:""; }).join("")}</div>`:""}
+    ${p.bio?`<p class="ptbio">“${esc(p.bio)}”</p>`:""}
+    ${me?"":ptFree(p)}
+    <div class="row" style="margin:8px 0 0">
+      <button class="chip" onclick="ptShare('${p.user_id}','${esc(String(p.name||"").replace(/'/g,""))}')">🔗 Share</button>
+      ${me?`<button class="chip" onclick="xOpen()">✏️ Edit my profile</button>`:`<button class="chip" title="Report or block" onclick="repOpen('user','${p.user_id}',null,null,'${p.user_id}','${esc(String(p.name||"").replace(/'/g,""))}')">🚩</button>`}
+      ${!me&&!solo?`<span class="note" style="margin:0 0 0 auto;align-self:center">🤝 "Let's trade?" coming soon</span>`:""}
+    </div></div>`;
+}
+function ptLink(id){ return (location.protocol.startsWith("http")?location.origin:"https://pontetalk.setzio.com")+"/?partner="+id; }
+async function ptShare(id, name){
+  const url=ptLink(id);
+  try{ if(navigator.share){ await navigator.share({ title:`${name} on PonteTalk`, text:`Practice languages with ${name} on PonteTalk (sign in to view):`, url }); return; } }catch(e){ if(e && e.name==="AbortError") return; }
+  try{ await navigator.clipboard.writeText(url); bToast("🔗 Link copied! Only signed-in members can open it · Link kopiert"); }
+  catch(e){ window.prompt("Copy this link · Link kopieren", url); }
+}
+VIEWS.partners = function(){
+  const top=`<div class="topline"><button class="chip" onclick="goHome()">← Back</button><span>Find partners</span></div>
+    <h1 style="margin-bottom:4px">👥 Find partners</h1>${sessTabs("partners")}
+    <p class="sub" style="margin-top:0">Find people to practice with: they help with your language, you help with theirs.<br><span class="de">Finde Tandempartner.</span></p>`;
+  if(!A.user) return `${top}<div class="card center"><div style="font-size:40px">👥</div><h3>Sign in to find partners</h3>
+    <button class="btn primary" onclick="A.ret='partners';go('account')">Sign in · Anmelden</button></div>`;
+  if(PT.err==="optin") return `${top}<div class="card center"><div style="font-size:40px">👋</div>
+    <h3 style="margin:4px 0">Show yourself to see others</h3>
+    <p class="note">Find partners is opt-in and fair both ways: switch on <b>"Show me in Find partners"</b> in your exchange profile, then come back. You can switch it off anytime.<br><span class="de">Erst im Tandem-Profil sichtbar machen.</span></p>
+    <button class="btn primary" onclick="X.after=null;xOpen()">🗣️ Open my exchange profile</button></div>`;
+  if(PT.err) return `${top}<div class="err">${esc(PT.err)}</div>`;
+  if(PT.list===null) return `${top}<p class="note center">Loading… · Lädt…</p>`;
+  const all=PT.list.map(p=>Object.assign({ _s:ptScore(p) }, p));
+  const speakOpts=XLANGS.filter(k=>all.some(p=>(p.languages||[]).some(x=>x.code===k && x.role!=="learning")));
+  const iLearn=(PT.my||[]).filter(x=>x.role==="learning").map(x=>x.code);
+  let shown=all.filter(p=>!PT.fl.speak || (p.languages||[]).some(x=>x.code===PT.fl.speak && x.role!=="learning"));
+  if(PT.fl.learnLvl.length) shown=shown.filter(p=>(p.languages||[]).some(x=>x.role==="learning" && PT.fl.learnLvl.includes(ptLvl(x.level))));
+  if(PT.onlyBoth) shown=shown.filter(p=>p._s.both);
+  shown.sort((a,b)=>b._s.score-a._s.score);
+  const ch=(on,click,label)=>`<button class="chip ${on?"on":""}" aria-pressed="${on}" onclick="${click}">${label}</button>`;
+  return `${top}
+    <div class="shlearn"><b>Speaks · Spricht</b><div class="row" style="margin:6px 0 0">${ch(!PT.fl.speak,"PT.fl.speak='';xr()","🌍 Any")}${speakOpts.sort((a,b)=>iLearn.includes(b)-iLearn.includes(a)).map(k=>ch(PT.fl.speak===k,`PT.fl.speak='${k}';xr()`,`${T[k].flag} ${esc(T[k].nameEn)}`)).join("")}</div>
+      <b style="display:block;margin-top:10px">Their learning level · Ihr Niveau</b><div class="row" style="margin:6px 0 0">${["A0","A1","A2","B1","B2+"].filter(c=>LEVELS.some(l=>l.code===c)||c==="A0").map(c=>ch(PT.fl.learnLvl.includes(c),`ptLvlT('${c}')`,c)).join("")}</div>
+      <label class="blchk" style="margin-top:10px;flex-wrap:nowrap;align-items:flex-start;font-size:14px"><input type="checkbox" style="flex:none;margin-top:2px" ${PT.onlyBoth?"checked":""} onchange="PT.onlyBoth=this.checked;xr()"> ⭐ Only perfect matches (they speak what I learn AND learn what I speak)</label></div>
+    <p class="note" style="margin:6px 0 10px">${shown.length} ${shown.length===1?"person":"people"} · best matches first</p>
+    ${shown.length?`<div class="ptgrid">${shown.map(p=>ptCard(p)).join("")}</div>`
+      :`<div class="card center"><p class="note">No one matches yet. Try "Any", or share PonteTalk with a friend! · Noch niemand passend.</p></div>`}
+    <p class="note center" style="margin-top:14px">🔒 Only signed-in members who also show themselves can see profiles. Never share phone numbers or addresses. Meet in sessions.</p>`;
+};
+function ptLvlT(c){ const a=PT.fl.learnLvl, i=a.indexOf(c); if(i>=0) a.splice(i,1); else a.push(c); xr(); }
+/* one shared profile: /?partner=<id> */
+async function ptOneOpen(id){
+  PT.oneId=id; PT.one=undefined; go("partner");
+  try{ const [r,l]=await Promise.all([ A.sb.rpc("pt_partner",{ p_user:id }), A.sb.from("user_languages").select("language_code,role").eq("user_id",A.user.id) ]);
+    PT.my=(l.data||[]).map(x=>({ code:x.language_code, role:x.role }));
+    if(r.error) throw r.error; PT.one=r.data||null; }
+  catch(e){ PT.one=null; }
+  if(S.screen==="partner") xr();
+}
+VIEWS.partner = function(){
+  const top=`<div class="topline"><button class="chip" onclick="ptOpen()">← Find partners</button><span>Profile</span></div>`;
+  if(PT.one===undefined) return `${top}<p class="note center" style="margin-top:40px">Loading… · Lädt…</p>`;
+  if(!PT.one) return `${top}<div class="card center"><div style="font-size:40px">🔍</div><h3>This profile isn't available</h3><p class="note">It may be hidden. · Nicht verfügbar.</p>
+    <button class="btn secondary" onclick="ptOpen()">👥 Find partners</button></div>`;
+  return `${top}<div style="max-width:560px">${ptCard(PT.one,true)}</div>`;
+};
+
 /* ===================== PROFILE PHOTOS ===================== */
 const AV = {};   // user_id -> photo URL ("" = none)
 function avUrl(uid){ if(A.user && uid===A.user.id) return (A.profile&&A.profile.avatar_url)||""; return AV[uid]||""; }
@@ -4611,7 +4747,7 @@ function cfNorm(x){ return String(x||"").normalize("NFD").replace(/[̀-ͯ]/g,"")
 function sessTabs(which){
   const t=(k,l,click)=>`<button role="tab" aria-selected="${which===k}" class="${which===k?"on":""}" onclick="${click}">${l}</button>`;
   return `<div class="stabs" role="tablist">
-    ${t("online","💻 Online","bTab('online')")}${t("in_person","📍 In person","bTab('in_person')")}${t("cafes","☕ <span class='hidesm'>Language cafés</span><span class='showsm'>Cafés</span>","cfOpen()")}${t("lounges","🛋️ Lounges","luOpen()")}</div>`;
+    ${t("online","💻 Online","bTab('online')")}${t("in_person","📍 In person","bTab('in_person')")}${t("cafes","☕ <span class='hidesm'>Language cafés</span><span class='showsm'>Cafés</span>","cfOpen()")}${t("lounges","🛋️ Lounges","luOpen()")}${t("partners","👥 <span class='hidesm'>Partners</span><span class='showsm'>People</span>","ptOpen()")}</div>`;
 }
 function bTab(f){ B.fmt=f; if(S.screen!=="board") bOpen(); else xr(); }
 function cfOpen(){ CF.err=""; CF.msg=""; CF.f=null; go("cafes"); cfLoad(); }
@@ -5698,7 +5834,7 @@ const NAV_ITEMS = [
   ["shop","Shop","Shop","shOpen()"],
   ["profile","Profile","Profil","A.ret='home';A.err='';A.msg='';go('account')"]
 ];
-NAV_TAB.shop="shop"; NAV_TAB.shopedit="shop"; NAV_TAB.shopitem="shop"; WIDE.shopitem="md"; NAV_TAB.cafes="sessions"; NAV_TAB.cafeedit="sessions"; NAV_TAB.chat="sessions"; WIDE.chat="md"; NAV_TAB.blocks="profile"; WIDE.blocks="md"; NAV_TAB.lounges="sessions"; NAV_TAB.lounge="sessions"; WIDE.lounges="xl"; WIDE.lounge="md"; NAV_TAB.reports="profile"; WIDE.reports="md";
+NAV_TAB.shop="shop"; NAV_TAB.shopedit="shop"; NAV_TAB.shopitem="shop"; WIDE.shopitem="md"; NAV_TAB.cafes="sessions"; NAV_TAB.cafeedit="sessions"; NAV_TAB.chat="sessions"; WIDE.chat="md"; NAV_TAB.blocks="profile"; WIDE.blocks="md"; NAV_TAB.partners="sessions"; WIDE.partners="xl"; NAV_TAB.partner="sessions"; WIDE.partner="md"; NAV_TAB.lounges="sessions"; NAV_TAB.lounge="sessions"; WIDE.lounges="xl"; WIDE.lounge="md"; NAV_TAB.reports="profile"; WIDE.reports="md";
 WIDE.cafes="xl"; WIDE.cafeedit="md";
 WIDE.shop="xl"; WIDE.shopedit="md";
 ICO.shop='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>';
@@ -6320,6 +6456,7 @@ function quickCard(){
   return `<div class="card"><h3>Quick start · Schnellstart</h3>
     <button class="btn qbtn" style="background:var(--plum);color:#fff" onclick="hOpen()">${ICO.plus} Host a session</button>
     <button class="btn secondary qbtn" onclick="luOpen()">🛋️ Chat in a lounge <span data-lupres-all>${lpAll()}</span></button>
+    <button class="btn secondary qbtn" onclick="ptOpen()">👥 Find a partner</button>
     <button class="btn secondary qbtn" onclick="cfOpen()">☕ Find a language café</button>
     <button class="btn secondary qbtn" onclick="shOpen()">📘 Free resources</button>
     <button class="btn secondary qbtn" onclick="go('games')">${ICO.play} Play a game now</button></div>`;
@@ -6704,6 +6841,11 @@ try{ if(new URLSearchParams(location.search).has("stats")){ S.screen="stats"; le
 try{ if(new URLSearchParams(location.search).has("reports")){ S.screen="reports"; let n=0; const w=setInterval(()=>{ n++; if(A.status==="in"&&A.user){ clearInterval(w); raLoad(); } else if((A.status==="out"&&n>2)||n>20){ clearInterval(w); A.ret="reports"; A.msg="Sign in to see reports · Bitte anmelden"; go("account"); } },500); } }catch(e){}
 try{ const rid=new URLSearchParams(location.search).get("r"); if(rid && /^[0-9a-f-]{36}$/i.test(rid)){ S.screen="shopitem"; SH.one=null; A.ret="shopitem"; SH.oneId=rid; document.addEventListener("DOMContentLoaded", ()=>shOneLoad(rid)); } }catch(e){}
 try{ if(new URLSearchParams(location.search).has("shop")){ S.screen="shop"; document.addEventListener("DOMContentLoaded", ()=>shLoad()); } }catch(e){}
+try{ const pid=new URLSearchParams(location.search).get("partner"); if(pid && /^[0-9a-f-]{36}$/i.test(pid)){
+  PT.oneId=pid; S.screen="partners"; try{ sessionStorage.setItem("pt_partner",pid); }catch(e){}
+  let n=0; const w=setInterval(()=>{ n++;
+    if(A.status==="in"&&A.user){ clearInterval(w); ptOneOpen(pid); }
+    else if((A.status==="out"&&n>2)||n>20){ clearInterval(w); A.ret="partner"; A.msg="Sign in (free) to see this language partner · Melde dich an, um das Profil zu sehen"; go("account"); } },500); } }catch(e){}
 try{ const lid=new URLSearchParams(location.search).get("lounge"); if(lid && /^[a-z]{2,5}-[a-z]{2,5}$/.test(lid)){
   LU.pend=lid; S.screen="lounges"; try{ sessionStorage.setItem("pt_lounge",lid); }catch(e){}
   let n=0; const w=setInterval(()=>{ n++;
