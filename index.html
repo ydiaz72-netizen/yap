@@ -6654,7 +6654,7 @@ const NP_ITEMS = [
   ["seat_offers","🎉 Seat offers from the waitlist","Freie Plätze von der Warteliste"],
   ["approvals","✅ Host approved / declined my request","Zu- oder Absage vom Host"],
   ["join_requests","🔔 Someone asks to join my session","Jemand möchte teilnehmen"],
-  ["reminders","⏰ Reminders (1 day and 15 min before)","Erinnerungen (1 Tag und 15 Min. vorher)"],
+  ["reminders","⏰ Reminders (3 days before if there are materials, 1 day and 15 min before)","Erinnerungen (3 Tage vorher bei Materialien, 1 Tag und 15 Min. vorher)"],
   ["cancellations","❌ A session I joined was cancelled","Eine Session wurde abgesagt"],
   ["session_matches","✨ New sessions that fit my languages and free time (max 1 email a day)","Neue passende Sessions (max. 1 E-Mail pro Tag)"]
 ];
@@ -6764,6 +6764,7 @@ function nbText(n){
     case "changed":      return `📝 ${t}: ${nbChanges(d)}`;
     case "reminder_24h": return `⏰ Tomorrow: ${t}${n.starts_at?` at ${nbClock(n.starts_at)}`:""}.`;
     case "reminder_15m": return `⏰ ${t} starts in 15 minutes.`;
+    case "reminder_prep": return `📚 ${t} is in 3 days. ${who==="Someone"?"The host":who} shared materials: have a look before the call. Want to focus on something? Tell them in the chat.`;
     default:             return `Update for ${t}.`;
   }
 }
