@@ -231,6 +231,20 @@
   .pfav.busy{opacity:.5;pointer-events:none}
   #tnav .tme{padding:0;overflow:hidden}
   #tnav .tme img{width:100%;height:100%;object-fit:cover;display:block}
+  /* ---- Language lounges ---- */
+  .lugrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+  .lucard{display:flex;flex-direction:column;align-items:flex-start;text-align:left;cursor:pointer;font:inherit;color:inherit;margin:0;width:100%}
+  .lucard:hover{border-color:var(--plum)}
+  .luflags{display:flex;align-items:center;gap:6px;font-size:30px;line-height:1}
+  .luflags span{font-size:14px;color:var(--muted);font-weight:800}
+  .lufree{color:#1d6a62}
+  .luq{background:var(--teal-soft);border-radius:14px;padding:10px 14px;display:flex;flex-direction:column;gap:2px}
+  .lufind .lurow{display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+  .lufind .lurow:last-of-type{border-bottom:none}
+  .lusess{align-self:center;background:var(--sun-soft);border:1px solid var(--line);border-radius:14px;padding:10px 14px;display:flex;flex-direction:column;gap:4px;align-items:flex-start;max-width:90%}
+  .lusess .tm{font-size:11px;opacity:.65}
+  .lusess .cx{border:none;background:none;opacity:.5;cursor:pointer;font-size:12px;padding:0}
+  .lulist{max-height:calc(100vh - 420px);min-height:260px}
   /* ---- Language cafés ---- */
   .stabs{display:flex;gap:6px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:4px;margin:6px 0 14px}
   .stabs button{flex:1;border:none;background:none;border-radius:10px;padding:10px 8px;font:800 14px 'Plus Jakarta Sans',Nunito,sans-serif;color:var(--muted);cursor:pointer}
@@ -4059,6 +4073,246 @@ VIEWS.quiz = function(){
       : d.role==="host" ? qzHostView(d, s) : qzGuestView(d)}`;
 };
 
+/* ===================== LANGUAGE LOUNGES ===================== */
+/* One open chat per language pair + "Find a time". Database: sql/lounges.sql (pt_lounge_* functions). */
+const LU = { list:null, id:null, msgs:[], last:0, free:[], busy:false, err:"", draft:"", chan:null, timer:null,
+  admin:false, canPost:null, findOpen:false, pickDay:null, pickHour:19 };
+const LU_NAMES = { es:"Spanish", en:"English", de:"German", it:"Italian", fr:"French", pt:"Portuguese" };
+const LU_QS = [
+  { en:"What did you eat today?", es:"¿Qué comiste hoy?", de:"Was hast du heute gegessen?", it:"Cosa hai mangiato oggi?" },
+  { en:"What's the weather like where you are?", es:"¿Qué tiempo hace donde estás?", de:"Wie ist das Wetter bei dir?", it:"Che tempo fa dove sei?" },
+  { en:"What are you doing this weekend?", es:"¿Qué vas a hacer este fin de semana?", de:"Was machst du am Wochenende?", it:"Cosa fai questo fine settimana?" },
+  { en:"Why are you learning this language?", es:"¿Por qué aprendes este idioma?", de:"Warum lernst du diese Sprache?", it:"Perché impari questa lingua?" },
+  { en:"What's your favorite word in the language you're learning?", es:"¿Cuál es tu palabra favorita en el idioma que aprendes?", de:"Was ist dein Lieblingswort in der Sprache, die du lernst?", it:"Qual è la tua parola preferita nella lingua che impari?" },
+  { en:"Describe your city in three words.", es:"Describe tu ciudad en tres palabras.", de:"Beschreibe deine Stadt in drei Wörtern.", it:"Descrivi la tua città in tre parole." },
+  { en:"What music are you listening to lately?", es:"¿Qué música escuchas últimamente?", de:"Welche Musik hörst du gerade?", it:"Che musica ascolti ultimamente?" },
+  { en:"What's a typical dish from your country?", es:"¿Cuál es un plato típico de tu país?", de:"Was ist ein typisches Gericht aus deinem Land?", it:"Qual è un piatto tipico del tuo paese?" },
+  { en:"Coffee or tea? Why?", es:"¿Café o té? ¿Por qué?", de:"Kaffee oder Tee? Warum?", it:"Caffè o tè? Perché?" },
+  { en:"What was the best part of your week?", es:"¿Qué fue lo mejor de tu semana?", de:"Was war das Beste an deiner Woche?", it:"Qual è stata la parte migliore della tua settimana?" },
+  { en:"Which place would you love to visit?", es:"¿Qué lugar te encantaría visitar?", de:"Welchen Ort würdest du gern besuchen?", it:"Quale posto ti piacerebbe visitare?" },
+  { en:"What do you do to relax?", es:"¿Qué haces para relajarte?", de:"Was machst du, um dich zu entspannen?", it:"Cosa fai per rilassarti?" },
+  { en:"Recommend a movie or series.", es:"Recomienda una película o serie.", de:"Empfiehl einen Film oder eine Serie.", it:"Consiglia un film o una serie." },
+  { en:"What's a funny mistake you made in another language?", es:"¿Qué error gracioso cometiste en otro idioma?", de:"Welchen lustigen Fehler hast du in einer anderen Sprache gemacht?", it:"Che errore divertente hai fatto in un'altra lingua?" },
+  { en:"Morning person or night owl?", es:"¿Madrugador o noctámbulo?", de:"Frühaufsteher oder Nachteule?", it:"Mattiniero o nottambulo?" },
+  { en:"What's something you learned recently?", es:"¿Qué aprendiste recientemente?", de:"Was hast du kürzlich gelernt?", it:"Cosa hai imparato di recente?" },
+  { en:"What holiday do you love most?", es:"¿Qué fiesta te gusta más?", de:"Welchen Feiertag magst du am liebsten?", it:"Quale festa ti piace di più?" },
+  { en:"Do you have a pet? Tell us about it!", es:"¿Tienes mascota? ¡Cuéntanos!", de:"Hast du ein Haustier? Erzähl uns davon!", it:"Hai un animale? Raccontaci!" },
+  { en:"What's your dream job?", es:"¿Cuál es el trabajo de tus sueños?", de:"Was ist dein Traumjob?", it:"Qual è il lavoro dei tuoi sogni?" },
+  { en:"What makes you smile?", es:"¿Qué te hace sonreír?", de:"Was bringt dich zum Lächeln?", it:"Cosa ti fa sorridere?" }
+];
+function luFlag(k){ return cfLang(k)[0]; }
+function luName(l){ return `${LU_NAMES[l.lang_a]||cfLang(l.lang_a)[1]} ⇄ ${LU_NAMES[l.lang_b]||cfLang(l.lang_b)[1]}`; }
+function luRoom(){ return (LU.list||[]).find(x=>x.id===LU.id) || { id:LU.id, lang_a:(LU.id||"").split("-")[0], lang_b:(LU.id||"").split("-")[1] }; }
+function luErr(e){
+  const m=String((e&&e.message)||e||"");
+  if(/lounge_profile_needed/.test(m)) return "Add your name and confirm 18+ in your exchange profile first · Erst Name und 18+ im Profil";
+  if(/lounge_slow_down/.test(m)) return "Slow down a little 🙂 Try again in a moment · Kurz warten";
+  if(/lounge_no_links_yet/.test(m)) return "New members can post links after their first week · Links ab der zweiten Woche";
+  if(/lounge_too_many_times/.test(m)) return "You can mark up to 21 times per lounge · Maximal 21 Zeiten";
+  if(/lounge_length/.test(m)) return "Messages can be up to 500 characters · Maximal 500 Zeichen";
+  return bErr(e);
+}
+// Weekly times are stored in UTC (day 0 = Sunday). These helpers convert to and from the viewer's local time.
+function luNextLocal(dow, hour){ // next local Date with this local weekday + hour
+  const d=new Date(); d.setMinutes(0,0,0); d.setHours(hour);
+  let add=(dow-d.getDay()+7)%7; if(add===0 && d<=new Date()) add=7; d.setDate(d.getDate()+add); return d;
+}
+function luNextUtc(dow, hour){ // next Date with this UTC weekday + hour
+  const d=new Date(); d.setUTCMinutes(0,0,0); d.setUTCHours(hour);
+  let add=(dow-d.getUTCDay()+7)%7; if(add===0 && d<=new Date()) add=7; d.setUTCDate(d.getUTCDate()+add); return d;
+}
+function luWhen(d){ return d.toLocaleDateString("en-GB",{ weekday:"short" })+" "+d.toLocaleTimeString("en-GB",{ hour:"2-digit", minute:"2-digit" }); }
+
+/* ---- list ---- */
+async function luOpen(){
+  LU.err=""; go("lounges");
+  if(!A.user) return;
+  try{ const { data, error } = await A.sb.rpc("pt_lounges"); if(error) throw error; LU.list=data||[]; }
+  catch(e){ LU.err=luErr(e); }
+  if(S.screen==="lounges") xr();
+}
+VIEWS.lounges = function(){
+  const top=`<div class="topline"><button class="chip" onclick="goHome()">← Back</button><span>Language lounges</span></div>
+    <h1 style="margin-bottom:4px">🛋️ Language lounges</h1>${sessTabs("lounges")}
+    <p class="sub" style="margin-top:0">Chat with people learning the same languages, and agree on a time to talk.<br><span class="de">Plaudern und gemeinsam eine Zeit finden.</span></p>`;
+  if(!A.user) return `${top}<div class="card center"><div style="font-size:40px">🛋️</div><h3>Sign in to join the lounges</h3>
+    <button class="btn primary" onclick="A.ret='lounges';go('account')">Sign in · Anmelden</button></div>`;
+  if(LU.err && !LU.list) return `${top}<div class="err">${esc(LU.err)}</div>`;
+  if(!LU.list) return `${top}<p class="note center">Loading… · Lädt…</p>`;
+  return `${top}<div class="lugrid">${LU.list.map(l=>`<button class="card lucard" onclick="luEnter('${esc(l.id)}')">
+      <div class="luflags">${luFlag(l.lang_a)}<span>⇄</span>${luFlag(l.lang_b)}</div>
+      <b>${esc(luName(l))}</b>
+      <span class="note" style="margin:4px 0 0">${l.msgs_7d?`💬 ${l.msgs_7d} message${l.msgs_7d===1?"":"s"} this week`:"💬 Be the first to say hi"}${l.free_24h?` · <b class="lufree">🙋 ${l.free_24h} free in the next 24 h</b>`:""}</span>
+    </button>`).join("")}</div>
+    <p class="note center" style="margin-top:12px">Want another language pair? Tell us in any lounge. · Andere Sprachen? Schreib uns.</p>`;
+};
+
+AFTER.lounges = function(){ if(A.user && !LU.list && !LU.loading){ LU.loading=true; A.sb.rpc("pt_lounges").then(r=>{ LU.loading=false; if(r.error) LU.err=luErr(r.error); else LU.list=r.data||[]; if(S.screen==="lounges") xr(); },()=>{ LU.loading=false; }); } };
+
+/* ---- one lounge ---- */
+async function luEnter(id){
+  luStop(); Object.assign(LU,{ id, msgs:[], last:0, free:[], err:"", draft:"", findOpen:false, pickDay:null });
+  go("lounge");
+  if(!LU.list) A.sb.rpc("pt_lounges").then(r=>{ if(!r.error){ LU.list=r.data||[]; if(S.screen==="lounge") xr(); } },()=>{});
+  if(LU.canPost===null) A.sb.rpc("pt_lounge_can_post").then(r=>{ LU.canPost=!!r.data; if(S.screen==="lounge") xr(); },()=>{});
+  A.sb.rpc("pt_is_admin").then(r=>{ LU.admin=!!r.data; },()=>{});
+  await Promise.all([luFetch(true), luFreeLoad()]);
+  luStart();
+}
+function luStop(){
+  if(LU.timer){ clearInterval(LU.timer); LU.timer=null; }
+  if(LU.chan && A.sb){ try{ A.sb.removeChannel(LU.chan); }catch(e){} LU.chan=null; }
+}
+function luStart(){
+  try{
+    LU.chan=A.sb.channel("lounge-"+LU.id)
+      .on("postgres_changes",{ event:"INSERT", schema:"public", table:"lounge_messages", filter:`lounge_id=eq.${LU.id}` }, ()=>luFetch(false))
+      .subscribe();
+  }catch(e){ LU.chan=null; }
+  LU.timer=setInterval(()=>{ if(S.screen!=="lounge"){ luStop(); return; } luFetch(false); }, 15000);
+}
+async function luFetch(first){
+  try{
+    const { data, error } = await A.sb.rpc("pt_lounge_messages",{ p_lounge:LU.id, p_after:first?0:LU.last }); if(error) throw error;
+    const add=(data||[]).filter(m=>!LU.msgs.some(x=>x.id===m.id));
+    LU.msgs = first ? (data||[]) : LU.msgs.concat(add);
+    if(LU.msgs.length) LU.last=LU.msgs[LU.msgs.length-1].id;
+    if(S.screen==="lounge"){ if(first) xr(); else if(add.length) luPaint(); }
+  }catch(e){ LU.err=luErr(e); if(S.screen==="lounge") xr(); }
+}
+function luListHtml(){
+  if(!LU.msgs.length) return `<p class="note center" style="margin:auto">No messages yet. Answer today's question to get things going 👋 · Noch nichts hier</p>`;
+  let lastDay="";
+  return LU.msgs.map(m=>{
+    const d=new Date(m.created_at), day=d.toDateString(), mine=A.user&&m.user_id===A.user.id;
+    const sep = day!==lastDay ? `<div class="chday">${esc(bDayLabel(m.created_at).split(" · ")[0])}</div>` : ""; lastDay=day;
+    const t=d.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
+    const canDel = mine || LU.admin;
+    const tools = `${!mine?`<button class="cx" aria-label="Report message" title="Report · Melden" onclick="luReport(${m.id})">🚩</button>`:""}${canDel?`<button class="cx" aria-label="Delete message" title="Delete" onclick="luDel(${m.id})">✕</button>`:""}`;
+    if(m.kind==="session"){
+      const past = m.starts_at && new Date(m.starts_at) < new Date();
+      return `${sep}<div class="lusess"><div class="note" style="margin:0">📅 ${esc(m.name)} is hosting</div><b>${esc(m.body)}</b>
+        ${m.starts_at?`<div>${esc(fmtWhen(m.starts_at))}</div>`:""}
+        ${past?`<span class="note" style="margin:0">Already happened</span>`:`<button class="chip on" onclick="luStop();sOpen('${m.ref_activity}')">Open and join →</button>`}
+        <span class="tm">${t}</span>${tools}</div>`;
+    }
+    return `${sep}<div class="cm ${mine?"me":""}">${mine?"":`<div class="who">${m.avatar_url?`<img class="avs" src="${esc(m.avatar_url)}" alt="">`:""}${esc(m.name||"Member")}</div>`}
+      ${chLinkify(m.body)}<span class="tm">${t}</span>${tools}</div>`;
+  }).join("");
+}
+function luPaint(){
+  const el=document.getElementById("lulist"); if(!el) return;
+  const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+  el.innerHTML=luListHtml(); if(atBottom) el.scrollTop=el.scrollHeight;
+}
+function luQuestion(l){
+  const day=Math.floor(Date.now()/86400000), q=LU_QS[day % LU_QS.length];
+  const a=q[l.lang_a], b=q[l.lang_b];
+  return `<div class="luq"><span class="note" style="margin:0">💡 Question of the day · Frage des Tages</span>
+    ${a?`<div><b>${luFlag(l.lang_a)} ${esc(a)}</b></div>`:""}${b?`<div><b>${luFlag(l.lang_b)} ${esc(b)}</b></div>`:""}
+    ${!a&&!b?`<div><b>🇬🇧 ${esc(q.en)}</b></div>`:""}</div>`;
+}
+VIEWS.lounge = function(){
+  const l=luRoom();
+  const best=luBest();
+  return `<div class="topline"><button class="chip" onclick="luStop();luOpen()">← Lounges</button><span>🛋️ Lounge</span></div>
+  <div class="chhead"><div class="luflags" style="font-size:26px">${luFlag(l.lang_a)}<span>⇄</span>${luFlag(l.lang_b)}</div>
+    <div style="flex:1;min-width:0"><h2 style="margin:0;font-size:20px">${esc(luName(l))}</h2>
+    <p class="note" style="margin:0">Open to all members · Für alle Mitglieder</p></div></div>
+  ${luQuestion(l)}
+  <button class="btn secondary" style="margin:8px 0" aria-expanded="${LU.findOpen}" onclick="LU.findOpen=!LU.findOpen;xr()">📅 Find a time to talk${best.length?` · ${best[0].n} free ${esc(luWhen(best[0].when))}`:""} ${LU.findOpen?"▲":"▼"}</button>
+  ${LU.findOpen?luFindHtml(l, best):""}
+  <div class="chsafe">🌍 Everyone in PonteTalk can read this lounge. Don't share phone numbers or addresses. To meet, host a session. · Öffentlich: keine Telefonnummern.</div>
+  ${LU.err?`<div class="err">${esc(LU.err)}</div>`:""}
+  <div class="chlist lulist" id="lulist" aria-live="polite">${luListHtml()}</div>
+  ${LU.canPost===false ? `<div class="card center" style="margin-top:10px"><p style="margin:0 0 8px">To post, add your name and confirm you're 18+ in your exchange profile. · Zum Schreiben: Name und 18+ im Profil.</p>
+      <button class="btn primary" onclick="luStop();xOpen()">Complete my profile · Profil ergänzen</button></div>`
+    : `<div class="chin"><textarea id="lutxt" rows="1" maxlength="500" placeholder="Message · Nachricht…" oninput="LU.draft=this.value;this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();luSend();}">${esc(LU.draft)}</textarea>
+      <button class="btn primary" ${LU.busy?"disabled":""} onclick="luSend()" aria-label="Send">Send</button></div>`}`;
+};
+AFTER.lounge = function(){ const el=document.getElementById("lulist"); if(el) el.scrollTop=el.scrollHeight; };
+async function luSend(){
+  const ta=document.getElementById("lutxt"); const body=((ta&&ta.value)||"").trim();
+  if(!body || LU.busy) return;
+  LU.busy=true; LU.err="";
+  try{
+    const { error } = await A.sb.rpc("pt_lounge_post",{ p_lounge:LU.id, p_body:body }); if(error) throw error;
+    LU.draft=""; if(ta){ ta.value=""; ta.style.height="auto"; }
+    LU.busy=false; await luFetch(false);
+    const el=document.getElementById("lulist"); if(el) el.scrollTop=el.scrollHeight;
+  }catch(e){ LU.busy=false; LU.err=luErr(e); if(/lounge_profile_needed/.test(String(e&&e.message))) LU.canPost=false; xr(); }
+}
+async function luDel(id){
+  if(!window.confirm("Delete this message? · Nachricht löschen?")) return;
+  try{ const { error } = await A.sb.rpc("pt_lounge_delete",{ p_id:id }); if(error) throw error;
+    LU.msgs=LU.msgs.filter(m=>m.id!==id); luPaint(); }
+  catch(e){ bToast(luErr(e)); }
+}
+function luReport(id){
+  const m=LU.msgs.find(x=>x.id===id); if(!m) return;
+  repOpen("user", m.user_id, null, null);
+  const d=document.getElementById("repDet");
+  if(d){ d.value=`Lounge ${LU.id}, message #${m.id}: “${m.body.slice(0,300)}”`; repShow(); }
+}
+
+/* ---- Find a time ---- */
+async function luFreeLoad(){
+  try{ const { data, error } = await A.sb.rpc("pt_lounge_free_get",{ p_lounge:LU.id }); if(error) throw error; LU.free=data||[]; }
+  catch(e){ LU.free=[]; }
+  if(S.screen==="lounge") xr();
+}
+function luBest(){
+  return (LU.free||[]).map(f=>({ dow:f.dow, hour:f.hour, n:f.n, mine:f.mine, when:luNextUtc(f.dow,f.hour) }))
+    .sort((a,b)=> b.n-a.n || a.when-b.when).slice(0,6);
+}
+async function luToggle(dow, hour, on){
+  LU.busy=true; xr();
+  try{ const { error } = await A.sb.rpc("pt_lounge_free_set",{ p_lounge:LU.id, p_dow:dow, p_hour:hour, p_on:on }); if(error) throw error;
+    if(on) bToast("🙋 Added. Others can see that someone is free then (not who) · Hinzugefügt"); await luFreeLoad(); }
+  catch(e){ bToast(luErr(e)); if(/lounge_profile_needed/.test(String(e&&e.message))) LU.canPost=false; }
+  LU.busy=false; xr();
+}
+function luAddPicked(){
+  if(LU.pickDay===null){ bToast("Pick a day first · Erst einen Tag wählen"); return; }
+  const d=luNextLocal(LU.pickDay, LU.pickHour);
+  luToggle(d.getUTCDay(), d.getUTCHours(), true);
+}
+function luFindHtml(l, best){
+  const days=[1,2,3,4,5,6,0], dn=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const hours=[]; for(let h=7;h<=22;h++) hours.push(h);
+  const mine=(LU.free||[]).filter(f=>f.mine).map(f=>({ dow:f.dow, hour:f.hour, when:luNextUtc(f.dow,f.hour) })).sort((a,b)=>a.when.getDay()-b.when.getDay()||a.when.getHours()-b.when.getHours());
+  return `<div class="card lufind">
+    <h3 style="margin:0 0 4px">Best times · Beste Zeiten</h3>
+    <p class="note" style="margin:0 0 8px">Every week, in your time (${esc(tzName(detectTz()))}). People only see how many are free, not who.</p>
+    ${best.length ? best.map(b=>`<div class="lurow"><div style="flex:1"><b>${esc(luWhen(b.when))}</b><br><span class="note" style="margin:0">👥 ${b.n} free${b.mine?" · incl. you":""}</span></div>
+        ${b.mine?`<button class="chip" ${LU.busy?"disabled":""} onclick="luToggle(${b.dow},${b.hour},false)">✓ I'm free</button>`
+                :`<button class="chip" ${LU.busy?"disabled":""} onclick="luToggle(${b.dow},${b.hour},true)">＋ Me too</button>`}
+        <button class="chip on" onclick="luHost(${b.dow},${b.hour})">📅 Host this</button></div>`).join("")
+      : `<p class="note" style="margin:0 0 6px">No times yet. Add when you're usually free 👇</p>`}
+    <h3 style="margin:14px 0 6px">When are you usually free? · Wann hast du Zeit?</h3>
+    <div class="row" style="margin:0">${days.map(d=>`<button class="chip ${LU.pickDay===d?"on":""}" aria-pressed="${LU.pickDay===d}" onclick="LU.pickDay=${d};xr()">${dn[d]}</button>`).join("")}</div>
+    <div class="row" style="margin:8px 0 0;align-items:center"><select onchange="LU.pickHour=+this.value" aria-label="Time" style="width:auto">${hours.map(h=>`<option value="${h}" ${LU.pickHour===h?"selected":""}>${String(h).padStart(2,"0")}:00</option>`).join("")}</select>
+      <button class="chip on" ${LU.busy?"disabled":""} onclick="luAddPicked()">＋ Add my time</button></div>
+    ${mine.length?`<p class="note" style="margin:10px 0 4px">Your times · Deine Zeiten:</p><div class="row" style="margin:0">${mine.map(f=>`<button class="chip" onclick="luToggle(${f.dow},${f.hour},false)" aria-label="Remove ${esc(luWhen(f.when))}">${esc(luWhen(f.when))} ✕</button>`).join("")}</div>`:""}
+  </div>`;
+}
+function luHost(dow, hour){
+  const l=luRoom(), when=luNextUtc(dow,hour);
+  if(when.getTime()-Date.now() < 3600000) when.setUTCDate(when.getUTCDate()+7);  // need at least 1 hour notice
+  const lounge=LU.id; luStop();
+  H.started=false; H.editId=null; H.dupFrom=null;
+  hOpen();
+  if(S.screen!=="host") return;   // e.g. not signed in
+  Object.assign(H,{ a:LANG_KEYS.includes(l.lang_a)?l.lang_a:"", b:LANG_KEYS.includes(l.lang_b)?l.lang_b:"",
+    date:`${when.getFullYear()}-${hPad(when.getMonth()+1)}-${hPad(when.getDate())}`, time:`${hPad(when.getHours())}:${hPad(when.getMinutes())}`,
+    fmt:"online", lounge });
+  xr();
+  bToast("📅 Time and languages filled in. Check the rest and post! · Bitte prüfen und posten");
+}
+async function luAnnounce(lounge, activity){
+  try{ await A.sb.rpc("pt_lounge_announce",{ p_lounge:lounge, p_activity:activity }); }catch(e){}
+}
+
 /* ===================== PROFILE PHOTOS ===================== */
 const AV = {};   // user_id -> photo URL ("" = none)
 function avUrl(uid){ if(A.user && uid===A.user.id) return (A.profile&&A.profile.avatar_url)||""; return AV[uid]||""; }
@@ -4143,7 +4397,7 @@ function cfNorm(x){ return String(x||"").normalize("NFD").replace(/[̀-ͯ]/g,"")
 function sessTabs(which){
   const t=(k,l,click)=>`<button role="tab" aria-selected="${which===k}" class="${which===k?"on":""}" onclick="${click}">${l}</button>`;
   return `<div class="stabs" role="tablist">
-    ${t("online","💻 Online","bTab('online')")}${t("in_person","📍 In person","bTab('in_person')")}${t("cafes","☕ <span class='hidesm'>Language cafés</span><span class='showsm'>Cafés</span>","cfOpen()")}</div>`;
+    ${t("online","💻 Online","bTab('online')")}${t("in_person","📍 In person","bTab('in_person')")}${t("cafes","☕ <span class='hidesm'>Language cafés</span><span class='showsm'>Cafés</span>","cfOpen()")}${t("lounges","🛋️ Lounges","luOpen()")}</div>`;
 }
 function bTab(f){ B.fmt=f; if(S.screen!=="board") bOpen(); else xr(); }
 function cfOpen(){ CF.err=""; CF.msg=""; CF.f=null; go("cafes"); cfLoad(); }
@@ -4863,7 +5117,7 @@ function hOpen(){
     const d=new Date(Date.now()+86400000);
     Object.assign(H,{ bal:false, sa:2, sb:2, type:"conversation", game:"speak", title:"", a:"", b:"", min:1, max:3,
       date:`${d.getFullYear()}-${hPad(d.getMonth()+1)}-${hPad(d.getDate())}`, time:"19:00",
-      dur:45, seats:4, mode:"instant", topics:[], note:"", video:"", mats:[], matsWas:[], vis:"public", fmt:(S.screen==="board"&&B.fmt==="in_person")?"in_person":"online", city:"", place:"", area:"", cafe:null, addr:"", dirs:"", pub:false, placeWas:null, started:true });
+      dur:45, seats:4, mode:"instant", topics:[], note:"", video:"", mats:[], matsWas:[], vis:"public", fmt:(S.screen==="board"&&B.fmt==="in_person")?"in_person":"online", city:"", place:"", area:"", cafe:null, addr:"", dirs:"", pub:false, placeWas:null, lounge:null, started:true });
   }
   go("host"); hPrefill();
 }
@@ -4987,6 +5241,8 @@ async function hPost(){
     }
     const { data:made, error } = await A.sb.from("activities").insert(row).select("id").single();
     if(error) throw error;
+    if(H.lounge && made && made.id && H.vis!=="private") luAnnounce(H.lounge, made.id);
+    H.lounge=null;
     if((video || mc.list.length || H.fmt==="in_person") && made && made.id){
       try{ await hSaveLink(made.id, video, ""); await hSaveMats(made.id, mc.list, []); await hSavePlace(made.id, null); }
       catch(e){ H.started=false; H.busy=false; bToast("📣 Session posted, but the video link or materials didn't save. Tap ✏️ Edit to add them · Nicht alles gespeichert"); bOpen(); return; }
@@ -5228,7 +5484,7 @@ const NAV_ITEMS = [
   ["shop","Shop","Shop","shOpen()"],
   ["profile","Profile","Profil","A.ret='home';A.err='';A.msg='';go('account')"]
 ];
-NAV_TAB.shop="shop"; NAV_TAB.shopedit="shop"; NAV_TAB.shopitem="shop"; WIDE.shopitem="md"; NAV_TAB.cafes="sessions"; NAV_TAB.cafeedit="sessions"; NAV_TAB.chat="sessions"; WIDE.chat="md"; NAV_TAB.reports="profile"; WIDE.reports="md";
+NAV_TAB.shop="shop"; NAV_TAB.shopedit="shop"; NAV_TAB.shopitem="shop"; WIDE.shopitem="md"; NAV_TAB.cafes="sessions"; NAV_TAB.cafeedit="sessions"; NAV_TAB.chat="sessions"; WIDE.chat="md"; NAV_TAB.lounges="sessions"; NAV_TAB.lounge="sessions"; WIDE.lounges="xl"; WIDE.lounge="md"; NAV_TAB.reports="profile"; WIDE.reports="md";
 WIDE.cafes="xl"; WIDE.cafeedit="md";
 WIDE.shop="xl"; WIDE.shopedit="md";
 ICO.shop='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>';
