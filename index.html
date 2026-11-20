@@ -230,6 +230,21 @@
   .wdbadge{display:inline-block;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:800;background:var(--coral);color:#fff;vertical-align:middle}
   .chip.wdok{border-color:var(--teal);background:var(--teal-soft);color:#1d6a62}
   .wdfix{margin-top:8px;border-top:1px solid var(--line);padding-top:4px}
+  .wdstat{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px;flex-wrap:wrap}
+  /* ---- Practice my words ---- */
+  .wpdots{font-size:15px;letter-spacing:2px;color:var(--teal);font-weight:800}
+  .wpbig{font-size:30px;font-weight:800;margin:14px 0 10px}
+  .wpans{font-size:20px;font-weight:700;margin-bottom:4px}
+  .wpgap{display:inline-block;margin:6px 0 2px;font-size:19px;font-weight:800}
+  .qzpick.wpo.right{border-color:var(--teal);background:var(--teal-soft);color:#1d6a62}
+  .qzpick.wpo.wrong{border-color:#E28B78;background:#FBE3DE;color:#B54530}
+  .qzpick.wpo.dim{opacity:.55}
+  .qzpick.wpo:disabled{cursor:default;color:inherit}
+  .wpfb{margin-top:12px;border-radius:12px;padding:10px 12px;font-weight:700}
+  .wpfb.ok{background:var(--teal-soft);color:#1d6a62}
+  .wpfb.no{background:#FBE3DE;color:#B54530}
+  .wpmast{margin:10px 0 0;font-weight:800;color:#6E4E00;background:var(--sun-soft);border-radius:12px;padding:8px}
+  .wprow{display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
   .qzrow:last-child{border-bottom:none}
   /* ---- Session materials ---- */
   .mrow{display:grid;grid-template-columns:1fr auto;gap:6px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px;margin-top:8px}
@@ -2990,6 +3005,7 @@ VIEWS.account = function(){
     ${A.games===null?`<p class="note center">Loading your games… <button class="linkbtn" onclick="loadGames()">Retry</button></p>`:acctStats(gs)}</div>
   <div class="card"><h3>📚 My words <span class="de">· Meine Wörter</span></h3>
     <p class="note" style="margin-top:0">Words and phrases you saved in your sessions, checked by your partners.<br><span class="de">Wörter aus deinen Sessions, geprüft von deinen Partnern.</span></p>
+    <button class="btn primary" onclick="wpOpen(null)">🎯 Practise my words · Wörter üben</button>
     <button class="btn secondary" onclick="wdAllOpen()">📚 See my words · Meine Wörter</button></div>
   ${acctHistory(gs)}
   <p class="note center">Tap a game to see its questions, answers &amp; tips · Tippe auf ein Spiel für Details</p>
@@ -4259,7 +4275,8 @@ async function wdOpen(id){
 }
 async function wdFetch(){
   try{
-    const { data, error } = await A.sb.rpc("pt_words_get",{ p_activity:WD.id }); if(error) throw error;
+    const [r]=await Promise.all([ A.sb.rpc("pt_words_get",{ p_activity:WD.id }), wpProgLoad() ]);
+    const { data, error } = r; if(error) throw error;
     WD.data=data||{ words:[], langs:[] };
     const L=(WD.data.langs||[]).filter(Boolean);
     if(!WD.edit && (!WD.form.lang || !L.includes(WD.form.lang))) WD.form=wdBlankForm(L);
@@ -4337,7 +4354,7 @@ async function wdAllOpen(){
   go("words"); await wdAllFetch();
 }
 async function wdAllFetch(){
-  try{ const { data, error } = await A.sb.rpc("pt_words_mine"); if(error) throw error; WD.all=data||[]; }
+  try{ const [r]=await Promise.all([ A.sb.rpc("pt_words_mine"), wpProgLoad() ]); const { data, error } = r; if(error) throw error; WD.all=data||[]; }
   catch(e){ WD.err=wdErr(e); if(!WD.all) WD.all=[]; }
   if(S.screen==="words") xr();
 }
@@ -4377,7 +4394,7 @@ function wdItem(w, mode){
     <div class="wdmean" dir="auto">= ${esc(w.meaning)}</div>
     ${w.example?`<p class="note wdex" dir="auto">“${esc(w.example)}”</p>`:""}
     ${fixed}${note}
-    <div style="margin-top:6px">${wdStatus(w)}</div>
+    <div class="wdstat">${wdStatus(w)}${mode!=="other"?wpDots(w.id):""}</div>
     ${check}</div>`;
 }
 function wdForm(d){
@@ -4407,6 +4424,7 @@ function wdSessionView(d, s){
     ${wdForm(d)}
     <h3 style="margin:18px 0 8px">📚 My words <span class="de">· Meine Wörter</span> (${mine.length})</h3>
     ${mine.length ? mine.map(w=>wdItem(w,"mine")).join("") : `<p class="note">No words yet. Add the first one above! · Noch keine Wörter.</p>`}
+    ${mine.length?`<button class="btn primary" onclick="wpOpen('${WD.id}')">🎯 Practise these words · Diese Wörter üben</button>`:""}
     ${canAsk?`<button class="btn secondary" onclick="wdAsk()">📨 Ask my partner to check (${unchecked}) · Partner fragen</button>`:""}
     ${others.length?`<h3 style="margin:22px 0 4px">🤝 Help your partners <span class="de">· Hilf deinen Partnern</span>${toCheck?` <span class="wdbadge">${toCheck} to check</span>`:""}</h3>
       <p class="note" style="margin:0 0 8px">Is it right? Tap ✓, or fix it so they practise the correct version. · Stimmt es? ✓ oder korrigieren.</p>
@@ -4418,7 +4436,9 @@ function wdAllView(){
     <p class="note">In a session you joined, tap “Save words I learned”. · In einer Session auf „Wörter speichern“ tippen.</p></div>`;
   const groups=[]; WD.all.forEach(w=>{ let g=groups.find(x=>x.id===w.activity_id); if(!g){ g={ id:w.activity_id, title:w.title, at:w.starts_at, list:[] }; groups.push(g); } g.list.push(w); });
   const ok=WD.all.filter(w=>w.status!=="unchecked").length;
-  return `<div class="card"><b>${WD.all.length}</b> word${WD.all.length===1?"":"s"} saved · <b>${ok}</b> checked by a partner</div>
+  const mast=WD.all.filter(w=>(WP.prog[w.id]||{}).mastered).length;
+  return `<div class="card"><b>${WD.all.length}</b> word${WD.all.length===1?"":"s"} saved · <b>${ok}</b> checked by a partner · <b>${mast}</b> ⭐ mastered</div>
+    <button class="btn primary" onclick="wpOpen(null)">🎯 Practise my words · Wörter üben</button>
     ${WD.err?`<div class="err">${esc(WD.err)}</div>`:""}
     ${groups.map(g=>`<p class="dayh">${esc(g.title||"Session")} · ${g.at?esc(fmtWhen(g.at)):""}</p>${g.list.map(w=>wdItem(w,"all")).join("")}`).join("")}`;
 }
@@ -4430,6 +4450,145 @@ VIEWS.words = function(){
     <h2 style="margin-bottom:2px">${esc(s.title||"Words I learned")}</h2>
     ${s.starts_at?`<p class="note" style="margin:0 0 12px">${fmtWhen(s.starts_at)}</p>`:""}
     ${!d ? (WD.err?`<div class="err">${esc(WD.err)}</div>`:`<p class="note center" style="margin-top:30px">Loading… · Lädt…</p>`) : wdSessionView(d, s)}`;
+};
+
+/* ===================== PRACTICE MY WORDS ===================== */
+/* Learning loop, step 2. A 5-question quiz built automatically from the student's own saved words.
+   Question types: meaning (word → meaning), reverse (meaning → word), fill-in-the-blank (from the example
+   sentence) and a flashcard fallback when there aren't enough words for multiple choice.
+   A word is mastered after 3 right answers in a row. Database: sql/words_practice.sql. */
+const WP = { scope:null, from:"all", words:null, prog:{}, qs:[], step:0, pick:-1, shown:false, res:[], done:null, busy:false, err:"" };
+const WP_N = 5, WP_MASTER = 3;
+async function wpProgLoad(){
+  try{ const { data, error } = await A.sb.rpc("pt_words_progress"); if(error) return WP.prog;
+    WP.prog={}; (data||[]).forEach(p=>{ WP.prog[p.id]=p; }); }catch(e){}
+  return WP.prog;
+}
+function wpDots(id){
+  const p=WP.prog[id]; if(!p) return `<span class="wpdots" aria-label="Not practised yet">${"○".repeat(WP_MASTER)}</span>`;
+  if(p.mastered) return `<span class="wdtag ok">⭐ Mastered · Gelernt</span>`;
+  const n=Math.min(p.streak,WP_MASTER);
+  return `<span class="wpdots" aria-label="${n} of ${WP_MASTER} right in a row">${"●".repeat(n)}${"○".repeat(WP_MASTER-n)}</span>`;
+}
+function wpShuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function wpUniq(list){ const seen=new Set(); return list.filter(x=>{ const k=String(x).trim().toLowerCase(); if(!k||seen.has(k)) return false; seen.add(k); return true; }); }
+function wpBlank(w){
+  if(!w.example) return null;
+  const i=w.example.toLowerCase().indexOf(String(w.word).toLowerCase()); if(i<0) return null;
+  return w.example.slice(0,i)+"_____"+w.example.slice(i+w.word.length);
+}
+// Pick the words that need practice most: never practised, just fixed, often wrong, not seen for a while
+function wpChoose(pool){
+  const now=Date.now();
+  const score=w=>{ const p=WP.prog[w.id];
+    if(!p) return w.status==="fixed" ? -30 : -20;
+    let s=p.streak*10 + (p.mastered?100:0) - Math.max(0,p.wrong-p.right)*3;
+    const days=p.last_seen?(now-new Date(p.last_seen).getTime())/86400000:30;
+    return s - Math.min(days,30);
+  };
+  const open=wpShuffle(pool.filter(w=>!(WP.prog[w.id]||{}).mastered)).sort((a,b)=>score(a)-score(b));
+  const done=wpShuffle(pool.filter(w=>(WP.prog[w.id]||{}).mastered));
+  return open.concat(done).slice(0,WP_N);
+}
+function wpBuild(chosen, all){
+  return wpShuffle(chosen).map(w=>{
+    const sameLang=wpUniq(all.filter(x=>x.id!==w.id && x.lang===w.lang && x.word.toLowerCase()!==w.word.toLowerCase()).map(x=>x.word));
+    const meanings=wpUniq(all.filter(x=>x.id!==w.id && x.meaning.toLowerCase()!==w.meaning.toLowerCase()).map(x=>x.meaning));
+    const blank=wpBlank(w);
+    const types=[];
+    if(meanings.length>=3) types.push("mean");
+    if(sameLang.length>=3) types.push("rev");
+    if(blank && sameLang.length>=3) types.push("blank");
+    const t=types.length ? types[Math.floor(Math.random()*types.length)] : "card";
+    if(t==="card") return { w, t };
+    const right = t==="mean" ? w.meaning : w.word;
+    const wrong = wpShuffle(t==="mean" ? meanings : sameLang).slice(0,3);
+    const o=wpShuffle([right].concat(wrong));
+    return { w, t, o, a:o.indexOf(right), blank };
+  });
+}
+async function wpOpen(scope){
+  Object.assign(WP,{ scope:scope||null, from:S.screen==="words"&&WD.id!=="all"?"session":"all", words:null, qs:[], step:0, pick:-1, shown:false, res:[], done:null, busy:false, err:"" });
+  go("practice");
+  try{
+    const [m]=await Promise.all([ A.sb.rpc("pt_words_mine"), wpProgLoad() ]);
+    if(m.error) throw m.error;
+    WP.words=m.data||[];
+  }catch(e){ WP.err=bErr(e); WP.words=[]; }
+  wpStart();
+}
+function wpStart(){
+  const all=WP.words||[], pool=WP.scope?all.filter(w=>w.activity_id===WP.scope):all;
+  Object.assign(WP,{ qs: pool.length?wpBuild(wpChoose(pool), all):[], step:0, pick:-1, shown:false, res:[], done:null, err:WP.err });
+  if(S.screen==="practice") xr();
+}
+function wpAnswer(k){
+  const q=WP.qs[WP.step]; if(!q || WP.shown) return;
+  WP.pick=k; WP.shown=true; WP.res[WP.step]=(k===q.a); xr();
+}
+function wpCard(ok){ WP.res[WP.step]=ok; wpNext(); }
+function wpReveal(){ WP.shown=true; xr(); }
+async function wpNext(){
+  if(WP.step<WP.qs.length-1){ WP.step++; WP.pick=-1; WP.shown=false; xr(); window.scrollTo(0,0); return; }
+  WP.busy=true; xr();
+  const results=WP.qs.map((q,i)=>({ id:q.w.id, ok:!!WP.res[i] }));
+  try{
+    const { data, error } = await A.sb.rpc("pt_words_practice_save",{ p_results:results }); if(error) throw error;
+    (data.progress||[]).forEach(p=>{ WP.prog[p.id]=p; });
+    WP.done={ right:results.filter(r=>r.ok).length, total:results.length, mastered:data.mastered_now||0 };
+  }catch(e){ WP.err=bErr(e); WP.done={ right:results.filter(r=>r.ok).length, total:results.length, mastered:0, unsaved:true }; }
+  WP.busy=false; xr(); window.scrollTo(0,0);
+}
+function wpBack(){
+  if(WP.from==="session" && WD.id && WD.id!=="all"){ go("words"); wdFetch(); return; }
+  wdAllOpen();
+}
+function wpQuestion(q){
+  const w=q.w, lang=wdLang(w.lang);
+  if(q.t==="card") return `<div class="card center">
+      <div class="qzn">${lang} · Do you remember? · Weißt du es noch?</div>
+      <div class="wpbig" dir="auto">${esc(w.word)}</div>
+      ${WP.shown ? `<div class="wpans" dir="auto">= ${esc(w.meaning)}</div>${w.example?`<p class="note wdex" dir="auto">“${esc(w.example)}”</p>`:""}
+        <div class="brow2"><button class="btn secondary" onclick="wpCard(false)">😅 Not yet · Noch nicht</button><button class="btn primary" onclick="wpCard(true)">✅ I knew it · Gewusst</button></div>`
+      : `<button class="btn primary" onclick="wpReveal()">👀 Show answer · Lösung zeigen</button>`}
+    </div>`;
+  const prompt = q.t==="mean" ? `What does <b dir="auto">${esc(w.word)}</b> mean? · Was bedeutet das?`
+    : q.t==="rev" ? `How do you say <b dir="auto">${esc(w.meaning)}</b>? · Wie sagt man das?`
+    : `Fill the gap · Lücke füllen:<br><span class="wpgap" dir="auto">${esc(q.blank)}</span><br><span class="note">(${esc(w.meaning)})</span>`;
+  const right=WP.shown && WP.pick===q.a;
+  return `<div class="card"><div class="qzn">${lang}</div>
+      <h3 style="margin:4px 0 10px;font-weight:700">${prompt}</h3>
+      ${q.o.map((o,k)=>{ const cls = !WP.shown ? "" : k===q.a ? "right" : k===WP.pick ? "wrong" : "dim";
+        return `<button class="qzpick wpo ${cls}" dir="auto" ${WP.shown?"disabled":""} onclick="wpAnswer(${k})">${WP.shown&&k===q.a?"✅ ":WP.shown&&k===WP.pick?"❌ ":""}${esc(o)}</button>`; }).join("")}
+      ${WP.shown?`<div class="wpfb ${right?"ok":"no"}">${right?"🎉 Right! · Richtig!":`Not quite · Nicht ganz: <b dir="auto">${esc(w.word)}</b> = ${esc(w.meaning)}`}</div>`:""}
+    </div>
+    ${WP.shown?`<button class="btn primary" ${WP.busy?"disabled":""} onclick="wpNext()">${WP.step<WP.qs.length-1?"Next · Weiter →":WP.busy?"Saving… · Speichert…":"🏁 See results · Ergebnis"}</button>`:""}`;
+}
+function wpResults(){
+  const d=WP.done, pct=d.total?d.right/d.total:0;
+  const emo = pct===1?"🏆":pct>=0.6?"🎉":"💪";
+  return `<div class="card center"><div style="font-size:48px">${emo}</div>
+      <h2 style="margin:4px 0">${d.right} of ${d.total} right · ${d.right} von ${d.total} richtig</h2>
+      <p class="note" style="margin:0">${pct===1?"Perfect! · Perfekt!":pct>=0.6?"Nice work! · Gut gemacht!":"Every try helps you remember. · Jeder Versuch hilft."}</p>
+      ${d.mastered?`<p class="wpmast">⭐ ${d.mastered} new word${d.mastered===1?"":"s"} mastered! · Neu gelernt!</p>`:""}
+      ${d.unsaved?`<div class="err">Couldn't save your progress this time · Nicht gespeichert</div>`:""}</div>
+    <div class="card">${WP.qs.map((q,i)=>`<div class="wprow"><span>${WP.res[i]?"✅":"❌"}</span>
+        <span style="flex:1"><b dir="auto">${esc(q.w.word)}</b> <span class="note" dir="auto">= ${esc(q.w.meaning)}</span></span>${wpDots(q.w.id)}</div>`).join("")}
+      <p class="note" style="margin:8px 0 0">${WP_MASTER} right in a row = ⭐ mastered · ${WP_MASTER}× richtig in Folge = gelernt</p></div>
+    <button class="btn primary" onclick="wpStart()">🔁 Practise again · Nochmal üben</button>
+    <button class="btn ghost" onclick="wpBack()">Done · Fertig</button>`;
+}
+VIEWS.practice = function(){
+  const top=`<div class="topline"><button class="chip" onclick="wpBack()">← ${WP.from==="session"?"Session words":"My words"}</button><span>🎯 Practice</span></div>`;
+  if(WP.words===null) return `${top}<p class="note center" style="margin-top:40px">Building your quiz… · Quiz wird erstellt…</p>`;
+  if(!WP.qs.length) return `${top}<div class="card center"><div style="font-size:40px">📚</div><h3>No words to practise yet · Noch keine Wörter</h3>
+      <p class="note">Save words in a session first, then come back here. · Erst Wörter in einer Session speichern.</p>
+      ${WP.err?`<div class="err">${esc(WP.err)}</div>`:""}</div>`;
+  if(WP.done) return `${top}${wpResults()}`;
+  const q=WP.qs[WP.step];
+  return `${top}
+    <div class="qzdots" aria-label="Question ${WP.step+1} of ${WP.qs.length}">${WP.qs.map((_,k)=>`<span class="${k===WP.step?"cur":""} ${k<WP.step?"done":""}"></span>`).join("")}</div>
+    ${wpQuestion(q)}`;
 };
 
 /* ===================== LANGUAGE LOUNGES ===================== */
