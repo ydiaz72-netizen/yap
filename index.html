@@ -5067,10 +5067,10 @@ function ecRecHtml(c, mine){
     <button class="ecmic" onclick="ecStart('${c.id}',${c.max_sec||15})" aria-label="Record">🎙️</button><span class="ecmeta">Up to ${c.max_sec||15} s</span></div>`;
 }
 async function ecStart(cid, maxSec){
-  if(!navigator.mediaDevices||!window.MediaRecorder){ bToast("Recording isn't supported in this browser · Aufnahme nicht möglich"); return; }
+  if(!navigator.mediaDevices||!window.MediaRecorder){ EC.err="Recording isn't supported in this browser. Try Chrome or Safari (iOS 14.5+) · Aufnahme nicht möglich"; xr(); return; }
   ecDiscard(true);
   let stream; try{ stream=await navigator.mediaDevices.getUserMedia({ audio:true }); }
-  catch(e){ bToast("Please allow the microphone to record · Bitte Mikrofon erlauben"); return; }
+  catch(e){ EC.err="Your browser blocked the microphone. Allow it (tap the 🔒 or aA next to the address), then try again · Mikrofon erlauben"; bToast("Please allow the microphone to record · Bitte Mikrofon erlauben"); xr(); return; }
   const mime=ecMime(); let mr; try{ mr=mime?new MediaRecorder(stream,{ mimeType:mime }):new MediaRecorder(stream); }catch(e){ mr=new MediaRecorder(stream); }
   const chunks=[]; mr.ondataavailable=ev=>{ if(ev.data&&ev.data.size) chunks.push(ev.data); };
   mr.onstop=()=>{ stream.getTracks().forEach(t=>t.stop()); const r=EC.rec; EC.rec=null; if(!r||r.cancel){ xr(); return; }
@@ -5156,13 +5156,14 @@ function ecFormHtml(l){
     <div class="row" style="gap:8px;flex-wrap:wrap">${[10,15,20,30].map(s=>`<button class="chip ${f.max===s?"on":""}" onclick="EC.form.max=${s};ecDiscard(true);xr()">${s} s</button>`).join("")}</div>
     ${EC.err?`<div class="err">${esc(EC.err)}</div>`:""}
     <div class="row" style="gap:8px;margin-top:14px"><button class="btn secondary" onclick="ecStopRec();ecDiscard(true);EC.form=null;EC.err='';xr()">Cancel · Abbrechen</button>
-      <button class="btn primary" ${EC.busy||!EC.blob?"disabled":""} onclick="ecCreate()">${EC.busy?"Starting…":"🚀 Start challenge · Starten"}</button></div>
+      <button class="btn primary" ${EC.busy?"disabled":""} style="${EC.blob?"":"opacity:.6"}" onclick="ecCreate()">${EC.busy?"Starting…":"🚀 Start challenge · Starten"}</button></div>
+    ${!EC.blob&&!EC.rec?`<p class="note" style="margin:8px 0 0;color:var(--coral);font-weight:700">🎙️ Step 1: tap the mic above and record your phrase. · Erst aufnehmen.</p>`:""}
     <p class="note" style="margin:10px 0 0">One live challenge per lounge, up to 3 in the queue. Likes stay hidden until the end. · Likes bleiben bis zum Ende verborgen.</p></div>`;
 }
 async function ecCreate(){
   const f=EC.form; if(!f||EC.busy) return;
   if(!f.phrase.trim()){ EC.err=ecErr("echo_phrase"); xr(); return; }
-  if(!EC.blob){ EC.err="Record the phrase first · Erst aufnehmen"; xr(); return; }
+  if(!EC.blob){ EC.err="Record the phrase first: tap the 🎙️ mic, say it, then tap ■ to stop · Erst aufnehmen"; xr(); const m=document.querySelector(".ecmic"); if(m) m.scrollIntoView({behavior:"smooth",block:"center"}); return; }
   const st=new Date(f.start); if(isNaN(st)){ EC.err=ecErr("echo_window"); xr(); return; }
   const start=st<new Date()?new Date():st, end=new Date(start.getTime()+f.hours*3600000);
   EC.busy=true; EC.err=""; xr(); let path=null;
