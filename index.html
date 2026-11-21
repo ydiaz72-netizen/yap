@@ -4980,13 +4980,13 @@ function ecCard(l){
   let body="";
   if(c){
     const live=c.state==="live";
-    body=`<div class="ectop"><b>🎙️ Echo Challenge</b><span class="ecmeta">${live?`⏳ ends in ${esc(ecLeft(c.ends_at))}`:`🕒 starts ${esc(fmtWhen(c.starts_at))}`}</span></div>
+    body=`<div class="ectop"><b>🎙️ Echo Challenge <button class="linkbtn" style="font-size:13px;margin-left:4px" onclick="ecHow()">ℹ️ How it works</button></b><span class="ecmeta">${live?`⏳ ends in ${esc(ecLeft(c.ends_at))}`:`🕒 starts ${esc(fmtWhen(c.starts_at))}`}</span></div>
       <div style="display:flex;align-items:center;gap:10px">${live?ecPlayBtn(c.audio_path,"the phrase"):""}
         <div style="min-width:0"><div class="ecphrase" lang="${esc(c.language)}" dir="auto">${luFlag(c.language)} ${esc(c.phrase)}</div>
         ${c.meaning?`<div class="ecmean">${esc(c.meaning)}</div>`:""}<div class="ecmeta">by ${esc(c.host_name)}${live?` · 🎧 ${c.entries_count} echoes · 👏 ${c.likes_given} likes given`:""}</div></div></div>
       <button class="btn ${live?"primary":"secondary"}" style="margin-top:10px" onclick="ecOpen()">${live?((c.entries||[]).some(e=>e.mine)?"🎧 Listen & vote · Anhören":"🎙️ Record my echo · Mitmachen"):"See the challenge · Ansehen"}</button>`;
   } else {
-    body=`<div class="ectop"><b>🎙️ Echo Challenge</b></div>
+    body=`<div class="ectop"><b>🎙️ Echo Challenge</b><button class="linkbtn" style="font-size:13px" onclick="ecHow()">ℹ️ How it works</button></div>
       <p class="note" style="margin:4px 0 8px">A native speaker records a phrase, everyone echoes it, the best echo wins 🏆 · Nachsprechen und gewinnen</p>
       ${canAny&&!EC.data.mine_active?`<button class="btn primary" onclick="ecNew()">＋ Start a challenge · Challenge starten</button>`
         :`<p class="note" style="margin:0">Native or fluent speakers can start one. · Muttersprachler können eine starten.</p>`}`;
@@ -4994,11 +4994,30 @@ function ecCard(l){
   const lastLine=last&&!c?`<button class="linkbtn" style="margin-top:8px" onclick="ecOpen()">🏆 Last challenge: “${esc(last.phrase)}”: see the results</button>`:"";
   return `<div class="eccard">${body}${lastLine}</div>`;
 }
-function ecOpen(){ go("echo"); if(!EC.data) ecLoad(); }
+function ecHow(){
+  try{ localStorage.setItem("pt_ec_how","1"); }catch(e){}
+  const c=EC.data&&EC.data.current, sec=(c&&c.max_sec)||15, short=c&&c.short;
+  const old=document.getElementById("ecHow"); if(old) old.remove();
+  const box=document.createElement("div"); box.className="sheet-bg"; box.id="ecHow";
+  const step=(n,e,en,de)=>`<div style="display:flex;gap:12px;align-items:flex-start;margin:0 0 14px"><span style="flex:none;width:30px;height:30px;border-radius:50%;background:var(--coral);color:#fff;display:grid;place-items:center;font-weight:800">${n}</span>
+    <div><b>${e} ${en}</b><br><span class="de" style="color:var(--muted)">${de}</span></div></div>`;
+  box.innerHTML=`<div class="sheet" role="dialog" aria-label="How Echo Challenge works"><h3 style="margin:0 0 4px">🎙️ How it works · So funktioniert's</h3>
+    <p class="note" style="margin:0 0 14px">A native speaker says a phrase. You repeat it. The best echo wins! · Nachsprechen und gewinnen!</p>
+    ${step(1,"▶","Listen to the phrase","Hör dir den Satz an")}
+    ${step(2,"🎙️",`Record your echo (up to ${sec} s). Not happy? Record again: the new one replaces the old.`,`Nimm dich auf (bis ${sec} Sek.). Neu aufnehmen ersetzt die alte Aufnahme.`)}
+    ${step(3,"👏","Listen to the others and give your 3 likes. Likes stay secret until the end.","Hör die anderen an und vergib 3 Likes. Sie bleiben bis zum Ende geheim.")}
+    ${step(4,"🏆","When time is up: most likes = 🏆 People's choice, and the host picks a ⭐ favourite.","Am Ende: meiste Likes = 🏆 Publikumsliebling, der Host wählt einen ⭐ Favoriten.")}
+    <div class="note" style="background:var(--sun-soft);border-radius:12px;padding:10px 12px;margin:0 0 12px">💡 ${short?"New here? In this challenge you can vote right away once your name + 18+ are in your profile.":"New here? You can record right away (name + 18+ in your profile). Voting opens 24 h after you join."}
+      <br><span class="de">${short?"Neu? Hier darfst du sofort abstimmen (Name + 18+ im Profil).":"Neu? Aufnehmen geht sofort, abstimmen nach 24 Std."}</span></div>
+    <button class="btn primary" onclick="document.getElementById('ecHow').remove()">Got it! · Alles klar!</button></div>`;
+  box.addEventListener("click",e=>{ if(e.target===box) box.remove(); });
+  document.body.appendChild(box);
+}
+function ecOpen(){ go("echo"); if(!EC.data) ecLoad(); let seen=false; try{ seen=!!localStorage.getItem("pt_ec_how"); }catch(e){} if(!seen) setTimeout(ecHow,300); }
 /* --- the full challenge screen --- */
 VIEWS.echo = function(){
   const l=luRoom(); const d=EC.data;
-  const back=`<div class="topline"><button class="chip" onclick="ecStopRec();go('lounge')">← ${esc(luName(l))}</button><span>🎙️ Echo Challenge</span></div>`;
+  const back=`<div class="topline"><button class="chip" onclick="ecStopRec();go('lounge')">← ${esc(luName(l))}</button><button class="chip" onclick="ecHow()">ℹ️ How it works</button></div>`;
   if(!d) return back+`<p class="note center">${EC.err?esc(EC.err):"Loading… · Lädt…"}</p>`;
   if(EC.form) return back+ecFormHtml(l);
   const c=d.current, last=d.last;
