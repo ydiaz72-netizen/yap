@@ -4932,7 +4932,7 @@ function ecErr(e){
   if(/echo_closed/.test(m)) return "This challenge is closed · Diese Challenge ist geschlossen";
   if(/echo_own/.test(m)) return "That's your own 🙂 · Das ist deins";
   if(/echo_length/.test(m)) return "That recording is too long or too short · Aufnahme zu lang oder zu kurz";
-  if(/echo_too_new/.test(m)) return "New accounts can vote after 24 hours · Neue Konten können nach 24 Std. abstimmen";
+  if(/echo_too_new/.test(m)) return "New accounts can vote after 24 hours (in 1-day challenges: once your name + 18+ are in your profile) · Neue Konten: nach 24 Std.";
   if(/echo_no_likes_left/.test(m)) return "You've used your 3 likes. Take one back to give it to someone else · Alle 3 Likes vergeben";
   if(/echo_pick_time/.test(m)) return "You can pick your favourite in the 7 days after the end · Auswahl bis 7 Tage nach Ende";
   return luErr(e);
@@ -5029,7 +5029,7 @@ function ecChallengeHtml(c, isCurrent){
   const others=(c.entries||[]);
   if(!up){
     h+=`<div class="card"><div class="ectop"><h3 style="margin:0">${ended?"Results · Ergebnis":"Echoes · Aufnahmen"}</h3>
-      ${live&&!host?`<span class="ecmeta">${c.can_vote?`👏 ${left} of 3 likes left`:"Voting opens 24 h after you joined"}</span>`:""}</div>
+      ${live&&!host?`<span class="ecmeta">${c.can_vote?`👏 ${left} of 3 likes left`:(c.short?"Add your name + 18+ in your profile to vote":"Voting opens 24 h after you joined")}</span>`:""}</div>
       ${others.length?others.map(e=>ecEntryHtml(c,e,host,live,ended,left)).join(""):`<p class="note" style="margin:6px 0 0">No echoes yet. Be the first! · Noch keine Aufnahmen.</p>`}</div>`;
   }
   if(host && (up||live)) h+=`<button class="linkbtn" style="color:var(--muted)" onclick="ecRemove('${c.id}')">Cancel this challenge · Challenge absagen</button>`;
@@ -5158,7 +5158,7 @@ function ecFormHtml(l){
     <div class="row" style="gap:8px;margin-top:14px"><button class="btn secondary" onclick="ecStopRec();ecDiscard(true);EC.form=null;EC.err='';xr()">Cancel · Abbrechen</button>
       <button class="btn primary" ${EC.busy?"disabled":""} style="${EC.blob?"":"opacity:.6"}" onclick="ecCreate()">${EC.busy?"Starting…":"🚀 Start challenge · Starten"}</button></div>
     ${!EC.blob&&!EC.rec?`<p class="note" style="margin:8px 0 0;color:var(--coral);font-weight:700">🎙️ Step 1: tap the mic above and record your phrase. · Erst aufnehmen.</p>`:""}
-    <p class="note" style="margin:10px 0 0">One live challenge per lounge, up to 3 in the queue. Likes stay hidden until the end. · Likes bleiben bis zum Ende verborgen.</p></div>`;
+    <p class="note" style="margin:10px 0 0">One live challenge per lounge, up to 3 in the queue. Likes stay hidden until the end. In challenges of 1 day or less, new members can vote right away. · Bei 1-Tages-Challenges dürfen neue Mitglieder sofort abstimmen.</p></div>`;
 }
 async function ecCreate(){
   const f=EC.form; if(!f||EC.busy) return;
