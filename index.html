@@ -191,6 +191,29 @@
   .dayh{margin:16px 0 8px;font-size:15px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
   .dayh:first-child{margin-top:4px}
   .pvbox{background:var(--plum-soft);border-radius:14px;padding:10px 12px;margin-top:6px}
+
+  /* ---- Echo Challenge ---- */
+  .eccard{border:1.5px solid #F7C2B3;background:linear-gradient(135deg,#FFF4EF,#FFFFFF);border-radius:18px;padding:12px 14px;margin:8px 0}
+  .eccard .ectop{display:flex;align-items:center;gap:8px;justify-content:space-between;flex-wrap:wrap}
+  .ecphrase{font-size:19px;font-weight:800;line-height:1.3;margin:6px 0 2px}
+  .ecmean{color:var(--muted);font-size:14px}
+  .ecmeta{font-size:13px;color:var(--muted);font-weight:600}
+  .ecplay{flex:none;width:40px;height:40px;border-radius:50%;border:none;background:var(--coral);color:#fff;font-size:16px;cursor:pointer;display:grid;place-items:center}
+  .ecplay.on{background:var(--ink)}
+  .ecrow{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+  .ecrow:first-child{border-top:none}
+  .ecrow .nm{flex:1;min-width:0;font-weight:700}
+  .ecrow .nm small{display:block;font-weight:600;color:var(--muted);font-size:12px}
+  .eclike{flex:none;border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;font:700 14px 'Plus Jakarta Sans',sans-serif;cursor:pointer}
+  .eclike.on{background:var(--sun-soft);border-color:var(--sun)}
+  .eclike:disabled{opacity:.5;cursor:default}
+  .ecrec{display:flex;flex-direction:column;align-items:center;gap:10px;padding:8px 0}
+  .ecmic{width:84px;height:84px;border-radius:50%;border:none;background:var(--coral);color:#fff;font-size:34px;cursor:pointer;box-shadow:0 8px 20px rgba(242,92,59,.35)}
+  .ecmic.rec{background:#C2410C;animation:ecpulse 1s infinite}
+  @keyframes ecpulse{0%{box-shadow:0 0 0 0 rgba(242,92,59,.5)}100%{box-shadow:0 0 0 18px rgba(242,92,59,0)}}
+  .ecbar{width:100%;height:8px;border-radius:999px;background:#F1EEE8;overflow:hidden}
+  .ecbar i{display:block;height:100%;background:var(--coral)}
+  .ecbadge{display:inline-block;border-radius:999px;padding:2px 8px;font-size:12px;font-weight:800;margin-left:4px}
   /* ---- Pop quiz ---- */
   .qzb.live{animation:qzpulse 1.6s ease-in-out infinite}
   @keyframes qzpulse{0%,100%{box-shadow:0 0 0 0 rgba(42,140,130,.45)}50%{box-shadow:0 0 0 8px rgba(42,140,130,0)}}
@@ -4809,6 +4832,7 @@ async function luEnter(id){
   if(LU.canPost===null) A.sb.rpc("pt_lounge_can_post").then(r=>{ LU.canPost=!!r.data; if(S.screen==="lounge") xr(); },()=>{});
   A.sb.rpc("pt_is_admin").then(r=>{ LU.admin=!!r.data; },()=>{});
   lpStart(); lpTrack();
+  if(EC.lounge!==id){ EC.data=null; EC.form=null; } EC.lounge=id; ecLoad();
   await Promise.all([luFetch(true), luFreeLoad()]);
   luStart();
 }
@@ -4891,6 +4915,270 @@ function luQuestion(l){
     ${a?`<div lang="${l.lang_a}" dir="auto" class="luql"><b>${luFlag(l.lang_a)} ${esc(a)}</b></div>${q[l.lang_a+"R"]?`<div class="luroman">${esc(q[l.lang_a+"R"])}</div>`:""}`:""}${b?`<div lang="${l.lang_b}" dir="auto" class="luql"><b>${luFlag(l.lang_b)} ${esc(b)}</b></div>${q[l.lang_b+"R"]?`<div class="luroman">${esc(q[l.lang_b+"R"])}</div>`:""}`:""}
     ${!a&&!b?`<div><b>🇬🇧 ${esc(q.en)}</b></div>`:""}</div>`;
 }
+
+/* ===================== ECHO CHALLENGE ===================== */
+/* Voice challenges in the lounges. Database: sql/echo_challenge.sql (pt_echo_* functions, bucket "echo"). */
+const EC={ lounge:null, data:null, loading:false, err:"", urls:{}, playing:null, audio:null, rec:null, blob:null, blobUrl:"", recMs:0,
+  recFor:null, busy:false, form:null, tick:null, cleaned:false };
+function ecErr(e){
+  const m=String((e&&e.message)||e||"");
+  if(/echo_cannot_host/.test(m)) return "To start a challenge you need this language as native or fluent in your profile, your name + 18+, and an account older than 7 days · Nur Muttersprachler/fließend, Konto älter als 7 Tage";
+  if(/echo_one_each/.test(m)) return "You already have a challenge running or waiting. One at a time · Du hast schon eine Challenge";
+  if(/echo_busy/.test(m)){ const t=(m.match(/echo_busy: (.+)$/)||[])[1]; return `Another challenge runs then${t?` (until ${fmtWhen(t)})`:""}. Pick a later start · Wähle einen späteren Start`; }
+  if(/echo_queue_full/.test(m)) return "3 challenges are already waiting in this lounge. Try again later · Warteschlange voll";
+  if(/echo_window/.test(m)) return "Pick a start within 14 days and a length between 1 hour and 7 days · Start in 14 Tagen, 1 Std. bis 7 Tage";
+  if(/echo_phrase/.test(m)) return "Write the word or sentence (up to 200 characters) · Wort oder Satz eingeben";
+  if(/echo_audio/.test(m)) return "The recording didn't upload. Please try again · Aufnahme fehlgeschlagen";
+  if(/echo_closed/.test(m)) return "This challenge is closed · Diese Challenge ist geschlossen";
+  if(/echo_own/.test(m)) return "That's your own 🙂 · Das ist deins";
+  if(/echo_length/.test(m)) return "That recording is too long or too short · Aufnahme zu lang oder zu kurz";
+  if(/echo_too_new/.test(m)) return "New accounts can vote after 24 hours · Neue Konten können nach 24 Std. abstimmen";
+  if(/echo_no_likes_left/.test(m)) return "You've used your 3 likes. Take one back to give it to someone else · Alle 3 Likes vergeben";
+  if(/echo_pick_time/.test(m)) return "You can pick your favourite in the 7 days after the end · Auswahl bis 7 Tage nach Ende";
+  return luErr(e);
+}
+function ecLeft(iso){
+  const ms=new Date(iso).getTime()-Date.now(); if(ms<=0) return "0 min";
+  const m=Math.round(ms/60000); if(m<60) return `${m} min`;
+  const h=Math.floor(m/60); if(h<48) return `${h} h ${m%60?`${m%60} min`:""}`.trim();
+  return `${Math.round(h/24)} days`;
+}
+async function ecLoad(){
+  if(!EC.lounge||!A.sb) return; EC.loading=true;
+  try{ const { data, error } = await A.sb.rpc("pt_echo_lounge",{ p_lounge:EC.lounge }); if(error) throw error; EC.data=data; EC.err=""; await ecSign(); }
+  catch(e){ EC.err=ecErr(e); }
+  EC.loading=false;
+  if(S.screen==="lounge"||S.screen==="echo") xr();
+  if(!EC.cleaned){ EC.cleaned=true; ecCleanup(); }
+}
+async function ecCleanup(){ // quietly remove voice files nobody uses any more
+  try{ const r=await A.sb.rpc("pt_echo_cleanup_list"); const l=(r.data||[]).slice(0,50); if(l.length) await A.sb.storage.from("echo").remove(l); }catch(e){}
+}
+function ecPaths(){
+  const p=[]; const add=c=>{ if(!c) return; p.push(c.audio_path); (c.entries||[]).forEach(e=>p.push(e.audio_path)); };
+  if(EC.data){ add(EC.data.current); add(EC.data.last); } return p.filter(x=>x&&!EC.urls[x]);
+}
+async function ecSign(){
+  const p=ecPaths(); if(!p.length) return;
+  try{ const r=await A.sb.storage.from("echo").createSignedUrls(p, 3600); (r.data||[]).forEach(x=>{ if(x.signedUrl) EC.urls[x.path]=x.signedUrl; }); }catch(e){}
+}
+function ecPlay(path){
+  if(EC.audio){ EC.audio.pause(); }
+  if(EC.playing===path){ EC.playing=null; xr(); return; }
+  const url=path==="__mine"?EC.blobUrl:EC.urls[path]; if(!url){ bToast("Loading… try again in a second · Lädt…"); ecSign(); return; }
+  EC.audio=new Audio(url); EC.playing=path; EC.audio.onended=()=>{ EC.playing=null; xr(); };
+  EC.audio.play().catch(()=>{ EC.playing=null; xr(); }); xr();
+}
+function ecPlayBtn(path, label){
+  const on=EC.playing===path;
+  return `<button class="ecplay ${on?"on":""}" onclick="ecPlay('${esc(path)}')" aria-label="${on?"Stop":"Play"} ${esc(label||"recording")}">${on?"■":"▶"}</button>`;
+}
+/* --- the card inside the lounge --- */
+function ecCard(l){
+  if(!EC.data||EC.lounge!==l.id) return "";
+  const c=EC.data.current, last=EC.data.last, canAny=Object.values(EC.data.can_host||{}).some(Boolean);
+  let body="";
+  if(c){
+    const live=c.state==="live";
+    body=`<div class="ectop"><b>🎙️ Echo Challenge</b><span class="ecmeta">${live?`⏳ ends in ${esc(ecLeft(c.ends_at))}`:`🕒 starts ${esc(fmtWhen(c.starts_at))}`}</span></div>
+      <div style="display:flex;align-items:center;gap:10px">${live?ecPlayBtn(c.audio_path,"the phrase"):""}
+        <div style="min-width:0"><div class="ecphrase" lang="${esc(c.language)}" dir="auto">${luFlag(c.language)} ${esc(c.phrase)}</div>
+        ${c.meaning?`<div class="ecmean">${esc(c.meaning)}</div>`:""}<div class="ecmeta">by ${esc(c.host_name)}${live?` · 🎧 ${c.entries_count} echoes · 👏 ${c.likes_given} likes given`:""}</div></div></div>
+      <button class="btn ${live?"primary":"secondary"}" style="margin-top:10px" onclick="ecOpen()">${live?((c.entries||[]).some(e=>e.mine)?"🎧 Listen & vote · Anhören":"🎙️ Record my echo · Mitmachen"):"See the challenge · Ansehen"}</button>`;
+  } else {
+    body=`<div class="ectop"><b>🎙️ Echo Challenge</b></div>
+      <p class="note" style="margin:4px 0 8px">A native speaker records a phrase, everyone echoes it, the best echo wins 🏆 · Nachsprechen und gewinnen</p>
+      ${canAny&&!EC.data.mine_active?`<button class="btn primary" onclick="ecNew()">＋ Start a challenge · Challenge starten</button>`
+        :`<p class="note" style="margin:0">Native or fluent speakers can start one. · Muttersprachler können eine starten.</p>`}`;
+  }
+  const lastLine=last&&!c?`<button class="linkbtn" style="margin-top:8px" onclick="ecOpen()">🏆 Last challenge: “${esc(last.phrase)}”: see the results</button>`:"";
+  return `<div class="eccard">${body}${lastLine}</div>`;
+}
+function ecOpen(){ go("echo"); if(!EC.data) ecLoad(); }
+/* --- the full challenge screen --- */
+VIEWS.echo = function(){
+  const l=luRoom(); const d=EC.data;
+  const back=`<div class="topline"><button class="chip" onclick="ecStopRec();go('lounge')">← ${esc(luName(l))}</button><span>🎙️ Echo Challenge</span></div>`;
+  if(!d) return back+`<p class="note center">${EC.err?esc(EC.err):"Loading… · Lädt…"}</p>`;
+  if(EC.form) return back+ecFormHtml(l);
+  const c=d.current, last=d.last;
+  let h=back+(EC.err?`<div class="err">${esc(EC.err)}</div>`:"");
+  if(c) h+=ecChallengeHtml(c, true);
+  else h+=`<div class="card"><h3 style="margin:0 0 4px">No challenge right now · Gerade keine Challenge</h3>
+    ${Object.values(d.can_host||{}).some(Boolean)&&!d.mine_active?`<button class="btn primary" onclick="ecNew()">＋ Start a challenge · Challenge starten</button>`:`<p class="note" style="margin:0">Native or fluent speakers can start one. · Muttersprachler können eine starten.</p>`}</div>`;
+  if((d.queue||[]).length) h+=`<div class="card"><h3 style="margin:0 0 6px">⏭️ Next up · Als Nächstes</h3>${d.queue.map(q=>`<div class="ecrow"><div class="nm">${luFlag(q.language)} ${esc(q.phrase)}<small>${esc(q.host_name)} · starts ${esc(fmtWhen(q.starts_at))}</small></div></div>`).join("")}</div>`;
+  if(c&&Object.values(d.can_host||{}).some(Boolean)&&!d.mine_active&&(d.queue||[]).length<3) h+=`<button class="btn secondary" style="margin-top:6px" onclick="ecNew()">＋ Queue the next challenge · Nächste Challenge planen</button>`;
+  if(last) h+=`<h3 style="margin:18px 0 6px">🏆 Last challenge · Letzte Challenge</h3>`+ecChallengeHtml(last, false);
+  h+=`<p class="note" style="margin-top:14px">🔒 Recordings are only for PonteTalk members and are deleted 14 days after a challenge ends. · Aufnahmen werden 14 Tage nach Ende gelöscht.</p>`;
+  return h;
+};
+function ecChallengeHtml(c, isCurrent){
+  const me=A.user&&A.user.id, host=c.host_id===me, live=c.state==="live", ended=c.state==="ended", up=c.state==="upcoming";
+  const mine=(c.entries||[]).find(e=>e.mine), left=3-(c.my_likes||0);
+  let h=`<div class="card">
+    <div class="ectop"><span class="ecmeta">${luFlag(c.language)} by ${esc(c.host_name)}</span>
+      <span class="ecmeta">${live?`⏳ ends in ${esc(ecLeft(c.ends_at))}`:up?`🕒 starts ${esc(fmtWhen(c.starts_at))}`:`✅ ended ${esc(fmtWhen(c.ends_at))}`}</span></div>
+    <div style="display:flex;align-items:center;gap:12px;margin-top:6px">${up?"":ecPlayBtn(c.audio_path,"the phrase")}
+      <div style="min-width:0"><div class="ecphrase" lang="${esc(c.language)}" dir="auto" style="font-size:22px">${esc(c.phrase)}</div>${c.meaning?`<div class="ecmean">${esc(c.meaning)}</div>`:""}</div></div>
+    <div class="ecmeta" style="margin-top:8px">🎧 ${c.entries_count} echoes · 👏 ${c.likes_given} likes given${live?" · likes stay hidden until the end":""}</div>`;
+  if(live && !host && isCurrent){
+    h+=`<div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--line)">${ecRecHtml(c, mine)}</div>`;
+  }
+  if(host && live) h+=`<p class="note" style="margin:10px 0 0">This is your challenge 🎙️ You can listen, but not vote or enter. · Deine Challenge.</p>`;
+  h+=`</div>`;
+  const others=(c.entries||[]);
+  if(!up){
+    h+=`<div class="card"><div class="ectop"><h3 style="margin:0">${ended?"Results · Ergebnis":"Echoes · Aufnahmen"}</h3>
+      ${live&&!host?`<span class="ecmeta">${c.can_vote?`👏 ${left} of 3 likes left`:"Voting opens 24 h after you joined"}</span>`:""}</div>
+      ${others.length?others.map(e=>ecEntryHtml(c,e,host,live,ended,left)).join(""):`<p class="note" style="margin:6px 0 0">No echoes yet. Be the first! · Noch keine Aufnahmen.</p>`}</div>`;
+  }
+  if(host && (up||live)) h+=`<button class="linkbtn" style="color:var(--muted)" onclick="ecRemove('${c.id}')">Cancel this challenge · Challenge absagen</button>`;
+  else if(!host) h+=`<button class="linkbtn" style="color:var(--muted)" onclick="ecReport('${c.id}',null)">🚩 Report this challenge · Melden</button>`;
+  return h;
+}
+function ecEntryHtml(c,e,host,live,ended,left){
+  const badges=`${e.people_choice?`<span class="ecbadge" style="background:var(--sun-soft)">🏆 People's choice</span>`:""}${e.host_pick?`<span class="ecbadge" style="background:var(--teal-soft)">⭐ Host's pick</span>`:""}`;
+  let act="";
+  if(live && !e.mine && !host) act=`<button class="eclike ${e.liked?"on":""}" ${(!c.can_vote||(!e.liked&&left<=0))?"disabled":""} onclick="ecLike('${e.id}',${!e.liked})" aria-label="${e.liked?"Take back like":"Like"}">👏${e.liked?" Liked":""}</button>`;
+  if(ended) act=`<span class="ecmeta" style="flex:none">👏 ${e.likes||0}</span>`+(host&&!c.host_pick?`<button class="eclike" onclick="ecPick('${e.id}')">⭐ Pick</button>`:"");
+  const tools=e.mine?`<button class="cx" title="Delete my echo · Löschen" aria-label="Delete my echo" onclick="ecDelEntry('${e.id}')">✕</button>`
+    :`<button class="cx" title="Report · Melden" aria-label="Report this echo" onclick="ecReport(null,'${e.id}')">🚩</button>`;
+  return `<div class="ecrow">${ecPlayBtn(e.audio_path, e.name)}<div class="nm">${esc(e.name)}${e.mine?" (you)":""}${badges}<small>${(e.duration_ms/1000).toFixed(1)} s</small></div>${act}${tools}</div>`;
+}
+/* --- recording (works with iPhone Safari = mp4/aac and Android/desktop = webm/opus) --- */
+function ecMime(){
+  const opts=["audio/webm;codecs=opus","audio/mp4","audio/webm","audio/ogg;codecs=opus"];
+  try{ for(const o of opts) if(window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(o)) return o; }catch(e){}
+  return "";
+}
+function ecRecHtml(c, mine){
+  const r=EC.rec, maxMs=(c.max_sec||15)*1000;
+  if(r && EC.recFor===c.id){
+    const pct=Math.min(100,(Date.now()-r.t0)/maxMs*100);
+    return `<div class="ecrec"><button class="ecmic rec" onclick="ecStop()" aria-label="Stop recording">■</button>
+      <div class="ecbar"><i style="width:${pct}%"></i></div><span class="ecmeta">Recording… max ${c.max_sec} s · Aufnahme läuft</span></div>`;
+  }
+  if(EC.blob && EC.recFor===c.id){
+    return `<div class="ecrec"><div style="display:flex;align-items:center;gap:10px">${ecPlayBtn("__mine","my new recording")}<b>Your echo · ${(EC.recMs/1000).toFixed(1)} s</b></div>
+      <div class="row" style="gap:8px;justify-content:center"><button class="btn secondary" onclick="ecDiscard()">↺ Again · Nochmal</button>
+      <button class="btn primary" ${EC.busy?"disabled":""} onclick="ecSendEntry('${c.id}')">${EC.busy?"Sending…":"✓ Send my echo · Senden"}</button></div></div>`;
+  }
+  return `<div class="ecrec"><p class="note center" style="margin:0">${mine?"You've sent your echo ✅ Want to try again? The new one replaces it (and its likes).":"Listen ▶, then repeat it. Tap the mic to record."}<br><span class="de">${mine?"Neue Aufnahme ersetzt die alte.":"Anhören, dann nachsprechen."}</span></p>
+    <button class="ecmic" onclick="ecStart('${c.id}',${c.max_sec||15})" aria-label="Record">🎙️</button><span class="ecmeta">Up to ${c.max_sec||15} s</span></div>`;
+}
+async function ecStart(cid, maxSec){
+  if(!navigator.mediaDevices||!window.MediaRecorder){ bToast("Recording isn't supported in this browser · Aufnahme nicht möglich"); return; }
+  ecDiscard(true);
+  let stream; try{ stream=await navigator.mediaDevices.getUserMedia({ audio:true }); }
+  catch(e){ bToast("Please allow the microphone to record · Bitte Mikrofon erlauben"); return; }
+  const mime=ecMime(); let mr; try{ mr=mime?new MediaRecorder(stream,{ mimeType:mime }):new MediaRecorder(stream); }catch(e){ mr=new MediaRecorder(stream); }
+  const chunks=[]; mr.ondataavailable=ev=>{ if(ev.data&&ev.data.size) chunks.push(ev.data); };
+  mr.onstop=()=>{ stream.getTracks().forEach(t=>t.stop()); const r=EC.rec; EC.rec=null; if(!r||r.cancel){ xr(); return; }
+    EC.recMs=Math.max(300,Date.now()-r.t0); EC.blob=new Blob(chunks,{ type:mr.mimeType||mime||"audio/webm" }); EC.blobUrl=URL.createObjectURL(EC.blob); xr(); };
+  EC.recFor=cid; EC.rec={ mr, t0:Date.now(), maxMs:maxSec*1000, iv:setInterval(()=>{ if(!EC.rec){ return; } if(Date.now()-EC.rec.t0>=EC.rec.maxMs) ecStop(); else xr(); },250) };
+  mr.start(); xr();
+}
+function ecStop(){ const r=EC.rec; if(!r) return; clearInterval(r.iv); try{ r.mr.stop(); }catch(e){ EC.rec=null; xr(); } }
+function ecStopRec(){ const r=EC.rec; if(r){ r.cancel=true; clearInterval(r.iv); try{ r.mr.stop(); }catch(e){} EC.rec=null; } if(EC.audio) EC.audio.pause(); EC.playing=null; }
+function ecDiscard(quiet){ if(EC.blobUrl){ try{ URL.revokeObjectURL(EC.blobUrl); }catch(e){} } EC.blob=null; EC.blobUrl=""; EC.recMs=0; if(EC.playing==="__mine"){ if(EC.audio) EC.audio.pause(); EC.playing=null; } if(!quiet) xr(); }
+function ecExt(type){ return /mp4|aac|m4a/.test(type)?"m4a":/ogg/.test(type)?"ogg":"webm"; }
+async function ecUpload(blob, prefix){
+  const path=`${A.user.id}/${prefix}-${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ecExt(blob.type)}`;
+  const up=await A.sb.storage.from("echo").upload(path, blob, { contentType:blob.type||"audio/webm", upsert:false });
+  if(up.error) throw up.error; return path;
+}
+async function ecSendEntry(cid){
+  if(!EC.blob||EC.busy) return; EC.busy=true; EC.err=""; xr(); let path=null;
+  try{
+    path=await ecUpload(EC.blob, "e-"+cid.slice(0,8));
+    const { data:old, error } = await A.sb.rpc("pt_echo_enter",{ p_challenge:cid, p_path:path, p_duration_ms:Math.round(EC.recMs) }); if(error) throw error;
+    if(old){ try{ await A.sb.storage.from("echo").remove([old]); }catch(e){} }
+    ecDiscard(true); bToast("Your echo is in! 🎙️ · Deine Aufnahme ist drin!"); await ecLoad();
+  }catch(e){ EC.err=ecErr(e); if(path){ try{ await A.sb.storage.from("echo").remove([path]); }catch(x){} } }
+  EC.busy=false; xr();
+}
+async function ecLike(id, on){
+  try{ const { error } = await A.sb.rpc("pt_echo_like",{ p_entry:id, p_on:on }); if(error) throw error; await ecLoad(); }
+  catch(e){ bToast(ecErr(e)); }
+}
+async function ecPick(id){
+  if(!window.confirm("Make this your ⭐ Host's pick? · Als Favorit wählen?")) return;
+  try{ const { error } = await A.sb.rpc("pt_echo_pick",{ p_entry:id }); if(error) throw error; await ecLoad(); }catch(e){ bToast(ecErr(e)); }
+}
+async function ecDelEntry(id){
+  if(!window.confirm("Delete your echo? · Deine Aufnahme löschen?")) return;
+  try{ const { error } = await A.sb.rpc("pt_echo_entry_remove",{ p_entry:id }); if(error) throw error; await ecLoad(); }catch(e){ bToast(ecErr(e)); }
+}
+async function ecRemove(id){
+  if(!window.confirm("Cancel this challenge for everyone? · Challenge für alle absagen?")) return;
+  try{ const { error } = await A.sb.rpc("pt_echo_remove",{ p_challenge:id }); if(error) throw error; await ecLoad(); }catch(e){ bToast(ecErr(e)); }
+}
+function ecReport(cid, eid){
+  const old=document.getElementById("ecRep"); if(old) old.remove();
+  const box=document.createElement("div"); box.className="sheet-bg"; box.id="ecRep";
+  box.innerHTML=`<div class="sheet" role="dialog" aria-label="Report"><h3 style="margin:0 0 6px">🚩 Report · Melden</h3>
+    <p class="note" style="margin:0 0 10px">Only the PonteTalk team sees this. Your name isn't shown. · Nur das Team sieht das.</p>
+    <div class="row" style="flex-wrap:wrap;gap:8px">${RP_REASONS.filter(r=>r[0]!=="no_show").map(r=>`<button class="chip" onclick="ecReportSend(${cid?`'${cid}'`:"null"},${eid?`'${eid}'`:"null"},'${r[0]}')">${esc(r[1])}</button>`).join("")}</div>
+    <button class="btn secondary" style="margin-top:12px" onclick="document.getElementById('ecRep').remove()">Cancel · Abbrechen</button></div>`;
+  box.addEventListener("click",e=>{ if(e.target===box) box.remove(); }); document.body.appendChild(box);
+}
+async function ecReportSend(cid, eid, reason){
+  const b=document.getElementById("ecRep"); if(b) b.remove();
+  try{ const { error } = await A.sb.rpc("pt_echo_report",{ p_challenge:cid, p_entry:eid, p_reason:reason, p_details:null }); if(error) throw error; bToast("Thanks, we'll take a look · Danke, wir schauen es uns an"); }
+  catch(e){ bToast(ecErr(e)); }
+}
+/* --- start a challenge --- */
+function ecLocalInput(iso){ const d=new Date(iso); d.setSeconds(0,0); const p=n=>String(n).padStart(2,"0"); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`; }
+function ecNew(){
+  const d=EC.data||{}, langs=Object.keys(d.can_host||{}).filter(k=>d.can_host[k]);
+  if(!langs.length){ bToast("Native or fluent speakers can start one · Nur für Muttersprachler"); return; }
+  const free=d.next_free&&new Date(d.next_free)>new Date()?d.next_free:new Date().toISOString();
+  EC.form={ lang:langs[0], langs, phrase:"", meaning:"", start:ecLocalInput(free), hours:24, max:15 };
+  ecDiscard(true); EC.err=""; go("echo");
+}
+function ecFormHtml(l){
+  const f=EC.form, durs=[[1,"1 hour"],[3,"3 hours"],[24,"1 day"],[72,"3 days"],[168,"7 days"]];
+  const fakeC={ id:"__new", max_sec:f.max };
+  return `<div class="card"><h2 style="margin:0 0 4px">🎙️ Start an Echo Challenge</h2>
+    <p class="note" style="margin:0 0 12px">Say a word or sentence in your language. Others echo it, and the best echo wins. · Sag etwas vor, die anderen sprechen nach.</p>
+    ${f.langs.length>1?`<label class="lbl">Language · Sprache</label><div class="row" style="gap:8px;margin-bottom:10px">${f.langs.map(k=>`<button class="chip ${f.lang===k?"on":""}" onclick="EC.form.lang='${k}';xr()">${luFlag(k)} ${esc(cfLang(k)[1])}</button>`).join("")}</div>`:`<p class="ecmeta">${luFlag(f.lang)} ${esc(cfLang(f.lang)[1])}</p>`}
+    <label class="lbl" for="ecPh">Word or sentence · Wort oder Satz</label>
+    <input id="ecPh" type="text" maxlength="200" value="${esc(f.phrase)}" oninput="EC.form.phrase=this.value" placeholder="${f.lang==="de"?"z. B. Ich hätte gern ein Brötchen.":f.lang==="es"?"p. ej. ¿Me pones un café, por favor?":"e.g. Could I have a coffee, please?"}">
+    <label class="lbl" for="ecMe">Meaning (optional) · Bedeutung</label>
+    <input id="ecMe" type="text" maxlength="200" value="${esc(f.meaning)}" oninput="EC.form.meaning=this.value" placeholder="Translation or a hint · Übersetzung oder Tipp">
+    <label class="lbl">Your recording · Deine Aufnahme</label>
+    ${ecRecHtml(fakeC, false).replace("Listen ▶, then repeat it. Tap the mic to record.","Tap the mic and say it clearly, at a natural speed.").replace("Anhören, dann nachsprechen.","Deutlich und natürlich sprechen.")}
+    <label class="lbl" for="ecSt">Starts · Beginn</label>
+    <input id="ecSt" type="datetime-local" style="width:100%;border:2px solid var(--line);border-radius:14px;padding:12px 14px;font:600 16px 'Plus Jakarta Sans',sans-serif;color:var(--ink);background:#fff" value="${esc(f.start)}" onchange="EC.form.start=this.value">
+    <label class="lbl">Open for · Dauer</label>
+    <div class="row" style="gap:8px;flex-wrap:wrap">${durs.map(([h,t])=>`<button class="chip ${f.hours===h?"on":""}" onclick="EC.form.hours=${h};xr()">${t}</button>`).join("")}</div>
+    <label class="lbl">Max length of each echo · Max. Länge</label>
+    <div class="row" style="gap:8px;flex-wrap:wrap">${[10,15,20,30].map(s=>`<button class="chip ${f.max===s?"on":""}" onclick="EC.form.max=${s};ecDiscard(true);xr()">${s} s</button>`).join("")}</div>
+    ${EC.err?`<div class="err">${esc(EC.err)}</div>`:""}
+    <div class="row" style="gap:8px;margin-top:14px"><button class="btn secondary" onclick="ecStopRec();ecDiscard(true);EC.form=null;EC.err='';xr()">Cancel · Abbrechen</button>
+      <button class="btn primary" ${EC.busy||!EC.blob?"disabled":""} onclick="ecCreate()">${EC.busy?"Starting…":"🚀 Start challenge · Starten"}</button></div>
+    <p class="note" style="margin:10px 0 0">One live challenge per lounge, up to 3 in the queue. Likes stay hidden until the end. · Likes bleiben bis zum Ende verborgen.</p></div>`;
+}
+async function ecCreate(){
+  const f=EC.form; if(!f||EC.busy) return;
+  if(!f.phrase.trim()){ EC.err=ecErr("echo_phrase"); xr(); return; }
+  if(!EC.blob){ EC.err="Record the phrase first · Erst aufnehmen"; xr(); return; }
+  const st=new Date(f.start); if(isNaN(st)){ EC.err=ecErr("echo_window"); xr(); return; }
+  const start=st<new Date()?new Date():st, end=new Date(start.getTime()+f.hours*3600000);
+  EC.busy=true; EC.err=""; xr(); let path=null;
+  try{
+    path=await ecUpload(EC.blob, "c");
+    const { error } = await A.sb.rpc("pt_echo_create",{ p_lounge:EC.lounge, p_language:f.lang, p_phrase:f.phrase.trim(), p_meaning:f.meaning.trim()||null,
+      p_path:path, p_max_sec:f.max, p_starts:start.toISOString(), p_ends:end.toISOString() }); if(error) throw error;
+    EC.form=null; ecDiscard(true); bToast("Your challenge is set! 🎙️ · Challenge erstellt!"); await ecLoad();
+  }catch(e){ EC.err=ecErr(e); if(path){ try{ await A.sb.storage.from("echo").remove([path]); }catch(x){} } }
+  EC.busy=false; xr();
+}
+AFTER.echo = function(){
+  if(EC.tick) return;
+  EC.tick=setInterval(()=>{ if(S.screen!=="echo"&&S.screen!=="lounge"){ clearInterval(EC.tick); EC.tick=null; return; } if(!EC.rec&&!EC.busy&&!EC.blob&&!EC.form) ecLoad(); },60000);
+};
+
 VIEWS.lounge = function(){
   const l=luRoom();
   const best=luBest();
@@ -4900,6 +5188,7 @@ VIEWS.lounge = function(){
     <p class="note" style="margin:0">Open to all members · Für alle Mitglieder <span data-lupres="${esc(l.id)}">${lpHere(l.id)}</span></p></div>
     <button class="chip" style="flex:none" onclick="luShare()" aria-label="Share link to this lounge">🔗 Share</button></div>
   ${luQuestion(l)}
+  ${ecCard(l)}
   <button class="btn secondary" style="margin:8px 0" aria-expanded="${LU.findOpen}" onclick="LU.findOpen=!LU.findOpen;xr()">📅 Find a time to talk${best.length?` · ${best[0].n} free ${esc(luWhen(best[0].when))}: ${esc((best[0].people||[]).slice(0,3).map(x=>A.user&&x.user_id===A.user.id?"you":x.name).join(", "))}${best[0].n>3?"…":""}`:""} ${LU.findOpen?"▲":"▼"}</button>
   ${LU.findOpen?luFindHtml(l, best):""}
   <div class="chsafe">🌍 Everyone in PonteTalk can read this lounge. Don't share phone numbers or addresses. To meet, host a session. · Öffentlich: keine Telefonnummern.</div>
@@ -7208,6 +7497,9 @@ function nbText(n){
     case "reminder_24h": return `⏰ Tomorrow: ${t}${n.starts_at?` at ${nbClock(n.starts_at)}`:""}.`;
     case "reminder_15m": return `⏰ ${t} starts in 15 minutes.`;
     case "word_fixed":   return `✏️ ${who} fixed your word <b>“${esc(d.old||"")}”</b>: now <b>“${esc(d.word||"")}”</b> (${t}). Tap to see it.`;
+    case "echo_new":     return `🎙️ New Echo Challenge by ${who}: <b>“${esc(d.phrase||"")}”</b>. Listen and record your echo!`;
+    case "echo_result":  return d.winners ? `🏆 The Echo Challenge <b>“${esc(d.phrase||"")}”</b> is over. People's choice: <b>${esc(d.winners)}</b>.${d.host?" Pick your ⭐ favourite!":""}`
+                              : `🏁 The Echo Challenge <b>“${esc(d.phrase||"")}”</b> is over. Tap to see the echoes.`;
     case "reminder_prep": return `📚 ${t} is in 3 days. ${who==="Someone"?"The host":who} shared materials: have a look before the call. Want to focus on something? Tell them in the chat.`;
     default:             return `Update for ${t}.`;
   }
@@ -7251,6 +7543,7 @@ async function nbTap(id){
   if(!n.read_at){ n.read_at=new Date().toISOString(); NB.unread=Math.max(0,NB.unread-1); bellSync(); try{ await A.sb.rpc("pt_mark_read",{ p_id:id }); }catch(e){} }
   const sh=document.getElementById("nbSheet"); if(sh) sh.remove();
   if(n.kind==="report"){ raOpen(); return; }
+  if(/^echo_/.test(n.kind) && n.data && n.data.lounge){ await luEnter(n.data.lounge); ecOpen(); return; }
   if(n.activity_id){ if(n.kind==="chat") chOpen(n.activity_id); else if(n.kind==="word_fixed") wdOpen(n.activity_id); else sOpen(n.activity_id); }
 }
 function nbTools(){
