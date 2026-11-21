@@ -114,13 +114,14 @@ returns boolean language sql stable security definer set search_path = public as
                 and role in ('native','fluent'));
 $$;
 
--- Can I start a challenge in this language? (native/fluent, name + 18+, account 7+ days)
+-- Can I start a challenge in this language? (native/fluent, name + 18+, account 7+ days; admins always)
 create or replace function public.pt_echo_can_host(p_lang text)
 returns boolean language sql stable security definer set search_path = public as $$
-  select auth.uid() is not null
-     and public.pt_echo_speaks(auth.uid(), p_lang)
-     and public.pt_lounge_can_post()
-     and exists(select 1 from auth.users where id = auth.uid() and created_at < now() - interval '7 days');
+  select auth.uid() is not null and (
+    coalesce(public.pt_is_admin(), false)
+    or (public.pt_echo_speaks(auth.uid(), p_lang)
+        and public.pt_lounge_can_post()
+        and exists(select 1 from auth.users where id = auth.uid() and created_at < now() - interval '7 days')));
 $$;
 grant execute on function public.pt_echo_can_host(text) to authenticated;
 
