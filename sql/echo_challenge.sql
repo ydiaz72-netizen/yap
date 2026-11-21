@@ -8,6 +8,8 @@
 --   · Others record their echo (max 15 s by default). One entry each;
 --     re-recording replaces it until the window closes.
 --   · Everyone gets 3 likes per challenge. Likes stay hidden until the end.
+--     Voting needs an account older than 24 h, except in challenges of
+--     1 day or less: there, name + 18+ is enough (new people can vote at once).
 --   · At the end: 🏆 People's choice (most likes, ties all win) and
 --     ⭐ Host's pick (chosen by the host after the end).
 --   · Limits: 1 live + up to 3 queued challenges per lounge,
@@ -164,6 +166,15 @@ returns timestamptz language sql stable security definer set search_path = publi
 $$;
 grant execute on function public.pt_echo_next_free(text) to authenticated;
 
+-- May I vote in this challenge? (24 h old account, or name + 18+ in short challenges)
+create or replace function public.pt_echo_can_vote(p_challenge uuid)
+returns boolean language sql stable security definer set search_path = public as $$
+  select auth.uid() is not null and (
+    exists(select 1 from auth.users where id = auth.uid() and created_at < now() - interval '24 hours')
+    or (public.pt_lounge_can_post()
+        and exists(select 1 from echo_challenges where id = p_challenge and ends_at - starts_at <= interval '24 hours 5 minutes')));
+$$;
+
 -- ---------- one challenge as JSON (likes hidden while live) ----------
 create or replace function public.pt_echo_json(p_id uuid)
 returns jsonb language plpgsql stable security definer set search_path = public as $$
@@ -181,7 +192,8 @@ begin
     'entries_count', (select count(*) from echo_entries where challenge_id = c.id),
     'likes_given', (select count(*) from echo_likes where challenge_id = c.id),
     'my_likes', (select count(*) from echo_likes where challenge_id = c.id and user_id = v_me),
-    'can_vote', exists(select 1 from auth.users where id = v_me and created_at < now() - interval '24 hours'),
+    'can_vote', public.pt_echo_can_vote(c.id),
+    'short', c.ends_at - c.starts_at <= interval '24 hours 5 minutes',
     'entries', case when v_state = 'upcoming' then '[]'::jsonb else coalesce((
       select jsonb_agg(jsonb_build_object(
         'id', e.id, 'user_id', e.user_id, 'name', coalesce(p.display_name,'Member'), 'avatar_url', p.avatar_url,
@@ -268,8 +280,7 @@ begin
   if now() < c.starts_at or now() >= c.ends_at then raise exception 'echo_closed'; end if;
   if e.user_id = auth.uid() then raise exception 'echo_own'; end if;
   if public.pt_blocked_between(auth.uid(), e.user_id) then raise exception 'not_found'; end if;
-  if not exists(select 1 from auth.users where id = auth.uid() and created_at < now() - interval '24 hours') then
-    raise exception 'echo_too_new'; end if;
+  if not public.pt_echo_can_vote(c.id) then raise exception 'echo_too_new'; end if;
   if p_on then
     if not exists(select 1 from echo_likes where entry_id = e.id and user_id = auth.uid()) then
       if (select count(*) from echo_likes where challenge_id = c.id and user_id = auth.uid()) >= 3 then
