@@ -865,7 +865,7 @@
 <script>/* Extra interface languages live in /i18n/<code>.js (English text → translation). Load the chosen one before the app starts. */
 (function(){ try{ var X=["tr","uk","fa","ur"], v=localStorage.getItem("pt_ui");
   if(!v){ var n=String((navigator.languages&&navigator.languages[0])||navigator.language||"").slice(0,2).toLowerCase(); if(X.indexOf(n)>-1) v=n; }
-  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=8"><\/script>'); }catch(e){} })();</script>
+  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=9"><\/script>'); }catch(e){} })();</script>
 
 <script>
 /* ===================== CONTENT ===================== */
@@ -1238,7 +1238,7 @@ function bi(en,de,es){ if(es!==undefined) return tr(en,de,es); return `${en} <sp
 function uiSet(l){
   if(!UI_CODES.includes(l)) return;
   if(UI_EXTRA.includes(l) && !I18N_DATA[l]){
-    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=8";
+    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=9";
     sc.onload=()=>uiSet(l); sc.onerror=()=>bToast(offlineMsg()); document.head.appendChild(sc); return;
   }
   UI=l; I18N_T=null; I18N_M.clear();
@@ -8524,20 +8524,26 @@ VIEWS.examr = function(){
 
 /* ===================== TEST PRACTICE: German exam (DTZ A2–B1) ===================== */
 /* Original practice material in /dtz/dtz.json, modelled on the DTZ format. History: sql/exam_practice(_dtz).sql */
-const DT_V="2026-11-22c";
+const DT_V="2026-11-22d";
 const DT_TEIL={ H1:"Hören 1 · Ansagen", H2:"Hören 2 · Radio", H3:"Hören 3 · Gespräche", H4:"Hören 4 · Meinungen",
   L1:"Lesen 1 · Wegweiser", L2:"Lesen 2 · Anzeigen", L3:"Lesen 3 · Kurze Texte", L4:"Lesen 4 · Meinungen", L5:"Lesen 5 · Brief" };
 const DT={ d:null, err:"", att:[], ans:[], run:null, res:null, w:null, sp:null, slow:false, playing:null, es:false, esd:null };
-try{ DT.es=localStorage.getItem("pt_dtz_es")==="1"; }catch(e){}
-const DT_ESW={ Richtig:"Verdadero", Falsch:"Falso", Ja:"Sí", Nein:"No" };
-function dtE(){ return DT.es&&DT.esd; }
-async function dtEsLoad(){ if(DT.esd) return; try{ const r=await fetch(`/dtz/es.json?v=${DT_V}`); DT.esd=await r.json(); }catch(e){} }
-async function dtSetEs(on){ DT.es=on; try{ localStorage.setItem("pt_dtz_es", on?"1":"0"); }catch(e){} if(on) await dtEsLoad(); xr(); }
-function dtEsLine(t){ return t?`<span class="extr" lang="es">${esc(t)}</span>`:""; }
+/* Help language for the exam: Spanish, Arabic or Farsi (files /dtz/<code>.json, same shape) */
+const DT_HL=[["es","🇪🇸","Español","Ayuda en español"],["ar","🗣️","العربية","مساعدة بالعربية"],["fa","🗣️","فارسی","راهنما به فارسی"]];
+DT.hl=""; DT.hd={};
+try{ DT.hl=localStorage.getItem("pt_dtz_help")||(localStorage.getItem("pt_dtz_es")==="1"?"es":""); }catch(e){}
+if(!DT_HL.some(x=>x[0]===DT.hl)) DT.hl="";
+const DT_W={ es:{ Richtig:"Verdadero", Falsch:"Falso", Ja:"Sí", Nein:"No" }, ar:{ Richtig:"صحيح", Falsch:"خطأ", Ja:"نعم", Nein:"لا" }, fa:{ Richtig:"درست", Falsch:"غلط", Ja:"بله", Nein:"نه" } };
+function dtE(){ return DT.hl&&DT.hd[DT.hl]; }
+function dtHlTag(){ return `lang="${DT.hl}" dir="auto"`; }
+function dtHlName(){ const x=DT_HL.find(x=>x[0]===DT.hl); return x?x[1]+" "+x[2]:""; }
+async function dtHelpLoad(l){ l=l||DT.hl; if(!l||DT.hd[l]) return; try{ const r=await fetch(`/dtz/${l}.json?v=${DT_V}`); DT.hd[l]=await r.json(); }catch(e){} }
+async function dtSetHelp(l){ DT.hl=l||""; try{ localStorage.setItem("pt_dtz_help", DT.hl); localStorage.removeItem("pt_dtz_es"); }catch(e){} if(DT.hl) await dtHelpLoad(); xr(); }
+function dtEsLine(t){ return t?`<span class="extr" ${dtHlTag()}>${esc(t)}</span>`:""; }
 function dtLevel(n){ return n>=33?"B1":n>=20?"A2":"–"; }
 async function dtOpen(){
   go("dtz");
-  try{ if(!DT.d){ const r=await fetch(`/dtz/dtz.json?v=${DT_V}`); DT.d=await r.json(); dtIndex(); } await Promise.all([DT.es?dtEsLoad():null, dtLoadHist(), DT.man===undefined?dtLoadManifest():null]); }
+  try{ if(!DT.d){ const r=await fetch(`/dtz/dtz.json?v=${DT_V}`); DT.d=await r.json(); dtIndex(); } await Promise.all([DT.hl?dtHelpLoad():null, dtLoadHist(), DT.man===undefined?dtLoadManifest():null]); }
   catch(e){ DT.err=tr("Couldn't load the exercises. Check your connection","Übungen konnten nicht geladen werden. Prüfe deine Verbindung","No se pudieron cargar los ejercicios. Revisa tu conexión"); }
   try{ if(window.speechSynthesis) speechSynthesis.getVoices(); }catch(e){}
   if(/^dtz/.test(S.screen)) xr();
@@ -8741,7 +8747,9 @@ VIEWS.dtz = function(){
     <p class="sub" style="margin:0 0 6px">${tr("Practise for the Deutsch-Test für Zuwanderer: Hören, Lesen, Schreiben, Sprechen. Also good practice for telc and Goethe B1.","Übe für den Deutsch-Test für Zuwanderer: Hören, Lesen, Schreiben, Sprechen. Auch gut für telc und Goethe B1.","Practica para el Deutsch-Test für Zuwanderer: Hören, Lesen, Schreiben, Sprechen. También sirve para telc y Goethe B1.")}</p><div style="display:inline-block;background:var(--teal-soft);color:var(--teal);font-weight:800;font-size:13px;border-radius:999px;padding:5px 12px;margin:0 0 10px">${tr(`🎉 Free during our launch`,`🎉 Kostenlos zum Start`,`🎉 Gratis durante el lanzamiento`)}</div>`;
   if(DT.err) return h+`<div class="err">${esc(DT.err)}</div>`;
   if(!DT.d) return h+`<p class="note center">${tr(`Loading…`,`Lädt…`,`Cargando…`)}</p>`;
-  h+=`<label class="card" style="display:flex;gap:12px;align-items:center;cursor:pointer"><input type="checkbox" style="width:22px;height:22px" ${DT.es?"checked":""} onchange="dtSetEs(this.checked)"><span><b>🇪🇸 Ayuda en español</b><br><span class="ecmeta">${tr("Spanish under the questions and answers. Texts and listening transcripts in Spanish appear after you answer (in practice).","Spanisch unter Fragen und Antworten. Texte und Hörtexte auf Spanisch erscheinen nach dem Antworten (beim Üben).","Español debajo de preguntas y respuestas. Los textos y transcripciones en español aparecen después de responder (en práctica).")}</span></span></label>`;
+  h+=`<div class="card"><b>🌍 ${tr("Help in your language","Hilfe in deiner Sprache","Ayuda en tu idioma")}</b>
+    <div class="row" style="margin:8px 0 6px">${[["","—"]].concat(DT_HL.map(x=>[x[0],x[1]+" "+x[2]])).map(([k,l])=>`<button class="chip ${DT.hl===k?"on":""}" onclick="dtSetHelp('${k}')"><span dir="auto">${k?l:tr("German only","Nur Deutsch","Solo alemán")}</span></button>`).join("")}</div>
+    <span class="ecmeta">${tr("Translation under the questions and answers. Texts and listening transcripts in your language appear after you answer (in practice).","Übersetzung unter Fragen und Antworten. Texte und Hörtexte in deiner Sprache erscheinen nach dem Antworten (beim Üben).","Traducción debajo de preguntas y respuestas. Los textos y transcripciones en tu idioma aparecen después de responder (en práctica).")}</span></div>`;
   const last=dtLast(), mocks=DT.att.filter(a=>a.mode==="mock"), best=mocks.reduce((m,a)=>Math.max(m,a.correct),0);
   const wr=DT.att.filter(a=>a.mode==="writing"), sp=DT.att.filter(a=>a.mode==="speaking");
   const wrong=DT.items.filter(x=>last[x.it.id]===false).length;
@@ -8797,8 +8805,8 @@ function dtGapText(x){
 function dtTranscript(x){
   const E=dtE();
   if(!x.it.s&&x.g.text){ const et=E&&E.text[x.g.items[0].id];
-    return `<details style="margin-top:8px"><summary class="linkbtn" style="cursor:pointer">${tr(`📄 Show the text`,`📄 Text zeigen`,`📄 Ver el texto`)}</summary><div class="dttext" lang="de">${esc(x.g.text)}</div>${et?`<div class="ecmeta">🇪🇸 Español</div><div class="dttext" lang="es">${esc(et)}</div>`:""}</details>`; }
-  if(x.it.s&&E){ const es=E.script[(x.akey||"").split("-").pop()]; if(es) return `<details style="margin-top:8px"><summary class="linkbtn" style="cursor:pointer">${tr(`📄 Show the text`,`📄 Text zeigen`,`📄 Ver el texto`)}</summary><div class="dttext">${x.it.s.map(l=>`${l.v==="N"?"":`<b>${l.v==="M"?"👨":"👩"}</b> `}${esc(l.t)}`).join("\n")}</div><div class="ecmeta">🇪🇸 Español</div><div class="dttext" lang="es">${es.map((t,i)=>`${x.it.s[i].v==="N"?"":`<b>${x.it.s[i].v==="M"?"👨":"👩"}</b> `}${esc(t)}`).join("\n")}</div></details>`; }
+    return `<details style="margin-top:8px"><summary class="linkbtn" style="cursor:pointer">${tr(`📄 Show the text`,`📄 Text zeigen`,`📄 Ver el texto`)}</summary><div class="dttext" lang="de">${esc(x.g.text)}</div>${et?`<div class="ecmeta">${dtHlName()}</div><div class="dttext" ${dtHlTag()}>${esc(et)}</div>`:""}</details>`; }
+  if(x.it.s&&E){ const es=E.script[(x.akey||"").split("-").pop()]; if(es) return `<details style="margin-top:8px"><summary class="linkbtn" style="cursor:pointer">${tr(`📄 Show the text`,`📄 Text zeigen`,`📄 Ver el texto`)}</summary><div class="dttext">${x.it.s.map(l=>`${l.v==="N"?"":`<b>${l.v==="M"?"👨":"👩"}</b> `}${esc(l.t)}`).join("\n")}</div><div class="ecmeta">${dtHlName()}</div><div class="dttext" ${dtHlTag()}>${es.map((t,i)=>`${x.it.s[i].v==="N"?"":`<b>${x.it.s[i].v==="M"?"👨":"👩"}</b> `}${esc(t)}`).join("\n")}</div></details>`; }
   return x.it.s?`<details style="margin-top:8px"><summary class="linkbtn" style="cursor:pointer">${tr(`📄 Show the text`,`📄 Text zeigen`,`📄 Ver el texto`)}</summary><div class="dttext">${x.it.s.map(l=>`${l.v==="N"?"":`<b>${l.v==="M"?"👨":"👩"}</b> `}${esc(l.t)}`).join("\n")}</div></details>`:""; }
 VIEWS.dtzq = function(){
   const r=DT.run; if(!r) return `<p class="note center">…</p>`;
@@ -8806,16 +8814,16 @@ VIEWS.dtzq = function(){
   const plays=r.plays[x.akey]||0, grid=it.a.length>4;
   let h=`<div class="topline"><button class="chip" onclick="dtQuit()">✕ ${mock?tr("End test","Test beenden","Terminar test"):tr("Stop","Stopp","Parar")}</button><span class="ecmeta">${mock?`⏱ <span id="dtclock">${exClock(r.end-Date.now())}</span> · `:""}${r.i+1} / ${r.list.length}</span></div>
     <div class="exbar" style="margin:0 0 10px"><i style="width:${Math.round((r.i+1)/r.list.length*100)}%;background:var(--coral)"></i></div>
-    <div class="card"><div class="ecmeta">${g.k==="H"?"Hören":"Lesen"} ${g.t} · ${esc(g.intro[0])}</div><div class="note" style="margin:2px 0 6px">${esc(g.intro[1])}${dtE()?`<br><span lang="es">🇪🇸 ${esc(dtE().intro[x.part]||"")}</span>`:""}</div>
+    <div class="card"><div class="ecmeta">${g.k==="H"?"Hören":"Lesen"} ${g.t} · ${esc(g.intro[0])}</div><div class="note" style="margin:2px 0 6px">${esc(g.intro[1])}${dtE()?`<br><span ${dtHlTag()}>${esc(dtE().intro[x.part]||"")}</span>`:""}</div>
       ${g.topic?`<div style="font-weight:800;margin:4px 0">Thema: ${esc(g.topic)}${dtE()&&dtE().topic[g.items[0].id]?dtEsLine(dtE().topic[g.items[0].id]):""}</div>`:""}
       ${x.akey?`<div class="dtplay"><button class="btn primary" style="width:auto;padding:10px 18px" data-dtplay="${x.akey}" onclick="dtPlay('${x.akey}')">${DT.playing===x.akey?"⏹ "+tr("Stop","Stopp","Parar"):"▶️ "+tr("Hören · Listen","Hören","Hören · Escuchar")}</button>${mock?`<span class="ecmeta">${plays}/2 ${tr("played","gehört","escuchado")}</span>`:""}</div>`:""}
       ${g.text?`<div class="dttext" lang="de">${dtGapText(x)}</div>`:""}
       ${(()=>{ const eq=dtE()&&dtE().q[it.id];
-        return x.part==="L4"?`<div class="dtquote" lang="de">${esc(it.q)}${eq?dtEsLine(eq.q):""}</div><div class="exq" style="font-size:17px">Ist die Person dafür?${UI==="en"?" · Is this person in favour?":""}${dtE()?dtEsLine("¿La persona está a favor?"):""}</div>`
-        :x.part==="L5"?`<div class="exq" style="font-size:17px">Welches Wort passt in ${esc(it.q)}?${dtE()?dtEsLine("¿Qué palabra encaja en el hueco "+it.q.replace("Lücke ","")+"?"):""}</div>`
+        return x.part==="L4"?`<div class="dtquote" lang="de">${esc(it.q)}${eq?dtEsLine(eq.q):""}</div><div class="exq" style="font-size:17px">Ist die Person dafür?${UI==="en"?" · Is this person in favour?":""}${dtE()?dtEsLine((dtE().ui||{}).favour):""}</div>`
+        :x.part==="L5"?`<div class="exq" style="font-size:17px">Welches Wort passt in ${esc(it.q)}?${dtE()?dtEsLine(((dtE().ui||{}).gap||"").replace("{n}",it.q.replace("Lücke ",""))):""}</div>`
         :`<div class="exq" lang="de">${esc(it.q)}</div>${eq?dtEsLine(eq.q):""}`; })()}
       <div class="${grid?"dtgrid":""}">${it.a.map((a,k)=>{ let c=""; if(shown){ if(k===it.c) c="ok"; else if(k===pick) c="no"; } else if(pick===k) c="sel";
-        return `<button class="exopt ${c}" ${shown?"disabled":""} onclick="dtPick(${k})">${grid?"":`<span class="k">${shown&&k===it.c?"✓":shown&&k===pick?"✕":"abcdefghi"[k]}</span>`}<span lang="de">${esc(a)}${(()=>{ if(!dtE()||grid||x.part==="L5") return ""; const ea=(dtE().q[it.id]||{}).a; const t=ea?ea[k]:DT_ESW[a]; return t?`<span class="extr" lang="es">${esc(t)}</span>`:""; })()}</span></button>`; }).join("")}</div>
+        return `<button class="exopt ${c}" ${shown?"disabled":""} onclick="dtPick(${k})">${grid?"":`<span class="k">${shown&&k===it.c?"✓":shown&&k===pick?"✕":"abcdefghi"[k]}</span>`}<span lang="de">${esc(a)}${(()=>{ if(!dtE()||grid||x.part==="L5") return ""; const ea=(dtE().q[it.id]||{}).a; const t=ea?ea[k]:(DT_W[DT.hl]||{})[a]; return t?`<span class="extr" ${dtHlTag()}>${esc(t)}</span>`:""; })()}</span></button>`; }).join("")}</div>
       ${shown?`<div class="${pick===it.c?"ok":"err"}" style="margin-top:8px">${pick===it.c?"✅ "+tr("Richtig! · Correct!","Richtig!","¡Correcto! · Richtig!"):`❌ ${tr("Correct answer","Richtig ist","Respuesta correcta")}: <b>${esc(it.a[it.c])}</b>`}</div>${dtTranscript(x)}`:""}
     </div>`;
   if(mock){
@@ -8893,7 +8901,7 @@ VIEWS.dtzw = function(){
   const t=w.t;
   let h=`<div class="topline"><button class="chip" onclick="go('dtz')">${uiBack()} ${tr("German exam","Deutschprüfung","Examen de alemán")}</button><span class="ecmeta">${w.done?"":`⏱ <span id="dtwclock">${exClock(w.end-Date.now())}</span>`}</span></div>
     <div class="card"><div class="ecmeta">Schreiben · ${t.to==="informal"?tr("informal letter (du)","informeller Brief (du)","carta informal (du)"):tr("formal letter (Sie)","formeller Brief (Sie)","carta formal (Sie)")}</div><h3 style="margin:4px 0">${esc(t.title)}</h3>
-      <div class="dttext" lang="de">${esc(t.sit)}${dtE()&&dtE().w[t.id]?`\n<span class="extr" lang="es">🇪🇸 ${esc(dtE().w[t.id].sit)}</span>`:""}</div>
+      <div class="dttext" lang="de">${esc(t.sit)}${dtE()&&dtE().w[t.id]?`\n<span class="extr" ${dtHlTag()}>${esc(dtE().w[t.id].sit)}</span>`:""}</div>
       <div class="ecmeta">${tr("Write about all 4 points · Schreiben Sie zu allen 4 Punkten:","Schreiben Sie zu allen 4 Punkten:","Escribe sobre los 4 puntos · Schreiben Sie zu allen 4 Punkten:")}</div>
       <ol style="margin:6px 0 0 20px;padding:0" lang="de">${t.pts.map((p,i)=>`<li style="margin:3px 0">${esc(p)}${dtE()&&dtE().w[t.id]?dtEsLine(dtE().w[t.id].pts[i]):""}</li>`).join("")}</ol>
       <p class="note">${tr(`Don't forget: greeting (${t.to==="informal"?"Liebe/Lieber …":"Sehr geehrte …"}), the 4 points, a closing sentence and your name.`,`Nicht vergessen: Anrede (${t.to==="informal"?"Liebe/Lieber …":"Sehr geehrte …"}), die 4 Punkte, ein Schlusssatz und dein Name.`,`No olvides: saludo (${t.to==="informal"?"Liebe/Lieber …":"Sehr geehrte …"}), los 4 puntos, una frase de cierre y tu nombre.`)}</p></div>`;
@@ -8946,7 +8954,7 @@ VIEWS.dtzs = function(){
   const c=sp.c, rec=!!sp.rec, E=dtE()&&dtE().s[c.id];
   const row=(k,label)=>`<label class="dtchk"><input type="checkbox" ${sp.checks[k]?"checked":""} onchange="DT.sp.checks['${k}']=this.checked"><span>${label}</span></label>`;
   return `<div class="topline"><button class="chip" onclick="if(DT.sp.rec)DT.sp.rec.stop();go('dtz')">${uiBack()} ${tr("German exam","Deutschprüfung","Examen de alemán")}</button><span class="ecmeta">Sprechen · Teil ${c.teil}</span></div>
-    <div class="card"><h3 style="margin:0 0 4px">${esc(c.title)}</h3><p class="note" style="margin:0 0 8px">${esc(c.en)}${E?`<br><span lang="es">🇪🇸 ${esc(E.desc)}</span>`:""}</p>
+    <div class="card"><h3 style="margin:0 0 4px">${esc(c.title)}</h3><p class="note" style="margin:0 0 8px">${esc(c.en)}${E?`<br><span ${dtHlTag()}>${esc(E.desc)}</span>`:""}</p>
       <div class="ecmeta">${UI==="de"?(c.teil===3?"Besprechen Sie:":"Sprechen Sie über:"):tr("Talk about","","Habla sobre")+" · "+(c.teil===3?"Besprechen Sie:":"Sprechen Sie über:")}</div>
       <ul style="margin:6px 0 0 20px;padding:0" lang="de">${c.pts.map((p,i)=>`<li style="margin:3px 0">${esc(p)}${E?dtEsLine(E.pts[i]):""}</li>`).join("")}</ul>
       ${c.follow.length?`<div class="ecmeta" style="margin-top:8px">${tr("The examiner may ask · Mögliche Fragen:","Mögliche Fragen:","El examinador puede preguntar · Mögliche Fragen:")}</div><ul style="margin:6px 0 0 20px;padding:0" lang="de">${c.follow.map((p,i)=>{ const id=`SQ-${c.id}-${i}`, v=DT.man&&DT.man.clips&&DT.man.clips[id]; return `<li>${esc(p)}${v?` <button class="linkbtn" style="text-decoration:none" onclick="exSay('${id}',DT.d.sprechen.find(x=>x.id==='${c.id}').follow[${i}])" aria-label="Listen">🔊</button>`:""}${E?dtEsLine(E.follow[i]):""}</li>`; }).join("")}</ul>`:""}
