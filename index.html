@@ -859,11 +859,11 @@
 <script>
 /* ===================== CONTENT ===================== */
 const CATS = {
-  everyday:{en:"Everyday Life",de:"Alltag",e:"🏠"},
-  social:{en:"Social",de:"Soziales",e:"🎉"},
-  work:{en:"Work & Career",de:"Arbeit & Beruf",e:"💼"},
-  travel:{en:"Travel",de:"Reisen",e:"✈️"},
-  mix:{en:"Surprise me",de:"Überrasch mich",e:"🎲"}
+  everyday:{en:"Everyday Life",de:"Alltag",es:"Vida diaria",e:"🏠"},
+  social:{en:"Social",de:"Soziales",es:"Social",e:"🎉"},
+  work:{en:"Work & Career",de:"Arbeit & Beruf",es:"Trabajo y carrera",e:"💼"},
+  travel:{en:"Travel",de:"Reisen",es:"Viajes",e:"✈️"},
+  mix:{en:"Surprise me",de:"Überrasch mich",es:"Sorpréndeme",e:"🎲"}
 };
 const FMTS = {
   role:{en:"Role Play",de:"Rollenspiel",e:"🎭",
@@ -1147,16 +1147,16 @@ const P1 = {
 };
 
 const RATINGS = [
-  {v:1,pts:1,e:"🌱",en:"Keep practicing",de:"Weiter üben"},
-  {v:2,pts:3,e:"👍",en:"Good",de:"Gut"},
-  {v:3,pts:5,e:"⭐",en:"Great",de:"Sehr gut"},
-  {v:4,pts:8,e:"🏆",en:"Excellent",de:"Ausgezeichnet"}
+  {v:1,pts:1,e:"🌱",en:"Keep practicing",de:"Weiter üben",es:"Sigue practicando"},
+  {v:2,pts:3,e:"👍",en:"Good",de:"Gut",es:"Bien"},
+  {v:3,pts:5,e:"⭐",en:"Great",de:"Sehr gut",es:"Muy bien"},
+  {v:4,pts:8,e:"🏆",en:"Excellent",de:"Ausgezeichnet",es:"Excelente"}
 ];
 const REACTS = [
-  {k:"clear",e:"👍",en:"Clear",de:"Verständlich"},
-  {k:"creative",e:"🔥",en:"Creative",de:"Kreativ"},
-  {k:"funny",e:"😂",en:"Funny",de:"Lustig"},
-  {k:"learned",e:"💡",en:"I learned something",de:"Was gelernt"}
+  {k:"clear",e:"👍",en:"Clear",de:"Verständlich",es:"Claro"},
+  {k:"creative",e:"🔥",en:"Creative",de:"Kreativ",es:"Creativo"},
+  {k:"funny",e:"😂",en:"Funny",de:"Lustig",es:"Divertido"},
+  {k:"learned",e:"💡",en:"I learned something",de:"Was gelernt",es:"Aprendí algo"}
 ];
 const COLORS = ["#FF6B4A","#6C4AB6","#20A99A","#E9A21C","#E0457B","#3D7BD9","#7A9A2B","#9C5B3B","#0E8FB0","#B44AA0"];
 
@@ -1342,56 +1342,56 @@ setup(){
       <button class="x" onclick="removePlayer(${i})" aria-label="Remove">×</button>
     </div>`).join("");
   return `
-  <div class="topline"><button class="chip" onclick="go('home')">← Back</button><span>${S.players.length}/10 players</span></div>
-  <h2>${bi("Who's playing?","Wer spielt mit?")}</h2>
-  <p class="sub">Add 2–10 players. Each person picks the language they want to <b>practice</b>.</p>
+  <div class="topline"><button class="chip" onclick="go('home')">← ${tr("Back","Zurück","Atrás")}</button><span>${S.players.length}/10 ${tr("players","Spieler","jugadores")}</span></div>
+  <h2>${tr("Who's playing?","Wer spielt mit?","¿Quién juega?")}</h2>
+  <p class="sub">${tr("Add 2–10 players. Each person picks the language they want to <b>practice</b>.","Füge 2–10 Spieler hinzu. Jede Person wählt die Sprache, die sie <b>üben</b> möchte.","Añade de 2 a 10 jugadores. Cada persona elige el idioma que quiere <b>practicar</b>.")}</p>
   <div class="card">
-    <label class="lbl">Name</label>
-    <input type="text" id="pname" maxlength="16" placeholder="e.g. Ana" value="${esc(d.name)}" autocomplete="off">
-    <label class="lbl">I'm practicing · Ich übe</label>
+    <label class="lbl">${tr("Name","Name","Nombre")}</label>
+    <input type="text" id="pname" maxlength="16" placeholder="${tr("e.g. Ana","z. B. Ana","p. ej. Ana")}" value="${esc(d.name)}" autocomplete="off">
+    <label class="lbl">${tr("I'm practicing","Ich übe","Estoy practicando")}</label>
     <div class="row">
       ${LANG_KEYS.map(k=>`<button class="chip lang ${d.lang===k?"on":""}" onclick="setDraft('lang','${k}')">${T[k].flag} ${T[k].name}</button>`).join("")}
     </div>
-    <label class="lbl">My level · Mein Niveau</label>
+    <label class="lbl">${tr("My level","Mein Niveau","Mi nivel")}</label>
     <div class="row">${LVL_ORDER.map(i=>[LEVELS[i],i]).map(([l,i])=>`<button class="chip ${d.level===i?"on":""}" onclick="setDraft('level',${i})">${l.code} · ${T[d.lang].levels[i]}</button>`).join("")}</div>
     <div class="err" id="err">${esc(S.err)}</div>
-    <button class="btn secondary" onclick="addPlayer()">+ Add player<small>Spieler hinzufügen</small></button>
+    <button class="btn secondary" onclick="addPlayer()">+ ${tr("Add player","Spieler hinzufügen","Añadir jugador")}</button>
   </div>
   ${S.players.length?`<div class="card">${list}</div>`:""}
-  <button class="btn primary" ${S.players.length<2?'style="opacity:.45"':""} onclick="toSettings()">Next: game settings<small>Weiter: Einstellungen</small></button>`;
+  <button class="btn primary" ${S.players.length<2?'style="opacity:.45"':""} onclick="toSettings()">${tr("Next: game settings","Weiter: Einstellungen","Siguiente: ajustes del juego")}</button>`;
 },
 settings(){
   return `
-  <div class="topline"><button class="chip" onclick="go('setup')">← Back</button><span>${S.players.length} players</span></div>
-  <h2>${bi("Game settings","Einstellungen")}</h2>
+  <div class="topline"><button class="chip" onclick="go('setup')">← ${tr("Back","Zurück","Atrás")}</button><span>${S.players.length} ${tr("players","Spieler","jugadores")}</span></div>
+  <h2>${tr("Game settings","Einstellungen","Ajustes del juego")}</h2>
   <div class="card">
-    <label class="lbl" style="margin-top:0">Game · Spiel</label>
+    <label class="lbl" style="margin-top:0">${tr("Game","Spiel","Juego")}</label>
     ${gameChips(S.game,"setGame")}
     ${S.game==="charades"
-      ? `<label class="lbl">Difficulty · Schwierigkeit</label>${cDiffChips(S.cdiff, S.players, "setCDiff")}`
-      : `<label class="lbl">Topic · Thema</label>
-    <div class="row">${Object.entries(CATS).map(([k,c])=>`<button class="chip ${S.cat===k?"on":""}" onclick="setOpt('cat','${k}')">${c.e} ${c.en} · ${c.de}</button>`).join("")}</div>`}
-    <label class="lbl">Rounds · Runden</label>
+      ? `<label class="lbl">${tr("Difficulty","Schwierigkeit","Dificultad")}</label>${cDiffChips(S.cdiff, S.players, "setCDiff")}`
+      : `<label class="lbl">${tr("Topic","Thema","Tema")}</label>
+    <div class="row">${Object.entries(CATS).map(([k,c])=>`<button class="chip ${S.cat===k?"on":""}" onclick="setOpt('cat','${k}')">${c.e} ${tr(c.en,c.de,c.es)}</button>`).join("")}</div>`}
+    <label class="lbl">${tr("Rounds","Runden","Rondas")}</label>
     <div class="stepper">
       <button class="step" onclick="setRounds(-1)" ${S.rounds<=1?"disabled":""} aria-label="Fewer rounds">−</button>
-      <div class="stepval"><b>${S.rounds}</b><span>${S.rounds===1?"round · Runde":"rounds · Runden"}</span></div>
+      <div class="stepval"><b>${S.rounds}</b><span>${S.rounds===1?tr("round","Runde","ronda"):tr("rounds","Runden","rondas")}</span></div>
       <button class="step" onclick="setRounds(1)" ${S.rounds>=10?"disabled":""} aria-label="More rounds">+</button>
     </div>
-    <p class="note" style="margin-bottom:0">The table decides! 1–10 rounds · Ihr entscheidet: 1–10 Runden</p>
-    <p class="note">${S.rounds} round${S.rounds>1?"s":""} = ${S.rounds*S.players.length} turns · about ${Math.round(S.rounds*S.players.length*(S.time/60+1.5))} min</p>
-    <label class="lbl">${S.game==="charades"?"Acting time · Spielzeit":"Speaking time · Sprechzeit"}</label>
+    <p class="note" style="margin-bottom:0">${tr("The table decides! 1–10 rounds","Ihr entscheidet: 1–10 Runden","¡Decide la mesa! 1–10 rondas")}</p>
+    <p class="note">${tr(`${S.rounds} round${S.rounds>1?"s":""} = ${S.rounds*S.players.length} turns · about ${Math.round(S.rounds*S.players.length*(S.time/60+1.5))} min`,`${S.rounds} Runde${S.rounds>1?"n":""} = ${S.rounds*S.players.length} Züge · etwa ${Math.round(S.rounds*S.players.length*(S.time/60+1.5))} Min.`,`${S.rounds} ronda${S.rounds>1?"s":""} = ${S.rounds*S.players.length} turnos · unos ${Math.round(S.rounds*S.players.length*(S.time/60+1.5))} min`)}</p>
+    <label class="lbl">${S.game==="charades"?tr("Acting time","Spielzeit","Tiempo de mímica"):tr("Speaking time","Sprechzeit","Tiempo para hablar")}</label>
     <div class="row">${(S.game==="charades"?[45,60,90]:[60,90,120]).map(n=>`<button class="chip ${S.time===n?"on":""}" onclick="setOpt('time',${n})">${n}s</button>`).join("")}</div>
-    <p class="note">${S.game==="charades"?"Each actor gets this long to act out as many words as possible.":"Quick Response turns get half the time."}</p>
+    <p class="note">${S.game==="charades"?tr("Each actor gets this long to act out as many words as possible.","So lange darf jede Person möglichst viele Wörter vorspielen.","Cada actor tiene este tiempo para representar todas las palabras que pueda."):tr("Quick Response turns get half the time.","Schnelle Antworten bekommen die halbe Zeit.","Los turnos de respuesta rápida tienen la mitad de tiempo.")}</p>
   </div>
-  <button class="btn primary" onclick="startGame()">Let's go!<small>Los geht's!</small></button>`;
+  <button class="btn primary" onclick="startGame()">${tr("Let's go!","Los geht's!","¡Vamos!")}</button>`;
 },
 handoff(){
   const p = S.players[S.turn], i=S.turn;
   return `
-  <div class="topline"><span>Round ${S.round}/${S.rounds} · Runde ${S.round}</span><button class="chip" onclick="confirmQuit()">End game</button></div>
+  <div class="topline"><span>${tr("Round","Runde","Ronda")} ${S.round}/${S.rounds}</span><button class="chip" onclick="confirmQuit()">${tr("End game","Spiel beenden","Terminar juego")}</button></div>
   <div class="handoff">
     <div class="emoji">📱👉</div>
-    <p class="sub" style="margin:10px 0 0">${bi("Pass the phone to","Gib das Handy weiter an")}</p>
+    <p class="sub" style="margin:10px 0 0">${tr("Pass the phone to","Gib das Handy weiter an","Pasa el móvil a")}</p>
     <div class="big-name" style="color:${COLORS[i%COLORS.length]}">${esc(p.name)}</div>
     <div>${langBadge(p.lang)} <span class="badge b-fmt">${LEVELS[p.level].code}</span></div>
     <button class="btn primary" style="margin-top:28px" onclick="showChallenge()">${T[p.lang].ready}</button>
@@ -1418,7 +1418,7 @@ challenge(){
     <div class="bar" id="bar"><i id="barFill"></i></div>
   </div>
   <button class="btn primary" id="startBtn" onclick="startTimer()">⏱️ ${T[L].startTimer}<small>${T[L].startSub}</small></button>
-  <button class="btn secondary hidden" id="doneBtn" onclick="finishTurn()">✓ ${T[L].done}<small>Feedback time · Zeit für Feedback</small></button>
+  <button class="btn secondary hidden" id="doneBtn" onclick="finishTurn()">✓ ${T[L].done}<small>${tr("Feedback time","Zeit für Feedback","Hora del feedback")}</small></button>
   ${S.rerolled?"":`<button class="btn ghost" id="rerollBtn" onclick="reroll()">🔄 ${T[L].reroll}</button>`}`;
 },
 feedback(){
@@ -1426,86 +1426,86 @@ feedback(){
   const t = S.turnReacts;
   const langName = T[L].nameEn;
   return `
-  <div class="topline"><span>Feedback for ${esc(p.name)}</span>${langBadge(L)}</div>
-  <h2>${bi("How was it?","Wie war's?")}</h2>
+  <div class="topline"><span>${tr("Feedback for","Feedback für","Feedback para")} ${esc(p.name)}</span>${langBadge(L)}</div>
+  <h2>${tr("How was it?","Wie war's?","¿Qué tal?")}</h2>
   <div class="coach coach-score ${S.needRating?"need":""}">
-    <h3>🧑‍🏫 Coach score <span class="de">· Bewertung</span></h3>
-    <p style="margin:0 0 10px;font-size:15px">The best <b>${langName}</b> speaker at the table judges ${esc(p.name)}'s answer: grammar, words and how natural it sounded.<br><span class="de">Die Person, die am besten ${T[L].nameDe} spricht, bewertet.</span></p>
+    <h3>🧑‍🏫 ${tr("Coach score","Bewertung","Puntuación del coach")}</h3>
+    <p style="margin:0 0 10px;font-size:15px">${tr(`The best <b>${langName}</b> speaker at the table judges ${esc(p.name)}'s answer: grammar, words and how natural it sounded.`,`Die Person, die am besten <b>${T[L].nameDe}</b> spricht, bewertet die Antwort von ${esc(p.name)}: Grammatik, Wörter und wie natürlich es klang.`,`Quien mejor hable <b>${lname(L).toLowerCase()}</b> en la mesa valora la respuesta de ${esc(p.name)}: gramática, palabras y naturalidad.`)}</p>
     <div class="ratings">${RATINGS.map(r=>`
       <button class="rate ${S.turnRating===r.v?"on":""}" onclick="setRating(${r.v})">
-        <span class="e">${r.e}</span><b>${r.en}</b><span class="de">${r.de}</span><span class="rp">+${r.pts}</span>
+        <span class="e">${r.e}</span><b>${tr(r.en,r.de,r.es)}</b><span class="rp">+${r.pts}</span>
       </button>`).join("")}</div>
-    ${S.needRating?`<p class="err" style="margin:8px 0 0">Coach: pick a score first · Bitte zuerst bewerten</p>`:""}
+    ${S.needRating?`<p class="err" style="margin:8px 0 0">${tr(`Coach: pick a score first`,`Coach: bitte zuerst bewerten`,`Coach: primero elige una puntuación`)}</p>`:""}
   </div>
   <div class="bonusbox">
     <h3 style="margin:0 0 8px">🎁 Bonus</h3>
-    <div class="bonus ${S.hintsUsed?"off":"got"}"><span>🙈 <b>No hints</b> <span class="de">· Ohne Hilfe</span></span><span class="bp">${S.hintsUsed?"–":"+2"}</span></div>
+    <div class="bonus ${S.hintsUsed?"off":"got"}"><span>🙈 <b>${tr("No hints","Ohne Hilfe","Sin pistas")}</b></span><span class="bp">${S.hintsUsed?"–":"+2"}</span></div>
     <button class="bonus ${S.timeUp?(S.keptTalking?"got":"off"):"off"}" onclick="toggleKept()" ${S.timeUp?"":"disabled"}>
-      <span>🎤 <b>Kept talking to the end</b> <span class="de">· Bis zum Ende</span>${S.timeUp?`<br><span class="note">${S.keptTalking?"Tap to remove if they went quiet":"Tap if they really kept talking"}</span>`:`<br><span class="note">Finished before the timer · Vor Ablauf fertig</span>`}</span>
+      <span>🎤 <b>${tr("Kept talking to the end","Bis zum Ende gesprochen","Habló hasta el final")}</b>${S.timeUp?`<br><span class="note">${S.keptTalking?tr("Tap to remove if they went quiet","Tippen zum Entfernen, falls Pause","Toca para quitar si se quedó callado"):tr("Tap if they really kept talking","Tippen, wenn wirklich durchgesprochen","Toca si de verdad siguió hablando")}</span>`:`<br><span class="note">${tr("Finished before the timer","Vor Ablauf fertig","Terminó antes del tiempo")}</span>`}</span>
       <span class="bp">${S.timeUp&&S.keptTalking?"+2":"–"}</span>
     </button>
   </div>
-  <h3 style="margin:18px 0 4px">👏 Table reactions <span class="de">· Reaktionen</span></h3>
-  <p class="note" style="margin:0 0 10px">Everyone taps one — +1 point each · Jede Person tippt eine</p>
+  <h3 style="margin:18px 0 4px">👏 ${tr("Table reactions","Reaktionen","Reacciones de la mesa")}</h3>
+  <p class="note" style="margin:0 0 10px">${tr("Everyone taps one — +1 point each","Jede Person tippt eine — je +1 Punkt","Cada persona toca una — +1 punto cada una")}</p>
   <div class="reacts">${REACTS.map(r=>`
     <button class="react ${t[r.k]?"hit":""}" onclick="react('${r.k}')">
       ${t[r.k]?`<span class="n">${t[r.k]}</span>`:""}
-      <span class="e">${r.e}</span>${r.en}<br><span class="de">${r.de}</span>
+      <span class="e">${r.e}</span>${tr(r.en,r.de,r.es)}
     </button>`).join("")}</div>
-  <button class="btn ghost" onclick="resetReacts()" style="font-size:13px">Oops, reset reactions</button>
+  <button class="btn ghost" onclick="resetReacts()" style="font-size:13px">${tr("Oops, reset reactions","Hoppla, Reaktionen zurücksetzen","Ups, reiniciar reacciones")}</button>
   <div class="coach">
-    <h3>💬 Coach tip <span class="de">· Tipp</span></h3>
-    <p style="margin:0 0 8px;font-size:15px">Say one phrase that would sound more natural — or a new word ${esc(p.name)} can use.</p>
-    <label class="lbl" style="margin-top:10px">✍️ What ${esc(p.name)} said <span class="de">· optional</span></label>
-    <textarea id="ans" dir="auto" rows="2" placeholder="A sentence or two from the answer" oninput="S.turnAns=this.value">${esc(S.turnAns||"")}</textarea>
-    <label class="lbl">💡 Tip or better phrase <span class="de">· optional</span></label>
-    <textarea id="tip" dir="auto" rows="2" placeholder="e.g. Say “I went” instead of “I go”" oninput="S.turnTip=this.value">${esc(S.turnTip||"")}</textarea>
-    <p class="note" style="margin:6px 0 0">Saved for ${esc(p.name)}'s review at the end · Für die Auswertung gespeichert</p>
+    <h3>💬 ${tr("Coach tip","Tipp","Consejo del coach")}</h3>
+    <p style="margin:0 0 8px;font-size:15px">${tr(`Say one phrase that would sound more natural — or a new word ${esc(p.name)} can use.`,`Sag einen Satz, der natürlicher klingt — oder ein neues Wort, das ${esc(p.name)} nutzen kann.`,`Di una frase que sonaría más natural, o una palabra nueva que ${esc(p.name)} pueda usar.`)}</p>
+    <label class="lbl" style="margin-top:10px">✍️ ${tr(`What ${esc(p.name)} said`,`Was ${esc(p.name)} gesagt hat`,`Lo que dijo ${esc(p.name)}`)} <span class="de">· ${tr("optional","optional","opcional")}</span></label>
+    <textarea id="ans" dir="auto" rows="2" placeholder="${tr("A sentence or two from the answer","Ein oder zwei Sätze aus der Antwort","Una o dos frases de la respuesta")}" oninput="S.turnAns=this.value">${esc(S.turnAns||"")}</textarea>
+    <label class="lbl">💡 ${tr("Tip or better phrase","Tipp oder bessere Formulierung","Consejo o frase mejor")} <span class="de">· ${tr("optional","optional","opcional")}</span></label>
+    <textarea id="tip" dir="auto" rows="2" placeholder="${tr("e.g. Say “I went” instead of “I go”","z. B. „ich bin gegangen“ statt „ich gehe“","p. ej. Di “fui” en vez de “voy”")}" oninput="S.turnTip=this.value">${esc(S.turnTip||"")}</textarea>
+    <p class="note" style="margin:6px 0 0">${tr(`Saved for ${esc(p.name)}'s review at the end`,`Für die Auswertung von ${esc(p.name)} gespeichert`,`Guardado para el repaso de ${esc(p.name)} al final`)}</p>
   </div>
-  <button class="btn primary" onclick="nextTurn()">${isLastTurn()?"See results 🏆":"Next player →"}<small>${isLastTurn()?"Ergebnisse":"Nächste Person"}</small></button>`;
+  <button class="btn primary" onclick="nextTurn()">${isLastTurn()?tr("See results 🏆","Ergebnisse 🏆","Ver resultados 🏆"):tr("Next player →","Nächste Person →","Siguiente jugador →")}</button>`;
 },
 results(){
   const ranked = S.players.map((p,i)=>({p,i})).sort((a,b)=>b.p.pts-a.p.pts);
-  const top = `<div class="topline"><button class="chip" onclick="goHome()">🏠 Home</button><button class="chip" onclick="playAgain()">🔁 Play again</button></div>`;
+  const top = `<div class="topline"><button class="chip" onclick="goHome()">🏠 ${tr("Home","Start","Inicio")}</button><button class="chip" onclick="playAgain()">🔁 ${tr("Play again","Nochmal spielen","Jugar otra vez")}</button></div>`;
   const medals=["🥇","🥈","🥉"];
-  const award = (k,e,en,de) => {
+  const award = (k,e,en,de,es) => {
     const best = S.players.map((p,i)=>({p,i})).sort((a,b)=>b.p.reacts[k]-a.p.reacts[k])[0];
     if(!best || best.p.reacts[k]===0) return "";
-    return `<div class="award"><span class="e">${e}</span><div>${en} <span class="de">· ${de}</span><br><span style="color:${COLORS[best.i%COLORS.length]}">${esc(best.p.name)}</span></div></div>`;
+    return `<div class="award"><span class="e">${e}</span><div>${tr(en,de,es)}<br><span style="color:${COLORS[best.i%COLORS.length]}">${esc(best.p.name)}</span></div></div>`;
   };
   return `${top}
   <h1 class="center">🏆</h1>
-  <h2 class="center">${bi("Great game!","Super gespielt!")}</h2>
+  <h2 class="center">${tr("Great game!","Super gespielt!","¡Gran partida!")}</h2>
   <div class="card">${ranked.map((r,n)=>`
     <div class="rank"><span class="medal">${medals[n]||"⭐"}</span>${avatar(r.p,r.i)}
       <div><div class="pname">${esc(r.p.name)}</div><div class="pmeta">${T[r.p.lang].flag} ${LEVELS[r.p.level].code}${r.p.ratings.length?` · ${avgLabel(r.p)}`:""}</div></div>
       <span class="pts">${r.p.pts}</span></div>`).join("")}</div>
   <div class="card">
-    <h3>Awards <span class="de">· Auszeichnungen</span></h3>
+    <h3>${tr("Awards","Auszeichnungen","Premios")}</h3>
     ${bestSpeaker()}${charadesAwards(S.players)}
-    ${award("creative","🔥","Most creative","Am kreativsten")}
-    ${award("funny","😂","Funniest","Am lustigsten")}
-    ${award("clear","👍","Clearest speaker","Am verständlichsten")}
-    ${award("learned","💡","Best teacher","Beste/r Lehrer/in")}
+    ${award("creative","🔥","Most creative","Am kreativsten","Más creativo")}
+    ${award("funny","😂","Funniest","Am lustigsten","Más divertido")}
+    ${award("clear","👍","Clearest speaker","Am verständlichsten","Habla más claro")}
+    ${award("learned","💡","Best teacher","Beste/r Lehrer/in","Mejor profe")}
   </div>
   ${saveCardInperson()}
   <div class="card">
-    <h3>📤 Your review <span class="de">· Deine Auswertung</span></h3>
-    <p class="note">Each player can send themselves their questions, answers, useful words and tips to practice later.<br><span class="de">Schick dir deine Fragen, Antworten und Tipps zum Wiederholen.</span></p>
+    <h3>📤 ${tr("Your review","Deine Auswertung","Tu repaso")}</h3>
+    <p class="note">${tr("Each player can send themselves their questions, answers, useful words and tips to practice later.","Jede Person kann sich ihre Fragen, Antworten, nützlichen Wörter und Tipps zum Wiederholen schicken.","Cada jugador puede enviarse sus preguntas, respuestas, palabras útiles y consejos para practicar después.")}</p>
     <div class="row" style="margin-top:6px">
     ${S.players.map((p,i)=>`<button class="chip" onclick="openExport(${i})">📤 ${esc(p.name)}</button>`).join("")}
     </div>
-    <button class="btn secondary" style="margin-top:12px" onclick="openExport(-1)">📋 Export whole game<small>Ganzes Spiel exportieren (für Organisator/innen)</small></button>
+    <button class="btn secondary" style="margin-top:12px" onclick="openExport(-1)">📋 ${tr("Export whole game","Ganzes Spiel exportieren","Exportar toda la partida")}<small>${tr("for organisers","für Organisator/innen","para organizadores")}</small></button>
   </div>
   <div class="card center">
-    <h3>Did you enjoy it? <span class="de">· Hat's Spaß gemacht?</span></h3>
+    <h3>${tr("Did you enjoy it?","Hat's Spaß gemacht?","¿Te gustó?")}</h3>
     <div class="faces">${["😞","😐","🙂","😄","🤩"].map((f,i)=>`<button class="face ${S.rating===i+1?"on":""}" onclick="rate(${i+1})">${f}</button>`).join("")}</div>
   </div>
-  <p class="note center" style="margin:4px 0 0">⚠️ Send your reviews before starting a new game · Erst Auswertung senden, dann neu starten</p>
-  <button class="btn primary" onclick="playAgain()">🔁 Play another round!<small>Noch eine Runde!</small></button>
-  <button class="btn secondary" onclick="go('settings')">🎮 Change game or settings<small>Same players · Gleiche Gruppe</small></button>
-  <button class="btn secondary" onclick="newGame()">👥 New players · Neue Spieler</button>
-  <button class="btn ghost" onclick="goHome()">🏠 Back to home · Zur Startseite</button>
+  <p class="note center" style="margin:4px 0 0">⚠️ ${tr("Send your reviews before starting a new game","Erst Auswertung senden, dann neu starten","Envía tus repasos antes de empezar otra partida")}</p>
+  <button class="btn primary" onclick="playAgain()">🔁 ${tr("Play another round!","Noch eine Runde!","¡Otra ronda!")}</button>
+  <button class="btn secondary" onclick="go('settings')">🎮 ${tr("Change game or settings","Spiel oder Einstellungen ändern","Cambiar juego o ajustes")}<small>${tr("Same players","Gleiche Gruppe","Mismos jugadores")}</small></button>
+  <button class="btn secondary" onclick="newGame()">👥 ${tr("New players","Neue Spieler","Nuevos jugadores")}</button>
+  <button class="btn ghost" onclick="goHome()">🏠 ${tr("Back to home","Zur Startseite","Volver al inicio")}</button>
   <a class="powered" href="https://setzio.com" target="_blank" rel="noopener">
     <span class="pw-top">Powered by <b>Setzio</b></span>
     <span class="pw-sub">Booking &amp; CRM app for salons, spas &amp; studios · <u>Try it free</u></span>
@@ -1540,15 +1540,15 @@ const AFTER = {
 function setDraft(k,v){ S.draft[k]=v; const n=$("pname"); if(n) S.draft.name=n.value; render(); }
 function addPlayer(){
   const name=(($("pname")||{}).value||"").trim();
-  if(!name){ S.err="Please type a name · Bitte Namen eingeben"; render(); return; }
-  if(S.players.length>=10){ S.err="Max 10 players · Maximal 10 Spieler"; render(); return; }
-  if(S.players.some(p=>p.name.toLowerCase()===name.toLowerCase())){ S.err="That name is taken · Name schon vergeben"; render(); return; }
+  if(!name){ S.err=tr(`Please type a name`,`Bitte Namen eingeben`,`Escribe un nombre`); render(); return; }
+  if(S.players.length>=10){ S.err=tr(`Max 10 players`,`Maximal 10 Spieler`,`Máximo 10 jugadores`); render(); return; }
+  if(S.players.some(p=>p.name.toLowerCase()===name.toLowerCase())){ S.err=tr(`That name is taken`,`Name schon vergeben`,`Ese nombre ya está`); render(); return; }
   S.players.push({name,lang:S.draft.lang,level:S.draft.level,pts:0,reacts:{clear:0,creative:0,funny:0,learned:0},tips:[]});
   S.draft.name=""; S.err=""; render();
   const i=$("pname"); if(i) i.focus();
 }
 function removePlayer(i){ S.players.splice(i,1); render(); }
-function toSettings(){ if(S.players.length<2){ S.err="Add at least 2 players · Mindestens 2 Spieler"; render(); return; } S.err=""; go("settings"); }
+function toSettings(){ if(S.players.length<2){ S.err=tr(`Add at least 2 players`,`Mindestens 2 Spieler`,`Añade al menos 2 jugadores`); render(); return; } S.err=""; go("settings"); }
 function setOpt(k,v){ S[k]=v; render(); }
 function setRounds(d){ S.rounds=Math.min(10,Math.max(1,S.rounds+d)); render(); }
 function resetScores(){ S.players.forEach(p=>{p.pts=0;p.coach=0;p.bonus=0;p.cact=0;p.cguess=0;p.ratings=[];p.reacts={clear:0,creative:0,funny:0,learned:0};p.tips=[];}); }
@@ -1957,32 +1957,32 @@ function onlineTick(){
 function oForm(){
   const d=S.draft;
   return `
-    <label class="lbl">Your name · Dein Name</label>
+    <label class="lbl">${tr(`Your name`,`Dein Name`,`Tu nombre`)}</label>
     <input type="text" id="oname" maxlength="16" placeholder="e.g. Ana" value="${esc(d.name)}" autocomplete="off" oninput="S.draft.name=this.value">
-    <label class="lbl">I'm practicing · Ich übe</label>
+    <label class="lbl">${tr("I'm practicing","Ich übe","Estoy practicando")}</label>
     <div class="row">${LANG_KEYS.map(k=>`<button class="chip lang ${d.lang===k?"on":""}" onclick="setDraft('lang','${k}')">${T[k].flag} ${T[k].name}</button>`).join("")}</div>
-    <label class="lbl">My level · Mein Niveau</label>
+    <label class="lbl">${tr("My level","Mein Niveau","Mi nivel")}</label>
     <div class="row">${LVL_ORDER.map(i=>[LEVELS[i],i]).map(([l,i])=>`<button class="chip ${d.level===i?"on":""}" onclick="setDraft('level',${i})">${l.code} · ${T[d.lang].levels[i]}</button>`).join("")}</div>`;
 }
 VIEWS.online = function(){
   const ses = loadSession();
   return `
-  <div class="topline"><button class="chip" onclick="go('home')">← Back</button><span>🌐 Online</span></div>
-  <h2>${bi("Play online","Online spielen")}</h2>
-  <p class="sub">Everyone joins from their own phone and talks on a video call while you play. New games get a free Jitsi video link, or the host can add their own (Zoom, WhatsApp, Meet…).<br><span class="de">Alle spielen am eigenen Handy und sprechen per Videoanruf – der Link ist im Spiel.</span></p>
-  ${ses && ses.code ? `<div class="card resume"><b>Continue game ${esc(ses.code)}?</b> <span class="de">· Spiel fortsetzen?</span>
-     <button class="btn secondary" onclick="resumeOnline()">↩️ Rejoin ${esc(ses.code)}<small>${ses.role==="host"?"You're the host":"As "+esc(ses.me&&ses.me.name||"")}</small></button></div>` : ""}
+  <div class="topline"><button class="chip" onclick="go('home')">← ${tr("Back","Zurück","Atrás")}</button><span>🌐 Online</span></div>
+  <h2>${tr("Play online","Online spielen","Jugar online")}</h2>
+  <p class="sub">${tr("Everyone joins from their own phone and talks on a video call while you play. New games get a free Jitsi video link, or the host can add their own (Zoom, WhatsApp, Meet…).","Alle spielen am eigenen Handy und sprechen dabei per Videoanruf. Neue Spiele bekommen einen kostenlosen Jitsi-Link, oder der Host fügt einen eigenen hinzu (Zoom, WhatsApp, Meet…).","Cada uno entra desde su móvil y habla por videollamada mientras juega. Las partidas nuevas tienen un enlace Jitsi gratis, o el anfitrión puede añadir el suyo (Zoom, WhatsApp, Meet…).")}</p>
+  ${ses && ses.code ? `<div class="card resume"><b>${tr(`Continue game ${esc(ses.code)}?`,`Spiel ${esc(ses.code)} fortsetzen?`,`¿Continuar la partida ${esc(ses.code)}?`)}</b>
+     <button class="btn secondary" onclick="resumeOnline()">↩️ ${tr(`Rejoin ${esc(ses.code)}`,`${esc(ses.code)} wieder beitreten`,`Volver a ${esc(ses.code)}`)}<small>${ses.role==="host"?tr("You're the host","Du bist Host","Eres el anfitrión"):tr("As","Als","Como")+" "+esc(ses.me&&ses.me.name||"")}</small></button></div>` : ""}
   <div class="card">${oForm()}
-    <label class="lbl">Room code · Raumcode <span class="de">(to join)</span></label>
-    <input type="text" id="ocode" maxlength="4" placeholder="e.g. K7QM" value="${esc(O.codeInput)}" autocomplete="off" autocapitalize="characters"
+    <label class="lbl">${tr("Room code","Raumcode","Código de sala")} <span class="de">(${tr("to join","zum Beitreten","para unirte")})</span></label>
+    <input type="text" id="ocode" maxlength="4" placeholder="${tr("e.g. K7QM","z. B. K7QM","p. ej. K7QM")}" value="${esc(O.codeInput)}" autocomplete="off" autocapitalize="characters"
       style="text-transform:uppercase;letter-spacing:.3em;font-size:22px;text-align:center" oninput="O.codeInput=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')">
     <div class="err">${esc(O.err)}</div>
-    <button class="btn primary" onclick="joinOnline()">🚪 Join game<small>Spiel beitreten</small></button>
-    <div class="or">— or · oder —</div>
-    <button class="btn secondary" onclick="hostOnline()">✨ Create a new game<small>Neues Spiel erstellen (du bist Host)</small></button>
+    <button class="btn primary" onclick="joinOnline()">🚪 ${tr("Join game","Spiel beitreten","Unirse a la partida")}</button>
+    <div class="or">— ${tr("or","oder","o")} —</div>
+    <button class="btn secondary" onclick="hostOnline()">✨ ${tr("Create a new game","Neues Spiel erstellen","Crear una partida nueva")}<small>${tr("You're the host","Du bist Host","Serás el anfitrión")}</small></button>
   </div>`;
 };
-function oCheckName(){ const n=($("oname")||{}).value; if(n!==undefined) S.draft.name=n; if(!S.draft.name.trim()){ O.err="Please type your name · Bitte Namen eingeben"; render(); return false; } O.err=""; return true; }
+function oCheckName(){ const n=($("oname")||{}).value; if(n!==undefined) S.draft.name=n; if(!S.draft.name.trim()){ O.err=tr("Please type your name","Bitte Namen eingeben","Escribe tu nombre"); render(); return false; } O.err=""; return true; }
 function hostOnline(){ if(!oCheckName()) return; onlineConnect("host", newCode(), null); logUsage("room_created", {mode:"online", langs:[S.draft.lang], levels:[S.draft.level], players:1}); }
 function joinOnline(){
   if(!oCheckName()) return;
@@ -1997,10 +1997,10 @@ function resumeOnline(){
 
 function oStatusBar(){
   const G=O.G, hostGone = O.role==="guest" && G && !O.online.some(p=>p.id===G.hostId) && Date.now()-O.hostSeen>6000;
-  if(O.status==="connecting") return `<div class="obanner">🔌 Connecting… · Verbinde…</div>`;
+  if(O.status==="connecting") return `<div class="obanner">${tr(`🔌 Connecting…`,`🔌 Verbinde…`,`🔌 Conectando…`)}</div>`;
   if(O.status==="error") return `<div class="obanner bad">⚠️ ${esc(O.err)}</div>`;
-  if(O.role==="guest" && !G) return `<div class="obanner">⏳ Looking for room ${esc(O.code)}… Make sure the host has created it. · Warte auf den Host…</div>`;
-  if(hostGone) return `<div class="obanner bad">📴 The host seems offline. Waiting for them to come back… · Host offline</div>`;
+  if(O.role==="guest" && !G) return `<div class="obanner">⏳ ${tr(`Looking for room ${esc(O.code)}… Make sure the host has created it.`,`Suche Raum ${esc(O.code)}… Hat der Host ihn erstellt?`,`Buscando la sala ${esc(O.code)}… Comprueba que el anfitrión la creó.`)}</div>`;
+  if(hostGone) return `<div class="obanner bad">${tr(`📴 The host seems offline. Waiting for them to come back…`,`📴 Der Host scheint offline. Warte, bis er zurückkommt…`,`📴 El anfitrión parece desconectado. Esperando a que vuelva…`)}</div>`;
   return "";
 }
 function oPlayersList(G){
@@ -2028,7 +2028,7 @@ function oWaitView(){
 }
 function oRequests(){
   const G=O.G; if(O.role!=="host" || !G || !(G.pending||[]).length) return "";
-  return `<div class="card reqcard"><h3>🔔 Wants to join · Möchte mitspielen</h3>${G.pending.map(q=>`
+  return `<div class="card reqcard"><h3>${tr(`🔔 Wants to join`,`🔔 Möchte mitspielen`,`🔔 Quiere unirse`)}</h3>${G.pending.map(q=>`
     <div class="player"><div class="avatar" style="background:var(--plum)">${esc(q.name.charAt(0).toUpperCase())}</div>
       <div><div class="pname">${esc(q.name)}</div><div class="pmeta">${T[q.lang].flag} ${T[q.lang].name} · ${LEVELS[q.level].code}</div></div>
       <span class="row" style="margin-left:auto;gap:6px">
@@ -2053,26 +2053,26 @@ function oCallChip(){
 }
 function oVideoSave(){
   const v=vClean((($("ovideo")||{}).value)||"");
-  if(v && !vValid(v)){ O.vErr="That doesn't look like a link. Paste the full link, e.g. https://zoom.us/j/123… · Bitte ganzen Link einfügen"; render(); return; }
+  if(v && !vValid(v)){ O.vErr=tr("That doesn't look like a link. Paste the full link, e.g. https://zoom.us/j/123…","Das sieht nicht wie ein Link aus. Bitte ganzen Link einfügen, z. B. https://zoom.us/j/123…","Eso no parece un enlace. Pega el enlace completo, p. ej. https://zoom.us/j/123…"); render(); return; }
   O.vErr=""; O.vEdit=false; act({type:"video", url:v});
 }
 function oVideoCard(){
   const G=O.G, host=O.role==="host", v=G.video||"", prov=v?(V_PROV[vProvider(v)]||"video call"):"";
-  if(host && (O.vEdit || !v)) return `<div class="card"><h3 style="margin:0 0 4px">🎥 Video call · Videoanruf</h3>
-      <p class="note" style="margin:0 0 6px">Paste your Zoom, WhatsApp, Google Meet or Teams link, or make a free Jitsi link. · Link einfügen oder Jitsi-Link erstellen.</p>
+  if(host && (O.vEdit || !v)) return `<div class="card"><h3 style="margin:0 0 4px">${tr(`🎥 Video call`,`🎥 Videoanruf`,`🎥 Videollamada`)}</h3>
+      <p class="note" style="margin:0 0 6px">${tr(`Paste your Zoom, WhatsApp, Google Meet or Teams link, or make a free Jitsi link.`,`Füge deinen Zoom-, WhatsApp-, Google-Meet- oder Teams-Link ein oder erstelle einen kostenlosen Jitsi-Link.`,`Pega tu enlace de Zoom, WhatsApp, Google Meet o Teams, o crea un enlace Jitsi gratis.`)}</p>
       <input type="text" id="ovideo" data-keep inputmode="url" autocapitalize="off" spellcheck="false" placeholder="https://…" value="${esc(O.vEdit?v:"")}" autocomplete="off" onkeydown="if(event.key==='Enter')oVideoSave()">
       ${O.vErr?`<div class="err">${esc(O.vErr)}</div>`:""}
       <div class="brow2"><button class="btn secondary" onclick="O.vErr='';O.vEdit=false;act({type:'video',url:oJitsi()})">✨ Free Jitsi link</button>
         <button class="btn primary" onclick="oVideoSave()">💾 Save link</button></div>
       ${O.vEdit?`<button class="btn ghost" onclick="O.vEdit=false;O.vErr='';render()">${tr(`Cancel`,`Abbrechen`,`Cancelar`)}</button>`:""}</div>`;
-  if(!v) return `<div class="card center"><p class="note" style="margin:0">🎥 No video link yet. The host can add one. · Noch kein Videolink.</p></div>`;
-  return `<div class="card center"><h3 style="margin:0 0 6px">🎥 Talk while you play · Sprecht beim Spielen</h3>
-      <a class="btn primary vbtn" href="${esc(v)}" target="_blank" rel="noopener noreferrer">🎥 Join ${esc(prov)} · Videoanruf</a>
-      <p class="note" style="margin:6px 0 0">Opens in a new tab. Keep this game open too: switch back to play. · Öffnet in neuem Tab. Spiel offen lassen.</p>
+  if(!v) return `<div class="card center"><p class="note" style="margin:0">${tr(`🎥 No video link yet. The host can add one.`,`🎥 Noch kein Videolink. Der Host kann einen hinzufügen.`,`🎥 Aún no hay enlace de vídeo. El anfitrión puede añadirlo.`)}</p></div>`;
+  return `<div class="card center"><h3 style="margin:0 0 6px">${tr(`🎥 Talk while you play`,`🎥 Sprecht beim Spielen`,`🎥 Hablad mientras jugáis`)}</h3>
+      <a class="btn primary vbtn" href="${esc(v)}" target="_blank" rel="noopener noreferrer">🎥 ${tr(`Join ${esc(prov)}`,`${esc(prov)} beitreten`,`Unirse a ${esc(prov)}`)}</a>
+      <p class="note" style="margin:6px 0 0">${tr(`Opens in a new tab. Keep this game open too: switch back to play.`,`Öffnet in neuem Tab. Lass das Spiel offen und wechsle zum Spielen zurück.`,`Se abre en otra pestaña. Deja también esta partida abierta y vuelve para jugar.`)}</p>
       ${host&&vProvider(v)==="jitsi"?`<p class="note" style="margin:4px 0 0">Jitsi is free; guests join without an account. As the host you may need to sign in once (Google or GitHub) to start the call.</p>`:""}
       ${host?`<div class="row" style="justify-content:center;margin:8px 0 0">
         <button class="chip" onclick="O.vEdit=true;O.vErr='';render()">✏️ Change link</button>
-        <button class="chip" onclick="navigator.clipboard&&navigator.clipboard.writeText(O.G.video).then(()=>bToast('📋 Link copied · Kopiert'),()=>{})">📋 Copy</button>
+        <button class="chip" onclick="navigator.clipboard&&navigator.clipboard.writeText(O.G.video).then(()=>bToast(tr('📋 Link copied','📋 Link kopiert','📋 Enlace copiado')),()=>{})">📋 ${tr("Copy","Kopieren","Copiar")}</button>
         <button class="chip" onclick="act({type:'video',url:''})">✕ Remove</button></div>`:""}
     </div>`;
 }
@@ -2085,36 +2085,36 @@ VIEWS.lobby = function(){
     <div class="topline"><button class="chip" onclick="confirmLeave()">← Leave</button><span>🌐 Online</span></div>
     ${oStatusBar()}
     <div class="card center">
-      <div class="note">Room code · Raumcode</div>
+      <div class="note">${tr(`Room code`,`Raumcode`,`Código de sala`)}</div>
       <div class="roomcode">${esc(O.code)}</div>
-      ${host?`<p class="note" style="margin:4px 0 10px">Share the code or the link · Code oder Link teilen</p>
+      ${host?`<p class="note" style="margin:4px 0 10px">${tr(`Share the code or the link`,`Code oder Link teilen`,`Comparte el código o el enlace`)}</p>
       <div class="exgrid">
         <button class="btn secondary exb" onclick="shareRoom()">📲 Invite</button>
         <button class="btn secondary exb" onclick="copyRoom()">📋 Copy link</button>
-      </div><p class="note" id="roomMsg" style="min-height:16px;margin:6px 0 0"></p>`:`<p class="note">You're in! · Du bist drin!</p>`}
+      </div><p class="note" id="roomMsg" style="min-height:16px;margin:6px 0 0"></p>`:`<p class="note">${tr(`You're in!`,`Du bist drin!`,`¡Estás dentro!`)}</p>`}
     </div>
     ${G?oVideoCard():""}
-    ${G?`<div class="card"><div class="topline" style="margin-bottom:4px"><h3 style="margin:0">Players · Spieler (${G.players.length}/10)</h3>${oLockBtn()}</div>
-      ${host&&G.locked?`<p class="note" style="margin:0 0 6px">🔒 Locked — nobody new can join · Gesperrt</p>`:""}${oPlayersList(G)}</div>`:""}
+    ${G?`<div class="card"><div class="topline" style="margin-bottom:4px"><h3 style="margin:0">${tr("Players","Spieler","Jugadores")} (${G.players.length}/10)</h3>${oLockBtn()}</div>
+      ${host&&G.locked?`<p class="note" style="margin:0 0 6px">${tr(`🔒 Locked — nobody new can join`,`🔒 Gesperrt — niemand Neues kann beitreten`,`🔒 Cerrada: nadie nuevo puede entrar`)}</p>`:""}${oPlayersList(G)}</div>`:""}
     ${G && host ? `<div class="card">
-      <label class="lbl" style="margin-top:0">Game · Spiel</label>
+      <label class="lbl" style="margin-top:0">${tr("Game","Spiel","Juego")}</label>
       ${gameChips(G.game,"oSetGame")}
-      ${G.game==="charades" ? `<label class="lbl">How to give clues · Hinweise</label>
+      ${G.game==="charades" ? `<label class="lbl">${tr(`How to give clues`,`Hinweise`,`Cómo dar pistas`)}</label>
       <div class="row"><button class="chip ${G.cmode!=="camera"?"on":""}" onclick="act({type:'settings',cmode:'emoji'})">😀 Emoji clues</button>
         <button class="chip ${G.cmode==="camera"?"on":""}" onclick="act({type:'settings',cmode:'camera'})">🎥 Act on camera</button></div>
-      <p class="note" style="margin:6px 0 0">${G.cmode==="camera"?"Everyone needs to be on a video call (Zoom, WhatsApp…). · Alle im Videoanruf.":"No camera needed: the actor sends emojis, the others type their guesses. · Keine Kamera nötig."}</p>
-      <label class="lbl">Difficulty · Schwierigkeit</label>${cDiffChips(G.cdiff===undefined?"auto":G.cdiff, G.players, "oSetCDiff")}`
-      : `<label class="lbl">Topic · Thema</label>
+      <p class="note" style="margin:6px 0 0">${G.cmode==="camera"?tr("Everyone needs to be on a video call (Zoom, WhatsApp…).","Alle müssen im Videoanruf sein (Zoom, WhatsApp…).","Todos deben estar en videollamada (Zoom, WhatsApp…)."):tr(`No camera needed: the actor sends emojis, the others type their guesses.`,`Keine Kamera nötig.`,`No hace falta cámara: quien actúa envía emojis y los demás escriben sus respuestas.`)}</p>
+      <label class="lbl">${tr("Difficulty","Schwierigkeit","Dificultad")}</label>${cDiffChips(G.cdiff===undefined?"auto":G.cdiff, G.players, "oSetCDiff")}`
+      : `<label class="lbl">${tr("Topic","Thema","Tema")}</label>
       <div class="row">${Object.entries(CATS).map(([k,c])=>`<button class="chip ${G.cat===k?"on":""}" onclick="act({type:'settings',cat:'${k}'})">${c.e} ${c.en} · ${c.de}</button>`).join("")}</div>`}
-      <label class="lbl">Rounds · Runden</label>
+      <label class="lbl">${tr("Rounds","Runden","Rondas")}</label>
       <div class="stepper"><button class="step" onclick="act({type:'settings',rounds:${G.rounds-1}})" ${G.rounds<=1?"disabled":""}>−</button>
-        <div class="stepval"><b>${G.rounds}</b><span>${G.rounds===1?"round · Runde":"rounds · Runden"}</span></div>
+        <div class="stepval"><b>${G.rounds}</b><span>${G.rounds===1?tr("round","Runde","ronda"):tr("rounds","Runden","rondas")}</span></div>
         <button class="step" onclick="act({type:'settings',rounds:${G.rounds+1}})" ${G.rounds>=10?"disabled":""}>+</button></div>
-      <label class="lbl">${G.game==="charades"?"Acting time · Spielzeit":"Speaking time · Sprechzeit"}</label>
+      <label class="lbl">${G.game==="charades"?tr("Acting time","Spielzeit","Tiempo de mímica"):tr("Speaking time","Sprechzeit","Tiempo para hablar")}</label>
       <div class="row">${(G.game==="charades"?[45,60,90]:[60,90,120]).map(n=>`<button class="chip ${G.time===n?"on":""}" onclick="act({type:'settings',time:${n}})">${n}s</button>`).join("")}</div>
     </div>
-    <button class="btn primary" ${G.players.length<2?'style="opacity:.45"':""} onclick="${G.players.length<2?"":"act({type:'start'})"}">▶ Start game<small>${G.players.length<2?"Waiting for at least 1 more player · Warte auf Mitspieler":"Spiel starten"}</small></button>`
-    : G ? `<div class="card center"><div class="emoji">⏳</div><p>Waiting for the host to start…<br><span class="de">Warte, bis der Host startet…</span></p>
+    <button class="btn primary" ${G.players.length<2?'style="opacity:.45"':""} onclick="${G.players.length<2?"":"act({type:'start'})"}">▶ ${tr("Start game","Spiel starten","Empezar partida")}${G.players.length<2?`<small>${tr("Waiting for at least 1 more player","Warte auf Mitspieler","Esperando al menos 1 jugador más")}</small>`:""}</button>`
+    : G ? `<div class="card center"><div class="emoji">⏳</div><p>${tr(`Waiting for the host to start…`,`Warte, bis der Host startet…`,`Esperando a que el anfitrión empiece…`)}</p>
       <p class="note">${G.game==="charades"?(G.cmode==="camera"?"🎭 Charades · 🎥 camera":"🎭 Charades · 😀 emoji clues"):`🗣️ Speak Up · ${CATS[G.cat].e} ${CATS[G.cat].en}`} · ${G.rounds} rounds · ${G.time}s</p></div>` : ""}`;
   }
   if(G.phase==="turn") return oTurnView();
@@ -2136,7 +2136,7 @@ function oTurnView(){
   const timer = tp.timer ? `<div class="timerrow"><div class="timer" id="otimer">…</div>${soundBtn()}</div><div class="bar" id="obar"><i id="obarFill"></i></div>` : "";
   const offline = !isOnline(a.id);
   return `${oHeader()}
-    <div class="turnwho">${avatar(a,G.turn)}<div>${me?`<b>${bi("Your turn!","Du bist dran!")}</b>`:`<b>${esc(a.name)}</b> <span class="note">is speaking · spricht</span>`}<br>${langBadge(L)} <span class="badge b-fmt">${LEVELS[a.level].code}</span></div></div>
+    <div class="turnwho">${avatar(a,G.turn)}<div>${me?`<b>${tr("Your turn!","Du bist dran!","¡Te toca!")}</b>`:`<b>${esc(a.name)}</b> <span class="note">${tr("is speaking","spricht","está hablando")}</span>`}<br>${langBadge(L)} <span class="badge b-fmt">${LEVELS[a.level].code}</span></div></div>
     ${offline && O.role==="host" ? `<div class="obanner bad">📴 ${esc(a.name)} seems offline. <button class="chip" onclick="act({type:'skip'})">Skip turn</button></div>`:""}
     <div class="card" dir="${X.dir}" lang="${L}">
       <div class="row"><span class="badge b-fmt">${f.e} ${fLabel}</span><span class="badge b-cat">${CATS[c.c].e} ${X.cats[c.c]}</span></div>
@@ -2144,11 +2144,11 @@ function oTurnView(){
       ${me?`<p class="note" style="margin:0 0 10px">${fHow}</p><div class="task">🎯 ${X.tasks[a.level]}${romDiv((X.tasksR||[])[a.level])}</div>
         ${tp.hintsUsed?`<div class="hints show">${c.w.map((w,k)=>`<span class="hint">${esc(w)}${romP((c.wr||[])[k])}</span>`).join("")}</div>`
           :`<button class="chip hintbtn" style="margin-top:12px" onclick="act({type:'hint'})">💬 ${X.help}</button><p class="note" style="margin:6px 0 0">🙈 ${X.nohint}</p>`}`
-        :`<p class="note" style="margin:0">🎧 Listen on the call — you'll give feedback next.<br><span class="de">Hör im Anruf zu – gleich gibst du Feedback.</span></p>`}
+        :`<p class="note" style="margin:0">${tr(`🎧 Listen on the call — you'll give feedback next.`,`🎧 Hör im Anruf zu – gleich gibst du Feedback.`,`🎧 Escucha en la llamada: luego darás feedback.`)}</p>`}
     </div>
     ${timer}
     ${me ? (tp.timer
-        ? `<button class="btn secondary" onclick="act({type:'done'})">✓ ${X.done}<small>Feedback time · Zeit für Feedback</small></button>`
+        ? `<button class="btn secondary" onclick="act({type:'done'})">✓ ${X.done}<small>${tr("Feedback time","Zeit für Feedback","Hora del feedback")}</small></button>`
         : `<button class="btn primary" onclick="act({type:'timer'})">⏱️ ${X.startTimer}<small>${X.startSub}</small></button>
            ${tp.rerolled?"":`<button class="btn ghost" onclick="act({type:'reroll'})">🔄 ${X.reroll}</button>`}`)
       : (O.role==="host" ? `<p class="note center" style="margin-top:10px">Host: if ${esc(a.name)} is stuck, you can <a href="#" onclick="act({type:'${tp.timer?"done":"timer"}'});return false">${tp.timer?"end the turn":"start the timer"}</a>.</p>` : "")}`;
@@ -2159,13 +2159,13 @@ function oFeedbackView(){
     <div class="turnwho">${avatar(a,G.turn)}<div><b>${me?bi("How did you do?","Wie war's?"):`Feedback for ${esc(a.name)}`}</b><br>${langBadge(a.lang)}</div></div>
     <div id="odyn">${oFeedbackDyn()}</div>
     ${me ? "" : `<div class="coach" style="margin-top:14px">
-      <h3>💬 Coach tip <span class="de">· Tipp</span></h3>
-      <label class="lbl" style="margin-top:6px">✍️ What ${esc(a.name)} said <span class="de">· optional</span></label>
+      <h3>💬 ${tr("Coach tip","Tipp","Consejo del coach")}</h3>
+      <label class="lbl" style="margin-top:6px">✍️ ${tr(`What ${esc(a.name)} said`,`Was ${esc(a.name)} gesagt hat`,`Lo que dijo ${esc(a.name)}`)} <span class="de">· ${tr("optional","optional","opcional")}</span></label>
       <textarea id="oans" dir="auto" rows="2" placeholder="A sentence from the answer" oninput="O.draftAns=this.value">${esc(O.draftAns)}</textarea>
-      <button class="chip" style="margin-top:6px" onclick="sendNote('ans')">Send · Senden</button>
-      <label class="lbl">💡 Tip or better phrase <span class="de">· optional</span></label>
+      <button class="chip" style="margin-top:6px" onclick="sendNote('ans')">${tr(`Send`,`Senden`,`Enviar`)}</button>
+      <label class="lbl">💡 ${tr("Tip or better phrase","Tipp oder bessere Formulierung","Consejo o frase mejor")} <span class="de">· ${tr("optional","optional","opcional")}</span></label>
       <textarea id="otip" dir="auto" rows="2" placeholder="e.g. Say “I went” instead of “I go”" oninput="O.draftTip=this.value">${esc(O.draftTip)}</textarea>
-      <button class="chip" style="margin-top:6px" onclick="sendNote('tip')">Send · Senden</button>
+      <button class="chip" style="margin-top:6px" onclick="sendNote('tip')">${tr(`Send`,`Senden`,`Enviar`)}</button>
       <p class="note" id="noteMsg" style="min-height:16px;margin:6px 0 0">${esc(O.sentNote)}</p>
     </div>`}
     <div id="odyn2">${oFeedbackDyn2()}</div>`;
@@ -2177,31 +2177,31 @@ function oFeedbackDyn(){
   const L=a.lang, rater=tp.ratedBy ? (G.players.find(p=>p.id===tp.ratedBy)||{}).name : "";
   return `
     <div class="coach coach-score">
-      <h3>🧑‍🏫 Coach score <span class="de">· Bewertung</span></h3>
-      <p style="margin:0 0 10px;font-size:15px">${me?`The best <b>${T[L].nameEn}</b> speaker is scoring you… · Du wirst bewertet…`:`The best <b>${T[L].nameEn}</b> speaker picks one. · Die Person, die am besten ${T[L].nameDe} spricht, wählt.`}</p>
+      <h3>🧑‍🏫 ${tr("Coach score","Bewertung","Puntuación del coach")}</h3>
+      <p style="margin:0 0 10px;font-size:15px">${me?tr(`The best <b>${T[L].nameEn}</b> speaker is scoring you…`,`Die Person, die am besten ${T[L].nameDe} spricht, bewertet dich…`,`Quien mejor habla ${lname(L).toLowerCase()} te está puntuando…`):tr(`The best <b>${T[L].nameEn}</b> speaker picks one.`,`Die Person, die am besten ${T[L].nameDe} spricht, wählt.`,`Quien mejor habla ${lname(L).toLowerCase()} elige una.`)}</p>
       <div class="ratings">${RATINGS.map(r=>`<button class="rate ${tp.rating===r.v?"on":""}" ${canJudge?`onclick="act({type:'rate',v:${r.v}})"`:"disabled"}>
-        <span class="e">${r.e}</span><b>${r.en}</b><span class="de">${r.de}</span><span class="rp">+${r.pts}</span></button>`).join("")}</div>
+        <span class="e">${r.e}</span><b>${tr(r.en,r.de,r.es)}</b><span class="rp">+${r.pts}</span></button>`).join("")}</div>
       ${rater?`<p class="note" style="margin:8px 0 0">Scored by ${esc(rater)}</p>`:""}
     </div>
     <div class="bonusbox">
       <h3 style="margin:0 0 8px">🎁 Bonus</h3>
-      <div class="bonus ${tp.hintsUsed?"off":"got"}"><span>🙈 <b>No hints</b> <span class="de">· Ohne Hilfe</span></span><span class="bp">${tp.hintsUsed?"–":"+2"}</span></div>
+      <div class="bonus ${tp.hintsUsed?"off":"got"}"><span>🙈 <b>${tr("No hints","Ohne Hilfe","Sin pistas")}</b></span><span class="bp">${tp.hintsUsed?"–":"+2"}</span></div>
       <button class="bonus ${tp.timeUp&&tp.kept?"got":"off"}" ${tp.timeUp&&!me?`onclick="act({type:'kept'})"`:"disabled"}>
-        <span>🎤 <b>Kept talking to the end</b> <span class="de">· Bis zum Ende</span><br><span class="note">${tp.timeUp?(me?"":(tp.kept?"Tap to remove if they went quiet":"Tap if they really kept talking")):"Finished before the timer · Vor Ablauf fertig"}</span></span>
+        <span>🎤 <b>${tr("Kept talking to the end","Bis zum Ende gesprochen","Habló hasta el final")}</b><br><span class="note">${tp.timeUp?(me?"":(tp.kept?tr("Tap to remove if they went quiet","Tippen zum Entfernen, falls Pause","Toca para quitar si se quedó callado"):tr("Tap if they really kept talking","Tippen, wenn wirklich durchgesprochen","Toca si de verdad siguió hablando"))):tr("Finished before the timer","Vor Ablauf fertig","Terminó antes del tiempo")}</span></span>
         <span class="bp">${tp.timeUp&&tp.kept?"+2":"–"}</span></button>
     </div>
-    <h3 style="margin:18px 0 4px">👏 Reactions <span class="de">· Reaktionen</span></h3>
-    <p class="note" style="margin:0 0 10px">${me?"Your table's reactions · Reaktionen der Gruppe":"Pick one — tap again to undo · Eine wählen"}</p>
+    <h3 style="margin:18px 0 4px">👏 ${tr("Reactions","Reaktionen","Reacciones")}</h3>
+    <p class="note" style="margin:0 0 10px">${me?tr("Your table's reactions","Reaktionen der Gruppe","Reacciones de tu mesa"):tr("Pick one — tap again to undo","Eine wählen — nochmal tippen zum Rückgängigmachen","Elige una; toca otra vez para deshacer")}</p>
     <div class="reacts">${REACTS.map(r=>`<button class="react ${mine===r.k?"hit":""}" ${me?"disabled":`onclick="act({type:'react',k:'${r.k}'})"`}>
-      ${counts[r.k]?`<span class="n">${counts[r.k]}</span>`:""}<span class="e">${r.e}</span>${r.en}<br><span class="de">${r.de}</span></button>`).join("")}</div>
+      ${counts[r.k]?`<span class="n">${counts[r.k]}</span>`:""}<span class="e">${r.e}</span>${tr(r.en,r.de,r.es)}</button>`).join("")}</div>
     `;
 }
 function oFeedbackDyn2(){
   const G=O.G, a=G.players[G.turn], tp=G.tp, me=a.id===O.me.id, canJudge=!me||O.role==="host";
   return `
-    ${tp.notes.length?`<div class="card" style="margin-top:14px"><h3>📝 Notes · Notizen</h3>${tp.notes.map(n=>`<p style="margin:6px 0">${n.type==="tip"?"💡":"✍️"} <span dir="auto">${esc(n.text)}</span> <span class="note">— ${esc(n.by)}</span></p>`).join("")}</div>`:""}
-    ${canJudge ? `<button class="btn primary" ${tp.rating?"":'style="opacity:.45"'} onclick="${tp.rating?"act({type:'next'})":"needScore()"}">${oIsLast()?"See results 🏆":"Next player →"}<small>${tp.rating?(oIsLast()?"Ergebnisse":"Nächste Person"):"Coach: pick a score first · Erst bewerten"}</small></button>`
-      : `<p class="note center" style="margin-top:14px">⏳ Waiting for the coach and the table… · Warte auf Feedback…</p>`}`;
+    ${tp.notes.length?`<div class="card" style="margin-top:14px"><h3>📝 ${tr("Notes","Notizen","Notas")}</h3>${tp.notes.map(n=>`<p style="margin:6px 0">${n.type==="tip"?"💡":"✍️"} <span dir="auto">${esc(n.text)}</span> <span class="note">— ${esc(n.by)}</span></p>`).join("")}</div>`:""}
+    ${canJudge ? `<button class="btn primary" ${tp.rating?"":'style="opacity:.45"'} onclick="${tp.rating?"act({type:'next'})":"needScore()"}">${oIsLast()?tr("See results 🏆","Ergebnisse 🏆","Ver resultados 🏆"):tr("Next player →","Nächste Person →","Siguiente jugador →")}${tp.rating?"":`<small>${tr("Coach: pick a score first","Coach: erst bewerten","Coach: primero puntúa")}</small>`}</button>`
+      : `<p class="note center" style="margin-top:14px">${tr(`⏳ Waiting for the coach and the table…`,`⏳ Warte auf Coach und Gruppe…`,`⏳ Esperando al coach y a la mesa…`)}</p>`}`;
 }
 function needScore(){ const el=document.querySelector(".coach-score"); if(el){ el.classList.add("need"); el.scrollIntoView({behavior:"smooth",block:"center"}); } }
 function sendNote(kind){
@@ -2210,7 +2210,7 @@ function sendNote(kind){
   act({type:"note", note:kind, text:v});
   if(kind==="ans") O.draftAns=""; else O.draftTip="";
   const el=$(kind==="ans"?"oans":"otip"); if(el) el.value="";
-  O.sentNote="Sent ✓ · Gesendet ✓"; const m=$("noteMsg"); if(m) m.textContent=O.sentNote;
+  O.sentNote=tr("Sent ✓","Gesendet ✓","Enviado ✓"); const m=$("noteMsg"); if(m) m.textContent=O.sentNote;
 }
 function oResultsView(){
   const G=O.G, ranked=G.players.map((p,i)=>({p,i})).sort((a,b)=>b.p.pts-a.p.pts), medals=["🥇","🥈","🥉"];
@@ -2218,26 +2218,26 @@ function oResultsView(){
   const avg = p => p.ratings.length ? (()=>{ const a=p.ratings.reduce((x,y)=>x+y,0)/p.ratings.length; const r=RATINGS[Math.min(3,Math.max(0,Math.round(a)-1))]; return `${r.e} ${r.en}`; })() : "";
   return `
     <div class="topline"><span>🌐 ${esc(O.code)}</span><span class="row" style="gap:6px">${oCallChip()}${oLockBtn()}<button class="chip" onclick="confirmLeave()">✕ Leave</button></span></div>${oStatusBar()}${oRequests()}
-    <h1 class="center">🏆</h1><h2 class="center">${bi("Great game!","Super gespielt!")}</h2>
+    <h1 class="center">🏆</h1><h2 class="center">${tr("Great game!","Super gespielt!","¡Gran partida!")}</h2>
     <div class="card">${ranked.map((r,n)=>`<div class="rank"><span class="medal">${medals[n]||"⭐"}</span>${avatar(r.p,r.i)}
       <div><div class="pname">${esc(r.p.name)} ${r.p.id===O.me.id?'<span class="note">(you)</span>':""}</div><div class="pmeta">${T[r.p.lang].flag} ${LEVELS[r.p.level].code}${r.p.ratings.length?` · ${avg(r.p)}`:""}</div></div>
       <span class="pts">${r.p.pts}</span></div>`).join("")}</div>
-    ${G.game==="charades" && charadesAwards(G.players) ? `<div class="card"><h3>Awards <span class="de">· Auszeichnungen</span></h3>${charadesAwards(G.players)}</div>` : ""}
+    ${G.game==="charades" && charadesAwards(G.players) ? `<div class="card"><h3>${tr("Awards","Auszeichnungen","Premios")}</h3>${charadesAwards(G.players)}</div>` : ""}
     ${saveCardOnline()}
     <div class="card">
-      <h3>📤 Your review <span class="de">· Deine Auswertung</span></h3>
+      <h3>📤 ${tr("Your review","Deine Auswertung","Tu repaso")}</h3>
       <p class="note">Your questions, answers, useful words and tips — to practice later.</p>
-      ${meIdx>=0?`<button class="btn primary" onclick="openExport(${meIdx}, oCtx())">📤 My review · Meine Auswertung</button>`:""}
+      ${meIdx>=0?`<button class="btn primary" onclick="openExport(${meIdx}, oCtx())">${tr(`📤 My review`,`📤 Meine Auswertung`,`📤 Mi repaso`)}</button>`:""}
       ${O.role==="host"?`<button class="btn secondary" onclick="openExport(-1, oCtx())">📋 Export whole game<small>Ganzes Spiel (für Host)</small></button>`:""}
     </div>
     <div class="card center">
-      <h3>Did you enjoy it? <span class="de">· Hat's Spaß gemacht?</span></h3>
+      <h3>${tr("Did you enjoy it?","Hat's Spaß gemacht?","¿Te gustó?")}</h3>
       <div class="faces">${["😞","😐","🙂","😄","🤩"].map((f,i)=>`<button class="face ${O.rating===i+1?"on":""}" onclick="oRate(${i+1})">${f}</button>`).join("")}</div>
     </div>
-    ${O.role==="host" ? `<button class="btn primary" onclick="bump('replays');act({type:'start'})">🔁 Play another round!<small>Same players · Gleiche Gruppe</small></button>
+    ${O.role==="host" ? `<button class="btn primary" onclick="bump('replays');act({type:'start'})">🔁 ${tr("Play another round!","Noch eine Runde!","¡Otra ronda!")}<small>${tr("Same players","Gleiche Gruppe","Mismos jugadores")}</small></button>
       <button class="btn secondary" onclick="act({type:'lobby'})">👥 Back to lobby<small>Change settings or players</small></button>`
-      : `<p class="note center">The host can start another round · Der Host kann neu starten</p>`}
-    <button class="btn ghost" onclick="confirmLeave()">🏠 Leave & go home · Zur Startseite</button>`;
+      : `<p class="note center">${tr(`The host can start another round`,`Der Host kann neu starten`,`El anfitrión puede empezar otra ronda`)}</p>`}
+    <button class="btn ghost" onclick="confirmLeave()">${tr(`🏠 Leave & go home`,`🏠 Verlassen & zur Startseite`,`🏠 Salir e ir al inicio`)}</button>`;
 }
 function oCtx(){ return {players:O.G.players, log:O.G.log||[], rounds:O.G.rounds, clog:O.G.clog||[]}; }
 function oRate(n){ const first=O.rating===null; O.rating=n; const s=loadStats(); if(first) s.ratings.push(n); else s.ratings[s.ratings.length-1]=n; saveStats(s); renderOnline(true); }
@@ -2250,14 +2250,14 @@ async function shareRoom(){
 }
 async function copyRoom(){
   const m=$("roomMsg");
-  try{ await navigator.clipboard.writeText(roomLink()); if(m) m.textContent="Link copied! · Kopiert!"; }
+  try{ await navigator.clipboard.writeText(roomLink()); if(m) m.textContent=tr("Link copied!","Link kopiert!","¡Enlace copiado!"); }
   catch(e){ if(m) m.textContent=roomLink(); }
 }
 function confirmLeave(){
   const box=document.createElement("div");
   box.style.cssText="position:fixed;inset:0;background:rgba(43,33,64,.45);display:grid;place-items:center;padding:20px;z-index:9";
   box.innerHTML=`<div class="card" style="max-width:360px;width:100%"><h3>Leave this game?</h3><p class="note">${O.role==="host"?"You're the host — the game stops for everyone.":"You can rejoin with the same code."}</p>
-    <button class="btn primary" id="lYes">Leave · Verlassen</button><button class="btn ghost" id="lNo">Stay · Bleiben</button></div>`;
+    <button class="btn primary" id="lYes">${tr("Leave","Verlassen","Salir")}</button><button class="btn ghost" id="lNo">${tr("Stay","Bleiben","Quedarme")}</button></div>`;
   document.body.appendChild(box);
   $("lNo").onclick=()=>box.remove(); $("lYes").onclick=()=>{ box.remove(); onlineLeave(); };
 }
@@ -2265,8 +2265,8 @@ function hostMenu(){
   const box=document.createElement("div");
   box.className="sheet-bg";
   box.innerHTML=`<div class="sheet"><div class="topline"><h3 style="margin:0">⚙️ Host</h3><button class="chip" id="hmX">✕</button></div>
-    <button class="btn secondary" id="hmSkip">⏭️ Skip this turn<small>No points · Ohne Punkte</small></button>
-    <button class="btn secondary" id="hmEnd">🏁 End game now<small>Show results · Ergebnisse zeigen</small></button>
+    <button class="btn secondary" id="hmSkip">⏭️ ${tr("Skip this turn","Diesen Zug überspringen","Saltar este turno")}<small>${tr("No points","Ohne Punkte","Sin puntos")}</small></button>
+    <button class="btn secondary" id="hmEnd">🏁 ${tr("End game now","Spiel jetzt beenden","Terminar ahora")}<small>${tr("Show results","Ergebnisse zeigen","Ver resultados")}</small></button>
     <button class="btn ghost" id="hmLobby">👥 Back to lobby</button></div>`;
   document.body.appendChild(box);
   const close=()=>box.remove();
@@ -2308,11 +2308,11 @@ setInterval(()=>{ if(S.screen==="lobby" && O.role==="guest") renderOnline(); }, 
 const CW_LANGS = ["en","de","es","pt","pl","uk","ar","ur"];
 const CW = [["🐶",0,["dog","der Hund","el perro","o cachorro","pies","собака","كلب"]],["🐱",0,["cat","die Katze","el gato","o gato","kot","кіт","قطة"]],["🐘",0,["elephant","der Elefant","el elefante","o elefante","słoń","слон","فيل"]],["🐒",0,["monkey","der Affe","el mono","o macaco","małpa","мавпа","قرد"]],["🐍",0,["snake","die Schlange","la serpiente","a cobra","wąż","змія","ثعبان"]],["🐔",0,["chicken","das Huhn","la gallina","a galinha","kura","курка","دجاجة"]],["🐟",0,["fish","der Fisch","el pez","o peixe","ryba","риба","سمكة"]],["🦁",0,["lion","der Löwe","el león","o leão","lew","лев","أسد"]],["🐰",0,["rabbit","das Kaninchen","el conejo","o coelho","królik","кролик","أرنب"]],["🦆",0,["duck","die Ente","el pato","o pato","kaczka","качка","بطة"]],["🍌",0,["banana","die Banane","el plátano","a banana","banan","банан","موزة"]],["🍎",0,["apple","der Apfel","la manzana","a maçã","jabłko","яблуко","تفاحة"]],["🍕",0,["pizza","die Pizza","la pizza","a pizza","pizza","піца","بيتزا"]],["🍦",0,["ice cream","das Eis","el helado","o sorvete","lody","морозиво","بوظة"]],["☕",0,["coffee","der Kaffee","el café","o café","kawa","кава","قهوة"]],["🍝",0,["spaghetti","die Spaghetti","los espaguetis","o espaguete","spaghetti","спагеті","معكرونة"]],["🥚",0,["egg","das Ei","el huevo","o ovo","jajko","яйце","بيضة"]],["📱",0,["phone","das Handy","el móvil","o celular","telefon","телефон","هاتف"]],["🚗",0,["car","das Auto","el coche","o carro","samochód","автомобіль","سيارة"]],["🚲",0,["bicycle","das Fahrrad","la bicicleta","a bicicleta","rower","велосипед","دراجة"]],["✈️",0,["airplane","das Flugzeug","el avión","o avião","samolot","літак","طائرة"]],["☂️",0,["umbrella","der Regenschirm","el paraguas","o guarda-chuva","parasol","парасолька","مظلة"]],["👓",0,["glasses","die Brille","las gafas","os óculos","okulary","окуляри","نظارة"]],["🎸",0,["guitar","die Gitarre","la guitarra","o violão","gitara","гітара","غيتار"]],["⚽",0,["football","der Fußball","el fútbol","o futebol","piłka nożna","футбол","كرة القدم"]],["🪥",0,["toothbrush","die Zahnbürste","el cepillo de dientes","a escova de dentes","szczoteczka do zębów","зубна щітка","فرشاة أسنان"]],["🛏️",0,["bed","das Bett","la cama","a cama","łóżko","ліжко","سرير"]],["🔑",0,["key","der Schlüssel","la llave","a chave","klucz","ключ","مفتاح"]],["👶",0,["baby","das Baby","el bebé","o bebê","niemowlę","немовля","طفل رضيع"]],["🌧️",0,["rain","der Regen","la lluvia","a chuva","deszcz","дощ","مطر"]],["🏊",1,["swimming","schwimmen","nadar","nadar","pływać","плавати","السباحة"]],["💃",1,["dancing","tanzen","bailar","dançar","tańczyć","танцювати","الرقص"]],["😴",1,["sleeping","schlafen","dormir","dormir","spać","спати","النوم"]],["🍳",1,["cooking","kochen","cocinar","cozinhar","gotować","готувати","الطبخ"]],["🚿",1,["taking a shower","duschen","ducharse","tomar banho","brać prysznic","приймати душ","الاستحمام"]],["🦷",1,["brushing your teeth","Zähne putzen","lavarse los dientes","escovar os dentes","myć zęby","чистити зуби","تنظيف الأسنان"]],["📖",1,["reading","lesen","leer","ler","czytać","читати","القراءة"]],["🎤",1,["singing","singen","cantar","cantar","śpiewać","співати","الغناء"]],["🏃",1,["running","laufen","correr","correr","biegać","бігати","الجري"]],["🚴",1,["cycling","Rad fahren","montar en bici","andar de bicicleta","jeździć na rowerze","кататися на велосипеді","ركوب الدراجة"]],["📞",1,["calling someone","telefonieren","llamar por teléfono","ligar para alguém","dzwonić do kogoś","дзвонити комусь","الاتصال بالهاتف"]],["🤳",1,["taking a selfie","ein Selfie machen","hacerse un selfie","tirar uma selfie","robić selfie","робити селфі","التقاط صورة سيلفي"]],["🧹",1,["cleaning","putzen","limpiar","limpar","sprzątać","прибирати","التنظيف"]],["👕",1,["ironing","bügeln","planchar","passar roupa","prasować","прасувати","الكيّ"]],["🛒",1,["shopping","einkaufen","ir de compras","fazer compras","robić zakupy","робити покупки","التسوق"]],["🚘",1,["driving","Auto fahren","conducir","dirigir","prowadzić samochód","водити машину","قيادة السيارة"]],["🎣",1,["fishing","angeln","pescar","pescar","łowić ryby","рибалити","صيد السمك"]],["🧘",1,["doing yoga","Yoga machen","hacer yoga","fazer ioga","ćwiczyć jogę","займатися йогою","ممارسة اليوغا"]],["📸",1,["taking a photo","fotografieren","hacer una foto","tirar uma foto","robić zdjęcie","фотографувати","التصوير"]],["🍽️",1,["eating","essen","comer","comer","jeść","їсти","الأكل"]],["🥱",1,["yawning","gähnen","bostezar","bocejar","ziewać","позіхати","التثاؤب"]],["🤧",1,["sneezing","niesen","estornudar","espirrar","kichać","чхати","العطس"]],["🎹",1,["playing the piano","Klavier spielen","tocar el piano","tocar piano","grać na pianinie","грати на піаніно","العزف على البيانو"]],["🧗",1,["climbing","klettern","escalar","escalar","wspinać się","лазити по скелях","التسلق"]],["🏋️",1,["lifting weights","Gewichte heben","levantar pesas","levantar peso","podnosić ciężary","піднімати штангу","رفع الأثقال"]],["🎨",1,["painting","malen","pintar","pintar","malować","малювати","الرسم"]],["🧳",1,["packing a suitcase","den Koffer packen","hacer la maleta","fazer a mala","pakować walizkę","пакувати валізу","تحضير الحقيبة"]],["⛷️",1,["skiing","Ski fahren","esquiar","esquiar","jeździć na nartach","кататися на лижах","التزلج"]],["🌱",1,["gardening","im Garten arbeiten","trabajar en el jardín","cuidar do jardim","pracować w ogrodzie","працювати в саду","البستنة"]],["🐕",1,["walking the dog","mit dem Hund Gassi gehen","pasear al perro","passear com o cachorro","wyprowadzać psa","вигулювати собаку","تمشية الكلب"]],["👨‍🍳",2,["chef","der Koch / die Köchin","el cocinero / la cocinera","o cozinheiro / a cozinheira","kucharz / kucharka","кухар / кухарка","طبّاخ"]],["👩‍⚕️",2,["doctor","der Arzt / die Ärztin","el médico / la médica","o médico / a médica","lekarz / lekarka","лікар / лікарка","طبيب"]],["👮",2,["police officer","der Polizist / die Polizistin","el policía / la policía","o policial / a policial","policjant / policjantka","поліцейський / поліцейська","شرطي"]],["💇",2,["hairdresser","der Friseur / die Friseurin","el peluquero / la peluquera","o cabeleireiro / a cabeleireira","fryzjer / fryzjerka","перукар / перукарка","مصفّف شعر"]],["🧑‍🏫",2,["teacher","der Lehrer / die Lehrerin","el profesor / la profesora","o professor / a professora","nauczyciel / nauczycielka","вчитель / вчителька","معلّم"]],["🧑‍🚒",2,["firefighter","der Feuerwehrmann / die Feuerwehrfrau","el bombero / la bombera","o bombeiro / a bombeira","strażak / strażaczka","пожежник / пожежниця","رجل إطفاء"]],["🦷",2,["dentist","der Zahnarzt / die Zahnärztin","el dentista / la dentista","o dentista / a dentista","dentysta / dentystka","стоматолог / стоматологиня","طبيب أسنان"]],["🧑‍✈️",2,["pilot","der Pilot / die Pilotin","el piloto / la piloto","o piloto / a piloto","pilot / pilotka","пілот / пілотеса","طيّار"]],["🤵",2,["waiter","der Kellner / die Kellnerin","el camarero / la camarera","o garçom / a garçonete","kelner / kelnerka","офіціант / офіціантка","نادل"]],["📷",2,["photographer","der Fotograf / die Fotografin","el fotógrafo / la fotógrafa","o fotógrafo / a fotógrafa","fotograf / fotografka","фотограф / фотографиня","مصوّر"]],["🏗️",2,["construction worker","der Bauarbeiter / die Bauarbeiterin","el albañil / la albañila","o pedreiro / a pedreira","budowlaniec","будівельник / будівельниця","عامل بناء"]],["🎻",2,["musician","der Musiker / die Musikerin","el músico / la música","o músico / a musicista","muzyk / muzyczka","музикант / музикантка","موسيقي"]],["🚌",2,["missing the bus","den Bus verpassen","perder el autobús","perder o ônibus","spóźnić się na autobus","запізнитися на автобус","فوات الحافلة"]],["🗝️",2,["losing your keys","den Schlüssel verlieren","perder las llaves","perder as chaves","zgubić klucze","загубити ключі","فقدان المفاتيح"]],["🎂",2,["a birthday party","eine Geburtstagsparty","una fiesta de cumpleaños","uma festa de aniversário","przyjęcie urodzinowe","вечірка на день народження","حفلة عيد ميلاد"]],["💍",2,["a wedding","eine Hochzeit","una boda","um casamento","ślub","весілля","حفل زفاف"]],["🩺",2,["going to the doctor","zum Arzt gehen","ir al médico","ir ao médico","iść do lekarza","йти до лікаря","الذهاب إلى الطبيب"]],["🛄",2,["checking in at the airport","am Flughafen einchecken","facturar en el aeropuerto","fazer o check-in no aeroporto","odprawa na lotnisku","реєстрація в аеропорту","تسجيل الوصول في المطار"]],["🎬",2,["going to the cinema","ins Kino gehen","ir al cine","ir ao cinema","iść do kina","йти в кіно","الذهاب إلى السينما"]],["🌹",2,["a first date","das erste Date","la primera cita","o primeiro encontro","pierwsza randka","перше побачення","الموعد الأول"]],["☔",2,["getting caught in the rain","vom Regen überrascht werden","mojarse con la lluvia","pegar chuva","zmoknąć na deszczu","потрапити під дощ","التبلّل بالمطر"]],["🧾",2,["paying the bill","die Rechnung bezahlen","pagar la cuenta","pagar a conta","płacić rachunek","оплатити рахунок","دفع الفاتورة"]],["🥶",2,["being cold","frieren","tener frío","sentir frio","marznąć","мерзнути","الشعور بالبرد"]],["😱",2,["being scared","Angst haben","tener miedo","ter medo","bać się","боятися","الخوف"]],["🤒",2,["having a fever","Fieber haben","tener fiebre","estar com febre","mieć gorączkę","мати температуру","الإصابة بالحمّى"]],["🚕",2,["hailing a taxi","ein Taxi heranwinken","parar un taxi","chamar um táxi","łapać taksówkę","ловити таксі","إيقاف سيارة أجرة"]],["🧊",2,["slipping on ice","auf dem Eis ausrutschen","resbalar en el hielo","escorregar no gelo","poślizgnąć się na lodzie","посковзнутися на льоду","الانزلاق على الجليد"]],["🎁",2,["opening a present","ein Geschenk auspacken","abrir un regalo","abrir um presente","otwierać prezent","відкривати подарунок","فتح هدية"]],["🏕️",2,["camping","zelten","ir de camping","acampar","biwakować","жити в наметі","التخييم"]],["🥴",2,["jet lag","der Jetlag","el jet lag","o jet lag","jet lag","джетлаг","اضطراب الرحلات الجوية"]],["🥰",3,["falling in love","sich verlieben","enamorarse","apaixonar-se","zakochać się","закохатися","الوقوع في الحب"]],["😤",3,["being jealous","eifersüchtig sein","estar celoso","estar com ciúmes","być zazdrosnym","ревнувати","الغيرة"]],["😳",3,["being embarrassed","verlegen sein","tener vergüenza","ficar com vergonha","wstydzić się","соромитися","الإحراج"]],["🤯",3,["being stressed","gestresst sein","estar estresado","estar estressado","być zestresowanym","бути в стресі","التوتر"]],["🏆",3,["winning the lottery","im Lotto gewinnen","ganar la lotería","ganhar na loteria","wygrać na loterii","виграти в лотерею","الفوز باليانصيب"]],["🧟",3,["a zombie","ein Zombie","un zombi","um zumbi","zombie","зомбі","زومبي"]],["🦸",3,["a superhero","ein Superheld","un superhéroe","um super-herói","superbohater","супергерой","بطل خارق"]],["🏴‍☠️",3,["a pirate","ein Pirat","un pirata","um pirata","pirat","пірат","قرصان"]],["🧜",3,["a mermaid","eine Meerjungfrau","una sirena","uma sereia","syrena","русалка","حورية البحر"]],["👻",3,["a ghost","ein Gespenst","un fantasma","um fantasma","duch","привид","شبح"]],["🕵️",3,["a detective","ein Detektiv","un detective","um detetive","detektyw","детектив","محقّق"]],["🤖",3,["a robot","ein Roboter","un robot","um robô","robot","робот","روبوت"]],["🧙",3,["a wizard","ein Zauberer","un mago","um mago","czarodziej","чарівник","ساحر"]],["🚀",3,["an astronaut","ein Astronaut","un astronauta","um astronauta","astronauta","астронавт","رائد فضاء"]],["🦖",3,["a dinosaur","ein Dinosaurier","un dinosaurio","um dinossauro","dinozaur","динозавр","ديناصور"]],["🎢",3,["a roller coaster","eine Achterbahn","una montaña rusa","uma montanha-russa","kolejka górska","американські гірки","قطار الملاهي"]],["🌋",3,["a volcano","ein Vulkan","un volcán","um vulcão","wulkan","вулкан","بركان"]],["🌪️",3,["a tornado","ein Tornado","un tornado","um tornado","tornado","торнадо","إعصار"]],["🤐",3,["keeping a secret","ein Geheimnis bewahren","guardar un secreto","guardar um segredo","dochować tajemnicy","зберігати таємницю","كتمان السرّ"]],["⏰",3,["oversleeping","verschlafen","quedarse dormido","perder a hora","zaspać","проспати","النوم أكثر من اللازم"]],["🤥",3,["telling a lie","lügen","mentir","mentir","kłamać","брехати","الكذب"]],["🤝",3,["a job interview","ein Vorstellungsgespräch","una entrevista de trabajo","uma entrevista de emprego","rozmowa kwalifikacyjna","співбесіда","مقابلة عمل"]],["📦",3,["moving house","umziehen","mudarse de casa","mudar de casa","przeprowadzać się","переїжджати","الانتقال إلى منزل جديد"]],["🗣️",3,["learning a language","eine Sprache lernen","aprender un idioma","aprender um idioma","uczyć się języka","вивчати мову","تعلّم لغة"]],["🌍",3,["travelling around the world","um die Welt reisen","viajar por el mundo","viajar pelo mundo","podróżować dookoła świata","подорожувати світом","السفر حول العالم"]],["🔥",3,["a barbecue","ein Grillfest","una barbacoa","um churrasco","grill","барбекю","حفلة شواء"]],["🧩",3,["doing a jigsaw puzzle","ein Puzzle machen","hacer un rompecabezas","montar um quebra-cabeça","układać puzzle","складати пазл","تركيب أحجية"]],["🧘‍♀️",3,["meditating","meditieren","meditar","meditar","medytować","медитувати","التأمّل"]],["🎉",3,["a surprise party","eine Überraschungsparty","una fiesta sorpresa","uma festa surpresa","impreza niespodzianka","вечірка-сюрприз","حفلة مفاجئة"]],["🥵",3,["a heatwave","eine Hitzewelle","una ola de calor","uma onda de calor","fala upałów","спека","موجة حرّ"]]]; // [emoji, difficulty, [en,de,es,pt,pl,uk,ar]]
 const CDIFF = [
-  {k:0, e:"🟢", en:"Easy",   de:"Leicht",  hint:"Animals, food, things · Tiere, Essen, Dinge"},
-  {k:1, e:"🟡", en:"Medium", de:"Mittel",  hint:"Actions · Tätigkeiten"},
-  {k:2, e:"🟠", en:"Hard",   de:"Schwer",  hint:"Jobs & situations · Berufe & Situationen"},
-  {k:3, e:"🔴", en:"Expert", de:"Experte", hint:"Feelings & stories · Gefühle & Geschichten"},
-  {k:"mix", e:"🎲", en:"Mix", de:"Gemischt", hint:"A bit of everything · Von allem etwas"}
+  {k:0, e:"🟢", en:"Easy",   de:"Leicht",  es:"Fácil", hint:"Animals, food, things · Tiere, Essen, Dinge · Animales, comida, cosas"},
+  {k:1, e:"🟡", en:"Medium", de:"Mittel",  es:"Medio", hint:"Actions · Tätigkeiten · Acciones"},
+  {k:2, e:"🟠", en:"Hard",   de:"Schwer",  es:"Difícil", hint:"Jobs & situations · Berufe & Situationen · Trabajos y situaciones"},
+  {k:3, e:"🔴", en:"Expert", de:"Experte", es:"Experto", hint:"Feelings & stories · Gefühle & Geschichten · Sentimientos e historias"},
+  {k:"mix", e:"🎲", en:"Mix", de:"Gemischt", es:"Mezcla", hint:"A bit of everything · Von allem etwas · Un poco de todo"}
 ];
 CW.forEach((x,i)=>x[2].push(["کتا","بلی","ہاتھی","بندر","سانپ","مرغی","مچھلی","شیر","خرگوش","بطخ","کیلا","سیب","پیزا","آئس کریم","کافی","سپیگٹی","انڈا","موبائل فون","گاڑی","سائیکل","ہوائی جہاز","چھتری","عینک","گٹار","فٹ بال","ٹوتھ برش","بستر","چابی","بچہ","بارش","تیراکی","ناچنا","سونا","کھانا پکانا","نہانا","دانت صاف کرنا","پڑھنا","گانا گانا","دوڑنا","سائیکل چلانا","فون کرنا","سیلفی لینا","صفائی کرنا","استری کرنا","خریداری کرنا","گاڑی چلانا","مچھلی پکڑنا","یوگا کرنا","تصویر کھینچنا","کھانا کھانا","جمائی لینا","چھینکنا","پیانو بجانا","چڑھائی کرنا","وزن اٹھانا","پینٹنگ کرنا","سوٹ کیس پیک کرنا","اسکیئنگ کرنا","باغبانی","کتے کو سیر کرانا","باورچی","ڈاکٹر","پولیس والا","حجام / بیوٹیشن","استاد / استانی","فائر فائٹر","دانتوں کا ڈاکٹر","پائلٹ","ویٹر","فوٹوگرافر","مزدور","موسیقار","بس چھوٹ جانا","چابیاں گم کرنا","سالگرہ کی پارٹی","شادی","ڈاکٹر کے پاس جانا","ایئرپورٹ پر چیک اِن کرنا","سینما جانا","پہلی ملاقات","بارش میں بھیگ جانا","بل ادا کرنا","سردی لگنا","ڈر لگنا","بخار ہونا","ٹیکسی روکنا","برف پر پھسلنا","تحفہ کھولنا","کیمپنگ","جیٹ لیگ","محبت ہو جانا","حسد کرنا","شرمندہ ہونا","ذہنی دباؤ","لاٹری جیتنا","زومبی","سپر ہیرو","بحری قزاق","جل پری","بھوت","جاسوس","روبوٹ","جادوگر","خلاباز","ڈائنوسار","رولر کوسٹر","آتش فشاں","طوفان","راز رکھنا","دیر تک سوتے رہنا","جھوٹ بولنا","نوکری کا انٹرویو","گھر بدلنا","زبان سیکھنا","دنیا کی سیر","باربی کیو","پزل جوڑنا","مراقبہ","سرپرائز پارٹی","شدید گرمی"][i]));
 const CW_R = { ar:["kalb","qitta","fiil","qird","thu'baan","dajaaja","samaka","asad","arnab","batta","mawza","tuffaaha","biitza","buuza","qahwa","ma'karuuna","bayda","haatif","sayyaara","darraaja","taa'ira","mizalla","nazzaara","giitaar","kurat al-qadam","furshaat asnaan","sariir","miftaah","tifl radii'","matar","as-sibaaha","ar-raqs","an-nawm","at-tabkh","al-istihmaam","tanziif al-asnaan","al-qiraa'a","al-ghinaa'","al-jary","rukuub ad-darraaja","al-ittisaal bil-haatif","iltiqaat suurat selfie","at-tanziif","al-kayy","at-tasawwuq","qiyaadat as-sayyaara","sayd as-samak","mumaarasat al-yooga","at-taswiir","al-akl","at-tathaa'ub","al-'uts","al-'azf 'ala al-piyaano","at-tasalluq","raf' al-athqaal","ar-rasm","tahdiir al-haqiiba","at-tazalluj","al-bastana","tamshiyat al-kalb","tabbaakh","tabiib","shurti","musaffif sha'r","mu'allim","rajul itfaa'","tabiib asnaan","tayyaar","naadil","musawwir","'aamil binaa'","muusiiqi","fawaat al-haafila","fuqdaan al-mafaatiih","haflat 'iid miilaad","hafl zifaaf","adh-dhahaab ila at-tabiib","tasjiil al-wusuul fi al-mataar","adh-dhahaab ila as-siinama","al-maw'id al-awwal","at-taballul bil-matar","daf' al-faatuura","ash-shu'uur bil-bard","al-khawf","al-isaaba bil-humma","iiqaaf sayyaarat ujra","al-inzilaaq 'ala al-jaliid","fath hadiyya","at-takhyiim","idtiraab ar-rahalaat al-jawwiyya","al-wuquu' fi al-hubb","al-ghayra","al-ihraaj","at-tawattur","al-fawz bil-yaanasiib","zoombi","batal khaariq","qursaan","huuriyyat al-bahr","shabah","muhaqqiq","roobot","saahir","raa'id fadaa'","diinaasuur","qitaar al-malaahi","burkaan","i'saar","kitmaan as-sirr","an-nawm akthar min al-laazim","al-kadhib","muqaabalat 'amal","al-intiqaal ila manzil jadiid","ta'allum lugha","as-safar hawl al-'aalam","haflat shiwaa'","tarkiib uhjiya","at-ta'ammul","hafla mufaaji'a","mawjat harr"], ur:["kutta","billi","haathi","bandar","saanp","murghi","machhli","sher","khargosh","batakh","kela","seb","pizza","ice cream","coffee","spaghetti","anda","mobile phone","gaari","cycle","hawaai jahaaz","chhatri","ainak","guitar","football","toothbrush","bistar","chaabi","bachcha","baarish","tairaaki","naachna","sona","khaana pakaana","nahaana","daant saaf karna","parhna","gaana gaana","daurna","cycle chalaana","phone karna","selfie lena","safaai karna","istri karna","khareedaari karna","gaari chalaana","machhli pakarna","yoga karna","tasveer khainchna","khaana khaana","jamaai lena","chheenkna","piano bajaana","charhaai karna","wazan uthaana","painting karna","suitcase pack karna","skiing karna","baaghbaani","kutte ko sair karaana","baawarchi","doctor","police waala","hajjaam / beautician","ustaad / ustaani","fire fighter","daanton ka doctor","pilot","waiter","photographer","mazdoor","mauseeqaar","bus chhoot jaana","chaabiyaan gum karna","saalgirah ki party","shaadi","doctor ke paas jaana","airport par check-in karna","cinema jaana","pehli mulaaqaat","baarish mein bheeg jaana","bill ada karna","sardi lagna","dar lagna","bukhaar hona","taxi rokna","barf par phisalna","tohfa kholna","camping","jet lag","mohabbat ho jaana","hasad karna","sharminda hona","zehni dabaao","lottery jeetna","zombie","superhero","behri qazzaaq","jal pari","bhoot","jaasoos","robot","jaadugar","khalaabaaz","dinosaur","roller coaster","aatish fishaan","toofaan","raaz rakhna","der tak sote rehna","jhooth bolna","naukri ka interview","ghar badalna","zabaan seekhna","duniya ki sair","barbecue","puzzle jorna","muraaqaba","surprise party","shadeed garmi"] };
@@ -2406,17 +2406,17 @@ function cGuesserLangs(players, actorIdx){ return [...new Set(players.filter((p,
 function cDiffChips(cur, players, onclickFn){
   const auto = cAutoDiff(players);
   return `<div class="row">
-    <button class="chip ${cur==="auto"?"on":""}" onclick="${onclickFn}('auto')">✨ Auto · ${CDIFF[auto].e} ${CDIFF[auto].en}</button>
-    ${CDIFF.map(d=>`<button class="chip ${cur===d.k?"on":""}" onclick="${onclickFn}(${typeof d.k==="string"?`'${d.k}'`:d.k})">${d.e} ${d.en} · ${d.de}</button>`).join("")}</div>
-    <p class="note" style="margin:6px 0 0">${cur==="auto"?`Picked from the lowest level at the table · nach dem niedrigsten Niveau`:esc((CDIFF.find(d=>d.k===cur)||{}).hint||"")}</p>`;
+    <button class="chip ${cur==="auto"?"on":""}" onclick="${onclickFn}('auto')">✨ Auto · ${CDIFF[auto].e} ${tr(CDIFF[auto].en,CDIFF[auto].de,CDIFF[auto].es)}</button>
+    ${CDIFF.map(d=>`<button class="chip ${cur===d.k?"on":""}" onclick="${onclickFn}(${typeof d.k==="string"?`'${d.k}'`:d.k})">${d.e} ${tr(d.en,d.de,d.es)}</button>`).join("")}</div>
+    <p class="note" style="margin:6px 0 0">${cur==="auto"?tr("Picked from the lowest level at the table","Nach dem niedrigsten Niveau am Tisch","Según el nivel más bajo de la mesa"):esc((h=>{ const p=h.split(" · "); return tr(p[0],p[1]||p[0],p[2]||p[0]); })((CDIFF.find(d=>d.k===cur)||{}).hint||""))}</p>`;
 }
 function gameChips(cur, fn){
   return `<div class="row">
     <button class="chip ${cur!=="charades"?"on":""}" onclick="${fn}('speak')">🗣️ Speak Up</button>
-    <button class="chip ${cur==="charades"?"on":""}" onclick="${fn}('charades')">🎭 Charades · Pantomime</button></div>
+    <button class="chip ${cur==="charades"?"on":""}" onclick="${fn}('charades')">🎭 ${tr("Charades","Pantomime","Mímica")}</button></div>
     <p class="note" style="margin:6px 0 0">${cur==="charades"
-      ? "Act out words without speaking — the others guess out loud in their practice language. · Ohne Worte vorspielen, die anderen raten."
-      : "Answer speaking challenges, get coached and scored. · Sprechaufgaben mit Feedback."}</p>`;
+      ? tr("Act out words without speaking — the others guess out loud in their practice language.","Wörter ohne Sprechen vorspielen — die anderen raten laut in ihrer Übungssprache.","Representa palabras sin hablar: los demás adivinan en voz alta en el idioma que practican.")
+      : tr("Answer speaking challenges, get coached and scored.","Sprechaufgaben beantworten, Feedback und Punkte bekommen.","Responde retos orales, recibe consejos y puntos.")}</p>`;
 }
 
 /* ---------- one phone ---------- */
@@ -2462,10 +2462,10 @@ function cNext(){
 }
 VIEWS.chandoff = function(){
   const p=S.players[S.turn], i=S.turn;
-  return `<div class="topline"><span>Round ${S.round}/${S.rounds} · Runde ${S.round}</span><button class="chip" onclick="confirmQuit()">End game</button></div>
+  return `<div class="topline"><span>${tr("Round","Runde","Ronda")} ${S.round}/${S.rounds}</span><button class="chip" onclick="confirmQuit()">${tr("End game","Spiel beenden","Terminar juego")}</button></div>
   <div class="handoff">
     <div class="emoji">🎭</div>
-    <p class="sub" style="margin:10px 0 0">${bi("Pass the phone to","Gib das Handy weiter an")}</p>
+    <p class="sub" style="margin:10px 0 0">${tr("Pass the phone to","Gib das Handy weiter an","Pasa el móvil a")}</p>
     <div class="big-name" style="color:${COLORS[i%COLORS.length]}">${esc(p.name)}</div>
     <div>${langBadge(p.lang)}</div>
     <p class="note" style="margin-top:14px">🤫 You're the actor — don't let the others see the screen!<br><span class="de">Du spielst vor – niemand darf den Bildschirm sehen!</span></p>
@@ -6070,7 +6070,7 @@ function attShow(){
           <div class="row">${chip(p,"on_time","✓ On time")}${chip(p,"late","⏰ Late")}${chip(p,"no_show","✗ No-show")}</div></div>`).join("")}
     ${AT.list&&AT.list.length?`<p class="note" style="margin:10px 0 0">People you don't mark aren't counted either way. Be fair: a no-show lowers their score. · Unmarkierte zählen nicht.</p>`:""}
     ${AT.err?`<div class="err">${esc(AT.err)}</div>`:""}
-    ${AT.list&&AT.list.length?`<button class="btn primary" ${AT.busy?"disabled":""} onclick="attSave()">${AT.busy?tr(`Saving…`,`Speichert…`,`Guardando…`):"💾 Save · Speichern"}</button>`:""}
+    ${AT.list&&AT.list.length?`<button class="btn primary" ${AT.busy?"disabled":""} onclick="attSave()">${AT.busy?tr(`Saving…`,`Speichert…`,`Guardando…`):tr(`💾 Save`,`💾 Speichern`,`💾 Guardar`)}</button>`:""}
   </div>`;
 }
 async function attSave(){
@@ -7846,7 +7846,7 @@ const VC_V="2026-11-22c";
 const VC_LEVELS=["A1","A2","B1"];
 const VC_DECK="de";
 const VC_LANGS=[["en","English"],["es","Español"],["ar","العربية"],["fa","فارسی / دری"]];
-const VC={ d:null, err:"", p:{}, days:{}, goal:10, lang:"en", level:"A1", run:null, dirty:{}, dayDirty:false, chk:null };
+const VC={ d:null, err:"", p:{}, days:{}, goal:10, lang:(typeof UI!=="undefined"&&UI==="es")?"es":"en", level:"A1", run:null, dirty:{}, dayDirty:false, chk:null };
 function vcLoadLocal(){ try{ const v=JSON.parse(localStorage.getItem("pt_vocab_"+VC_DECK)||"{}"); VC.p=v.p||{}; VC.days=v.days||{}; VC.goal=v.goal||10; VC.lang=v.lang||VC.lang; VC.level=v.level||"A1"; }catch(e){} }
 function vcSaveLocal(){ try{ localStorage.setItem("pt_vocab_"+VC_DECK, JSON.stringify({ p:VC.p, days:VC.days, goal:VC.goal, lang:VC.lang, level:VC.level })); }catch(e){} }
 (function(){ try{ const l=(navigator.language||"en").slice(0,2); if(["es","ar","fa"].includes(l)) VC.lang=l; }catch(e){} vcLoadLocal(); })();
@@ -7865,7 +7865,7 @@ async function vcOpen(){
   go("vocab");
   try{ await vcLoadData();
     await Promise.all([vcSync(), DT.man===undefined?dtLoadManifest():null]); }
-  catch(e){ VC.err="Couldn't load the words. Check your connection · Wörter konnten nicht geladen werden"; }
+  catch(e){ VC.err=tr("Couldn't load the words. Check your connection","Wörter konnten nicht geladen werden. Prüfe deine Verbindung","No se pudieron cargar las palabras. Revisa tu conexión"); }
   if(/^vocab/.test(S.screen)) xr();
 }
 /* merge server progress (newest wins) */
@@ -7919,19 +7919,19 @@ function vcHow(){
   const box=document.createElement("div"); box.className="sheet-bg"; box.id="vcHow";
   const step=(n,e,en,de,es)=>`<div style="display:flex;gap:12px;align-items:flex-start;margin:0 0 14px"><span style="flex:none;width:30px;height:30px;border-radius:50%;background:var(--coral);color:#fff;display:grid;place-items:center;font-weight:800">${n}</span>
     <div><b>${e} ${es===undefined?en:tr(en,de,es)}</b>${es===undefined?`<br><span class="de" style="color:var(--muted)">${de}</span>`:""}</div></div>`;
-  box.innerHTML=`<div class="sheet" role="dialog" aria-label="How flashcards work"><h3 style="margin:0 0 4px">🃏 How it works · So funktioniert's</h3>
-    <p class="note" style="margin:0 0 14px">A few minutes a day. Words come back right before you'd forget them. · Ein paar Minuten am Tag.</p>
-    ${step(1,"👀","Look at the word and think: what does it mean? Say it out loud.","Schau das Wort an: Was bedeutet es? Sag es laut.")}
-    ${step(2,"👆","Tap “Show” to see the meaning and an example.","Tippe auf „Zeigen“: Bedeutung und Beispiel.")}
-    ${step(3,"✅","Be honest: how well did you know it?","Ehrlich: Wie gut wusstest du es?")}
+  box.innerHTML=`<div class="sheet" role="dialog" aria-label="How flashcards work"><h3 style="margin:0 0 4px">🃏 ${tr("How it works","So funktioniert's","Cómo funciona")}</h3>
+    <p class="note" style="margin:0 0 14px">${tr("A few minutes a day. Words come back right before you'd forget them.","Ein paar Minuten am Tag. Wörter kommen zurück, kurz bevor du sie vergessen würdest.","Unos minutos al día. Las palabras vuelven justo antes de que las olvides.")}</p>
+    ${step(1,"👀","Look at the word and think: what does it mean? Say it out loud.","Schau das Wort an: Was bedeutet es? Sag es laut.","Mira la palabra y piensa: ¿qué significa? Dila en voz alta.")}
+    ${step(2,"👆","Tap “Show” to see the meaning and an example.","Tippe auf „Zeigen“: Bedeutung und Beispiel.","Toca “Mostrar” para ver el significado y un ejemplo.")}
+    ${step(3,"✅","Be honest: how well did you know it?","Ehrlich: Wie gut wusstest du es?","Sé sincero: ¿qué tan bien la sabías?")}
     <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 10px;font-size:14px;margin:-4px 0 14px 42px">
-      <b style="color:#D9466A">Again</b><span>didn't know it → back in a few minutes</span>
-      <b style="color:#E59A2F">Hard</b><span>knew it, but hard → back tomorrow</span>
-      <b style="color:#2A8C82">Good</b><span>knew it → back in a few days</span>
-      <b style="color:#2F6FD1">Easy</b><span>too easy → back much later</span></div>
-    ${step(4,"🔁","Later, reviews mix it up: pick the German word, or der / die / das.","Später gemischt: richtiges Wort wählen oder der / die / das.")}
-    <div class="note" style="background:var(--sun-soft);border-radius:12px;padding:10px 12px;margin:0 0 12px">💡 Colours help you remember: <b style="color:#2F6FD1">der</b> · <b style="color:#D9466A">die</b> · <b style="color:#2A8C82">das</b>. Come back every day for your 🔥 streak.</div>
-    <button class="btn primary" onclick="document.getElementById('vcHow').remove()">Got it! · Alles klar!</button></div>`;
+      <b style="color:#D9466A">${tr("Again","Nochmal","Otra vez")}</b><span>${tr("didn't know it → back in a few minutes","nicht gewusst → in ein paar Minuten wieder","no la sabía → vuelve en unos minutos")}</span>
+      <b style="color:#E59A2F">${tr("Hard","Schwer","Difícil")}</b><span>${tr("knew it, but hard → back tomorrow","gewusst, aber schwer → morgen wieder","la sabía, pero costó → vuelve mañana")}</span>
+      <b style="color:#2A8C82">${tr("Good","Gut","Bien")}</b><span>${tr("knew it → back in a few days","gewusst → in ein paar Tagen wieder","la sabía → vuelve en unos días")}</span>
+      <b style="color:#2F6FD1">${tr("Easy","Leicht","Fácil")}</b><span>${tr("too easy → back much later","zu leicht → viel später wieder","muy fácil → vuelve mucho después")}</span></div>
+    ${step(4,"🔁","Later, reviews mix it up: pick the German word, or der / die / das.","Später gemischt: richtiges Wort wählen oder der / die / das.","Luego los repasos se mezclan: elige la palabra alemana o der / die / das.")}
+    <div class="note" style="background:var(--sun-soft);border-radius:12px;padding:10px 12px;margin:0 0 12px">💡 ${tr("Colours help you remember:","Farben helfen beim Merken:","Los colores te ayudan a recordar:")} <b style="color:#2F6FD1">der</b> · <b style="color:#D9466A">die</b> · <b style="color:#2A8C82">das</b>. ${tr("Come back every day for your 🔥 streak.","Komm jeden Tag wieder für deine 🔥 Serie.","Vuelve cada día para tu 🔥 racha.")}</div>
+    <button class="btn primary" onclick="document.getElementById('vcHow').remove()">${tr("Got it!","Alles klar!","¡Entendido!")}</button></div>`;
   box.addEventListener("click",e=>{ if(e.target===box) box.remove(); });
   document.body.appendChild(box);
 }
@@ -7947,7 +7947,7 @@ function vcStart(mode, theme){
     for(const w of fresh) list.push({ id:w.id, type:"new" });
     if(!list.length&&!theme) for(const w of W.filter(w=>w.lv===VC.level&&!(VC.p[w.id]&&VC.p[w.id].r)).slice(0,VC.goal)) list.push({ id:w.id, type:"new" }); // extra words on request
   }
-  if(!list.length){ bToast(mode==="gender"?"Nothing yet":"All done for today 🎉 · Alles erledigt"); return; }
+  if(!list.length){ bToast(mode==="gender"?tr("Nothing yet","Noch nichts","Aún nada"):tr("All done for today 🎉","Für heute alles erledigt 🎉","Todo hecho por hoy 🎉")); return; }
   VC.run={ list:mode==="gender"?list:[...list.filter(c=>c.type!=="new").slice(0,10), ...list.filter(c=>c.type==="new"), ...list.filter(c=>c.type!=="new").slice(10)], i:0, show:false, pick:null, ok:0, n:0, mode, seen:{} };
   go("vocabq");
   let seen=false; try{ seen=!!localStorage.getItem("pt_vc_how"); }catch(e){} if(!seen&&mode!=="gender") setTimeout(vcHow,250);
@@ -7961,25 +7961,25 @@ VIEWS.vocabq = function(){
   const r=VC.run; if(!r) return `<p class="note center">…</p>`;
   const c=r.list[r.i], w=VC.byId[c.id], dir=vcRtl()?"rtl":"auto";
   if(!c.opts&&(c.type==="pick"||c.type==="listen")) c.opts=vcOpts(w);
-  const back=`<div class="topline"><button class="chip" onclick="vcQuit()">✕ Stop</button><span class="ecmeta"><button class="linkbtn" style="margin-right:8px" onclick="vcHow()">ℹ️ How it works</button>${r.i+1} / ${r.list.length}</span></div>
+  const back=`<div class="topline"><button class="chip" onclick="vcQuit()">✕ ${tr("Stop","Stopp","Parar")}</button><span class="ecmeta"><button class="linkbtn" style="margin-right:8px" onclick="vcHow()">ℹ️ ${tr("How it works","So funktioniert's","Cómo funciona")}</button>${r.i+1} / ${r.list.length}</span></div>
     <div class="exbar" style="margin:0 0 12px"><i style="width:${Math.round((r.i)/r.list.length*100)}%;background:var(--coral)"></i></div>`;
   const xid="VX-"+w.id, xv=DT.man&&DT.man.clips&&DT.man.clips[xid];
   const reveal=`<div class="vcmean" dir="${dir}">${esc(vcTr(w))}</div>${w.pl?`<div class="vcpl">Plural: ${esc(w.pl)}</div>`:""}<div class="vcex" lang="de">${esc(w.ex)}${xv?` <button class="linkbtn" style="text-decoration:none" onclick="exSay('${xid}',VC.byId['${w.id}'].ex)" aria-label="Listen">🔊</button>`:""}</div>`;
-  const rate=`<div class="vcrate">${[["Again","Nochmal","#D9466A",0],["Hard","Schwer","#E59A2F",1],["Good","Gut","#2A8C82",2],["Easy","Leicht","#2F6FD1",3]].map(([a,b,col,g])=>`<button style="background:${col}" onclick="vcRate(${g})">${a}<small>${b}</small></button>`).join("")}</div>`;
+  const rate=`<div class="vcrate">${[["Again","Nochmal","#D9466A",0,"Otra vez"],["Hard","Schwer","#E59A2F",1,"Difícil"],["Good","Gut","#2A8C82",2,"Bien"],["Easy","Leicht","#2F6FD1",3,"Fácil"]].map(([a,b,col,g,e])=>`<button style="background:${col}" onclick="vcRate(${g})">${tr(a,b,e)}${UI==="de"?"":`<small>${b}</small>`}</button>`).join("")}</div>`;
   let h=back;
   if(c.type==="new"||c.type==="flip"){
-    h+=`<div class="vccard">${c.type==="new"?`<div class="ecmeta">🆕 New word · Neues Wort</div>`:""}<div class="vcw" lang="de">${vcWordHtml(w)} ${vcSpk(w)}</div>
+    h+=`<div class="vccard">${c.type==="new"?`<div class="ecmeta">${tr(`🆕 New word`,`🆕 Neues Wort`,`🆕 Palabra nueva`)}</div>`:""}<div class="vcw" lang="de">${vcWordHtml(w)} ${vcSpk(w)}</div>
       ${r.show?reveal:`<div class="note">💭 Think of the meaning, then tap Show<br>Überlege, dann tippe auf Zeigen</div>`}</div>
-      ${r.show?`<p class="note center" style="margin:12px 0 0">How well did you know it? · Wie gut wusstest du es?</p>`+rate:`<button class="btn primary qbtn" style="margin-top:12px" onclick="VC.run.show=true;xr()">Show · Zeigen</button>`}`;
+      ${r.show?`<p class="note center" style="margin:12px 0 0">${tr(`How well did you know it?`,`Wie gut wusstest du es?`,`¿Qué tan bien la sabías?`)}</p>`+rate:`<button class="btn primary qbtn" style="margin-top:12px" onclick="VC.run.show=true;xr()">${tr(`Show`,`Zeigen`,`Mostrar`)}</button>`}`;
   } else if(c.type==="pick"||c.type==="listen"){
-    h+=`<div class="vccard" style="min-height:150px">${c.type==="listen"?`<div class="ecmeta">🔊 Listen and choose · Hören</div><button class="btn primary" style="width:auto;margin:6px auto" onclick="vcSay(VC.byId['${w.id}'])">🔊 Play</button>`
-        :`<div class="ecmeta">Which German word? · Welches Wort?</div><div class="vcmean" style="font-size:26px" dir="${dir}">${esc(vcTr(w))}</div>`}</div>
+    h+=`<div class="vccard" style="min-height:150px">${c.type==="listen"?`<div class="ecmeta">🔊 ${tr("Listen and choose","Hören und wählen","Escucha y elige")}</div><button class="btn primary" style="width:auto;margin:6px auto" onclick="vcSay(VC.byId['${w.id}'])">🔊 ${tr("Play","Abspielen","Reproducir")}</button>`
+        :`<div class="ecmeta">${tr(`Which German word?`,`Welches deutsche Wort?`,`¿Qué palabra alemana?`)}</div><div class="vcmean" style="font-size:26px" dir="${dir}">${esc(vcTr(w))}</div>`}</div>
       ${c.opts.map((o,k)=>{ let cl=""; if(r.pick!==null){ if(o.id===w.id) cl="ok"; else if(k===r.pick) cl="no"; }
         return `<button class="exopt ${cl}" ${r.pick!==null?"disabled":""} onclick="vcPick(${k})"><span lang="${c.type==="listen"?"":"de"}" dir="${c.type==="listen"?dir:"auto"}">${c.type==="listen"?esc(vcTr(o)):vcWordHtml(o)}</span></button>`; }).join("")}
       ${r.pick!==null?`<div class="vccard" style="min-height:0;margin-top:10px"><div class="vcw" style="font-size:26px" lang="de">${vcWordHtml(w)} ${vcSpk(w)}</div>${reveal}</div><button class="btn primary qbtn" style="margin-top:10px" onclick="vcNext()">${tr("Next →","Weiter →","Siguiente →")}</button>`:""}`;
   } else if(c.type==="gender"){
     const noun=w.w.replace(/^(der|die|das) /,"");
-    h+=`<div class="vccard" style="min-height:180px"><div class="ecmeta">der, die or das?</div><div class="vcw" lang="de">${r.pick!==null?vcWordHtml(w):`<span style="color:#9AA1AC">___</span> ${esc(noun)}`}</div>
+    h+=`<div class="vccard" style="min-height:180px"><div class="ecmeta">${tr("der, die or das?","der, die oder das?","¿der, die o das?")}</div><div class="vcw" lang="de">${r.pick!==null?vcWordHtml(w):`<span style="color:#9AA1AC">___</span> ${esc(noun)}`}</div>
       ${r.pick!==null?`<div class="vcmean" dir="${dir}">${esc(vcTr(w))}</div>${w.pl?`<div class="vcpl">Plural: ${esc(w.pl)}</div>`:""}`:""}</div>
       <div class="vcg">${[["der","#2F6FD1"],["die","#D9466A"],["das","#2A8C82"]].map(([g,col],k)=>`<button style="background:${col};${r.pick!==null&&g!==w.g?"opacity:.35":""}" ${r.pick!==null?"disabled":""} onclick="vcPick(${k})">${g}</button>`).join("")}</div>
       ${r.pick!==null?`<div class="${["der","die","das"][r.pick]===w.g?"ok":"err"}" style="margin-top:10px">${["der","die","das"][r.pick]===w.g?"✅ Richtig!":`❌ ${esc(w.w)}`}</div><button class="btn primary qbtn" style="margin-top:10px" onclick="vcNext()">${tr("Next →","Weiter →","Siguiente →")}</button>`:""}`;
@@ -7999,84 +7999,85 @@ function vcQuit(){ exHush(); const r=VC.run; if(r&&r.n) vcFinish(); else { VC.ru
 async function vcFinish(){ const r=VC.run; VC.res={ n:r.n, ok:r.ok, mode:r.mode }; VC.run=null; go("vocabr"); await vcFlush(); }
 VIEWS.vocabr = function(){
   const x=VC.res||{ n:0, ok:0 }, st=vcStats(), sk=vcStreak();
-  return `<div class="topline"><button class="chip" onclick="go('vocab')">← Vocabulary</button><span></span></div>
-    <div class="card center"><div style="font-size:54px">${sk>1?"🔥":"🎉"}</div><h2 style="margin:4px 0">Well done! · Super gemacht!</h2>
-      <div style="font-size:36px;font-weight:800;margin:6px 0">${x.ok} / ${x.n}</div><p class="note" style="margin:0">correct · richtig${sk?` · 🔥 ${sk} day${sk>1?"s":""} in a row`:""}</p>
-      ${(()=>{ const s2=vcStats(vcLv(VC.level)); return `<p class="note">${VC.level}: ${s2.learned} of ${s2.total} words learned · ${s2.mastered} mastered</p>`; })()}
-      <div class="row" style="gap:8px;justify-content:center;margin-top:10px"><button class="btn primary" onclick="vcStart('learn')">Keep going · Weiter</button><button class="btn secondary" onclick="go('vocab')">${tr(`Done`,`Fertig`,`Hecho`)}</button></div></div>`;
+  return `<div class="topline"><button class="chip" onclick="go('vocab')">← ${tr("Vocabulary","Wortschatz","Vocabulario")}</button><span></span></div>
+    <div class="card center"><div style="font-size:54px">${sk>1?"🔥":"🎉"}</div><h2 style="margin:4px 0">${tr("Well done!","Super gemacht!","¡Muy bien!")}</h2>
+      <div style="font-size:36px;font-weight:800;margin:6px 0">${x.ok} / ${x.n}</div><p class="note" style="margin:0">${tr("correct","richtig","correctas")}${sk?" · 🔥 "+tr(`${sk} day${sk>1?"s":""} in a row`,`${sk} Tag${sk>1?"e":""} in Folge`,`${sk} día${sk>1?"s":""} seguidos`):""}</p>
+      ${(()=>{ const s2=vcStats(vcLv(VC.level)); return `<p class="note">${VC.level}: ${tr(`${s2.learned} of ${s2.total} words learned · ${s2.mastered} mastered`,`${s2.learned} von ${s2.total} Wörtern gelernt · ${s2.mastered} sicher`,`${s2.learned} de ${s2.total} palabras aprendidas · ${s2.mastered} dominadas`)}</p>`; })()}
+      <div class="row" style="gap:8px;justify-content:center;margin-top:10px"><button class="btn primary" onclick="vcStart('learn')">${tr("Keep going","Weiter","Seguir")}</button><button class="btn secondary" onclick="go('vocab')">${tr(`Done`,`Fertig`,`Hecho`)}</button></div></div>`;
 };
 /* ---------- quick level check ---------- */
 function vcCheckStart(){ if(!VC.d) return; const list=[];
   for(const lv of VC_LEVELS){ const pool=vcLv(lv).filter(w=>!(VC.p[w.id]&&VC.p[w.id].r)); list.push(...exShuffle(pool).slice(0,12)); }
-  if(list.length<10){ bToast("You already know most words 🎉"); return; }
+  if(list.length<10){ bToast(tr("You already know most words 🎉","Du kennst schon die meisten Wörter 🎉","Ya sabes la mayoría de las palabras 🎉")); return; }
   VC.chk={ list:exShuffle(list), i:0, yes:{}, n:{}, show:false }; go("vocabchk"); }
 VIEWS.vocabchk = function(){
   const k=VC.chk; if(!k) return "";
   if(k.i>=k.list.length){
     const rows=VC_LEVELS.map(lv=>{ const n=k.n[lv]||0, y=k.yes[lv]||0, pct=n?Math.round(y/n*100):0; return { lv, pct, est:Math.round(pct/100*vcLv(lv).length) }; });
     const sug=(rows.find(r=>r.pct<80)||rows[rows.length-1]).lv; VC.level=sug; vcSaveLocal();
-    return `<div class="topline"><button class="chip" onclick="go('vocab')">← Vocabulary</button><span></span></div>
-      <div class="card center"><div style="font-size:48px">📊</div><h2 style="margin:4px 0">Your result · Dein Ergebnis</h2>
-      ${rows.map(r=>`<div style="text-align:left;margin:10px 0"><div class="ectop"><b>${r.lv}</b><span class="ecmeta">about ${r.pct}% · ≈ ${r.est} words</span></div><div class="exbar" style="margin-top:4px"><i style="width:${r.pct}%"></i></div></div>`).join("")}
-      <p class="note">We'll start you at <b>${sug}</b>. Words you knew are marked as learned and come back for review.</p>
-      <button class="btn primary" onclick="vcStart('learn')">Start learning ${sug} · Los geht's</button></div>`; }
+    return `<div class="topline"><button class="chip" onclick="go('vocab')">← ${tr("Vocabulary","Wortschatz","Vocabulario")}</button><span></span></div>
+      <div class="card center"><div style="font-size:48px">📊</div><h2 style="margin:4px 0">${tr("Your result","Dein Ergebnis","Tu resultado")}</h2>
+      ${rows.map(r=>`<div style="text-align:left;margin:10px 0"><div class="ectop"><b>${r.lv}</b><span class="ecmeta">${tr(`about ${r.pct}% · ≈ ${r.est} words`,`etwa ${r.pct} % · ≈ ${r.est} Wörter`,`aprox. ${r.pct} % · ≈ ${r.est} palabras`)}</span></div><div class="exbar" style="margin-top:4px"><i style="width:${r.pct}%"></i></div></div>`).join("")}
+      <p class="note">${tr(`We'll start you at <b>${sug}</b>. Words you knew are marked as learned and come back for review.`,`Du startest bei <b>${sug}</b>. Wörter, die du kanntest, sind als gelernt markiert und kommen zur Wiederholung.`,`Empezarás en <b>${sug}</b>. Las palabras que sabías se marcan como aprendidas y vuelven para repasar.`)}</p>
+      <button class="btn primary" onclick="vcStart('learn')">${tr(`Start learning ${sug}`,`${sug} lernen – los geht's`,`Empezar a aprender ${sug}`)}</button></div>`; }
   const w=k.list[k.i];
-  return `<div class="topline"><button class="chip" onclick="go('vocab')">✕ Stop</button><span class="ecmeta">${k.i+1} / ${k.list.length}</span></div>
+  return `<div class="topline"><button class="chip" onclick="go('vocab')">✕ ${tr("Stop","Stopp","Parar")}</button><span class="ecmeta">${k.i+1} / ${k.list.length}</span></div>
     <div class="exbar" style="margin:0 0 12px"><i style="width:${Math.round(k.i/k.list.length*100)}%;background:var(--coral)"></i></div>
-    <div class="vccard"><div class="ecmeta">Do you know this word? · Kennst du das Wort?</div><div class="vcw" lang="de">${vcWordHtml(w)}</div>
-      ${k.show?`<div class="vcmean" dir="${vcRtl()?"rtl":"auto"}">${esc(vcTr(w))}</div>`:`<button class="linkbtn" onclick="VC.chk.show=true;xr()">Check the meaning · Bedeutung zeigen</button>`}</div>
-    <div class="row" style="gap:8px;margin-top:12px"><button class="btn secondary" style="flex:1" onclick="vcChk(false)">✗ No · Nein</button><button class="btn primary" style="flex:1" onclick="vcChk(true)">✓ I know it · Ja</button></div>`;
+    <div class="vccard"><div class="ecmeta">${tr(`Do you know this word?`,`Kennst du das Wort?`,`¿Conoces esta palabra?`)}</div><div class="vcw" lang="de">${vcWordHtml(w)}</div>
+      ${k.show?`<div class="vcmean" dir="${vcRtl()?"rtl":"auto"}">${esc(vcTr(w))}</div>`:`<button class="linkbtn" onclick="VC.chk.show=true;xr()">${tr(`Check the meaning`,`Bedeutung zeigen`,`Ver el significado`)}</button>`}</div>
+    <div class="row" style="gap:8px;margin-top:12px"><button class="btn secondary" style="flex:1" onclick="vcChk(false)">${tr(`✗ No`,`✗ Nein`,`✗ No`)}</button><button class="btn primary" style="flex:1" onclick="vcChk(true)">${tr(`✓ I know it`,`✓ Kenne ich`,`✓ La sé`)}</button></div>`;
 };
 function vcChk(yes){ const k=VC.chk, w=k.list[k.i]; k.n[w.lv]=(k.n[w.lv]||0)+1; if(yes){ k.yes[w.lv]=(k.yes[w.lv]||0)+1; const now=Date.now(); VC.p[w.id]={ i:7, e:2.5, d:now+7*864e5, r:1, l:0, u:now }; VC.dirty[w.id]=1; }
   k.i++; k.show=false; if(k.i>=k.list.length) vcFlush(); xr(); }
 /* ---------- hub ---------- */
 VIEWS.vocab = function(){
-  let h=`<div class="topline"><button class="chip" onclick="go('home')">← Home</button><span>🃏 Vocabulary</span></div>
-    <h2 style="margin:6px 0 2px">Wortschatz · Vocabulary</h2>
-    <p class="sub" style="margin:0 0 6px">German flashcards that come back at the right time, so words stick.</p>
-    <div style="display:inline-block;background:var(--teal-soft);color:var(--teal);font-weight:800;font-size:13px;border-radius:999px;padding:5px 12px;margin:0 0 10px">🎉 Free during our launch · Kostenlos zum Start</div>`;
+  let h=`<div class="topline"><button class="chip" onclick="go('home')">← ${tr("Home","Start","Inicio")}</button><span>🃏 ${tr("Vocabulary","Wortschatz","Vocabulario")}</span></div>
+    <h2 style="margin:6px 0 2px">${tr("Wortschatz · Vocabulary","Wortschatz","Wortschatz · Vocabulario")}</h2>
+    <p class="sub" style="margin:0 0 6px">${tr("German flashcards that come back at the right time, so words stick.","Deutsch-Karteikarten, die zur richtigen Zeit wiederkommen, damit Wörter hängen bleiben.","Tarjetas de alemán que vuelven en el momento justo para que las palabras se queden.")}</p>
+    <div style="display:inline-block;background:var(--teal-soft);color:var(--teal);font-weight:800;font-size:13px;border-radius:999px;padding:5px 12px;margin:0 0 10px">${tr(`🎉 Free during our launch`,`🎉 Kostenlos zum Start`,`🎉 Gratis durante el lanzamiento`)}</div>`;
   if(VC.err) return h+`<div class="err">${esc(VC.err)}</div>`;
   if(!VC.d) return h+`<p class="note center">${tr(`Loading…`,`Lädt…`,`Cargando…`)}</p>`;
   const st=vcStats(), sk=vcStreak(), today=VC.days[vcToday()]||{ n:0,c:0,w:0 }, newLeft=Math.max(0,VC.goal-(today.w||0));
   h+=`<div class="card"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end">
-      <label class="lbl" style="margin:0">🌍 My language<select onchange="VC.lang=this.value;vcSaveLocal();xr()" style="width:100%;margin-top:4px;border:2px solid var(--line);border-radius:12px;padding:10px;font:600 15px 'Plus Jakarta Sans',sans-serif">${VC_LANGS.map(([k,n])=>`<option value="${k}" ${VC.lang===k?"selected":""}>${n}</option>`).join("")}</select></label>
-      <label class="lbl" style="margin:0">🎯 New words a day<select onchange="VC.goal=+this.value;vcSaveLocal();xr()" style="width:100%;margin-top:4px;border:2px solid var(--line);border-radius:12px;padding:10px;font:600 15px 'Plus Jakarta Sans',sans-serif">${[5,10,20].map(n=>`<option value="${n}" ${VC.goal===n?"selected":""}>${n}</option>`).join("")}</select></label></div></div>
-    <div class="card" style="border:2px solid var(--coral)"><div class="ectop"><h3 style="margin:0">📅 Today · Heute</h3><b>🔥 ${sk} day${sk===1?"":"s"}</b></div>
-      <p class="note" style="margin:6px 0 10px">${st.due} to review · ${newLeft} new words left today${today.n?` · done today: ${today.n}`:""}</p>
-      <button class="btn primary qbtn" onclick="vcStart('learn')">${st.due||newLeft?"▶️ Start · Los geht's":"➕ Learn more words"}</button>
-      <button class="linkbtn" onclick="vcHow()">ℹ️ How it works · So funktioniert's</button>
-      ${!st.learned?`<button class="btn secondary qbtn" onclick="vcCheckStart()">📊 Quick level check (2 min)</button>`:""}</div>
-    <div class="card"><h3 style="margin:0 0 4px">📈 My level · Mein Niveau</h3>
-      <p class="note" style="margin:0 0 8px">Tap a level to learn its new words. <span style="color:var(--teal)">■</span> learned · <span style="color:var(--plum)">■</span> mastered</p>
+      <label class="lbl" style="margin:0">🌍 ${tr("My language","Meine Sprache","Mi idioma")}<select onchange="VC.lang=this.value;vcSaveLocal();xr()" style="width:100%;margin-top:4px;border:2px solid var(--line);border-radius:12px;padding:10px;font:600 15px 'Plus Jakarta Sans',sans-serif">${VC_LANGS.map(([k,n])=>`<option value="${k}" ${VC.lang===k?"selected":""}>${n}</option>`).join("")}</select></label>
+      <label class="lbl" style="margin:0">🎯 ${tr("New words a day","Neue Wörter pro Tag","Palabras nuevas al día")}<select onchange="VC.goal=+this.value;vcSaveLocal();xr()" style="width:100%;margin-top:4px;border:2px solid var(--line);border-radius:12px;padding:10px;font:600 15px 'Plus Jakarta Sans',sans-serif">${[5,10,20].map(n=>`<option value="${n}" ${VC.goal===n?"selected":""}>${n}</option>`).join("")}</select></label></div></div>
+    <div class="card" style="border:2px solid var(--coral)"><div class="ectop"><h3 style="margin:0">📅 ${tr("Today","Heute","Hoy")}</h3><b>🔥 ${tr(`${sk} day${sk===1?"":"s"}`,`${sk} Tag${sk===1?"":"e"}`,`${sk} día${sk===1?"":"s"}`)}</b></div>
+      <p class="note" style="margin:6px 0 10px">${tr(`${st.due} to review · ${newLeft} new words left today${today.n?` · done today: ${today.n}`:""}`,`${st.due} zu wiederholen · noch ${newLeft} neue Wörter heute${today.n?` · heute geschafft: ${today.n}`:""}`,`${st.due} por repasar · quedan ${newLeft} palabras nuevas hoy${today.n?` · hechas hoy: ${today.n}`:""}`)}</p>
+      <button class="btn primary qbtn" onclick="vcStart('learn')">${st.due||newLeft?"▶️ "+tr("Start","Los geht's","Empezar"):"➕ "+tr("Learn more words","Mehr Wörter lernen","Aprender más palabras")}</button>
+      <button class="linkbtn" onclick="vcHow()">ℹ️ ${tr("How it works","So funktioniert's","Cómo funciona")}</button>
+      ${!st.learned?`<button class="btn secondary qbtn" onclick="vcCheckStart()">📊 ${tr("Quick level check (2 min)","Schneller Niveau-Check (2 Min.)","Test rápido de nivel (2 min)")}</button>`:""}</div>
+    <div class="card"><h3 style="margin:0 0 4px">📈 ${tr("My level","Mein Niveau","Mi nivel")}</h3>
+      <p class="note" style="margin:0 0 8px">${tr("Tap a level to learn its new words.","Tippe auf ein Niveau, um seine neuen Wörter zu lernen.","Toca un nivel para aprender sus palabras nuevas.")} <span style="color:var(--teal)">■</span> ${tr("learned","gelernt","aprendidas")} · <span style="color:var(--plum)">■</span> ${tr("mastered","sicher","dominadas")}</p>
       ${VC_LEVELS.map(lv=>{ const s2=vcStats(vcLv(lv)), on=VC.level===lv;
         return `<button onclick="VC.level='${lv}';vcSaveLocal();xr()" style="display:block;width:100%;text-align:left;border:2px solid ${on?"var(--coral)":"var(--line)"};background:${on?"var(--coral-soft)":"#fff"};border-radius:14px;padding:10px 12px;margin:0 0 8px;cursor:pointer;font:inherit;color:inherit">
-          <div class="ectop"><b>${on?"▶ ":""}${lv}</b><span class="ecmeta">${s2.learned} learned · ${s2.mastered} mastered · ${s2.total}</span></div>
+          <div class="ectop"><b>${on?"▶ ":""}${lv}</b><span class="ecmeta">${s2.learned} ${tr("learned","gelernt","aprendidas")} · ${s2.mastered} ${tr("mastered","sicher","dominadas")} · ${s2.total}</span></div>
           <div class="exbar" style="margin:6px 0 2px"><i style="width:${Math.round(s2.learned/s2.total*100)}%"></i></div>
           <div class="exbar"><i style="width:${Math.round(s2.mastered/s2.total*100)}%;background:var(--plum)"></i></div></button>`; }).join("")}
-      <div class="ectop" style="opacity:.55;padding:0 4px"><b>B2 · C1</b><span class="ecmeta">coming soon · bald</span></div>
+      <div class="ectop" style="opacity:.55;padding:0 4px"><b>B2 · C1</b><span class="ecmeta">${tr(`coming soon`,`bald`,`muy pronto`)}</span></div>
       ${vcDaysHtml()}
-      ${st.learned?`<button class="linkbtn" onclick="vcCheckStart()">📊 Level check</button>`:""}
-      ${!A.user?`<p class="note" style="margin:8px 0 0">💾 Saved on this phone only. <button class="linkbtn" onclick="A.ret='vocab';go('account')">Sign in</button> to keep your progress everywhere.</p>`:""}</div>
-    <div class="card"><h3 style="margin:0 0 4px">🎲 Quick games</h3>
-      <button class="btn secondary qbtn" onclick="vcStart('gender')">🔵🔴🟢 der · die · das (20 nouns)</button></div>
-    <div class="card"><h3 style="margin:0 0 6px">🗂️ Topics · Themen (${VC.level})</h3><div class="vcth">${Object.entries(VC.d.themes).map(([k,t])=>{ const ws=vcLv(VC.level).filter(w=>w.t===k); if(!ws.length) return ""; const s2=vcStats(ws);
+      ${st.learned?`<button class="linkbtn" onclick="vcCheckStart()">📊 ${tr("Level check","Niveau-Check","Test de nivel")}</button>`:""}
+      ${!A.user?`<p class="note" style="margin:8px 0 0">💾 ${tr("Saved on this phone only.","Nur auf diesem Handy gespeichert.","Guardado solo en este móvil.")} <button class="linkbtn" onclick="A.ret='vocab';go('account')">${tr("Sign in","Anmelden","Entra")}</button> ${tr("to keep your progress everywhere.","um deinen Fortschritt überall zu haben.","para tener tu progreso en todas partes.")}</p>`:""}</div>
+    <div class="card"><h3 style="margin:0 0 4px">🎲 ${tr("Quick games","Schnelle Spiele","Juegos rápidos")}</h3>
+      <button class="btn secondary qbtn" onclick="vcStart('gender')">🔵🔴🟢 der · die · das (${tr("20 nouns","20 Nomen","20 sustantivos")})</button></div>
+    <div class="card"><h3 style="margin:0 0 6px">🗂️ ${tr("Topics","Themen","Temas")} (${VC.level})</h3><div class="vcth">${Object.entries(VC.d.themes).map(([k,t])=>{ const ws=vcLv(VC.level).filter(w=>w.t===k); if(!ws.length) return ""; const s2=vcStats(ws);
       const lab=VC.lang==="es"?t[2]:VC.lang==="ar"?t[3]:VC.lang==="fa"?t[4]:t[1];
-      return `<button onclick="vcStart('learn','${k}')">${t[0]} ${esc(lab)}<small>${s2.learned}/${ws.length} learned</small></button>`; }).join("")}</div></div>
-    <p class="note">Word list by PonteTalk. Colours: <b style="color:#2F6FD1">der</b> · <b style="color:#D9466A">die</b> · <b style="color:#2A8C82">das</b>.</p>`;
+      return `<button onclick="vcStart('learn','${k}')">${t[0]} ${esc(lab)}<small>${s2.learned}/${ws.length} ${tr("learned","gelernt","aprendidas")}</small></button>`; }).join("")}</div></div>
+    <p class="note">${tr("Word list by PonteTalk. Colours:","Wortliste von PonteTalk. Farben:","Lista de palabras de PonteTalk. Colores:")} <b style="color:#2F6FD1">der</b> · <b style="color:#D9466A">die</b> · <b style="color:#2A8C82">das</b>.</p>`;
   return h;
 };
 function vcDaysHtml(){ const out=[]; const d=new Date(); d.setDate(d.getDate()-29); let max=1;
   const ks=[]; for(let k=0;k<30;k++){ const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; ks.push(key); max=Math.max(max,(VC.days[key]||{}).n||0); d.setDate(d.getDate()+1); }
   const tot=ks.reduce((n,k)=>n+((VC.days[k]||{}).n||0),0), cor=ks.reduce((n,k)=>n+((VC.days[k]||{}).c||0),0);
-  return `<div class="ecmeta" style="margin-top:6px">Last 30 days · ${tot} cards${tot?` · ${Math.round(cor/tot*100)}% right`:""}</div>
+  return `<div class="ecmeta" style="margin-top:6px">${tr("Last 30 days","Letzte 30 Tage","Últimos 30 días")} · ${tot} ${tr("cards","Karten","tarjetas")}${tot?` · ${Math.round(cor/tot*100)}% ${tr("right","richtig","correctas")}`:""}</div>
     <div class="vcdays">${ks.map(k=>{ const n=(VC.days[k]||{}).n||0; return `<i class="${n?"":"z"}" style="height:${n?Math.max(10,Math.round(n/max*100)):6}%" title="${k}: ${n}"></i>`; }).join("")}</div>`; }
 
 /* ===================== TEST PRACTICE: Leben in Deutschland / Einbürgerungstest ===================== */
 /* Data: /lid/questions.json (official BAMF catalogue), /lid/tr/<lang>.json, /lid/img/. History: sql/exam_practice.sql */
 const LID_V="2025-05-07";
 const LID_STATES=[["BW","Baden-Württemberg"],["BY","Bayern"],["BE","Berlin"],["BB","Brandenburg"],["HB","Bremen"],["HH","Hamburg"],["HE","Hessen"],["MV","Mecklenburg-Vorpommern"],["NI","Niedersachsen"],["NW","Nordrhein-Westfalen"],["RP","Rheinland-Pfalz"],["SL","Saarland"],["SN","Sachsen"],["ST","Sachsen-Anhalt"],["SH","Schleswig-Holstein"],["TH","Thüringen"]];
-const LID_LANGS=[["","Off · Aus"],["en","English"],["es","Español"],["fa","فارسی / دری"],["tr","Türkçe"],["ru","Русский"],["fr","Français"],["ar","العربية"],["uk","Українська"],["hi","हिन्दी"]];
-const LID_TOPICS={"History & Geography":"🏛️ History & geography · Geschichte","Law & Governance":"⚖️ Law & government · Recht","Elections":"🗳️ Elections · Wahlen","Education & Religion":"🎓 Education & religion · Bildung","Economy & Employment":"💼 Work & economy · Arbeit","Democracy & Politics":"🏛️ Democracy · Demokratie","Rights & Freedoms":"🕊️ Rights & freedoms · Grundrechte","Federal System":"🗺️ Federal system · Bundesländer","Constitution":"📜 Constitution · Grundgesetz","Assembly & Protests":"📣 Assembly · Versammlung"};
+const LID_LANGS=[["",tr("Off","Aus","Desactivada")],["en","English"],["es","Español"],["fa","فارسی / دری"],["tr","Türkçe"],["ru","Русский"],["fr","Français"],["ar","العربية"],["uk","Українська"],["hi","हिन्दी"]];
+const LID_TOPICS3={"History & Geography":["🏛️","History & geography","Geschichte & Geografie","Historia y geografía"],"Law & Governance":["⚖️","Law & government","Recht & Staat","Leyes y gobierno"],"Elections":["🗳️","Elections","Wahlen","Elecciones"],"Education & Religion":["🎓","Education & religion","Bildung & Religion","Educación y religión"],"Economy & Employment":["💼","Work & economy","Arbeit & Wirtschaft","Trabajo y economía"],"Democracy & Politics":["🏛️","Democracy","Demokratie","Democracia"],"Rights & Freedoms":["🕊️","Rights & freedoms","Grundrechte","Derechos y libertades"],"Federal System":["🗺️","Federal system","Bundesländer","Sistema federal"],"Constitution":["📜","Constitution","Grundgesetz","Constitución"],"Assembly & Protests":["📣","Assembly","Versammlung","Reunión y protestas"]};
+const LID_TOPICS=new Proxy({},{ ownKeys:()=>Reflect.ownKeys(LID_TOPICS3), getOwnPropertyDescriptor:(t,k)=>k in LID_TOPICS3?{enumerable:true,configurable:true,value:LID_TOPICS3[k][0]+" "+tr(LID_TOPICS3[k][1],LID_TOPICS3[k][2],LID_TOPICS3[k][3])}:undefined, get:(t,k)=>k in LID_TOPICS3?LID_TOPICS3[k][0]+" "+tr(LID_TOPICS3[k][1],LID_TOPICS3[k][2],LID_TOPICS3[k][3]):undefined });
 const EX={ qs:null, tr:{}, lang:"", state:"TH", err:"", run:null, res:null, ans:[], att:[], hist:false, loading:false };
 try{ const v=JSON.parse(localStorage.getItem("pt_lid")||"{}"); if(v.state) EX.state=v.state; if(typeof v.lang==="string") EX.lang=v.lang; }catch(e){}
 function exSavePrefs(){ try{ localStorage.setItem("pt_lid", JSON.stringify({ state:EX.state, lang:EX.lang })); }catch(e){} }
@@ -8103,7 +8104,7 @@ function exlStart(topic){
   else if(topic==="__wrong") list=pool.filter(q=>last[q.n]===false);
   else if(topic==="__all") list=pool.filter(q=>!q.s);
   else list=pool.filter(q=>q.t===topic&&!q.s);
-  if(!list.length){ bToast(topic==="__wrong"?"No mistakes 🎉 · Keine Fehler":"Nothing here yet"); return; }
+  if(!list.length){ bToast(topic==="__wrong"?tr("No mistakes 🎉","Keine Fehler 🎉","Sin errores 🎉"):tr("Nothing here yet","Noch nichts da","Aún no hay nada")); return; }
   EXL.list=list; EXL.i=0; EXL.phase="q"; EXL.on=true; go("exlisten"); exlRun();
 }
 function exlRun(){
@@ -8117,15 +8118,15 @@ function exlToggle(){ EXL.on=!EXL.on; if(EXL.on) exlRun(); else { clearTimeout(E
 function exlGo(d){ clearTimeout(EXL.t); exHush(); EXL.i=Math.max(0,Math.min(EXL.list.length-1,EXL.i+d)); EXL.phase="q"; EXL.on=true; exlRun(); }
 function exlQuit(){ EXL.on=false; clearTimeout(EXL.t); exHush(); go("exam"); }
 VIEWS.exlisten = function(){
-  const q=EXL.list[EXL.i]; const tr=EX.lang&&EX.tr[EX.lang]; const t=q&&tr&&tr[q.n];
-  if(!q) return `<div class="topline"><button class="chip" onclick="exlQuit()">← Back</button><span></span></div><div class="card center"><div style="font-size:48px">🎧</div><h2>Fertig! · Done!</h2><p class="note">You listened to ${EXL.list.length} questions.</p><button class="btn primary" onclick="exlQuit()">Back · Zurück</button></div>`;
-  return `<div class="topline"><button class="chip" onclick="exlQuit()">✕ Stop</button><span class="ecmeta">🎧 ${EXL.i+1} / ${EXL.list.length}</span></div>
+  const q=EXL.list[EXL.i]; const trd=EX.lang&&EX.tr[EX.lang]; const t=q&&trd&&trd[q.n];
+  if(!q) return `<div class="topline"><button class="chip" onclick="exlQuit()">← ${tr("Back","Zurück","Atrás")}</button><span></span></div><div class="card center"><div style="font-size:48px">🎧</div><h2>${tr("Fertig! · Done!","Fertig!","¡Fertig! · ¡Listo!")}</h2><p class="note">${tr(`You listened to ${EXL.list.length} questions.`,`Du hast ${EXL.list.length} Fragen gehört.`,`Escuchaste ${EXL.list.length} preguntas.`)}</p><button class="btn primary" onclick="exlQuit()">${tr("Back","Zurück","Atrás")}</button></div>`;
+  return `<div class="topline"><button class="chip" onclick="exlQuit()">✕ ${tr("Stop","Stopp","Parar")}</button><span class="ecmeta">🎧 ${EXL.i+1} / ${EXL.list.length}</span></div>
     <div class="exbar" style="margin:0 0 10px"><i style="width:${Math.round((EXL.i+1)/EXL.list.length*100)}%;background:var(--coral)"></i></div>
     <div class="card"><div class="ecmeta">Frage ${esc(q.n)}</div><div class="exq" lang="de">${esc(q.q)}</div>${t?`<div class="extr" dir="${EX.lang==="ar"||EX.lang==="fa"?"rtl":"auto"}">${esc(t.q)}</div>`:""}
-      ${EXL.phase==="a"?`<div class="ok" style="margin-top:10px;font-size:18px">✓ <b lang="de">${esc(q.a[q.c])}</b>${t&&t.a[q.c]?`<span class="extr">${esc(t.a[q.c])}</span>`:""}</div>`:`<p class="note" style="margin-top:10px">🤔 Think of the answer… · Überlege…</p>`}</div>
-    <div style="display:flex;gap:8px"><button class="btn secondary" style="flex:1" onclick="exlGo(-1)">⏮</button><button class="btn primary" style="flex:2" onclick="exlToggle()">${EXL.on?"⏸ Pause":"▶️ Play"}</button><button class="btn secondary" style="flex:1" onclick="exlGo(1)">⏭</button></div>
-    <label class="row" style="gap:8px;margin-top:10px;font-size:14px"><input type="checkbox" ${EXL.slow?"checked":""} onchange="EXL.slow=this.checked"> 🐢 Slower · Langsamer</label>
-    <p class="note">Keep listening like a podcast: question, a short pause to think, then the right answer. Works with the screen on.</p>`;
+      ${EXL.phase==="a"?`<div class="ok" style="margin-top:10px;font-size:18px">✓ <b lang="de">${esc(q.a[q.c])}</b>${t&&t.a[q.c]?`<span class="extr">${esc(t.a[q.c])}</span>`:""}</div>`:`<p class="note" style="margin-top:10px">${tr(`🤔 Think of the answer…`,`🤔 Überlege dir die Antwort…`,`🤔 Piensa la respuesta…`)}</p>`}</div>
+    <div style="display:flex;gap:8px"><button class="btn secondary" style="flex:1" onclick="exlGo(-1)">⏮</button><button class="btn primary" style="flex:2" onclick="exlToggle()">${EXL.on?"⏸ "+tr("Pause","Pause","Pausa"):"▶️ "+tr("Play","Abspielen","Reproducir")}</button><button class="btn secondary" style="flex:1" onclick="exlGo(1)">⏭</button></div>
+    <label class="row" style="gap:8px;margin-top:10px;font-size:14px"><input type="checkbox" ${EXL.slow?"checked":""} onchange="EXL.slow=this.checked"> ${tr(`🐢 Slower`,`🐢 Langsamer`,`🐢 Más despacio`)}</label>
+    <p class="note">${tr("Keep listening like a podcast: question, a short pause to think, then the right answer. Works with the screen on.","Hör zu wie bei einem Podcast: Frage, kurze Pause zum Nachdenken, dann die richtige Antwort. Funktioniert bei eingeschaltetem Bildschirm.","Escucha como un pódcast: pregunta, una pausa para pensar y luego la respuesta correcta. Funciona con la pantalla encendida.")}</p>`;
 };
 async function exOpen(){
   go("exam");
@@ -8133,7 +8134,7 @@ async function exOpen(){
     if(!EX.qs){ const r=await fetch(`/lid/questions.json?v=${LID_V}`); EX.qs=(await r.json()).questions; }
     if(EX.lang) await exTr(EX.lang);
     await Promise.all([exLoadHist(), DT.man===undefined?dtLoadManifest():null]);
-  }catch(e){ EX.err="Couldn't load the questions. Check your connection · Fragen konnten nicht geladen werden"; }
+  }catch(e){ EX.err=tr("Couldn't load the questions. Check your connection","Fragen konnten nicht geladen werden. Prüfe deine Verbindung","No se pudieron cargar las preguntas. Revisa tu conexión"); }
   if(S.screen==="exam") xr();
 }
 async function exTr(l){ if(!l||EX.tr[l]) return; try{ const r=await fetch(`/lid/tr/${l}.json?v=${LID_V}`); EX.tr[l]=await r.json(); }catch(e){} }
@@ -8178,7 +8179,7 @@ function exStart(mode, topic){
   else if(topic==="__new") list=exShuffle(pool.filter(q=>!(q.n in last))).slice(0,20);
   else if(topic==="__all") list=pool.slice();
   else list=exShuffle(pool.filter(q=>q.t===topic)).slice(0,20);
-  if(!list.length){ bToast(topic==="__wrong"?"No mistakes to practise 🎉 · Keine Fehler":"Nothing here yet · Noch nichts da"); return; }
+  if(!list.length){ bToast(topic==="__wrong"?tr("No mistakes to practise 🎉","Keine Fehler zum Üben 🎉","No hay errores que practicar 🎉"):tr("Nothing here yet","Noch nichts da","Aún no hay nada")); return; }
   EX.run={ mode, topic:topic||null, list, i:0, picks:{}, shown:{}, t0:Date.now(), end:mode==="mock"?Date.now()+60*60000:0 };
   EX.res=null; go("examq");
 }
@@ -8189,46 +8190,46 @@ function exQText(q){
 function exImg(q){ return q.i?`<img class="eximg" src="/lid/img/${esc(q.i)}?v=${LID_V}" alt="Pictures 1 to 4 for question ${esc(q.n)} · Bilder 1 bis 4" loading="lazy">`:""; }
 function exClock(ms){ const s=Math.max(0,Math.round(ms/1000)); return `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`; }
 VIEWS.exam = function(){
-  const back=`<div class="topline"><button class="chip" onclick="go('home')">← Home</button><span>🇩🇪 Test practice</span></div>`;
+  const back=`<div class="topline"><button class="chip" onclick="go('home')">← ${tr("Home","Start","Inicio")}</button><span>🇩🇪 ${tr("Test practice","Testtraining","Práctica de examen")}</span></div>`;
   let h=back+`<h2 style="margin:6px 0 2px">Leben in Deutschland · Einbürgerungstest</h2>
-    <p class="sub" style="margin:0 0 6px">Practise with all official BAMF questions: 300 general + 10 for your Bundesland. · Alle offiziellen Fragen.</p><div style="display:inline-block;background:var(--teal-soft);color:var(--teal);font-weight:800;font-size:13px;border-radius:999px;padding:5px 12px;margin:0 0 10px">🎉 Free during our launch · Kostenlos zum Start</div>`;
+    <p class="sub" style="margin:0 0 6px">${tr(`Practise with all official BAMF questions: 300 general + 10 for your Bundesland.`,`Übe mit allen offiziellen BAMF-Fragen: 300 allgemeine + 10 für dein Bundesland.`,`Practica con todas las preguntas oficiales del BAMF: 300 generales + 10 de tu estado federado.`)}</p><div style="display:inline-block;background:var(--teal-soft);color:var(--teal);font-weight:800;font-size:13px;border-radius:999px;padding:5px 12px;margin:0 0 10px">${tr(`🎉 Free during our launch`,`🎉 Kostenlos zum Start`,`🎉 Gratis durante el lanzamiento`)}</div>`;
   if(EX.err) return h+`<div class="err">${esc(EX.err)}</div>`;
   if(!EX.qs) return h+`<p class="note center">${tr(`Loading…`,`Lädt…`,`Cargando…`)}</p>`;
   const pool=exPool(), last=exLast(), known=pool.filter(q=>last[q.n]===true).length, wrong=pool.filter(q=>last[q.n]===false).length, unseen=pool.filter(q=>!(q.n in last)).length;
   const mocks=EX.att.filter(a=>a.mode==="mock"), passed=mocks.filter(a=>a.passed).length, best=mocks.reduce((m,a)=>Math.max(m,a.correct),0);
   h+=`<div class="card"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end">
       <label class="lbl" style="margin:0">🗺️ Bundesland<select onchange="exSetState(this.value)" style="width:100%;margin-top:4px;border:2px solid var(--line);border-radius:12px;padding:10px;font:600 15px 'Plus Jakarta Sans',sans-serif">${LID_STATES.map(([k,n])=>`<option value="${k}" ${EX.state===k?"selected":""}>${n}</option>`).join("")}</select></label>
-      <label class="lbl" style="margin:0">🌍 Translation<select onchange="exSetLang(this.value)" style="width:100%;margin-top:4px;border:2px solid var(--line);border-radius:12px;padding:10px;font:600 15px 'Plus Jakarta Sans',sans-serif">${LID_LANGS.map(([k,n])=>`<option value="${k}" ${EX.lang===k?"selected":""}>${n}</option>`).join("")}</select></label></div></div>
-    <div class="card" style="border:2px solid var(--coral)"><h3 style="margin:0 0 4px">📝 Mock test · Probetest</h3>
-      <p class="note" style="margin:0 0 10px">33 questions (30 general + 3 ${esc((LID_STATES.find(x=>x[0]===EX.state)||[0,""])[1])}), 60 minutes. Pass: 17 correct (Einbürgerungstest), 15 for “Leben in Deutschland” · Wie in der echten Prüfung.</p>
-      <button class="btn primary" onclick="exStart('mock')">Start mock test · Probetest starten</button></div>
-    <div class="card"><h3 style="margin:0 0 6px">📈 My progress · Mein Fortschritt</h3>
-      <div class="ectop"><span class="ecmeta" style="flex:1;min-width:0">Answered right (last try) · Richtig beantwortet</span><b>${known} / ${pool.length}</b></div>
+      <label class="lbl" style="margin:0">🌍 ${tr("Translation","Übersetzung","Traducción")}<select onchange="exSetLang(this.value)" style="width:100%;margin-top:4px;border:2px solid var(--line);border-radius:12px;padding:10px;font:600 15px 'Plus Jakarta Sans',sans-serif">${LID_LANGS.map(([k,n])=>`<option value="${k}" ${EX.lang===k?"selected":""}>${n}</option>`).join("")}</select></label></div></div>
+    <div class="card" style="border:2px solid var(--coral)"><h3 style="margin:0 0 4px">${tr(`📝 Mock test`,`📝 Probetest`,`📝 Simulacro de examen`)}</h3>
+      <p class="note" style="margin:0 0 10px">${tr(`33 questions (30 general + 3 ${esc((LID_STATES.find(x=>x[0]===EX.state)||[0,""])[1])}), 60 minutes. Pass: 17 correct (Einbürgerungstest), 15 for “Leben in Deutschland”.`,`33 Fragen (30 allgemeine + 3 ${esc((LID_STATES.find(x=>x[0]===EX.state)||[0,""])[1])}), 60 Minuten. Bestanden: 17 richtig (Einbürgerungstest), 15 für „Leben in Deutschland“. Wie in der echten Prüfung.`,`33 preguntas (30 generales + 3 de ${esc((LID_STATES.find(x=>x[0]===EX.state)||[0,""])[1])}), 60 minutos. Aprobado: 17 correctas (Einbürgerungstest), 15 para “Leben in Deutschland”.`)}</p>
+      <button class="btn primary" onclick="exStart('mock')">${tr(`Start mock test`,`Probetest starten`,`Empezar simulacro`)}</button></div>
+    <div class="card"><h3 style="margin:0 0 6px">${tr(`📈 My progress`,`📈 Mein Fortschritt`,`📈 Mi progreso`)}</h3>
+      <div class="ectop"><span class="ecmeta" style="flex:1;min-width:0">${tr(`Answered right (last try)`,`Richtig beantwortet (letzter Versuch)`,`Respondidas bien (último intento)`)}</span><b>${known} / ${pool.length}</b></div>
       <div class="exbar" style="margin:6px 0 10px"><i style="width:${pool.length?Math.round(known/pool.length*100):0}%"></i></div>
-      <div class="extiles"><div><b>${mocks.length}</b><span class="ecmeta">mock tests</span></div><div><b>${passed}</b><span class="ecmeta">passed ✅</span></div><div><b>${mocks.length?best:"–"}<small style="font-size:12px">/33</small></b><span class="ecmeta">best score</span></div></div>
-      ${mocks.length?exHistHtml(mocks):`<p class="note" style="margin:6px 0 0">Your test scores will show up here. · Hier erscheinen deine Ergebnisse.</p>`}
-      ${!A.user?`<p class="note" style="margin:8px 0 0">💾 Saved on this phone only. <button class="linkbtn" onclick="A.ret='exam';go('account')">Sign in</button> to keep your history everywhere. · Anmelden, um den Verlauf zu speichern.</p>`:""}
+      <div class="extiles"><div><b>${mocks.length}</b><span class="ecmeta">${tr("mock tests","Probetests","simulacros")}</span></div><div><b>${passed}</b><span class="ecmeta">${tr("passed ✅","bestanden ✅","aprobados ✅")}</span></div><div><b>${mocks.length?best:"–"}<small style="font-size:12px">/33</small></b><span class="ecmeta">${tr("best score","Bestwert","mejor nota")}</span></div></div>
+      ${mocks.length?exHistHtml(mocks):`<p class="note" style="margin:6px 0 0">${tr(`Your test scores will show up here.`,`Hier erscheinen deine Ergebnisse.`,`Aquí aparecerán tus resultados.`)}</p>`}
+      ${!A.user?`<p class="note" style="margin:8px 0 0">💾 ${tr("Saved on this phone only.","Nur auf diesem Handy gespeichert.","Guardado solo en este móvil.")} <button class="linkbtn" onclick="A.ret='exam';go('account')">${tr("Sign in","Anmelden","Entra")}</button> ${tr("to keep your history everywhere.","um deinen Verlauf überall zu haben.","para tener tu historial en todas partes.")}</p>`:""}
     </div>
-    <div class="card exprac"><h3 style="margin:0 0 4px">🎧 Listening mode · Hörmodus</h3>
-      <p class="note" style="margin:0 0 8px">Learn by listening, like a podcast: each question, a pause to think, then the right answer. Great on the bus.</p>
-      <button class="btn secondary qbtn" onclick="exlStart('__all')">🎧 All general questions · Alle (${pool.filter(q=>!q.s&&!q.i).length})</button>
-      <button class="btn secondary qbtn" onclick="exlStart('__wrong')">🎧 My mistakes · Meine Fehler (${wrong})</button>
-      <button class="btn secondary qbtn" onclick="exlStart('__state')">🎧 My Bundesland · Mein Bundesland</button></div>
-    <div class="card exprac"><h3 style="margin:0 0 6px">📚 Practise · Üben</h3>
-      <p class="note" style="margin:0 0 8px">You see the right answer after each question. · Nach jeder Frage siehst du die Lösung.</p>
-      <button class="btn secondary qbtn" onclick="exStart('practice','__wrong')">🔁 My mistakes · Meine Fehler (${wrong})</button>
-      <button class="btn secondary qbtn" onclick="exStart('practice','__new')">🆕 Questions I haven't tried · Neue Fragen (${unseen})</button>
-      <button class="btn secondary qbtn" onclick="exStart('practice','__state')">📍 My Bundesland · Mein Bundesland (10)</button>
+    <div class="card exprac"><h3 style="margin:0 0 4px">${tr(`🎧 Listening mode`,`🎧 Hörmodus`,`🎧 Modo escucha`)}</h3>
+      <p class="note" style="margin:0 0 8px">${tr("Learn by listening, like a podcast: each question, a pause to think, then the right answer. Great on the bus.","Lerne durch Zuhören wie bei einem Podcast: jede Frage, eine Pause zum Nachdenken, dann die richtige Antwort. Super im Bus.","Aprende escuchando, como un pódcast: cada pregunta, una pausa para pensar y luego la respuesta correcta. Ideal en el autobús.")}</p>
+      <button class="btn secondary qbtn" onclick="exlStart('__all')">🎧 ${tr("All general questions","Alle allgemeinen Fragen","Todas las preguntas generales")} (${pool.filter(q=>!q.s&&!q.i).length})</button>
+      <button class="btn secondary qbtn" onclick="exlStart('__wrong')">🎧 ${tr("My mistakes","Meine Fehler","Mis errores")} (${wrong})</button>
+      <button class="btn secondary qbtn" onclick="exlStart('__state')">${tr(`🎧 My Bundesland`,`🎧 Mein Bundesland`,`🎧 Mi estado federado`)}</button></div>
+    <div class="card exprac"><h3 style="margin:0 0 6px">${tr(`📚 Practise`,`📚 Üben`,`📚 Practicar`)}</h3>
+      <p class="note" style="margin:0 0 8px">${tr(`You see the right answer after each question.`,`Nach jeder Frage siehst du die Lösung.`,`Ves la respuesta correcta después de cada pregunta.`)}</p>
+      <button class="btn secondary qbtn" onclick="exStart('practice','__wrong')">🔁 ${tr("My mistakes","Meine Fehler","Mis errores")} (${wrong})</button>
+      <button class="btn secondary qbtn" onclick="exStart('practice','__new')">🆕 ${tr("Questions I haven't tried","Neue Fragen","Preguntas que no he probado")} (${unseen})</button>
+      <button class="btn secondary qbtn" onclick="exStart('practice','__state')">📍 ${tr("My Bundesland","Mein Bundesland","Mi estado federado")} (10)</button>
       ${Object.entries(LID_TOPICS).map(([k,l])=>{ const qq=pool.filter(q=>q.t===k&&!q.s); if(!qq.length) return ""; const ok=qq.filter(q=>last[q.n]===true).length;
         return `<button class="btn secondary qbtn" onclick="exStart('practice','${k.replace(/'/g,"\\'")}')">${esc(l)} <span class="ecmeta">${ok}/${qq.length}</span></button>`; }).join("")}
-      <button class="btn secondary qbtn" onclick="exStart('practice','__all')">🗂️ All ${pool.length} in order · Alle der Reihe nach</button></div>
+      <button class="btn secondary qbtn" onclick="exStart('practice','__all')">🗂️ ${tr(`All ${pool.length} in order`,`Alle ${pool.length} der Reihe nach`,`Las ${pool.length} en orden`)}</button></div>
     <button class="btn secondary qbtn" onclick="dtOpen()">🎓 German exam A2–B1 (DTZ) →</button>
-    <p class="note">Questions: official BAMF catalogue (as of 07.05.2025). Translations and explanations: open-source project “Leben in Deutschland” (MIT); Spanish and Farsi by PonteTalk. PonteTalk is not an official BAMF app. · Keine offizielle BAMF-App.</p>`;
+    <p class="note">${tr("Questions: official BAMF catalogue (as of 07.05.2025). Translations and explanations: open-source project “Leben in Deutschland” (MIT); Spanish and Farsi by PonteTalk. PonteTalk is not an official BAMF app.","Fragen: offizieller BAMF-Katalog (Stand 07.05.2025). Übersetzungen und Erklärungen: Open-Source-Projekt „Leben in Deutschland“ (MIT); Spanisch und Farsi von PonteTalk. PonteTalk ist keine offizielle BAMF-App.","Preguntas: catálogo oficial del BAMF (a 07.05.2025). Traducciones y explicaciones: proyecto de código abierto “Leben in Deutschland” (MIT); español y farsi por PonteTalk. PonteTalk no es una app oficial del BAMF.")}</p>`;
   return h;
 };
 function exHistHtml(mocks){
   const l=mocks.slice(0,12).reverse();
-  return `<div class="ecmeta" style="margin-top:8px">Last mock tests · Letzte Probetests (dashed line = 17 to pass)</div>
+  return `<div class="ecmeta" style="margin-top:8px">${tr("Last mock tests (dashed line = 17 to pass)","Letzte Probetests (gestrichelte Linie = 17 zum Bestehen)","Últimos simulacros (línea discontinua = 17 para aprobar)")}</div>
     <div class="exhist"><div class="pl" style="bottom:${17/33*100}%"></div>${l.map(a=>`<i class="${a.passed?"":"f"}" style="height:${Math.max(4,a.correct/33*100)}%" title="${a.correct}/33 · ${esc(fmtWhen(a.created_at))}"></i>`).join("")}</div>
     <div class="ecmeta">${l.map(a=>a.correct).join(" · ")}</div>`;
 }
@@ -8236,22 +8237,22 @@ VIEWS.examq = function(){
   const r=EX.run; if(!r) return `<p class="note center">…</p>`;
   const q=r.list[r.i], tq=exQText(q), t=tq.t, mock=r.mode==="mock", pick=r.picks[q.n], shown=!mock&&r.shown[q.n];
   const left=mock?r.end-Date.now():0;
-  let h=`<div class="topline"><button class="chip" onclick="exQuit()">✕ ${mock?"End test":"Stop"}</button><span class="ecmeta">${mock?`⏱ <span id="exclock">${exClock(left)}</span> · `:""}${r.i+1} / ${r.list.length}</span></div>
+  let h=`<div class="topline"><button class="chip" onclick="exQuit()">✕ ${mock?tr("End test","Test beenden","Terminar test"):tr("Stop","Stopp","Parar")}</button><span class="ecmeta">${mock?`⏱ <span id="exclock">${exClock(left)}</span> · `:""}${r.i+1} / ${r.list.length}</span></div>
     <div class="exbar" style="margin:0 0 10px"><i style="width:${Math.round((r.i+1)/r.list.length*100)}%;background:var(--coral)"></i></div>
     <div class="card"><div class="ectop"><span class="ecmeta">Frage ${esc(q.n)}${q.s?` · ${esc((LID_STATES.find(x=>x[0]===q.s)||[0,""])[1])}`:""}</span><button class="linkbtn" onclick="exReadQ()" aria-label="Read aloud">🔊 ${shown?"Antwort":"Vorlesen"}</button></div>
       <div class="exq" lang="de">${esc(q.q)}</div>${t?`<div class="extr" dir="${tq.rtl?"rtl":"auto"}">${esc(t.q)}</div>`:""}
       ${exImg(q)}
       ${q.a.map((a,k)=>{ let c=""; if(shown){ if(k===q.c) c="ok"; else if(k===pick) c="no"; } else if(pick===k) c="sel";
         return `<button class="exopt ${c}" ${shown?"disabled":""} onclick="exPick(${k})"><span class="k">${shown&&k===q.c?"✓":shown&&k===pick?"✕":"ABCD"[k]}</span><span lang="de">${esc(a)}${t&&t.a[k]&&!/^Bild \d/.test(a)?`<span class="extr" dir="${tq.rtl?"rtl":"auto"}">${esc(t.a[k])}</span>`:""}</span></button>`; }).join("")}
-      ${shown?`<div class="${pick===q.c?"ok":"err"}" style="margin-top:8px">${pick===q.c?"✅ Richtig! · Correct!":`❌ Richtig ist · Correct: <b>${esc(q.a[q.c])}</b>`}${t&&t.x?`<div class="extr" style="margin-top:6px" dir="${tq.rtl?"rtl":"auto"}">💡 ${esc(t.x)}</div>`:""}</div>`:""}
+      ${shown?`<div class="${pick===q.c?"ok":"err"}" style="margin-top:8px">${pick===q.c?"✅ "+tr("Richtig! · Correct!","Richtig!","¡Correcto! · Richtig!"):`❌ ${tr("Correct answer","Richtig ist","Respuesta correcta")}: <b>${esc(q.a[q.c])}</b>`}${t&&t.x?`<div class="extr" style="margin-top:6px" dir="${tq.rtl?"rtl":"auto"}">💡 ${esc(t.x)}</div>`:""}</div>`:""}
     </div>`;
   if(mock){
-    h+=`<div class="row" style="gap:8px"><button class="btn secondary" ${r.i===0?"disabled":""} onclick="exGo(${r.i-1})">← Back</button>
-      ${r.i<r.list.length-1?`<button class="btn primary" onclick="exGo(${r.i+1})">${tr("Next →","Weiter →","Siguiente →")}</button>`:`<button class="btn primary" onclick="exFinish()">✓ Finish · Abgeben</button>`}</div>
+    h+=`<div class="row" style="gap:8px"><button class="btn secondary" ${r.i===0?"disabled":""} onclick="exGo(${r.i-1})">← ${tr("Back","Zurück","Atrás")}</button>
+      ${r.i<r.list.length-1?`<button class="btn primary" onclick="exGo(${r.i+1})">${tr("Next →","Weiter →","Siguiente →")}</button>`:`<button class="btn primary" onclick="exFinish()">✓ ${tr("Finish","Abgeben","Entregar")}</button>`}</div>
       <div class="exdots">${r.list.map((x,k)=>`<button class="${x.n in r.picks?"done":""} ${k===r.i?"cur":""}" onclick="exGo(${k})" aria-label="Question ${k+1}">${k+1}</button>`).join("")}</div>
-      <p class="note">${Object.keys(r.picks).length} of ${r.list.length} answered · beantwortet. <button class="linkbtn" onclick="exFinish()">Finish now · Jetzt abgeben</button></p>`;
+      <p class="note">${tr(`${Object.keys(r.picks).length} of ${r.list.length} answered.`,`${Object.keys(r.picks).length} von ${r.list.length} beantwortet.`,`${Object.keys(r.picks).length} de ${r.list.length} respondidas.`)} <button class="linkbtn" onclick="exFinish()">${tr("Finish now","Jetzt abgeben","Entregar ahora")}</button></p>`;
   } else if(shown){
-    h+=`<button class="btn primary" onclick="${r.i<r.list.length-1?`exGo(${r.i+1})`:"exFinish()"}">${r.i<r.list.length-1?tr("Next →","Weiter →","Siguiente →"):"See my result · Ergebnis"}</button>`;
+    h+=`<button class="btn primary" onclick="${r.i<r.list.length-1?`exGo(${r.i+1})`:"exFinish()"}">${r.i<r.list.length-1?tr("Next →","Weiter →","Siguiente →"):tr("See my result","Ergebnis ansehen","Ver mi resultado")}</button>`;
   }
   return h;
 };
@@ -8276,7 +8277,7 @@ function exQuit(){
 }
 async function exFinish(timeUp){
   const r=EX.run; if(!r) return;
-  if(r.mode==="mock"&&!timeUp){ const miss=r.list.length-Object.keys(r.picks).length; if(miss&&!window.confirm(`${miss} question(s) not answered. Finish anyway? · Trotzdem abgeben?`)) return; }
+  if(r.mode==="mock"&&!timeUp){ const miss=r.list.length-Object.keys(r.picks).length; if(miss&&!window.confirm(tr(`${miss} question(s) not answered. Finish anyway?`,`${miss} Frage(n) nicht beantwortet. Trotzdem abgeben?`,`${miss} pregunta(s) sin responder. ¿Entregar igualmente?`))) return; }
   if(r.timer) clearInterval(r.timer);
   const list=r.mode==="mock"?r.list:r.list.filter(q=>q.n in r.picks);
   const answers=list.filter(q=>q.n in r.picks).map(q=>({ n:q.n, ok:r.picks[q.n]===q.c }));
@@ -8290,18 +8291,18 @@ VIEWS.examr = function(){
   const x=EX.res; if(!x) return `<p class="note center">…</p>`;
   const mock=x.mode==="mock", pct=Math.round(x.correct/x.total*100);
   const wrong=x.list.filter(q=>x.picks[q.n]!==q.c);
-  let h=`<div class="topline"><button class="chip" onclick="go('exam')">← Test practice</button><span></span></div>
-    <div class="card center">${mock?`<div style="font-size:54px">${x.passed?"🎉":"💪"}</div><h2 style="margin:4px 0">${x.passed?"Bestanden! · Passed!":"Noch nicht · Not yet"}</h2>`:`<div style="font-size:48px">📚</div><h2 style="margin:4px 0">Practice done · Geschafft!</h2>`}
+  let h=`<div class="topline"><button class="chip" onclick="go('exam')">← ${tr("Test practice","Testtraining","Práctica de examen")}</button><span></span></div>
+    <div class="card center">${mock?`<div style="font-size:54px">${x.passed?"🎉":"💪"}</div><h2 style="margin:4px 0">${x.passed?tr("Bestanden! · Passed!","Bestanden!","¡Bestanden! · ¡Aprobado!"):tr("Noch nicht · Not yet","Noch nicht","Noch nicht · Todavía no")}</h2>`:`<div style="font-size:48px">📚</div><h2 style="margin:4px 0">${tr("Practice done!","Geschafft!","¡Práctica terminada!")}</h2>`}
       <div style="font-size:40px;font-weight:800;margin:6px 0">${x.correct} / ${x.total}</div>
-      <p class="note" style="margin:0">${mock?`You need 17 for the Einbürgerungstest (15 for “Leben in Deutschland”). Time: ${exClock(x.seconds*1000)} of 60:00.`:`${pct}% correct · richtig`}</p>
-      <div class="row" style="gap:8px;justify-content:center;margin-top:12px"><button class="btn primary" onclick="exStart('${mock?"mock":"practice"}'${mock?"":`,'${(x.topic||"__all").replace(/'/g,"\\'")}'`})">${mock?"New mock test · Neuer Test":"Again · Nochmal"}</button>
-      ${wrong.length?`<button class="btn secondary" onclick="exStart('practice','__wrong')">🔁 Practise mistakes</button>`:""}</div></div>`;
+      <p class="note" style="margin:0">${mock?tr(`You need 17 for the Einbürgerungstest (15 for “Leben in Deutschland”). Time: ${exClock(x.seconds*1000)} of 60:00.`,`Du brauchst 17 für den Einbürgerungstest (15 für „Leben in Deutschland“). Zeit: ${exClock(x.seconds*1000)} von 60:00.`,`Necesitas 17 para el Einbürgerungstest (15 para “Leben in Deutschland”). Tiempo: ${exClock(x.seconds*1000)} de 60:00.`):`${pct}% ${tr("correct","richtig","correctas")}`}</p>
+      <div class="row" style="gap:8px;justify-content:center;margin-top:12px"><button class="btn primary" onclick="exStart('${mock?"mock":"practice"}'${mock?"":`,'${(x.topic||"__all").replace(/'/g,"\\'")}'`})">${mock?tr("New mock test","Neuer Probetest","Nuevo simulacro"):tr("Again","Nochmal","Otra vez")}</button>
+      ${wrong.length?`<button class="btn secondary" onclick="exStart('practice','__wrong')">🔁 ${tr("Practise mistakes","Fehler üben","Practicar errores")}</button>`:""}</div></div>`;
   if(wrong.length){
-    const tr=EX.lang&&EX.tr[EX.lang];
-    h+=`<div class="card"><h3 style="margin:0 0 8px">To review · Zum Wiederholen (${wrong.length})</h3>${wrong.map(q=>{ const t=tr&&tr[q.n];
+    const trd=EX.lang&&EX.tr[EX.lang];
+    h+=`<div class="card"><h3 style="margin:0 0 8px">${tr("To review","Zum Wiederholen","Para repasar")} (${wrong.length})</h3>${wrong.map(q=>{ const t=trd&&trd[q.n];
       return `<div style="padding:10px 0;border-top:1px solid var(--line)"><div class="ecmeta">Frage ${esc(q.n)}</div><b lang="de">${esc(q.q)}</b>${t?`<span class="extr">${esc(t.q)}</span>`:""}
         ${q.i?exImg(q):""}
-        ${q.n in x.picks?`<div style="color:var(--coral);font-weight:700;margin-top:4px">✕ ${esc(q.a[x.picks[q.n]])}</div>`:`<div class="ecmeta" style="margin-top:4px">Not answered · Nicht beantwortet</div>`}
+        ${q.n in x.picks?`<div style="color:var(--coral);font-weight:700;margin-top:4px">✕ ${esc(q.a[x.picks[q.n]])}</div>`:`<div class="ecmeta" style="margin-top:4px">${tr(`Not answered`,`Nicht beantwortet`,`Sin responder`)}</div>`}
         <div style="color:var(--teal);font-weight:800">✓ ${esc(q.a[q.c])}${t&&t.a[q.c]&&!/^Bild \d/.test(q.a[q.c])?` <span class="extr" style="display:inline">· ${esc(t.a[q.c])}</span>`:""}</div>
         ${t&&t.x?`<div class="extr">💡 ${esc(t.x)}</div>`:""}</div>`; }).join("")}</div>`;
   }
@@ -8324,7 +8325,7 @@ function dtLevel(n){ return n>=33?"B1":n>=20?"A2":"–"; }
 async function dtOpen(){
   go("dtz");
   try{ if(!DT.d){ const r=await fetch(`/dtz/dtz.json?v=${DT_V}`); DT.d=await r.json(); dtIndex(); } await Promise.all([DT.es?dtEsLoad():null, dtLoadHist(), DT.man===undefined?dtLoadManifest():null]); }
-  catch(e){ DT.err="Couldn't load the exercises. Check your connection · Übungen konnten nicht geladen werden"; }
+  catch(e){ DT.err=tr("Couldn't load the exercises. Check your connection","Übungen konnten nicht geladen werden. Prüfe deine Verbindung","No se pudieron cargar los ejercicios. Revisa tu conexión"); }
   try{ if(window.speechSynthesis) speechSynthesis.getVoices(); }catch(e){}
   if(/^dtz/.test(S.screen)) xr();
 }
@@ -8372,7 +8373,7 @@ function dtClipUrl(id,v){ return `${SB_URL}/storage/v1/object/public/dtz-audio/$
 async function dtLoadManifest(){ try{ const r=await fetch(`${SB_URL}/storage/v1/object/public/dtz-audio/manifest.json?t=${Date.now()}`,{ cache:"no-store" }); DT.man=r.ok?await r.json():null; }catch(e){ DT.man=null; } }
 function dtHasClip(key){ const id=(key||"").split("-").pop(); return !!(DT.man&&DT.man.clips&&DT.man.clips[id]); }
 function dtStop(){ try{ speechSynthesis.cancel(); }catch(e){} if(DT_AUDIO){ try{ DT_AUDIO.pause(); }catch(e){} DT_AUDIO=null; } DT.playing=null; dtPlayUi(); }
-function dtPlayUi(){ document.querySelectorAll("[data-dtplay]").forEach(b=>{ const on=b.dataset.dtplay===DT.playing; b.textContent=on?"⏹ Stop":"▶️ Hören · Listen"; }); }
+function dtPlayUi(){ document.querySelectorAll("[data-dtplay]").forEach(b=>{ const on=b.dataset.dtplay===DT.playing; b.textContent=on?"⏹ "+tr("Stop","Stopp","Parar"):"▶️ "+tr("Hören · Listen","Hören","Hören · Escuchar"); }); }
 function dtPlay(key){
   const x=DT.items.find(y=>y.akey===key); if(!x) return;
   if(DT.playing===key){ dtStop(); return; }
@@ -8522,40 +8523,40 @@ VIEWS.dtzstudio = function(){
 };
 /* ---------- hub ---------- */
 VIEWS.dtz = function(){
-  let h=`<div class="topline"><button class="chip" onclick="dtStop();go('home')">← Home</button><span>🇩🇪 Test practice</span></div>
+  let h=`<div class="topline"><button class="chip" onclick="dtStop();go('home')">← ${tr("Home","Start","Inicio")}</button><span>🇩🇪 ${tr("Test practice","Testtraining","Práctica de examen")}</span></div>
     <h2 style="margin:6px 0 2px">Deutsch-Prüfung A2–B1 (DTZ)</h2>
-    <p class="sub" style="margin:0 0 6px">Practise for the Deutsch-Test für Zuwanderer: Hören, Lesen, Schreiben, Sprechen. Also good practice for telc and Goethe B1.</p><div style="display:inline-block;background:var(--teal-soft);color:var(--teal);font-weight:800;font-size:13px;border-radius:999px;padding:5px 12px;margin:0 0 10px">🎉 Free during our launch · Kostenlos zum Start</div>`;
+    <p class="sub" style="margin:0 0 6px">${tr("Practise for the Deutsch-Test für Zuwanderer: Hören, Lesen, Schreiben, Sprechen. Also good practice for telc and Goethe B1.","Übe für den Deutsch-Test für Zuwanderer: Hören, Lesen, Schreiben, Sprechen. Auch gut für telc und Goethe B1.","Practica para el Deutsch-Test für Zuwanderer: Hören, Lesen, Schreiben, Sprechen. También sirve para telc y Goethe B1.")}</p><div style="display:inline-block;background:var(--teal-soft);color:var(--teal);font-weight:800;font-size:13px;border-radius:999px;padding:5px 12px;margin:0 0 10px">${tr(`🎉 Free during our launch`,`🎉 Kostenlos zum Start`,`🎉 Gratis durante el lanzamiento`)}</div>`;
   if(DT.err) return h+`<div class="err">${esc(DT.err)}</div>`;
   if(!DT.d) return h+`<p class="note center">${tr(`Loading…`,`Lädt…`,`Cargando…`)}</p>`;
-  h+=`<label class="card" style="display:flex;gap:12px;align-items:center;cursor:pointer"><input type="checkbox" style="width:22px;height:22px" ${DT.es?"checked":""} onchange="dtSetEs(this.checked)"><span><b>🇪🇸 Ayuda en español</b><br><span class="ecmeta">Spanish under the questions and answers. Texts and listening transcripts in Spanish appear after you answer (in practice).</span></span></label>`;
+  h+=`<label class="card" style="display:flex;gap:12px;align-items:center;cursor:pointer"><input type="checkbox" style="width:22px;height:22px" ${DT.es?"checked":""} onchange="dtSetEs(this.checked)"><span><b>🇪🇸 Ayuda en español</b><br><span class="ecmeta">${tr("Spanish under the questions and answers. Texts and listening transcripts in Spanish appear after you answer (in practice).","Spanisch unter Fragen und Antworten. Texte und Hörtexte auf Spanisch erscheinen nach dem Antworten (beim Üben).","Español debajo de preguntas y respuestas. Los textos y transcripciones en español aparecen después de responder (en práctica).")}</span></span></label>`;
   const last=dtLast(), mocks=DT.att.filter(a=>a.mode==="mock"), best=mocks.reduce((m,a)=>Math.max(m,a.correct),0);
   const wr=DT.att.filter(a=>a.mode==="writing"), sp=DT.att.filter(a=>a.mode==="speaking");
   const wrong=DT.items.filter(x=>last[x.it.id]===false).length;
-  const noVoice=!dtCanSpeak();
-  h+=`<div class="card" style="border:2px solid var(--coral)"><h3 style="margin:0 0 4px">📝 Mock test · Probetest</h3>
-      <p class="note" style="margin:0 0 10px">Hören (20 questions) + Lesen (25 questions), 70 minutes. Out of 45 points: about <b>20 = A2</b>, about <b>33 = B1</b>. You can listen to each text twice.</p>
+  const noVoice=!dtCanSpeak(), Q=n=>tr(`${n} questions`,`${n} Fragen`,`${n} preguntas`);
+  h+=`<div class="card" style="border:2px solid var(--coral)"><h3 style="margin:0 0 4px">${tr(`📝 Mock test`,`📝 Probetest`,`📝 Simulacro de examen`)}</h3>
+      <p class="note" style="margin:0 0 10px">${tr("Hören (20 questions) + Lesen (25 questions), 70 minutes. Out of 45 points: about <b>20 = A2</b>, about <b>33 = B1</b>. You can listen to each text twice.","Hören (20 Fragen) + Lesen (25 Fragen), 70 Minuten. Von 45 Punkten: etwa <b>20 = A2</b>, etwa <b>33 = B1</b>. Jeden Hörtext kannst du zweimal hören.","Hören (20 preguntas) + Lesen (25 preguntas), 70 minutos. De 45 puntos: unos <b>20 = A2</b>, unos <b>33 = B1</b>. Puedes escuchar cada texto dos veces.")}</p>
       ${DT.d.sets.map(st=>{ const mine=mocks.filter(a=>a.topic===`set${st.id}`); const b=mine.reduce((m,a)=>Math.max(m,a.correct),-1);
-        return `<button class="btn primary qbtn" onclick="dtStart('mock','${st.id}')">${esc(st.title)}${b>=0?` <span style="opacity:.85;font-weight:600">· best ${b}/45 (${dtLevel(b)})</span>`:""}</button>`; }).join("")}
-      ${noVoice&&!(DT.man&&DT.man.clips)?`<p class="note">🔇 Your browser can't read the listening texts aloud. Try Chrome or Safari.</p>`:""}</div>
-    <div class="card"><h3 style="margin:0 0 6px">📈 My progress · Mein Fortschritt</h3>
-      <div class="extiles"><div><b>${mocks.length}</b><span class="ecmeta">mock tests</span></div><div><b>${mocks.length?best:"–"}<small style="font-size:12px">/45</small></b><span class="ecmeta">best · ${mocks.length?dtLevel(best):"–"}</span></div><div><b>${wr.length+sp.length}</b><span class="ecmeta">letters + speaking</span></div></div>
+        return `<button class="btn primary qbtn" onclick="dtStart('mock','${st.id}')">${esc(st.title)}${b>=0?` <span style="opacity:.85;font-weight:600">· ${tr("best","bestes","mejor")} ${b}/45 (${dtLevel(b)})</span>`:""}</button>`; }).join("")}
+      ${noVoice&&!(DT.man&&DT.man.clips)?`<p class="note">🔇 ${tr("Your browser can't read the listening texts aloud. Try Chrome or Safari.","Dein Browser kann die Hörtexte nicht vorlesen. Probier Chrome oder Safari.","Tu navegador no puede leer en voz alta los textos. Prueba Chrome o Safari.")}</p>`:""}</div>
+    <div class="card"><h3 style="margin:0 0 6px">${tr(`📈 My progress`,`📈 Mein Fortschritt`,`📈 Mi progreso`)}</h3>
+      <div class="extiles"><div><b>${mocks.length}</b><span class="ecmeta">${tr("mock tests","Probetests","simulacros")}</span></div><div><b>${mocks.length?best:"–"}<small style="font-size:12px">/45</small></b><span class="ecmeta">${tr("best","bestes","mejor")} · ${mocks.length?dtLevel(best):"–"}</span></div><div><b>${wr.length+sp.length}</b><span class="ecmeta">${tr("letters + speaking","Briefe + Sprechen","cartas + expresión oral")}</span></div></div>
       ${mocks.length?dtHistHtml(mocks):""}
       ${Object.keys(DT_TEIL).map(k=>{ const its=DT.items.filter(x=>x.part===k), done=its.filter(x=>x.it.id in last), ok=its.filter(x=>last[x.it.id]===true).length;
-        return `<div style="margin-top:8px"><div style="display:flex;justify-content:space-between;gap:8px"><span class="ecmeta">${esc(DT_TEIL[k])}</span><span class="ecmeta">${done.length?`${ok}/${its.length} right`:"not tried"}</span></div><div class="exbar"><i style="width:${Math.round(ok/its.length*100)}%"></i></div></div>`; }).join("")}
-      ${!A.user?`<p class="note" style="margin:8px 0 0">💾 Saved on this phone only. <button class="linkbtn" onclick="A.ret='dtz';go('account')">Sign in</button> to keep your history everywhere.</p>`:""}</div>
-    <div class="card"><h3 style="margin:0 0 4px">🎧 Hören · Listening</h3><p class="note" style="margin:0 0 6px">The answer and the text appear after each question.</p>
-      <div class="dtteil">${["H1","H2","H3","H4"].map(k=>`<button onclick="dtStart('practice','${k}')">${esc(DT_TEIL[k])}<small>${DT.items.filter(x=>x.part===k).length} questions</small></button>`).join("")}</div>
-      <label class="row" style="gap:8px;margin-top:6px;font-size:14px"><input type="checkbox" ${DT.slow?"checked":""} onchange="DT.slow=this.checked"> 🐢 Read slower in practice · Langsamer</label></div>
-    <div class="card"><h3 style="margin:0 0 6px">📖 Lesen · Reading</h3>
-      <div class="dtteil">${["L1","L2","L3","L4","L5"].map(k=>`<button onclick="dtStart('practice','${k}')">${esc(DT_TEIL[k])}<small>${DT.items.filter(x=>x.part===k).length} questions</small></button>`).join("")}</div>
-      <button class="btn secondary qbtn" style="margin-top:8px" onclick="dtStart('practice','wrong')">🔁 My mistakes · Meine Fehler (${wrong})</button></div>
-    <div class="card"><h3 style="margin:0 0 4px">✍️ Schreiben · Writing</h3><p class="note" style="margin:0 0 6px">Write a letter in 30 minutes, check it, then compare with a sample answer.</p>
+        return `<div style="margin-top:8px"><div style="display:flex;justify-content:space-between;gap:8px"><span class="ecmeta">${esc(DT_TEIL[k])}</span><span class="ecmeta">${done.length?tr(`${ok}/${its.length} right`,`${ok}/${its.length} richtig`,`${ok}/${its.length} bien`):tr("not tried","noch nicht geübt","sin probar")}</span></div><div class="exbar"><i style="width:${Math.round(ok/its.length*100)}%"></i></div></div>`; }).join("")}
+      ${!A.user?`<p class="note" style="margin:8px 0 0">💾 ${tr("Saved on this phone only.","Nur auf diesem Handy gespeichert.","Guardado solo en este móvil.")} <button class="linkbtn" onclick="A.ret='dtz';go('account')">${tr("Sign in","Anmelden","Entra")}</button> ${tr("to keep your history everywhere.","um deinen Verlauf überall zu haben.","para tener tu historial en todas partes.")}</p>`:""}</div>
+    <div class="card"><h3 style="margin:0 0 4px">🎧 ${tr("Hören · Listening","Hören","Hören · Comprensión auditiva")}</h3><p class="note" style="margin:0 0 6px">${tr("The answer and the text appear after each question.","Lösung und Text erscheinen nach jeder Frage.","La respuesta y el texto aparecen después de cada pregunta.")}</p>
+      <div class="dtteil">${["H1","H2","H3","H4"].map(k=>`<button onclick="dtStart('practice','${k}')">${esc(DT_TEIL[k])}<small>${Q(DT.items.filter(x=>x.part===k).length)}</small></button>`).join("")}</div>
+      <label class="row" style="gap:8px;margin-top:6px;font-size:14px"><input type="checkbox" ${DT.slow?"checked":""} onchange="DT.slow=this.checked"> 🐢 ${tr("Read slower in practice","Beim Üben langsamer lesen","Leer más despacio en práctica")}</label></div>
+    <div class="card"><h3 style="margin:0 0 6px">📖 ${tr("Lesen · Reading","Lesen","Lesen · Comprensión lectora")}</h3>
+      <div class="dtteil">${["L1","L2","L3","L4","L5"].map(k=>`<button onclick="dtStart('practice','${k}')">${esc(DT_TEIL[k])}<small>${Q(DT.items.filter(x=>x.part===k).length)}</small></button>`).join("")}</div>
+      <button class="btn secondary qbtn" style="margin-top:8px" onclick="dtStart('practice','wrong')">🔁 ${tr("My mistakes","Meine Fehler","Mis errores")} (${wrong})</button></div>
+    <div class="card"><h3 style="margin:0 0 4px">✍️ ${tr("Schreiben · Writing","Schreiben","Schreiben · Expresión escrita")}</h3><p class="note" style="margin:0 0 6px">${tr("Write a letter in 30 minutes, check it, then compare with a sample answer.","Schreib einen Brief in 30 Minuten, prüf ihn und vergleiche mit einer Musterlösung.","Escribe una carta en 30 minutos, revísala y compárala con una respuesta modelo.")}</p>
       ${DT.d.schreiben.map(w=>{ const d=wr.filter(a=>a.topic===w.id).length; return `<button class="btn secondary qbtn" onclick="dtWrite('${w.id}')">${d?"✅ ":""}${esc(w.title)} <span class="ecmeta">${w.to==="informal"?"informal":"formal"}</span></button>`; }).join("")}</div>
-    <div class="card"><h3 style="margin:0 0 4px">🗣️ Sprechen · Speaking</h3><p class="note" style="margin:0 0 6px">Prompt cards for the 3 parts of the oral exam. Record yourself, or practise with a partner in a German lounge.</p>
+    <div class="card"><h3 style="margin:0 0 4px">🗣️ ${tr("Sprechen · Speaking","Sprechen","Sprechen · Expresión oral")}</h3><p class="note" style="margin:0 0 6px">${tr("Prompt cards for the 3 parts of the oral exam. Record yourself, or practise with a partner in a German lounge.","Aufgabenkarten für die 3 Teile der mündlichen Prüfung. Nimm dich auf oder übe mit einem Partner in einer Deutsch-Lounge.","Tarjetas para las 3 partes del examen oral. Grábate o practica con un compañero en una sala de alemán.")}</p>
       ${DT.d.sprechen.map(c=>{ const d=sp.filter(a=>a.topic===c.id).length; return `<button class="btn secondary qbtn" onclick="dtSpeak('${c.id}')">${d?"✅ ":""}Teil ${c.teil} · ${esc(c.title)}</button>`; }).join("")}
-      <button class="btn secondary qbtn" onclick="dtStop();luOpen()">👥 Find a partner in a lounge</button></div>
-    <p class="note">All exercises are original PonteTalk practice material in the style of the DTZ format. Not official telc, Goethe-Institut or BAMF material. Levels shown are estimates.</p>
-    <button class="btn secondary qbtn" onclick="exOpen()">🇩🇪 Leben in Deutschland test →</button>`;
+      <button class="btn secondary qbtn" onclick="dtStop();luOpen()">👥 ${tr("Find a partner in a lounge","Partner in einer Lounge finden","Buscar un compañero en una sala")}</button></div>
+    <p class="note">${tr("All exercises are original PonteTalk practice material in the style of the DTZ format. Not official telc, Goethe-Institut or BAMF material. Levels shown are estimates.","Alle Übungen sind eigenes PonteTalk-Übungsmaterial im Stil des DTZ-Formats. Kein offizielles Material von telc, Goethe-Institut oder BAMF. Die Niveaus sind Schätzungen.","Todos los ejercicios son material original de PonteTalk al estilo del DTZ. No es material oficial de telc, el Goethe-Institut ni el BAMF. Los niveles son estimaciones.")}</p>
+    <button class="btn secondary qbtn" onclick="exOpen()">🇩🇪 ${tr("Leben in Deutschland test →","Leben-in-Deutschland-Test →","Test Leben in Deutschland →")}</button>`;
   return h;
 };
 function dtHistHtml(mocks){
@@ -8571,7 +8572,7 @@ function dtStart(mode, what){
   if(mode==="mock") list=DT.items.filter(x=>x.set===what);
   else if(what==="wrong"){ const last=dtLast(); list=DT.items.filter(x=>last[x.it.id]===false); }
   else list=DT.items.filter(x=>x.part===what);
-  if(!list.length){ bToast(what==="wrong"?"No mistakes to practise 🎉 · Keine Fehler":"Nothing here yet"); return; }
+  if(!list.length){ bToast(what==="wrong"?tr("No mistakes to practise 🎉","Keine Fehler zum Üben 🎉","No hay errores que practicar 🎉"):tr("Nothing here yet","Noch nichts da","Aún no hay nada")); return; }
   DT.run={ mode, what, list, i:0, picks:{}, shown:{}, plays:{}, t0:Date.now(), end:mode==="mock"?Date.now()+70*60000:0 };
   DT.res=null; go("dtzq");
 }
@@ -8583,34 +8584,34 @@ function dtGapText(x){
 function dtTranscript(x){
   const E=dtE();
   if(!x.it.s&&x.g.text){ const et=E&&E.text[x.g.items[0].id];
-    return `<details style="margin-top:8px"><summary class="linkbtn" style="cursor:pointer">📄 Show the text · Text zeigen</summary><div class="dttext" lang="de">${esc(x.g.text)}</div>${et?`<div class="ecmeta">🇪🇸 Español</div><div class="dttext" lang="es">${esc(et)}</div>`:""}</details>`; }
-  if(x.it.s&&E){ const es=E.script[(x.akey||"").split("-").pop()]; if(es) return `<details style="margin-top:8px"><summary class="linkbtn" style="cursor:pointer">📄 Show the text · Text zeigen</summary><div class="dttext">${x.it.s.map(l=>`${l.v==="N"?"":`<b>${l.v==="M"?"👨":"👩"}</b> `}${esc(l.t)}`).join("\n")}</div><div class="ecmeta">🇪🇸 Español</div><div class="dttext" lang="es">${es.map((t,i)=>`${x.it.s[i].v==="N"?"":`<b>${x.it.s[i].v==="M"?"👨":"👩"}</b> `}${esc(t)}`).join("\n")}</div></details>`; }
-  return x.it.s?`<details style="margin-top:8px"><summary class="linkbtn" style="cursor:pointer">📄 Show the text · Text zeigen</summary><div class="dttext">${x.it.s.map(l=>`${l.v==="N"?"":`<b>${l.v==="M"?"👨":"👩"}</b> `}${esc(l.t)}`).join("\n")}</div></details>`:""; }
+    return `<details style="margin-top:8px"><summary class="linkbtn" style="cursor:pointer">${tr(`📄 Show the text`,`📄 Text zeigen`,`📄 Ver el texto`)}</summary><div class="dttext" lang="de">${esc(x.g.text)}</div>${et?`<div class="ecmeta">🇪🇸 Español</div><div class="dttext" lang="es">${esc(et)}</div>`:""}</details>`; }
+  if(x.it.s&&E){ const es=E.script[(x.akey||"").split("-").pop()]; if(es) return `<details style="margin-top:8px"><summary class="linkbtn" style="cursor:pointer">${tr(`📄 Show the text`,`📄 Text zeigen`,`📄 Ver el texto`)}</summary><div class="dttext">${x.it.s.map(l=>`${l.v==="N"?"":`<b>${l.v==="M"?"👨":"👩"}</b> `}${esc(l.t)}`).join("\n")}</div><div class="ecmeta">🇪🇸 Español</div><div class="dttext" lang="es">${es.map((t,i)=>`${x.it.s[i].v==="N"?"":`<b>${x.it.s[i].v==="M"?"👨":"👩"}</b> `}${esc(t)}`).join("\n")}</div></details>`; }
+  return x.it.s?`<details style="margin-top:8px"><summary class="linkbtn" style="cursor:pointer">${tr(`📄 Show the text`,`📄 Text zeigen`,`📄 Ver el texto`)}</summary><div class="dttext">${x.it.s.map(l=>`${l.v==="N"?"":`<b>${l.v==="M"?"👨":"👩"}</b> `}${esc(l.t)}`).join("\n")}</div></details>`:""; }
 VIEWS.dtzq = function(){
   const r=DT.run; if(!r) return `<p class="note center">…</p>`;
   const x=r.list[r.i], it=x.it, g=x.g, mock=r.mode==="mock", pick=r.picks[it.id], shown=!mock&&r.shown[it.id];
   const plays=r.plays[x.akey]||0, grid=it.a.length>4;
-  let h=`<div class="topline"><button class="chip" onclick="dtQuit()">✕ ${mock?"End test":"Stop"}</button><span class="ecmeta">${mock?`⏱ <span id="dtclock">${exClock(r.end-Date.now())}</span> · `:""}${r.i+1} / ${r.list.length}</span></div>
+  let h=`<div class="topline"><button class="chip" onclick="dtQuit()">✕ ${mock?tr("End test","Test beenden","Terminar test"):tr("Stop","Stopp","Parar")}</button><span class="ecmeta">${mock?`⏱ <span id="dtclock">${exClock(r.end-Date.now())}</span> · `:""}${r.i+1} / ${r.list.length}</span></div>
     <div class="exbar" style="margin:0 0 10px"><i style="width:${Math.round((r.i+1)/r.list.length*100)}%;background:var(--coral)"></i></div>
     <div class="card"><div class="ecmeta">${g.k==="H"?"Hören":"Lesen"} ${g.t} · ${esc(g.intro[0])}</div><div class="note" style="margin:2px 0 6px">${esc(g.intro[1])}${dtE()?`<br><span lang="es">🇪🇸 ${esc(dtE().intro[x.part]||"")}</span>`:""}</div>
       ${g.topic?`<div style="font-weight:800;margin:4px 0">Thema: ${esc(g.topic)}${dtE()&&dtE().topic[g.items[0].id]?dtEsLine(dtE().topic[g.items[0].id]):""}</div>`:""}
-      ${x.akey?`<div class="dtplay"><button class="btn primary" style="width:auto;padding:10px 18px" data-dtplay="${x.akey}" onclick="dtPlay('${x.akey}')">${DT.playing===x.akey?"⏹ Stop":"▶️ Hören · Listen"}</button>${mock?`<span class="ecmeta">${plays}/2 played</span>`:""}</div>`:""}
+      ${x.akey?`<div class="dtplay"><button class="btn primary" style="width:auto;padding:10px 18px" data-dtplay="${x.akey}" onclick="dtPlay('${x.akey}')">${DT.playing===x.akey?"⏹ "+tr("Stop","Stopp","Parar"):"▶️ "+tr("Hören · Listen","Hören","Hören · Escuchar")}</button>${mock?`<span class="ecmeta">${plays}/2 ${tr("played","gehört","escuchado")}</span>`:""}</div>`:""}
       ${g.text?`<div class="dttext" lang="de">${dtGapText(x)}</div>`:""}
       ${(()=>{ const eq=dtE()&&dtE().q[it.id];
-        return x.part==="L4"?`<div class="dtquote" lang="de">${esc(it.q)}${eq?dtEsLine(eq.q):""}</div><div class="exq" style="font-size:17px">Ist die Person dafür? · Is this person in favour?${dtE()?dtEsLine("¿La persona está a favor?"):""}</div>`
+        return x.part==="L4"?`<div class="dtquote" lang="de">${esc(it.q)}${eq?dtEsLine(eq.q):""}</div><div class="exq" style="font-size:17px">Ist die Person dafür?${UI==="en"?" · Is this person in favour?":""}${dtE()?dtEsLine("¿La persona está a favor?"):""}</div>`
         :x.part==="L5"?`<div class="exq" style="font-size:17px">Welches Wort passt in ${esc(it.q)}?${dtE()?dtEsLine("¿Qué palabra encaja en el hueco "+it.q.replace("Lücke ","")+"?"):""}</div>`
         :`<div class="exq" lang="de">${esc(it.q)}</div>${eq?dtEsLine(eq.q):""}`; })()}
       <div class="${grid?"dtgrid":""}">${it.a.map((a,k)=>{ let c=""; if(shown){ if(k===it.c) c="ok"; else if(k===pick) c="no"; } else if(pick===k) c="sel";
         return `<button class="exopt ${c}" ${shown?"disabled":""} onclick="dtPick(${k})">${grid?"":`<span class="k">${shown&&k===it.c?"✓":shown&&k===pick?"✕":"abcdefghi"[k]}</span>`}<span lang="de">${esc(a)}${(()=>{ if(!dtE()||grid||x.part==="L5") return ""; const ea=(dtE().q[it.id]||{}).a; const t=ea?ea[k]:DT_ESW[a]; return t?`<span class="extr" lang="es">${esc(t)}</span>`:""; })()}</span></button>`; }).join("")}</div>
-      ${shown?`<div class="${pick===it.c?"ok":"err"}" style="margin-top:8px">${pick===it.c?"✅ Richtig! · Correct!":`❌ Richtig ist · Correct: <b>${esc(it.a[it.c])}</b>`}</div>${dtTranscript(x)}`:""}
+      ${shown?`<div class="${pick===it.c?"ok":"err"}" style="margin-top:8px">${pick===it.c?"✅ "+tr("Richtig! · Correct!","Richtig!","¡Correcto! · Richtig!"):`❌ ${tr("Correct answer","Richtig ist","Respuesta correcta")}: <b>${esc(it.a[it.c])}</b>`}</div>${dtTranscript(x)}`:""}
     </div>`;
   if(mock){
-    h+=`<div class="row" style="gap:8px"><button class="btn secondary" ${r.i===0?"disabled":""} onclick="dtGo(${r.i-1})">← Back</button>
-      ${r.i<r.list.length-1?`<button class="btn primary" onclick="dtGo(${r.i+1})">${tr("Next →","Weiter →","Siguiente →")}</button>`:`<button class="btn primary" onclick="dtFinish()">✓ Finish · Abgeben</button>`}</div>
+    h+=`<div class="row" style="gap:8px"><button class="btn secondary" ${r.i===0?"disabled":""} onclick="dtGo(${r.i-1})">← ${tr("Back","Zurück","Atrás")}</button>
+      ${r.i<r.list.length-1?`<button class="btn primary" onclick="dtGo(${r.i+1})">${tr("Next →","Weiter →","Siguiente →")}</button>`:`<button class="btn primary" onclick="dtFinish()">✓ ${tr("Finish","Abgeben","Entregar")}</button>`}</div>
       <div class="exdots">${r.list.map((y,k)=>`<button class="${y.it.id in r.picks?"done":""} ${k===r.i?"cur":""}" onclick="dtGo(${k})" aria-label="Question ${k+1}">${k+1}</button>`).join("")}</div>
-      <p class="note">1–20 Hören · 21–45 Lesen. ${Object.keys(r.picks).length} of ${r.list.length} answered. <button class="linkbtn" onclick="dtFinish()">Finish now · Jetzt abgeben</button></p>`;
+      <p class="note">1–20 Hören · 21–45 Lesen. ${tr(`${Object.keys(r.picks).length} of ${r.list.length} answered.`,`${Object.keys(r.picks).length} von ${r.list.length} beantwortet.`,`${Object.keys(r.picks).length} de ${r.list.length} respondidas.`)} <button class="linkbtn" onclick="dtFinish()">${tr("Finish now","Jetzt abgeben","Entregar ahora")}</button></p>`;
   } else if(shown){
-    h+=`<button class="btn primary" onclick="${r.i<r.list.length-1?`dtGo(${r.i+1})`:"dtFinish()"}">${r.i<r.list.length-1?tr("Next →","Weiter →","Siguiente →"):"See my result · Ergebnis"}</button>`;
+    h+=`<button class="btn primary" onclick="${r.i<r.list.length-1?`dtGo(${r.i+1})`:"dtFinish()"}">${r.i<r.list.length-1?tr("Next →","Weiter →","Siguiente →"):tr("See my result","Ergebnis ansehen","Ver mi resultado")}</button>`;
   }
   return h;
 };
@@ -8635,7 +8636,7 @@ function dtQuit(){
 }
 async function dtFinish(timeUp){
   const r=DT.run; if(!r) return;
-  if(r.mode==="mock"&&!timeUp){ const miss=r.list.length-Object.keys(r.picks).length; if(miss&&!window.confirm(`${miss} question(s) not answered. Finish anyway? · Trotzdem abgeben?`)) return; }
+  if(r.mode==="mock"&&!timeUp){ const miss=r.list.length-Object.keys(r.picks).length; if(miss&&!window.confirm(tr(`${miss} question(s) not answered. Finish anyway?`,`${miss} Frage(n) nicht beantwortet. Trotzdem abgeben?`,`${miss} pregunta(s) sin responder. ¿Entregar igualmente?`))) return; }
   if(r.timer) clearInterval(r.timer); dtStop();
   const list=r.mode==="mock"?r.list:r.list.filter(x=>x.it.id in r.picks);
   const answers=list.filter(x=>x.it.id in r.picks).map(x=>({ n:x.it.id, ok:r.picks[x.it.id]===x.it.c }));
@@ -8650,15 +8651,15 @@ async function dtFinish(timeUp){
 VIEWS.dtzr = function(){
   const x=DT.res; if(!x) return `<p class="note center">…</p>`;
   const mock=x.mode==="mock", lv=dtLevel(x.correct), wrong=x.list.filter(y=>x.picks[y.it.id]!==y.it.c);
-  let h=`<div class="topline"><button class="chip" onclick="go('dtz')">← German exam</button><span></span></div>
-    <div class="card center">${mock?`<div style="font-size:54px">${lv==="B1"?"🎉":lv==="A2"?"👍":"💪"}</div><h2 style="margin:4px 0">${lv==="B1"?"B1 level! · Niveau B1":lv==="A2"?"A2 level · Niveau A2":"Keep going · Weiter üben"}</h2>`:`<div style="font-size:48px">📚</div><h2 style="margin:4px 0">Practice done · Geschafft!</h2>`}
+  let h=`<div class="topline"><button class="chip" onclick="go('dtz')">← ${tr("German exam","Deutschprüfung","Examen de alemán")}</button><span></span></div>
+    <div class="card center">${mock?`<div style="font-size:54px">${lv==="B1"?"🎉":lv==="A2"?"👍":"💪"}</div><h2 style="margin:4px 0">${lv==="B1"?tr("B1 level!","Niveau B1!","¡Nivel B1!"):lv==="A2"?tr("A2 level","Niveau A2","Nivel A2"):tr("Keep going","Weiter üben","Sigue practicando")}</h2>`:`<div style="font-size:48px">📚</div><h2 style="margin:4px 0">${tr("Practice done!","Geschafft!","¡Práctica terminada!")}</h2>`}
       <div style="font-size:40px;font-weight:800;margin:6px 0">${x.correct} / ${x.total}</div>
-      ${mock?`<p class="note" style="margin:0">Hören ${x.h}/20 · Lesen ${x.l}/25. About 20 points = A2, about 33 = B1 (estimate). Time: ${exClock(x.seconds*1000)}.</p>`:`<p class="note" style="margin:0">${Math.round(x.correct/x.total*100)}% correct · richtig</p>`}
-      <div class="row" style="gap:8px;justify-content:center;margin-top:12px"><button class="btn primary" onclick="go('dtz')">Back to German exam</button>
-      ${wrong.length?`<button class="btn secondary" onclick="dtStart('practice','wrong')">🔁 Practise mistakes</button>`:""}</div></div>`;
-  if(wrong.length) h+=`<div class="card"><h3 style="margin:0 0 8px">To review · Zum Wiederholen (${wrong.length})</h3>${wrong.map(y=>`<div style="padding:10px 0;border-top:1px solid var(--line)">
+      ${mock?`<p class="note" style="margin:0">Hören ${x.h}/20 · Lesen ${x.l}/25. ${tr(`About 20 points = A2, about 33 = B1 (estimate). Time: ${exClock(x.seconds*1000)}.`,`Etwa 20 Punkte = A2, etwa 33 = B1 (Schätzung). Zeit: ${exClock(x.seconds*1000)}.`,`Unos 20 puntos = A2, unos 33 = B1 (estimación). Tiempo: ${exClock(x.seconds*1000)}.`)}</p>`:`<p class="note" style="margin:0">${Math.round(x.correct/x.total*100)}% ${tr("correct","richtig","correctas")}</p>`}
+      <div class="row" style="gap:8px;justify-content:center;margin-top:12px"><button class="btn primary" onclick="go('dtz')">${tr("Back to German exam","Zurück zur Deutschprüfung","Volver al examen de alemán")}</button>
+      ${wrong.length?`<button class="btn secondary" onclick="dtStart('practice','wrong')">🔁 ${tr("Practise mistakes","Fehler üben","Practicar errores")}</button>`:""}</div></div>`;
+  if(wrong.length) h+=`<div class="card"><h3 style="margin:0 0 8px">${tr("To review","Zum Wiederholen","Para repasar")} (${wrong.length})</h3>${wrong.map(y=>`<div style="padding:10px 0;border-top:1px solid var(--line)">
       <div class="ecmeta">${esc(DT_TEIL[y.part])}</div><b lang="de">${esc(y.part==="L4"?"„"+y.it.q+"“ – dafür?":y.it.q)}</b>${dtE()&&dtE().q[y.it.id]?dtEsLine(dtE().q[y.it.id].q):""}
-      ${y.it.id in x.picks?`<div style="color:var(--coral);font-weight:700;margin-top:4px">✕ ${esc(y.it.a[x.picks[y.it.id]])}</div>`:`<div class="ecmeta" style="margin-top:4px">Not answered · Nicht beantwortet</div>`}
+      ${y.it.id in x.picks?`<div style="color:var(--coral);font-weight:700;margin-top:4px">✕ ${esc(y.it.a[x.picks[y.it.id]])}</div>`:`<div class="ecmeta" style="margin-top:4px">${tr(`Not answered`,`Nicht beantwortet`,`Sin responder`)}</div>`}
       <div style="color:var(--teal);font-weight:800">✓ ${esc(y.it.a[y.it.c])}</div>${dtTranscript(y)}</div>`).join("")}</div>`;
   return h;
 };
@@ -8677,29 +8678,29 @@ function dtAuto(w){ const s=w.text.trim(); return {
 VIEWS.dtzw = function(){
   const w=DT.w; if(!w) return `<p class="note center">…</p>`;
   const t=w.t;
-  let h=`<div class="topline"><button class="chip" onclick="go('dtz')">← German exam</button><span class="ecmeta">${w.done?"":`⏱ <span id="dtwclock">${exClock(w.end-Date.now())}</span>`}</span></div>
-    <div class="card"><div class="ecmeta">Schreiben · ${t.to==="informal"?"informal letter (du)":"formal letter (Sie)"}</div><h3 style="margin:4px 0">${esc(t.title)}</h3>
+  let h=`<div class="topline"><button class="chip" onclick="go('dtz')">← ${tr("German exam","Deutschprüfung","Examen de alemán")}</button><span class="ecmeta">${w.done?"":`⏱ <span id="dtwclock">${exClock(w.end-Date.now())}</span>`}</span></div>
+    <div class="card"><div class="ecmeta">Schreiben · ${t.to==="informal"?tr("informal letter (du)","informeller Brief (du)","carta informal (du)"):tr("formal letter (Sie)","formeller Brief (Sie)","carta formal (Sie)")}</div><h3 style="margin:4px 0">${esc(t.title)}</h3>
       <div class="dttext" lang="de">${esc(t.sit)}${dtE()&&dtE().w[t.id]?`\n<span class="extr" lang="es">🇪🇸 ${esc(dtE().w[t.id].sit)}</span>`:""}</div>
-      <div class="ecmeta">Write about all 4 points · Schreiben Sie zu allen 4 Punkten:</div>
+      <div class="ecmeta">${tr("Write about all 4 points · Schreiben Sie zu allen 4 Punkten:","Schreiben Sie zu allen 4 Punkten:","Escribe sobre los 4 puntos · Schreiben Sie zu allen 4 Punkten:")}</div>
       <ol style="margin:6px 0 0 20px;padding:0" lang="de">${t.pts.map((p,i)=>`<li style="margin:3px 0">${esc(p)}${dtE()&&dtE().w[t.id]?dtEsLine(dtE().w[t.id].pts[i]):""}</li>`).join("")}</ol>
-      <p class="note">Don't forget: greeting (${t.to==="informal"?"Liebe/Lieber …":"Sehr geehrte …"}), the 4 points, a closing sentence and your name.</p></div>`;
+      <p class="note">${tr(`Don't forget: greeting (${t.to==="informal"?"Liebe/Lieber …":"Sehr geehrte …"}), the 4 points, a closing sentence and your name.`,`Nicht vergessen: Anrede (${t.to==="informal"?"Liebe/Lieber …":"Sehr geehrte …"}), die 4 Punkte, ein Schlusssatz und dein Name.`,`No olvides: saludo (${t.to==="informal"?"Liebe/Lieber …":"Sehr geehrte …"}), los 4 puntos, una frase de cierre y tu nombre.`)}</p></div>`;
   if(!w.done){
     h+=`<textarea class="dtta" lang="de" spellcheck="false" placeholder="${t.to==="informal"?"Liebe …,":"Sehr geehrte …,"}" oninput="dtWInput(this)">${esc(w.text)}</textarea>
-      <div class="ectop" style="margin:4px 0 10px"><span class="ecmeta"><b id="dtwc">${dtWords(w.text)}</b> words · Wörter (aim for 80–120)</span><span class="ecmeta">Draft saved ✓</span></div>
-      <button class="btn primary" onclick="DT.w.done=true;xr();window.scrollTo(0,0)">✓ Done · Check my letter</button>`;
+      <div class="ectop" style="margin:4px 0 10px"><span class="ecmeta"><b id="dtwc">${dtWords(w.text)}</b> ${tr("words (aim for 80–120)","Wörter (Ziel: 80–120)","palabras (objetivo 80–120)")}</span><span class="ecmeta">${tr("Draft saved ✓","Entwurf gespeichert ✓","Borrador guardado ✓")}</span></div>
+      <button class="btn primary" onclick="DT.w.done=true;xr();window.scrollTo(0,0)">✓ ${tr("Done · Check my letter","Fertig · Brief prüfen","Listo · Revisar mi carta")}</button>`;
   } else {
     const a=dtAuto(w);
     const row=(k,label,auto)=>`<label class="dtchk"><input type="checkbox" ${w.checks[k]??auto?"checked":""} onchange="DT.w.checks['${k}']=this.checked"><span>${label}</span></label>`;
-    h+=`<div class="card"><h3 style="margin:0 0 4px">Check your letter · Prüfen</h3><p class="note" style="margin:0 0 4px">Tick what's true. Be honest, it helps you more.</p>
-      ${row("anrede",`Greeting fits (${t.to==="informal"?"Liebe/Lieber …":"Sehr geehrte/r …"})`,a.anrede)}
-      ${t.pts.map((p,i)=>row("p"+i,`I wrote about: <b lang="de">${esc(p)}</b>`,false)).join("")}
-      ${row("gruss","Closing and name (Viele Grüße / Mit freundlichen Grüßen)",a.gruss)}
-      ${row("words",`At least about 80 words (you wrote ${dtWords(w.text)})`,a.words)}
-      <button class="btn primary qbtn" style="margin-top:8px" onclick="dtWSave()">💾 Save result · Speichern</button>
-      <button class="btn secondary qbtn" onclick="DT.w.done=false;xr()">✏️ Keep writing</button></div>
-      <div class="card"><h3 style="margin:0 0 4px">Your letter</h3><div class="dttext" lang="de">${esc(w.text||"–")}</div></div>
-      <div class="card"><h3 style="margin:0 0 4px">Sample answer · Musterlösung</h3><p class="note" style="margin:0 0 4px">One good way to answer. Yours can be different.</p><div class="dttext" lang="de">${esc(t.model)}</div>
-      <button class="btn secondary qbtn" onclick="dtStop();luOpen()">👥 Ask a native speaker in a lounge to correct it</button></div>`;
+    h+=`<div class="card"><h3 style="margin:0 0 4px">${tr("Check your letter","Brief prüfen","Revisa tu carta")}</h3><p class="note" style="margin:0 0 4px">${tr("Tick what's true. Be honest, it helps you more.","Hake ab, was stimmt. Sei ehrlich, das hilft dir mehr.","Marca lo que sea cierto. Sé sincero, te ayuda más.")}</p>
+      ${row("anrede",tr(`Greeting fits (${t.to==="informal"?"Liebe/Lieber …":"Sehr geehrte/r …"})`,`Anrede passt (${t.to==="informal"?"Liebe/Lieber …":"Sehr geehrte/r …"})`,`El saludo encaja (${t.to==="informal"?"Liebe/Lieber …":"Sehr geehrte/r …"})`),a.anrede)}
+      ${t.pts.map((p,i)=>row("p"+i,`${tr("I wrote about:","Ich habe geschrieben über:","Escribí sobre:")} <b lang="de">${esc(p)}</b>`,false)).join("")}
+      ${row("gruss",tr("Closing and name (Viele Grüße / Mit freundlichen Grüßen)","Gruß und Name (Viele Grüße / Mit freundlichen Grüßen)","Despedida y nombre (Viele Grüße / Mit freundlichen Grüßen)"),a.gruss)}
+      ${row("words",tr(`At least about 80 words (you wrote ${dtWords(w.text)})`,`Mindestens etwa 80 Wörter (du hast ${dtWords(w.text)} geschrieben)`,`Al menos unas 80 palabras (escribiste ${dtWords(w.text)})`),a.words)}
+      <button class="btn primary qbtn" style="margin-top:8px" onclick="dtWSave()">💾 ${tr("Save result","Ergebnis speichern","Guardar resultado")}</button>
+      <button class="btn secondary qbtn" onclick="DT.w.done=false;xr()">✏️ ${tr("Keep writing","Weiterschreiben","Seguir escribiendo")}</button></div>
+      <div class="card"><h3 style="margin:0 0 4px">${tr("Your letter","Dein Brief","Tu carta")}</h3><div class="dttext" lang="de">${esc(w.text||"–")}</div></div>
+      <div class="card"><h3 style="margin:0 0 4px">${tr("Sample answer · Musterlösung","Musterlösung","Respuesta modelo · Musterlösung")}</h3><p class="note" style="margin:0 0 4px">${tr("One good way to answer. Yours can be different.","Eine gute Möglichkeit. Deine kann anders sein.","Una buena forma de responder. La tuya puede ser distinta.")}</p><div class="dttext" lang="de">${esc(t.model)}</div>
+      <button class="btn secondary qbtn" onclick="dtStop();luOpen()">👥 ${tr("Ask a native speaker in a lounge to correct it","Bitte jemanden mit Deutsch als Muttersprache in einer Lounge um Korrektur","Pide a un hablante nativo en una sala que la corrija")}</button></div>`;
   }
   return h;
 };
@@ -8718,8 +8719,8 @@ async function dtWSave(){
 function dtSpeak(id){ const c=DT.d.sprechen.find(x=>x.id===id); if(!c) return; DT.sp={ c, rec:null, url:null, err:"", checks:{}, prep:0 }; go("dtzs"); }
 async function dtRec(){
   const sp=DT.sp; if(sp.rec){ try{ sp.rec.stop(); }catch(e){} return; }
-  if(!navigator.mediaDevices||!window.MediaRecorder){ sp.err="Recording isn't supported in this browser. Try Chrome or Safari."; xr(); return; }
-  let stream; try{ stream=await navigator.mediaDevices.getUserMedia({ audio:true }); }catch(e){ sp.err="Please allow the microphone to record · Mikrofon erlauben"; xr(); return; }
+  if(!navigator.mediaDevices||!window.MediaRecorder){ sp.err=tr("Recording isn't supported in this browser. Try Chrome or Safari.","Aufnahme geht in diesem Browser nicht. Probier Chrome oder Safari.","Este navegador no permite grabar. Prueba Chrome o Safari."); xr(); return; }
+  let stream; try{ stream=await navigator.mediaDevices.getUserMedia({ audio:true }); }catch(e){ sp.err=tr("Please allow the microphone to record","Bitte Mikrofon erlauben","Permite el micrófono para grabar"); xr(); return; }
   const mime=ecMime(); let mr; try{ mr=mime?new MediaRecorder(stream,{ mimeType:mime }):new MediaRecorder(stream); }catch(e){ mr=new MediaRecorder(stream); }
   const parts=[]; mr.ondataavailable=e=>{ if(e.data&&e.data.size) parts.push(e.data); };
   mr.onstop=()=>{ stream.getTracks().forEach(t=>t.stop()); clearTimeout(sp.stopT); if(sp.url) URL.revokeObjectURL(sp.url);
@@ -8731,21 +8732,21 @@ VIEWS.dtzs = function(){
   const sp=DT.sp; if(!sp) return `<p class="note center">…</p>`;
   const c=sp.c, rec=!!sp.rec, E=dtE()&&dtE().s[c.id];
   const row=(k,label)=>`<label class="dtchk"><input type="checkbox" ${sp.checks[k]?"checked":""} onchange="DT.sp.checks['${k}']=this.checked"><span>${label}</span></label>`;
-  return `<div class="topline"><button class="chip" onclick="if(DT.sp.rec)DT.sp.rec.stop();go('dtz')">← German exam</button><span class="ecmeta">Sprechen · Teil ${c.teil}</span></div>
+  return `<div class="topline"><button class="chip" onclick="if(DT.sp.rec)DT.sp.rec.stop();go('dtz')">← ${tr("German exam","Deutschprüfung","Examen de alemán")}</button><span class="ecmeta">Sprechen · Teil ${c.teil}</span></div>
     <div class="card"><h3 style="margin:0 0 4px">${esc(c.title)}</h3><p class="note" style="margin:0 0 8px">${esc(c.en)}${E?`<br><span lang="es">🇪🇸 ${esc(E.desc)}</span>`:""}</p>
-      <div class="ecmeta">${c.teil===3?"Talk about · Besprechen Sie:":"Talk about · Sprechen Sie über:"}</div>
+      <div class="ecmeta">${UI==="de"?(c.teil===3?"Besprechen Sie:":"Sprechen Sie über:"):tr("Talk about","","Habla sobre")+" · "+(c.teil===3?"Besprechen Sie:":"Sprechen Sie über:")}</div>
       <ul style="margin:6px 0 0 20px;padding:0" lang="de">${c.pts.map((p,i)=>`<li style="margin:3px 0">${esc(p)}${E?dtEsLine(E.pts[i]):""}</li>`).join("")}</ul>
-      ${c.follow.length?`<div class="ecmeta" style="margin-top:8px">The examiner may ask · Mögliche Fragen:</div><ul style="margin:6px 0 0 20px;padding:0" lang="de">${c.follow.map((p,i)=>{ const id=`SQ-${c.id}-${i}`, v=DT.man&&DT.man.clips&&DT.man.clips[id]; return `<li>${esc(p)}${v?` <button class="linkbtn" style="text-decoration:none" onclick="exSay('${id}',DT.d.sprechen.find(x=>x.id==='${c.id}').follow[${i}])" aria-label="Listen">🔊</button>`:""}${E?dtEsLine(E.follow[i]):""}</li>`; }).join("")}</ul>`:""}
-      <details style="margin-top:8px" open><summary class="linkbtn" style="cursor:pointer">💬 Useful phrases · Redemittel</summary><div class="dttext" lang="de" style="white-space:normal">${c.phr.map((t,k)=>{ const id=`SP-${c.id}-${k}`, v=DT.man&&DT.man.clips&&DT.man.clips[id];
+      ${c.follow.length?`<div class="ecmeta" style="margin-top:8px">${tr("The examiner may ask · Mögliche Fragen:","Mögliche Fragen:","El examinador puede preguntar · Mögliche Fragen:")}</div><ul style="margin:6px 0 0 20px;padding:0" lang="de">${c.follow.map((p,i)=>{ const id=`SQ-${c.id}-${i}`, v=DT.man&&DT.man.clips&&DT.man.clips[id]; return `<li>${esc(p)}${v?` <button class="linkbtn" style="text-decoration:none" onclick="exSay('${id}',DT.d.sprechen.find(x=>x.id==='${c.id}').follow[${i}])" aria-label="Listen">🔊</button>`:""}${E?dtEsLine(E.follow[i]):""}</li>`; }).join("")}</ul>`:""}
+      <details style="margin-top:8px" open><summary class="linkbtn" style="cursor:pointer">💬 ${tr("Useful phrases · Redemittel","Redemittel","Frases útiles · Redemittel")}</summary><div class="dttext" lang="de" style="white-space:normal">${c.phr.map((t,k)=>{ const id=`SP-${c.id}-${k}`, v=DT.man&&DT.man.clips&&DT.man.clips[id];
         return `<div style="display:flex;gap:8px;align-items:center;padding:4px 0">${v?`<button class="linkbtn" style="text-decoration:none;font-size:18px" onclick="exSay('${id}',DT.d.sprechen.find(x=>x.id==='${c.id}').phr[${k}])" aria-label="Listen">🔊</button>`:"•"}<span>${esc(t)}</span></div>`; }).join("")}</div></details></div>
-    <div class="card"><h3 style="margin:0 0 6px">🎙️ Practise · Üben</h3>
-      ${sp.prep&&sp.prep>Date.now()?`<p class="note">⏳ Prepare: <b id="dtprep">${exClock(sp.prep-Date.now())}</b> · Notizen machen</p>`:`<button class="btn secondary qbtn" onclick="dtPrep()">⏳ 1 minute to prepare · Vorbereitung</button>`}
-      <button class="btn ${rec?"secondary":"primary"} qbtn" onclick="dtRec()">${rec?`⏹ Stop recording · <span id="dtrect">0:00</span>`:sp.url?"🎙️ Record again":"🎙️ Record myself · Aufnehmen"}</button>
+    <div class="card"><h3 style="margin:0 0 6px">🎙️ ${tr("Practise","Üben","Practicar")}</h3>
+      ${sp.prep&&sp.prep>Date.now()?`<p class="note">⏳ ${tr("Prepare","Vorbereitung","Prepárate")}: <b id="dtprep">${exClock(sp.prep-Date.now())}</b></p>`:`<button class="btn secondary qbtn" onclick="dtPrep()">⏳ ${tr("1 minute to prepare","1 Minute Vorbereitung","1 minuto para prepararte")}</button>`}
+      <button class="btn ${rec?"secondary":"primary"} qbtn" onclick="dtRec()">${rec?`⏹ ${tr("Stop recording","Aufnahme stoppen","Parar grabación")} · <span id="dtrect">0:00</span>`:sp.url?"🎙️ "+tr("Record again","Nochmal aufnehmen","Grabar otra vez"):"🎙️ "+tr("Record myself","Mich aufnehmen","Grabarme")}</button>
       ${sp.err?`<div class="err">${esc(sp.err)}</div>`:""}
-      ${sp.url&&!rec?`<audio controls src="${sp.url}" style="width:100%;margin:8px 0"></audio><p class="note" style="margin:0">${exClock((sp.secs||0)*1000)} recorded. Your recording stays on this phone.</p>`:""}
-      <div style="margin-top:8px">${row("all","I talked about every point")}${row("sent","I spoke in full sentences")}${row("long",c.teil===1?"I spoke for about 1–2 minutes":"I spoke for about 2–3 minutes")}${row("q",c.teil===3?"I made suggestions and reacted to my partner":"I could answer extra questions")}</div>
-      <button class="btn primary qbtn" style="margin-top:8px" onclick="dtSSave()">💾 Save · Speichern</button>
-      <button class="btn secondary qbtn" onclick="if(DT.sp.rec)DT.sp.rec.stop();luOpen()">👥 Practise with a partner in a lounge</button></div>`;
+      ${sp.url&&!rec?`<audio controls src="${sp.url}" style="width:100%;margin:8px 0"></audio><p class="note" style="margin:0">${tr(`${exClock((sp.secs||0)*1000)} recorded. Your recording stays on this phone.`,`${exClock((sp.secs||0)*1000)} aufgenommen. Die Aufnahme bleibt auf diesem Handy.`,`${exClock((sp.secs||0)*1000)} grabado. Tu grabación se queda en este móvil.`)}</p>`:""}
+      <div style="margin-top:8px">${row("all",tr("I talked about every point","Ich habe über jeden Punkt gesprochen","Hablé de todos los puntos"))}${row("sent",tr("I spoke in full sentences","Ich habe in ganzen Sätzen gesprochen","Hablé con frases completas"))}${row("long",c.teil===1?tr("I spoke for about 1–2 minutes","Ich habe etwa 1–2 Minuten gesprochen","Hablé unos 1–2 minutos"):tr("I spoke for about 2–3 minutes","Ich habe etwa 2–3 Minuten gesprochen","Hablé unos 2–3 minutos"))}${row("q",c.teil===3?tr("I made suggestions and reacted to my partner","Ich habe Vorschläge gemacht und auf meinen Partner reagiert","Hice propuestas y reaccioné a mi compañero"):tr("I could answer extra questions","Ich konnte Zusatzfragen beantworten","Pude responder preguntas extra"))}</div>
+      <button class="btn primary qbtn" style="margin-top:8px" onclick="dtSSave()">${tr(`💾 Save`,`💾 Speichern`,`💾 Guardar`)}</button>
+      <button class="btn secondary qbtn" onclick="if(DT.sp.rec)DT.sp.rec.stop();luOpen()">👥 ${tr("Practise with a partner in a lounge","Mit einem Partner in einer Lounge üben","Practica con un compañero en una sala")}</button></div>`;
 };
 AFTER.dtzs = function(){
   const sp=DT.sp; if(!sp||sp.timer) return;
@@ -8762,16 +8763,16 @@ async function dtSSave(){
 
 /* ===================== GAMES ===================== */
 VIEWS.games = function(){
-  return `<h2>${bi("Games","Spiele")}</h2>
-  <p class="sub">${bi("Speaking games for 2–10 players.","Sprechspiele für 2–10 Personen.")}</p>
+  return `<h2>${tr("Games","Spiele","Juegos")}</h2>
+  <p class="sub">${tr("Speaking games for 2–10 players.","Sprechspiele für 2–10 Personen.","Juegos de conversación para 2–10 jugadores.")}</p>
   <div class="bgrid">
-    <div class="card"><h3>▶ Play together · Zusammen spielen</h3><p class="note">One phone, passed around the table. · Ein Handy für alle.</p>
-      <button class="btn primary" onclick="go('setup')">Start · Los geht's</button></div>
-    <div class="card"><h3>🌐 Play online · Online spielen</h3><p class="note">Everyone on their own phone, with a room code. · Jede/r am eigenen Handy.</p>
-      <button class="btn secondary" onclick="O.err='';go('online')">Create or join a room</button></div>
+    <div class="card"><h3>▶ ${tr("Play together","Zusammen spielen","Jugar juntos")}</h3><p class="note">${tr("One phone, passed around the table.","Ein Handy, das am Tisch herumgeht.","Un móvil que pasa por la mesa.")}</p>
+      <button class="btn primary" onclick="go('setup')">${tr("Start","Los geht's","Empezar")}</button></div>
+    <div class="card"><h3>🌐 ${tr("Play online","Online spielen","Jugar online")}</h3><p class="note">${tr("Everyone on their own phone, with a room code.","Jede/r am eigenen Handy, mit Raumcode.","Cada uno en su móvil, con un código de sala.")}</p>
+      <button class="btn secondary" onclick="O.err='';go('online')">${tr("Create or join a room","Raum erstellen oder beitreten","Crear o unirse a una sala")}</button></div>
   </div>
-  <div class="card"><h3>📅 Game nights · Spieleabende</h3><p class="note">Join a scheduled game session with people from around the world.</p>
-    <button class="btn secondary" onclick="bOpen()">See sessions · Sessions ansehen</button></div>
+  <div class="card"><h3>📅 ${tr("Game nights","Spieleabende","Noches de juegos")}</h3><p class="note">${tr("Join a scheduled game session with people from around the world.","Mach bei einem geplanten Spieleabend mit Leuten aus aller Welt mit.","Únete a una sesión de juego programada con gente de todo el mundo.")}</p>
+    <button class="btn secondary" onclick="bOpen()">${tr("See sessions","Sessions ansehen","Ver sesiones")}</button></div>
   ${legalLinks()}`;
 };
 
