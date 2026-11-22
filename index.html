@@ -50,6 +50,13 @@
   @font-face{font-family:'Nunito';font-style:normal;font-display:swap;font-weight:200 1000;src:url(fonts/nunito-cyrillic-wght-normal.woff2) format('woff2');unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
   @font-face{font-family:'Nunito';font-style:normal;font-display:swap;font-weight:200 1000;src:url(fonts/nunito-cyrillic-ext-wght-normal.woff2) format('woff2');unicode-range:U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F}
   @font-face{font-family:'Noto Nastaliq Urdu';font-style:normal;font-display:swap;font-weight:400 700;src:url(fonts/noto-nastaliq-urdu-arabic-wght-normal.woff2) format('woff2');unicode-range:U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC,U+102E0-102FB,U+10E60-10E7E,U+10EC2-10EC4,U+10EFC-10EFF,U+1EE00-1EE03,U+1EE05-1EE1F,U+1EE21-1EE22,U+1EE24,U+1EE27,U+1EE29-1EE32,U+1EE34-1EE37,U+1EE39,U+1EE3B,U+1EE42,U+1EE47,U+1EE49,U+1EE4B,U+1EE4D-1EE4F,U+1EE51-1EE52,U+1EE54,U+1EE57,U+1EE59,U+1EE5B,U+1EE5D,U+1EE5F,U+1EE61-1EE62,U+1EE64,U+1EE67-1EE6A,U+1EE6C-1EE72,U+1EE74-1EE77,U+1EE79-1EE7C,U+1EE7E,U+1EE80-1EE89,U+1EE8B-1EE9B,U+1EEA1-1EEA3,U+1EEA5-1EEA9,U+1EEAB-1EEBB,U+1EEF0-1EEF1}
+  @font-face{font-family:'Vazirmatn';font-style:normal;font-display:swap;font-weight:100 900;src:url(fonts/vazirmatn-arabic-wght-normal.woff2) format('woff2');unicode-range:U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC}
+  /* Farsi and Urdu interface: right to left, with a font made for each script */
+  html[lang=fa] body, html[lang=fa] button, html[lang=fa] input, html[lang=fa] textarea, html[lang=fa] select, html[lang=fa] h1, html[lang=fa] h2, html[lang=fa] h3, html[lang=fa] .btn, html[lang=fa] .chip{font-family:'Vazirmatn','Plus Jakarta Sans',Nunito,system-ui,sans-serif}
+  html[lang=ur] body, html[lang=ur] button, html[lang=ur] input, html[lang=ur] textarea, html[lang=ur] select, html[lang=ur] h1, html[lang=ur] h2, html[lang=ur] h3, html[lang=ur] .btn, html[lang=ur] .chip{font-family:'Noto Nastaliq Urdu','Plus Jakarta Sans',Nunito,system-ui,sans-serif}
+  html[lang=ur] body{line-height:2.05}
+  html[lang=ur] h1, html[lang=ur] h2, html[lang=ur] h3, html[lang=ur] .btn, html[lang=ur] .chip, html[lang=ur] button{line-height:1.9}
+  html[dir=rtl] .lucard{text-align:right;align-items:flex-start}
   :root{
     --bg:#FAF7F2; --card:#FFFFFF; --ink:#1B2A41; --muted:#5B6474;
     --coral:#F25C3B; --coral-soft:#FCE6DF; --sun:#F2B544; --sun-soft:#FDF2D8;
@@ -857,7 +864,7 @@
 </div></noscript>
 <div class="wrap" id="app"></div>
 <script>/* Extra interface languages live in /i18n/<code>.js (English text → translation). Load the chosen one before the app starts. */
-(function(){ try{ var X=["tr","uk","fa"], v=localStorage.getItem("pt_ui");
+(function(){ try{ var X=["tr","uk","fa","ur"], v=localStorage.getItem("pt_ui");
   if(!v){ var n=String((navigator.languages&&navigator.languages[0])||navigator.language||"").slice(0,2).toLowerCase(); if(X.indexOf(n)>-1) v=n; }
   if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=1"><\/script>'); }catch(e){} })();</script>
 
@@ -1203,13 +1210,14 @@ function langBadge(l){ const t=T[l]; return `<span class="badge" style="backgrou
 function avatar(p,i){ return `<div class="avatar" style="background:${COLORS[i%COLORS.length]}">${esc(p.name.charAt(0).toUpperCase())}</div>`; }
 /* Interface language (one at a time). Screens that are translated use tr()/bi(en,de,es);
    screens not translated yet still show English · Deutsch. */
-const UI_LANGS=[["en","English","🇬🇧"],["de","Deutsch","🇩🇪"],["es","Español","🇪🇸"],["tr","Türkçe","🇹🇷"],["uk","Українська","🇺🇦"]];
-const UI_CODES=UI_LANGS.map(x=>x[0]), UI_EXTRA=["tr","uk","fa"], UI_RTL=["fa"];
+const UI_LANGS=[["en","English","🇬🇧"],["de","Deutsch","🇩🇪"],["es","Español","🇪🇸"],["tr","Türkçe","🇹🇷"],["uk","Українська","🇺🇦"],["fa","فارسی","🇮🇷"],["ur","اردو","🇵🇰"]];
+const UI_CODES=UI_LANGS.map(x=>x[0]), UI_EXTRA=["tr","uk","fa","ur"], UI_RTL=["fa","ur"];
 window.I18N_DATA=window.I18N_DATA||{};
 let UI=(()=>{ const ok=v=>UI_CODES.includes(v) && (!UI_EXTRA.includes(v) || I18N_DATA[v]);
   try{ const v=localStorage.getItem("pt_ui"); if(ok(v)) return v; }catch(e){}
   const n=String((navigator.languages&&navigator.languages[0])||navigator.language||"en").slice(0,2).toLowerCase();
   return ok(n)?n:"en"; })();
+function uiBack(){ return UI_RTL.includes(UI)?"→":"←"; }
 function uiDir(){ try{ document.documentElement.lang=UI; document.documentElement.dir=UI_RTL.includes(UI)?"rtl":"ltr"; }catch(e){} }
 uiDir();
 /* Extra languages: look up the English text. Sentences with names or numbers inside use {0}, {1} … */
@@ -1369,7 +1377,7 @@ setup(){
       <button class="x" onclick="removePlayer(${i})" aria-label="Remove">×</button>
     </div>`).join("");
   return `
-  <div class="topline"><button class="chip" onclick="go('home')">← ${tr("Back","Zurück","Atrás")}</button><span>${S.players.length}/10 ${tr("players","Spieler","jugadores")}</span></div>
+  <div class="topline"><button class="chip" onclick="go('home')">${uiBack()} ${tr("Back","Zurück","Atrás")}</button><span>${S.players.length}/10 ${tr("players","Spieler","jugadores")}</span></div>
   <h2>${tr("Who's playing?","Wer spielt mit?","¿Quién juega?")}</h2>
   <p class="sub">${tr("Add 2–10 players. Each person picks the language they want to <b>practice</b>.","Füge 2–10 Spieler hinzu. Jede Person wählt die Sprache, die sie <b>üben</b> möchte.","Añade de 2 a 10 jugadores. Cada persona elige el idioma que quiere <b>practicar</b>.")}</p>
   <div class="card">
@@ -1389,7 +1397,7 @@ setup(){
 },
 settings(){
   return `
-  <div class="topline"><button class="chip" onclick="go('setup')">← ${tr("Back","Zurück","Atrás")}</button><span>${S.players.length} ${tr("players","Spieler","jugadores")}</span></div>
+  <div class="topline"><button class="chip" onclick="go('setup')">${uiBack()} ${tr("Back","Zurück","Atrás")}</button><span>${S.players.length} ${tr("players","Spieler","jugadores")}</span></div>
   <h2>${tr("Game settings","Einstellungen","Ajustes del juego")}</h2>
   <div class="card">
     <label class="lbl" style="margin-top:0">${tr("Game","Spiel","Juego")}</label>
@@ -1543,7 +1551,7 @@ stats(){
   const s=loadStats();
   const avg = s.ratings.length ? (s.ratings.reduce((a,b)=>a+b,0)/s.ratings.length).toFixed(1) : "–";
   return `
-  <div class="topline"><button class="chip" onclick="go('home')">← Back</button><span>On this device</span></div>
+  <div class="topline"><button class="chip" onclick="go('home')">${uiBack()} Back</button><span>On this device</span></div>
   <h2>Host stats</h2>
   <p class="sub">Your validation numbers, saved only on this phone.</p>
   <div class="card">
@@ -1994,7 +2002,7 @@ function oForm(){
 VIEWS.online = function(){
   const ses = loadSession();
   return `
-  <div class="topline"><button class="chip" onclick="go('home')">← ${tr("Back","Zurück","Atrás")}</button><span>🌐 Online</span></div>
+  <div class="topline"><button class="chip" onclick="go('home')">${uiBack()} ${tr("Back","Zurück","Atrás")}</button><span>🌐 Online</span></div>
   <h2>${tr("Play online","Online spielen","Jugar online")}</h2>
   <p class="sub">${tr("Everyone joins from their own phone and talks on a video call while you play. New games get a free Jitsi video link, or the host can add their own (Zoom, WhatsApp, Meet…).","Alle spielen am eigenen Handy und sprechen dabei per Videoanruf. Neue Spiele bekommen einen kostenlosen Jitsi-Link, oder der Host fügt einen eigenen hinzu (Zoom, WhatsApp, Meet…).","Cada uno entra desde su móvil y habla por videollamada mientras juega. Las partidas nuevas tienen un enlace Jitsi gratis, o el anfitrión puede añadir el suyo (Zoom, WhatsApp, Meet…).")}</p>
   ${ses && ses.code ? `<div class="card resume"><b>${tr(`Continue game ${esc(ses.code)}?`,`Spiel ${esc(ses.code)} fortsetzen?`,`¿Continuar la partida ${esc(ses.code)}?`)}</b>
@@ -2049,7 +2057,7 @@ function oWaitView(){
   if(dec){ icon="🙅"; title="The host didn't let you in this time"; de="Der Host hat abgelehnt"; note="You can ask the host on the call, then try again later."; }
   else if(G.locked && !pend){ icon="🔒"; title="This room is locked"; de="Dieser Raum ist gesperrt"; note="The game already started. Ask the host to unlock it, then reload this page."; }
   else if(pend){ icon="🔔"; title="Request sent — waiting for the host"; de="Anfrage gesendet – warte auf den Host"; note="The host will accept you in a moment. You'll join from the next turn."; }
-  return `<div class="topline"><button class="chip" onclick="confirmLeave()">← Leave</button><span>🌐 ${esc(O.code)}</span></div>${oStatusBar()}
+  return `<div class="topline"><button class="chip" onclick="confirmLeave()">${uiBack()} Leave</button><span>🌐 ${esc(O.code)}</span></div>${oStatusBar()}
     <div class="handoff"><div class="emoji">${icon}</div><h2>${title}</h2><p class="sub">${de}</p><p class="note">${note}</p>
     ${G.phase!=="lobby"?`<p class="note">Game in progress · ${G.players.length} players · ${T[(G.players[G.turn]||{lang:"en"}).lang].round} ${G.round||1}/${G.rounds}</p>`:""}</div>`;
 }
@@ -2109,7 +2117,7 @@ VIEWS.lobby = function(){
   if(!G || G.phase==="lobby"){
     const host=O.role==="host";
     return `
-    <div class="topline"><button class="chip" onclick="confirmLeave()">← Leave</button><span>🌐 Online</span></div>
+    <div class="topline"><button class="chip" onclick="confirmLeave()">${uiBack()} Leave</button><span>🌐 Online</span></div>
     ${oStatusBar()}
     <div class="card center">
       <div class="note">${tr(`Room code`,`Raumcode`,`Código de sala`)}</div>
@@ -3098,7 +3106,7 @@ function legalBack(){ const r=A.legalRet||"home"; if(r==="lobby" && !O.G) go("ho
 const G_LOGO = `<svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>`;
 
 VIEWS.account = function(){
-  const top=`<div class="topline"><button class="chip" onclick="acctBack()">← ${tr("Back","Zurück","Atrás")}</button><span>👤 ${tr("Account","Konto","Cuenta")}</span></div>`;
+  const top=`<div class="topline"><button class="chip" onclick="acctBack()">${uiBack()} ${tr("Back","Zurück","Atrás")}</button><span>👤 ${tr("Account","Konto","Cuenta")}</span></div>`;
   const msg = `${A.err?`<div class="err">${esc(A.err)}</div>`:""}${A.msg?`<p class="note center okmsg">${esc(A.msg)}</p>`:""}`;
   if(A.status==="loading") return `${top}<p class="note center" style="margin-top:40px">${tr("Loading…","Lädt…","Cargando…")}</p>`;
   if(A.status!=="in"){
@@ -3302,7 +3310,7 @@ async function xSave(){
   }
 }
 VIEWS.xprofile = function(){
-  const top=`<div class="topline"><button class="chip" onclick="xBack()">← ${tr("Back","Zurück","Atrás")}</button><span>🌍 ${tr("Exchange profile","Tandem-Profil","Perfil de intercambio")}</span></div>`;
+  const top=`<div class="topline"><button class="chip" onclick="xBack()">${uiBack()} ${tr("Back","Zurück","Atrás")}</button><span>🌍 ${tr("Exchange profile","Tandem-Profil","Perfil de intercambio")}</span></div>`;
   if(!A.user) return `${top}<p class="note center" style="margin-top:40px">${tr("Please sign in first","Bitte zuerst anmelden","Primero entra en tu cuenta")}</p>`;
   if(!X.loaded) return `${top}<p class="note center" style="margin-top:40px">${tr("Loading…","Lädt…","Cargando…")}</p>`;
   const lvls=LVL_ORDER.map(i=>[LEVELS[i],i]);
@@ -3549,7 +3557,7 @@ async function blUnblock(uid){
 }
 function blOpen(){ go("blocks"); blLoad(); }
 VIEWS.blocks = function(){
-  const top=`<div class="topline"><button class="chip" onclick="A.ret='home';go('account')">← ${tr("Profile","Profil","Perfil")}</button><span>🚫 ${tr("Blocked people","Blockiert","Bloqueados")}</span></div>`;
+  const top=`<div class="topline"><button class="chip" onclick="A.ret='home';go('account')">${uiBack()} ${tr("Profile","Profil","Perfil")}</button><span>🚫 ${tr("Blocked people","Blockiert","Bloqueados")}</span></div>`;
   const list=BL.list;
   return `${top}<h2 style="margin-bottom:4px">${tr(`🚫 Blocked people`,`🚫 Blockierte Personen`,`🚫 Personas bloqueadas`)}</h2>
     <p class="sub" style="margin-top:0">${tr(`People you block can't join your sessions or invite you, and you won't see each other's lounge messages. They aren't told.`,`Blockierte Personen können deinen Sessions nicht beitreten. Sie werden nicht informiert.`,`Las personas que bloqueas no pueden unirse a tus sesiones ni invitarte, y no veréis los mensajes del otro en las salas. No se les avisa.`)}</p>
@@ -3632,7 +3640,7 @@ VIEWS.stats = function(){
   const k=ST.k, D=d=>d?new Date(d).toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"–";
   const tile=(n,l,sub)=>`<div class="sttile"><b>${n==null?"…":n}</b><span>${l}</span>${sub?`<small>${sub}</small>`:""}</div>`;
   const sel=ST.item && (ST.items||[]).find(x=>x.item_id===ST.item);
-  return `<div class="topline"><button class="chip" onclick="go('account')">← Profile</button><span>📊 Stats</span></div>
+  return `<div class="topline"><button class="chip" onclick="go('account')">${uiBack()} Profile</button><span>📊 Stats</span></div>
   <h2>${bi("Stats","Statistiken")}</h2>
   <p class="sub">Only admins see this page. · Nur für Admins sichtbar. <button class="linkbtn" onclick="stLoad()">↻ Refresh</button></p>
   ${!k?`<p class="note center">${tr(`Loading…`,`Lädt…`,`Cargando…`)}</p>`:`
@@ -3670,7 +3678,7 @@ VIEWS.reports = function(){
   const RS=Object.fromEntries(RP_REASONS.map(r=>[r[0],r[1]]));
   const chip=(k,l)=>`<button class="chip ${RA.filter===k?"on":""}" onclick="RA.filter='${k}';RA.list=null;xr();raLoad()">${l}</button>`;
   const L=RA.list;
-  return `<div class="topline"><button class="chip" onclick="go('account')">← Profile</button><span>🛠 Reports</span></div>
+  return `<div class="topline"><button class="chip" onclick="go('account')">${uiBack()} Profile</button><span>🛠 Reports</span></div>
   <h2>${bi("Reports","Meldungen")}</h2>
   <p class="sub">Reported people are never told who reported them. · Gemeldete erfahren nie, wer gemeldet hat.</p>
   <div class="row" style="margin-bottom:12px">${chip("open","Open")}${chip("closed","Closed")}${chip("all","All")}</div>
@@ -3833,7 +3841,7 @@ function chPaint(){
 VIEWS.chat = function(){
   const s=bRowOf({ activity_id:CH.id })||{};
   const open=chWindow(s.starts_at?s:{ starts_at:new Date().toISOString(), duration_min:60 });
-  return `<div class="topline"><button class="chip" onclick="chStop();sOpen('${CH.id}')">← ${tr("Session","Session","Sesión")}</button><span>💬 Chat</span></div>
+  return `<div class="topline"><button class="chip" onclick="chStop();sOpen('${CH.id}')">${uiBack()} ${tr("Session","Session","Sesión")}</button><span>💬 Chat</span></div>
   <div class="chhead"><div style="flex:1;min-width:0"><h2 style="margin:0;font-size:20px">${esc(s.title||tr("Session chat","Session-Chat","Chat de la sesión"))}</h2>
     ${s.starts_at?`<p class="note" style="margin:0">${fmtWhen(s.starts_at)}${s.format==="in_person"&&s.place_name?` · 📍 ${esc(s.place_name)}`:""}</p>`:""}</div></div>
   <div class="chsafe">🔒 ${tr("Only the host and people who joined can read this. Keep it here: no need to share phone numbers or home addresses.","Nur der Host und Teilnehmende können das lesen. Bleibt hier: Telefonnummern oder Adressen müsst ihr nicht teilen.","Solo el anfitrión y los participantes pueden leer esto. Quedaos aquí: no hace falta compartir teléfonos ni direcciones.")}${s.format==="in_person"?" "+tr("Meet at the public place from the session.","Trefft euch am öffentlichen Ort der Session.","Quedad en el lugar público de la sesión."):""}</div>
@@ -4434,13 +4442,13 @@ function qzGuestView(d){
       ${x.o.map((o,k)=>`<button class="qzpick ${QZ.pick[i]===k?"on":""}" aria-pressed="${QZ.pick[i]===k}" onclick="qzPick(${k})">${esc(o)}</button>`).join("")}
     </div>
     ${QZ.err?`<div class="err">${esc(QZ.err)}</div>`:""}
-    <div class="brow2">${i>0?`<button class="btn ghost" onclick="qzGo(-1)">← ${tr("Back","Zurück","Atrás")}</button>`:"<span></span>"}
+    <div class="brow2">${i>0?`<button class="btn ghost" onclick="qzGo(-1)">${uiBack()} ${tr("Back","Zurück","Atrás")}</button>`:"<span></span>"}
       ${last?`<button class="btn primary" ${QZ.busy?"disabled":""} onclick="qzSubmit()">${QZ.busy?tr(`Sending…`,`Sendet…`,`Enviando…`):tr(`📨 Send answers`,`📨 Senden`,`📨 Enviar respuestas`)}</button>`
             :`<button class="btn primary" onclick="qzGo(1)">${tr("Next →","Weiter →","Siguiente →")}</button>`}</div>`;
 }
 VIEWS.quiz = function(){
   const s=bRowOf({ activity_id:QZ.id })||{}, d=QZ.data;
-  return `<div class="topline"><button class="chip" onclick="qzBack()">← ${tr("Session","Session","Sesión")}</button><span>📝 Quiz</span></div>
+  return `<div class="topline"><button class="chip" onclick="qzBack()">${uiBack()} ${tr("Session","Session","Sesión")}</button><span>📝 Quiz</span></div>
     <h2 style="margin-bottom:2px">${esc(s.title||"Quiz")}</h2>
     ${s.starts_at?`<p class="note" style="margin:0 0 12px">${fmtWhen(s.starts_at)}</p>`:""}
     ${!d ? (QZ.err?`<div class="err">${esc(QZ.err)}</div>`:`<p class="note center" style="margin-top:30px">${tr(`Loading…`,`Lädt…`,`Cargando…`)}</p>`)
@@ -4663,10 +4671,10 @@ function wdAllView(){
     ${groups.map(g=>`<p class="dayh">${esc(g.title||"Session")} · ${g.at?esc(fmtWhen(g.at)):""}</p>${g.list.map(w=>wdItem(w,"all")).join("")}`).join("")}`;
 }
 VIEWS.words = function(){
-  if(WD.id==="all") return `<div class="topline"><button class="chip" onclick="wdBack()">← ${tr("Account","Konto","Cuenta")}</button><span>📚 ${tr("My words","Meine Wörter","Mis palabras")}</span></div>
+  if(WD.id==="all") return `<div class="topline"><button class="chip" onclick="wdBack()">${uiBack()} ${tr("Account","Konto","Cuenta")}</button><span>📚 ${tr("My words","Meine Wörter","Mis palabras")}</span></div>
     <h2 style="margin-bottom:12px">${tr("My words","Meine Wörter","Mis palabras")}</h2>${wdAllView()}`;
   const s=bRowOf({ activity_id:WD.id })||{}, d=WD.data;
-  return `<div class="topline"><button class="chip" onclick="wdBack()">← ${tr("Session","Session","Sesión")}</button><span>📚 ${tr("Words I learned","Gelernte Wörter","Palabras que aprendí")}</span></div>
+  return `<div class="topline"><button class="chip" onclick="wdBack()">${uiBack()} ${tr("Session","Session","Sesión")}</button><span>📚 ${tr("Words I learned","Gelernte Wörter","Palabras que aprendí")}</span></div>
     <h2 style="margin-bottom:2px">${esc(s.title||tr("Words I learned","Gelernte Wörter","Palabras que aprendí"))}</h2>
     ${s.starts_at?`<p class="note" style="margin:0 0 12px">${fmtWhen(s.starts_at)}</p>`:""}
     ${!d ? (WD.err?`<div class="err">${esc(WD.err)}</div>`:`<p class="note center" style="margin-top:30px">${tr(`Loading…`,`Lädt…`,`Cargando…`)}</p>`) : wdSessionView(d, s)}`;
@@ -4800,7 +4808,7 @@ function wpResults(){
     <button class="btn ghost" onclick="wpBack()">${tr(`Done`,`Fertig`,`Hecho`)}</button>`;
 }
 VIEWS.practice = function(){
-  const top=`<div class="topline"><button class="chip" onclick="wpBack()">← ${WP.from==="session"?tr("Session words","Session-Wörter","Palabras de la sesión"):WP.from==="home"?tr("Home","Start","Inicio"):tr("My words","Meine Wörter","Mis palabras")}</button><span>🎯 ${tr("Practice","Üben","Práctica")}</span></div>`;
+  const top=`<div class="topline"><button class="chip" onclick="wpBack()">${uiBack()} ${WP.from==="session"?tr("Session words","Session-Wörter","Palabras de la sesión"):WP.from==="home"?tr("Home","Start","Inicio"):tr("My words","Meine Wörter","Mis palabras")}</button><span>🎯 ${tr("Practice","Üben","Práctica")}</span></div>`;
   if(WP.words===null) return `${top}<p class="note center" style="margin-top:40px">${tr(`Building your quiz…`,`Quiz wird erstellt…`,`Preparando tu quiz…`)}</p>`;
   if(!WP.qs.length) return `${top}<div class="card center"><div style="font-size:40px">📚</div><h3>${tr(`No words to practise yet`,`Noch keine Wörter`,`Aún no hay palabras para practicar`)}</h3>
       <p class="note">${tr(`Save words in a session first, then come back here.`,`Speichere erst Wörter in einer Session und komm dann zurück.`,`Primero guarda palabras en una sesión y luego vuelve aquí.`)}</p>
@@ -4874,7 +4882,7 @@ async function luOpen(){
   if(S.screen==="lounges") xr();
 }
 VIEWS.lounges = function(){
-  const top=`<div class="topline"><button class="chip" onclick="goHome()">← ${tr("Back","Zurück","Atrás")}</button><span>${tr("Language lounges","Sprach-Lounges","Salas de idiomas")}</span></div>
+  const top=`<div class="topline"><button class="chip" onclick="goHome()">${uiBack()} ${tr("Back","Zurück","Atrás")}</button><span>${tr("Language lounges","Sprach-Lounges","Salas de idiomas")}</span></div>
     <h1 style="margin-bottom:4px">🛋️ ${tr("Language lounges","Sprach-Lounges","Salas de idiomas")}</h1>${sessTabs("lounges")}
     <p class="sub" style="margin-top:0">${tr(`Chat with people learning the same languages, and agree on a time to talk.`,`Chatte mit Leuten, die dieselben Sprachen lernen, und findet gemeinsam eine Zeit zum Reden.`,`Chatea con gente que aprende los mismos idiomas y quedad a una hora para hablar.`)}</p>`;
   if(!A.user) return `${top}<div class="card center"><div style="font-size:40px">🛋️</div><h3>${tr("Sign in to join the lounges","Melde dich an, um mitzumachen","Entra para unirte a las salas")}</h3>
@@ -5175,7 +5183,7 @@ function ecOpen(){ go("echo"); if(!EC.data) ecLoad(); let seen=false; try{ seen=
 /* --- the full challenge screen --- */
 VIEWS.echo = function(){
   const l=luRoom(); const d=EC.data;
-  const back=`<div class="topline"><button class="chip" onclick="ecStopRec();go('lounge')">← ${esc(luName(l))}</button><button class="chip" onclick="ecHow()">ℹ️ ${tr("How it works","So funktioniert's","Cómo funciona")}</button></div>`;
+  const back=`<div class="topline"><button class="chip" onclick="ecStopRec();go('lounge')">${uiBack()} ${esc(luName(l))}</button><button class="chip" onclick="ecHow()">ℹ️ ${tr("How it works","So funktioniert's","Cómo funciona")}</button></div>`;
   if(!d) return back+`<p class="note center">${EC.err?esc(EC.err):tr(`Loading…`,`Lädt…`,`Cargando…`)}</p>`;
   if(EC.form) return back+ecFormHtml(l);
   const c=d.current, last=d.last;
@@ -5360,7 +5368,7 @@ AFTER.echo = function(){
 VIEWS.lounge = function(){
   const l=luRoom();
   const best=luBest();
-  return `<div class="topline"><button class="chip" onclick="luStop();luOpen()">← ${tr("Lounges","Lounges","Salas")}</button><span>🛋️ ${tr("Lounge","Lounge","Sala")}</span></div>
+  return `<div class="topline"><button class="chip" onclick="luStop();luOpen()">${uiBack()} ${tr("Lounges","Lounges","Salas")}</button><span>🛋️ ${tr("Lounge","Lounge","Sala")}</span></div>
   <div class="chhead"><div class="luflags" style="font-size:26px">${luFlag(l.lang_a)}<span>⇄</span>${luFlag(l.lang_b)}</div>
     <div style="flex:1;min-width:0"><h2 style="margin:0;font-size:20px">${esc(luName(l))}</h2>
     <p class="note" style="margin:0">${tr(`Open to all members`,`Für alle Mitglieder`,`Abierta a todos los miembros`)} <span data-lupres="${esc(l.id)}">${lpHere(l.id)}</span></p></div>
@@ -5527,7 +5535,7 @@ async function ptShare(id, name){
   catch(e){ window.prompt(tr("Copy this link:","Link kopieren:","Copia este enlace:"), url); }
 }
 VIEWS.partners = function(){
-  const top=`<div class="topline"><button class="chip" onclick="goHome()">← ${tr("Back","Zurück","Atrás")}</button><span>${tr("Find partners","Partner finden","Buscar compañeros")}</span></div>
+  const top=`<div class="topline"><button class="chip" onclick="goHome()">${uiBack()} ${tr("Back","Zurück","Atrás")}</button><span>${tr("Find partners","Partner finden","Buscar compañeros")}</span></div>
     <h1 style="margin-bottom:4px">👥 ${tr("Find partners","Partner finden","Buscar compañeros")}</h1>${sessTabs("partners")}
     <p class="sub" style="margin-top:0">${tr(`Find people to practice with: they help with your language, you help with theirs.`,`Finde Leute zum Üben: Sie helfen dir mit deiner Sprache, du ihnen mit ihrer.`,`Encuentra gente con quien practicar: te ayudan con tu idioma y tú con el suyo.`)}</p>`;
   if(!A.user) return `${top}<div class="card center"><div style="font-size:40px">👥</div><h3>${tr("Sign in to find partners","Melde dich an, um Partner zu finden","Entra para buscar compañeros")}</h3>
@@ -5652,7 +5660,7 @@ async function ptOneOpen(id){
   if(S.screen==="partner") xr();
 }
 VIEWS.partner = function(){
-  const top=`<div class="topline"><button class="chip" onclick="ptOpen()">← ${tr("Find partners","Partner finden","Buscar compañeros")}</button><span>${tr("Profile","Profil","Perfil")}</span></div>`;
+  const top=`<div class="topline"><button class="chip" onclick="ptOpen()">${uiBack()} ${tr("Find partners","Partner finden","Buscar compañeros")}</button><span>${tr("Profile","Profil","Perfil")}</span></div>`;
   if(PT.one===undefined) return `${top}<p class="note center" style="margin-top:40px">${tr(`Loading…`,`Lädt…`,`Cargando…`)}</p>`;
   if(!PT.one) return `${top}<div class="card center"><div style="font-size:40px">🔍</div><h3>${tr("This profile isn't available","Dieses Profil ist nicht verfügbar","Este perfil no está disponible")}</h3><p class="note">${tr("It may be hidden.","Es ist vielleicht verborgen.","Puede que esté oculto.")}</p>
     <button class="btn secondary" onclick="ptOpen()">👥 ${tr("Find partners","Partner finden","Buscar compañeros")}</button></div>`;
@@ -5829,7 +5837,7 @@ VIEWS.cafes = function(){
   const used=CF_LANGS.filter(k=>k!=="multi" && (CF.list||[]).some(c=>c.status==="approved" && (c.languages||[]).includes(k)));
   const pend=(CF.list||[]).filter(c=>c.status==="pending"), flagged=(CF.list||[]).filter(c=>(CF.reports[c.id]||[]).length);
   const other=(CF.list||[]).filter(c=>c.status==="hidden"||c.status==="rejected");
-  return `<div class="topline"><button class="chip" onclick="goHome()">← ${tr("Back","Zurück","Atrás")}</button><span>${tr("Language cafés","Sprachcafés","Cafés de idiomas")}</span></div>
+  return `<div class="topline"><button class="chip" onclick="goHome()">${uiBack()} ${tr("Back","Zurück","Atrás")}</button><span>${tr("Language cafés","Sprachcafés","Cafés de idiomas")}</span></div>
   <h2>${tr("Sessions","Sessions","Sesiones")}</h2>
   ${sessTabs("cafes")}
   <p class="sub" style="margin-top:0">${tr(`Language cafés around the world, in person and online. Check each café's page or details for the latest dates.`,`Sprachcafés weltweit, vor Ort und online. Aktuelle Termine findest du auf der Seite des Cafés.`,`Cafés de idiomas de todo el mundo, presenciales y online. Mira la página o los detalles de cada café para ver las fechas.`)}</p>
@@ -5893,7 +5901,7 @@ function cfEdit(id){
 }
 function cfToggleLang(k){ const L=CF.f.languages, i=L.indexOf(k); if(i>=0) L.splice(i,1); else if(L.length<10) L.push(k); xr(); }
 VIEWS.cafeedit = function(){
-  const f=CF.f, top=`<div class="topline"><button class="chip" onclick="cfOpen()">← ${tr("Language cafés","Sprachcafés","Cafés de idiomas")}</button><span>${f&&f.id?"✏️ "+tr("Edit café","Café bearbeiten","Editar café"):CF.admin?"＋ "+tr("Add café","Café hinzufügen","Añadir café"):"＋ "+tr("Suggest a café","Café vorschlagen","Sugerir un café")}</span></div>`;
+  const f=CF.f, top=`<div class="topline"><button class="chip" onclick="cfOpen()">${uiBack()} ${tr("Language cafés","Sprachcafés","Cafés de idiomas")}</button><span>${f&&f.id?"✏️ "+tr("Edit café","Café bearbeiten","Editar café"):CF.admin?"＋ "+tr("Add café","Café hinzufügen","Añadir café"):"＋ "+tr("Suggest a café","Café vorschlagen","Sugerir un café")}</span></div>`;
   if(!f) return `${top}<p class="note center">–</p>`;
   const chip=(on,click,label)=>`<button class="chip ${on?"on":""}" aria-pressed="${on}" onclick="${click}">${label}</button>`;
   return `${top}
@@ -6135,7 +6143,7 @@ function mrHtml(){
 }
 /* Strikes: no-shows and late cancels (warn only while strike_blocks_on = 0) */
 function mrNum(n){ n=+n||0; const w=Math.floor(n), h=n-w>=0.5; return (w||!h?String(w):"")+(h?"½":""); }
-function uiLoc(){ return {de:"de-DE",es:"es-ES",tr:"tr-TR",uk:"uk-UA",fa:"fa-u-ca-gregory"}[UI]||"en-GB"; }
+function uiLoc(){ return {de:"de-DE",es:"es-ES",tr:"tr-TR",uk:"uk-UA",fa:"fa-u-ca-gregory",ur:"ur-PK-u-hc-h23"}[UI]||"en-GB"; }
 function mrStrikes(){
   const k=MR.strikes; if(!k) return "";
   const ev=k.events||[], D2=d=>new Date(d).toLocaleDateString(uiLoc(),{day:"numeric",month:"short"});
@@ -6389,7 +6397,7 @@ function bCard(s){
   </div>`;
 }
 VIEWS.board = function(){
-  const top=`<div class="topline"><button class="chip" onclick="goHome()">← ${tr("Back","Zurück","Atrás")}</button><span>${tr("Sessions","Sessions","Sesiones")}</span></div>`;
+  const top=`<div class="topline"><button class="chip" onclick="goHome()">${uiBack()} ${tr("Back","Zurück","Atrás")}</button><span>${tr("Sessions","Sessions","Sesiones")}</span></div>`;
   const list=B.list;
   const shown=(list||[]).filter(s=>s.visibility!=="private" || isMine(s)).filter(s=>!B.mine || isMine(s)).filter(s=>B.mine || (s.format||"online")===(B.fmt||"online")).filter(s=>B.mine || B.fmt!=="in_person" || !B.city || cfNorm(s.city).includes(cfNorm(B.city).trim())).filter(s=>!B.lang || s.language_a===B.lang || s.language_b===B.lang).filter(s=>!B.fit || FIT.ids.has(s.activity_id));
   return `${top}
@@ -6638,7 +6646,7 @@ async function hPost(){
   }catch(e){ H.busy=false; H.err=bErr(e); xr(); }
 }
 VIEWS.host = function(){
-  const top=`<div class="topline"><button class="chip" onclick="${H.editId?"hCancelEdit()":"bOpen()"}">← ${tr("Sessions","Sessions","Sesiones")}</button><span>${H.editId?"✏️ "+tr("Edit session","Session bearbeiten","Editar sesión"):H.dupFrom?"⧉ "+tr("Duplicate session","Session kopieren","Duplicar sesión"):"＋ "+tr("Host a session","Session anbieten","Organizar una sesión")}</span></div>`;
+  const top=`<div class="topline"><button class="chip" onclick="${H.editId?"hCancelEdit()":"bOpen()"}">${uiBack()} ${tr("Sessions","Sessions","Sesiones")}</button><span>${H.editId?"✏️ "+tr("Edit session","Session bearbeiten","Editar sesión"):H.dupFrom?"⧉ "+tr("Duplicate session","Session kopieren","Duplicar sesión"):"＋ "+tr("Host a session","Session anbieten","Organizar una sesión")}</span></div>`;
   if(!A.user) return `${top}<p class="note center" style="margin-top:40px">${tr("Please sign in first","Bitte zuerst anmelden","Primero entra en tu cuenta")}</p>`;
   if(!H.checked) return `${top}<p class="note center" style="margin-top:40px">${tr("Loading…","Lädt…","Cargando…")}</p>`;
   if(!H.adult) return `${top}<div class="card center" style="margin-top:20px"><div style="font-size:40px">🪪</div>
@@ -6953,7 +6961,7 @@ async function shOneLoad(id){
   if(S.screen==="shopitem") xr();
 }
 VIEWS.shopitem = function(){
-  const top=`<div class="topline"><button class="chip" onclick="shOpen()">← PonteShop</button><span>${tr("Resource","Material","Recurso")}</span></div>`;
+  const top=`<div class="topline"><button class="chip" onclick="shOpen()">${uiBack()} PonteShop</button><span>${tr("Resource","Material","Recurso")}</span></div>`;
   if(SH.one===undefined || SH.one===null) return `${top}<p class="note center" style="margin-top:40px">${tr(`Loading…`,`Lädt…`,`Cargando…`)}</p>`;
   if(!SH.one) return `${top}<div class="card center"><div style="font-size:40px">🔍</div><h3>${tr(`This resource isn't available`,`Dieses Material ist nicht verfügbar`,`Este recurso no está disponible`)}</h3>
     <p class="note">${tr(`It may have been hidden or deleted.`,`Es wurde vielleicht versteckt oder gelöscht.`,`Puede que se haya ocultado o eliminado.`)}</p><button class="btn secondary" onclick="shOpen()">${tr(`See all resources`,`Alle Materialien ansehen`,`Ver todos los recursos`)}</button></div>`;
@@ -7148,7 +7156,7 @@ VIEWS.shop = function(){
   const topics=SH_TOPICS.filter(tp=>list.some(it=>(it.topics||[]).includes(tp[0])));
   const kinds=SH_KINDS.filter(kd=>list.some(it=>it.kind===kd[0]));
   const v=shView(), vb=(k,l)=>`<button class="${v===k?"on":""}" aria-pressed="${v===k}" onclick="shSetView('${k}')">${l}</button>`;
-  return `<div class="topline"><button class="chip" onclick="goHome()">← ${tr("Back","Zurück","Atrás")}</button><span>PonteShop</span></div>
+  return `<div class="topline"><button class="chip" onclick="goHome()">${uiBack()} ${tr("Back","Zurück","Atrás")}</button><span>PonteShop</span></div>
   <div class="shhero">
     <h2>PonteShop <span class="shfree">${tr("Free","Kostenlos","Gratis")}</span></h2>
     <p>${tr(`Free worksheets, flashcards and guides to practise between sessions.`,`Kostenlose Arbeitsblätter, Karteikarten und Leitfäden zum Üben zwischen den Sessions.`,`Hojas de ejercicios, tarjetas y guías gratis para practicar entre sesiones.`)}</p>
@@ -7248,7 +7256,7 @@ function shPick(inp){
   xr();
 }
 VIEWS.shopedit = function(){
-  const f=SH.f, top=`<div class="topline"><button class="chip" onclick="shOpen()">← PonteShop</button><span>${f&&f.id?"✏️ "+tr("Edit resource","Material bearbeiten","Editar recurso"):"＋ "+tr("Share a resource","Material teilen","Compartir un recurso")}</span></div>`;
+  const f=SH.f, top=`<div class="topline"><button class="chip" onclick="shOpen()">${uiBack()} PonteShop</button><span>${f&&f.id?"✏️ "+tr("Edit resource","Material bearbeiten","Editar recurso"):"＋ "+tr("Share a resource","Material teilen","Compartir un recurso")}</span></div>`;
   if(!f || !A.user) return `${top}<p class="note center" style="margin-top:40px">${tr("Please sign in first","Bitte zuerst anmelden","Primero entra en tu cuenta")}</p>`;
   const chip=(on,click,label)=>`<button class="chip ${on?"on":""}" aria-pressed="${on}" onclick="${click}">${label}</button>`;
   const fileLabel = f.file ? `${esc(f.file.name)} · ${shSize(f.file.size)}` : (f.fileName ? `${esc(f.fileName)} · ${shSize(f.size)} <span class="de">(${tr("tap to replace","zum Ersetzen tippen","toca para cambiar")})</span>` : tr("Choose a file (PDF, image, audio, ZIP… max 50 MB)","Datei wählen (PDF, Bild, Audio, ZIP… max. 50 MB)","Elige un archivo (PDF, imagen, audio, ZIP… máx. 50 MB)"));
@@ -7658,7 +7666,7 @@ function landing(){
     </div>
     <div class="bub" aria-hidden="true">
       <div class="core">${HERO_SVG}</div>
-      ${HELLOS.map(([t,l,x,y])=>`<span style="left:${x}%;top:${y}%">${t}<small>${l}</small></span>`).join("")}
+      ${HELLOS.map(([t,l,x,y])=>`<span dir="auto" style="left:${x}%;top:${y}%">${t}<small>${l}</small></span>`).join("")}
     </div>
   </section>
   <section class="lsteps">
@@ -7690,7 +7698,7 @@ async function sShare(id){
 }
 function sOpen(id){ if(!id) return bOpen(); S.sid=id; go("session"); bLoad(); }
 VIEWS.session = function(){
-  const top=`<div class="topline"><button class="chip" onclick="bOpen()">← ${tr("All sessions","Alle Sessions","Todas las sesiones")}</button><span>${tr("Session","Session","Sesión")}</span></div>`;
+  const top=`<div class="topline"><button class="chip" onclick="bOpen()">${uiBack()} ${tr("All sessions","Alle Sessions","Todas las sesiones")}</button><span>${tr("Session","Session","Sesión")}</span></div>`;
   if(B.list===null) return `${top}<p class="note center" style="margin-top:40px">${tr("Loading…","Lädt…","Cargando…")}</p>`;
   const s=(B.list||[]).find(x=>x.activity_id===S.sid);
   if(!s) return `${top}<div class="card center" style="margin-top:16px"><h3>${tr("This session isn't available anymore","Diese Session ist nicht mehr verfügbar","Esta sesión ya no está disponible")}</h3>
@@ -8059,7 +8067,7 @@ function vcQuit(){ exHush(); const r=VC.run; if(r&&r.n) vcFinish(); else { VC.ru
 async function vcFinish(){ const r=VC.run; VC.res={ n:r.n, ok:r.ok, mode:r.mode }; VC.run=null; go("vocabr"); await vcFlush(); }
 VIEWS.vocabr = function(){
   const x=VC.res||{ n:0, ok:0 }, st=vcStats(), sk=vcStreak();
-  return `<div class="topline"><button class="chip" onclick="go('vocab')">← ${tr("Vocabulary","Wortschatz","Vocabulario")}</button><span></span></div>
+  return `<div class="topline"><button class="chip" onclick="go('vocab')">${uiBack()} ${tr("Vocabulary","Wortschatz","Vocabulario")}</button><span></span></div>
     <div class="card center"><div style="font-size:54px">${sk>1?"🔥":"🎉"}</div><h2 style="margin:4px 0">${tr("Well done!","Super gemacht!","¡Muy bien!")}</h2>
       <div style="font-size:36px;font-weight:800;margin:6px 0">${x.ok} / ${x.n}</div><p class="note" style="margin:0">${tr("correct","richtig","correctas")}${sk?" · 🔥 "+tr(`${sk} day${sk>1?"s":""} in a row`,`${sk} Tag${sk>1?"e":""} in Folge`,`${sk} día${sk>1?"s":""} seguidos`):""}</p>
       ${(()=>{ const s2=vcStats(vcLv(VC.level)); return `<p class="note">${VC.level}: ${tr(`${s2.learned} of ${s2.total} words learned · ${s2.mastered} mastered`,`${s2.learned} von ${s2.total} Wörtern gelernt · ${s2.mastered} sicher`,`${s2.learned} de ${s2.total} palabras aprendidas · ${s2.mastered} dominadas`)}</p>`; })()}
@@ -8075,7 +8083,7 @@ VIEWS.vocabchk = function(){
   if(k.i>=k.list.length){
     const rows=VC_LEVELS.map(lv=>{ const n=k.n[lv]||0, y=k.yes[lv]||0, pct=n?Math.round(y/n*100):0; return { lv, pct, est:Math.round(pct/100*vcLv(lv).length) }; });
     const sug=(rows.find(r=>r.pct<80)||rows[rows.length-1]).lv; VC.level=sug; vcSaveLocal();
-    return `<div class="topline"><button class="chip" onclick="go('vocab')">← ${tr("Vocabulary","Wortschatz","Vocabulario")}</button><span></span></div>
+    return `<div class="topline"><button class="chip" onclick="go('vocab')">${uiBack()} ${tr("Vocabulary","Wortschatz","Vocabulario")}</button><span></span></div>
       <div class="card center"><div style="font-size:48px">📊</div><h2 style="margin:4px 0">${tr("Your result","Dein Ergebnis","Tu resultado")}</h2>
       ${rows.map(r=>`<div style="text-align:left;margin:10px 0"><div class="ectop"><b>${r.lv}</b><span class="ecmeta">${tr(`about ${r.pct}% · ≈ ${r.est} words`,`etwa ${r.pct} % · ≈ ${r.est} Wörter`,`aprox. ${r.pct} % · ≈ ${r.est} palabras`)}</span></div><div class="exbar" style="margin-top:4px"><i style="width:${r.pct}%"></i></div></div>`).join("")}
       <p class="note">${tr(`We'll start you at <b>${sug}</b>. Words you knew are marked as learned and come back for review.`,`Du startest bei <b>${sug}</b>. Wörter, die du kanntest, sind als gelernt markiert und kommen zur Wiederholung.`,`Empezarás en <b>${sug}</b>. Las palabras que sabías se marcan como aprendidas y vuelven para repasar.`)}</p>
@@ -8091,7 +8099,7 @@ function vcChk(yes){ const k=VC.chk, w=k.list[k.i]; k.n[w.lv]=(k.n[w.lv]||0)+1; 
   k.i++; k.show=false; if(k.i>=k.list.length) vcFlush(); xr(); }
 /* ---------- hub ---------- */
 VIEWS.vocab = function(){
-  let h=`<div class="topline"><button class="chip" onclick="go('home')">← ${tr("Home","Start","Inicio")}</button><span>🃏 ${tr("Vocabulary","Wortschatz","Vocabulario")}</span></div>
+  let h=`<div class="topline"><button class="chip" onclick="go('home')">${uiBack()} ${tr("Home","Start","Inicio")}</button><span>🃏 ${tr("Vocabulary","Wortschatz","Vocabulario")}</span></div>
     <h2 style="margin:6px 0 2px">${tr("Wortschatz · Vocabulary","Wortschatz","Wortschatz · Vocabulario")}</h2>
     <p class="sub" style="margin:0 0 6px">${tr("German flashcards that come back at the right time, so words stick.","Deutsch-Karteikarten, die zur richtigen Zeit wiederkommen, damit Wörter hängen bleiben.","Tarjetas de alemán que vuelven en el momento justo para que las palabras se queden.")}</p>
     <div style="display:inline-block;background:var(--teal-soft);color:var(--teal);font-weight:800;font-size:13px;border-radius:999px;padding:5px 12px;margin:0 0 10px">${tr(`🎉 Free during our launch`,`🎉 Kostenlos zum Start`,`🎉 Gratis durante el lanzamiento`)}</div>`;
@@ -8179,7 +8187,7 @@ function exlGo(d){ clearTimeout(EXL.t); exHush(); EXL.i=Math.max(0,Math.min(EXL.
 function exlQuit(){ EXL.on=false; clearTimeout(EXL.t); exHush(); go("exam"); }
 VIEWS.exlisten = function(){
   const q=EXL.list[EXL.i]; const trd=EX.lang&&EX.tr[EX.lang]; const t=q&&trd&&trd[q.n];
-  if(!q) return `<div class="topline"><button class="chip" onclick="exlQuit()">← ${tr("Back","Zurück","Atrás")}</button><span></span></div><div class="card center"><div style="font-size:48px">🎧</div><h2>${tr("Fertig! · Done!","Fertig!","¡Fertig! · ¡Listo!")}</h2><p class="note">${tr(`You listened to ${EXL.list.length} questions.`,`Du hast ${EXL.list.length} Fragen gehört.`,`Escuchaste ${EXL.list.length} preguntas.`)}</p><button class="btn primary" onclick="exlQuit()">${tr("Back","Zurück","Atrás")}</button></div>`;
+  if(!q) return `<div class="topline"><button class="chip" onclick="exlQuit()">${uiBack()} ${tr("Back","Zurück","Atrás")}</button><span></span></div><div class="card center"><div style="font-size:48px">🎧</div><h2>${tr("Fertig! · Done!","Fertig!","¡Fertig! · ¡Listo!")}</h2><p class="note">${tr(`You listened to ${EXL.list.length} questions.`,`Du hast ${EXL.list.length} Fragen gehört.`,`Escuchaste ${EXL.list.length} preguntas.`)}</p><button class="btn primary" onclick="exlQuit()">${tr("Back","Zurück","Atrás")}</button></div>`;
   return `<div class="topline"><button class="chip" onclick="exlQuit()">✕ ${tr("Stop","Stopp","Parar")}</button><span class="ecmeta">🎧 ${EXL.i+1} / ${EXL.list.length}</span></div>
     <div class="exbar" style="margin:0 0 10px"><i style="width:${Math.round((EXL.i+1)/EXL.list.length*100)}%;background:var(--coral)"></i></div>
     <div class="card"><div class="ecmeta">Frage ${esc(q.n)}</div><div class="exq" lang="de">${esc(q.q)}</div>${t?`<div class="extr" dir="${EX.lang==="ar"||EX.lang==="fa"?"rtl":"auto"}">${esc(t.q)}</div>`:""}
@@ -8250,7 +8258,7 @@ function exQText(q){
 function exImg(q){ return q.i?`<img class="eximg" src="/lid/img/${esc(q.i)}?v=${LID_V}" alt="Pictures 1 to 4 for question ${esc(q.n)} · Bilder 1 bis 4" loading="lazy">`:""; }
 function exClock(ms){ const s=Math.max(0,Math.round(ms/1000)); return `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`; }
 VIEWS.exam = function(){
-  const back=`<div class="topline"><button class="chip" onclick="go('home')">← ${tr("Home","Start","Inicio")}</button><span>🇩🇪 ${tr("Test practice","Testtraining","Práctica de examen")}</span></div>`;
+  const back=`<div class="topline"><button class="chip" onclick="go('home')">${uiBack()} ${tr("Home","Start","Inicio")}</button><span>🇩🇪 ${tr("Test practice","Testtraining","Práctica de examen")}</span></div>`;
   let h=back+`<h2 style="margin:6px 0 2px">Leben in Deutschland · Einbürgerungstest</h2>
     <p class="sub" style="margin:0 0 6px">${tr(`Practise with all official BAMF questions: 300 general + 10 for your Bundesland.`,`Übe mit allen offiziellen BAMF-Fragen: 300 allgemeine + 10 für dein Bundesland.`,`Practica con todas las preguntas oficiales del BAMF: 300 generales + 10 de tu estado federado.`)}</p><div style="display:inline-block;background:var(--teal-soft);color:var(--teal);font-weight:800;font-size:13px;border-radius:999px;padding:5px 12px;margin:0 0 10px">${tr(`🎉 Free during our launch`,`🎉 Kostenlos zum Start`,`🎉 Gratis durante el lanzamiento`)}</div>`;
   if(EX.err) return h+`<div class="err">${esc(EX.err)}</div>`;
@@ -8307,7 +8315,7 @@ VIEWS.examq = function(){
       ${shown?`<div class="${pick===q.c?"ok":"err"}" style="margin-top:8px">${pick===q.c?"✅ "+tr("Richtig! · Correct!","Richtig!","¡Correcto! · Richtig!"):`❌ ${tr("Correct answer","Richtig ist","Respuesta correcta")}: <b>${esc(q.a[q.c])}</b>`}${t&&t.x?`<div class="extr" style="margin-top:6px" dir="${tq.rtl?"rtl":"auto"}">💡 ${esc(t.x)}</div>`:""}</div>`:""}
     </div>`;
   if(mock){
-    h+=`<div class="row" style="gap:8px"><button class="btn secondary" ${r.i===0?"disabled":""} onclick="exGo(${r.i-1})">← ${tr("Back","Zurück","Atrás")}</button>
+    h+=`<div class="row" style="gap:8px"><button class="btn secondary" ${r.i===0?"disabled":""} onclick="exGo(${r.i-1})">${uiBack()} ${tr("Back","Zurück","Atrás")}</button>
       ${r.i<r.list.length-1?`<button class="btn primary" onclick="exGo(${r.i+1})">${tr("Next →","Weiter →","Siguiente →")}</button>`:`<button class="btn primary" onclick="exFinish()">✓ ${tr("Finish","Abgeben","Entregar")}</button>`}</div>
       <div class="exdots">${r.list.map((x,k)=>`<button class="${x.n in r.picks?"done":""} ${k===r.i?"cur":""}" onclick="exGo(${k})" aria-label="Question ${k+1}">${k+1}</button>`).join("")}</div>
       <p class="note">${tr(`${Object.keys(r.picks).length} of ${r.list.length} answered.`,`${Object.keys(r.picks).length} von ${r.list.length} beantwortet.`,`${Object.keys(r.picks).length} de ${r.list.length} respondidas.`)} <button class="linkbtn" onclick="exFinish()">${tr("Finish now","Jetzt abgeben","Entregar ahora")}</button></p>`;
@@ -8351,7 +8359,7 @@ VIEWS.examr = function(){
   const x=EX.res; if(!x) return `<p class="note center">…</p>`;
   const mock=x.mode==="mock", pct=Math.round(x.correct/x.total*100);
   const wrong=x.list.filter(q=>x.picks[q.n]!==q.c);
-  let h=`<div class="topline"><button class="chip" onclick="go('exam')">← ${tr("Test practice","Testtraining","Práctica de examen")}</button><span></span></div>
+  let h=`<div class="topline"><button class="chip" onclick="go('exam')">${uiBack()} ${tr("Test practice","Testtraining","Práctica de examen")}</button><span></span></div>
     <div class="card center">${mock?`<div style="font-size:54px">${x.passed?"🎉":"💪"}</div><h2 style="margin:4px 0">${x.passed?tr("Bestanden! · Passed!","Bestanden!","¡Bestanden! · ¡Aprobado!"):tr("Noch nicht · Not yet","Noch nicht","Noch nicht · Todavía no")}</h2>`:`<div style="font-size:48px">📚</div><h2 style="margin:4px 0">${tr("Practice done!","Geschafft!","¡Práctica terminada!")}</h2>`}
       <div style="font-size:40px;font-weight:800;margin:6px 0">${x.correct} / ${x.total}</div>
       <p class="note" style="margin:0">${mock?tr(`You need 17 for the Einbürgerungstest (15 for “Leben in Deutschland”). Time: ${exClock(x.seconds*1000)} of 60:00.`,`Du brauchst 17 für den Einbürgerungstest (15 für „Leben in Deutschland“). Zeit: ${exClock(x.seconds*1000)} von 60:00.`,`Necesitas 17 para el Einbürgerungstest (15 para “Leben in Deutschland”). Tiempo: ${exClock(x.seconds*1000)} de 60:00.`):`${pct}% ${tr("correct","richtig","correctas")}`}</p>
@@ -8551,7 +8559,7 @@ VIEWS.dtzstudio = function(){
   const sel=(k,label)=>`<label class="lbl" style="margin:8px 0 0">${label}<select onchange="DS.${k}=this.value;dsSaveVoices()" style="width:100%;margin-top:4px;border:2px solid var(--line);border-radius:12px;padding:10px;font:600 15px 'Plus Jakarta Sans',sans-serif">
       <option value="">${k==="n"?"Same as female voice":"Choose…"}</option>${(DS.voices||[]).map(v=>`<option value="${esc(v.id)}" ${DS[k]===v.id?"selected":""}>${esc(v.name)}${v.l.gender?` · ${esc(v.l.gender)}`:""}${v.l.accent?` · ${esc(v.l.accent)}`:""}${v.l.language?` · ${esc(v.l.language)}`:""}</option>`).join("")}</select></label>
       ${DS[k]?`<button class="linkbtn" onclick="dsTest('${k==="m"?"M":k==="n"?"N":"F"}')">▶ Test this voice</button>`:""}`;
-  return `<div class="topline"><button class="chip" onclick="go('account')">← Account</button><span>🎙️ Audio studio</span></div>
+  return `<div class="topline"><button class="chip" onclick="go('account')">${uiBack()} Account</button><span>🎙️ Audio studio</span></div>
     <h2 style="margin:6px 0 2px">Listening audio</h2>
     <p class="sub" style="margin:0 0 10px">Creates natural voices with ElevenLabs and saves them for everyone.<br>🎓 German exam: ${have}/${clips.length} clips · 🇩🇪 Leben in Deutschland: ${lhave}/${lclips.length} clips · 🃏 Vocabulary: ${vhave}/${vclips.length} words</p>
     ${DS.err?`<div class="err" style="margin-bottom:8px">${esc(DS.err)}</div>`:""}
@@ -8583,7 +8591,7 @@ VIEWS.dtzstudio = function(){
 };
 /* ---------- hub ---------- */
 VIEWS.dtz = function(){
-  let h=`<div class="topline"><button class="chip" onclick="dtStop();go('home')">← ${tr("Home","Start","Inicio")}</button><span>🇩🇪 ${tr("Test practice","Testtraining","Práctica de examen")}</span></div>
+  let h=`<div class="topline"><button class="chip" onclick="dtStop();go('home')">${uiBack()} ${tr("Home","Start","Inicio")}</button><span>🇩🇪 ${tr("Test practice","Testtraining","Práctica de examen")}</span></div>
     <h2 style="margin:6px 0 2px">Deutsch-Prüfung A2–B1 (DTZ)</h2>
     <p class="sub" style="margin:0 0 6px">${tr("Practise for the Deutsch-Test für Zuwanderer: Hören, Lesen, Schreiben, Sprechen. Also good practice for telc and Goethe B1.","Übe für den Deutsch-Test für Zuwanderer: Hören, Lesen, Schreiben, Sprechen. Auch gut für telc und Goethe B1.","Practica para el Deutsch-Test für Zuwanderer: Hören, Lesen, Schreiben, Sprechen. También sirve para telc y Goethe B1.")}</p><div style="display:inline-block;background:var(--teal-soft);color:var(--teal);font-weight:800;font-size:13px;border-radius:999px;padding:5px 12px;margin:0 0 10px">${tr(`🎉 Free during our launch`,`🎉 Kostenlos zum Start`,`🎉 Gratis durante el lanzamiento`)}</div>`;
   if(DT.err) return h+`<div class="err">${esc(DT.err)}</div>`;
@@ -8666,7 +8674,7 @@ VIEWS.dtzq = function(){
       ${shown?`<div class="${pick===it.c?"ok":"err"}" style="margin-top:8px">${pick===it.c?"✅ "+tr("Richtig! · Correct!","Richtig!","¡Correcto! · Richtig!"):`❌ ${tr("Correct answer","Richtig ist","Respuesta correcta")}: <b>${esc(it.a[it.c])}</b>`}</div>${dtTranscript(x)}`:""}
     </div>`;
   if(mock){
-    h+=`<div class="row" style="gap:8px"><button class="btn secondary" ${r.i===0?"disabled":""} onclick="dtGo(${r.i-1})">← ${tr("Back","Zurück","Atrás")}</button>
+    h+=`<div class="row" style="gap:8px"><button class="btn secondary" ${r.i===0?"disabled":""} onclick="dtGo(${r.i-1})">${uiBack()} ${tr("Back","Zurück","Atrás")}</button>
       ${r.i<r.list.length-1?`<button class="btn primary" onclick="dtGo(${r.i+1})">${tr("Next →","Weiter →","Siguiente →")}</button>`:`<button class="btn primary" onclick="dtFinish()">✓ ${tr("Finish","Abgeben","Entregar")}</button>`}</div>
       <div class="exdots">${r.list.map((y,k)=>`<button class="${y.it.id in r.picks?"done":""} ${k===r.i?"cur":""}" onclick="dtGo(${k})" aria-label="Question ${k+1}">${k+1}</button>`).join("")}</div>
       <p class="note">1–20 Hören · 21–45 Lesen. ${tr(`${Object.keys(r.picks).length} of ${r.list.length} answered.`,`${Object.keys(r.picks).length} von ${r.list.length} beantwortet.`,`${Object.keys(r.picks).length} de ${r.list.length} respondidas.`)} <button class="linkbtn" onclick="dtFinish()">${tr("Finish now","Jetzt abgeben","Entregar ahora")}</button></p>`;
@@ -8711,7 +8719,7 @@ async function dtFinish(timeUp){
 VIEWS.dtzr = function(){
   const x=DT.res; if(!x) return `<p class="note center">…</p>`;
   const mock=x.mode==="mock", lv=dtLevel(x.correct), wrong=x.list.filter(y=>x.picks[y.it.id]!==y.it.c);
-  let h=`<div class="topline"><button class="chip" onclick="go('dtz')">← ${tr("German exam","Deutschprüfung","Examen de alemán")}</button><span></span></div>
+  let h=`<div class="topline"><button class="chip" onclick="go('dtz')">${uiBack()} ${tr("German exam","Deutschprüfung","Examen de alemán")}</button><span></span></div>
     <div class="card center">${mock?`<div style="font-size:54px">${lv==="B1"?"🎉":lv==="A2"?"👍":"💪"}</div><h2 style="margin:4px 0">${lv==="B1"?tr("B1 level!","Niveau B1!","¡Nivel B1!"):lv==="A2"?tr("A2 level","Niveau A2","Nivel A2"):tr("Keep going","Weiter üben","Sigue practicando")}</h2>`:`<div style="font-size:48px">📚</div><h2 style="margin:4px 0">${tr("Practice done!","Geschafft!","¡Práctica terminada!")}</h2>`}
       <div style="font-size:40px;font-weight:800;margin:6px 0">${x.correct} / ${x.total}</div>
       ${mock?`<p class="note" style="margin:0">Hören ${x.h}/20 · Lesen ${x.l}/25. ${tr(`About 20 points = A2, about 33 = B1 (estimate). Time: ${exClock(x.seconds*1000)}.`,`Etwa 20 Punkte = A2, etwa 33 = B1 (Schätzung). Zeit: ${exClock(x.seconds*1000)}.`,`Unos 20 puntos = A2, unos 33 = B1 (estimación). Tiempo: ${exClock(x.seconds*1000)}.`)}</p>`:`<p class="note" style="margin:0">${Math.round(x.correct/x.total*100)}% ${tr("correct","richtig","correctas")}</p>`}
@@ -8738,7 +8746,7 @@ function dtAuto(w){ const s=w.text.trim(); return {
 VIEWS.dtzw = function(){
   const w=DT.w; if(!w) return `<p class="note center">…</p>`;
   const t=w.t;
-  let h=`<div class="topline"><button class="chip" onclick="go('dtz')">← ${tr("German exam","Deutschprüfung","Examen de alemán")}</button><span class="ecmeta">${w.done?"":`⏱ <span id="dtwclock">${exClock(w.end-Date.now())}</span>`}</span></div>
+  let h=`<div class="topline"><button class="chip" onclick="go('dtz')">${uiBack()} ${tr("German exam","Deutschprüfung","Examen de alemán")}</button><span class="ecmeta">${w.done?"":`⏱ <span id="dtwclock">${exClock(w.end-Date.now())}</span>`}</span></div>
     <div class="card"><div class="ecmeta">Schreiben · ${t.to==="informal"?tr("informal letter (du)","informeller Brief (du)","carta informal (du)"):tr("formal letter (Sie)","formeller Brief (Sie)","carta formal (Sie)")}</div><h3 style="margin:4px 0">${esc(t.title)}</h3>
       <div class="dttext" lang="de">${esc(t.sit)}${dtE()&&dtE().w[t.id]?`\n<span class="extr" lang="es">🇪🇸 ${esc(dtE().w[t.id].sit)}</span>`:""}</div>
       <div class="ecmeta">${tr("Write about all 4 points · Schreiben Sie zu allen 4 Punkten:","Schreiben Sie zu allen 4 Punkten:","Escribe sobre los 4 puntos · Schreiben Sie zu allen 4 Punkten:")}</div>
@@ -8792,7 +8800,7 @@ VIEWS.dtzs = function(){
   const sp=DT.sp; if(!sp) return `<p class="note center">…</p>`;
   const c=sp.c, rec=!!sp.rec, E=dtE()&&dtE().s[c.id];
   const row=(k,label)=>`<label class="dtchk"><input type="checkbox" ${sp.checks[k]?"checked":""} onchange="DT.sp.checks['${k}']=this.checked"><span>${label}</span></label>`;
-  return `<div class="topline"><button class="chip" onclick="if(DT.sp.rec)DT.sp.rec.stop();go('dtz')">← ${tr("German exam","Deutschprüfung","Examen de alemán")}</button><span class="ecmeta">Sprechen · Teil ${c.teil}</span></div>
+  return `<div class="topline"><button class="chip" onclick="if(DT.sp.rec)DT.sp.rec.stop();go('dtz')">${uiBack()} ${tr("German exam","Deutschprüfung","Examen de alemán")}</button><span class="ecmeta">Sprechen · Teil ${c.teil}</span></div>
     <div class="card"><h3 style="margin:0 0 4px">${esc(c.title)}</h3><p class="note" style="margin:0 0 8px">${esc(c.en)}${E?`<br><span lang="es">🇪🇸 ${esc(E.desc)}</span>`:""}</p>
       <div class="ecmeta">${UI==="de"?(c.teil===3?"Besprechen Sie:":"Sprechen Sie über:"):tr("Talk about","","Habla sobre")+" · "+(c.teil===3?"Besprechen Sie:":"Sprechen Sie über:")}</div>
       <ul style="margin:6px 0 0 20px;padding:0" lang="de">${c.pts.map((p,i)=>`<li style="margin:3px 0">${esc(p)}${E?dtEsLine(E.pts[i]):""}</li>`).join("")}</ul>
@@ -8838,7 +8846,7 @@ VIEWS.games = function(){
 
 /* ---- legal pages ---- */
 VIEWS.impressum = function(){
-  return `<div class="topline"><button class="chip" onclick="legalBack()">← Back</button><span>Impressum</span></div>
+  return `<div class="topline"><button class="chip" onclick="legalBack()">${uiBack()} Back</button><span>Impressum</span></div>
   <h2>Impressum</h2>
   <div class="card legaltext">
     <p><b>Angaben gemäß § 5 DDG</b></p>
@@ -8851,7 +8859,7 @@ VIEWS.impressum = function(){
 };
 VIEWS.privacy = function(){
   const who=`${esc(LEGAL.name)}, ${esc(LEGAL.street)}, ${esc(LEGAL.city)}, ${esc(LEGAL.country)} · ${esc(LEGAL.email)}`;
-  return `<div class="topline"><button class="chip" onclick="legalBack()">← Back</button><span>Datenschutz</span></div>
+  return `<div class="topline"><button class="chip" onclick="legalBack()">${uiBack()} Back</button><span>Datenschutz</span></div>
   <h2>Datenschutzerklärung <span class="de">· Privacy policy</span></h2>
   <div class="card legaltext">
     <p class="note">Stand: November 2026 · English summary below.</p>
