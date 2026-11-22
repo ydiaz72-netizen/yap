@@ -13,4 +13,6 @@ Checks from the V1 roadmap (Testing rows). Each test cleans up after itself.
 
 The SQL tests create test users and sessions inside the test, then undo everything at the end, so nothing stays in the database and no emails go out. The result is a table with ✅ / ❌ per check.
 
-Known limit (found by QA-01): a session that crosses midnight in your own time (for example 23:30–00:30) never counts as "fits my free time".
+| `trust_fixes.sql` | QA-04/05 | Sessions across midnight fit free times; host late cancel = ½ strike (guests none); host removes a person, seat passes on, removed person can't rejoin | Supabase → SQL Editor, after `sql/trust_fixes.sql` |
+
+The midnight limit QA-01 found is fixed by `sql/trust_fixes.sql`.
