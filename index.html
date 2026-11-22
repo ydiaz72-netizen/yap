@@ -216,6 +216,25 @@
   .ecbadge{display:inline-block;border-radius:999px;padding:2px 8px;font-size:12px;font-weight:800;margin-left:4px}
 
 
+
+  /* ---- Vocabulary flashcards ---- */
+  .vccard{background:#fff;border-radius:24px;box-shadow:0 10px 30px rgba(27,42,65,.10);padding:26px 20px;text-align:center;min-height:260px;display:flex;flex-direction:column;justify-content:center;gap:8px}
+  .vcw{font-size:34px;font-weight:800;line-height:1.15}
+  .vcw .der{color:#2F6FD1}.vcw .die{color:#D9466A}.vcw .das{color:#2A8C82}
+  .vcpl{font-size:15px;color:var(--muted);font-weight:600}
+  .vcmean{font-size:22px;font-weight:800;color:var(--teal)}
+  .vcex{font-size:16px;color:var(--ink);background:#F7F4EE;border-radius:14px;padding:10px 12px;margin-top:6px}
+  .vcrate{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:12px}
+  .vcrate button{border:0;border-radius:14px;padding:12px 4px;font:800 14px 'Plus Jakarta Sans',sans-serif;cursor:pointer;color:#fff}
+  .vcrate small{display:block;font-weight:600;font-size:11px;opacity:.9}
+  .vcg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+  .vcg button{border:0;border-radius:16px;padding:16px 4px;font:800 20px 'Plus Jakarta Sans',sans-serif;color:#fff;cursor:pointer}
+  .vcth{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+  .vcth button{text-align:left;border:2px solid var(--line);background:#fff;border-radius:14px;padding:10px;font:700 14px 'Plus Jakarta Sans',sans-serif;color:var(--ink);cursor:pointer}
+  .vcth small{display:block;color:var(--muted);font-weight:600;font-size:12px;margin-top:4px}
+  .vcdays{display:flex;gap:3px;align-items:flex-end;height:60px;margin:8px 0 2px}
+  .vcdays i{flex:1;border-radius:4px 4px 0 0;background:var(--teal);min-height:3px}
+  .vcdays i.z{background:#ECE7DE}
   /* ---- German exam practice (DTZ) ---- */
   .dttext{white-space:pre-line;background:#F7F4EE;border-radius:14px;padding:12px 14px;font-size:15px;line-height:1.5;margin:8px 0}
   .dttext mark{background:var(--coral-soft);color:var(--coral);font-weight:800;border-radius:6px;padding:0 4px}
@@ -2959,7 +2978,7 @@ function saveCardOnline(){
 const GAME_ICON = { speak:"🗣️", charades:"🎭", emoji:"😀" };
 const GAME_NAME = { speak:"Speak Up", charades:"Charades", emoji:"Emoji Charades" };
 function fmtDate(iso){ try{ const d=new Date(iso); return `${String(d.getDate()).padStart(2,"0")}.${String(d.getMonth()+1).padStart(2,"0")}.${d.getFullYear()}`; }catch(e){ return ""; } }
-function acctBack(){ const r=A.ret||"home"; A.ret="home"; A.editing=false; if(r==="results" && S.players.length && S.gid) go("results"); else if(r==="lobby" && O.G) go("lobby"); else if(r==="board") bOpen(); else if(r==="session") sOpen(S.sid); else if(r==="exam") exOpen(); else if(r==="dtz") dtOpen(); else go("home"); }
+function acctBack(){ const r=A.ret||"home"; A.ret="home"; A.editing=false; if(r==="results" && S.players.length && S.gid) go("results"); else if(r==="lobby" && O.G) go("lobby"); else if(r==="board") bOpen(); else if(r==="session") sOpen(S.sid); else if(r==="exam") exOpen(); else if(r==="dtz") dtOpen(); else if(r==="vocab") vcOpen(); else go("home"); }
 
 function acctStats(gs){
   if(!gs.length) return `<p class="note center" style="margin:10px 0">No games yet. Finish a game and tap <b>Save</b> on the results screen!<br><span class="de">Noch keine Spiele gespeichert.</span></p>`;
@@ -7340,6 +7359,7 @@ function quickCard(){
     <button class="btn secondary qbtn" onclick="luOpen()">🛋️ Chat in a lounge <span data-lupres-all>${lpAll()}</span></button>
     <button class="btn secondary qbtn" onclick="ptOpen()">👥 Find a partner <span data-ptcount>${ptCountHtml()}</span></button>
     <button class="btn secondary qbtn" onclick="cfOpen()">☕ Find a language café</button>
+    <button class="btn secondary qbtn" onclick="vcOpen()">🃏 Vocabulary flashcards · Wortschatz</button>
     <button class="btn secondary qbtn" onclick="exOpen()">🇩🇪 Leben in Deutschland test</button>
     <button class="btn secondary qbtn" onclick="dtOpen()">🎓 German exam A2–B1 (DTZ)</button>
     <button class="btn secondary qbtn" onclick="shOpen()">📘 Free resources</button>
@@ -7635,6 +7655,196 @@ async function nbReadAll(){
   try{ await A.sb.rpc("pt_mark_read",{ p_id:null }); }catch(e){}
 }
 
+
+/* ===================== VOCABULARY FLASHCARDS (spaced repetition) ===================== */
+/* Words: /vocab/de-a1.json (original list). Progress: sql/vocab.sql when signed in, this phone otherwise.
+   🔊 appears only for words that have a recorded clip (Admin → Audio studio), never the phone voice. */
+const VC_V="2026-11-22";
+const VC_DECK="de";
+const VC_LANGS=[["en","English"],["es","Español"],["ar","العربية"],["fa","فارسی / دری"]];
+const VC={ d:null, err:"", p:{}, days:{}, goal:10, lang:"en", run:null, dirty:{}, dayDirty:false, chk:null };
+function vcLoadLocal(){ try{ const v=JSON.parse(localStorage.getItem("pt_vocab_"+VC_DECK)||"{}"); VC.p=v.p||{}; VC.days=v.days||{}; VC.goal=v.goal||10; VC.lang=v.lang||VC.lang; }catch(e){} }
+function vcSaveLocal(){ try{ localStorage.setItem("pt_vocab_"+VC_DECK, JSON.stringify({ p:VC.p, days:VC.days, goal:VC.goal, lang:VC.lang })); }catch(e){} }
+(function(){ try{ const l=(navigator.language||"en").slice(0,2); if(["es","ar","fa"].includes(l)) VC.lang=l; }catch(e){} vcLoadLocal(); })();
+function vcToday(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
+function vcRtl(){ return VC.lang==="ar"||VC.lang==="fa"; }
+function vcTr(w){ return (w.tr&&w.tr[VC.lang])||w.tr.en; }
+function vcClip(w){ const id="V-"+w.id; return DT.man&&DT.man.clips&&DT.man.clips[id]?id:null; }
+async function vcOpen(){
+  go("vocab");
+  try{ if(!VC.d){ const r=await fetch(`/vocab/de-a1.json?v=${VC_V}`); VC.d=await r.json(); VC.byId={}; VC.d.words.forEach(w=>VC.byId[w.id]=w); }
+    await Promise.all([vcSync(), DT.man===undefined?dtLoadManifest():null]); }
+  catch(e){ VC.err="Couldn't load the words. Check your connection · Wörter konnten nicht geladen werden"; }
+  if(/^vocab/.test(S.screen)) xr();
+}
+/* merge server progress (newest wins) */
+async function vcSync(){
+  if(!(A.user&&A.sb)) return;
+  try{
+    const [a,b]=await Promise.all([
+      A.sb.from("vocab_progress").select("word_id,interval,ease,due,reps,lapses,updated_at").eq("deck",VC_DECK).limit(10000),
+      A.sb.from("vocab_days").select("day,reviews,correct,new_words").gte("day", new Date(Date.now()-120*864e5).toISOString().slice(0,10))]);
+    if(a.error||b.error) return;
+    for(const r of a.data||[]){ const u=Date.parse(r.updated_at), l=VC.p[r.word_id];
+      if(!l||(l.u||0)<u) VC.p[r.word_id]={ i:r.interval, e:r.ease, d:Date.parse(r.due), r:r.reps, l:r.lapses, u }; else if((l.u||0)>u) VC.dirty[r.word_id]=1; }
+    for(const id in VC.p) if(!(a.data||[]).some(r=>r.word_id===id)) VC.dirty[id]=1;
+    for(const r of b.data||[]){ const l=VC.days[r.day]; if(!l||l.n<r.reviews) VC.days[r.day]={ n:r.reviews, c:r.correct, w:r.new_words }; }
+    vcSaveLocal(); await vcFlush();
+  }catch(e){}
+}
+async function vcFlush(){
+  vcSaveLocal();
+  if(!(A.user&&A.sb)) return;
+  const ids=Object.keys(VC.dirty); VC.dirty={};
+  try{
+    for(let k=0;k<ids.length;k+=200){
+      const rows=ids.slice(k,k+200).filter(id=>VC.p[id]).map(id=>{ const x=VC.p[id]; return { deck:VC_DECK, word_id:id, interval:x.i, ease:x.e, due:new Date(x.d).toISOString(), reps:x.r, lapses:x.l, updated_at:new Date(x.u||Date.now()).toISOString() }; });
+      if(rows.length){ const r=await A.sb.from("vocab_progress").upsert(rows,{ onConflict:"user_id,deck,word_id" }); if(r.error) throw r.error; }
+    }
+    if(VC.dayDirty){ const t=vcToday(), x=VC.days[t]||{ n:0,c:0,w:0 }; VC.dayDirty=false;
+      const r=await A.sb.from("vocab_days").upsert({ day:t, reviews:x.n, correct:x.c, new_words:x.w },{ onConflict:"user_id,day" }); if(r.error) throw r.error; }
+  }catch(e){ ids.forEach(id=>VC.dirty[id]=1); }
+}
+/* spaced repetition (SM-2 style): 0 again · 1 hard · 2 good · 3 easy */
+function vcGrade(id, g){
+  const now=Date.now(), x=VC.p[id]||{ i:0, e:2.5, d:now, r:0, l:0 }, isNew=!x.r;
+  if(g===0){ x.l++; x.i=0; x.e=Math.max(1.3,x.e-0.2); x.d=now+10*60000; }
+  else { if(g===1){ x.i=isNew?1:Math.max(1,Math.round(x.i*1.2)); x.e=Math.max(1.3,x.e-0.15); }
+    if(g===2){ x.i=x.r===0?1:x.r===1?3:Math.round(Math.max(1,x.i)*x.e); }
+    if(g===3){ x.i=x.r===0?4:Math.round(Math.max(1,x.i)*x.e*1.3); x.e+=0.15; }
+    x.r++; x.d=now+x.i*864e5; }
+  x.u=now; VC.p[id]=x; VC.dirty[id]=1;
+  const t=vcToday(), dd=VC.days[t]||(VC.days[t]={ n:0,c:0,w:0 }); dd.n++; if(g>=2) dd.c++; if(isNew&&g>0) dd.w++; VC.dayDirty=true;
+  if(Object.keys(VC.dirty).length>=10) vcFlush();
+}
+function vcStreak(){ let n=0; const d=new Date(); if(!(VC.days[vcToday()]||{}).n) d.setDate(d.getDate()-1);
+  for(;;){ const k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; if((VC.days[k]||{}).n){ n++; d.setDate(d.getDate()-1); } else break; } return n; }
+function vcStats(list){ list=list||(VC.d?VC.d.words:[]); let learned=0, mastered=0, due=0; const now=Date.now();
+  for(const w of list){ const x=VC.p[w.id]; if(x&&x.r){ learned++; if(x.i>=21) mastered++; if(x.d<=now) due++; } } return { learned, mastered, due, total:list.length }; }
+function vcNoun(w){ return w.g&&!(w.pl||"").startsWith("("); }
+/* ---------- session ---------- */
+function vcStart(mode, theme){
+  if(!VC.d) return; const now=Date.now(), W=VC.d.words, list=[];
+  if(mode==="gender"){ const pool=W.filter(vcNoun); for(const w of exShuffle(pool).slice(0,20)) list.push({ id:w.id, type:"gender" }); }
+  else {
+    const due=W.filter(w=>{ const x=VC.p[w.id]; return x&&x.r&&x.d<=now&&(!theme||w.t===theme); }).sort((a,b)=>VC.p[a.id].d-VC.p[b.id].d).slice(0,60);
+    const today=VC.days[vcToday()]||{ w:0 }, room=theme?Math.max(VC.goal,10):Math.max(0,VC.goal-(today.w||0));
+    const fresh=W.filter(w=>!(VC.p[w.id]&&VC.p[w.id].r)&&(!theme||w.t===theme)).slice(0,room);
+    for(const w of due){ const types=["flip","pick"]; if(vcNoun(w)) types.push("gender"); if(vcClip(w)) types.push("listen"); list.push({ id:w.id, type:types[Math.floor(Math.random()*types.length)] }); }
+    for(const w of fresh) list.push({ id:w.id, type:"new" });
+    if(!list.length&&!theme) for(const w of W.filter(w=>!(VC.p[w.id]&&VC.p[w.id].r)).slice(0,VC.goal)) list.push({ id:w.id, type:"new" }); // extra words on request
+  }
+  if(!list.length){ bToast(mode==="gender"?"Nothing yet":"All done for today 🎉 · Alles erledigt"); return; }
+  VC.run={ list:mode==="gender"?list:[...list.filter(c=>c.type!=="new").slice(0,10), ...list.filter(c=>c.type==="new"), ...list.filter(c=>c.type!=="new").slice(10)], i:0, show:false, pick:null, ok:0, n:0, mode, seen:{} };
+  go("vocabq");
+}
+function vcOpts(w){ const pool=VC.d.words.filter(x=>x.id!==w.id&&x.t===w.t), more=VC.d.words.filter(x=>x.id!==w.id);
+  const o=exShuffle(pool.length>=3?pool:more).slice(0,3); return exShuffle([w,...o]); }
+function vcWordHtml(w){ const m=(w.w||"").match(/^(der|die|das) (.*)$/); return m?`<span class="${m[1]}">${m[1]}</span> ${esc(m[2])}`:esc(w.w); }
+function vcSay(w){ const id=vcClip(w); if(id) exSay(id, w.w); }
+function vcSpk(w){ return vcClip(w)?`<button class="linkbtn" style="font-size:22px;text-decoration:none" onclick="vcSay(VC.byId['${w.id}'])" aria-label="Listen">🔊</button>`:""; }
+VIEWS.vocabq = function(){
+  const r=VC.run; if(!r) return `<p class="note center">…</p>`;
+  const c=r.list[r.i], w=VC.byId[c.id], dir=vcRtl()?"rtl":"auto";
+  if(!c.opts&&(c.type==="pick"||c.type==="listen")) c.opts=vcOpts(w);
+  const back=`<div class="topline"><button class="chip" onclick="vcQuit()">✕ Stop</button><span class="ecmeta">${r.i+1} / ${r.list.length}</span></div>
+    <div class="exbar" style="margin:0 0 12px"><i style="width:${Math.round((r.i)/r.list.length*100)}%;background:var(--coral)"></i></div>`;
+  const reveal=`<div class="vcmean" dir="${dir}">${esc(vcTr(w))}</div>${w.pl?`<div class="vcpl">Plural: ${esc(w.pl)}</div>`:""}<div class="vcex" lang="de">${esc(w.ex)}</div>`;
+  const rate=`<div class="vcrate">${[["Again","Nochmal","#D9466A",0],["Hard","Schwer","#E59A2F",1],["Good","Gut","#2A8C82",2],["Easy","Leicht","#2F6FD1",3]].map(([a,b,col,g])=>`<button style="background:${col}" onclick="vcRate(${g})">${a}<small>${b}</small></button>`).join("")}</div>`;
+  let h=back;
+  if(c.type==="new"||c.type==="flip"){
+    h+=`<div class="vccard">${c.type==="new"?`<div class="ecmeta">🆕 New word · Neues Wort</div>`:""}<div class="vcw" lang="de">${vcWordHtml(w)} ${vcSpk(w)}</div>
+      ${r.show?reveal:`<div class="note">What does it mean? · Was bedeutet das?</div>`}</div>
+      ${r.show?rate:`<button class="btn primary qbtn" style="margin-top:12px" onclick="VC.run.show=true;xr()">Show · Zeigen</button>`}`;
+  } else if(c.type==="pick"||c.type==="listen"){
+    h+=`<div class="vccard" style="min-height:150px">${c.type==="listen"?`<div class="ecmeta">🔊 Listen and choose · Hören</div><button class="btn primary" style="width:auto;margin:6px auto" onclick="vcSay(VC.byId['${w.id}'])">🔊 Play</button>`
+        :`<div class="ecmeta">Which German word? · Welches Wort?</div><div class="vcmean" style="font-size:26px" dir="${dir}">${esc(vcTr(w))}</div>`}</div>
+      ${c.opts.map((o,k)=>{ let cl=""; if(r.pick!==null){ if(o.id===w.id) cl="ok"; else if(k===r.pick) cl="no"; }
+        return `<button class="exopt ${cl}" ${r.pick!==null?"disabled":""} onclick="vcPick(${k})"><span lang="${c.type==="listen"?"":"de"}" dir="${c.type==="listen"?dir:"auto"}">${c.type==="listen"?esc(vcTr(o)):vcWordHtml(o)}</span></button>`; }).join("")}
+      ${r.pick!==null?`<div class="vccard" style="min-height:0;margin-top:10px"><div class="vcw" style="font-size:26px" lang="de">${vcWordHtml(w)} ${vcSpk(w)}</div>${reveal}</div><button class="btn primary qbtn" style="margin-top:10px" onclick="vcNext()">Next · Weiter →</button>`:""}`;
+  } else if(c.type==="gender"){
+    const noun=w.w.replace(/^(der|die|das) /,"");
+    h+=`<div class="vccard" style="min-height:180px"><div class="ecmeta">der, die or das?</div><div class="vcw" lang="de">${r.pick!==null?vcWordHtml(w):`<span style="color:#9AA1AC">___</span> ${esc(noun)}`}</div>
+      ${r.pick!==null?`<div class="vcmean" dir="${dir}">${esc(vcTr(w))}</div>${w.pl?`<div class="vcpl">Plural: ${esc(w.pl)}</div>`:""}`:""}</div>
+      <div class="vcg">${[["der","#2F6FD1"],["die","#D9466A"],["das","#2A8C82"]].map(([g,col],k)=>`<button style="background:${col};${r.pick!==null&&g!==w.g?"opacity:.35":""}" ${r.pick!==null?"disabled":""} onclick="vcPick(${k})">${g}</button>`).join("")}</div>
+      ${r.pick!==null?`<div class="${["der","die","das"][r.pick]===w.g?"ok":"err"}" style="margin-top:10px">${["der","die","das"][r.pick]===w.g?"✅ Richtig!":`❌ ${esc(w.w)}`}</div><button class="btn primary qbtn" style="margin-top:10px" onclick="vcNext()">Next · Weiter →</button>`:""}`;
+  }
+  return h;
+};
+function vcRate(g){ const r=VC.run, c=r.list[r.i]; vcGrade(c.id,g); r.n++; if(g>=2) r.ok++;
+  if(g===0&&!r.seen[c.id]){ r.seen[c.id]=1; r.list.splice(Math.min(r.list.length, r.i+4), 0, { id:c.id, type:"flip" }); }
+  vcNext(true); }
+function vcPick(k){ const r=VC.run, c=r.list[r.i], w=VC.byId[c.id]; if(r.pick!==null) return; r.pick=k;
+  const ok=c.type==="gender"?["der","die","das"][k]===w.g:c.opts[k].id===w.id;
+  if(r.mode==="gender"){ r.n++; if(ok) r.ok++; const t=vcToday(), dd=VC.days[t]||(VC.days[t]={ n:0,c:0,w:0 }); dd.n++; if(ok) dd.c++; VC.dayDirty=true; }
+  else { vcGrade(c.id, ok?2:0); r.n++; if(ok) r.ok++; if(!ok&&!r.seen[c.id]){ r.seen[c.id]=1; r.list.splice(Math.min(r.list.length, r.i+4), 0, { id:c.id, type:"flip" }); } }
+  if(ok&&vcClip(w)) vcSay(w); xr(); }
+function vcNext(){ const r=VC.run; exHush(); r.i++; r.show=false; r.pick=null; if(r.i>=r.list.length){ vcFinish(); return; } xr(); }
+function vcQuit(){ exHush(); const r=VC.run; if(r&&r.n) vcFinish(); else { VC.run=null; go("vocab"); } }
+async function vcFinish(){ const r=VC.run; VC.res={ n:r.n, ok:r.ok, mode:r.mode }; VC.run=null; go("vocabr"); await vcFlush(); }
+VIEWS.vocabr = function(){
+  const x=VC.res||{ n:0, ok:0 }, st=vcStats(), sk=vcStreak();
+  return `<div class="topline"><button class="chip" onclick="go('vocab')">← Vocabulary</button><span></span></div>
+    <div class="card center"><div style="font-size:54px">${sk>1?"🔥":"🎉"}</div><h2 style="margin:4px 0">Well done! · Super gemacht!</h2>
+      <div style="font-size:36px;font-weight:800;margin:6px 0">${x.ok} / ${x.n}</div><p class="note" style="margin:0">correct · richtig${sk?` · 🔥 ${sk} day${sk>1?"s":""} in a row`:""}</p>
+      <p class="note">A1: ${st.learned} of ${st.total} words learned · ${st.mastered} mastered</p>
+      <div class="row" style="gap:8px;justify-content:center;margin-top:10px"><button class="btn primary" onclick="vcStart('learn')">Keep going · Weiter</button><button class="btn secondary" onclick="go('vocab')">Done · Fertig</button></div></div>`;
+};
+/* ---------- quick level check ---------- */
+function vcCheckStart(){ if(!VC.d) return; const pool=VC.d.words.filter(w=>!(VC.p[w.id]&&VC.p[w.id].r)); if(pool.length<10){ bToast("You already know most of A1 🎉"); return; }
+  VC.chk={ list:exShuffle(pool).slice(0,20), i:0, yes:0, show:false }; go("vocabchk"); }
+VIEWS.vocabchk = function(){
+  const k=VC.chk; if(!k) return "";
+  if(k.i>=k.list.length){ const pct=Math.round(k.yes/k.list.length*100), est=Math.round(pct/100*VC.d.words.length);
+    return `<div class="topline"><button class="chip" onclick="go('vocab')">← Vocabulary</button><span></span></div>
+      <div class="card center"><div style="font-size:48px">📊</div><h2 style="margin:4px 0">You know about ${pct}% of A1</h2><p class="note">≈ ${est} of ${VC.d.words.length} words. Words you knew are marked as learned and will come back for review.</p>
+      <button class="btn primary" onclick="vcStart('learn')">Start learning · Los geht's</button></div>`; }
+  const w=k.list[k.i];
+  return `<div class="topline"><button class="chip" onclick="go('vocab')">✕ Stop</button><span class="ecmeta">${k.i+1} / ${k.list.length}</span></div>
+    <div class="exbar" style="margin:0 0 12px"><i style="width:${Math.round(k.i/k.list.length*100)}%;background:var(--coral)"></i></div>
+    <div class="vccard"><div class="ecmeta">Do you know this word? · Kennst du das Wort?</div><div class="vcw" lang="de">${vcWordHtml(w)}</div>
+      ${k.show?`<div class="vcmean" dir="${vcRtl()?"rtl":"auto"}">${esc(vcTr(w))}</div>`:`<button class="linkbtn" onclick="VC.chk.show=true;xr()">Check the meaning · Bedeutung zeigen</button>`}</div>
+    <div class="row" style="gap:8px;margin-top:12px"><button class="btn secondary" style="flex:1" onclick="vcChk(false)">✗ No · Nein</button><button class="btn primary" style="flex:1" onclick="vcChk(true)">✓ I know it · Ja</button></div>`;
+};
+function vcChk(yes){ const k=VC.chk, w=k.list[k.i]; if(yes){ k.yes++; const now=Date.now(); VC.p[w.id]={ i:7, e:2.5, d:now+7*864e5, r:1, l:0, u:now }; VC.dirty[w.id]=1; }
+  k.i++; k.show=false; if(k.i>=k.list.length) vcFlush(); xr(); }
+/* ---------- hub ---------- */
+VIEWS.vocab = function(){
+  let h=`<div class="topline"><button class="chip" onclick="go('home')">← Home</button><span>🃏 Vocabulary</span></div>
+    <h2 style="margin:6px 0 2px">Wortschatz · Vocabulary</h2>
+    <p class="sub" style="margin:0 0 6px">German flashcards that come back at the right time, so words stick.</p>
+    <div style="display:inline-block;background:var(--teal-soft);color:var(--teal);font-weight:800;font-size:13px;border-radius:999px;padding:5px 12px;margin:0 0 10px">🎉 Free during our launch · Kostenlos zum Start</div>`;
+  if(VC.err) return h+`<div class="err">${esc(VC.err)}</div>`;
+  if(!VC.d) return h+`<p class="note center">Loading… · Lädt…</p>`;
+  const st=vcStats(), sk=vcStreak(), today=VC.days[vcToday()]||{ n:0,c:0,w:0 }, newLeft=Math.max(0,VC.goal-(today.w||0));
+  h+=`<div class="card"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end">
+      <label class="lbl" style="margin:0">🌍 My language<select onchange="VC.lang=this.value;vcSaveLocal();xr()" style="width:100%;margin-top:4px;border:2px solid var(--line);border-radius:12px;padding:10px;font:600 15px 'Plus Jakarta Sans',sans-serif">${VC_LANGS.map(([k,n])=>`<option value="${k}" ${VC.lang===k?"selected":""}>${n}</option>`).join("")}</select></label>
+      <label class="lbl" style="margin:0">🎯 New words a day<select onchange="VC.goal=+this.value;vcSaveLocal();xr()" style="width:100%;margin-top:4px;border:2px solid var(--line);border-radius:12px;padding:10px;font:600 15px 'Plus Jakarta Sans',sans-serif">${[5,10,20].map(n=>`<option value="${n}" ${VC.goal===n?"selected":""}>${n}</option>`).join("")}</select></label></div></div>
+    <div class="card" style="border:2px solid var(--coral)"><div class="ectop"><h3 style="margin:0">📅 Today · Heute</h3><b>🔥 ${sk} day${sk===1?"":"s"}</b></div>
+      <p class="note" style="margin:6px 0 10px">${st.due} to review · ${newLeft} new words left today${today.n?` · done today: ${today.n}`:""}</p>
+      <button class="btn primary qbtn" onclick="vcStart('learn')">${st.due||newLeft?"▶️ Start · Los geht's":"➕ Learn more words"}</button>
+      ${!st.learned?`<button class="btn secondary qbtn" onclick="vcCheckStart()">📊 Quick level check (2 min)</button>`:""}</div>
+    <div class="card"><h3 style="margin:0 0 6px">📈 My level · Mein Niveau</h3>
+      <div class="ectop"><b>A1</b><span class="ecmeta">${st.learned} learned · ${st.mastered} mastered · ${st.total}</span></div>
+      <div class="exbar" style="margin:6px 0 2px;position:relative"><i style="width:${Math.round(st.learned/st.total*100)}%"></i></div>
+      <div class="exbar" style="margin:2px 0 10px"><i style="width:${Math.round(st.mastered/st.total*100)}%;background:var(--plum)"></i></div>
+      <div class="ectop" style="opacity:.55"><b>A2 · B1 · B2 · C1</b><span class="ecmeta">coming soon · bald</span></div>
+      ${vcDaysHtml()}
+      ${st.learned?`<button class="linkbtn" onclick="vcCheckStart()">📊 Level check</button>`:""}
+      ${!A.user?`<p class="note" style="margin:8px 0 0">💾 Saved on this phone only. <button class="linkbtn" onclick="A.ret='vocab';go('account')">Sign in</button> to keep your progress everywhere.</p>`:""}</div>
+    <div class="card"><h3 style="margin:0 0 4px">🎲 Quick games</h3>
+      <button class="btn secondary qbtn" onclick="vcStart('gender')">🔵🔴🟢 der · die · das (20 nouns)</button></div>
+    <div class="card"><h3 style="margin:0 0 6px">🗂️ Topics · Themen</h3><div class="vcth">${Object.entries(VC.d.themes).map(([k,t])=>{ const ws=VC.d.words.filter(w=>w.t===k), s2=vcStats(ws);
+      const lab=VC.lang==="es"?t[2]:VC.lang==="ar"?t[3]:VC.lang==="fa"?t[4]:t[1];
+      return `<button onclick="vcStart('learn','${k}')">${t[0]} ${esc(lab)}<small>${s2.learned}/${ws.length} learned</small></button>`; }).join("")}</div></div>
+    <p class="note">Word list by PonteTalk. Colours: <b style="color:#2F6FD1">der</b> · <b style="color:#D9466A">die</b> · <b style="color:#2A8C82">das</b>.</p>`;
+  return h;
+};
+function vcDaysHtml(){ const out=[]; const d=new Date(); d.setDate(d.getDate()-29); let max=1;
+  const ks=[]; for(let k=0;k<30;k++){ const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; ks.push(key); max=Math.max(max,(VC.days[key]||{}).n||0); d.setDate(d.getDate()+1); }
+  const tot=ks.reduce((n,k)=>n+((VC.days[k]||{}).n||0),0), cor=ks.reduce((n,k)=>n+((VC.days[k]||{}).c||0),0);
+  return `<div class="ecmeta" style="margin-top:6px">Last 30 days · ${tot} cards${tot?` · ${Math.round(cor/tot*100)}% right`:""}</div>
+    <div class="vcdays">${ks.map(k=>{ const n=(VC.days[k]||{}).n||0; return `<i class="${n?"":"z"}" style="height:${n?Math.max(10,Math.round(n/max*100)):6}%" title="${k}: ${n}"></i>`; }).join("")}</div>`; }
 
 /* ===================== TEST PRACTICE: Leben in Deutschland / Einbürgerungstest ===================== */
 /* Data: /lid/questions.json (official BAMF catalogue), /lid/tr/<lang>.json, /lid/img/. History: sql/exam_practice.sql */
@@ -7965,22 +8175,24 @@ function dtPlay(key){
 
 /* ---------- Admin: Audio studio (ElevenLabs) ---------- */
 /* The admin pastes their own ElevenLabs API key. It stays in this page's memory only: never saved, never sent anywhere except api.elevenlabs.io. */
-const DS={ key:"", voices:null, f:"", m:"", n:"", busy:false, log:[], done:0, total:0, err:"", redo:false, stop:false, grp:{ dtz:true, lid:true }, showLid:false };
+const DS={ key:"", voices:null, f:"", m:"", n:"", busy:false, log:[], done:0, total:0, err:"", redo:false, stop:false, grp:{ dtz:true, lid:true, vocab:true }, showLid:false };
 const DS_MODEL="eleven_multilingual_v2";
 async function dsOpen(){
   go("dtzstudio");
   try{ if(!DT.d){ const r=await fetch(`/dtz/dtz.json?v=${DT_V}`); DT.d=await r.json(); dtIndex(); }
     if(!EX.qs){ const r=await fetch(`/lid/questions.json?v=${LID_V}`); EX.qs=(await r.json()).questions; }
+    if(!VC.d){ const r=await fetch(`/vocab/de-a1.json?v=${VC_V}`); VC.d=await r.json(); VC.byId={}; VC.d.words.forEach(w=>VC.byId[w.id]=w); }
     await dtLoadManifest(); }catch(e){ DS.err="Couldn't load the exercises."; }
   try{ const v=JSON.parse(localStorage.getItem("pt_ds_voices")||"{}"); DS.f=DS.f||v.f||""; DS.m=DS.m||v.m||""; DS.n=DS.n||v.n||""; }catch(e){}
   if(S.screen==="dtzstudio") xr();
 }
 function dsClips(grp){ const seen={}, out=[];
   if(!grp||grp==="dtz") for(const x of (DT.items||[])){ if(!x.akey||seen[x.akey]) continue; seen[x.akey]=1; out.push({ id:x.akey.split("-").pop(), part:x.part, lines:x.it.s }); }
+  if(!grp||grp==="vocab") for(const w of ((VC.d&&VC.d.words)||[])) out.push({ id:"V-"+w.id, part:"VOCAB", lines:[{ v:"F", t:w.w }] });
   if(!grp||grp==="lid") for(const q of (EX.qs||[])){ if(q.s||q.i) continue; // general questions without pictures
     out.push({ id:`L${q.n}q`, part:"LID", lines:[{ v:"F", t:q.q }] }, { id:`L${q.n}a`, part:"LID", lines:[{ v:"M", t:q.a[q.c] }] }); }
   return out; }
-function dsLabel(c){ return c.part==="LID"?"Leben in Deutschland":DT_TEIL[c.part]; }
+function dsLabel(c){ return c.part==="LID"?"Leben in Deutschland":c.part==="VOCAB"?"Vocabulary":DT_TEIL[c.part]; }
 function dsChars(list){ return list.reduce((n,c)=>n+c.lines.reduce((m,l)=>m+l.t.length,0),0); }
 async function dsApi(path, opt){
   let r; try{ r=await fetch("https://api.elevenlabs.io"+path, { ...opt, headers:{ "xi-api-key":DS.key, ...(opt&&opt.headers||{}) } }); }
@@ -8016,7 +8228,7 @@ async function dsGenerate(onlyId){
   if(!DS.f||!DS.m){ DS.err="Choose a female and a male voice."; xr(); return; }
   dsSaveVoices(); DS.err=""; DS.busy=true; DS.stop=false; DS.log=[];
   const man={ v:1, model:DS_MODEL, voices:{ f:DS.f, m:DS.m, n:DS.n||DS.f }, clips:{ ...((DT.man&&DT.man.clips)||{}) } };
-  const all=dsClips(), todo=all.filter(c=>onlyId?c.id===onlyId:((c.part==="LID"?DS.grp.lid:DS.grp.dtz)&&(DS.redo||!man.clips[c.id])));
+  const all=dsClips(), todo=all.filter(c=>onlyId?c.id===onlyId:((c.part==="LID"?DS.grp.lid:c.part==="VOCAB"?DS.grp.vocab:DS.grp.dtz)&&(DS.redo||!man.clips[c.id])));
   DS.total=todo.length; DS.done=0; xr();
   const saveMan=async()=>{ const mu=await A.sb.storage.from("dtz-audio").upload("manifest.json", new Blob([JSON.stringify(man)],{ type:"application/json" }), { upsert:true, contentType:"application/json", cacheControl:"0" });
     if(mu.error) throw new Error("Saving the list failed: "+mu.error.message); DT.man=JSON.parse(JSON.stringify(man)); };
@@ -8038,14 +8250,14 @@ async function dsGenerate(onlyId){
 }
 VIEWS.dtzstudio = function(){
   const has=c=>DT.man&&DT.man.clips&&DT.man.clips[c.id];
-  const clips=DT.d?dsClips("dtz"):[], have=clips.filter(has).length, lclips=EX.qs?dsClips("lid"):[], lhave=lclips.filter(has).length;
-  const missing=[...(DS.grp.dtz?clips:[]),...(DS.grp.lid?lclips:[])].filter(c=>DS.redo||!has(c)), est=dsChars(missing);
+  const clips=DT.d?dsClips("dtz"):[], have=clips.filter(has).length, lclips=EX.qs?dsClips("lid"):[], lhave=lclips.filter(has).length, vclips=VC.d?dsClips("vocab"):[], vhave=vclips.filter(has).length;
+  const missing=[...(DS.grp.dtz?clips:[]),...(DS.grp.lid?lclips:[]),...(DS.grp.vocab?vclips:[])].filter(c=>DS.redo||!has(c)), est=dsChars(missing);
   const sel=(k,label)=>`<label class="lbl" style="margin:8px 0 0">${label}<select onchange="DS.${k}=this.value;dsSaveVoices()" style="width:100%;margin-top:4px;border:2px solid var(--line);border-radius:12px;padding:10px;font:600 15px 'Plus Jakarta Sans',sans-serif">
       <option value="">${k==="n"?"Same as female voice":"Choose…"}</option>${(DS.voices||[]).map(v=>`<option value="${esc(v.id)}" ${DS[k]===v.id?"selected":""}>${esc(v.name)}${v.l.gender?` · ${esc(v.l.gender)}`:""}${v.l.accent?` · ${esc(v.l.accent)}`:""}${v.l.language?` · ${esc(v.l.language)}`:""}</option>`).join("")}</select></label>
       ${DS[k]?`<button class="linkbtn" onclick="dsTest('${k==="m"?"M":k==="n"?"N":"F"}')">▶ Test this voice</button>`:""}`;
   return `<div class="topline"><button class="chip" onclick="go('account')">← Account</button><span>🎙️ Audio studio</span></div>
     <h2 style="margin:6px 0 2px">Listening audio</h2>
-    <p class="sub" style="margin:0 0 10px">Creates natural voices with ElevenLabs and saves them for everyone.<br>🎓 German exam: ${have}/${clips.length} clips · 🇩🇪 Leben in Deutschland: ${lhave}/${lclips.length} clips</p>
+    <p class="sub" style="margin:0 0 10px">Creates natural voices with ElevenLabs and saves them for everyone.<br>🎓 German exam: ${have}/${clips.length} clips · 🇩🇪 Leben in Deutschland: ${lhave}/${lclips.length} clips · 🃏 Vocabulary: ${vhave}/${vclips.length} words</p>
     ${DS.err?`<div class="err" style="margin-bottom:8px">${esc(DS.err)}</div>`:""}
     <div class="card"><h3 style="margin:0 0 4px">1 · Your ElevenLabs key</h3>
       <p class="note" style="margin:0 0 6px">ElevenLabs → Developers → API keys. It stays on this phone only while this page is open and is never saved.</p>
@@ -8057,6 +8269,7 @@ VIEWS.dtzstudio = function(){
     <div class="card"><h3 style="margin:0 0 4px">3 · Create the audio</h3>
       <label style="display:flex;gap:8px;align-items:flex-start;font-size:14px;margin:4px 0"><input type="checkbox" ${DS.grp.dtz?"checked":""} onchange="DS.grp.dtz=this.checked;xr()"> 🎓 German exam listening (${clips.length-have} missing)</label>
       <label style="display:flex;gap:8px;align-items:flex-start;font-size:14px;margin:4px 0"><input type="checkbox" ${DS.grp.lid?"checked":""} onchange="DS.grp.lid=this.checked;xr()"> 🇩🇪 Leben in Deutschland: question + right answer (${lclips.length-lhave} missing)</label>
+      <label style="display:flex;gap:8px;align-items:flex-start;font-size:14px;margin:4px 0"><input type="checkbox" ${DS.grp.vocab?"checked":""} onchange="DS.grp.vocab=this.checked;xr()"> 🃏 Vocabulary A1 words (${vclips.length-vhave} missing)</label>
       <p class="note" style="margin:6px 0">To make: <b>${missing.length} clips ≈ ${est.toLocaleString()} characters</b> (credits). Keep this page open and the screen on; a laptop works best.</p>
       <label class="row" style="gap:8px;font-size:14px"><input type="checkbox" ${DS.redo?"checked":""} onchange="DS.redo=this.checked"> Redo clips that already exist</label>
       ${DS.busy?`<div class="exbar" style="margin:10px 0"><i style="width:${DS.total?Math.round(DS.done/DS.total*100):0}%"></i></div><p class="note">${DS.done} / ${DS.total}…</p><button class="btn secondary qbtn" onclick="DS.stop=true">Stop</button>`
@@ -8418,6 +8631,7 @@ try{ const lid=new URLSearchParams(location.search).get("lounge"); if(lid && /^[
       A.msg=`Sign in (free) to join the ${cfLang(pr[0])[1]} ⇄ ${cfLang(pr[1])[1]} lounge · Melde dich an, um der Lounge beizutreten`; go("account"); } },500); } }catch(e){}
 try{ if(new URLSearchParams(location.search).has("lid")) setTimeout(()=>exOpen(),0); }catch(e){}
 try{ if(new URLSearchParams(location.search).has("dtz")) setTimeout(()=>dtOpen(),0); }catch(e){}
+try{ if(new URLSearchParams(location.search).has("vocab")) setTimeout(()=>vcOpen(),0); }catch(e){}
 try{ if(new URLSearchParams(location.search).has("cafes")){ S.screen="cafes"; document.addEventListener("DOMContentLoaded", ()=>cfLoad()); } }catch(e){}
 try{ if(new URLSearchParams(location.search).has("board")){ S.screen="board"; document.addEventListener("DOMContentLoaded", ()=>bLoad()); } }catch(e){}
 
