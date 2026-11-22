@@ -865,7 +865,7 @@
 <script>/* Extra interface languages live in /i18n/<code>.js (English text → translation). Load the chosen one before the app starts. */
 (function(){ try{ var X=["tr","uk","fa","ur"], v=localStorage.getItem("pt_ui");
   if(!v){ var n=String((navigator.languages&&navigator.languages[0])||navigator.language||"").slice(0,2).toLowerCase(); if(X.indexOf(n)>-1) v=n; }
-  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=2"><\/script>'); }catch(e){} })();</script>
+  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=3"><\/script>'); }catch(e){} })();</script>
 
 <script>
 /* ===================== CONTENT ===================== */
@@ -1238,7 +1238,7 @@ function bi(en,de,es){ if(es!==undefined) return tr(en,de,es); return `${en} <sp
 function uiSet(l){
   if(!UI_CODES.includes(l)) return;
   if(UI_EXTRA.includes(l) && !I18N_DATA[l]){
-    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=2";
+    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=3";
     sc.onload=()=>uiSet(l); sc.onerror=()=>bToast(offlineMsg()); document.head.appendChild(sc); return;
   }
   UI=l; I18N_T=null; I18N_M.clear();
@@ -1728,7 +1728,7 @@ function avgLabel(p){ const a=p.ratings.reduce((x,y)=>x+y,0)/p.ratings.length; c
 function bestSpeaker(){
   const c=S.players.map((p,i)=>({p,i,a:p.ratings.length?p.ratings.reduce((x,y)=>x+y,0)/p.ratings.length:0})).sort((x,y)=>y.a-x.a)[0];
   if(!c||!c.a) return "";
-  return `<div class="award"><span class="e">🏅</span><div>Best speaker (coach score) <span class="de">· Beste Sprecher/in</span><br><span style="color:${COLORS[c.i%COLORS.length]}">${esc(c.p.name)}</span></div></div>`;
+  return `<div class="award"><span class="e">🏅</span><div>${tr(`Best speaker (coach score)`,`Beste/r Sprecher/in (Coach-Punkte)`,`Mejor hablante (nota del coach)`)}<br><span style="color:${COLORS[c.i%COLORS.length]}">${esc(c.p.name)}</span></div></div>`;
 }
 function rate(n){ const first=S.rating===null; S.rating=n; const s=loadStats(); if(first) s.ratings.push(n); else s.ratings[s.ratings.length-1]=n; saveStats(s); render(); }
 function playAgain(){ bump("replays"); startGame(); }
@@ -2503,7 +2503,7 @@ VIEWS.chandoff = function(){
     <p class="sub" style="margin:10px 0 0">${tr("Pass the phone to","Gib das Handy weiter an","Pasa el móvil a")}</p>
     <div class="big-name" style="color:${COLORS[i%COLORS.length]}">${esc(p.name)}</div>
     <div>${langBadge(p.lang)}</div>
-    <p class="note" style="margin-top:14px">🤫 You're the actor — don't let the others see the screen!<br><span class="de">Du spielst vor – niemand darf den Bildschirm sehen!</span></p>
+    <p class="note" style="margin-top:14px">🤫 ${tr(`You're the actor — don't let the others see the screen!`,`Du spielst vor – niemand darf den Bildschirm sehen!`,`Te toca actuar: ¡que nadie vea la pantalla!`)}</p>
     <button class="btn primary" style="margin-top:18px" onclick="cShowTurn()">${T[p.lang].ready}</button>
   </div>`;
 };
@@ -2514,13 +2514,13 @@ VIEWS.cturn = function(){
   <div id="timerBox" class="hidden"><div class="timerrow"><div class="timer" id="timer">0:00</div>${soundBtn()}</div><div class="bar" id="bar"><i id="barFill"></i></div></div>
   <div id="cpre" class="card center">
     <div class="cemoji">🤐</div>
-    <h3>No talking — only gestures! <span class="de">· Nur Gesten!</span></h3>
-    <p class="note">Act out as many words as you can in ${S.time} seconds. Tap the name of whoever guesses — they must say it in the language they're practicing.<br><span class="de">So viele Wörter wie möglich. Tippe auf den Namen, wer es errät.</span></p>
+    <h3>${tr(`No talking — only gestures!`,`Nicht sprechen – nur Gesten!`,`¡Sin hablar, solo gestos!`)}</h3>
+    <p class="note">${tr(`Act out as many words as you can in ${S.time} seconds. Tap the name of whoever guesses — they must say it in the language they're practicing.`,`Spiele in ${S.time} Sekunden so viele Wörter wie möglich vor. Tippe auf den Namen, wer es errät – in der Sprache, die er/sie übt.`,`Actúa tantas palabras como puedas en ${S.time} segundos. Toca el nombre de quien adivine: debe decirla en el idioma que practica.`)}</p>
     <button class="btn primary" onclick="cStart()">⏱️ ${T[a.lang].startTimer}</button>
   </div>
   <div id="clive" class="hidden">
     <div class="card center cardword" id="cbox"></div>
-    <h3 style="margin:4px 0 8px">🙋 Tap who guessed it <span class="de">· Wer hat's erraten?</span></h3>
+    <h3 style="margin:4px 0 8px">🙋 ${tr(`Tap who guessed it`,`Wer hat's erraten?`,`Toca quién lo adivinó`)}</h3>
     <div class="cguessers">${guessers.map(x=>`<button class="cg" onclick="cGuess(${x.i})"><span class="cgck">✓</span><span><b>${esc(x.p.name)}</b> got it!<br><span class="cgde">hat's erraten</span></span></button>`).join("")}</div>
     <div class="exgrid" style="margin-top:6px">
       <button class="btn secondary exb" onclick="cSkip()">⏭️ Skip</button>
@@ -2536,13 +2536,13 @@ VIEWS.csum = function(){
   <div class="card center"><div class="big-name" style="font-size:40px;color:var(--coral)">${ct.guessed.length}</div>
     <p class="note" style="margin:0">${ct.guessed.length===1?"word guessed":"words guessed"} · ${esc(a.name)} +${ct.guessed.length} points</p></div>
   ${ct.guessed.length?`<div class="card"><h3>✅ Guessed · Erraten</h3>${ct.guessed.map(g=>`<div class="cline"><span class="cemo">${CW[g.w][0]}</span><div>${cAnswerChips(g.w, langs)}<div class="note">by ${esc(S.players[g.by].name)} · +1</div></div></div>`).join("")}</div>`:""}
-  ${skipped.length?`<div class="card"><h3>⏭️ Skipped — learn these! <span class="de">· Übersprungen</span></h3>${skipped.map(g=>`<div class="cline"><span class="cemo">${CW[g.w][0]}</span><div>${cAnswerChips(g.w, langs)}</div></div>`).join("")}</div>`:""}
+  ${skipped.length?`<div class="card"><h3>⏭️ ${tr(`Skipped — learn these!`,`Übersprungen – lern diese!`,`Saltadas: ¡apréndelas!`)}</h3>${skipped.map(g=>`<div class="cline"><span class="cemo">${CW[g.w][0]}</span><div>${cAnswerChips(g.w, langs)}</div></div>`).join("")}</div>`:""}
   <button class="btn primary" onclick="cNext()">${isLastTurn()?"See results 🏆":"Next actor →"}<small>${isLastTurn()?"Ergebnisse":"Nächste Person"}</small></button>`;
 };
 function charadesAwards(players){
   const best=k=>players.map((p,i)=>({p,i})).sort((a,b)=>(b.p[k]||0)-(a.p[k]||0))[0];
-  const row=(k,e,en,de)=>{ const b=best(k); if(!b||!(b.p[k])) return ""; return `<div class="award"><span class="e">${e}</span><div>${en} <span class="de">· ${de}</span><br><span style="color:${COLORS[b.i%COLORS.length]}">${esc(b.p.name)}</span> <span class="note">(${b.p[k]})</span></div></div>`; };
-  return row("cact","🎭","Best actor","Beste/r Schauspieler/in")+row("cguess","🧠","Best guesser","Beste/r Rater/in");
+  const row=(k,e,en,de,es)=>{ const b=best(k); if(!b||!(b.p[k])) return ""; return `<div class="award"><span class="e">${e}</span><div>${tr(en,de,es)}<br><span style="color:${COLORS[b.i%COLORS.length]}">${esc(b.p.name)}</span> <span class="note">(${b.p[k]})</span></div></div>`; };
+  return row("cact","🎭","Best actor","Beste/r Schauspieler/in","Mejor actor/actriz")+row("cguess","🧠","Best guesser","Beste/r Rater/in","Mejor adivino/a");
 }
 function charadesReview(i, ctx){
   const p=ctx.players[i], L=p.lang, items=(ctx.clog||[]).filter(x=>x.actor===i||x.by===i);
@@ -2609,14 +2609,14 @@ function oCTurnView(){
     if(!tp.timer){
       body=`<div class="card center"><div class="cemoji">${emojiMode?"😀":"🤐"}</div><h3>${bi("You're the actor!","Du spielst vor!")}</h3>
         <p class="note">${emojiMode
-          ? `Describe as many words as you can in ${G.time} seconds — using only emojis! The others type their guesses.<br><span class="de">Nur mit Emojis beschreiben – die anderen tippen ihre Antworten.</span>`
-          : `Turn your camera on and act out as many words as you can in ${G.time} seconds — no talking! Tap whoever guesses.<br><span class="de">Kamera an, nur Gesten! Tippe auf den Namen, wer es errät.</span>`}</p>
+          ? `${tr(`Describe as many words as you can in ${G.time} seconds — using only emojis! The others type their guesses.`,`Beschreibe in ${G.time} Sekunden so viele Wörter wie möglich – nur mit Emojis! Die anderen tippen ihre Antworten.`,`Describe tantas palabras como puedas en ${G.time} segundos, ¡solo con emojis! Los demás escriben sus respuestas.`)}`
+          : `${tr(`Turn your camera on and act out as many words as you can in ${G.time} seconds — no talking! Tap whoever guesses.`,`Kamera an und in ${G.time} Sekunden so viele Wörter wie möglich vorspielen – ohne zu sprechen! Tippe auf den Namen, wer es errät.`,`Enciende la cámara y actúa tantas palabras como puedas en ${G.time} segundos, ¡sin hablar! Toca a quien adivine.`)}`}</p>
         <button class="btn primary" onclick="act({type:'cstart'})">⏱️ ${T[a.lang].startTimer}</button></div>`;
     } else {
       const guessers=G.players.map((p,i)=>({p,i})).filter(x=>x.i!==G.turn);
       body=`${timer}<div class="card center cardword"><div class="cemoji">${CW[tp.w][0]}</div><div class="cword" dir="${T[a.lang].dir}" lang="${a.lang}">${esc(cWord(tp.w,a.lang))}</div>${romDiv(cRoman(tp.w,a.lang))}
         <div class="note" style="margin-top:8px">Accept these answers · Diese Antworten zählen:</div><div>${cAnswerChips(tp.w, cGuesserLangs(G.players, G.turn))}</div></div>
-        <h3 style="margin:4px 0 8px">🙋 Tap who guessed it <span class="de">· Wer hat's erraten?</span></h3>
+        <h3 style="margin:4px 0 8px">🙋 ${tr(`Tap who guessed it`,`Wer hat's erraten?`,`Toca quién lo adivinó`)}</h3>
         <div class="cguessers">${guessers.map(x=>`<button class="cg" onclick="act({type:'cguess',by:${x.i}})"><span class="cgck">✓</span><span><b>${esc(x.p.name)}</b> got it!<br><span class="cgde">hat's erraten</span></span></button>`).join("")}</div>
         <div class="exgrid" style="margin-top:6px"><button class="btn secondary exb" onclick="act({type:'cskip'})">⏭️ Skip</button><button class="btn ghost exb" onclick="act({type:'cend'})">🏁 End turn</button></div>`;
     }
@@ -2624,7 +2624,7 @@ function oCTurnView(){
     const last = tp.last ? `<div class="card center"><div class="note">${tp.last.skip?"⏭️ Skipped · Übersprungen":`✅ Guessed by ${esc(G.players[tp.last.by].name)}`}</div>
       <div class="cemoji" style="font-size:40px">${CW[tp.last.w][0]}</div><div class="cword" style="font-size:24px" dir="${T[myLang].dir}" lang="${myLang}">${esc(cWord(tp.last.w,myLang))}</div>${romDiv(cRoman(tp.last.w,myLang))}</div>` : "";
     body=`${timer}<div class="card center"><div class="cemoji">🎭</div>
-      <h3>${esc(a.name)} is acting! <span class="de">· spielt vor!</span></h3>
+      <h3>${tr(`${esc(a.name)} is acting!`,`${esc(a.name)} spielt vor!`,`¡${esc(a.name)} está actuando!`)}</h3>
       <p>Guess out loud in <b>${T[myLang].flag} ${T[myLang].name}</b>!</p>
       <p class="note">${tp.timer?"Watch the camera and shout your guess · Rate laut!":"Get ready… · Gleich geht's los…"}</p>
       <div class="big-name" style="font-size:34px;color:var(--coral)">✓ ${tp.guessed.length}</div></div>${last}
@@ -2639,7 +2639,7 @@ function oCSumView(){
   <div class="card center"><div class="big-name" style="font-size:40px;color:var(--coral)">${tp.guessed.length}</div>
     <p class="note" style="margin:0">${tp.guessed.length===1?"word guessed":"words guessed"} · ${esc(a.name)} +${tp.guessed.length}</p></div>
   ${tp.guessed.length?`<div class="card"><h3>✅ Guessed · Erraten</h3>${tp.guessed.map(g=>`<div class="cline"><span class="cemo">${CW[g.w][0]}</span><div>${cAnswerChips(g.w, langs)}<div class="note">by ${esc(G.players[g.by].name)} · +1</div></div></div>`).join("")}</div>`:""}
-  ${tp.skips.length?`<div class="card"><h3>⏭️ Skipped — learn these! <span class="de">· Übersprungen</span></h3>${tp.skips.map(w=>`<div class="cline"><span class="cemo">${CW[w][0]}</span><div>${cAnswerChips(w, langs)}</div></div>`).join("")}</div>`:""}
+  ${tp.skips.length?`<div class="card"><h3>⏭️ ${tr(`Skipped — learn these!`,`Übersprungen – lern diese!`,`Saltadas: ¡apréndelas!`)}</h3>${tp.skips.map(w=>`<div class="cline"><span class="cemo">${CW[w][0]}</span><div>${cAnswerChips(w, langs)}</div></div>`).join("")}</div>`:""}
   ${me||O.role==="host" ? `<button class="btn primary" onclick="act({type:'cnext'})">${oIsLast()?"See results 🏆":"Next actor →"}<small>${oIsLast()?"Ergebnisse":"Nächste Person"}</small></button>`
     : `<p class="note center">⏳ Waiting for ${esc(a.name)} to continue… · Warte…</p>`}`;
 }
@@ -2729,7 +2729,7 @@ function renderChat(){
       return `<div class="cm ${mine?"me":""}">${mine?"":`<div class="cmn" style="color:${col}">${esc(m.by)}</div>`}
         <div class="cmb" dir="auto">${esc(m.text)}</div>
         ${O.role==="host"&&!mine?`<button class="cmdel" onclick="act({type:'chatdel',id:'${m.id}'})" aria-label="Delete">🗑️</button>`:""}</div>`; }).join("")
-    : `<p class="note center" style="margin:30px 0">No messages yet. Say hi! 👋<br><span class="de">Noch keine Nachrichten.</span></p>`;
+    : `<p class="note center" style="margin:30px 0">${tr(`No messages yet. Say hi! 👋`,`Noch keine Nachrichten. Sag Hallo! 👋`,`Aún no hay mensajes. ¡Saluda! 👋`)}</p>`;
   box.innerHTML = O.chatOpen ? `
     <div class="chatpanel">
       <div class="chathead"><b>💬 Room chat · ${esc(O.code)}</b><span style="display:flex;gap:6px">${msgs.length?`<button class="chip" id="chatExport" onclick="exportChat()" aria-label="Export chat">📤 Export</button>`:""}<button class="chip" onclick="toggleChat()" aria-label="Close chat">✕</button></span></div>
@@ -3003,8 +3003,8 @@ function saveCardInperson(){
   logInpersonFinished();
   if(!S.gid) return "";
   if(!A.user) return `<div class="card acard">
-      <h3>🔐 Keep your scores <span class="de">· Punkte behalten</span></h3>
-      <p class="note">Free account: save this game, see your history and track your progress.<br><span class="de">Kostenloses Konto: Spiel speichern, Verlauf &amp; Fortschritt sehen.</span></p>
+      <h3>🔐 ${tr(`Keep your scores`,`Punkte behalten`,`Guarda tus puntos`)}</h3>
+      <p class="note">${tr(`Free account: save this game, see your history and track your progress.`,`Kostenloses Konto: Spiel speichern, Verlauf sehen und Fortschritt verfolgen.`,`Cuenta gratis: guarda esta partida, mira tu historial y sigue tu progreso.`)}</p>
       <button class="btn primary" onclick="keepScoresFrom('results')">👤 Sign in / Create account<small>Anmelden / Konto erstellen</small></button></div>`;
   const st=A.saving["ip-"+S.gid];
   if(st==="ok" || st==="queued") return `<div class="card acard center">
@@ -3013,7 +3013,7 @@ function saveCardInperson(){
       <button class="btn ghost" onclick="A.ret='results';go('account')">🏆 See my games · Meine Spiele</button></div>`;
   const mine=meName().toLowerCase();
   return `<div class="card acard">
-      <h3>💾 Save to My games <span class="de">· Speichern</span></h3>
+      <h3>💾 ${tr(`Save to My games`,`In Meine Spiele speichern`,`Guardar en Mis partidas`)}</h3>
       <p class="note">Which player are you? · Wer bist du?</p>
       <div class="row">${S.players.map((p,i)=>`<button class="chip ${p.name.toLowerCase()===mine?"on":""}" ${st==="busy"?"disabled":""} onclick="saveInperson(${i})">${p.name.toLowerCase()===mine?"⭐ ":""}${esc(p.name)}</button>`).join("")}</div>
       <p class="note" style="margin:8px 0 0">Only you see your saved games. Other players can save theirs on their own phone.</p></div>`;
@@ -3023,7 +3023,7 @@ function saveCardOnline(){
   logOnlineFinished();
   if(O.G.players.findIndex(p=>p.id===O.me.id)<0) return "";
   if(!A.user) return `<div class="card acard">
-      <h3>🔐 Keep your scores <span class="de">· Punkte behalten</span></h3>
+      <h3>🔐 ${tr(`Keep your scores`,`Punkte behalten`,`Guarda tus puntos`)}</h3>
       <p class="note">Free account: save this game, see your history and track your progress.</p>
       <button class="btn primary" onclick="keepScoresFrom('lobby')">👤 Sign in / Create account<small>Anmelden / Konto erstellen</small></button></div>`;
   maybeSaveOnline();
@@ -3039,7 +3039,7 @@ function fmtDate(iso){ try{ const d=new Date(iso); return `${String(d.getDate())
 function acctBack(){ const r=A.ret||"home"; A.ret="home"; A.editing=false; if(r==="results" && S.players.length && S.gid) go("results"); else if(r==="lobby" && O.G) go("lobby"); else if(r==="board") bOpen(); else if(r==="session") sOpen(S.sid); else if(r==="exam") exOpen(); else if(r==="dtz") dtOpen(); else if(r==="vocab") vcOpen(); else go("home"); }
 
 function acctStats(gs){
-  if(!gs.length) return `<p class="note center" style="margin:10px 0">No games yet. Finish a game and tap <b>Save</b> on the results screen!<br><span class="de">Noch keine Spiele gespeichert.</span></p>`;
+  if(!gs.length) return `<p class="note center" style="margin:10px 0">${tr("No games yet. Finish a game and tap <b>Save</b> on the results screen!","Noch keine Spiele. Beende ein Spiel und tippe auf dem Ergebnis-Bildschirm auf <b>Speichern</b>!","Aún no hay partidas. ¡Termina una partida y toca <b>Guardar</b> en la pantalla de resultados!")}</p>`;
   const total=gs.reduce((a,g)=>a+(g.score||0),0), wins=gs.filter(g=>g.rank===1&&g.players>1).length;
   const rated=gs.filter(g=>g.rating!=null), avgR=rated.length ? rated.reduce((a,g)=>a+Number(g.rating),0)/rated.length : null;
   const best=Math.max(...gs.map(g=>g.score||0));
@@ -3048,27 +3048,27 @@ function acctStats(gs){
   const last=gs.slice(0,10).reverse(), mx=Math.max(1,...last.map(g=>g.score||0));
   const langs={}; gs.forEach(g=>{ langs[g.lang]=(langs[g.lang]||0)+1; });
   return `<div class="sgrid">
-      <div class="sbox"><b>${gs.length}</b><span>games · Spiele</span></div>
-      <div class="sbox"><b>${total}</b><span>points · Punkte</span></div>
-      <div class="sbox"><b>${wins}</b><span>🥇 wins · Siege</span></div>
-      <div class="sbox"><b>${best}</b><span>best score · Rekord</span></div>
-      <div class="sbox"><b>${days}</b><span>days played · Tage</span></div>
-      <div class="sbox"><b>${R?R.e:"–"}</b><span>${R?esc(R.en):"coach rating"}</span></div>
+      <div class="sbox"><b>${gs.length}</b><span>${tr("games","Spiele","partidas")}</span></div>
+      <div class="sbox"><b>${total}</b><span>${tr("points","Punkte","puntos")}</span></div>
+      <div class="sbox"><b>${wins}</b><span>🥇 ${tr("wins","Siege","victorias")}</span></div>
+      <div class="sbox"><b>${best}</b><span>${tr("best score","Rekord","mejor puntuación")}</span></div>
+      <div class="sbox"><b>${days}</b><span>${tr("days played","Spieltage","días jugados")}</span></div>
+      <div class="sbox"><b>${R?R.e:"–"}</b><span>${R?esc(tr(R.en,R.de,R.es)):tr("coach rating","Coach-Bewertung","nota del coach")}</span></div>
     </div>
-    ${last.length>1?`<h3 style="margin-top:14px">📈 Last ${last.length} games <span class="de">· Letzte Spiele</span></h3>
-    <div class="pchart" role="img" aria-label="Scores of your last ${last.length} games">${last.map(g=>`<div class="pcol ${(g.score||0)===mx?"best":""}" title="${g.score||0} · ${fmtDate(g.played_at)}"><span class="pval">${g.score||0}</span><span class="ptrack"><i class="pfill" style="height:${Math.max(7,Math.round((g.score||0)/mx*100))}%"></i></span><span class="pdate">${fmtDate(g.played_at).slice(0,5)}</span></div>`).join("")}</div>
-    <p class="note center" style="margin:6px 0 0">💜 = your best · dein bester Wert</p>`:""}
+    ${last.length>1?`<h3 style="margin-top:14px">📈 ${tr(`Last ${last.length} games`,`Letzte ${last.length} Spiele`,`Últimas ${last.length} partidas`)}</h3>
+    <div class="pchart" role="img" aria-label="${tr(`Last ${last.length} games`,`Letzte ${last.length} Spiele`,`Últimas ${last.length} partidas`)}">${last.map(g=>`<div class="pcol ${(g.score||0)===mx?"best":""}" title="${g.score||0} · ${fmtDate(g.played_at)}"><span class="pval">${g.score||0}</span><span class="ptrack"><i class="pfill" style="height:${Math.max(7,Math.round((g.score||0)/mx*100))}%"></i></span><span class="pdate">${fmtDate(g.played_at).slice(0,5)}</span></div>`).join("")}</div>
+    <p class="note center" style="margin:6px 0 0">💜 = ${tr("your best","dein bester Wert","tu mejor resultado")}</p>`:""}
     <div class="row" style="margin-top:10px">${Object.entries(langs).map(([l,n])=>T[l]?`<span class="feat">${T[l].flag} ${T[l].name} · ${n}</span>`:"").join("")}</div>`;
 }
 function acctHistory(gs){
   if(!gs.length) return "";
   const medals=["🥇","🥈","🥉"];
-  return `<div class="card"><h3>🗂️ My games <span class="de">· Meine Spiele</span></h3>
+  return `<div class="card"><h3>🗂️ ${tr("My games","Meine Spiele","Mis partidas")}</h3>
     ${gs.slice(0,50).map((g,n)=>`<button class="hrow" onclick="openGame(${n})">
       <span class="hico">${GAME_ICON[g.game]||"🎮"}</span>
-      <span class="hmid"><b>${GAME_NAME[g.game]||"Game"}</b> ${g.mode==="online"?"🌐":"📱"}<br><span class="note">${fmtDate(g.played_at)} · ${T[g.lang]?T[g.lang].flag:""} ${g.level!=null&&LEVELS[g.level]?LEVELS[g.level].code:""} · ${g.players} players</span></span>
+      <span class="hmid"><b>${GAME_NAME[g.game]||"Game"}</b> ${g.mode==="online"?"🌐":"📱"}<br><span class="note">${fmtDate(g.played_at)} · ${T[g.lang]?T[g.lang].flag:""} ${g.level!=null&&LEVELS[g.level]?LEVELS[g.level].code:""} · ${g.players} ${tr("players","Spieler","jugadores")}</span></span>
       <span class="hpts">${g.players>1&&medals[g.rank-1]?medals[g.rank-1]:""} ${g.score}</span></button>`).join("")}
-    ${gs.length>50?`<p class="note center">Showing your last 50 games</p>`:""}</div>`;
+    ${gs.length>50?`<p class="note center">${tr("Showing your last 50 games","Deine letzten 50 Spiele","Tus últimas 50 partidas")}</p>`:""}</div>`;
 }
 async function openGame(n){
   const g=(A.games||[])[n]; if(!g) return;
@@ -3080,8 +3080,8 @@ async function openGame(n){
 function confirmDelete(){
   const box=document.createElement("div"); box.className="sheet-bg";
   box.innerHTML=`<div class="sheet">
-    <h3>Delete your account? <span class="de">· Konto löschen?</span></h3>
-    <p>This permanently deletes your login, your profile and <b>all saved games</b>. It can't be undone.<br><span class="de">Login, Profil und alle gespeicherten Spiele werden endgültig gelöscht.</span></p>
+    <h3>${tr(`Delete your account?`,`Konto löschen?`,`¿Eliminar tu cuenta?`)}</h3>
+    <p>${tr(`This permanently deletes your login, your profile and <b>all saved games</b>. It can't be undone.`,`Login, Profil und <b>alle gespeicherten Spiele</b> werden endgültig gelöscht. Das kann nicht rückgängig gemacht werden.`,`Esto borra para siempre tu acceso, tu perfil y <b>todas las partidas guardadas</b>. No se puede deshacer.`)}</p>
     <button class="btn danger" id="delYes">🗑️ Delete forever · Endgültig löschen</button>
     <button class="btn ghost" id="delNo">${tr(`Cancel`,`Abbrechen`,`Cancelar`)}</button>
     <p class="note center" id="delMsg"></p></div>`;
@@ -4088,7 +4088,7 @@ function bExport(){
       <div class="mid"><div class="ti">${g?"🎲 ":""}${esc(s.title)}</div><div class="me">${fl(s.language_a)}${s.language_b?` ⇄ ${fl(s.language_b)}`:""} · ${esc(lv(s))}</div>
       <div class="me">${place}${s.host_name?` · with ${esc(s.host_name)}`:""}</div>
       ${s.balanced&&s.language_b ? (()=>{ const side=(k,n,t)=>{ const o=Math.max(0,(n||0)-(t||0)); const nm=T[k]?`${T[k].flag} ${esc(T[k].nameEn)}`:esc(k);
-          return o>0 ? `<span class="want">🙋 ${o} ${nm}-speaker seat${o>1?"s":""} available</span>` : `<span class="want full">${nm}-speaker seats full · waitlist</span>`; };
+          return o>0 ? `<span class="want">🙋 ${tr(`${nm}: ${o} free`,`${nm}: ${o} frei`,`${nm}: ${o} libres`)}</span>` : `<span class="want full">${tr(`${nm}: full · waitlist`,`${nm}: voll · Warteliste`,`${nm}: lleno · lista de espera`)}</span>`; };
           return `<div class="sides2">${side(s.language_a,s.seats_a,s.taken_a)}${side(s.language_b,s.seats_b,s.taken_b)}</div>`; })()
         : `<div class="want ${s.seats_open<=0?"full":""}">${s.seats_open<=0?left:want}${s.seats_open>0&&left?` · <b>${left}</b>`:""}</div>`}</div>
       <a class="go" href="${origin}/?s=${s.activity_id}">Sign up →</a></div>`; }).join("")).join("");
@@ -6148,7 +6148,7 @@ function mrStrikes(){
   const k=MR.strikes; if(!k) return "";
   const ev=k.events||[], D2=d=>new Date(d).toLocaleDateString(uiLoc(),{day:"numeric",month:"short"});
   const av=k.passes_left>0;
-  const pass=tr(`🎟️ Free “life happens” pass this month: <b>${av?"available":"used"}</b>`,`🎟️ Freier „Kann passieren“-Pass diesen Monat: <b>${av?"verfügbar":"genutzt"}</b>`,`🎟️ Pase gratis “imprevistos” este mes: <b>${av?"disponible":"usado"}</b>`);
+  const pass=tr(`🎟️ Free “life happens” pass this month: <b>${av?tr("available","verfügbar","disponible"):tr("used","genutzt","usado")}</b>`,`🎟️ Freier „Kann passieren“-Pass diesen Monat: <b>${av?"verfügbar":"genutzt"}</b>`,`🎟️ Pase gratis “imprevistos” este mes: <b>${av?"disponible":"usado"}</b>`);
   if(!ev.length) return `<div class="note" style="margin:8px 0 0">✅ ${tr("No strikes","Keine Verwarnungen","Sin faltas")}<br>${pass}</div>`;
   let warn="";
   if(k.blocked && k.block_until){ const d=D2(k.block_until); warn=`<p class="note" style="margin:6px 0 0;color:var(--coral)"><b>⏸️ ${tr(`You can join sessions again on ${d}.`,`Ab ${d} kannst du wieder beitreten.`,`Podrás unirte a sesiones otra vez el ${d}.`)}</b></p>`; }
