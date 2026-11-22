@@ -865,7 +865,7 @@
 <script>/* Extra interface languages live in /i18n/<code>.js (English text → translation). Load the chosen one before the app starts. */
 (function(){ try{ var X=["tr","uk","fa","ur"], v=localStorage.getItem("pt_ui");
   if(!v){ var n=String((navigator.languages&&navigator.languages[0])||navigator.language||"").slice(0,2).toLowerCase(); if(X.indexOf(n)>-1) v=n; }
-  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=4"><\/script>'); }catch(e){} })();</script>
+  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=5"><\/script>'); }catch(e){} })();</script>
 
 <script>
 /* ===================== CONTENT ===================== */
@@ -1238,7 +1238,7 @@ function bi(en,de,es){ if(es!==undefined) return tr(en,de,es); return `${en} <sp
 function uiSet(l){
   if(!UI_CODES.includes(l)) return;
   if(UI_EXTRA.includes(l) && !I18N_DATA[l]){
-    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=4";
+    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=5";
     sc.onload=()=>uiSet(l); sc.onerror=()=>bToast(offlineMsg()); document.head.appendChild(sc); return;
   }
   UI=l; I18N_T=null; I18N_M.clear();
@@ -6261,6 +6261,7 @@ async function bAct(fn,id){
     const st=data&&data.status;
     if(st==="cancelled" && data.late){ MR.data=null; MR.strikes=null; }
     if(st==="joined" && ["pt_join_activity","pt_accept_invite","pt_accept_offer"].includes(fn)) setTimeout(()=>calOpen(id,true),600);
+    if(st==="waitlisted") B.wlShow={ id, pos:data.position };
     const sideTxt = data && data.side ? (()=>{ const x=(B.list||[]).concat(R.list||[]).find(q=>q.activity_id===id); const k=x?(data.side==="a"?x.language_a:x.language_b):null; return k&&T[k]?" ("+tr(`${lname(k)} speakers`,`${lname(k)}-Sprechende`,`hablantes de ${lname(k).toLowerCase()}`)+")":""; })() : "";
     bToast( st==="joined" ? "✅ "+tr(`You're in${sideTxt}!`,`Du bist dabei${sideTxt}!`,`¡Estás dentro${sideTxt}!`)
           : st==="pending" ? "⏳ "+tr("Request sent. The host will reply","Anfrage gesendet. Der Host antwortet","Solicitud enviada. El anfitrión responderá")
@@ -6280,6 +6281,7 @@ async function bAct(fn,id){
   }
   B.busy=false;
   await bLoad();
+  if(B.wlShow){ const w=B.wlShow; B.wlShow=null; wlOpen(w.id, w.pos); }
 }
 
 async function bPeople(id){
@@ -6359,7 +6361,7 @@ function bCard(s){
     case "pending":
       act=`<p class="note">⏳ ${tr("Request sent. The host will reply.","Anfrage gesendet. Der Host antwortet.","Solicitud enviada. El anfitrión responderá.")}</p><button class="btn ghost" onclick="bAct('pt_leave_activity','${id}')">${tr("Withdraw","Zurückziehen","Retirar")}</button>`; break;
     case "waitlisted":
-      act=`<p class="note">🕒 ${tr(`You're <b>#${s.my_position}</b> on the waitlist. If a seat opens, we'll offer it to you.`,`Du bist <b>Nr. ${s.my_position}</b> auf der Warteliste. Wird ein Platz frei, bieten wir ihn dir an.`,`Eres el <b>n.º ${s.my_position}</b> en la lista de espera. Si se libera una plaza, te la ofreceremos.`)}</p><button class="btn ghost" onclick="bAct('pt_leave_activity','${id}')">${tr("Leave waitlist","Warteliste verlassen","Salir de la lista de espera")}</button>`; break;
+      act=`<p class="note">🕒 ${tr(`You're <b>#${s.my_position}</b> on the waitlist. If a seat opens, we'll offer it to you.`,`Du bist <b>Nr. ${s.my_position}</b> auf der Warteliste. Wird ein Platz frei, bieten wir ihn dir an.`,`Eres el <b>n.º ${s.my_position}</b> en la lista de espera. Si se libera una plaza, te la ofreceremos.`)}</p><div class="brow2"><button class="btn secondary" onclick="wlOpen('${id}')">${tr("Similar sessions","Ähnliche Sessions","Sesiones parecidas")}</button><button class="btn ghost" onclick="bAct('pt_leave_activity','${id}')">${tr("Leave waitlist","Warteliste verlassen","Salir de la lista de espera")}</button></div>`; break;
     case "offered": {
       const until=s.my_offer_expires?new Date(s.my_offer_expires).toLocaleTimeString(uiLoc(),{hour:"2-digit",minute:"2-digit"}):"";
       act=`<p class="okmsg">🎉 ${tr(`A seat is free for you! Accept by ${until}.`,`Ein Platz ist frei! Bis ${until} annehmen.`,`¡Hay una plaza libre para ti! Acéptala antes de las ${until}.`)}</p>
@@ -7482,6 +7484,37 @@ function calOpen(id, joined){
   document.body.appendChild(box);
 }
 function addToCal(id){ calOpen(id,false); }
+/* Waitlist sheet: your place, how offers work, similar open sessions, leave */
+function wlSimilar(s){
+  const seen=new Set(), langs=[s.language_a,s.language_b].filter(Boolean), now=Date.now();
+  return (D.board||[]).concat(R.list||[], B.list||[]).filter(x=>{
+    if(!x||seen.has(x.activity_id)) return false; seen.add(x.activity_id);
+    return x.activity_id!==s.activity_id && !isMine(x) && x.seats_open>0 && new Date(x.starts_at).getTime()>now+15*60000
+      && [x.language_a,x.language_b].some(k=>k&&langs.includes(k));
+  }).sort((a,b)=>Math.abs(new Date(a.starts_at)-new Date(s.starts_at))-Math.abs(new Date(b.starts_at)-new Date(s.starts_at))).slice(0,3);
+}
+function wlClose(){ const b=document.getElementById("wlSheet"); if(b) b.remove(); }
+function wlOpen(id, pos){
+  const s=calRow(id); if(!s) return; wlClose();
+  const n=pos||s.my_position||"?", sim=wlSimilar(s);
+  const box=document.createElement("div"); box.className="sheet-bg"; box.id="wlSheet";
+  box.addEventListener("click",e=>{ if(e.target===box) wlClose(); });
+  box.innerHTML=`<div class="sheet" role="dialog" aria-label="${tr("Waitlist","Warteliste","Lista de espera")}">
+    <div class="nbhead"><h3 style="margin:0">🕒 ${tr(`You're #${n} on the waitlist`,`Du bist Nr. ${n} auf der Warteliste`,`Eres el n.º ${n} en la lista de espera`)}</h3><button class="chip" aria-label="${tr("Close","Schließen","Cerrar")}" onclick="wlClose()">✕</button></div>
+    <p class="note" style="margin:0 0 12px"><b>${esc(s.title)}</b><br>${fmtWhen(s.starts_at)} · ${s.duration_min} min</p>
+    <div class="card" style="margin:0 0 12px;padding:12px 14px">
+      <p style="margin:0 0 6px">🔔 ${tr("If a seat opens, we'll tell you right away by email and in the app.","Wird ein Platz frei, sagen wir dir sofort Bescheid, per E-Mail und in der App.","Si se libera una plaza, te avisaremos enseguida por correo y en la app.")}</p>
+      <p style="margin:0">⏱️ ${tr("You'll then have <b>30 minutes</b> to accept. If you don't, the seat goes to the next person.","Dann hast du <b>30 Minuten</b> Zeit, ihn anzunehmen. Sonst geht der Platz an die nächste Person.","Entonces tendrás <b>30 minutos</b> para aceptarla. Si no, la plaza pasa a la siguiente persona.")}</p>
+    </div>
+    <h3 style="margin:0 0 8px;font-size:17px">${tr("Similar sessions with free seats","Ähnliche Sessions mit freien Plätzen","Sesiones parecidas con plazas libres")}</h3>
+    ${sim.length?sim.map(x=>`<div class="card" style="margin:0 0 8px;padding:10px 12px;display:flex;gap:10px;align-items:center">
+        <div style="flex:1;min-width:0"><b>${esc(x.title)}</b><div class="note" style="margin:2px 0 0">${fmtWhen(x.starts_at)} · ${langPair(x.language_a,x.language_b)} · ${tr(`${x.seats_open} left`,`${x.seats_open} frei`,`quedan ${x.seats_open}`)}</div></div>
+        <button class="btn primary" style="width:auto;flex:none;margin:0;padding:8px 14px;min-height:40px" onclick="wlClose();bAct('pt_join_activity','${x.activity_id}')">${x.join_mode==="approval"?tr("Request","Anfragen","Solicitar"):tr("Join","Beitreten","Unirme")}</button></div>`).join("")
+      :`<p class="note" style="margin:0 0 8px">${tr("No similar sessions with free seats right now.","Gerade keine ähnlichen Sessions mit freien Plätzen.","Ahora no hay sesiones parecidas con plazas libres.")} <button class="linkbtn" onclick="wlClose();bOpen()">${tr("See all sessions","Alle Sessions ansehen","Ver todas las sesiones")}</button></p>`}
+    <button class="btn ghost" style="margin-top:6px" onclick="wlClose();bAct('pt_leave_activity','${id}')">${tr("Leave waitlist","Warteliste verlassen","Salir de la lista de espera")}</button>
+    <button class="btn secondary" onclick="wlClose()">${tr("OK, I'll wait","OK, ich warte","Vale, espero")}</button></div>`;
+  document.body.appendChild(box);
+}
 function calIcs(id){
   const s=calRow(id); if(!s) return;
   const blob=new Blob([icsFor(s)],{type:"text/calendar"}), a=document.createElement("a");
