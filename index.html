@@ -3350,6 +3350,8 @@ const BERR = {
 };
 function bErr(e){
   const m=String((e&&e.message)||e||"");
+  const sb=m.match(/strike_block:\s*([^"\n]+)/);
+  if(sb) return `⏸️ You can join sessions again on ${sb[1].trim()} (missed or late-cancelled sessions). · Ab ${sb[1].trim()} kannst du wieder beitreten.`;
   const tc=m.match(/time_clash:\s*(.+)/);
   if(tc) return `⏰ You already have “${tc[1].trim()}” at this time. You can't be in two sessions at once. · Du hast zu dieser Zeit schon „${tc[1].trim()}“.`;
   for(const k in BERR) if(m.includes(k)) return BERR[k];
@@ -6046,10 +6048,14 @@ async function attSave(){
 }
 
 /* Profile: my own reliability */
-const MR = { data:null, loading:false };
+const MR = { data:null, strikes:null, loading:false };
 async function mrLoad(){
   if(!A.user || !A.sb || MR.loading) return; MR.loading=true;
-  try{ const { data, error } = await A.sb.rpc("pt_my_reliability"); if(!error) MR.data=data||{}; }catch(e){}
+  try{
+    const [r,k]=await Promise.all([A.sb.rpc("pt_my_reliability"), A.sb.rpc("pt_my_strikes")]);
+    if(!r.error) MR.data=r.data||{};
+    if(!k.error) MR.strikes=k.data||null;
+  }catch(e){}
   MR.loading=false; if(S.screen==="account") xr();
 }
 function mrHtml(){
@@ -6060,7 +6066,24 @@ function mrHtml(){
   parts.push(`<b>${r.recent||0}</b> session${r.recent===1?"":"s"} in the last 30 days`);
   return `<div class="mrel"><div style="font-weight:800;margin-bottom:4px">🤝 My reliability · Zuverlässigkeit ${relBadges(r)}</div>
     <div class="note" style="margin:0">${(r.badges||[]).includes("new")?`Come to 3 sessions to get your score. Tap <b>🙋 I'm here</b> when a session starts. · Nach 3 Sessions bekommst du deinen Wert.<br>`:""}${parts.join(" · ")}</div>
-    <div class="note" style="margin:6px 0 0;font-size:12px">⭐ Reliable: shows up 90%+ and on time 80%+ · 🔥 Regular: 4+ sessions in 30 days</div></div>`;
+    <div class="note" style="margin:6px 0 0;font-size:12px">⭐ Reliable: shows up 90%+ and on time 80%+ · 🔥 Regular: 4+ sessions in 30 days</div>${mrStrikes()}</div>`;
+}
+/* Strikes: no-shows and late cancels (warn only while strike_blocks_on = 0) */
+function mrNum(n){ n=+n||0; const w=Math.floor(n), h=n-w>=0.5; return (w||!h?String(w):"")+(h?"½":""); }
+function mrStrikes(){
+  const k=MR.strikes; if(!k) return "";
+  const ev=k.events||[], D2=d=>new Date(d).toLocaleDateString("en-GB",{day:"numeric",month:"short"});
+  const pass=`🎟️ Free “life happens” pass this month: <b>${k.passes_left>0?"available":"used"}</b>`;
+  if(!ev.length) return `<div class="note" style="margin:8px 0 0">✅ No strikes · Keine Verwarnungen<br>${pass}</div>`;
+  let warn="";
+  if(k.blocked && k.block_until) warn=`<p class="note" style="margin:6px 0 0;color:var(--coral)"><b>⏸️ You can join sessions again on ${D2(k.block_until)}.</b> · Ab ${D2(k.block_until)} wieder möglich.</p>`;
+  else if(k.block_until) warn=`<p class="note" style="margin:6px 0 0;color:var(--coral)"><b>⚠️ Please come to the sessions you join.</b> More missed sessions can pause joining for a while. · Bitte komm zu deinen Sessions.</p>`;
+  else if(k.next_rule && (+k.recent||0) > 0 && (+k.next_rule.strikes - +k.recent) <= 0.5) warn=`<p class="note" style="margin:6px 0 0"><b>Heads up:</b> one more missed session could pause joining for ${k.next_rule.days} days. · Noch eine verpasste Session kann eine Pause bedeuten.</p>`;
+  return `<div style="margin-top:10px;border-top:1px solid var(--line,#e5e0d8);padding-top:8px">
+    <div style="font-weight:800">Strikes · Verwarnungen: ${mrNum(k.recent)} <span class="note" style="margin:0;font-weight:400">(last ${k.window_days} days)</span></div>
+    ${ev.slice(0,6).map(e=>`<div class="note" style="margin:3px 0 0">${e.kind==="no_show"?"🚫 Missed":"⏰ Late cancel"} · ${esc(e.title||"Session")} · ${D2(e.at)} · ${e.waived?"<b>covered by your free pass</b>":`<b>${mrNum(e.weight)}</b> strike, gone on ${D2(e.expires_at)}`}</div>`).join("")}
+    ${warn}
+    <div class="note" style="margin:6px 0 0;font-size:12px">${pass}. Leaving less than 2h before start = ½ strike, missing a session = 1. Strikes go away after 60 days.</div></div>`;
 }
 
 /* ===================== VIDEO CALL LINKS ===================== */
@@ -6145,6 +6168,13 @@ async function fitsLoad(){
 function fitsBadge(s){ return FIT.ids.has(s.activity_id) ? `<span class="fitb" title="Fits the free times on your profile">🕒 Fits your free time</span>` : ""; }
 
 async function bAct(fn,id){
+  if(fn==="pt_leave_activity"){
+    const x=(D.board||[]).concat(B.list||[], R.list||[]).find(q=>q.activity_id===id);
+    if(x && x.my_status==="joined" && x.starts_at){
+      const left=new Date(x.starts_at)-Date.now();
+      if(left>0 && left<2*3600000 && !window.confirm("Leaving less than 2h before the start counts as a late cancel (½ strike). Your free monthly pass covers the first one. Leave anyway? · Spät absagen zählt als ½ Verwarnung. Trotzdem absagen?")) return;
+    }
+  }
   if(["pt_join_activity","pt_accept_invite","pt_accept_offer"].includes(fn) && !safetyOk()){
     const x=bRowOf({ activity_id:id }); if(x && x.format==="in_person"){ safetyOpen(fn,id); return; }
   }
@@ -6154,6 +6184,7 @@ async function bAct(fn,id){
     const { data, error } = await A.sb.rpc(fn,{ p_activity:id });
     if(error) throw error;
     const st=data&&data.status;
+    if(st==="cancelled" && data.late){ MR.data=null; MR.strikes=null; }
     const sideTxt = data && data.side ? (()=>{ const x=(B.list||[]).concat(R.list||[]).find(q=>q.activity_id===id); const k=x?(data.side==="a"?x.language_a:x.language_b):null; return k&&T[k]?` (${T[k].nameEn} speakers)`:""; })() : "";
     bToast( st==="joined" ? `✅ You're in${sideTxt}! · Du bist dabei!`
           : st==="pending" ? "⏳ Request sent. The host will reply · Anfrage gesendet"
