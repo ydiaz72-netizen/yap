@@ -68,6 +68,9 @@
   h1{font-size:34px} h2{font-size:26px} h3{font-size:19px}
   .sub{color:var(--muted);margin:0 0 18px}
   .de{color:var(--muted);font-weight:600;font-size:.9em}
+  .uipick{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 14px}
+  .uipick span{font-weight:700;margin-right:4px;font-size:14px}
+  .uipick .chip{padding:6px 12px;font-size:14px;min-height:0}
   .card{background:var(--card);border-radius:var(--radius);padding:18px;box-shadow:0 1px 2px rgba(27,42,65,.05),0 8px 24px rgba(27,42,65,.06);border:1px solid var(--line);margin-bottom:14px}
   .btn{display:block;width:100%;border:none;border-radius:16px;padding:16px 18px;font:700 18px 'Plus Jakarta Sans',Nunito,sans-serif;cursor:pointer;margin-top:10px;transition:transform .08s}
   .btn:active{transform:scale(.98)}
@@ -1193,7 +1196,25 @@ function romDiv(t){ return t ? `<div class="roman" dir="ltr">${esc(t)}</div>` : 
 function romP(t){ return t ? ` <span class="rom" dir="ltr">(${esc(t)})</span>` : ""; }
 function langBadge(l){ const t=T[l]; return `<span class="badge" style="background:${t.color}1F;color:${t.color}">${t.flag} ${t.name}</span>`; }
 function avatar(p,i){ return `<div class="avatar" style="background:${COLORS[i%COLORS.length]}">${esc(p.name.charAt(0).toUpperCase())}</div>`; }
-function bi(en,de){ return `${en} <span class="de">· ${de}</span>`; }
+/* Interface language (one at a time). Screens that are translated use tr()/bi(en,de,es);
+   screens not translated yet still show English · Deutsch. */
+const UI_LANGS=[["en","English","🇬🇧"],["de","Deutsch","🇩🇪"],["es","Español","🇪🇸"]];
+let UI=(()=>{ try{ const v=localStorage.getItem("pt_ui"); if(["en","de","es"].includes(v)) return v; }catch(e){}
+  const n=String((navigator.languages&&navigator.languages[0])||navigator.language||"en").slice(0,2).toLowerCase();
+  return ["de","es"].includes(n)?n:"en"; })();
+try{ document.documentElement.lang=UI; }catch(e){}
+function tr(en,de,es){ return UI==="de"?(de??en):UI==="es"?(es??en):en; }
+function bi(en,de,es){ if(es!==undefined) return tr(en,de,es); return `${en} <span class="de">· ${de}</span>`; }
+function uiSet(l){
+  if(!["en","de","es"].includes(l)) return; UI=l;
+  try{ localStorage.setItem("pt_ui",l); document.documentElement.lang=l; }catch(e){}
+  xr(); bToast(tr("🌐 Language: English","🌐 Sprache: Deutsch","🌐 Idioma: español"));
+}
+function uiPicker(){
+  return `<div class="uipick" role="group" aria-label="${tr("App language","App-Sprache","Idioma de la app")}">
+    <span>🌐 ${tr("App language","App-Sprache","Idioma de la app")}</span>
+    ${UI_LANGS.map(([k,n,f])=>`<button class="chip ${UI===k?"on":""}" ${UI===k?'aria-pressed="true"':""} onclick="uiSet('${k}')">${f} ${n}</button>`).join("")}</div>`;
+}
 
 let audio=null;
 function soundOn(){ try{ return localStorage.getItem("pt_sound")!=="off"; }catch(e){ return true; } }
@@ -3049,39 +3070,40 @@ function legalBack(){ const r=A.legalRet||"home"; if(r==="lobby" && !O.G) go("ho
 const G_LOGO = `<svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>`;
 
 VIEWS.account = function(){
-  const top=`<div class="topline"><button class="chip" onclick="acctBack()">← Back</button><span>👤 Account · Konto</span></div>`;
+  const top=`<div class="topline"><button class="chip" onclick="acctBack()">← ${tr("Back","Zurück","Atrás")}</button><span>👤 ${tr("Account","Konto","Cuenta")}</span></div>`;
   const msg = `${A.err?`<div class="err">${esc(A.err)}</div>`:""}${A.msg?`<p class="note center okmsg">${esc(A.msg)}</p>`:""}`;
-  if(A.status==="loading") return `${top}<p class="note center" style="margin-top:40px">Loading… · Lädt…</p>`;
+  if(A.status==="loading") return `${top}<p class="note center" style="margin-top:40px">${tr("Loading…","Lädt…","Cargando…")}</p>`;
   if(A.status!=="in"){
     return `${top}
-    <h2>${bi("Your PonteTalk account","Dein PonteTalk-Konto")}</h2>
+    ${uiPicker()}
+    <h2>${tr("Your PonteTalk account","Dein PonteTalk-Konto","Tu cuenta de PonteTalk")}</h2>
     <div class="card perks">
-      <div>🏆 <b>Keep your scores</b> &amp; game history <span class="de">· Punkte &amp; Verlauf</span></div>
-      <div>📈 <b>See your progress</b> over time <span class="de">· Fortschritt sehen</span></div>
-      <div>📝 <b>Your reviews &amp; tips</b> saved to practice later <span class="de">· Tipps gespeichert</span></div>
-      <div>🆓 <b>Free</b> · Kostenlos</div>
+      <div>🏆 ${tr("<b>Keep your scores</b> &amp; game history","<b>Punkte</b> &amp; Spielverlauf behalten","<b>Guarda tus puntos</b> y tu historial")}</div>
+      <div>📈 ${tr("<b>See your progress</b> over time","<b>Fortschritt</b> sehen","<b>Mira tu progreso</b> con el tiempo")}</div>
+      <div>📝 ${tr("<b>Your reviews &amp; tips</b> saved to practice later","<b>Deine Tipps</b> zum späteren Üben gespeichert","<b>Tus repasos y consejos</b> guardados para practicar")}</div>
+      <div>🆓 <b>${tr("Free","Kostenlos","Gratis")}</b></div>
     </div>
     <div class="card">
-      ${A.google?`<button class="btn gbtn" onclick="googleSignIn()" ${A.busy?"disabled":""}>${G_LOGO}<span>Continue with Google · Weiter mit Google</span></button>
-      <div class="divider"><span>or with email · oder per E-Mail</span></div>`:A.step!=="email"?"":`<p class="note" style="margin-top:0">Sign in with your email — no password needed.<br><span class="de">Anmelden mit deiner E-Mail – ohne Passwort.</span></p>`}
+      ${A.google?`<button class="btn gbtn" onclick="googleSignIn()" ${A.busy?"disabled":""}>${G_LOGO}<span>${tr("Continue with Google","Weiter mit Google","Continuar con Google")}</span></button>
+      <div class="divider"><span>${tr("or with email","oder per E-Mail","o con tu correo")}</span></div>`:A.step!=="email"?"":`<p class="note" style="margin-top:0">${tr("Sign in with your email — no password needed.","Anmelden mit deiner E-Mail – ohne Passwort.","Entra con tu correo, sin contraseña.")}</p>`}
       ${A.step==="email" ? `
-        <label class="lbl" for="aemail">Email · E-Mail</label>
+        <label class="lbl" for="aemail">${tr("Email","E-Mail","Correo electrónico")}</label>
         <input type="email" id="aemail" inputmode="email" autocomplete="email" placeholder="you@example.com" value="${esc(A.email)}" oninput="A.email=this.value" onkeydown="if(event.key==='Enter')sendCode()">
-        <button class="btn primary" onclick="sendCode()" ${A.busy?"disabled":""}>${A.busy?"Sending… · Wird gesendet…":"📧 Email me a code"}<small>Wir schicken dir einen Code</small></button>`
+        <button class="btn primary" onclick="sendCode()" ${A.busy?"disabled":""}>${A.busy?tr("Sending…","Wird gesendet…","Enviando…"):tr("📧 Email me a code","📧 Code per E-Mail schicken","📧 Envíame un código")}</button>`
       : `
         <div class="center" style="font-size:44px;line-height:1">📬</div>
-        <h3 class="center" style="margin:6px 0">Check your email! <span class="de">· Schau in deine E-Mails!</span></h3>
-        <p class="center" style="margin:0 0 4px">We sent a code to<br><b>${esc(A.email)}</b></p>
-        <p class="note center">Subject: “Your PonteTalk code”. Not there? Check spam.<br><span class="de">Betreff: „Your PonteTalk code“. Nicht da? Schau im Spam-Ordner.</span></p>
-        <label class="lbl" for="acode">Type the code · Code eingeben</label>
+        <h3 class="center" style="margin:6px 0">${tr("Check your email!","Schau in deine E-Mails!","¡Revisa tu correo!")}</h3>
+        <p class="center" style="margin:0 0 4px">${tr("We sent a code to","Wir haben einen Code geschickt an","Enviamos un código a")}<br><b>${esc(A.email)}</b></p>
+        <p class="note center">${tr("Subject: “Your PonteTalk code”. Not there? Check spam.","Betreff: „Your PonteTalk code“. Nicht da? Schau im Spam-Ordner.","Asunto: “Your PonteTalk code”. ¿No está? Mira en spam.")}</p>
+        <label class="lbl" for="acode">${tr("Type the code","Code eingeben","Escribe el código")}</label>
         <input type="text" id="acode" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="12345678" class="codein" value="${esc(A.code)}" oninput="A.code=this.value" onkeydown="if(event.key==='Enter')verifyCode()">
-        <button class="btn primary" onclick="verifyCode()" ${A.busy?"disabled":""}>${A.busy?"Checking… · Prüfe…":"✅ Sign in · Anmelden"}</button>
+        <button class="btn primary" onclick="verifyCode()" ${A.busy?"disabled":""}>${A.busy?tr("Checking…","Prüfe…","Comprobando…"):"✅ "+tr("Sign in","Anmelden","Entrar")}</button>
         <div class="row" style="justify-content:center;margin-top:6px">
-          <button class="chip" onclick="sendCode()">🔁 Send again · Nochmal senden</button>
-          <button class="chip" onclick="A.step='email';A.code='';A.msg='';A.err='';render()">✏️ Other email</button>
+          <button class="chip" onclick="sendCode()">🔁 ${tr("Send again","Nochmal senden","Enviar otra vez")}</button>
+          <button class="chip" onclick="A.step='email';A.code='';A.msg='';A.err='';render()">✏️ ${tr("Other email","Andere E-Mail","Otro correo")}</button>
         </div>`}
       ${msg}
-      <p class="note center" style="margin:12px 0 0">You must be 16 or older. By continuing you accept our <button class="linkbtn" onclick="openLegal('privacy')">privacy policy</button>.<br><span class="de">Ab 16 Jahren. Mit dem Fortfahren akzeptierst du die Datenschutzerklärung.</span></p>
+      <p class="note center" style="margin:12px 0 0">${tr("You must be 16 or older. By continuing you accept our","Ab 16 Jahren. Mit dem Fortfahren akzeptierst du unsere","Debes tener 16 años o más. Al continuar aceptas nuestra")} <button class="linkbtn" onclick="openLegal('privacy')">${tr("privacy policy","Datenschutzerklärung","política de privacidad")}</button>.</p>
     </div>
     ${legalLinks()}`;
   }
@@ -3090,54 +3112,56 @@ VIEWS.account = function(){
     const pf=A.pf||{lang:S.draft.lang, level:S.draft.level, name:(A.profile&&A.profile.display_name)||S.draft.name||""};
     A.pf=pf;
     return `${top}
-    <h2>${A.editing?bi("Edit profile","Profil bearbeiten"):bi("Welcome! 👋","Willkommen!")}</h2>
-    <p class="sub">${A.editing?"":"Tell us a little about you. You can change this anytime."}</p>
+    <h2>${A.editing?tr("Edit profile","Profil bearbeiten","Editar perfil"):tr("Welcome! 👋","Willkommen! 👋","¡Bienvenido/a! 👋")}</h2>
+    <p class="sub">${A.editing?"":tr("Tell us a little about you. You can change this anytime.","Erzähl uns ein bisschen von dir. Du kannst das jederzeit ändern.","Cuéntanos un poco sobre ti. Puedes cambiarlo cuando quieras.")}</p>
+    ${A.editing?"":uiPicker()}
     <div class="card">
-      <label class="lbl" for="pfname">Your name in games · Dein Name im Spiel</label>
-      <input type="text" id="pfname" maxlength="16" placeholder="e.g. Ana" value="${esc(pf.name||"")}" autocomplete="nickname">
-      <label class="lbl">I'm practicing · Ich übe</label>
+      <label class="lbl" for="pfname">${tr("Your name in games","Dein Name im Spiel","Tu nombre en los juegos")}</label>
+      <input type="text" id="pfname" maxlength="16" placeholder="${tr("e.g. Ana","z. B. Ana","p. ej. Ana")}" value="${esc(pf.name||"")}" autocomplete="nickname">
+      <label class="lbl">${tr("I'm practicing","Ich übe","Estoy practicando")}</label>
       <div class="row">${LANG_KEYS.map(k=>`<button class="chip lang ${pf.lang===k?"on":""}" onclick="setPf('lang','${k}')">${T[k].flag} ${T[k].name}</button>`).join("")}</div>
-      <label class="lbl">My level · Mein Niveau</label>
+      <label class="lbl">${tr("My level","Mein Niveau","Mi nivel")}</label>
       <div class="row">${LVL_ORDER.map(i=>[LEVELS[i],i]).map(([l,i])=>`<button class="chip ${pf.level===i?"on":""}" onclick="setPf('level',${i})">${l.code} · ${T[pf.lang].levels[i]}</button>`).join("")}</div>
       ${msg}
-      <button class="btn primary" onclick="saveProfile()" ${A.busy?"disabled":""}>💾 Save · Speichern</button>
-      ${A.editing?`<button class="btn ghost" onclick="A.editing=false;A.pf=null;A.err='';render()">Cancel · Abbrechen</button>`:""}
+      <button class="btn primary" onclick="saveProfile()" ${A.busy?"disabled":""}>💾 ${tr("Save","Speichern","Guardar")}</button>
+      ${A.editing?`<button class="btn ghost" onclick="A.editing=false;A.pf=null;A.err='';render()">${tr("Cancel","Abbrechen","Cancelar")}</button>`:""}
     </div>
-    <p class="note center">Signed in as ${esc(A.user.email||"")}</p>`;
+    <p class="note center">${tr("Signed in as","Angemeldet als","Conectado como")} ${esc(A.user.email||"")}</p>`;
   }
   const P=A.profile, gs=A.games||[], pend=pendingGame();
   const meIdx = pend ? pend.names.findIndex(n=>n.toLowerCase()===P.display_name.toLowerCase()) : -1;
   return `${top}
   <div class="card prof">
-    <label class="pfav ${AV_BUSY?"busy":""}" title="Change photo · Foto ändern" aria-label="Change profile photo">${P.avatar_url?`<img src="${esc(P.avatar_url)}" alt="">`:`<span class="pfin">${esc(P.display_name.charAt(0).toUpperCase())}</span>`}<span class="pfcam" aria-hidden="true">📷</span><input type="file" accept="image/*" onchange="avPick(this)"></label>
+    <label class="pfav ${AV_BUSY?"busy":""}" title="${tr("Change photo","Foto ändern","Cambiar foto")}" aria-label="${tr("Change profile photo","Profilfoto ändern","Cambiar foto de perfil")}">${P.avatar_url?`<img src="${esc(P.avatar_url)}" alt="">`:`<span class="pfin">${esc(P.display_name.charAt(0).toUpperCase())}</span>`}<span class="pfcam" aria-hidden="true">📷</span><input type="file" accept="image/*" onchange="avPick(this)"></label>
     <div style="flex:1"><div class="pname" style="font-size:20px">${esc(P.display_name)}</div>
-      <div class="pmeta" style="margin:2px 0 4px">${AV_BUSY?"Saving photo… · Speichert…":P.avatar_url?`<button class="linkbtn" style="font-size:13px" onclick="avRemove()">Remove photo · Foto entfernen</button>`:`<label class="linkbtn" style="font-size:13px;cursor:pointer">📷 Add a photo · Foto hinzufügen<input type="file" accept="image/*" style="display:none" onchange="avPick(this)"></label>`}</div>
+      <div class="pmeta" style="margin:2px 0 4px">${AV_BUSY?tr("Saving photo…","Speichert…","Guardando foto…"):P.avatar_url?`<button class="linkbtn" style="font-size:13px" onclick="avRemove()">${tr("Remove photo","Foto entfernen","Quitar foto")}</button>`:`<label class="linkbtn" style="font-size:13px;cursor:pointer">📷 ${tr("Add a photo","Foto hinzufügen","Añadir una foto")}<input type="file" accept="image/*" style="display:none" onchange="avPick(this)"></label>`}</div>
       <div class="pmeta">${T[P.practicing]?`${T[P.practicing].flag} ${T[P.practicing].name}`:""} · ${LEVELS[P.level]?LEVELS[P.level].code:""}</div></div>
-    <button class="chip" onclick="editProfile()">✏️ Edit</button>
+    <button class="chip" onclick="editProfile()">✏️ ${tr("Edit","Bearbeiten","Editar")}</button>
   </div>
   ${msg}
-  <div class="card"><h3>🌍 Language exchange <span class="de">· Sprachtandem</span></h3>
-    <p class="note" style="margin-top:0">Add your languages and free times to get matched with partners and sessions.<br><span class="de">Trage Sprachen und Zeiten ein, um passende Partner und Sessions zu finden.</span></p>
-    <button class="btn secondary" onclick="xOpen()">🗣️ My exchange profile · Mein Tandem-Profil</button></div>
+  <div class="card">${uiPicker().replace('margin:0 0 14px','')}</div>
+  <div class="card"><h3>🌍 ${tr("Language exchange","Sprachtandem","Intercambio de idiomas")}</h3>
+    <p class="note" style="margin-top:0">${tr("Add your languages and free times to get matched with partners and sessions.","Trage Sprachen und Zeiten ein, um passende Partner und Sessions zu finden.","Añade tus idiomas y tus horarios libres para encontrar compañeros y sesiones.")}</p>
+    <button class="btn secondary" onclick="xOpen()">🗣️ ${tr("My exchange profile","Mein Tandem-Profil","Mi perfil de intercambio")}</button></div>
   ${raCard()}
-  ${pend ? `<div class="card acard"><h3>💾 Save your last game? <span class="de">· Letztes Spiel speichern?</span></h3>
-     ${pend.recs.length>1?`<p class="note">Which player were you? · Wer warst du?</p><div class="row">${pend.names.map((n,i)=>`<button class="chip ${i===meIdx?"on":""}" onclick="savePending(${i})">${i===meIdx?"⭐ ":""}${esc(n)}</button>`).join("")}</div>`
-       :`<button class="btn primary" onclick="savePending(0)">💾 Save · Speichern</button>`}
-     <button class="btn ghost" onclick="lsSet('pt_pending',null);render()">No thanks · Nein danke</button></div>` : ""}
-  <div class="card"><h3>📊 My stats <span class="de">· Meine Statistik</span></h3>
+  ${pend ? `<div class="card acard"><h3>💾 ${tr("Save your last game?","Letztes Spiel speichern?","¿Guardar tu última partida?")}</h3>
+     ${pend.recs.length>1?`<p class="note">${tr("Which player were you?","Wer warst du?","¿Qué jugador eras?")}</p><div class="row">${pend.names.map((n,i)=>`<button class="chip ${i===meIdx?"on":""}" onclick="savePending(${i})">${i===meIdx?"⭐ ":""}${esc(n)}</button>`).join("")}</div>`
+       :`<button class="btn primary" onclick="savePending(0)">💾 ${tr("Save","Speichern","Guardar")}</button>`}
+     <button class="btn ghost" onclick="lsSet('pt_pending',null);render()">${tr("No thanks","Nein danke","No, gracias")}</button></div>` : ""}
+  <div class="card"><h3>📊 ${tr("My stats","Meine Statistik","Mis estadísticas")}</h3>
     ${mrHtml()}
-    ${A.games===null?`<p class="note center">Loading your games… <button class="linkbtn" onclick="loadGames()">Retry</button></p>`:acctStats(gs)}</div>
-  <div class="card"><h3>📚 My words <span class="de">· Meine Wörter</span></h3>
-    <p class="note" style="margin-top:0">Words and phrases you saved in your sessions, checked by your partners.<br><span class="de">Wörter aus deinen Sessions, geprüft von deinen Partnern.</span></p>
-    <button class="btn primary" onclick="wpOpen(null)">🎯 Practise my words · Wörter üben</button>
-    <button class="btn secondary" onclick="wdAllOpen()">📚 See my words · Meine Wörter</button></div>
+    ${A.games===null?`<p class="note center">${tr("Loading your games…","Lädt deine Spiele…","Cargando tus partidas…")} <button class="linkbtn" onclick="loadGames()">${tr("Retry","Nochmal","Reintentar")}</button></p>`:acctStats(gs)}</div>
+  <div class="card"><h3>📚 ${tr("My words","Meine Wörter","Mis palabras")}</h3>
+    <p class="note" style="margin-top:0">${tr("Words and phrases you saved in your sessions, checked by your partners.","Wörter aus deinen Sessions, geprüft von deinen Partnern.","Palabras y frases que guardaste en tus sesiones, revisadas por tus compañeros.")}</p>
+    <button class="btn primary" onclick="wpOpen(null)">🎯 ${tr("Practise my words","Wörter üben","Practicar mis palabras")}</button>
+    <button class="btn secondary" onclick="wdAllOpen()">📚 ${tr("See my words","Meine Wörter ansehen","Ver mis palabras")}</button></div>
   ${acctHistory(gs)}
-  <p class="note center">Tap a game to see its questions, answers &amp; tips · Tippe auf ein Spiel für Details</p>
+  <p class="note center">${tr("Tap a game to see its questions, answers &amp; tips","Tippe auf ein Spiel für Fragen, Antworten &amp; Tipps","Toca una partida para ver preguntas, respuestas y consejos")}</p>
   <div id="npc">${npCard()}</div>
-  <button class="btn secondary" onclick="blOpen()">🚫 Blocked people · Blockierte Personen</button>
-  <button class="btn secondary" onclick="signOut()">🚪 Sign out · Abmelden</button>
-  <button class="btn ghost dangertext" onclick="confirmDelete()">🗑️ Delete my account · Konto löschen</button>
-  <p class="note center">Signed in as ${esc(A.user.email||"")}</p>
+  <button class="btn secondary" onclick="blOpen()">🚫 ${tr("Blocked people","Blockierte Personen","Personas bloqueadas")}</button>
+  <button class="btn secondary" onclick="signOut()">🚪 ${tr("Sign out","Abmelden","Cerrar sesión")}</button>
+  <button class="btn ghost dangertext" onclick="confirmDelete()">🗑️ ${tr("Delete my account","Konto löschen","Eliminar mi cuenta")}</button>
+  <p class="note center">${tr("Signed in as","Angemeldet als","Conectado como")} ${esc(A.user.email||"")}</p>
   ${legalLinks()}`;
 };
 AFTER.account = function(){
@@ -3367,7 +3391,7 @@ function bToast(msg){
   document.body.appendChild(t); setTimeout(()=>t.remove(), 4200);
 }
 function fmtWhen(iso){
-  try{ return new Date(iso).toLocaleString("en-GB",{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}).replace(","," ·"); }catch(e){ return ""; }
+  try{ return new Date(iso).toLocaleString(uiLoc(),{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}).replace(","," ·"); }catch(e){ return ""; }
 }
 function tzName(tz){ return String(tz||"").split("/").pop().replace(/_/g," "); }
 function timeIn(iso,tz){ try{ return new Date(iso).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit",timeZone:tz}); }catch(e){ return ""; } }
@@ -3376,7 +3400,7 @@ function fmtHostTime(iso,tz){
     if(!tz || tz===detectTz()) return "";
     const t=timeIn(iso,tz);
     if(t===new Date(iso).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})) return "";   // same clock time, no need to show
-    return `🌍 ${t} in ${tzName(tz)} (host's time)`;
+    return tr(`🌍 ${t} in ${tzName(tz)} (host's time)`,`🌍 ${t} in ${tzName(tz)} (Zeit des Hosts)`,`🌍 ${t} en ${tzName(tz)} (hora del anfitrión)`);
   }catch(e){ return ""; }
 }
 function hostShort(iso,tz){ const h=fmtHostTime(iso,tz); return h ? `${timeIn(iso,tz)} ${tzName(tz)} (host)` : ""; }
@@ -3388,10 +3412,19 @@ function zonesLine(s){
   const parts=z.map(r=>`${esc(tzName(r.time_zone))} ${timeIn(s.starts_at,r.time_zone)}${r.people>1?` (${r.people})`:""}`);
   return `<p class="note" style="margin:6px 0 0">👥 People join from: ${parts.join(" · ")}</p>`;
 }
-function langPair(a,b){ const f=k=>T[k]?`${T[k].flag} ${esc(T[k].nameEn)}`:esc(k); return b ? `${f(a)} ⇄ ${f(b)}` : f(a); }
+/* Language name in the app language (Intl), falls back to the English name */
+const _LN={};
+function lname(k){
+  const en=T[k]?T[k].nameEn:String(k); if(UI==="en") return en;
+  const key=UI+":"+k; if(_LN[key]) return _LN[key];
+  let n=en; try{ const x=new Intl.DisplayNames([UI],{type:"language"}).of(k); if(x && x!==k) n=x.charAt(0).toUpperCase()+x.slice(1); }catch(e){}
+  return _LN[key]=n;
+}
+function langPair(a,b){ const f=k=>T[k]?`${T[k].flag} ${esc(lname(k))}`:esc(k); return b ? `${f(a)} ⇄ ${f(b)}` : f(a); }
 function lvlRange(a,b){ return a===b ? RANKS[a] : `${RANKS[a]}–${RANKS[b]}`; }
 function langsLine(arr){
-  return (arr||[]).map(l=>T[l.code] ? `${T[l.code].flag} ${l.role==="learning" ? "learning"+(l.level!=null?" "+RANKS[l.level]:"") : l.role}` : "").filter(Boolean).join(" · ");
+  const R2={ native:tr("native","Muttersprache","nativo"), fluent:tr("fluent","fließend","fluido") };
+  return (arr||[]).map(l=>T[l.code] ? `${T[l.code].flag} ${l.role==="learning" ? tr("learning","lernt","aprende")+(l.level!=null?" "+RANKS[l.level]:"") : (R2[l.role]||l.role)}` : "").filter(Boolean).join(" · ");
 }
 
 
@@ -3514,9 +3547,8 @@ function holdCard(){
   if(A.user && A.status==="in") holdCheck();
   if(!HOLD.on || !A.user || HOLD.uid!==A.user.id) return "";
   return `<div class="card" style="margin:0;border-left:5px solid var(--coral)">
-    <h3 style="margin:0 0 6px">⏸️ Your account is paused · Konto pausiert</h3>
-    <p class="note" style="margin:0">We got a few reports and are reviewing them. Until then you can browse, but you can't host, join, or chat. This usually takes 1–2 days. Questions? <a href="mailto:${esc(LEGAL.email)}">${esc(LEGAL.email)}</a><br>
-    <span class="de">Wir prüfen einige Meldungen. Bis dahin kannst du stöbern, aber nicht leiten, beitreten oder chatten.</span></p></div>`;
+    <h3 style="margin:0 0 6px">⏸️ ${tr("Your account is paused","Dein Konto ist pausiert","Tu cuenta está en pausa")}</h3>
+    <p class="note" style="margin:0">${tr("We got a few reports and are reviewing them. Until then you can browse, but you can't host, join, or chat. This usually takes 1–2 days.","Wir prüfen einige Meldungen. Bis dahin kannst du stöbern, aber nicht leiten, beitreten oder chatten. Das dauert meist 1–2 Tage.","Recibimos algunos reportes y los estamos revisando. Mientras tanto puedes mirar, pero no organizar, unirte ni chatear. Suele tardar 1–2 días.")} ${tr("Questions?","Fragen?","¿Preguntas?")} <a href="mailto:${esc(LEGAL.email)}">${esc(LEGAL.email)}</a></p></div>`;
 }
 async function raHolds(){
   try{ const { data, error } = await A.sb.rpc("pt_admin_holds"); if(error) throw error;
@@ -3895,12 +3927,12 @@ function safetyOpen(fn,id){
 const INV = { id:null, contacts:null, email:"", busy:false, err:"", done:{} };
 function invCard(){
   const L=(D.board||[]).filter(x=>x.my_status==="invited"); if(!L.length) return "";
-  return `<div class="card" style="margin:0;border:2px solid var(--teal)"><h3 style="margin:0 0 4px">📩 You're invited · Einladungen</h3>
+  return `<div class="card" style="margin:0;border:2px solid var(--teal)"><h3 style="margin:0 0 4px">📩 ${tr("You're invited","Du bist eingeladen","Estás invitado/a")}</h3>
     ${L.map(x=>`<div style="padding:8px 0;border-top:1px solid var(--line)">
-      <b>${x.visibility==="private"?"🔒 ":""}${esc(x.title)}</b><div class="note" style="margin:0">${fmtWhen(x.starts_at)} · from ${esc(x.host_name||"the host")}</div>
-      <div class="row" style="margin-top:6px"><button class="btn primary qbtn" style="width:auto;margin:0" onclick="rAct('pt_accept_invite','${x.activity_id}')">Accept · Annehmen</button>
-      <button class="btn ghost" style="width:auto;margin:0" onclick="rAct('pt_decline_invite','${x.activity_id}')">Decline</button>
-      <button class="linkbtn" onclick="sOpen('${x.activity_id}')">Details</button></div></div>`).join("")}</div>`;
+      <b>${x.visibility==="private"?"🔒 ":""}${esc(x.title)}</b><div class="note" style="margin:0">${fmtWhen(x.starts_at)} · ${tr("from","von","de")} ${esc(x.host_name||tr("the host","dem Host","el anfitrión"))}</div>
+      <div class="row" style="margin-top:6px"><button class="btn primary qbtn" style="width:auto;margin:0" onclick="rAct('pt_accept_invite','${x.activity_id}')">${tr("Accept","Annehmen","Aceptar")}</button>
+      <button class="btn ghost" style="width:auto;margin:0" onclick="rAct('pt_decline_invite','${x.activity_id}')">${tr("Decline","Ablehnen","Rechazar")}</button>
+      <button class="linkbtn" onclick="sOpen('${x.activity_id}')">${tr("Details","Details","Detalles")}</button></div></div>`).join("")}</div>`;
 }
 const INV_ERR = {
   no_account:"No PonteTalk account with that email. Send them your invite link instead (🔗 Share invite link) · Kein Konto mit dieser E-Mail",
@@ -4054,33 +4086,33 @@ function bExport(){
 }
 function bViewSwitch(){
   const v=bView(), b=(k,l,t)=>`<button class="${v===k?"on":""}" aria-pressed="${v===k}" title="${t}" onclick="bSetView('${k}')">${l}</button>`;
-  return `<div class="vsw" role="group" aria-label="View">${b("cards","▦ Cards","Cards")}${b("list","☰ List","List")}${b("day","📅 By day","By day")}</div>`;
+  return `<div class="vsw" role="group" aria-label="View">${b("cards","▦ "+tr("Cards","Karten","Tarjetas"),tr("Cards","Karten","Tarjetas"))}${b("list","☰ "+tr("List","Liste","Lista"),tr("List","Liste","Lista"))}${b("day","📅 "+tr("By day","Nach Tag","Por día"),tr("By day","Nach Tag","Por día"))}</div>`;
 }
 function bStatus(s){
-  if(s.is_host) return ["⭐ Hosting","ok"];
-  if(s.my_status==="joined") return ["✅ You're in","ok"];
-  if(s.my_status==="offered") return ["🎉 Seat for you","ok"];
-  if(s.my_status==="invited") return ["📩 Invited","ok"];
-  if(s.my_status==="pending") return ["⏳ Requested",""];
+  if(s.is_host) return ["⭐ "+tr("Hosting","Du leitest","Anfitrión"),"ok"];
+  if(s.my_status==="joined") return ["✅ "+tr("You're in","Dabei","Dentro"),"ok"];
+  if(s.my_status==="offered") return ["🎉 "+tr("Seat for you","Platz für dich","Plaza para ti"),"ok"];
+  if(s.my_status==="invited") return ["📩 "+tr("Invited","Eingeladen","Invitado/a"),"ok"];
+  if(s.my_status==="pending") return ["⏳ "+tr("Requested","Angefragt","Solicitado"),""];
   if(s.my_status==="waitlisted") return [`🕒 #${s.my_position||"?"}`,""];
-  return s.seats_open>0 ? [`${s.seats_open} left`,""] : ["Full","full"];
+  return s.seats_open>0 ? [tr(`${s.seats_open} left`,`${s.seats_open} frei`,`${s.seats_open} libres`),""] : [tr("Full","Voll","Completa"),"full"];
 }
 function bRow(s, dayMode){
   const d=new Date(s.starts_at), st=bStatus(s), g=s.type==="game";
-  const t=d.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
-  const day=d.toLocaleDateString("en-GB",{weekday:"short",day:"numeric"});
+  const t=d.toLocaleTimeString(uiLoc(),{hour:"2-digit",minute:"2-digit"});
+  const day=d.toLocaleDateString(uiLoc(),{weekday:"short",day:"numeric"});
   return `<button class="brow ${s.is_host||s.my_status==="joined"?"mine":""}" onclick="sOpen('${s.activity_id}')" aria-label="${esc(s.title)}, ${esc(fmtWhen(s.starts_at))}">
     <div class="bt">${dayMode?"":`<i>${esc(day)}</i>`}<b>${t}</b></div>
     <div class="bm"><div class="brt">${s.visibility==="private"?"🔒 ":""}${g?"🎲 ":""}${esc(s.title)}</div>${fitsBadge(s)}
-      <div class="note" style="margin:0;font-size:12px">🕒 your time${hostShort(s.starts_at,s.host_time_zone)?` · ${esc(hostShort(s.starts_at,s.host_time_zone))}`:""}</div>
+      <div class="note" style="margin:0;font-size:12px">🕒 ${tr("your time","deine Zeit","tu hora")}${hostShort(s.starts_at,s.host_time_zone)?` · ${esc(hostShort(s.starts_at,s.host_time_zone))}`:""}</div>
       <div class="note" style="margin:0">${s.format==="in_person"?`📍 ${esc(s.city||"")} · `:""}${codesPair(s.language_a,s.language_b)} · ${lvlRange(s.level_min,s.level_max)} · ${s.duration_min} min</div></div>
-    ${CU[s.activity_id]?`<span title="Unread chat messages">💬${chBadge(s.activity_id)}</span>`:""}<span class="bs ${st[1]}">${st[0]}</span><span class="chev" aria-hidden="true">›</span></button>`;
+    ${CU[s.activity_id]?`<span title="${tr("Unread chat messages","Ungelesene Nachrichten","Mensajes sin leer")}">💬${chBadge(s.activity_id)}</span>`:""}<span class="bs ${st[1]}">${st[0]}</span><span class="chev" aria-hidden="true">›</span></button>`;
 }
 function bDayLabel(iso){
   const d=new Date(iso), t0=new Date(); t0.setHours(0,0,0,0);
   const d0=new Date(d); d0.setHours(0,0,0,0); const n=Math.round((d0-t0)/864e5);
-  const lab=d.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"});
-  return n===0?`Today · ${lab}`:n===1?`Tomorrow · ${lab}`:lab;
+  const lab=d.toLocaleDateString(uiLoc(),{weekday:"long",day:"numeric",month:"long"});
+  return n===0?`${tr("Today","Heute","Hoy")} · ${lab}`:n===1?`${tr("Tomorrow","Morgen","Mañana")} · ${lab}`:lab;
 }
 function bListHtml(shown){
   const v=bView();
@@ -5679,7 +5711,7 @@ function cfNorm(x){ return String(x||"").normalize("NFD").replace(/[̀-ͯ]/g,"")
 function sessTabs(which){
   const t=(k,l,click)=>`<button role="tab" aria-selected="${which===k}" class="${which===k?"on":""}" onclick="${click}">${l}</button>`;
   return `<div class="stabs" role="tablist">
-    ${t("online","💻 Online","bTab('online')")}${t("in_person","📍 In person","bTab('in_person')")}${t("cafes","☕ <span class='hidesm'>Language cafés</span><span class='showsm'>Cafés</span>","cfOpen()")}${t("lounges","🛋️ Lounges","luOpen()")}${t("partners","👥 <span class='hidesm'>Partners</span><span class='showsm'>People</span>","ptOpen()")}</div>`;
+    ${t("online","💻 Online","bTab('online')")}${t("in_person","📍 "+tr("In person","Vor Ort","Presencial"),"bTab('in_person')")}${t("cafes",`☕ <span class='hidesm'>${tr("Language cafés","Sprachcafés","Cafés de idiomas")}</span><span class='showsm'>Cafés</span>`,"cfOpen()")}${t("lounges","🛋️ "+tr("Lounges","Lounges","Salas"),"luOpen()")}${t("partners",`👥 <span class='hidesm'>${tr("Partners","Partner","Compañeros")}</span><span class='showsm'>${tr("People","Leute","Gente")}</span>`,"ptOpen()")}</div>`;
 }
 function bTab(f){ B.fmt=f; if(S.screen!=="board") bOpen(); else xr(); }
 function cfOpen(){ CF.err=""; CF.msg=""; CF.f=null; go("cafes"); cfLoad(); }
@@ -5893,11 +5925,11 @@ async function cfSave(){
 }
 
 /* ===================== RELIABILITY BADGES + ATTENDANCE ===================== */
-const RB = { reliable:["⭐","Reliable","Zuverlässig"], regular:["🔥","Regular","Stammgast"], new:["🌱","New","Neu"] };
+const RB = { reliable:["⭐","Reliable","Zuverlässig","Fiable"], regular:["🔥","Regular","Stammgast","Habitual"], new:["🌱","New","Neu","Nuevo"] };
 function relBadges(rel){
   if(!rel || !rel.badges) return "";
   return ["reliable","regular","new"].filter(b=>rel.badges.includes(b))
-    .map(b=>`<span class="rbg ${b}" title="${b==="reliable"?"Shows up and is on time":b==="regular"?"4+ sessions in the last 30 days":"Fewer than 3 sessions so far"}">${RB[b][0]} ${RB[b][1]}</span>`).join("");
+    .map(b=>`<span class="rbg ${b}" title="${b==="reliable"?tr("Shows up and is on time","Kommt und ist pünktlich","Asiste y llega puntual"):b==="regular"?tr("4+ sessions in the last 30 days","4+ Sessions in den letzten 30 Tagen","4+ sesiones en los últimos 30 días"):tr("Fewer than 3 sessions so far","Bisher weniger als 3 Sessions","Menos de 3 sesiones hasta ahora")}">${RB[b][0]} ${tr(RB[b][1],RB[b][2],RB[b][3])}</span>`).join("");
 }
 const CI = {};   // my check-ins: activity_id -> { on_time }
 async function ciLoad(){
@@ -5914,8 +5946,8 @@ function ciOpen(s){
 function ciBtn(s, small){
   if(!A.user || s.my_status!=="joined" || !ciOpen(s)) return "";
   const c=CI[s.activity_id];
-  if(c) return `<p class="okmsg" style="margin:8px 0 0">✓ Checked in${c.on_time?" · on time 👏":""} · Eingecheckt</p>`;
-  return `<button class="btn primary ${small?"qbtn":""}" onclick="ciGo('${s.activity_id}')">🙋 I'm here · Ich bin da</button>`;
+  if(c) return `<p class="okmsg" style="margin:8px 0 0">✓ ${tr("Checked in","Eingecheckt","Registrado/a")}${c.on_time?" · "+tr("on time 👏","pünktlich 👏","puntual 👏"):""}</p>`;
+  return `<button class="btn primary ${small?"qbtn":""}" onclick="ciGo('${s.activity_id}')">🙋 ${tr("I'm here","Ich bin da","Estoy aquí")}</button>`;
 }
 const CI_ERR = { too_early:"Check-in opens 10 minutes before the start · Check-in ab 10 Min. vorher",
   too_late:"This session is over · Die Session ist vorbei", not_joined:"Only people in this session can check in · Nur Teilnehmende" };
@@ -5937,11 +5969,11 @@ async function acLoad(){
 }
 function acCard(){
   const L=(AC.list||[]); if(!L.length) return "";
-  return `<div class="card" style="margin:0;border:2px solid var(--sun)"><h3 style="margin:0 0 4px">📋 Who came? · Wer war da?</h3>
-    <p class="note" style="margin:0 0 8px">Takes 10 seconds and builds everyone's reliability badge. · Dauert 10 Sekunden.</p>
+  return `<div class="card" style="margin:0;border:2px solid var(--sun)"><h3 style="margin:0 0 4px">📋 ${tr("Who came?","Wer war da?","¿Quién vino?")}</h3>
+    <p class="note" style="margin:0 0 8px">${tr("Takes 10 seconds and builds everyone's reliability badge.","Dauert 10 Sekunden und baut die Zuverlässigkeit aller auf.","Tarda 10 segundos y construye la fiabilidad de todos.")}</p>
     ${L.map(a=>`<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 0;border-top:1px solid var(--line)">
-      <div style="flex:1;min-width:160px"><b>${esc(a.title)}</b><div class="note" style="margin:0">${fmtWhen(a.starts_at)} · ${a.confirmed} of ${a.people} marked</div></div>
-      <button class="btn ${a.confirmed?"secondary":"primary"} qbtn" style="width:auto;margin:0" onclick="attOpen('${a.activity_id}')">${a.confirmed?"Edit · Ändern":"Mark · Eintragen"}</button></div>`).join("")}
+      <div style="flex:1;min-width:160px"><b>${esc(a.title)}</b><div class="note" style="margin:0">${fmtWhen(a.starts_at)} · ${tr(`${a.confirmed} of ${a.people} marked`,`${a.confirmed} von ${a.people} eingetragen`,`${a.confirmed} de ${a.people} marcados`)}</div></div>
+      <button class="btn ${a.confirmed?"secondary":"primary"} qbtn" style="width:auto;margin:0" onclick="attOpen('${a.activity_id}')">${a.confirmed?tr("Edit","Ändern","Editar"):tr("Mark","Eintragen","Marcar")}</button></div>`).join("")}
   </div>`;
 }
 /* ---- Duplicate a session ("Schedule the next one?") ---- */
@@ -5959,20 +5991,20 @@ function avNudge(){
   let off=false; try{ off=localStorage.getItem("pt_av_nudge")==="off"; }catch(e){ off=!!window._ptAvOff; }
   if(off) return "";
   return `<div class="card" style="margin:0;background:var(--teal-soft);border:0">
-    <h3 style="margin:0 0 4px">🗓️ When are you usually free?</h3>
-    <p class="note" style="margin:0 0 10px">Tap your free times once and we'll show you sessions that fit, in your own time zone.<br><span class="de">Trag deine freien Zeiten ein, dann zeigen wir dir passende Sessions.</span></p>
-    <div class="row" style="margin:0"><button class="btn primary qbtn" style="width:auto;margin:0" onclick="xOpen()">Set my free times · Zeiten eintragen</button>
-    <button class="chip" onclick="try{localStorage.setItem('pt_av_nudge','off')}catch(e){window._ptAvOff=1};xr()">Later · Später</button></div></div>`;
+    <h3 style="margin:0 0 4px">🗓️ ${tr("When are you usually free?","Wann hast du meistens Zeit?","¿Cuándo sueles estar libre?")}</h3>
+    <p class="note" style="margin:0 0 10px">${tr("Tap your free times once and we'll show you sessions that fit, in your own time zone.","Trag deine freien Zeiten einmal ein, dann zeigen wir dir passende Sessions in deiner Zeitzone.","Marca tus horas libres una vez y te mostraremos sesiones que encajen, en tu zona horaria.")}</p>
+    <div class="row" style="margin:0"><button class="btn primary qbtn" style="width:auto;margin:0" onclick="xOpen()">${tr("Set my free times","Zeiten eintragen","Marcar mis horas libres")}</button>
+    <button class="chip" onclick="try{localStorage.setItem('pt_av_nudge','off')}catch(e){window._ptAvOff=1};xr()">${tr("Later","Später","Más tarde")}</button></div></div>`;
 }
 function fuCard(){
   const gone=fuDismissed(), L=(FU.list||[]).filter(x=>!gone.includes(x.activity_id));
   if(!L.length) return "";
   const a=L[0];
   return `<div class="card" style="margin:0;border:2px solid var(--teal)">
-    <h3 style="margin:0 0 4px">🔁 Schedule the next one? · Nächster Termin?</h3>
-    <p class="note" style="margin:0 0 10px">Your session <b>“${esc(a.title)}”</b> ended${a.people?` · ${a.people} ${a.people===1?"person":"people"} took part`:""}. Copy it to a new date in a few seconds.<br><span class="de">Kopiere sie auf ein neues Datum.</span></p>
-    <div class="row" style="margin:0"><button class="btn primary qbtn" style="width:auto;margin:0" onclick="hDup('${a.activity_id}')">⧉ Duplicate · Kopieren</button>
-      <button class="chip" onclick="fuDismiss('${a.activity_id}')">Not now · Nicht jetzt</button></div></div>`;
+    <h3 style="margin:0 0 4px">🔁 ${tr("Schedule the next one?","Nächster Termin?","¿Programar la próxima?")}</h3>
+    <p class="note" style="margin:0 0 10px">${tr(`Your session <b>“${esc(a.title)}”</b> ended`,`Deine Session <b>„${esc(a.title)}“</b> ist vorbei`,`Tu sesión <b>“${esc(a.title)}”</b> terminó`)}${a.people?" · "+tr(`${a.people} ${a.people===1?"person":"people"} took part`,`${a.people} ${a.people===1?"Person":"Personen"} dabei`,`${a.people} ${a.people===1?"persona participó":"personas participaron"}`):""}. ${tr("Copy it to a new date in a few seconds.","Kopiere sie in Sekunden auf ein neues Datum.","Cópiala a una nueva fecha en segundos.")}</p>
+    <div class="row" style="margin:0"><button class="btn primary qbtn" style="width:auto;margin:0" onclick="hDup('${a.activity_id}')">⧉ ${tr("Duplicate","Kopieren","Duplicar")}</button>
+      <button class="chip" onclick="fuDismiss('${a.activity_id}')">${tr("Not now","Nicht jetzt","Ahora no")}</button></div></div>`;
 }
 function hNextWeek(iso){
   let d=new Date(iso); do{ d=new Date(d.getTime()+7*86400000); }while(d.getTime() < Date.now()+3600000);
@@ -6061,30 +6093,32 @@ async function mrLoad(){
 }
 function mrHtml(){
   const r=MR.data; if(!r) return "";
-  const parts=[];
-  if(r.percent!=null) parts.push(`Shows up <b>${r.percent}%</b>`);
-  if(r.on_time!=null) parts.push(`on time <b>${r.on_time}%</b>`);
-  parts.push(`<b>${r.recent||0}</b> session${r.recent===1?"":"s"} in the last 30 days`);
-  return `<div class="mrel"><div style="font-weight:800;margin-bottom:4px">🤝 My reliability · Zuverlässigkeit ${relBadges(r)}</div>
-    <div class="note" style="margin:0">${(r.badges||[]).includes("new")?`Come to 3 sessions to get your score. Tap <b>🙋 I'm here</b> when a session starts. · Nach 3 Sessions bekommst du deinen Wert.<br>`:""}${parts.join(" · ")}</div>
-    <div class="note" style="margin:6px 0 0;font-size:12px">⭐ Reliable: shows up 90%+ and on time 80%+ · 🔥 Regular: 4+ sessions in 30 days</div>${mrStrikes()}</div>`;
+  const parts=[], n=r.recent||0;
+  if(r.percent!=null) parts.push(tr(`Shows up <b>${r.percent}%</b>`,`Erscheint <b>${r.percent}%</b>`,`Asiste <b>${r.percent}%</b>`));
+  if(r.on_time!=null) parts.push(tr(`on time <b>${r.on_time}%</b>`,`pünktlich <b>${r.on_time}%</b>`,`puntual <b>${r.on_time}%</b>`));
+  parts.push(tr(`<b>${n}</b> session${n===1?"":"s"} in the last 30 days`,`<b>${n}</b> Session${n===1?"":"s"} in den letzten 30 Tagen`,`<b>${n}</b> sesi${n===1?"ón":"ones"} en los últimos 30 días`));
+  return `<div class="mrel"><div style="font-weight:800;margin-bottom:4px">🤝 ${tr("My reliability","Meine Zuverlässigkeit","Mi fiabilidad")} ${relBadges(r)}</div>
+    <div class="note" style="margin:0">${(r.badges||[]).includes("new")?tr("Come to 3 sessions to get your score. Tap <b>🙋 I'm here</b> when a session starts.","Nach 3 Sessions bekommst du deinen Wert. Tippe <b>🙋 Ich bin da</b>, wenn eine Session beginnt.","Ven a 3 sesiones para tener tu puntuación. Toca <b>🙋 Estoy aquí</b> cuando empiece una sesión.")+"<br>":""}${parts.join(" · ")}</div>
+    <div class="note" style="margin:6px 0 0;font-size:12px">${tr("⭐ Reliable: shows up 90%+ and on time 80%+ · 🔥 Regular: 4+ sessions in 30 days","⭐ Zuverlässig: 90 %+ da und 80 %+ pünktlich · 🔥 Stammgast: 4+ Sessions in 30 Tagen","⭐ Fiable: asiste 90 %+ y puntual 80 %+ · 🔥 Habitual: 4+ sesiones en 30 días")}</div>${mrStrikes()}</div>`;
 }
 /* Strikes: no-shows and late cancels (warn only while strike_blocks_on = 0) */
 function mrNum(n){ n=+n||0; const w=Math.floor(n), h=n-w>=0.5; return (w||!h?String(w):"")+(h?"½":""); }
+function uiLoc(){ return UI==="de"?"de-DE":UI==="es"?"es-ES":"en-GB"; }
 function mrStrikes(){
   const k=MR.strikes; if(!k) return "";
-  const ev=k.events||[], D2=d=>new Date(d).toLocaleDateString("en-GB",{day:"numeric",month:"short"});
-  const pass=`🎟️ Free “life happens” pass this month: <b>${k.passes_left>0?"available":"used"}</b>`;
-  if(!ev.length) return `<div class="note" style="margin:8px 0 0">✅ No strikes · Keine Verwarnungen<br>${pass}</div>`;
+  const ev=k.events||[], D2=d=>new Date(d).toLocaleDateString(uiLoc(),{day:"numeric",month:"short"});
+  const av=k.passes_left>0;
+  const pass=tr(`🎟️ Free “life happens” pass this month: <b>${av?"available":"used"}</b>`,`🎟️ Freier „Kann passieren“-Pass diesen Monat: <b>${av?"verfügbar":"genutzt"}</b>`,`🎟️ Pase gratis “imprevistos” este mes: <b>${av?"disponible":"usado"}</b>`);
+  if(!ev.length) return `<div class="note" style="margin:8px 0 0">✅ ${tr("No strikes","Keine Verwarnungen","Sin faltas")}<br>${pass}</div>`;
   let warn="";
-  if(k.blocked && k.block_until) warn=`<p class="note" style="margin:6px 0 0;color:var(--coral)"><b>⏸️ You can join sessions again on ${D2(k.block_until)}.</b> · Ab ${D2(k.block_until)} wieder möglich.</p>`;
-  else if(k.block_until) warn=`<p class="note" style="margin:6px 0 0;color:var(--coral)"><b>⚠️ Please come to the sessions you join.</b> More missed sessions can pause joining for a while. · Bitte komm zu deinen Sessions.</p>`;
-  else if(k.next_rule && (+k.recent||0) > 0 && (+k.next_rule.strikes - +k.recent) <= 0.5) warn=`<p class="note" style="margin:6px 0 0"><b>Heads up:</b> one more missed session could pause joining for ${k.next_rule.days} days. · Noch eine verpasste Session kann eine Pause bedeuten.</p>`;
+  if(k.blocked && k.block_until){ const d=D2(k.block_until); warn=`<p class="note" style="margin:6px 0 0;color:var(--coral)"><b>⏸️ ${tr(`You can join sessions again on ${d}.`,`Ab ${d} kannst du wieder beitreten.`,`Podrás unirte a sesiones otra vez el ${d}.`)}</b></p>`; }
+  else if(k.block_until) warn=`<p class="note" style="margin:6px 0 0;color:var(--coral)">${tr("<b>⚠️ Please come to the sessions you join.</b> More missed sessions can pause joining for a while.","<b>⚠️ Bitte komm zu deinen Sessions.</b> Weitere verpasste Sessions können das Beitreten eine Zeit lang pausieren.","<b>⚠️ Por favor, ven a las sesiones a las que te unes.</b> Si faltas más, podrías no poder unirte durante un tiempo.")}</p>`;
+  else if(k.next_rule && (+k.recent||0) > 0 && (+k.next_rule.strikes - +k.recent) <= 0.5){ const d=k.next_rule.days; warn=`<p class="note" style="margin:6px 0 0">${tr(`<b>Heads up:</b> one more missed session could pause joining for ${d} days.`,`<b>Achtung:</b> Noch eine verpasste Session kann das Beitreten für ${d} Tage pausieren.`,`<b>Ojo:</b> una sesión más sin asistir podría pausar tu acceso durante ${d} días.`)}</p>`; }
   return `<div style="margin-top:10px;border-top:1px solid var(--line,#e5e0d8);padding-top:8px">
-    <div style="font-weight:800">Strikes · Verwarnungen: ${mrNum(k.recent)} <span class="note" style="margin:0;font-weight:400">(last ${k.window_days} days)</span></div>
-    ${ev.slice(0,6).map(e=>`<div class="note" style="margin:3px 0 0">${e.kind==="no_show"?"🚫 Missed":"⏰ Late cancel"} · ${esc(e.title||"Session")} · ${D2(e.at)} · ${e.waived?"<b>covered by your free pass</b>":`<b>${mrNum(e.weight)}</b> strike, gone on ${D2(e.expires_at)}`}</div>`).join("")}
+    <div style="font-weight:800">${tr("Strikes","Verwarnungen","Faltas")}: ${mrNum(k.recent)} <span class="note" style="margin:0;font-weight:400">(${tr(`last ${k.window_days} days`,`letzte ${k.window_days} Tage`,`últimos ${k.window_days} días`)})</span></div>
+    ${ev.slice(0,6).map(e=>`<div class="note" style="margin:3px 0 0">${e.kind==="no_show"?"🚫 "+tr("Missed","Verpasst","No asististe"):"⏰ "+tr("Late cancel","Spät abgesagt","Cancelación tardía")} · ${esc(e.title||"Session")} · ${D2(e.at)} · ${e.waived?`<b>${tr("covered by your free pass","durch deinen Pass abgedeckt","cubierto por tu pase gratis")}</b>`:tr(`<b>${mrNum(e.weight)}</b> strike, gone on ${D2(e.expires_at)}`,`<b>${mrNum(e.weight)}</b> Verwarnung, weg am ${D2(e.expires_at)}`,`<b>${mrNum(e.weight)}</b> falta, desaparece el ${D2(e.expires_at)}`)}</div>`).join("")}
     ${warn}
-    <div class="note" style="margin:6px 0 0;font-size:12px">${pass}. Leaving less than 2h before start = ½ strike, missing a session = 1. Strikes go away after 60 days.</div></div>`;
+    <div class="note" style="margin:6px 0 0;font-size:12px">${pass}. ${tr("Leaving less than 2h before start = ½ strike, missing a session = 1. Strikes go away after 60 days.","Absagen weniger als 2 Std. vorher = ½ Verwarnung, Session verpasst = 1. Verwarnungen verschwinden nach 60 Tagen.","Salir menos de 2 h antes = ½ falta, no asistir = 1. Las faltas desaparecen a los 60 días.")}</div></div>`;
 }
 
 /* ===================== VIDEO CALL LINKS ===================== */
@@ -6256,54 +6290,54 @@ function bCard(s){
   const id=s.activity_id, started=new Date(s.starts_at)<=new Date();
   const g=s.type==="game" ? GAMES_BOARD.find(x=>x[0]===s.game) : null;
   const hostT=fmtHostTime(s.starts_at, s.host_time_zone);
-  const rel=s.host_reliability&&s.host_reliability.percent!=null ? ` · ${s.host_reliability.percent}% shows up` : "";
-  const seatsTxt = s.seats_open>0 ? `${s.seats_open} of ${s.seats} open` : `Full${s.waitlisted?` · ${s.waitlisted} waiting`:""}`;
+  const rel=s.host_reliability&&s.host_reliability.percent!=null ? " · "+tr(`${s.host_reliability.percent}% shows up`,`erscheint zu ${s.host_reliability.percent} %`,`asiste el ${s.host_reliability.percent} %`) : "";
+  const seatsTxt = s.seats_open>0 ? tr(`${s.seats_open} of ${s.seats} open`,`${s.seats_open} von ${s.seats} frei`,`${s.seats_open} de ${s.seats} libres`) : tr("Full","Voll","Completa")+(s.waitlisted?" · "+tr(`${s.waitlisted} waiting`,`${s.waitlisted} warten`,`${s.waitlisted} en espera`):"");
   const sidesHtml = s.balanced ? `<div class="sides" aria-label="Seats per language">${[["a",s.language_a,s.taken_a,s.seats_a],["b",s.language_b,s.taken_b,s.seats_b]].map(([k,l,t,n])=>
-      `<span class="sidepill ${t>=n?"full":""}">${T[l]?T[l].flag:""} ${T[l]?esc(T[l].nameEn):l} speakers ${t} of ${n}${t>=n?" · full":""}${s.host_side===k?(s.is_host?" · incl. you":" · incl. host"):""}${s.my_side===k?" · you":""}</span>`).join("")}</div>` : "";
+      `<span class="sidepill ${t>=n?"full":""}">${T[l]?T[l].flag:""} ${tr(`${T[l]?esc(lname(l)):l} speakers ${t} of ${n}`,`${T[l]?esc(lname(l)):l}-Sprechende ${t} von ${n}`,`Hablantes de ${T[l]?esc(lname(l).toLowerCase()):l} ${t} de ${n}`)}${t>=n?" · "+tr("full","voll","completo"):""}${s.host_side===k?(s.is_host?" · "+tr("incl. you","inkl. dir","contigo"):" · "+tr("incl. host","inkl. Host","con anfitrión")):""}${s.my_side===k?" · "+tr("you","du","tú"):""}</span>`).join("")}</div>` : "";
   let act="";
   const isGame=s.type==="game", nowMs=Date.now(), startMs=new Date(s.starts_at).getTime();
   const roomWindow = isGame && nowMs >= startMs-30*60000 && nowMs < startMs+s.duration_min*60000;
   const roomSoon = isGame && nowMs < startMs-30*60000;
   if(s.is_host){
-    act = (roomWindow ? `<button class="btn primary" onclick="bRoom('${id}',true)">🎮 Open game room · Spielraum öffnen</button>`
-          : roomSoon ? `<p class="note" style="margin:8px 0 0">🎮 You can open the game room 30 min before the start. · Spielraum ab 30 Min. vorher.</p>` : "");
-    act+=`<div class="row" style="margin-top:6px"><span class="feat">⭐ You're hosting · Du leitest</span>${s.pending?`<span class="feat" style="background:#FFF1C2">🔔 ${s.pending} request${s.pending>1?"s":""}</span>`:""}</div>
+    act = (roomWindow ? `<button class="btn primary" onclick="bRoom('${id}',true)">🎮 ${tr("Open game room","Spielraum öffnen","Abrir sala de juego")}</button>`
+          : roomSoon ? `<p class="note" style="margin:8px 0 0">🎮 ${tr("You can open the game room 30 min before the start.","Spielraum ab 30 Min. vorher.","Puedes abrir la sala de juego 30 min antes.")}</p>` : "");
+    act+=`<div class="row" style="margin-top:6px"><span class="feat">⭐ ${tr("You're hosting","Du leitest","Eres el anfitrión")}</span>${s.pending?`<span class="feat" style="background:#FFF1C2">🔔 ${tr(`${s.pending} request${s.pending>1?"s":""}`,`${s.pending} Anfrage${s.pending>1?"n":""}`,`${s.pending} solicitud${s.pending>1?"es":""}`)}</span>`:""}</div>
       ${hostList(s)}
-      ${!started?`<button class="btn secondary" onclick="invOpen('${id}')">📩 Invite people · Einladen</button>`:""}
-      ${started?`<button class="btn secondary" onclick="attOpen('${id}')">📋 Who came? · Wer war da?</button>`:""}
+      ${!started?`<button class="btn secondary" onclick="invOpen('${id}')">📩 ${tr("Invite people","Leute einladen","Invitar a gente")}</button>`:""}
+      ${started?`<button class="btn secondary" onclick="attOpen('${id}')">📋 ${tr("Who came?","Wer war da?","¿Quién vino?")}</button>`:""}
 `;
   } else if(!A.user){
-    act=`<button class="btn primary" onclick="A.ret='board';go('account')">Sign in to join · Anmelden</button>`;
+    act=`<button class="btn primary" onclick="A.ret='board';go('account')">${tr("Sign in to join","Zum Beitreten anmelden","Entra para unirte")}</button>`;
   } else switch(s.my_status){
     case "joined":
-      act=`<p class="okmsg">✅ You're in! · Du bist dabei!</p>${roomWindow?`<button class="btn primary" onclick="bRoom('${id}',false)">🎮 Enter game room · Zum Spielraum</button>`:roomSoon?`<p class="note" style="margin:4px 0 0">🎮 The game room opens 30 min before the start. · Spielraum öffnet 30 Min. vorher.</p>`:""}${started?"":`<button class="btn ghost" onclick="bAct('pt_leave_activity','${id}')">Leave · Absagen</button>`}`; break;
+      act=`<p class="okmsg">✅ ${tr("You're in!","Du bist dabei!","¡Estás dentro!")}</p>${roomWindow?`<button class="btn primary" onclick="bRoom('${id}',false)">🎮 ${tr("Enter game room","Zum Spielraum","Entrar a la sala de juego")}</button>`:roomSoon?`<p class="note" style="margin:4px 0 0">🎮 ${tr("The game room opens 30 min before the start.","Spielraum öffnet 30 Min. vorher.","La sala de juego abre 30 min antes.")}</p>`:""}${started?"":`<button class="btn ghost" onclick="bAct('pt_leave_activity','${id}')">${tr("Leave","Absagen","Salir")}</button>`}`; break;
     case "invited":
-      act=`<p class="okmsg">📩 ${esc(s.host_name||"The host")} invited you! · Du bist eingeladen!</p>
-        <div class="brow2"><button class="btn primary" onclick="bAct('pt_accept_invite','${id}')" ${B.busy?"disabled":""}>Accept · Annehmen</button>
-        <button class="btn ghost" onclick="bAct('pt_decline_invite','${id}')">Decline · Ablehnen</button></div>`; break;
+      act=`<p class="okmsg">📩 ${tr(`${esc(s.host_name||"The host")} invited you!`,`${esc(s.host_name||"Der Host")} hat dich eingeladen!`,`¡${esc(s.host_name||"El anfitrión")} te invitó!`)}</p>
+        <div class="brow2"><button class="btn primary" onclick="bAct('pt_accept_invite','${id}')" ${B.busy?"disabled":""}>${tr("Accept","Annehmen","Aceptar")}</button>
+        <button class="btn ghost" onclick="bAct('pt_decline_invite','${id}')">${tr("Decline","Ablehnen","Rechazar")}</button></div>`; break;
     case "pending":
-      act=`<p class="note">⏳ Request sent. The host will reply. · Anfrage gesendet.</p><button class="btn ghost" onclick="bAct('pt_leave_activity','${id}')">Withdraw · Zurückziehen</button>`; break;
+      act=`<p class="note">⏳ ${tr("Request sent. The host will reply.","Anfrage gesendet. Der Host antwortet.","Solicitud enviada. El anfitrión responderá.")}</p><button class="btn ghost" onclick="bAct('pt_leave_activity','${id}')">${tr("Withdraw","Zurückziehen","Retirar")}</button>`; break;
     case "waitlisted":
-      act=`<p class="note">🕒 You're <b>#${s.my_position}</b> on the waitlist. If a seat opens, we'll offer it to you. · Platz ${s.my_position} auf der Warteliste.</p><button class="btn ghost" onclick="bAct('pt_leave_activity','${id}')">Leave waitlist · Warteliste verlassen</button>`; break;
+      act=`<p class="note">🕒 ${tr(`You're <b>#${s.my_position}</b> on the waitlist. If a seat opens, we'll offer it to you.`,`Du bist <b>Nr. ${s.my_position}</b> auf der Warteliste. Wird ein Platz frei, bieten wir ihn dir an.`,`Eres el <b>n.º ${s.my_position}</b> en la lista de espera. Si se libera una plaza, te la ofreceremos.`)}</p><button class="btn ghost" onclick="bAct('pt_leave_activity','${id}')">${tr("Leave waitlist","Warteliste verlassen","Salir de la lista de espera")}</button>`; break;
     case "offered": {
-      const until=s.my_offer_expires?new Date(s.my_offer_expires).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}):"";
-      act=`<p class="okmsg">🎉 A seat is free for you! Accept by ${until}. · Ein Platz ist frei! Bis ${until} annehmen.</p>
-        <div class="brow2"><button class="btn primary" onclick="bAct('pt_accept_offer','${id}')">Accept · Annehmen</button><button class="btn ghost" onclick="bAct('pt_decline_offer','${id}')">Pass · Ablehnen</button></div>`; break; }
+      const until=s.my_offer_expires?new Date(s.my_offer_expires).toLocaleTimeString(uiLoc(),{hour:"2-digit",minute:"2-digit"}):"";
+      act=`<p class="okmsg">🎉 ${tr(`A seat is free for you! Accept by ${until}.`,`Ein Platz ist frei! Bis ${until} annehmen.`,`¡Hay una plaza libre para ti! Acéptala antes de las ${until}.`)}</p>
+        <div class="brow2"><button class="btn primary" onclick="bAct('pt_accept_offer','${id}')">${tr("Accept","Annehmen","Aceptar")}</button><button class="btn ghost" onclick="bAct('pt_decline_offer','${id}')">${tr("Pass","Ablehnen","Pasar")}</button></div>`; break; }
     default:
-      if(started) act=`<p class="note">🔴 Live now · Läuft gerade</p>`;
+      if(started) act=`<p class="note">🔴 ${tr("Live now","Läuft gerade","En directo")}</p>`;
       else {
         const full=s.seats_open<=0;
-        const label = full ? `Join waitlist${s.waitlisted?` · you'd be #${s.waitlisted+1}`:""} · Warteliste`
-                    : s.join_mode==="approval" ? "✋ Request a seat · Anfragen" : "✍️ Sign up · Anmelden";
+        const label = full ? tr("Join waitlist","Auf die Warteliste","Lista de espera")+(s.waitlisted?" · "+tr(`you'd be #${s.waitlisted+1}`,`du wärst Nr. ${s.waitlisted+1}`,`serías el n.º ${s.waitlisted+1}`):"")
+                    : s.join_mode==="approval" ? "✋ "+tr("Request a seat","Platz anfragen","Solicitar plaza") : "✍️ "+tr("Sign up","Anmelden","Apuntarme");
         act=`<button class="btn ${full?"secondary":"primary"}" onclick="bAct('pt_join_activity','${id}')" ${B.busy?"disabled":""}>${label}</button>`;
       }
   }
   return `<div class="card bcard ${s.is_host||s.my_status==="joined"?"mine":""} ${s.my_status==="offered"?"offer":""}">
-    <div class="btop"><span class="feat">${s.format==="in_person"?"📍 In person · ":""}${g?`🎲 ${g[1]} ${g[2]}`:"💬 Conversation"}${s.balanced?" · ⚖️ Balanced":""}${s.visibility==="private"?" · 🔒 Private":""}</span><span class="note" style="margin:0;font-weight:800">${seatsTxt}</span></div>
+    <div class="btop"><span class="feat">${s.format==="in_person"?"📍 "+tr("In person","Vor Ort","Presencial")+" · ":""}${g?`🎲 ${g[1]} ${g[2]}`:"💬 "+tr("Conversation","Gespräch","Conversación")}${s.balanced?" · ⚖️ "+tr("Balanced","Ausgeglichen","Equilibrada"):""}${s.visibility==="private"?" · 🔒 "+tr("Private","Privat","Privada"):""}</span><span class="note" style="margin:0;font-weight:800">${seatsTxt}</span></div>
     <div class="btitle">${esc(s.title)}</div>${fitsBadge(s)}${sidesHtml?"":""}
     <div class="note" style="margin:0">${langPair(s.language_a,s.language_b)} · ${lvlRange(s.level_min,s.level_max)}</div>
     ${sidesHtml}
-    <div class="bwhen">🗓️ ${fmtWhen(s.starts_at)} <span class="yt">your time</span> · ${s.duration_min} min${hostT?`<small>${esc(hostT)}</small>`:""}</div>${zonesLine(s)}
+    <div class="bwhen">🗓️ ${fmtWhen(s.starts_at)} <span class="yt">${tr("your time","deine Zeit","tu hora")}</span> · ${s.duration_min} min${hostT?`<small>${esc(hostT)}</small>`:""}</div>${zonesLine(s)}
     ${placeLine(s)}
     <div class="note" style="margin:0">${avSmall(s.host_id)} ${esc(s.host_name||"Host")}${relBadges(s.host_reliability)}${rel}${s.host_languages&&s.host_languages.length?` · ${langsLine(s.host_languages)}`:""}</div>
     ${(s.topics||[]).length?`<div class="row" style="margin-top:8px">${s.topics.map(k=>{ const it=INTERESTS.find(x=>x[0]===k); return it?`<span class="feat">${it[1]} ${esc(it[2])}</span>`:""; }).join("")}</div>`:""}
@@ -6316,46 +6350,46 @@ function bCard(s){
     ${qzBtn(s)}
     ${wdBtn(s)}
     ${rsBlock(s)}
-    <div class="row" style="justify-content:center;margin-top:8px">${s.is_host && !started ? `<button class="chip" onclick="hEdit('${id}')">✏️ Edit · Bearbeiten</button>` : ""}${s.is_host ? `<button class="chip" onclick="hDup('${id}')">⧉ Duplicate · Kopieren</button>` : ""}<button class="chip" onclick="sShare('${id}')">🔗 ${s.is_host?"Share invite link":"Share"}</button></div>
-    ${s.is_host && !started ? `<p class="center" style="margin:10px 0 0"><button class="linkbtn dangertext" style="font-size:13px" onclick="bCancel('${id}')">Cancel session · Absagen</button></p>` : ""}
-    ${A.user && !s.is_host ? `<p class="center" style="margin:8px 0 0"><button class="linkbtn" style="font-size:12px;color:var(--muted)" onclick="repOpen('session',null,'${id}')">🚩 Report this session · Melden</button></p>` : ""}
+    <div class="row" style="justify-content:center;margin-top:8px">${s.is_host && !started ? `<button class="chip" onclick="hEdit('${id}')">✏️ ${tr("Edit","Bearbeiten","Editar")}</button>` : ""}${s.is_host ? `<button class="chip" onclick="hDup('${id}')">⧉ ${tr("Duplicate","Kopieren","Duplicar")}</button>` : ""}<button class="chip" onclick="sShare('${id}')">🔗 ${s.is_host?tr("Share invite link","Einladungslink teilen","Compartir enlace"):tr("Share","Teilen","Compartir")}</button></div>
+    ${s.is_host && !started ? `<p class="center" style="margin:10px 0 0"><button class="linkbtn dangertext" style="font-size:13px" onclick="bCancel('${id}')">${tr("Cancel session","Session absagen","Cancelar sesión")}</button></p>` : ""}
+    ${A.user && !s.is_host ? `<p class="center" style="margin:8px 0 0"><button class="linkbtn" style="font-size:12px;color:var(--muted)" onclick="repOpen('session',null,'${id}')">🚩 ${tr("Report this session","Session melden","Reportar esta sesión")}</button></p>` : ""}
   </div>`;
 }
 VIEWS.board = function(){
-  const top=`<div class="topline"><button class="chip" onclick="goHome()">← Back</button><span>Sessions</span></div>`;
+  const top=`<div class="topline"><button class="chip" onclick="goHome()">← ${tr("Back","Zurück","Atrás")}</button><span>${tr("Sessions","Sessions","Sesiones")}</span></div>`;
   const list=B.list;
   const shown=(list||[]).filter(s=>s.visibility!=="private" || isMine(s)).filter(s=>!B.mine || isMine(s)).filter(s=>B.mine || (s.format||"online")===(B.fmt||"online")).filter(s=>B.mine || B.fmt!=="in_person" || !B.city || cfNorm(s.city).includes(cfNorm(B.city).trim())).filter(s=>!B.lang || s.language_a===B.lang || s.language_b===B.lang).filter(s=>!B.fit || FIT.ids.has(s.activity_id));
   return `${top}
-  <h2>${bi("Sessions","Sessions")}</h2>
+  <h2>${tr("Sessions","Sessions","Sesiones")}</h2>
   ${sessTabs(B.fmt==="in_person"?"in_person":"online")}
-  <p class="sub" style="margin-top:0">${bi("Find a language exchange or game, or host your own.","Finde ein Sprachtreffen oder Spiel, oder biete selbst eins an.")}</p>
-  <button class="btn primary" onclick="hOpen()">＋ Host a session · Session anbieten</button>
+  <p class="sub" style="margin-top:0">${tr("Find a language exchange or game, or host your own.","Finde ein Sprachtreffen oder Spiel, oder biete selbst eins an.","Encuentra un intercambio o un juego, u organiza el tuyo.")}</p>
+  <button class="btn primary" onclick="hOpen()">＋ ${tr("Host a session","Session anbieten","Organizar una sesión")}</button>
   ${A.user?(()=>{ const n=(list||[]).filter(isMine).length;
     return `<div class="vsw" role="group" aria-label="Which sessions" style="margin:14px 0 0;width:fit-content">
-      <button class="${!B.mine?"on":""}" aria-pressed="${!B.mine}" onclick="B.mine=false;xr()">All sessions</button>
-      <button class="${B.mine?"on":""}" aria-pressed="${!!B.mine}" onclick="B.mine=true;xr()">⭐ My sessions${n?` (${n})`:""}</button></div>`; })():""}
-  ${B.mine?`<p class="note" style="margin:10px 0 0">⭐ Showing all your sessions, online and in person. · Alle deine Sessions.</p>`:""}
-  ${B.fmt==="in_person"&&!B.mine?`<input type="text" class="cfsearch" style="margin-top:12px" placeholder="🔍 City · Stadt (press Enter)" value="${esc(B.city||"")}" onchange="B.city=this.value;xr()" onkeydown="if(event.key==='Enter'){B.city=this.value;xr();}">`:""}
-  <div class="row" style="margin:14px 0 6px">${[["","🌍 All"]].concat(XLANGS.map(k=>[k,`${T[k].flag} ${esc(T[k].nameEn)}`])).map(([k,l])=>`<button class="chip ${B.lang===k?"on":""}" aria-pressed="${B.lang===k}" onclick="B.lang='${k}';xr()">${l}</button>`).join("")}</div>
-  ${A.user?(FIT.has===false?`<button class="chip" style="margin:0 0 8px" onclick="xOpen()">🗓️ Add your free times to see what fits · Zeiten eintragen</button>`
-    :`<div class="row" style="margin:0 0 8px"><button class="chip ${B.fit?"on":""}" aria-pressed="${!!B.fit}" onclick="B.fit=!B.fit;xr()">🕒 Fits my free time${FIT.ids.size?` (${FIT.ids.size})`:""}</button>
-      <button class="linkbtn" style="font-size:13px" onclick="xOpen()">Edit my free times</button></div>`):""}
-  ${(B.list||[]).length?`<div style="margin:0 0 8px"><button class="chip ${B.exp?"on":""}" onclick="B.exp=!B.exp;xr()" title="Export the session list as a PDF to share">📄 Export as PDF · Als PDF teilen</button></div>`:""}
+      <button class="${!B.mine?"on":""}" aria-pressed="${!B.mine}" onclick="B.mine=false;xr()">${tr("All sessions","Alle Sessions","Todas")}</button>
+      <button class="${B.mine?"on":""}" aria-pressed="${!!B.mine}" onclick="B.mine=true;xr()">⭐ ${tr("My sessions","Meine Sessions","Mis sesiones")}${n?` (${n})`:""}</button></div>`; })():""}
+  ${B.mine?`<p class="note" style="margin:10px 0 0">⭐ ${tr("Showing all your sessions, online and in person.","Alle deine Sessions, online und vor Ort.","Todas tus sesiones, online y presenciales.")}</p>`:""}
+  ${B.fmt==="in_person"&&!B.mine?`<input type="text" class="cfsearch" style="margin-top:12px" placeholder="🔍 ${tr("City (press Enter)","Stadt (Enter drücken)","Ciudad (pulsa Enter)")}" value="${esc(B.city||"")}" onchange="B.city=this.value;xr()" onkeydown="if(event.key==='Enter'){B.city=this.value;xr();}">`:""}
+  <div class="row" style="margin:14px 0 6px">${[["","🌍 "+tr("All","Alle","Todos")]].concat(XLANGS.map(k=>[k,`${T[k].flag} ${esc(lname(k))}`])).map(([k,l])=>`<button class="chip ${B.lang===k?"on":""}" aria-pressed="${B.lang===k}" onclick="B.lang='${k}';xr()">${l}</button>`).join("")}</div>
+  ${A.user?(FIT.has===false?`<button class="chip" style="margin:0 0 8px" onclick="xOpen()">🗓️ ${tr("Add your free times to see what fits","Zeiten eintragen, um Passendes zu sehen","Añade tus horas libres para ver qué encaja")}</button>`
+    :`<div class="row" style="margin:0 0 8px"><button class="chip ${B.fit?"on":""}" aria-pressed="${!!B.fit}" onclick="B.fit=!B.fit;xr()">🕒 ${tr("Fits my free time","Passt zu meiner Zeit","Encaja con mi tiempo")}${FIT.ids.size?` (${FIT.ids.size})`:""}</button>
+      <button class="linkbtn" style="font-size:13px" onclick="xOpen()">${tr("Edit my free times","Zeiten bearbeiten","Editar mis horas libres")}</button></div>`):""}
+  ${(B.list||[]).length?`<div style="margin:0 0 8px"><button class="chip ${B.exp?"on":""}" onclick="B.exp=!B.exp;xr()">📄 ${tr("Export as PDF","Als PDF teilen","Exportar como PDF")}</button></div>`:""}
   ${bExportPanel()}
-  <div class="bbar"><p class="note">🕒 All times are <b>your time</b>, from your phone (${esc(tzName(detectTz()))}). Everyone sees sessions in their own time automatically. · Zeiten in deiner Zeitzone.</p>${bViewSwitch()}</div>
+  <div class="bbar"><p class="note">🕒 ${tr(`All times are <b>your time</b>, from your phone (${esc(tzName(detectTz()))}). Everyone sees sessions in their own time automatically.`,`Alle Zeiten sind <b>deine Zeit</b> (${esc(tzName(detectTz()))}). Alle sehen Sessions automatisch in ihrer eigenen Zeit.`,`Todas las horas son <b>tu hora</b> (${esc(tzName(detectTz()))}). Cada persona ve las sesiones en su propia hora.`)}</p>${bViewSwitch()}</div>
   ${B.err?`<div class="err">${esc(B.err)}</div>`:""}
-  ${list===null ? `<p class="note center" style="margin-top:30px">Loading… · Lädt…</p>`
-    : (!shown.length && B.mine) ? `<div class="card center"><div style="font-size:40px">⭐</div><h3>No sessions yet · Noch keine eigenen Sessions</h3>
-        <p class="note">Sessions you join or host show up here, private ones too.<br><span class="de">Hier erscheinen Sessions, an denen du teilnimmst oder die du leitest.</span></p>
-        <button class="btn secondary" onclick="B.mine=false;xr()">See all sessions · Alle Sessions</button></div>`
-    : (!shown.length && B.fit) ? `<div class="card center"><div style="font-size:40px">🕒</div><h3>Nothing fits your free times yet</h3>
-        <p class="note">Try other days, add more free times, or host a session at a time that suits you.<br><span class="de">Noch nichts zu deinen Zeiten. Biete selbst eine Session an!</span></p>
-        <button class="btn secondary" onclick="B.fit=false;xr()">See all sessions · Alle Sessions</button></div>`
-    : !shown.length ? `<div class="card center"><div style="font-size:40px">🌱</div><h3>No sessions yet · Noch keine Sessions</h3>
-        <p class="note">Be the first! Host a session and others can join.<br><span class="de">Sei die/der Erste und biete eine Session an!</span></p>
-        <button class="btn secondary" onclick="hOpen()">＋ Host a session · Session anbieten</button></div>`
+  ${list===null ? `<p class="note center" style="margin-top:30px">${tr("Loading…","Lädt…","Cargando…")}</p>`
+    : (!shown.length && B.mine) ? `<div class="card center"><div style="font-size:40px">⭐</div><h3>${tr("No sessions yet","Noch keine eigenen Sessions","Aún no tienes sesiones")}</h3>
+        <p class="note">${tr("Sessions you join or host show up here, private ones too.","Hier erscheinen Sessions, an denen du teilnimmst oder die du leitest, auch private.","Aquí aparecen las sesiones a las que te unes u organizas, también las privadas.")}</p>
+        <button class="btn secondary" onclick="B.mine=false;xr()">${tr("See all sessions","Alle Sessions","Ver todas las sesiones")}</button></div>`
+    : (!shown.length && B.fit) ? `<div class="card center"><div style="font-size:40px">🕒</div><h3>${tr("Nothing fits your free times yet","Noch nichts zu deinen Zeiten","Aún nada encaja con tus horas")}</h3>
+        <p class="note">${tr("Try other days, add more free times, or host a session at a time that suits you.","Probier andere Tage, trag mehr Zeiten ein oder biete selbst eine Session an.","Prueba otros días, añade más horas libres u organiza una sesión a tu hora.")}</p>
+        <button class="btn secondary" onclick="B.fit=false;xr()">${tr("See all sessions","Alle Sessions","Ver todas las sesiones")}</button></div>`
+    : !shown.length ? `<div class="card center"><div style="font-size:40px">🌱</div><h3>${tr("No sessions yet","Noch keine Sessions","Aún no hay sesiones")}</h3>
+        <p class="note">${tr("Be the first! Host a session and others can join.","Sei die/der Erste und biete eine Session an!","¡Sé el primero! Organiza una sesión y otros podrán unirse.")}</p>
+        <button class="btn secondary" onclick="hOpen()">＋ ${tr("Host a session","Session anbieten","Organizar una sesión")}</button></div>`
     : bListHtml(shown)}
-  <button class="chip" style="display:block;margin:12px auto" onclick="B.list=null;xr();bLoad()">🔄 Refresh · Aktualisieren</button>
+  <button class="chip" style="display:block;margin:12px auto" onclick="B.list=null;xr();bLoad()">🔄 ${tr("Refresh","Aktualisieren","Actualizar")}</button>
   ${legalLinks()}`;
 };
 
@@ -6750,7 +6784,7 @@ function rCard(s){
       <ul class="rwhy">${s.reasons.map(r=>`<li>✅ ${esc(r)}</li>`).join("")}</ul>`:""}
     ${(s.topics||[]).length?`<div class="row" style="margin-top:10px">${s.topics.map(k=>{ const it=INTERESTS.find(x=>x[0]===k); return it?`<span class="feat">${it[1]} ${esc(it[2])}</span>`:""; }).join("")}</div>`:""}
     ${q?`<div class="rask"><b>💬 Try asking · Frag doch mal</b><span dir="${T[q.lang]?T[q.lang].dir:"ltr"}" lang="${q.lang}">${esc(q.t)}</span></div>`:""}
-    <div class="bwhen">🗓️ ${fmtWhen(s.starts_at)} <span class="yt">your time</span> · ${s.duration_min} min${hostT?`<small>${esc(hostT)}</small>`:""}</div>${zonesLine(s)}
+    <div class="bwhen">🗓️ ${fmtWhen(s.starts_at)} <span class="yt">${tr("your time","deine Zeit","tu hora")}</span> · ${s.duration_min} min${hostT?`<small>${esc(hostT)}</small>`:""}</div>${zonesLine(s)}
     ${placeLine(s)}
     <button class="btn ${full?"secondary":"primary"}" onclick="rAct('pt_join_activity','${id}')" ${B.busy?"disabled":""}>${label}</button>
     <div class="row" style="justify-content:center;margin-top:8px">
@@ -6790,11 +6824,11 @@ const ICO = {
   logo:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 15c3-5 15-5 18 0"/><path d="M6 15v4M18 15v4"/><circle cx="8" cy="7" r="2"/><circle cx="16" cy="7" r="2"/></svg>'
 };
 const NAV_ITEMS = [
-  ["home","Home","Start","goHome()"],
-  ["sessions","Sessions","Sessions","bOpen()"],
-  ["games","Games","Spiele","go('games')"],
-  ["shop","Shop","Shop","shOpen()"],
-  ["profile","Profile","Profil","A.ret='home';A.err='';A.msg='';go('account')"]
+  ["home","Home","Start","goHome()","Inicio"],
+  ["sessions","Sessions","Sessions","bOpen()","Sesiones"],
+  ["games","Games","Spiele","go('games')","Juegos"],
+  ["shop","Shop","Shop","shOpen()","Tienda"],
+  ["profile","Profile","Profil","A.ret='home';A.err='';A.msg='';go('account')","Perfil"]
 ];
 NAV_TAB.shop="shop"; NAV_TAB.shopedit="shop"; NAV_TAB.shopitem="shop"; WIDE.shopitem="md"; NAV_TAB.cafes="sessions"; NAV_TAB.cafeedit="sessions"; NAV_TAB.chat="sessions"; WIDE.chat="md"; NAV_TAB.blocks="profile"; WIDE.blocks="md"; NAV_TAB.partners="sessions"; WIDE.partners="xl"; NAV_TAB.partner="sessions"; WIDE.partner="md"; NAV_TAB.lounges="sessions"; NAV_TAB.lounge="sessions"; WIDE.lounges="xl"; WIDE.lounge="md"; NAV_TAB.reports="profile"; WIDE.reports="md";
 WIDE.cafes="xl"; WIDE.cafeedit="md";
@@ -6815,12 +6849,12 @@ function navSync(){
   if(!n){ n=document.createElement("nav"); n.id="bnav"; n.setAttribute("aria-label","Main · Hauptmenü"); document.body.appendChild(n); }
   if(!t){ t=document.createElement("header"); t.id="tnav"; document.body.appendChild(t); }
   cl.add("has-nav");
-  n.innerHTML = NAV_ITEMS.map(([k,en,de,fn])=>`<button class="${tab===k?"on":""}" ${tab===k?'aria-current="page"':""} onclick="${fn}">${ICO[k]}${en}<small>${de}</small></button>`).join("");
+  n.innerHTML = NAV_ITEMS.map(([k,en,de,fn,es])=>`<button class="${tab===k?"on":""}" ${tab===k?'aria-current="page"':""} onclick="${fn}">${ICO[k]}${tr(en,de,es)}</button>`).join("");
   if(A.user){ nbStart(); nbFresh(); } else if(NB.timer){ clearInterval(NB.timer); NB.timer=null; NB.list=[]; NB.unread=0; }
   const me = A.user ? `${bellBtn()}<button class="tme" aria-label="Profile" onclick="${NAV_ITEMS[4][3]}">${A.profile&&A.profile.avatar_url?`<img src="${esc(A.profile.avatar_url)}" alt="">`:esc((meName()||"?").charAt(0).toUpperCase())}</button>`
-                    : `<button class="tsign" onclick="${NAV_ITEMS[4][3]}">Sign in · Anmelden</button>`;
+                    : `<button class="tsign" onclick="${NAV_ITEMS[4][3]}">${tr("Sign in","Anmelden","Entrar")}</button>`;
   t.innerHTML = `<div class="tin"><button class="tlogo" onclick="goHome()"><span class="plogo">${ICO.logo}</span>PonteTalk</button>
-    <nav class="tlinks" aria-label="Main">${NAV_ITEMS.slice(0,4).map(([k,en,de,fn])=>`<button class="${tab===k?"on":""}" ${tab===k?'aria-current="page"':""} onclick="${fn}">${ICO[k]}${en}</button>`).join("")}</nav>${me}</div>`;
+    <nav class="tlinks" aria-label="Main">${NAV_ITEMS.slice(0,4).map(([k,en,de,fn,es])=>`<button class="${tab===k?"on":""}" ${tab===k?'aria-current="page"':""} onclick="${fn}">${ICO[k]}${tr(en,de,es)}</button>`).join("")}</nav>${me}</div>`;
 }
 
 
@@ -7297,7 +7331,7 @@ async function pgLoad(){
 async function pgSet(n){
   if(PG.busy) return; PG.busy=true; const old=PG.goal; PG.goal=n; PG.edit=false; xr();
   try{ const { error } = await A.sb.from("practice_goals").upsert({ user_id:A.user.id, days_per_week:n, updated_at:new Date().toISOString() },{ onConflict:"user_id" }); if(error) throw error;
-    bToast(`🎯 Goal: ${n} day${n===1?"":"s"} a week · Ziel gespeichert`); }
+    bToast("🎯 "+tr(`Goal: ${n} day${n===1?"":"s"} a week`,`Ziel: ${n} Tag${n===1?"":"e"} pro Woche`,`Meta: ${n} día${n===1?"":"s"} a la semana`)); }
   catch(e){ PG.goal=old; bToast(bErr(e)); }
   PG.busy=false; xr();
 }
@@ -7355,7 +7389,7 @@ function codesPair(a,b){ const c=k=>T[k]?T[k].code:String(k).toUpperCase(); retu
 function inDays(iso){
   const d0=new Date(); d0.setHours(0,0,0,0); const d1=new Date(iso); d1.setHours(0,0,0,0);
   const n=Math.round((d1-d0)/864e5);
-  return n<=0?"today · heute":n===1?"tomorrow · morgen":`in ${n} days · in ${n} Tagen`;
+  return n<=0?tr("today","heute","hoy"):n===1?tr("tomorrow","morgen","mañana"):tr(`in ${n} days`,`in ${n} Tagen`,`en ${n} días`);
 }
 function icsFor(s){
   const f=d=>new Date(d).toISOString().replace(/[-:]/g,"").replace(/\.\d{3}/,"");
@@ -7381,49 +7415,63 @@ function addToCal(id){
 }
 function nextCard(){
   const s=nextSession();
-  if(D.board===null) return `<p class="note" style="margin:0">Loading… · Lädt…</p>`;
-  if(!s) return `<div class="dnext"><div style="flex:1;min-width:180px"><p class="dlabel">Your next session</p>
-      <p style="margin:2px 0 0;font-weight:800;font-size:17px">Nothing booked yet · Noch nichts gebucht</p>
-      <p class="note" style="margin:2px 0 0">Pick a session below, or host your own.</p></div>
-      <div class="dbtns"><button class="btn primary" onclick="bOpen()">Find a session · Session finden</button></div></div>`;
-  const d=new Date(s.starts_at), wd=d.toLocaleDateString("en-GB",{weekday:"short"}).toUpperCase();
+  if(D.board===null) return `<p class="note" style="margin:0">${tr("Loading…","Lädt…","Cargando…")}</p>`;
+  if(!s) return `<div class="dnext"><div style="flex:1;min-width:180px"><p class="dlabel">${tr("Your next session","Deine nächste Session","Tu próxima sesión")}</p>
+      <p style="margin:2px 0 0;font-weight:800;font-size:17px">${tr("Nothing booked yet","Noch nichts gebucht","Aún no tienes nada reservado")}</p>
+      <p class="note" style="margin:2px 0 0">${tr("Pick a session below, or host your own.","Wähl unten eine Session oder leite selbst eine.","Elige una sesión abajo u organiza la tuya.")}</p></div>
+      <div class="dbtns"><button class="btn primary" onclick="bOpen()">${tr("Find a session","Session finden","Buscar una sesión")}</button></div></div>`;
+  const d=new Date(s.starts_at), wd=d.toLocaleDateString(uiLoc(),{weekday:"short"}).toUpperCase();
   const t1=d.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}), t2=new Date(d.getTime()+s.duration_min*60000).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
   const taken=s.seats-s.seats_open, nowMs=Date.now(), st=d.getTime();
   const roomNow = s.type==="game" && nowMs>=st-30*60000 && nowMs<st+s.duration_min*60000;
-  const role = s.is_host ? "You're hosting" : s.my_status==="offered" ? "🎉 Seat offered: accept it!" : "You're in";
+  const role = s.is_host ? tr("You're hosting","Du leitest","Eres el anfitrión") : s.my_status==="offered" ? tr("🎉 Seat offered: accept it!","🎉 Platz frei: annehmen!","🎉 Plaza ofrecida: ¡acéptala!") : tr("You're in","Du bist dabei","Estás dentro");
   return `<div class="dnext">
     <div class="ddate"><i>${wd}</i><b>${d.getDate()}</b></div>
-    <div style="flex:1;min-width:180px"><p class="dlabel">Your next session · ${inDays(s.starts_at)}</p>
+    <div style="flex:1;min-width:180px"><p class="dlabel">${tr("Your next session","Deine nächste Session","Tu próxima sesión")} · ${inDays(s.starts_at)}</p>
       <p style="margin:2px 0;font-weight:800;font-size:17px">${esc(s.title)}</p>
-      <p class="note" style="margin:0">${t1}–${t2} · ${codesPair(s.language_a,s.language_b)} · ${taken} of ${s.seats} joined · ${role}</p></div>
+      <p class="note" style="margin:0">${t1}–${t2} · ${codesPair(s.language_a,s.language_b)} · ${tr(`${taken} of ${s.seats} joined`,`${taken} von ${s.seats} dabei`,`${taken} de ${s.seats} apuntados`)} · ${role}</p></div>
     <div class="dbtns">
       ${ciBtn(s,true)}
       ${s.format==="in_person" && s.my_status!=="offered" ? pMapBtn(s,true) : ""}
-      ${VL[s.activity_id] && s.my_status!=="offered" ? vBtn(s.activity_id, nowMs>=st-15*60000, s).replace("btn ","btn qbtn ").replace(" · Videoanruf","") : ""}
-      ${roomNow ? `<button class="btn primary" onclick="bRoom('${s.activity_id}',${!!s.is_host})">🎮 ${s.is_host?"Open":"Enter"} game room</button>`
-                : `<button class="btn secondary qbtn" onclick="addToCal('${s.activity_id}')">${ICO.cal} Add to calendar</button>`}
-      <button class="btn ${roomNow?"secondary":"primary"}" style="${roomNow?"":"background:var(--plum);box-shadow:none"}" onclick="bOpen()">${s.is_host?"Manage":"Details"}</button>
+      ${VL[s.activity_id] && s.my_status!=="offered" ? vBtn(s.activity_id, nowMs>=st-15*60000, s).replace("btn ","btn qbtn ") : ""}
+      ${roomNow ? `<button class="btn primary" onclick="bRoom('${s.activity_id}',${!!s.is_host})">🎮 ${s.is_host?tr("Open game room","Spielraum öffnen","Abrir sala de juego"):tr("Enter game room","Zum Spielraum","Entrar a la sala de juego")}</button>`
+                : `<button class="btn secondary qbtn" onclick="addToCal('${s.activity_id}')">${ICO.cal} ${tr("Add to calendar","Zum Kalender","Añadir al calendario")}</button>`}
+      <button class="btn ${roomNow?"secondary":"primary"}" style="${roomNow?"":"background:var(--plum);box-shadow:none"}" onclick="bOpen()">${s.is_host?tr("Manage","Verwalten","Gestionar"):tr("Details","Details","Detalles")}</button>
     </div>
-    <button class="linkbtn" onclick="sShare('${s.activity_id}')">🔗 ${s.is_host?"Share invite link":"Share with a friend"}</button>
+    <button class="linkbtn" onclick="sShare('${s.activity_id}')">🔗 ${s.is_host?tr("Share invite link","Einladungslink teilen","Compartir enlace de invitación"):tr("Share with a friend","Mit Freunden teilen","Compartir con un amigo")}</button>
     ${s.my_status!=="offered" && chWindow(s) ? `<button class="linkbtn" style="margin-left:14px" onclick="chOpen('${s.activity_id}')">💬 Chat${chBadge(s.activity_id)}</button>` : ""}
     ${(()=>{ const n=(D.board||[]).filter(x=>x.is_host || ["joined","offered"].includes(x.my_status)).length;
-       return n>1 ? `<button class="linkbtn" style="margin-left:14px" onclick="bOpenMine()">⭐ All my sessions (${n})</button>` : ""; })()}</div>`;
+       return n>1 ? `<button class="linkbtn" style="margin-left:14px" onclick="bOpenMine()">⭐ ${tr("All my sessions","Alle meine Sessions","Todas mis sesiones")} (${n})</button>` : ""; })()}</div>`;
+}
+/* Match reasons come from the database in English */
+function whyTr(w){
+  w=String(w||""); if(!w) return "";
+  if(w.startsWith("You each teach")) return tr("You teach each other","Ihr lernt voneinander","Os enseñáis mutuamente");
+  if(UI==="en") return w;
+  const DAYS={Monday:["Montag","lunes"],Tuesday:["Dienstag","martes"],Wednesday:["Mittwoch","miércoles"],Thursday:["Donnerstag","jueves"],Friday:["Freitag","viernes"],Saturday:["Samstag","sábado"],Sunday:["Sonntag","domingo"]};
+  let m;
+  if((m=w.match(/^Fits your (\w+) free time/))){ const d=DAYS[m[1]]||[m[1],m[1]]; return tr("",`Passt zu deiner freien Zeit am ${d[0]}`,`Encaja con tu tiempo libre del ${d[1]}`); }
+  if(w==="Fits your level") return tr("","Passt zu deinem Niveau","Encaja con tu nivel");
+  if(w.startsWith("Host speaks")) return tr("","Der Host spricht die Sprache, die du lernst","El anfitrión habla el idioma que aprendes");
+  if((m=w.match(/^Host shows up (\d+)%/))) return tr("",`Host erscheint zu ${m[1]} %`,`El anfitrión asiste el ${m[1]} %`);
+  if((m=w.match(/^Shared interests: (.+)/))) return tr("",`Gemeinsame Interessen: ${m[1]}`,`Intereses en común: ${m[1]}`);
+  return w;
 }
 function sCard(s){
   const g=s.type==="game"?GAMES_BOARD.find(x=>x[0]===s.game):null, full=s.seats_open<=0;
   const why=(s.reasons||[])[0]||"";
-  const short = why.startsWith("You each teach") ? "You teach each other" : why.replace(/^Fits your /,"Fits your ");
-  const btn = full ? `Join waitlist` : s.join_mode==="approval" ? "Request" : "Sign up";
+  const short = whyTr(why);
+  const btn = full ? tr("Join waitlist","Auf die Warteliste","Lista de espera") : s.join_mode==="approval" ? tr("Request","Anfragen","Solicitar") : tr("Sign up","Anmelden","Apuntarme");
   return `<div class="scard ${s.perfect_match?"perfect":""}">
-    <span class="stag ${g&&!s.perfect_match?"game":""}">${s.perfect_match?"Perfect match":g?"Game":"Conversation"}</span>
+    <span class="stag ${g&&!s.perfect_match?"game":""}">${s.perfect_match?tr("Perfect match","Perfekter Treffer","Encaje perfecto"):g?tr("Game","Spiel","Juego"):tr("Conversation","Gespräch","Conversación")}</span>
     <p class="scodes">${codesPair(s.language_a,s.language_b)}</p>
     <button class="stitle" onclick="${A.user?`dOpen('${s.activity_id}')`:"bOpen()"}" aria-label="Details: ${esc(s.title)}">${esc(s.title)}</button>
-    <p class="swhen">${fmtWhen(s.starts_at)} <span class="yt">your time</span></p>${fmtHostTime(s.starts_at,s.host_time_zone)?`<p class="note" style="margin:0 0 4px;font-size:13px">${esc(fmtHostTime(s.starts_at,s.host_time_zone))}</p>`:""}
+    <p class="swhen">${fmtWhen(s.starts_at)} <span class="yt">${tr("your time","deine Zeit","tu hora")}</span></p>${fmtHostTime(s.starts_at,s.host_time_zone)?`<p class="note" style="margin:0 0 4px;font-size:13px">${esc(fmtHostTime(s.starts_at,s.host_time_zone))}</p>`:""}
     ${(()=>{ const b=bRowOf(s); return b&&b.format==="in_person"?`<p class="note" style="margin:0">📍 ${esc(b.place_name||"")}, ${esc(b.city||"")}</p>`:""; })()}
     ${short?`<p class="swhy">${esc(short)}</p>`:""}
-    <p class="sseats ${full?"full":""}">${full?`Full${s.waitlisted?` · you'd be #${s.waitlisted+1}`:""}`:`${s.seats_open} seat${s.seats_open>1?"s":""} left`}</p>
+    <p class="sseats ${full?"full":""}">${full?`${tr("Full","Voll","Completa")}${s.waitlisted?" · "+tr(`you'd be #${s.waitlisted+1}`,`du wärst Nr. ${s.waitlisted+1}`,`serías el n.º ${s.waitlisted+1}`):""}`:tr(`${s.seats_open} seat${s.seats_open>1?"s":""} left`,`${s.seats_open} Platz${s.seats_open>1?"e":""} frei`,`${s.seats_open} plaza${s.seats_open>1?"s":""} libre${s.seats_open>1?"s":""}`)}</p>
     ${A.user ? `<button class="btn ${full?"secondary":"primary"}" onclick="rAct('pt_join_activity','${s.activity_id}')" ${B.busy?"disabled":""}>${btn}</button>`
-             : `<button class="btn secondary" onclick="A.ret='board';A.err='';A.msg='';go('account')">Sign in to join</button>`}
+             : `<button class="btn secondary" onclick="A.ret='board';A.err='';A.msg='';go('account')">${tr("Sign in to join","Zum Beitreten anmelden","Entra para unirte")}</button>`}
   </div>`;
 }
 function dOpen(id){
@@ -7439,68 +7487,70 @@ function dOpen(id){
   box.querySelectorAll("button").forEach(b=>{ if(b.id!=="dClose") b.addEventListener("click",()=>setTimeout(()=>box.remove(),50)); });
 }
 function weekCard(){
-  const w=D.week, g=pgStats();
-  if(!w && !g) return `<div class="card"><h3>My week · Meine Woche</h3><p class="note" style="margin:0">Loading… · Lädt…</p></div>`;
+  const w=D.week, g=pgStats(), H=tr("My week","Meine Woche","Mi semana");
+  if(!w && !g) return `<div class="card"><h3>${H}</h3><p class="note" style="margin:0">${tr("Loading…","Lädt…","Cargando…")}</p></div>`;
   if(!g){
     const pct=Math.min(100,Math.round(100*w.count/w.goal));
-    return `<div class="card"><h3 style="margin-bottom:2px">My week · Meine Woche</h3>
-      <p class="note" style="margin:0 0 10px"><b style="color:var(--ink)">${w.count}</b> session${w.count===1?"":"s"} this week</p>
+    return `<div class="card"><h3 style="margin-bottom:2px">${H}</h3>
+      <p class="note" style="margin:0 0 10px">${tr(`<b style="color:var(--ink)">${w.count}</b> session${w.count===1?"":"s"} this week`,`<b style="color:var(--ink)">${w.count}</b> Session${w.count===1?"":"s"} diese Woche`,`<b style="color:var(--ink)">${w.count}</b> sesi${w.count===1?"ón":"ones"} esta semana`)}</p>
       <div class="wbar"><div style="width:${pct}%"></div></div></div>`;
   }
-  const L=["M","T","W","T","F","S","S"], goal=PG.goal, pct=Math.min(100,Math.round(100*g.done/goal));
+  const L=tr("M T W T F S S","M D M D F S S","L M X J V S D").split(" "), goal=PG.goal, pct=Math.min(100,Math.round(100*g.done/goal));
   const dot=(k,i)=>g.days.has(k)?"done":(w&&w.days[i]==="plan"?"plan":"");
-  const bits=[]; const T2=g.tot;
-  if(T2.session) bits.push(`🗣️ ${T2.session} session${T2.session===1?"":"s"}`);
-  if(T2.cards) bits.push(`🃏 ${T2.cards} card${T2.cards===1?"":"s"}`);
-  if(T2.test) bits.push(`📝 ${T2.test} test${T2.test===1?"":"s"}`);
+  const bits=[]; const T2=g.tot, pl=(n,a,b)=>n===1?a:b;
+  if(T2.session) bits.push(`🗣️ ${T2.session} ${tr(pl(T2.session,"session","sessions"),pl(T2.session,"Session","Sessions"),pl(T2.session,"sesión","sesiones"))}`);
+  if(T2.cards) bits.push(`🃏 ${T2.cards} ${tr(pl(T2.cards,"card","cards"),pl(T2.cards,"Karte","Karten"),pl(T2.cards,"tarjeta","tarjetas"))}`);
+  if(T2.test) bits.push(`📝 ${T2.test} ${tr(pl(T2.test,"test","tests"),pl(T2.test,"Test","Tests"),pl(T2.test,"test","tests"))}`);
   if(T2.echo) bits.push(`🎙️ ${T2.echo} Echo`);
-  const left=goal-g.done, todayDone=g.days.has(g.today);
-  const msg = g.done>=goal ? `<b style="color:var(--ink)">${g.done} day${g.done===1?"":"s"}</b> practised · goal of ${goal} reached! 🎉`
-            : `<b style="color:var(--ink)">${g.done} of ${goal} days</b> practised · ${left} to go${todayDone?"":" · practise today?"}`;
+  const left=goal-g.done, todayDone=g.days.has(g.today), B=x=>`<b style="color:var(--ink)">${x}</b>`;
+  const msg = g.done>=goal
+    ? tr(`${B(g.done+" day"+(g.done===1?"":"s"))} practised · goal of ${goal} reached! 🎉`,`${B(g.done+" Tag"+(g.done===1?"":"e"))} geübt · Ziel von ${goal} erreicht! 🎉`,`${B(g.done+" día"+(g.done===1?"":"s"))} de práctica · ¡meta de ${goal} cumplida! 🎉`)
+    : tr(`${B(g.done+" of "+goal+" days")} practised · ${left} to go`,`${B(g.done+" von "+goal+" Tagen")} geübt · noch ${left}`,`${B(g.done+" de "+goal+" días")} de práctica · faltan ${left}`)
+      + (todayDone?"":" · "+tr("practise today?","heute üben?","¿practicas hoy?"));
   return `<div class="card"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px">
-      <h3 style="margin-bottom:2px">My week · Meine Woche</h3>
-      <button class="linkbtn" style="white-space:nowrap;flex:none" onclick="PG.edit=!PG.edit;xr()">${PG.edit?"Close":"🎯 "+goal+"/week"}</button></div>
-    ${PG.edit?`<div style="margin:6px 0 10px"><p class="note" style="margin:0 0 6px">How many days a week do you want to practise? · Wie viele Tage pro Woche?</p>
+      <h3 style="margin-bottom:2px">${H}</h3>
+      <button class="linkbtn" style="white-space:nowrap;flex:none" onclick="PG.edit=!PG.edit;xr()">${PG.edit?tr("Close","Schließen","Cerrar"):"🎯 "+goal+tr("/week","/Woche","/semana")}</button></div>
+    ${PG.edit?`<div style="margin:6px 0 10px"><p class="note" style="margin:0 0 6px">${tr("How many days a week do you want to practise?","Wie viele Tage pro Woche möchtest du üben?","¿Cuántos días a la semana quieres practicar?")}</p>
       <div class="row">${[1,2,3,4,5,6,7].map(n=>`<button class="chip ${n===goal?"on":""}" onclick="pgSet(${n})">${n}</button>`).join("")}</div></div>`:""}
     <p class="note" style="margin:0 0 10px">${msg}</p>
-    <div class="wbar" role="img" aria-label="${g.done} of ${goal} practice days this week"><div style="width:${pct}%"></div></div>
+    <div class="wbar" role="img" aria-label="${g.done} / ${goal}"><div style="width:${pct}%"></div></div>
     <div class="wdots">${g.week.map((k,i)=>`<span><i class="${dot(k,i)}${k===g.today?" today":""}"></i>${L[i]}</span>`).join("")}</div>
-    ${bits.length?`<p class="note" style="margin:10px 0 0">This week · Diese Woche: ${bits.join(" · ")}</p>`
-      :`<p class="note" style="margin:10px 0 0">Sessions, flashcards, test practice and Echo all count. · Alles zählt.</p>`}
-    ${g.ds>1||g.wk>1?`<p class="note" style="margin:4px 0 0">${g.ds>1?`🔥 ${g.ds} days in a row`:""}${g.ds>1&&g.wk>1?" · ":""}${g.wk>1?`🏆 goal met ${g.wk} weeks in a row`:""}</p>`:""}
+    ${bits.length?`<p class="note" style="margin:10px 0 0">${tr("This week","Diese Woche","Esta semana")}: ${bits.join(" · ")}</p>`
+      :`<p class="note" style="margin:10px 0 0">${tr("Sessions, flashcards, test practice and Echo all count.","Sessions, Karteikarten, Testübungen und Echo zählen alle.","Sesiones, tarjetas, práctica de exámenes y Echo cuentan.")}</p>`}
+    ${g.ds>1||g.wk>1?`<p class="note" style="margin:4px 0 0">${g.ds>1?"🔥 "+tr(`${g.ds} days in a row`,`${g.ds} Tage in Folge`,`${g.ds} días seguidos`):""}${g.ds>1&&g.wk>1?" · ":""}${g.wk>1?"🏆 "+tr(`goal met ${g.wk} weeks in a row`,`Ziel ${g.wk} Wochen in Folge erreicht`,`meta cumplida ${g.wk} semanas seguidas`):""}</p>`:""}
   </div>`;
 }
 function quickCard(){
-  return `<div class="card"><h3>Quick start · Schnellstart</h3>
-    <button class="btn qbtn" style="background:var(--plum);color:#fff" onclick="hOpen()">${ICO.plus} Host a session</button>
-    <button class="btn qbtn" style="background:var(--teal);color:#fff" onclick="wpOpen(null)">🎯 Practise my words</button>
-    <button class="btn secondary qbtn" onclick="luOpen()">🛋️ Chat in a lounge <span data-lupres-all>${lpAll()}</span></button>
-    <button class="btn secondary qbtn" onclick="ptOpen()">👥 Find a partner <span data-ptcount>${ptCountHtml()}</span></button>
-    <button class="btn secondary qbtn" onclick="cfOpen()">☕ Find a language café</button>
-    <button class="btn secondary qbtn" onclick="vcOpen()">🃏 Vocabulary flashcards</button>
-    <button class="btn secondary qbtn" onclick="exOpen()">🇩🇪 Leben in Deutschland test</button>
-    <button class="btn secondary qbtn" onclick="dtOpen()">🎓 German exam A2–B1 (DTZ)</button>
-    <button class="btn secondary qbtn" onclick="shOpen()">📘 Free resources</button>
-    <button class="btn secondary qbtn" onclick="go('games')">${ICO.play} Play a game now</button></div>`;
+  return `<div class="card"><h3>${tr("Quick start","Schnellstart","Inicio rápido")}</h3>
+    <button class="btn qbtn" style="background:var(--plum);color:#fff" onclick="hOpen()">${ICO.plus} ${tr("Host a session","Session anbieten","Organizar una sesión")}</button>
+    <button class="btn qbtn" style="background:var(--teal);color:#fff" onclick="wpOpen(null)">🎯 ${tr("Practise my words","Meine Wörter üben","Practicar mis palabras")}</button>
+    <button class="btn secondary qbtn" onclick="luOpen()">🛋️ ${tr("Chat in a lounge","In einer Lounge chatten","Chatear en una sala")} <span data-lupres-all>${lpAll()}</span></button>
+    <button class="btn secondary qbtn" onclick="ptOpen()">👥 ${tr("Find a partner","Partner finden","Buscar compañero")} <span data-ptcount>${ptCountHtml()}</span></button>
+    <button class="btn secondary qbtn" onclick="cfOpen()">☕ ${tr("Find a language café","Sprachcafé finden","Buscar un café de idiomas")}</button>
+    <button class="btn secondary qbtn" onclick="vcOpen()">🃏 ${tr("Vocabulary flashcards","Vokabel-Karteikarten","Tarjetas de vocabulario")}</button>
+    <button class="btn secondary qbtn" onclick="exOpen()">🇩🇪 ${tr("Leben in Deutschland test","Leben-in-Deutschland-Test","Test Leben in Deutschland")}</button>
+    <button class="btn secondary qbtn" onclick="dtOpen()">🎓 ${tr("German exam A2–B1 (DTZ)","Deutschprüfung A2–B1 (DTZ)","Examen de alemán A2–B1 (DTZ)")}</button>
+    <button class="btn secondary qbtn" onclick="shOpen()">📘 ${tr("Free resources","Kostenlose Materialien","Recursos gratis")}</button>
+    <button class="btn secondary qbtn" onclick="go('games')">${ICO.play} ${tr("Play a game now","Jetzt ein Spiel spielen","Jugar ahora")}</button></div>`;
 }
 function homeDash(){
-  const name=meName()||"there";
+  const name=meName()||tr("there","du","");
   let sugg;
-  if(R.list===null) sugg=`<p class="note">Finding sessions for you… · Suche passende Sessions…</p>`;
-  else if(R.noProfile) sugg=`<div class="card center"><h3 style="margin:4px 0">Get matched with language partners</h3>
-      <p class="note">Add your languages and free times, and we'll suggest sessions for you.<br><span class="de">Trage Sprachen und Zeiten ein, dann schlagen wir dir Sessions vor.</span></p>
-      <button class="btn secondary" onclick="xOpen()">Set up my exchange profile</button></div>`;
-  else if(!rVisible().length) sugg=`<div class="card center"><h3 style="margin:4px 0">No matches right now · Gerade nichts Passendes</h3>
-      <p class="note">Host your own session and we'll show it to matching learners.</p>
-      <button class="btn secondary" onclick="hOpen()">Host a session · Session anbieten</button></div>`;
+  if(R.list===null) sugg=`<p class="note">${tr("Finding sessions for you…","Suche passende Sessions…","Buscando sesiones para ti…")}</p>`;
+  else if(R.noProfile) sugg=`<div class="card center"><h3 style="margin:4px 0">${tr("Get matched with language partners","Finde passende Sprachpartner","Encuentra compañeros de idiomas")}</h3>
+      <p class="note">${tr("Add your languages and free times, and we'll suggest sessions for you.","Trage Sprachen und Zeiten ein, dann schlagen wir dir Sessions vor.","Añade tus idiomas y horas libres y te sugeriremos sesiones.")}</p>
+      <button class="btn secondary" onclick="xOpen()">${tr("Set up my exchange profile","Tandem-Profil einrichten","Crear mi perfil de intercambio")}</button></div>`;
+  else if(!rVisible().length) sugg=`<div class="card center"><h3 style="margin:4px 0">${tr("No matches right now","Gerade nichts Passendes","Ahora no hay coincidencias")}</h3>
+      <p class="note">${tr("Host your own session and we'll show it to matching learners.","Leite eine eigene Session, wir zeigen sie passenden Lernenden.","Organiza tu propia sesión y la mostraremos a quien encaje.")}</p>
+      <button class="btn secondary" onclick="hOpen()">${tr("Host a session","Session anbieten","Organizar una sesión")}</button></div>`;
   else sugg=`<div class="dsg">${rVisible().slice(0,4).map(sCard).join("")}</div>
-      <p class="note" style="margin:6px 0 0">Tap a title for details · <button class="linkbtn" onclick="bOpen()">See all sessions</button></p>`;
-  const learn=(R.mine||[]).filter(m=>m.role==="learning").map(m=>T[m.code]?T[m.code].nameEn:m.code);
-  const speak=(R.mine||[]).filter(m=>m.role!=="learning").map(m=>T[m.code]?T[m.code].nameEn:m.code);
+      <p class="note" style="margin:6px 0 0">${tr("Tap a title for details","Tippe auf einen Titel für Details","Toca un título para ver detalles")} · <button class="linkbtn" onclick="bOpen()">${tr("See all sessions","Alle Sessions","Ver todas las sesiones")}</button></p>`;
+  const learn=(R.mine||[]).filter(m=>m.role==="learning").map(m=>T[m.code]?lname(m.code):m.code);
+  const speak=(R.mine||[]).filter(m=>m.role!=="learning").map(m=>T[m.code]?lname(m.code):m.code);
   return `<div class="dash">
     <div style="min-width:0;display:flex;flex-direction:column;gap:18px">
-      <div class="card" style="margin:0"><div class="dhead"><h1 class="dhi">Hi ${esc(name)}</h1>${bellBtn()}</div>
-        <p class="sub" style="margin:2px 0 14px">Here's what's next for you. · Das steht als Nächstes an.</p>${nextCard()}</div>
+      <div class="card" style="margin:0"><div class="dhead"><h1 class="dhi">${tr("Hi","Hallo","Hola")} ${esc(name)}</h1>${bellBtn()}</div>
+        <p class="sub" style="margin:2px 0 14px">${tr("Here's what's next for you.","Das steht als Nächstes an.","Esto es lo próximo para ti.")}</p>${nextCard()}</div>
       ${holdCard()}
       ${weekCard().replace('<div class="card">','<div class="card" style="margin:0">')}
       ${acCard()}
@@ -7508,8 +7558,8 @@ function homeDash(){
       ${avNudge()}
       ${invCard()}
       <div><div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px">
-        <h2 style="margin:0;font-size:20px">Suggested for you · Für dich</h2>
-        ${(R.mine||[]).length?`<span class="note" style="margin:0;font-size:14px">${speak.length?`I speak <b>${esc(speak.join(", "))}</b> · `:""}${learn.length?`I practise <b>${esc(learn.join(", "))}</b> · `:""}<button class="linkbtn" onclick="xOpen()">Change</button></span>`:""}
+        <h2 style="margin:0;font-size:20px">${tr("Suggested for you","Für dich","Sugerencias para ti")}</h2>
+        ${(R.mine||[]).length?`<span class="note" style="margin:0;font-size:14px">${speak.length?`${tr("I speak","Ich spreche","Hablo")} <b>${esc(speak.join(", "))}</b> · `:""}${learn.length?`${tr("I practise","Ich übe","Practico")} <b>${esc(learn.join(", "))}</b> · `:""}<button class="linkbtn" onclick="xOpen()">${tr("Change","Ändern","Cambiar")}</button></span>`:""}
       </div>${sugg}</div>
     </div>
     <aside style="display:flex;flex-direction:column;gap:14px">${quickCard()}</aside>
@@ -7528,14 +7578,15 @@ function landing(){
   const up=(B.list||[]).filter(x=>new Date(x.starts_at)>new Date()).slice(0,3);
   return `<section class="land">
     <div>
-      <span class="lpill">Free beta · Kostenlos</span>
-      <h1 class="lh1">Meet people.<br>Practise languages.<br><em>Have fun together.</em></h1>
-      <p class="lsub">Join small online sessions and speaking games with people from around the world. <span class="de">Kleine Sprachtreffen und Sprechspiele mit Menschen aus aller Welt.</span></p>
+      ${uiPicker()}
+      <span class="lpill">${tr("Free beta","Kostenlose Beta","Beta gratis")}</span>
+      <h1 class="lh1">${tr("Meet people.<br>Practise languages.<br><em>Have fun together.</em>","Menschen treffen.<br>Sprachen üben.<br><em>Zusammen Spaß haben.</em>","Conoce gente.<br>Practica idiomas.<br><em>Diviértete en compañía.</em>")}</h1>
+      <p class="lsub">${tr("Join small online sessions and speaking games with people from around the world.","Kleine Sprachtreffen und Sprechspiele mit Menschen aus aller Welt.","Únete a pequeñas sesiones online y juegos de conversación con gente de todo el mundo.")}</p>
       <div class="lcta">
-        <button class="btn primary" onclick="bOpen()">Find a session · Session finden</button>
-        <button class="btn secondary" onclick="go('games')">▶ Play a game</button>
+        <button class="btn primary" onclick="bOpen()">${tr("Find a session","Session finden","Buscar una sesión")}</button>
+        <button class="btn secondary" onclick="go('games')">▶ ${tr("Play a game","Spiel spielen","Jugar")}</button>
       </div>
-      <div class="lfacts"><span>8 languages</span><span>A0 – B2+</span><span>2–10 players</span><span>Free</span></div>
+      <div class="lfacts"><span>${tr("8 languages","8 Sprachen","8 idiomas")}</span><span>A0 – B2+</span><span>${tr("2–10 players","2–10 Personen","2–10 jugadores")}</span><span>${tr("Free","Kostenlos","Gratis")}</span></div>
     </div>
     <div class="bub" aria-hidden="true">
       <div class="core">${HERO_SVG}</div>
@@ -7543,15 +7594,15 @@ function landing(){
     </div>
   </section>
   <section class="lsteps">
-    <div class="lstep"><b class="n">1</b><div><h3>Add your languages</h3><p>What you speak, what you're learning. · Was du sprichst und lernst.</p></div></div>
-    <div class="lstep"><b class="n">2</b><div><h3>Join or host a session</h3><p>Small groups, in your own time zone. · Kleine Gruppen, deine Zeitzone.</p></div></div>
-    <div class="lstep"><b class="n">3</b><div><h3>Talk, play, make friends</h3><p>Speaking games keep it easy and fun. · Spiele machen es leicht.</p></div></div>
+    <div class="lstep"><b class="n">1</b><div><h3>${tr("Add your languages","Sprachen eintragen","Añade tus idiomas")}</h3><p>${tr("What you speak, what you're learning.","Was du sprichst und lernst.","Lo que hablas y lo que aprendes.")}</p></div></div>
+    <div class="lstep"><b class="n">2</b><div><h3>${tr("Join or host a session","Session beitreten oder leiten","Únete u organiza una sesión")}</h3><p>${tr("Small groups, in your own time zone.","Kleine Gruppen, in deiner Zeitzone.","Grupos pequeños, en tu zona horaria.")}</p></div></div>
+    <div class="lstep"><b class="n">3</b><div><h3>${tr("Talk, play, make friends","Reden, spielen, Freunde finden","Habla, juega, haz amigos")}</h3><p>${tr("Speaking games keep it easy and fun.","Sprechspiele machen es leicht und lustig.","Los juegos de conversación lo hacen fácil y divertido.")}</p></div></div>
   </section>
   ${up.length?`<section style="margin-top:22px">
     <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px">
-      <h2 style="margin:0;font-size:20px">Upcoming sessions · Bald</h2><button class="linkbtn" onclick="bOpen()">See all</button></div>
+      <h2 style="margin:0;font-size:20px">${tr("Upcoming sessions","Bald","Próximas sesiones")}</h2><button class="linkbtn" onclick="bOpen()">${tr("See all","Alle ansehen","Ver todas")}</button></div>
     <div class="dsg">${up.map(x=>sCard(Object.assign({reasons:[]},x))).join("")}</div></section>`:""}
-  <p class="center" style="margin-top:22px"><button class="linkbtn" onclick="A.ret='home';A.err='';A.msg='';go('account')">Already a member? Sign in · Anmelden</button></p>
+  <p class="center" style="margin-top:22px"><button class="linkbtn" onclick="A.ret='home';A.err='';A.msg='';go('account')">${tr("Already a member? Sign in","Schon dabei? Anmelden","¿Ya eres miembro? Entra")}</button></p>
   ${legalLinks()}`;
 }
 VIEWS.home = function(){ return (A.user && A.status==="in") ? homeDash() : landing(); };
@@ -7571,28 +7622,28 @@ async function sShare(id){
 }
 function sOpen(id){ if(!id) return bOpen(); S.sid=id; go("session"); bLoad(); }
 VIEWS.session = function(){
-  const top=`<div class="topline"><button class="chip" onclick="bOpen()">← All sessions</button><span>Session</span></div>`;
-  if(B.list===null) return `${top}<p class="note center" style="margin-top:40px">Loading… · Lädt…</p>`;
+  const top=`<div class="topline"><button class="chip" onclick="bOpen()">← ${tr("All sessions","Alle Sessions","Todas las sesiones")}</button><span>${tr("Session","Session","Sesión")}</span></div>`;
+  if(B.list===null) return `${top}<p class="note center" style="margin-top:40px">${tr("Loading…","Lädt…","Cargando…")}</p>`;
   const s=(B.list||[]).find(x=>x.activity_id===S.sid);
-  if(!s) return `${top}<div class="card center" style="margin-top:16px"><h3>This session isn't available anymore</h3>
-      <p class="note">It may have ended or been cancelled. · Die Session ist vorbei oder wurde abgesagt.</p>
-      <button class="btn primary" onclick="bOpen()">Find another session · Andere Session finden</button></div>`;
+  if(!s) return `${top}<div class="card center" style="margin-top:16px"><h3>${tr("This session isn't available anymore","Diese Session ist nicht mehr verfügbar","Esta sesión ya no está disponible")}</h3>
+      <p class="note">${tr("It may have ended or been cancelled.","Sie ist vorbei oder wurde abgesagt.","Puede que haya terminado o se haya cancelado.")}</p>
+      <button class="btn primary" onclick="bOpen()">${tr("Find another session","Andere Session finden","Buscar otra sesión")}</button></div>`;
   return `${top}
-    ${!A.user?`<p class="sub">You're invited to a PonteTalk session! Sign in (free) to join. · Du bist eingeladen!</p>`:""}
+    ${!A.user?`<p class="sub">${tr("You're invited to a PonteTalk session! Sign in (free) to join.","Du bist zu einer PonteTalk-Session eingeladen! Melde dich (kostenlos) an.","¡Te han invitado a una sesión de PonteTalk! Entra gratis para unirte.")}</p>`:""}
     ${bCard(s).replace("A.ret='board'","A.ret='session'")}
-    <p class="center"><button class="linkbtn" onclick="bOpen()">See all sessions →</button></p>
+    <p class="center"><button class="linkbtn" onclick="bOpen()">${tr("See all sessions →","Alle Sessions →","Ver todas las sesiones →")}</button></p>
     ${legalLinks()}`;
 };
 
 /* ===================== NOTIFICATION SETTINGS ===================== */
 const NP = { loaded:false, busy:false, v:{ all_emails:true, in_app:true, seat_offers:true, approvals:true, join_requests:true, reminders:true, cancellations:true, session_matches:true } };
 const NP_ITEMS = [
-  ["seat_offers","🎉 Seat offers from the waitlist","Freie Plätze von der Warteliste"],
-  ["approvals","✅ Host approved / declined my request","Zu- oder Absage vom Host"],
-  ["join_requests","🔔 Someone asks to join my session","Jemand möchte teilnehmen"],
-  ["reminders","⏰ Reminders (3 days before if there are materials, 1 day and 15 min before)","Erinnerungen (3 Tage vorher bei Materialien, 1 Tag und 15 Min. vorher)"],
-  ["cancellations","❌ A session I joined was cancelled","Eine Session wurde abgesagt"],
-  ["session_matches","✨ New sessions that fit my languages and free time (max 1 email a day)","Neue passende Sessions (max. 1 E-Mail pro Tag)"]
+  ["seat_offers","🎉 Seat offers from the waitlist","🎉 Freie Plätze von der Warteliste","🎉 Plazas libres de la lista de espera"],
+  ["approvals","✅ Host approved / declined my request","✅ Zu- oder Absage vom Host","✅ El anfitrión aceptó / rechazó mi solicitud"],
+  ["join_requests","🔔 Someone asks to join my session","🔔 Jemand möchte an meiner Session teilnehmen","🔔 Alguien pide unirse a mi sesión"],
+  ["reminders","⏰ Reminders (3 days before if there are materials, 1 day and 15 min before)","⏰ Erinnerungen (3 Tage vorher bei Materialien, 1 Tag und 15 Min. vorher)","⏰ Recordatorios (3 días antes si hay materiales, 1 día y 15 min antes)"],
+  ["cancellations","❌ A session I joined was cancelled","❌ Eine Session, an der ich teilnehme, wurde abgesagt","❌ Se canceló una sesión a la que me uní"],
+  ["session_matches","✨ New sessions that fit my languages and free time (max 1 email a day)","✨ Neue passende Sessions (max. 1 E-Mail pro Tag)","✨ Nuevas sesiones que encajan con mis idiomas y horarios (máx. 1 correo al día)"]
 ];
 async function npLoad(){
   if(!A.user || NP.loaded || NP.busy) return;
@@ -7607,19 +7658,19 @@ async function npLoad(){
 }
 async function npToggle(k){
   const on=!NP.v[k];
-  if(k==="seat_offers" && !on && !window.confirm("Turn off seat offers? You only have 30 minutes to accept a free seat, so you may miss it. · Wirklich abschalten?")) return;
-  if(k==="all_emails" && !on && !window.confirm("Turn off ALL emails, including seat offers and reminders? · ALLE E-Mails abschalten?")) return;
+  if(k==="seat_offers" && !on && !window.confirm(tr("Turn off seat offers? You only have 30 minutes to accept a free seat, so you may miss it.","Platzangebote abschalten? Du hast nur 30 Minuten, um einen freien Platz anzunehmen.","¿Desactivar ofertas de plaza? Solo tienes 30 minutos para aceptar una plaza libre."))) return;
+  if(k==="all_emails" && !on && !window.confirm(tr("Turn off ALL emails, including seat offers and reminders?","ALLE E-Mails abschalten, auch Platzangebote und Erinnerungen?","¿Desactivar TODOS los correos, incluidas ofertas de plaza y recordatorios?"))) return;
   NP.v[k]=on; xr();
   if(k==="in_app"){ if(on){ nbLoad(); } navSync(); }
   try{
     const { error } = await A.sb.from("notification_prefs").upsert({ user_id:A.user.id, ...NP.v, updated_at:new Date().toISOString() });
     if(error) throw error;
-    bToast(on?"Turned on · Eingeschaltet":"Turned off · Ausgeschaltet");
+    bToast(on?tr("Turned on","Eingeschaltet","Activado"):tr("Turned off","Ausgeschaltet","Desactivado"));
   }catch(e){ NP.v[k]=!on; xr(); bToast(bErr(e)); }
 }
 function npSwitch(k,en,de,extra){
   return `<button class="bonus" style="margin-top:8px" role="switch" aria-checked="${!!NP.v[k]}" onclick="npToggle('${k}')" ${extra||""}>
-      <span style="text-align:left"><b style="font-size:15px">${en}</b><br><span class="note" style="font-size:13px">${de}</span></span>
+      <span style="text-align:left"><b style="font-size:15px">${en}</b>${de?`<br><span class="note" style="font-size:13px">${de}</span>`:""}</span>
       <span style="flex:none;width:46px;height:28px;border-radius:14px;background:${NP.v[k]?"var(--teal)":"#D7DCE4"};position:relative;transition:background .15s">
         <span style="position:absolute;top:3px;left:${NP.v[k]?"21px":"3px"};width:22px;height:22px;border-radius:11px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:left .15s"></span></span>
     </button>`;
@@ -7628,20 +7679,20 @@ function npCard(){
   if(!A.user) return "";
   if(!NP.loaded){ setTimeout(npLoad,0); }
   const v=NP.v;
-  return `<div class="card"><h3>🔔 Notifications <span class="de">· Benachrichtigungen</span></h3>
-    ${npSwitch("in_app","🔔 Bell in the app","Glocke in der App: Hinweise direkt in PonteTalk")}
-    ${npSwitch("all_emails","📧 Emails",`An ${esc(A.user.email||"deine E-Mail")} · to your email`)}
-    ${!v.all_emails && !v.in_app?`<p class="note" style="color:#B54530;margin:8px 0 0">⚠️ All notifications are off. You may miss free seats, approvals and reminders. · Alle Benachrichtigungen sind aus.</p>`:""}
-    <p class="nplabel">Emails for · E-Mails bei</p>
+  return `<div class="card"><h3>🔔 ${tr("Notifications","Benachrichtigungen","Notificaciones")}</h3>
+    ${npSwitch("in_app","🔔 "+tr("Bell in the app","Glocke in der App","Campana en la app"),tr("Alerts right inside PonteTalk","Hinweise direkt in PonteTalk","Avisos dentro de PonteTalk"))}
+    ${npSwitch("all_emails","📧 "+tr("Emails","E-Mails","Correos"),tr(`To ${esc(A.user.email||"your email")}`,`An ${esc(A.user.email||"deine E-Mail")}`,`A ${esc(A.user.email||"tu correo")}`))}
+    ${!v.all_emails && !v.in_app?`<p class="note" style="color:#B54530;margin:8px 0 0">⚠️ ${tr("All notifications are off. You may miss free seats, approvals and reminders.","Alle Benachrichtigungen sind aus. Du verpasst vielleicht freie Plätze, Zusagen und Erinnerungen.","Todas las notificaciones están desactivadas. Podrías perderte plazas, aprobaciones y recordatorios.")}</p>`:""}
+    <p class="nplabel">${tr("Emails for","E-Mails bei","Correos para")}</p>
     <div class="${v.all_emails?"":"npoff"}" aria-disabled="${!v.all_emails}">
-    ${NP_ITEMS.map(([k,en,de])=>`<button class="bonus" style="margin-top:8px" role="switch" aria-checked="${!!NP.v[k]}" onclick="npToggle('${k}')">
-      <span style="text-align:left"><b style="font-size:15px">${en}</b><br><span class="note" style="font-size:13px">${de}</span></span>
+    ${NP_ITEMS.map(([k,en,de,es])=>`<button class="bonus" style="margin-top:8px" role="switch" aria-checked="${!!NP.v[k]}" onclick="npToggle('${k}')">
+      <span style="text-align:left"><b style="font-size:15px">${tr(en,de,es)}</b></span>
       <span style="flex:none;width:46px;height:28px;border-radius:14px;background:${NP.v[k]?"var(--teal)":"#D7DCE4"};position:relative;transition:background .15s">
         <span style="position:absolute;top:3px;left:${NP.v[k]?"21px":"3px"};width:22px;height:22px;border-radius:11px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:left .15s"></span></span>
     </button>`).join("")}
     </div>
-    ${v.all_emails && !v.seat_offers?`<p class="note" style="color:#B54530;margin:8px 0 0">⚠️ With seat offers off, you may miss free seats from the waitlist.</p>`:""}
-    ${!v.all_emails?`<p class="note" style="margin:8px 0 0">Emails are off. Turn on 📧 Emails above to choose which ones you get.</p>`:""}
+    ${v.all_emails && !v.seat_offers?`<p class="note" style="color:#B54530;margin:8px 0 0">⚠️ ${tr("With seat offers off, you may miss free seats from the waitlist.","Ohne Platzangebote verpasst du vielleicht freie Plätze.","Sin ofertas de plaza podrías perderte plazas libres.")}</p>`:""}
+    ${!v.all_emails?`<p class="note" style="margin:8px 0 0">${tr("Emails are off. Turn on 📧 Emails above to choose which ones you get.","E-Mails sind aus. Schalte oben 📧 E-Mails ein, um sie auszuwählen.","Los correos están desactivados. Activa 📧 Correos arriba para elegir cuáles recibir.")}</p>`:""}
   </div>`;
 }
 
