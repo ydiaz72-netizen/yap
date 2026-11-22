@@ -2064,7 +2064,7 @@ function oVideoCard(){
       ${O.vErr?`<div class="err">${esc(O.vErr)}</div>`:""}
       <div class="brow2"><button class="btn secondary" onclick="O.vErr='';O.vEdit=false;act({type:'video',url:oJitsi()})">✨ Free Jitsi link</button>
         <button class="btn primary" onclick="oVideoSave()">💾 Save link</button></div>
-      ${O.vEdit?`<button class="btn ghost" onclick="O.vEdit=false;O.vErr='';render()">Cancel · Abbrechen</button>`:""}</div>`;
+      ${O.vEdit?`<button class="btn ghost" onclick="O.vEdit=false;O.vErr='';render()">${tr(`Cancel`,`Abbrechen`,`Cancelar`)}</button>`:""}</div>`;
   if(!v) return `<div class="card center"><p class="note" style="margin:0">🎥 No video link yet. The host can add one. · Noch kein Videolink.</p></div>`;
   return `<div class="card center"><h3 style="margin:0 0 6px">🎥 Talk while you play · Sprecht beim Spielen</h3>
       <a class="btn primary vbtn" href="${esc(v)}" target="_blank" rel="noopener noreferrer">🎥 Join ${esc(prov)} · Videoanruf</a>
@@ -3048,7 +3048,7 @@ function confirmDelete(){
     <h3>Delete your account? <span class="de">· Konto löschen?</span></h3>
     <p>This permanently deletes your login, your profile and <b>all saved games</b>. It can't be undone.<br><span class="de">Login, Profil und alle gespeicherten Spiele werden endgültig gelöscht.</span></p>
     <button class="btn danger" id="delYes">🗑️ Delete forever · Endgültig löschen</button>
-    <button class="btn ghost" id="delNo">Cancel · Abbrechen</button>
+    <button class="btn ghost" id="delNo">${tr(`Cancel`,`Abbrechen`,`Cancelar`)}</button>
     <p class="note center" id="delMsg"></p></div>`;
   document.body.appendChild(box);
   $("delNo").onclick=()=>box.remove();
@@ -3526,7 +3526,7 @@ VIEWS.blocks = function(){
   const list=BL.list;
   return `${top}<h2 style="margin-bottom:4px">${tr(`🚫 Blocked people`,`🚫 Blockierte Personen`,`🚫 Personas bloqueadas`)}</h2>
     <p class="sub" style="margin-top:0">${tr(`People you block can't join your sessions or invite you, and you won't see each other's lounge messages. They aren't told.`,`Blockierte Personen können deinen Sessions nicht beitreten. Sie werden nicht informiert.`,`Las personas que bloqueas no pueden unirse a tus sesiones ni invitarte, y no veréis los mensajes del otro en las salas. No se les avisa.`)}</p>
-    ${list===null?`<p class="note center">Loading… · Lädt…</p>`
+    ${list===null?`<p class="note center">${tr(`Loading…`,`Lädt…`,`Cargando…`)}</p>`
      : !list.length?`<div class="card center"><div style="font-size:36px">🕊️</div><p class="note">${tr(`You haven't blocked anyone. To block someone, tap 🚩 on their message or name.`,`Du hast niemanden blockiert. Tippe zum Blockieren auf 🚩 bei einer Nachricht oder einem Namen.`,`No has bloqueado a nadie. Para bloquear, toca 🚩 en su mensaje o nombre.`)}</p></div>`
      : `<div class="card">${list.map(x=>`<div class="qzrow">${x.avatar_url?`<img class="avs" src="${esc(x.avatar_url)}" alt="">`:"👤"} <b>${esc(x.name)}</b>
          <span class="note" style="margin:0 0 0 auto">${new Date(x.created_at).toLocaleDateString("en-GB",{day:"numeric",month:"short"})}</span>
@@ -3608,7 +3608,7 @@ VIEWS.stats = function(){
   return `<div class="topline"><button class="chip" onclick="go('account')">← Profile</button><span>📊 Stats</span></div>
   <h2>${bi("Stats","Statistiken")}</h2>
   <p class="sub">Only admins see this page. · Nur für Admins sichtbar. <button class="linkbtn" onclick="stLoad()">↻ Refresh</button></p>
-  ${!k?`<p class="note center">Loading… · Lädt…</p>`:`
+  ${!k?`<p class="note center">${tr(`Loading…`,`Lädt…`,`Cargando…`)}</p>`:`
   <div class="stgrid">
     ${tile(k.members,"Members",`+${k.members_7d||0} this week · +${k.members_30d||0} in 30 days`)}
     ${tile(k.sessions_upcoming,"Upcoming sessions",`${k.sessions_held_30d||0} held in 30 days`)}
@@ -3625,7 +3625,7 @@ VIEWS.stats = function(){
       <td>${r.downloads}</td><td>${r.people}</td><td>${r.downloads_7d}</td><td class="note">${D(r.last_download)}</td></tr>`).join("")}
   </table></div><p class="note" style="margin:6px 0 0">Tap a resource to see who downloaded it. Previews are not counted.</p>`}
   <h3 style="margin:18px 0 8px">👥 Who downloaded ${sel?`“${esc(sel.title)}”`:"(all resources)"} ${sel?`<button class="linkbtn" onclick="stPick('${sel.item_id}')">show all</button>`:""}</h3>
-  ${ST.who===null?`<p class="note">Loading… · Lädt…</p>`:!ST.who.length?`<p class="note">Nobody yet.</p>`:`<div class="sttable"><table>
+  ${ST.who===null?`<p class="note">${tr(`Loading…`,`Lädt…`,`Cargando…`)}</p>`:!ST.who.length?`<p class="note">Nobody yet.</p>`:`<div class="sttable"><table>
     <tr><th>Person</th><th>Resource</th><th>×</th><th>Last</th></tr>
     ${ST.who.map(r=>`<tr><td><b>${esc(r.name||"Member")}</b><br><span class="note" style="margin:0">${esc(r.email||"")}</span></td><td>${esc(r.title)}</td><td>${r.times}</td><td class="note">${D(r.last_download)}</td></tr>`).join("")}
   </table></div>
@@ -3647,7 +3647,7 @@ VIEWS.reports = function(){
   <h2>${bi("Reports","Meldungen")}</h2>
   <p class="sub">Reported people are never told who reported them. · Gemeldete erfahren nie, wer gemeldet hat.</p>
   <div class="row" style="margin-bottom:12px">${chip("open","Open")}${chip("closed","Closed")}${chip("all","All")}</div>
-  ${L===null?`<p class="note center">Loading… · Lädt…</p>`
+  ${L===null?`<p class="note center">${tr(`Loading…`,`Lädt…`,`Cargando…`)}</p>`
    : !L.length?`<div class="card center"><div style="font-size:40px">🎉</div><p class="note">Nothing here · Nichts da</p></div>`
    : L.map(r=>`<div class="repcard ${r.status==="closed"?"closed":""}">
       <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><b>${TY[r.target_type]||r.target_type} · ${RS[r.reason]||r.reason}</b>
@@ -3976,7 +3976,7 @@ function invShow(){
     <p class="note" style="margin:4px 0 0">${tr(`They need a PonteTalk account with this email.`,`Sie brauchen ein PonteTalk-Konto mit dieser E-Mail.`,`Necesita una cuenta de PonteTalk con este correo.`)}</p>
     ${INV.err?`<div class="err">${esc(INV.err)}</div>`:""}
     <label class="lbl">${tr(`People you've met`,`Bekannte aus Sessions`,`Personas que conociste`)}</label>
-    ${INV.contacts===null?`<p class="note">Loading… · Lädt…</p>`
+    ${INV.contacts===null?`<p class="note">${tr(`Loading…`,`Lädt…`,`Cargando…`)}</p>`
       : !INV.contacts.length?`<p class="note">${tr(`Nobody yet. After your first sessions, people you met show up here.`,`Noch niemand. Nach deinen ersten Sessions erscheinen hier die Leute, die du getroffen hast.`,`Aún nadie. Después de tus primeras sesiones, aquí aparecerán las personas que conociste.`)}</p>`
       : INV.contacts.map(c=>{ const st=stOf(c.user_id);
           return `<div class="prow" style="align-items:center">${c.avatar_url?`<img class="pav" src="${esc(c.avatar_url)}" alt="">`:`<span class="pav" aria-hidden="true">${esc((c.name||"?").charAt(0).toUpperCase())}</span>`}
@@ -4221,24 +4221,24 @@ function qzBtn(s){
   const id=s.activity_id, q=QZS[id];
   if(s.is_host){
     if(!chWindow(s)) return "";
-    const lbl = !q ? "📝 Add a pop quiz · Quiz erstellen"
-      : q.status==="live" ? `🔴 Quiz is live · ${q.answered} answered`
-      : q.status==="closed" ? "📝 Quiz results · Ergebnisse"
-      : `📝 Pop quiz ready (${q.n} question${q.n===1?"":"s"}) · Quiz bereit`;
+    const lbl = !q ? "📝 "+tr("Add a pop quiz","Quiz erstellen","Crear un quiz")
+      : q.status==="live" ? "🔴 "+tr(`Quiz is live · ${q.answered} answered`,`Quiz läuft · ${q.answered} geantwortet`,`Quiz en directo · ${q.answered} respuestas`)
+      : q.status==="closed" ? "📝 "+tr("Quiz results","Quiz-Ergebnisse","Resultados del quiz")
+      : "📝 "+tr(`Pop quiz ready (${q.n} question${q.n===1?"":"s"})`,`Quiz bereit (${q.n} Frage${q.n===1?"":"n"})`,`Quiz listo (${q.n} pregunta${q.n===1?"":"s"})`);
     return `<button class="btn secondary qzb ${q&&q.status==="live"?"live":""}" style="margin-top:8px" onclick="qzOpen('${id}')">${lbl}</button>`;
   }
   if(s.my_status!=="joined" && s.my_status!=="attended") return "";
   if(!q || q.status==="draft") return "";
-  if(q.status==="live" && !q.mine) return `<button class="btn primary qzb live" style="margin-top:8px" onclick="qzOpen('${id}')">📝 Pop quiz! Take it now · Jetzt mitmachen</button>`;
-  return `<button class="btn secondary qzb" style="margin-top:8px" onclick="qzOpen('${id}')">📝 ${q.status==="closed"?"See quiz answers · Lösungen":"Quiz sent ✓ · Gesendet"}</button>`;
+  if(q.status==="live" && !q.mine) return `<button class="btn primary qzb live" style="margin-top:8px" onclick="qzOpen('${id}')">${tr(`📝 Pop quiz! Take it now`,`📝 Quiz! Jetzt mitmachen`,`📝 ¡Quiz! Hazlo ahora`)}</button>`;
+  return `<button class="btn secondary qzb" style="margin-top:8px" onclick="qzOpen('${id}')">📝 ${q.status==="closed"?tr(`See quiz answers`,`Lösungen`,`Ver respuestas del quiz`):tr(`Quiz sent ✓`,`Gesendet`,`Quiz enviado ✓`)}</button>`;
 }
 function qzErr(e){
   const m=String((e&&e.message)||e||"");
-  if(/quiz_live/.test(m)) return "Stop the quiz before you change it · Erst das Quiz beenden";
-  if(/quiz_not_live/.test(m)) return "The host already closed this quiz · Das Quiz ist schon beendet";
-  if(/quiz_already_sent/.test(m)) return "You already sent your answers · Schon gesendet";
-  if(/quiz_invalid/.test(m)) return "Each question needs text, 2–4 answers and one right answer · Jede Frage braucht Text, 2–4 Antworten und eine richtige";
-  if(/quiz_missing/.test(m)) return "Save the quiz first · Erst speichern";
+  if(/quiz_live/.test(m)) return tr(`Stop the quiz before you change it`,`Erst das Quiz beenden`,`Detén el quiz antes de cambiarlo`);
+  if(/quiz_not_live/.test(m)) return tr(`The host already closed this quiz`,`Das Quiz ist schon beendet`,`El anfitrión ya cerró este quiz`);
+  if(/quiz_already_sent/.test(m)) return tr(`You already sent your answers`,`Schon gesendet`,`Ya enviaste tus respuestas`);
+  if(/quiz_invalid/.test(m)) return tr(`Each question needs text, 2–4 answers and one right answer`,`Jede Frage braucht Text, 2–4 Antworten und eine richtige`,`Cada pregunta necesita texto, 2–4 respuestas y una correcta`);
+  if(/quiz_missing/.test(m)) return tr(`Save the quiz first`,`Erst speichern`,`Guarda el quiz primero`);
   return bErr(e);
 }
 function qzStopPoll(){ if(QZ.timer){ clearInterval(QZ.timer); QZ.timer=null; } }
@@ -4283,13 +4283,13 @@ function qzClean(){
     const x=QZ.edit[i], q=(x.q||"").trim().slice(0,200);
     const o=x.o.map(s=>(s||"").trim().slice(0,80));
     if(!q && o.every(s=>!s)) continue;              // empty question: skip it
-    if(!q) return { err:`Question ${i+1}: write the question · Frage ${i+1}: Text fehlt` };
-    if(o.filter(Boolean).length<2) return { err:`Question ${i+1}: add at least 2 answers · Frage ${i+1}: mindestens 2 Antworten` };
-    if(!o[x.a]) return { err:`Question ${i+1}: the right answer is empty · Frage ${i+1}: richtige Antwort ist leer` };
+    if(!q) return { err:tr(`Question ${i+1}: write the question`,`Frage ${i+1}: Text fehlt`,`Pregunta ${i+1}: escribe la pregunta`) };
+    if(o.filter(Boolean).length<2) return { err:tr(`Question ${i+1}: add at least 2 answers`,`Frage ${i+1}: mindestens 2 Antworten`,`Pregunta ${i+1}: añade al menos 2 respuestas`) };
+    if(!o[x.a]) return { err:tr(`Question ${i+1}: the right answer is empty`,`Frage ${i+1}: richtige Antwort ist leer`,`Pregunta ${i+1}: la respuesta correcta está vacía`) };
     const keep=o.map((s,k)=>[s,k]).filter(p=>p[0]);
     out.push({ q, o:keep.map(p=>p[0]), a:keep.findIndex(p=>p[1]===x.a) });
   }
-  if(!out.length) return { err:"Add at least one question · Mindestens eine Frage" };
+  if(!out.length) return { err:tr(`Add at least one question`,`Mindestens eine Frage`,`Añade al menos una pregunta`) };
   return { list:out };
 }
 async function qzSave(thenStart){
@@ -4335,7 +4335,7 @@ function qzPick(k){ QZ.pick[QZ.step]=k; xr(); }
 function qzGo(d){ const n=(QZ.data.questions||[]).length; QZ.step=Math.max(0,Math.min(n-1,QZ.step+d)); xr(); }
 async function qzSubmit(){
   const skipped=QZ.pick.filter(x=>x<0).length;
-  if(skipped && !window.confirm(`${skipped} question${skipped===1?"":"s"} without an answer. Send anyway? · Trotzdem senden?`)) return;
+  if(skipped && !window.confirm(tr(`${skipped} question${skipped===1?"":"s"} without an answer. Send anyway?`,`${skipped} Frage${skipped===1?"":"n"} ohne Antwort. Trotzdem senden?`,`${skipped} pregunta${skipped===1?"":"s"} sin respuesta. ¿Enviar igualmente?`))) return;
   QZ.busy=true; QZ.err=""; xr();
   try{
     const { data, error } = await A.sb.rpc("pt_quiz_submit",{ p_activity:QZ.id, p_answers:QZ.pick }); if(error) throw error;
@@ -4347,76 +4347,76 @@ async function qzSubmit(){
 
 /* ---- screens ---- */
 function qzReview(qs, mine){
-  return qs.map((x,i)=>`<div class="qzq"><div class="qzn">Question ${i+1} · Frage ${i+1}</div><b>${esc(x.q)}</b>
+  return qs.map((x,i)=>`<div class="qzq"><div class="qzn">${tr("Question","Frage","Pregunta")} ${i+1}</div><b>${esc(x.q)}</b>
     <div class="qzopts">${x.o.map((o,k)=>{ const right=k===x.a, me=mine&&mine[i]===k;
-      return `<div class="qzo ${right?"right":""} ${me&&!right?"wrong":""}">${right?"✅":me?"❌":"▫️"} ${esc(o)}${me?' <span class="note" style="margin:0 0 0 auto">your answer</span>':""}</div>`; }).join("")}</div></div>`).join("");
+      return `<div class="qzo ${right?"right":""} ${me&&!right?"wrong":""}">${right?"✅":me?"❌":"▫️"} ${esc(o)}${me?` <span class="note" style="margin:0 0 0 auto">${tr("your answer","deine Antwort","tu respuesta")}</span>`:""}</div>`; }).join("")}</div></div>`).join("");
 }
 function qzHostView(d, s){
   const st=d.status;
   if(QZ.edit){
-    return `<p class="note" style="margin:0 0 10px">Write it now, start it during the session. Nobody sees the questions until you tap <b>Start quiz</b>. · Niemand sieht das Quiz, bis du es startest.</p>
+    return `<p class="note" style="margin:0 0 10px">${tr(`Write it now, start it during the session. Nobody sees the questions until you tap <b>Start quiz</b>.`,`Schreib es jetzt, starte es während der Session. Niemand sieht die Fragen, bis du auf <b>Quiz starten</b> tippst.`,`Escríbelo ahora y empiézalo durante la sesión. Nadie ve las preguntas hasta que toques <b>Iniciar quiz</b>.`)}</p>
     ${QZ.edit.map((x,i)=>`<div class="card qzq">
-      <div class="row" style="margin:0;justify-content:space-between"><span class="qzn">Question ${i+1} · Frage ${i+1}</span>
+      <div class="row" style="margin:0;justify-content:space-between"><span class="qzn">${tr("Question","Frage","Pregunta")} ${i+1}</span>
         <span><button class="chip" aria-label="Move up" onclick="qzMoveQ(${i},-1)" ${i===0?"disabled":""}>↑</button><button class="chip" aria-label="Move down" onclick="qzMoveQ(${i},1)" ${i===QZ.edit.length-1?"disabled":""}>↓</button><button class="chip" aria-label="Delete question" onclick="qzDelQ(${i})">🗑</button></span></div>
-      <input type="text" maxlength="200" placeholder="e.g. Which article goes with “Haus”?" value="${esc(x.q)}" oninput="QZ.edit[${i}].q=this.value" aria-label="Question ${i+1}">
-      ${x.o.map((o,k)=>`<div class="qzorow"><button class="qzr ${x.a===k?"on":""}" onclick="qzSetA(${i},${k})" aria-pressed="${x.a===k}" title="Mark as the right answer">${x.a===k?"✓":""}</button>
-        <input type="text" maxlength="80" placeholder="Answer ${k+1}" value="${esc(o)}" oninput="QZ.edit[${i}].o[${k}]=this.value" aria-label="Question ${i+1} answer ${k+1}">
+      <input type="text" maxlength="200" placeholder="${tr(`e.g. Which article goes with “Haus”?`,`z. B. Welcher Artikel gehört zu „Haus“?`,`p. ej. ¿Qué artículo va con “Haus”?`)}" value="${esc(x.q)}" oninput="QZ.edit[${i}].q=this.value" aria-label="Question ${i+1}">
+      ${x.o.map((o,k)=>`<div class="qzorow"><button class="qzr ${x.a===k?"on":""}" onclick="qzSetA(${i},${k})" aria-pressed="${x.a===k}" title="${tr("Mark as the right answer","Als richtig markieren","Marcar como correcta")}">${x.a===k?"✓":""}</button>
+        <input type="text" maxlength="80" placeholder="${tr("Answer","Antwort","Respuesta")} ${k+1}" value="${esc(o)}" oninput="QZ.edit[${i}].o[${k}]=this.value" aria-label="Question ${i+1} answer ${k+1}">
         ${x.o.length>2?`<button class="chip" aria-label="Remove answer" onclick="qzDelO(${i},${k})">✕</button>`:""}</div>`).join("")}
-      <div class="row" style="margin:6px 0 0;justify-content:space-between">${x.o.length<4?`<button class="chip" onclick="qzAddO(${i})">＋ Answer</button>`:"<span></span>"}<span class="note" style="margin:0">Tap the circle to mark the right one ✓</span></div>
+      <div class="row" style="margin:6px 0 0;justify-content:space-between">${x.o.length<4?`<button class="chip" onclick="qzAddO(${i})">＋ ${tr("Answer","Antwort","Respuesta")}</button>`:"<span></span>"}<span class="note" style="margin:0">${tr("Tap the circle to mark the right one ✓","Tippe auf den Kreis für die richtige ✓","Toca el círculo para marcar la correcta ✓")}</span></div>
     </div>`).join("")}
-    ${QZ.edit.length<QZ_MAXQ?`<button class="btn secondary" onclick="qzAddQ()">＋ Add a question · Frage hinzufügen</button>`:""}
+    ${QZ.edit.length<QZ_MAXQ?`<button class="btn secondary" onclick="qzAddQ()">${tr(`＋ Add a question`,`＋ Frage hinzufügen`,`＋ Añadir una pregunta`)}</button>`:""}
     ${QZ.err?`<div class="err">${esc(QZ.err)}</div>`:""}
-    <button class="btn primary" ${QZ.busy?"disabled":""} onclick="qzSave(false)">${QZ.busy?"Saving… · Speichert…":"💾 Save for later · Speichern"}</button>
-    ${s && new Date(s.starts_at).getTime()-30*60000<=Date.now() ? `<button class="btn secondary" ${QZ.busy?"disabled":""} onclick="qzSave(true)">🚀 Save and start now · Jetzt starten</button>`:""}
-    ${st!=="none"?`<button class="btn ghost" onclick="QZ.edit=null;QZ.err='';xr()">Cancel · Abbrechen</button>`:""}`;
+    <button class="btn primary" ${QZ.busy?"disabled":""} onclick="qzSave(false)">${QZ.busy?tr(`Saving…`,`Speichert…`,`Guardando…`):tr(`💾 Save for later`,`💾 Speichern`,`💾 Guardar para luego`)}</button>
+    ${s && new Date(s.starts_at).getTime()-30*60000<=Date.now() ? `<button class="btn secondary" ${QZ.busy?"disabled":""} onclick="qzSave(true)">${tr(`🚀 Save and start now`,`🚀 Speichern und jetzt starten`,`🚀 Guardar y empezar ahora`)}</button>`:""}
+    ${st!=="none"?`<button class="btn ghost" onclick="QZ.edit=null;QZ.err='';xr()">${tr(`Cancel`,`Abbrechen`,`Cancelar`)}</button>`:""}`;
   }
   const res=QZ.res||{ people:[], right:[] }, qs=d.questions||[];
-  const board = res.people.length ? `<div class="card"><h3 style="margin:0 0 6px">🏆 Scores · Punkte</h3>${res.people.map((p,i)=>`<div class="qzrow">${["🥇","🥈","🥉"][i]||"▫️"} ${avSmall(p.user_id)} <b>${esc(p.name)}</b><span style="margin-left:auto;font-weight:800">${p.score} / ${p.total}</span></div>`).join("")}</div>`
-    : `<p class="note center">No answers yet · Noch keine Antworten</p>`;
+  const board = res.people.length ? `<div class="card"><h3 style="margin:0 0 6px">${tr(`🏆 Scores`,`🏆 Punkte`,`🏆 Puntuaciones`)}</h3>${res.people.map((p,i)=>`<div class="qzrow">${["🥇","🥈","🥉"][i]||"▫️"} ${avSmall(p.user_id)} <b>${esc(p.name)}</b><span style="margin-left:auto;font-weight:800">${p.score} / ${p.total}</span></div>`).join("")}</div>`
+    : `<p class="note center">${tr(`No answers yet`,`Noch keine Antworten`,`Aún no hay respuestas`)}</p>`;
   const perQ = qs.map((x,i)=>`<div class="qzq"><div class="qzn">Question ${i+1} · ${res.right[i]||0} of ${res.people.length} right</div><b>${esc(x.q)}</b>
       <div class="qzopts">${x.o.map((o,k)=>`<div class="qzo ${k===x.a?"right":""}">${k===x.a?"✅":"▫️"} ${esc(o)}</div>`).join("")}</div></div>`).join("");
-  if(st==="draft") return `<div class="card"><h3 style="margin:0 0 4px">📝 Ready · Bereit</h3><p class="note" style="margin:0">${qs.length} question${qs.length===1?"":"s"}. Hidden until you start it. · Versteckt bis zum Start.</p></div>
-    <button class="btn primary" ${QZ.busy?"disabled":""} onclick="qzStart()">🚀 Start quiz now · Quiz starten</button>
-    <button class="btn secondary" onclick="qzEditStart()">✏️ Edit questions · Bearbeiten</button>
+  if(st==="draft") return `<div class="card"><h3 style="margin:0 0 4px">📝 ${tr("Ready","Bereit","Listo")}</h3><p class="note" style="margin:0">${tr(`${qs.length} question${qs.length===1?"":"s"}. Hidden until you start it.`,`${qs.length} Frage${qs.length===1?"":"n"}. Versteckt bis zum Start.`,`${qs.length} pregunta${qs.length===1?"":"s"}. Oculto hasta que lo inicies.`)}</p></div>
+    <button class="btn primary" ${QZ.busy?"disabled":""} onclick="qzStart()">${tr(`🚀 Start quiz now`,`🚀 Quiz jetzt starten`,`🚀 Iniciar quiz ahora`)}</button>
+    <button class="btn secondary" onclick="qzEditStart()">${tr(`✏️ Edit questions`,`✏️ Fragen bearbeiten`,`✏️ Editar preguntas`)}</button>
     ${QZ.err?`<div class="err">${esc(QZ.err)}</div>`:""}
-    <details class="card" style="margin-top:10px"><summary style="cursor:pointer;font-weight:800">👀 Preview with answers</summary>${qzReview(qs,null)}</details>
-    <p class="center"><button class="linkbtn dangertext" style="font-size:13px" onclick="qzDelete()">Delete quiz · Löschen</button></p>`;
-  if(st==="live") return `<div class="obanner">🔴 Live · <b>${res.people.length}</b> answered so far. Updates by itself. · Läuft</div>
+    <details class="card" style="margin-top:10px"><summary style="cursor:pointer;font-weight:800">👀 ${tr("Preview with answers","Vorschau mit Lösungen","Vista previa con respuestas")}</summary>${qzReview(qs,null)}</details>
+    <p class="center"><button class="linkbtn dangertext" style="font-size:13px" onclick="qzDelete()">${tr(`Delete quiz`,`Quiz löschen`,`Eliminar quiz`)}</button></p>`;
+  if(st==="live") return `<div class="obanner">🔴 ${tr(`Live · <b>${res.people.length}</b> answered so far. Updates by itself.`,`Läuft · <b>${res.people.length}</b> haben geantwortet. Aktualisiert sich selbst.`,`En directo · <b>${res.people.length}</b> han respondido. Se actualiza solo.`)}</div>
     ${board}
-    <button class="btn primary" ${QZ.busy?"disabled":""} onclick="qzStop()">✅ Stop and show answers · Beenden & Lösungen zeigen</button>
+    <button class="btn primary" ${QZ.busy?"disabled":""} onclick="qzStop()">${tr(`✅ Stop and show answers`,`✅ Beenden & Lösungen zeigen`,`✅ Terminar y mostrar respuestas`)}</button>
     ${QZ.err?`<div class="err">${esc(QZ.err)}</div>`:""}`;
-  return `<div class="obanner">✅ Finished · Everyone can see the answers now. · Beendet</div>
+  return `<div class="obanner">${tr(`✅ Finished · Everyone can see the answers now.`,`✅ Beendet · Alle sehen jetzt die Lösungen.`,`✅ Terminado · Ahora todos ven las respuestas.`)}</div>
     ${board}<div class="card">${perQ}</div>
-    <button class="btn secondary" onclick="qzReset()">🔁 Run it again · Nochmal</button>
-    <button class="btn ghost" onclick="qzEditStart()">✏️ Edit for next time · Bearbeiten</button>
+    <button class="btn secondary" onclick="qzReset()">${tr(`🔁 Run it again`,`🔁 Nochmal starten`,`🔁 Repetir`)}</button>
+    <button class="btn ghost" onclick="qzEditStart()">${tr(`✏️ Edit for next time`,`✏️ Fürs nächste Mal bearbeiten`,`✏️ Editar para la próxima`)}</button>
     ${QZ.err?`<div class="err">${esc(QZ.err)}</div>`:""}`;
 }
 function qzGuestView(d){
   const qs=d.questions||[];
-  if(d.status==="none") return `<div class="card center"><div style="font-size:40px">⏳</div><h3>No quiz yet · Noch kein Quiz</h3><p class="note">When the host starts one, it shows up here. · Erscheint hier, wenn der Host startet.</p></div>`;
+  if(d.status==="none") return `<div class="card center"><div style="font-size:40px">⏳</div><h3>${tr("No quiz yet","Noch kein Quiz","Aún no hay quiz")}</h3><p class="note">${tr("When the host starts one, it shows up here.","Erscheint hier, wenn der Host eins startet.","Aparecerá aquí cuando el anfitrión lo inicie.")}</p></div>`;
   if(d.status==="closed") return `<div class="card center"><div style="font-size:40px">${d.mine?"🎉":"📝"}</div>
-      <h3 style="margin:0">${d.mine?`You got ${d.mine.score} of ${d.mine.total} · ${d.mine.score} von ${d.mine.total}`:"Quiz finished · Quiz beendet"}</h3></div>
+      <h3 style="margin:0">${d.mine?tr(`You got ${d.mine.score} of ${d.mine.total}`,`${d.mine.score} von ${d.mine.total} richtig`,`Acertaste ${d.mine.score} de ${d.mine.total}`):tr("Quiz finished","Quiz beendet","Quiz terminado")}</h3></div>
     <div class="card">${qzReview(qs, d.mine&&d.mine.answers)}</div>`;
-  if(d.mine) return `<div class="card center"><div style="font-size:40px">✅</div><h3 style="margin:0">Sent! ${d.mine.score} of ${d.mine.total} right</h3>
-    <p class="note">The right answers show up when the host ends the quiz. · Lösungen kommen, wenn der Host beendet.</p></div>`;
+  if(d.mine) return `<div class="card center"><div style="font-size:40px">✅</div><h3 style="margin:0">${tr(`Sent! ${d.mine.score} of ${d.mine.total} right`,`Gesendet! ${d.mine.score} von ${d.mine.total} richtig`,`¡Enviado! ${d.mine.score} de ${d.mine.total} correctas`)}</h3>
+    <p class="note">${tr(`The right answers show up when the host ends the quiz.`,`Die Lösungen erscheinen, wenn der Host das Quiz beendet.`,`Las respuestas correctas aparecen cuando el anfitrión termine el quiz.`)}</p></div>`;
   const i=QZ.step, x=qs[i]; if(!x) return "";
   const last=i===qs.length-1;
   return `<div class="qzdots" aria-label="Progress">${qs.map((_,k)=>`<span class="${k===i?"cur":""} ${QZ.pick[k]>=0?"done":""}"></span>`).join("")}</div>
-    <div class="card"><div class="qzn">Question ${i+1} of ${qs.length} · Frage ${i+1}/${qs.length}</div>
+    <div class="card"><div class="qzn">${tr(`Question ${i+1} of ${qs.length}`,`Frage ${i+1}/${qs.length}`,`Pregunta ${i+1} de ${qs.length}`)}</div>
       <h3 style="margin:4px 0 10px">${esc(x.q)}</h3>
       ${x.o.map((o,k)=>`<button class="qzpick ${QZ.pick[i]===k?"on":""}" aria-pressed="${QZ.pick[i]===k}" onclick="qzPick(${k})">${esc(o)}</button>`).join("")}
     </div>
     ${QZ.err?`<div class="err">${esc(QZ.err)}</div>`:""}
-    <div class="brow2">${i>0?`<button class="btn ghost" onclick="qzGo(-1)">← Back</button>`:"<span></span>"}
-      ${last?`<button class="btn primary" ${QZ.busy?"disabled":""} onclick="qzSubmit()">${QZ.busy?tr(`Sending…`,`Sendet…`,`Enviando…`):"📨 Send answers · Senden"}</button>`
-            :`<button class="btn primary" onclick="qzGo(1)">Next · Weiter →</button>`}</div>`;
+    <div class="brow2">${i>0?`<button class="btn ghost" onclick="qzGo(-1)">← ${tr("Back","Zurück","Atrás")}</button>`:"<span></span>"}
+      ${last?`<button class="btn primary" ${QZ.busy?"disabled":""} onclick="qzSubmit()">${QZ.busy?tr(`Sending…`,`Sendet…`,`Enviando…`):tr(`📨 Send answers`,`📨 Senden`,`📨 Enviar respuestas`)}</button>`
+            :`<button class="btn primary" onclick="qzGo(1)">${tr("Next →","Weiter →","Siguiente →")}</button>`}</div>`;
 }
 VIEWS.quiz = function(){
   const s=bRowOf({ activity_id:QZ.id })||{}, d=QZ.data;
-  return `<div class="topline"><button class="chip" onclick="qzBack()">← Session</button><span>📝 Pop quiz</span></div>
-    <h2 style="margin-bottom:2px">${esc(s.title||"Pop quiz")}</h2>
+  return `<div class="topline"><button class="chip" onclick="qzBack()">← ${tr("Session","Session","Sesión")}</button><span>📝 Quiz</span></div>
+    <h2 style="margin-bottom:2px">${esc(s.title||"Quiz")}</h2>
     ${s.starts_at?`<p class="note" style="margin:0 0 12px">${fmtWhen(s.starts_at)}</p>`:""}
-    ${!d ? (QZ.err?`<div class="err">${esc(QZ.err)}</div>`:`<p class="note center" style="margin-top:30px">Loading… · Lädt…</p>`)
+    ${!d ? (QZ.err?`<div class="err">${esc(QZ.err)}</div>`:`<p class="note center" style="margin-top:30px">${tr(`Loading…`,`Lädt…`,`Cargando…`)}</p>`)
       : d.role==="host" ? qzHostView(d, s) : qzGuestView(d)}`;
 };
 
@@ -4437,24 +4437,24 @@ async function wdLoad(){
     if(was!==JSON.stringify(WDS) && ["board","session"].includes(S.screen)) xr();
   }catch(e){}
 }
-function wdLang(k){ return T[k] ? `${T[k].flag} ${T[k].nameEn}` : (typeof LU_NAMES!=="undefined" && LU_NAMES[k]) || String(k||"").toUpperCase(); }
+function wdLang(k){ return T[k] ? `${T[k].flag} ${lname(k)}` : (typeof LU_NAMES!=="undefined" && LU_NAMES[k]) || String(k||"").toUpperCase(); }
 function wdBtn(s){
   if(!A.user || s.status==="cancelled") return "";
   if(!(s.is_host || s.my_status==="joined" || s.my_status==="attended")) return "";
   if(Date.now() < new Date(s.starts_at).getTime()-30*60000) return "";
   const w=WDS[s.activity_id]||{ n:0, mine:0, to_check:0 };
-  const lbl = w.mine ? `📚 My words from this session (${w.mine}) · Meine Wörter` : "📚 Save words I learned · Wörter speichern";
+  const lbl = w.mine ? "📚 "+tr(`My words from this session (${w.mine})`,`Meine Wörter aus dieser Session (${w.mine})`,`Mis palabras de esta sesión (${w.mine})`) : "📚 "+tr("Save words I learned","Gelernte Wörter speichern","Guardar palabras que aprendí");
   const chk = w.to_check ? ` <span class="wdbadge">${w.to_check} to check</span>` : "";
   return `<button class="btn secondary" style="margin-top:8px" onclick="wdOpen('${s.activity_id}')">${lbl}${chk}</button>`;
 }
 function wdErr(e){
   const m=String((e&&e.message)||e||"");
-  if(/words_not_open/.test(m)) return "You can add words from 30 minutes before the session · Ab 30 Min. vor Beginn";
-  if(/words_limit/.test(m)) return `Max ${WD_MAX} words per session · Höchstens ${WD_MAX} Wörter pro Session`;
-  if(/words_invalid/.test(m)) return "Add the word and what it means (word up to 80, meaning up to 120 characters) · Wort und Bedeutung eingeben";
-  if(/words_own/.test(m)) return "You can't check your own words · Eigene Wörter kannst du nicht prüfen";
-  if(/not_yours/.test(m)) return "That's not your word · Nicht dein Wort";
-  if(/not_in_session/.test(m)) return "Only people in this session can see its words · Nur für Teilnehmende";
+  if(/words_not_open/.test(m)) return tr(`You can add words from 30 minutes before the session`,`Ab 30 Min. vor Beginn`,`Puedes añadir palabras desde 30 minutos antes de la sesión`);
+  if(/words_limit/.test(m)) return tr(`Max ${WD_MAX} words per session`,`Höchstens ${WD_MAX} Wörter pro Session`,`Máximo ${WD_MAX} palabras por sesión`);
+  if(/words_invalid/.test(m)) return tr(`Add the word and what it means (word up to 80, meaning up to 120 characters)`,`Wort und Bedeutung eingeben`,`Añade la palabra y su significado (palabra hasta 80, significado hasta 120 caracteres)`);
+  if(/words_own/.test(m)) return tr(`You can't check your own words`,`Eigene Wörter kannst du nicht prüfen`,`No puedes revisar tus propias palabras`);
+  if(/not_yours/.test(m)) return tr(`That's not your word`,`Nicht dein Wort`,`Esa no es tu palabra`);
+  if(/not_in_session/.test(m)) return tr(`Only people in this session can see its words`,`Nur für Teilnehmende`,`Solo los participantes ven sus palabras`);
   return bErr(e);
 }
 function wdBlankForm(langs){
@@ -4483,14 +4483,14 @@ function wdBack(){ if(WD.id==="all"){ go("account"); return; } wdLoad(); sOpen(W
 /* ---- my words: add / edit / delete ---- */
 async function wdSave(){
   const f=WD.form, word=(f.word||"").trim(), meaning=(f.meaning||"").trim();
-  if(!word || !meaning){ WD.err="Add the word and what it means · Wort und Bedeutung eingeben"; xr(); return; }
+  if(!word || !meaning){ WD.err=tr(`Add the word and what it means`,`Wort und Bedeutung eingeben`,`Añade la palabra y su significado`); xr(); return; }
   WD.busy=true; WD.err=""; xr();
   try{
     const args={ p_lang:f.lang, p_word:word, p_meaning:meaning, p_example:(f.example||"").trim()||null };
     const r = WD.edit ? await A.sb.rpc("pt_words_edit",{ p_id:WD.edit, ...args })
                       : await A.sb.rpc("pt_words_add",{ p_activity:WD.id, ...args });
     if(r.error) throw r.error;
-    bToast(WD.edit?"💾 Saved · Gespeichert":"📚 Word saved! · Wort gespeichert!");
+    bToast(WD.edit?"💾 "+tr("Saved","Gespeichert","Guardado"):"📚 "+tr("Word saved!","Wort gespeichert!","¡Palabra guardada!"));
     WD.busy=false; WD.edit=null; WD.form=Object.assign(wdBlankForm(WD.data.langs), { lang:f.lang });
     await wdFetch();
     setTimeout(()=>{ const e=$("wdword"); if(e && window.innerWidth>700) e.focus({preventScroll:true}); },0);
@@ -4533,7 +4533,7 @@ function wdFixStart(id){
 }
 async function wdFixSave(){
   const v=WD.fixv, word=(v.word||"").trim(), meaning=(v.meaning||"").trim();
-  if(!word || !meaning){ WD.err="Add the word and what it means · Wort und Bedeutung eingeben"; xr(); return; }
+  if(!word || !meaning){ WD.err=tr(`Add the word and what it means`,`Wort und Bedeutung eingeben`,`Añade la palabra y su significado`); xr(); return; }
   WD.busy=true; WD.err=""; xr();
   try{ const { error } = await A.sb.rpc("pt_words_check",{ p_id:WD.fix, p_ok:false, p_word:word, p_meaning:meaning, p_note:(v.note||"").trim()||null });
     if(error) throw error;
@@ -4554,13 +4554,13 @@ async function wdAllFetch(){
 
 /* ---- screens ---- */
 function wdStatus(w){
-  if(w.status==="confirmed") return `<span class="wdtag ok">✓ Checked${w.checked_by_name?` by ${esc(w.checked_by_name)}`:""}</span>`;
-  if(w.status==="fixed") return `<span class="wdtag fix">✏️ Fixed${w.checked_by_name?` by ${esc(w.checked_by_name)}`:""}</span>`;
-  return `<span class="wdtag">Not checked yet · Noch nicht geprüft</span>`;
+  if(w.status==="confirmed") return `<span class="wdtag ok">✓ ${tr("Checked","Geprüft","Revisado")}${w.checked_by_name?` ${tr("by","von","por")} ${esc(w.checked_by_name)}`:""}</span>`;
+  if(w.status==="fixed") return `<span class="wdtag fix">✏️ ${tr("Fixed","Korrigiert","Corregido")}${w.checked_by_name?` ${tr("by","von","por")} ${esc(w.checked_by_name)}`:""}</span>`;
+  return `<span class="wdtag">${tr(`Not checked yet`,`Noch nicht geprüft`,`Aún sin revisar`)}</span>`;
 }
 function wdItem(w, mode){
   const fixed = w.status==="fixed" && (w.original_word||w.original_meaning)
-    ? `<p class="note wdold">Was · War: <s>${esc(w.original_word||w.word)}</s> = <s>${esc(w.original_meaning||w.meaning)}</s></p>` : "";
+    ? `<p class="note wdold">${tr("Was","War","Era")}: <s>${esc(w.original_word||w.word)}</s> = <s>${esc(w.original_meaning||w.meaning)}</s></p>` : "";
   const note = w.check_note ? `<p class="note" style="margin:4px 0 0">💬 ${esc(w.check_note)}</p>` : "";
   let tools="";
   if(mode==="mine") tools=`<span class="wdtools"><button class="chip" aria-label="Edit ${esc(w.word)}" onclick="wdEditStart('${w.id}')">✏️</button><button class="chip" aria-label="Delete ${esc(w.word)}" onclick="wdDelete('${w.id}')">🗑</button></span>`;
@@ -4569,16 +4569,16 @@ function wdItem(w, mode){
   if(mode==="other"){
     if(WD.fix===w.id){
       check=`<div class="wdfix">
-        <label class="lbl" for="wdfw">Correct word · Richtiges Wort</label>
+        <label class="lbl" for="wdfw">${tr(`Correct word`,`Richtiges Wort`,`Palabra correcta`)}</label>
         <input type="text" id="wdfw" dir="auto" maxlength="80" value="${esc(WD.fixv.word)}" oninput="WD.fixv.word=this.value">
-        <label class="lbl" for="wdfm">Meaning · Bedeutung</label>
+        <label class="lbl" for="wdfm">${tr(`Meaning`,`Bedeutung`,`Significado`)}</label>
         <input type="text" id="wdfm" dir="auto" maxlength="120" value="${esc(WD.fixv.meaning)}" oninput="WD.fixv.meaning=this.value">
-        <label class="lbl" for="wdfn">Short tip (optional) · Tipp (optional)</label>
-        <input type="text" id="wdfn" dir="auto" maxlength="200" placeholder="e.g. It's “die”, not “der”" value="${esc(WD.fixv.note)}" oninput="WD.fixv.note=this.value">
-        <div class="brow2"><button class="btn ghost" onclick="WD.fix=null;WD.err='';xr()">Cancel</button>
-          <button class="btn primary" ${WD.busy?"disabled":""} onclick="wdFixSave()">${WD.busy?"Saving…":"💾 Save fix"}</button></div></div>`;
+        <label class="lbl" for="wdfn">${tr(`Short tip (optional)`,`Tipp (optional)`,`Consejo breve (opcional)`)}</label>
+        <input type="text" id="wdfn" dir="auto" maxlength="200" placeholder="${tr("e.g. It's “die”, not “der”","z. B. Es heißt „die“, nicht „der“","p. ej. Es “die”, no “der”")}" value="${esc(WD.fixv.note)}" oninput="WD.fixv.note=this.value">
+        <div class="brow2"><button class="btn ghost" onclick="WD.fix=null;WD.err='';xr()">${tr("Cancel","Abbrechen","Cancelar")}</button>
+          <button class="btn primary" ${WD.busy?"disabled":""} onclick="wdFixSave()">${WD.busy?tr("Saving…","Speichert…","Guardando…"):"💾 "+tr("Save fix","Korrektur speichern","Guardar corrección")}</button></div></div>`;
     } else if(w.status==="unchecked"){
-      check=`<div class="row" style="margin:8px 0 0;gap:8px"><button class="chip wdok" onclick="wdCheckOk('${w.id}')">✓ Looks good · Passt</button><button class="chip" onclick="wdFixStart('${w.id}')">✏️ Fix · Korrigieren</button></div>`;
+      check=`<div class="row" style="margin:8px 0 0;gap:8px"><button class="chip wdok" onclick="wdCheckOk('${w.id}')">${tr(`✓ Looks good`,`✓ Passt`,`✓ Está bien`)}</button><button class="chip" onclick="wdFixStart('${w.id}')">${tr(`✏️ Fix`,`✏️ Korrigieren`,`✏️ Corregir`)}</button></div>`;
     }
   }
   return `<div class="wditem ${WD.edit===w.id?"editing":""}">
@@ -4592,57 +4592,57 @@ function wdItem(w, mode){
 }
 function wdForm(d){
   const L=(d.langs||[]).filter(Boolean), f=WD.form;
-  if(!d.open) return `<div class="card center"><div style="font-size:36px">⏳</div><p class="note" style="margin:6px 0 0">You can add words from 30 minutes before the session. · Ab 30 Min. vor Beginn.</p></div>`;
+  if(!d.open) return `<div class="card center"><div style="font-size:36px">⏳</div><p class="note" style="margin:6px 0 0">${tr(`You can add words from 30 minutes before the session.`,`Wörter kannst du ab 30 Min. vor Beginn hinzufügen.`,`Puedes añadir palabras desde 30 minutos antes de la sesión.`)}</p></div>`;
   return `<div class="card">
-    <h3 style="margin:0 0 4px">${WD.edit?"✏️ Edit word · Wort bearbeiten":"➕ Add a word · Wort hinzufügen"}</h3>
-    ${WD.edit?"":`<p class="note" style="margin:0 0 6px">2–3 words or phrases per session is perfect. · 2–3 Wörter pro Session reichen.</p>`}
-    <label class="lbl">Language of the word · Sprache</label>
+    <h3 style="margin:0 0 4px">${WD.edit?tr(`✏️ Edit word`,`✏️ Wort bearbeiten`,`✏️ Editar palabra`):tr(`➕ Add a word`,`➕ Wort hinzufügen`,`➕ Añadir una palabra`)}</h3>
+    ${WD.edit?"":`<p class="note" style="margin:0 0 6px">${tr(`2–3 words or phrases per session is perfect.`,`2–3 Wörter oder Ausdrücke pro Session sind perfekt.`,`2–3 palabras o frases por sesión es perfecto.`)}</p>`}
+    <label class="lbl">${tr(`Language of the word`,`Sprache des Wortes`,`Idioma de la palabra`)}</label>
     <div class="row">${L.map(k=>`<button class="chip ${f.lang===k?"on":""}" aria-pressed="${f.lang===k}" onclick="WD.form.lang='${k}';xr()">${wdLang(k)}</button>`).join("")}</div>
-    <label class="lbl" for="wdword">Word or phrase · Wort oder Ausdruck</label>
-    <input type="text" id="wdword" dir="auto" maxlength="80" placeholder="e.g. die Verabredung" value="${esc(f.word)}" oninput="WD.form.word=this.value">
-    <label class="lbl" for="wdmean">What it means · Bedeutung</label>
-    <input type="text" id="wdmean" dir="auto" maxlength="120" placeholder="e.g. the appointment / date" value="${esc(f.meaning)}" oninput="WD.form.meaning=this.value">
-    <label class="lbl" for="wdex">Example sentence (optional) · Beispielsatz (optional)</label>
-    <input type="text" id="wdex" dir="auto" maxlength="200" placeholder="e.g. Ich habe heute eine Verabredung." value="${esc(f.example)}" oninput="WD.form.example=this.value" onkeydown="if(event.key==='Enter')wdSave()">
+    <label class="lbl" for="wdword">${tr(`Word or phrase`,`Wort oder Ausdruck`,`Palabra o frase`)}</label>
+    <input type="text" id="wdword" dir="auto" maxlength="80" placeholder="${tr("e.g. die Verabredung","z. B. die Verabredung","p. ej. die Verabredung")}" value="${esc(f.word)}" oninput="WD.form.word=this.value">
+    <label class="lbl" for="wdmean">${tr(`What it means`,`Bedeutung`,`Qué significa`)}</label>
+    <input type="text" id="wdmean" dir="auto" maxlength="120" placeholder="${tr("e.g. the appointment / date","z. B. the appointment / date","p. ej. la cita")}" value="${esc(f.meaning)}" oninput="WD.form.meaning=this.value">
+    <label class="lbl" for="wdex">${tr(`Example sentence (optional)`,`Beispielsatz (optional)`,`Frase de ejemplo (opcional)`)}</label>
+    <input type="text" id="wdex" dir="auto" maxlength="200" placeholder="${tr("e.g. Ich habe heute eine Verabredung.","z. B. Ich habe heute eine Verabredung.","p. ej. Ich habe heute eine Verabredung.")}" value="${esc(f.example)}" oninput="WD.form.example=this.value" onkeydown="if(event.key==='Enter')wdSave()">
     ${WD.err?`<div class="err">${esc(WD.err)}</div>`:""}
-    <button class="btn primary" ${WD.busy?"disabled":""} onclick="wdSave()">${WD.busy?"Saving… · Speichert…":WD.edit?"💾 Save changes · Speichern":"📚 Save word · Speichern"}</button>
-    ${WD.edit?`<button class="btn ghost" onclick="wdEditCancel()">Cancel · Abbrechen</button>`:""}
+    <button class="btn primary" ${WD.busy?"disabled":""} onclick="wdSave()">${WD.busy?tr(`Saving…`,`Speichert…`,`Guardando…`):WD.edit?tr(`💾 Save changes`,`💾 Speichern`,`💾 Guardar cambios`):tr(`📚 Save word`,`📚 Speichern`,`📚 Guardar palabra`)}</button>
+    ${WD.edit?`<button class="btn ghost" onclick="wdEditCancel()">${tr(`Cancel`,`Abbrechen`,`Cancelar`)}</button>`:""}
   </div>`;
 }
 function wdSessionView(d, s){
   const ws=d.words||[], mine=ws.filter(w=>w.mine), others=ws.filter(w=>!w.mine);
   const unchecked=mine.filter(w=>w.status==="unchecked").length, toCheck=others.filter(w=>w.status==="unchecked").length;
   const canAsk = unchecked && s && s.activity_id && chWindow(s);
-  return `<p class="note" style="margin:0 0 12px">Save what you learned today. Your partner can check it, and it goes into your practice later. · Speichere, was du gelernt hast.</p>
+  return `<p class="note" style="margin:0 0 12px">${tr(`Save what you learned today. Your partner can check it, and it goes into your practice later.`,`Speichere, was du heute gelernt hast. Dein Partner kann es prüfen, und es kommt später in deine Übungen.`,`Guarda lo que aprendiste hoy. Tu compañero puede revisarlo y luego entra en tu práctica.`)}</p>
     ${wdForm(d)}
-    <h3 style="margin:18px 0 8px">📚 My words <span class="de">· Meine Wörter</span> (${mine.length})</h3>
-    ${mine.length ? mine.map(w=>wdItem(w,"mine")).join("") : `<p class="note">No words yet. Add the first one above! · Noch keine Wörter.</p>`}
-    ${mine.length?`<button class="btn primary" onclick="wpOpen('${WD.id}')">🎯 Practise these words · Diese Wörter üben</button>`:""}
-    ${canAsk?`<button class="btn secondary" onclick="wdAsk()">📨 Ask my partner to check (${unchecked}) · Partner fragen</button>`:""}
-    ${others.length?`<h3 style="margin:22px 0 4px">🤝 Help your partners <span class="de">· Hilf deinen Partnern</span>${toCheck?` <span class="wdbadge">${toCheck} to check</span>`:""}</h3>
-      <p class="note" style="margin:0 0 8px">Is it right? Tap ✓, or fix it so they practise the correct version. · Stimmt es? ✓ oder korrigieren.</p>
+    <h3 style="margin:18px 0 8px">📚 ${tr("My words","Meine Wörter","Mis palabras")} (${mine.length})</h3>
+    ${mine.length ? mine.map(w=>wdItem(w,"mine")).join("") : `<p class="note">${tr(`No words yet. Add the first one above!`,`Noch keine Wörter. Füg oben das erste hinzu!`,`Aún no hay palabras. ¡Añade la primera arriba!`)}</p>`}
+    ${mine.length?`<button class="btn primary" onclick="wpOpen('${WD.id}')">${tr(`🎯 Practise these words`,`🎯 Diese Wörter üben`,`🎯 Practicar estas palabras`)}</button>`:""}
+    ${canAsk?`<button class="btn secondary" onclick="wdAsk()">📨 ${tr(`Ask my partner to check (${unchecked})`,`Partner um Prüfung bitten (${unchecked})`,`Pedir a mi compañero que revise (${unchecked})`)}</button>`:""}
+    ${others.length?`<h3 style="margin:22px 0 4px">🤝 ${tr("Help your partners","Hilf deinen Partnern","Ayuda a tus compañeros")}${toCheck?` <span class="wdbadge">${tr(`${toCheck} to check`,`${toCheck} zu prüfen`,`${toCheck} por revisar`)}</span>`:""}</h3>
+      <p class="note" style="margin:0 0 8px">${tr(`Is it right? Tap ✓, or fix it so they practise the correct version.`,`Stimmt es? Tippe ✓ oder korrigiere es, damit die richtige Version geübt wird.`,`¿Está bien? Toca ✓ o corrígelo para que practiquen la versión correcta.`)}</p>
       ${others.map(w=>`<p class="qzn" style="margin:10px 0 4px">${esc(w.name)}</p>${wdItem(w,"other")}`).join("")}`:""}`;
 }
 function wdAllView(){
-  if(WD.all===null) return `<p class="note center" style="margin-top:30px">Loading… · Lädt…</p>`;
-  if(!WD.all.length) return `<div class="card center"><div style="font-size:40px">📚</div><h3>No words yet · Noch keine Wörter</h3>
-    <p class="note">In a session you joined, tap “Save words I learned”. · In einer Session auf „Wörter speichern“ tippen.</p></div>`;
+  if(WD.all===null) return `<p class="note center" style="margin-top:30px">${tr(`Loading…`,`Lädt…`,`Cargando…`)}</p>`;
+  if(!WD.all.length) return `<div class="card center"><div style="font-size:40px">📚</div><h3>${tr(`No words yet`,`Noch keine Wörter`,`Aún no hay palabras`)}</h3>
+    <p class="note">${tr(`In a session you joined, tap “Save words I learned”.`,`Tippe in einer Session, an der du teilnimmst, auf „Gelernte Wörter speichern“.`,`En una sesión a la que te uniste, toca “Guardar palabras que aprendí”.`)}</p></div>`;
   const groups=[]; WD.all.forEach(w=>{ let g=groups.find(x=>x.id===w.activity_id); if(!g){ g={ id:w.activity_id, title:w.title, at:w.starts_at, list:[] }; groups.push(g); } g.list.push(w); });
   const ok=WD.all.filter(w=>w.status!=="unchecked").length;
   const mast=WD.all.filter(w=>(WP.prog[w.id]||{}).mastered).length;
-  return `<div class="card"><b>${WD.all.length}</b> word${WD.all.length===1?"":"s"} saved · <b>${ok}</b> checked by a partner · <b>${mast}</b> ⭐ mastered</div>
-    <button class="btn primary" onclick="wpOpen(null)">🎯 Practise my words · Wörter üben</button>
+  return `<div class="card">${tr(`<b>${WD.all.length}</b> word${WD.all.length===1?"":"s"} saved · <b>${ok}</b> checked by a partner · <b>${mast}</b> ⭐ mastered`,`<b>${WD.all.length}</b> Wörter gespeichert · <b>${ok}</b> vom Partner geprüft · <b>${mast}</b> ⭐ gelernt`,`<b>${WD.all.length}</b> palabra${WD.all.length===1?"":"s"} guardada${WD.all.length===1?"":"s"} · <b>${ok}</b> revisadas · <b>${mast}</b> ⭐ dominadas`)}</div>
+    <button class="btn primary" onclick="wpOpen(null)">${tr(`🎯 Practise my words`,`🎯 Wörter üben`,`🎯 Practicar mis palabras`)}</button>
     ${WD.err?`<div class="err">${esc(WD.err)}</div>`:""}
     ${groups.map(g=>`<p class="dayh">${esc(g.title||"Session")} · ${g.at?esc(fmtWhen(g.at)):""}</p>${g.list.map(w=>wdItem(w,"all")).join("")}`).join("")}`;
 }
 VIEWS.words = function(){
-  if(WD.id==="all") return `<div class="topline"><button class="chip" onclick="wdBack()">← Account</button><span>📚 My words</span></div>
-    <h2 style="margin-bottom:12px">${bi("My words","Meine Wörter")}</h2>${wdAllView()}`;
+  if(WD.id==="all") return `<div class="topline"><button class="chip" onclick="wdBack()">← ${tr("Account","Konto","Cuenta")}</button><span>📚 ${tr("My words","Meine Wörter","Mis palabras")}</span></div>
+    <h2 style="margin-bottom:12px">${tr("My words","Meine Wörter","Mis palabras")}</h2>${wdAllView()}`;
   const s=bRowOf({ activity_id:WD.id })||{}, d=WD.data;
-  return `<div class="topline"><button class="chip" onclick="wdBack()">← Session</button><span>📚 Words I learned</span></div>
-    <h2 style="margin-bottom:2px">${esc(s.title||"Words I learned")}</h2>
+  return `<div class="topline"><button class="chip" onclick="wdBack()">← ${tr("Session","Session","Sesión")}</button><span>📚 ${tr("Words I learned","Gelernte Wörter","Palabras que aprendí")}</span></div>
+    <h2 style="margin-bottom:2px">${esc(s.title||tr("Words I learned","Gelernte Wörter","Palabras que aprendí"))}</h2>
     ${s.starts_at?`<p class="note" style="margin:0 0 12px">${fmtWhen(s.starts_at)}</p>`:""}
-    ${!d ? (WD.err?`<div class="err">${esc(WD.err)}</div>`:`<p class="note center" style="margin-top:30px">Loading… · Lädt…</p>`) : wdSessionView(d, s)}`;
+    ${!d ? (WD.err?`<div class="err">${esc(WD.err)}</div>`:`<p class="note center" style="margin-top:30px">${tr(`Loading…`,`Lädt…`,`Cargando…`)}</p>`) : wdSessionView(d, s)}`;
 };
 
 /* ===================== PRACTICE MY WORDS ===================== */
@@ -4659,7 +4659,7 @@ async function wpProgLoad(){
 }
 function wpDots(id){
   const p=WP.prog[id]; if(!p) return `<span class="wpdots" aria-label="Not practised yet">${"○".repeat(WP_MASTER)}</span>`;
-  if(p.mastered) return `<span class="wdtag ok">⭐ Mastered · Gelernt</span>`;
+  if(p.mastered) return `<span class="wdtag ok">${tr(`⭐ Mastered`,`⭐ Gelernt`,`⭐ Dominada`)}</span>`;
   const n=Math.min(p.streak,WP_MASTER);
   return `<span class="wpdots" aria-label="${n} of ${WP_MASTER} right in a row">${"●".repeat(n)}${"○".repeat(WP_MASTER-n)}</span>`;
 }
@@ -4740,43 +4740,43 @@ function wpBack(){
 function wpQuestion(q){
   const w=q.w, lang=wdLang(w.lang);
   if(q.t==="card") return `<div class="card center">
-      <div class="qzn">${lang} · Do you remember? · Weißt du es noch?</div>
+      <div class="qzn">${lang} · ${tr("Do you remember?","Weißt du es noch?","¿Lo recuerdas?")}</div>
       <div class="wpbig" dir="auto">${esc(w.word)}</div>
       ${WP.shown ? `<div class="wpans" dir="auto">= ${esc(w.meaning)}</div>${w.example?`<p class="note wdex" dir="auto">“${esc(w.example)}”</p>`:""}
-        <div class="brow2"><button class="btn secondary" onclick="wpCard(false)">😅 Not yet · Noch nicht</button><button class="btn primary" onclick="wpCard(true)">✅ I knew it · Gewusst</button></div>`
-      : `<button class="btn primary" onclick="wpReveal()">👀 Show answer · Lösung zeigen</button>`}
+        <div class="brow2"><button class="btn secondary" onclick="wpCard(false)">${tr(`😅 Not yet`,`😅 Noch nicht`,`😅 Todavía no`)}</button><button class="btn primary" onclick="wpCard(true)">${tr(`✅ I knew it`,`✅ Gewusst`,`✅ Lo sabía`)}</button></div>`
+      : `<button class="btn primary" onclick="wpReveal()">${tr(`👀 Show answer`,`👀 Lösung zeigen`,`👀 Ver respuesta`)}</button>`}
     </div>`;
-  const prompt = q.t==="mean" ? `What does <b dir="auto">${esc(w.word)}</b> mean? · Was bedeutet das?`
-    : q.t==="rev" ? `How do you say <b dir="auto">${esc(w.meaning)}</b>? · Wie sagt man das?`
-    : `Fill the gap · Lücke füllen:<br><span class="wpgap" dir="auto">${esc(q.blank)}</span><br><span class="note">(${esc(w.meaning)})</span>`;
+  const prompt = q.t==="mean" ? tr(`What does <b dir="auto">${esc(w.word)}</b> mean?`,`Was bedeutet <b dir="auto">${esc(w.word)}</b>?`,`¿Qué significa <b dir="auto">${esc(w.word)}</b>?`)
+    : q.t==="rev" ? tr(`How do you say <b dir="auto">${esc(w.meaning)}</b>?`,`Wie sagt man <b dir="auto">${esc(w.meaning)}</b>?`,`¿Cómo se dice <b dir="auto">${esc(w.meaning)}</b>?`)
+    : `${tr("Fill the gap","Lücke füllen","Completa el hueco")}:<br><span class="wpgap" dir="auto">${esc(q.blank)}</span><br><span class="note">(${esc(w.meaning)})</span>`;
   const right=WP.shown && WP.pick===q.a;
   return `<div class="card"><div class="qzn">${lang}</div>
       <h3 style="margin:4px 0 10px;font-weight:700">${prompt}</h3>
       ${q.o.map((o,k)=>{ const cls = !WP.shown ? "" : k===q.a ? "right" : k===WP.pick ? "wrong" : "dim";
         return `<button class="qzpick wpo ${cls}" dir="auto" ${WP.shown?"disabled":""} onclick="wpAnswer(${k})">${WP.shown&&k===q.a?"✅ ":WP.shown&&k===WP.pick?"❌ ":""}${esc(o)}</button>`; }).join("")}
-      ${WP.shown?`<div class="wpfb ${right?"ok":"no"}">${right?"🎉 Right! · Richtig!":`Not quite · Nicht ganz: <b dir="auto">${esc(w.word)}</b> = ${esc(w.meaning)}`}</div>`:""}
+      ${WP.shown?`<div class="wpfb ${right?"ok":"no"}">${right?"🎉 "+tr("Right!","Richtig!","¡Correcto!"):`${tr("Not quite","Nicht ganz","Casi")}: <b dir="auto">${esc(w.word)}</b> = ${esc(w.meaning)}`}</div>`:""}
     </div>
-    ${WP.shown?`<button class="btn primary" ${WP.busy?"disabled":""} onclick="wpNext()">${WP.step<WP.qs.length-1?"Next · Weiter →":WP.busy?"Saving… · Speichert…":"🏁 See results · Ergebnis"}</button>`:""}`;
+    ${WP.shown?`<button class="btn primary" ${WP.busy?"disabled":""} onclick="wpNext()">${WP.step<WP.qs.length-1?tr("Next →","Weiter →","Siguiente →"):WP.busy?tr(`Saving…`,`Speichert…`,`Guardando…`):tr(`🏁 See results`,`🏁 Ergebnis`,`🏁 Ver resultados`)}</button>`:""}`;
 }
 function wpResults(){
   const d=WP.done, pct=d.total?d.right/d.total:0;
   const emo = pct===1?"🏆":pct>=0.6?"🎉":"💪";
   return `<div class="card center"><div style="font-size:48px">${emo}</div>
-      <h2 style="margin:4px 0">${d.right} of ${d.total} right · ${d.right} von ${d.total} richtig</h2>
-      <p class="note" style="margin:0">${pct===1?"Perfect! · Perfekt!":pct>=0.6?"Nice work! · Gut gemacht!":"Every try helps you remember. · Jeder Versuch hilft."}</p>
-      ${d.mastered?`<p class="wpmast">⭐ ${d.mastered} new word${d.mastered===1?"":"s"} mastered! · Neu gelernt!</p>`:""}
-      ${d.unsaved?`<div class="err">Couldn't save your progress this time · Nicht gespeichert</div>`:""}</div>
+      <h2 style="margin:4px 0">${tr(`${d.right} of ${d.total} right`,`${d.right} von ${d.total} richtig`,`${d.right} de ${d.total} correctas`)}</h2>
+      <p class="note" style="margin:0">${pct===1?tr("Perfect!","Perfekt!","¡Perfecto!"):pct>=0.6?tr("Nice work!","Gut gemacht!","¡Buen trabajo!"):tr("Every try helps you remember.","Jeder Versuch hilft beim Merken.","Cada intento te ayuda a recordar.")}</p>
+      ${d.mastered?`<p class="wpmast">⭐ ${tr(`${d.mastered} new word${d.mastered===1?"":"s"} mastered!`,`${d.mastered} neue${d.mastered===1?"s Wort":" Wörter"} gelernt!`,`¡${d.mastered} palabra${d.mastered===1?"":"s"} nueva${d.mastered===1?"":"s"} dominada${d.mastered===1?"":"s"}!`)}</p>`:""}
+      ${d.unsaved?`<div class="err">${tr("Couldn't save your progress this time","Fortschritt wurde diesmal nicht gespeichert","Esta vez no se pudo guardar tu progreso")}</div>`:""}</div>
     <div class="card">${WP.qs.map((q,i)=>`<div class="wprow"><span>${WP.res[i]?"✅":"❌"}</span>
         <span style="flex:1"><b dir="auto">${esc(q.w.word)}</b> <span class="note" dir="auto">= ${esc(q.w.meaning)}</span></span>${wpDots(q.w.id)}</div>`).join("")}
-      <p class="note" style="margin:8px 0 0">${WP_MASTER} right in a row = ⭐ mastered · ${WP_MASTER}× richtig in Folge = gelernt</p></div>
-    <button class="btn primary" onclick="wpStart()">🔁 Practise again · Nochmal üben</button>
-    <button class="btn ghost" onclick="wpBack()">Done · Fertig</button>`;
+      <p class="note" style="margin:8px 0 0">${tr(`${WP_MASTER} right in a row = ⭐ mastered`,`${WP_MASTER}× richtig in Folge = ⭐ gelernt`,`${WP_MASTER} seguidas correctas = ⭐ dominada`)}</p></div>
+    <button class="btn primary" onclick="wpStart()">${tr(`🔁 Practise again`,`🔁 Nochmal üben`,`🔁 Practicar otra vez`)}</button>
+    <button class="btn ghost" onclick="wpBack()">${tr(`Done`,`Fertig`,`Hecho`)}</button>`;
 }
 VIEWS.practice = function(){
-  const top=`<div class="topline"><button class="chip" onclick="wpBack()">← ${WP.from==="session"?"Session words":WP.from==="home"?"Home":"My words"}</button><span>🎯 Practice</span></div>`;
-  if(WP.words===null) return `${top}<p class="note center" style="margin-top:40px">Building your quiz… · Quiz wird erstellt…</p>`;
-  if(!WP.qs.length) return `${top}<div class="card center"><div style="font-size:40px">📚</div><h3>No words to practise yet · Noch keine Wörter</h3>
-      <p class="note">Save words in a session first, then come back here. · Erst Wörter in einer Session speichern.</p>
+  const top=`<div class="topline"><button class="chip" onclick="wpBack()">← ${WP.from==="session"?tr("Session words","Session-Wörter","Palabras de la sesión"):WP.from==="home"?tr("Home","Start","Inicio"):tr("My words","Meine Wörter","Mis palabras")}</button><span>🎯 ${tr("Practice","Üben","Práctica")}</span></div>`;
+  if(WP.words===null) return `${top}<p class="note center" style="margin-top:40px">${tr(`Building your quiz…`,`Quiz wird erstellt…`,`Preparando tu quiz…`)}</p>`;
+  if(!WP.qs.length) return `${top}<div class="card center"><div style="font-size:40px">📚</div><h3>${tr(`No words to practise yet`,`Noch keine Wörter`,`Aún no hay palabras para practicar`)}</h3>
+      <p class="note">${tr(`Save words in a session first, then come back here.`,`Speichere erst Wörter in einer Session und komm dann zurück.`,`Primero guarda palabras en una sesión y luego vuelve aquí.`)}</p>
       ${WP.err?`<div class="err">${esc(WP.err)}</div>`:""}</div>`;
   if(WP.done) return `${top}${wpResults()}`;
   const q=WP.qs[WP.step];
@@ -4853,7 +4853,7 @@ VIEWS.lounges = function(){
   if(!A.user) return `${top}<div class="card center"><div style="font-size:40px">🛋️</div><h3>${tr("Sign in to join the lounges","Melde dich an, um mitzumachen","Entra para unirte a las salas")}</h3>
     <button class="btn primary" onclick="A.ret='lounges';go('account')">${tr("Sign in","Anmelden","Entrar")}</button></div>`;
   if(LU.err && !LU.list) return `${top}<div class="err">${esc(LU.err)}</div>`;
-  if(!LU.list) return `${top}<p class="note center">Loading… · Lädt…</p>`;
+  if(!LU.list) return `${top}<p class="note center">${tr(`Loading…`,`Lädt…`,`Cargando…`)}</p>`;
   return `${top}<div class="lugrid">${LU.list.map(l=>`<button class="card lucard" onclick="luEnter('${esc(l.id)}')">
       <div class="luflags">${luFlag(l.lang_a)}<span>⇄</span>${luFlag(l.lang_b)}</div>
       <span class="lucorner" data-lupres-badge="${esc(l.id)}">${lpBadge(l.id)}</span>
@@ -5510,7 +5510,7 @@ VIEWS.partners = function(){
     <p class="note">${tr(`Find partners is opt-in and fair both ways: switch on <b>"Show me in Find partners"</b> in your exchange profile, then come back. You can switch it off anytime.`,`Partner finden ist freiwillig und fair: Schalte im Tandem-Profil <b>„Zeig mich bei Partner finden“</b> ein und komm zurück. Du kannst es jederzeit ausschalten.`,`Buscar compañeros es voluntario y justo para todos: activa <b>“Mostrarme en Buscar compañeros”</b> en tu perfil de intercambio y vuelve. Puedes desactivarlo cuando quieras.`)}</p>
     <button class="btn primary" onclick="X.after=null;xOpen()">🗣️ ${tr("Open my exchange profile","Mein Tandem-Profil öffnen","Abrir mi perfil de intercambio")}</button></div>`;
   if(PT.err) return `${top}<div class="err">${esc(PT.err)}</div>`;
-  if(PT.list===null) return `${top}<p class="note center">Loading… · Lädt…</p>`;
+  if(PT.list===null) return `${top}<p class="note center">${tr(`Loading…`,`Lädt…`,`Cargando…`)}</p>`;
   const all=PT.list.map(p=>Object.assign({ _s:ptScore(p) }, p));
   const speakOpts=XLANGS.filter(k=>all.some(p=>(p.languages||[]).some(x=>x.code===k && x.role!=="learning")));
   const iLearn=(PT.my||[]).filter(x=>x.role==="learning").map(x=>x.code);
@@ -5626,7 +5626,7 @@ async function ptOneOpen(id){
 }
 VIEWS.partner = function(){
   const top=`<div class="topline"><button class="chip" onclick="ptOpen()">← ${tr("Find partners","Partner finden","Buscar compañeros")}</button><span>${tr("Profile","Profil","Perfil")}</span></div>`;
-  if(PT.one===undefined) return `${top}<p class="note center" style="margin-top:40px">Loading… · Lädt…</p>`;
+  if(PT.one===undefined) return `${top}<p class="note center" style="margin-top:40px">${tr(`Loading…`,`Lädt…`,`Cargando…`)}</p>`;
   if(!PT.one) return `${top}<div class="card center"><div style="font-size:40px">🔍</div><h3>${tr("This profile isn't available","Dieses Profil ist nicht verfügbar","Este perfil no está disponible")}</h3><p class="note">${tr("It may be hidden.","Es ist vielleicht verborgen.","Puede que esté oculto.")}</p>
     <button class="btn secondary" onclick="ptOpen()">👥 ${tr("Find partners","Partner finden","Buscar compañeros")}</button></div>`;
   return `${top}<div style="max-width:560px">${ptCard(PT.one,true)}</div>`;
@@ -5767,7 +5767,7 @@ function cfCard(c){
   </div>`;
 }
 function cfListHtml(){
-  if(CF.list===null) return `<p class="note center" style="margin-top:30px">Loading… · Lädt…</p>`;
+  if(CF.list===null) return `<p class="note center" style="margin-top:30px">${tr(`Loading…`,`Lädt…`,`Cargando…`)}</p>`;
   const sh=cfShown();
   if(!(CF.list||[]).some(c=>c.status==="approved")) return `<div class="card center"><div style="font-size:40px">☕</div>
       <h3>${tr(`First cafés coming soon`,`Bald die ersten Sprachcafés`,`Pronto los primeros cafés`)}</h3>
@@ -6063,14 +6063,14 @@ function attShow(){
   box.innerHTML=`<div class="sheet" role="dialog" aria-label="Who came?">
     <div class="nbhead"><h3 style="margin:0">📋 Who came? · Wer war da?</h3><button class="chip" aria-label="Close" onclick="document.getElementById('attSheet').remove()">✕</button></div>
     ${s.title?`<p class="note" style="margin:0 0 6px"><b>${esc(s.title)}</b>${s.starts_at?` · ${fmtWhen(s.starts_at)}`:""}</p>`:""}
-    ${AT.list===null ? `<p class="note center">Loading… · Lädt…</p>`
+    ${AT.list===null ? `<p class="note center">${tr(`Loading…`,`Lädt…`,`Cargando…`)}</p>`
       : !AT.list.length ? `<p class="note center">Nobody joined this session. · Niemand war angemeldet.</p>`
       : AT.list.map(p=>`<div class="atrow">${avSmall(p.user_id)} <b>${esc(p.name||"Member")}</b>${relBadges(p.reliability)}
           <div class="note" style="margin:2px 0 0">${p.checked_in_at?`🙋 Checked in at ${t(p.checked_in_at)}${p.on_time?" (on time)":" (late)"}`:"Didn't check in · Nicht eingecheckt"}</div>
           <div class="row">${chip(p,"on_time","✓ On time")}${chip(p,"late","⏰ Late")}${chip(p,"no_show","✗ No-show")}</div></div>`).join("")}
     ${AT.list&&AT.list.length?`<p class="note" style="margin:10px 0 0">People you don't mark aren't counted either way. Be fair: a no-show lowers their score. · Unmarkierte zählen nicht.</p>`:""}
     ${AT.err?`<div class="err">${esc(AT.err)}</div>`:""}
-    ${AT.list&&AT.list.length?`<button class="btn primary" ${AT.busy?"disabled":""} onclick="attSave()">${AT.busy?"Saving… · Speichert…":"💾 Save · Speichern"}</button>`:""}
+    ${AT.list&&AT.list.length?`<button class="btn primary" ${AT.busy?"disabled":""} onclick="attSave()">${AT.busy?tr(`Saving…`,`Speichert…`,`Guardando…`):"💾 Save · Speichern"}</button>`:""}
   </div>`;
 }
 async function attSave(){
@@ -6128,7 +6128,7 @@ function mrStrikes(){
 
 /* ===================== VIDEO CALL LINKS ===================== */
 const VL = {};   // activity_id -> { url, provider } (only host / joined people get rows back)
-const V_PROV = { jitsi:"Jitsi", zoom:"Zoom", meet:"Google Meet", whatsapp:"WhatsApp", teams:"Teams", other:"video call" };
+const V_PROV = { jitsi:"Jitsi", zoom:"Zoom", meet:"Google Meet", whatsapp:"WhatsApp", teams:"Teams", get other(){ return tr("video call","Videoanruf","videollamada"); } };
 function vProvider(u){
   const h=String(u||"").toLowerCase();
   return /meet\.jit\.si|jitsi/.test(h)?"jitsi" : /zoom\.us|zoom\.com/.test(h)?"zoom" : /meet\.google/.test(h)?"meet"
@@ -6158,13 +6158,13 @@ function vBtn(id, primary, s){
   const name=esc(V_PROV[v.provider]||"video call");
   if(s && !s.is_host && s.starts_at){
     const st=new Date(s.starts_at).getTime(), open=st-V_EARLY*60000, end=st+(s.duration_min||60)*60000+30*60000, now=Date.now();
-    if(now>=end) return `<span class="btn vbtn vlock" aria-disabled="true">🎥 Session ended · Vorbei</span>`;
+    if(now>=end) return `<span class="btn vbtn vlock" aria-disabled="true">🎥 ${tr("Session ended","Session vorbei","Sesión terminada")}</span>`;
     if(now<open){
       const t=new Date(open).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
-      return `<a class="btn ${primary?"primary":""} vbtn vlock" data-open="${open}" href="${esc(v.url)}" target="_blank" rel="noopener noreferrer" onclick="return vLockClick(this)">🎥 Opens at ${t} · öffnet um ${t}</a>`;
+      return `<a class="btn ${primary?"primary":""} vbtn vlock" data-open="${open}" href="${esc(v.url)}" target="_blank" rel="noopener noreferrer" onclick="return vLockClick(this)">🎥 ${tr(`Opens at ${t}`,`Öffnet um ${t}`,`Abre a las ${t}`)}</a>`;
     }
   }
-  return `<a class="btn ${primary?"primary":""} vbtn" href="${esc(v.url)}" target="_blank" rel="noopener noreferrer">🎥 Join ${name} · Videoanruf</a>`;
+  return `<a class="btn ${primary?"primary":""} vbtn" href="${esc(v.url)}" target="_blank" rel="noopener noreferrer">🎥 ${tr(`Join ${name}`,`${name} beitreten`,`Unirse a ${name}`)}</a>`;
 }
 function vLockClick(a){
   const open=+a.dataset.open; if(!open || Date.now()>=open) return true;
@@ -6175,9 +6175,9 @@ function vLine(s){
   const id=s.activity_id, v=VL[id];
   if(!A.user || !(s.is_host || s.my_status==="joined")) return "";
   if(s.format==="in_person") return pDetails(s);
-  if(v) return vBtn(id, false, s) + `<p class="note center" style="margin:4px 0 0">🔒 Only people in this session see this link · Nur Teilnehmende sehen den Link</p>`;
-  if(s.is_host && new Date(s.starts_at)>new Date()) return `<div class="vline">🎥 No video link yet · <button class="linkbtn" onclick="hEdit('${id}')">Add one · Hinzufügen</button></div>`;
-  if(!s.is_host) return `<div class="vline">🎥 The host hasn't added a video link yet · Noch kein Video-Link</div>`;
+  if(v) return vBtn(id, false, s) + `<p class="note center" style="margin:4px 0 0">${tr(`🔒 Only people in this session see this link`,`🔒 Nur Teilnehmende sehen den Link`,`🔒 Solo los participantes ven este enlace`)}</p>`;
+  if(s.is_host && new Date(s.starts_at)>new Date()) return `<div class="vline">🎥 ${tr("No video link yet","Noch kein Video-Link","Aún no hay enlace de vídeo")} · <button class="linkbtn" onclick="hEdit('${id}')">${tr("Add one","Hinzufügen","Añadir")}</button></div>`;
+  if(!s.is_host) return `<div class="vline">${tr(`🎥 The host hasn't added a video link yet`,`🎥 Der Host hat noch keinen Video-Link hinzugefügt`,`🎥 El anfitrión aún no ha añadido un enlace de vídeo`)}</div>`;
   return "";
 }
 
@@ -6280,7 +6280,7 @@ function speaksLearns(arr){
 }
 function bPeopleHtml(s){
   const ps=B.people[s.activity_id];
-  if(!ps) return `<p class="note center">Loading… · Lädt…</p>`;
+  if(!ps) return `<p class="note center">${tr(`Loading…`,`Lädt…`,`Cargando…`)}</p>`;
   if(!ps.length) return `<p class="note center">${tr(`Nobody yet`,`Noch niemand`,`Aún nadie`)}</p>`;
   const lab={ pending:"🔔 "+tr("Asks to join","Möchte teilnehmen","Pide unirse"), joined:"✅ "+tr("In","Dabei","Dentro"), offered:"🎁 "+tr("Seat offered","Platz angeboten","Plaza ofrecida"), waitlisted:"🕒 "+tr("Waitlist","Warteliste","Lista de espera") };
   return `<div style="margin:6px 0 4px">${ps.map(p=>`<div style="padding:8px 0;border-top:1px solid var(--line)">
@@ -6869,11 +6869,11 @@ function navSync(){
 const SH = { list:null, lang:"", lvl:-1, err:"", msg:"", busy:false, admin:false, f:null,
   fl:{ lang:[], base:[], topic:[], lvl:[], kind:[] }, q:"", view:null, showF:false };
 const SH_TOPICS = [
-  ["grammar","📐","Grammar","Grammatik"],["vocabulary","📚","Vocabulary","Wortschatz"],["conversation","💬","Conversation","Gespräch"],
-  ["pronunciation","🔊","Pronunciation","Aussprache"],["culture","🌍","Culture","Kultur"],["everyday","🏠","Everyday life","Alltag"],
-  ["travel","✈️","Travel","Reisen"],["work","💼","Work","Arbeit"],["exams","🎓","Exams","Prüfungen"]
+  ["grammar","📐","Grammar","Grammatik","Gramática"],["vocabulary","📚","Vocabulary","Wortschatz","Vocabulario"],["conversation","💬","Conversation","Gespräch","Conversación"],
+  ["pronunciation","🔊","Pronunciation","Aussprache","Pronunciación"],["culture","🌍","Culture","Kultur","Cultura"],["everyday","🏠","Everyday life","Alltag","Vida diaria"],
+  ["travel","✈️","Travel","Reisen","Viajes"],["work","💼","Work","Arbeit","Trabajo"],["exams","🎓","Exams","Prüfungen","Exámenes"]
 ];
-function shTopic(k){ return SH_TOPICS.find(x=>x[0]===k)||[k,"🏷️",k,k]; }
+function shTopic(k){ const x=SH_TOPICS.find(x=>x[0]===k)||[k,"🏷️",k,k,k]; return [x[0],x[1],tr(x[2],x[3],x[4]),x[3],x[4]]; }
 function shView(){ if(!SH.view){ try{ SH.view=localStorage.getItem("pt_shview"); }catch(e){} SH.view=SH.view==="list"?"list":"grid"; } return SH.view; }
 function shSetView(v){ SH.view=v; try{ localStorage.setItem("pt_shview",v); }catch(e){} xr(); }
 function shFlt(g,v){ const a=SH.fl[g], i=a.indexOf(v); if(i>=0) a.splice(i,1); else a.push(v); xr(); }
@@ -6896,26 +6896,26 @@ function shMatch(it){
   return true;
 }
 const SH_KINDS = [
-  ["worksheet","📝","Worksheet","Arbeitsblatt"],
-  ["flashcards","🃏","Flashcards","Karteikarten"],
-  ["guide","📘","Guide","Leitfaden"],
-  ["game","🎲","Game","Spiel"],
-  ["audio","🎧","Audio","Audio"],
-  ["other","📦","Other","Sonstiges"]
+  ["worksheet","📝","Worksheet","Arbeitsblatt","Hoja de ejercicios"],
+  ["flashcards","🃏","Flashcards","Karteikarten","Tarjetas"],
+  ["guide","📘","Guide","Leitfaden","Guía"],
+  ["game","🎲","Game","Spiel","Juego"],
+  ["audio","🎧","Audio","Audio","Audio"],
+  ["other","📦","Other","Sonstiges","Otro"]
 ];
 const SH_MAX = 50*1024*1024;
-function shKind(k){ return SH_KINDS.find(x=>x[0]===k) || SH_KINDS[5]; }
+function shKind(k){ const x=SH_KINDS.find(x=>x[0]===k) || SH_KINDS[5]; return [x[0],x[1],tr(x[2],x[3],x[4]),x[3],x[4]]; }
 function shSize(b){ if(!b) return ""; return b<1024*1024 ? Math.max(1,Math.round(b/1024))+" KB" : (b/1048576).toFixed(1).replace(/\.0$/,"")+" MB"; }
 function shErr(e){
   const m=String((e&&e.message)||e||"");
-  if(/adult_required/.test(m)) return "Please confirm you're 18+ in your exchange profile first · Bitte zuerst 18+ bestätigen";
-  if(/too_many_resources/.test(m)) return "You've shared 50 resources. Please delete some first · Maximal 50";
-  if(/sign in/i.test(m)) return "Please sign in to download · Bitte anmelden";
-  if(/not found/i.test(m)) return "This resource isn't available any more · Nicht mehr verfügbar";
+  if(/adult_required/.test(m)) return tr(`Please confirm you're 18+ in your exchange profile first`,`Bitte zuerst 18+ bestätigen`,`Primero confirma 18+ en tu perfil de intercambio`);
+  if(/too_many_resources/.test(m)) return tr(`You've shared 50 resources. Please delete some first`,`Maximal 50`,`Ya compartiste 50 recursos. Elimina alguno primero`);
+  if(/sign in/i.test(m)) return tr(`Please sign in to download`,`Bitte anmelden`,`Entra para descargar`);
+  if(/not found/i.test(m)) return tr(`This resource isn't available any more`,`Nicht mehr verfügbar`,`Este recurso ya no está disponible`);
   if(/row-level security|violates row|Unauthorized|403/i.test(m)) return "Only admins can do this · Nur für Admins";
-  if(/exceeded|too large|413/i.test(m)) return "File too big (max 50 MB) · Datei zu groß";
+  if(/exceeded|too large|413/i.test(m)) return tr(`File too big (max 50 MB)`,`Datei zu groß`,`Archivo demasiado grande (máx. 50 MB)`);
   if(/fetch|network|offline/i.test(m)) return tr(`No connection. Try again`,`Keine Verbindung`,`Sin conexión. Inténtalo de nuevo`);
-  return m || "Something went wrong · Etwas ist schiefgelaufen";
+  return m || tr(`Something went wrong`,`Etwas ist schiefgelaufen`,`Algo salió mal`);
 }
 function shOpen(){ SH.err=""; SH.msg=""; SH.f=null; go("shop"); shLoad(); }
 async function shOneLoad(id){
@@ -6925,13 +6925,13 @@ async function shOneLoad(id){
   if(S.screen==="shopitem") xr();
 }
 VIEWS.shopitem = function(){
-  const top=`<div class="topline"><button class="chip" onclick="shOpen()">← PonteShop</button><span>Resource</span></div>`;
-  if(SH.one===undefined || SH.one===null) return `${top}<p class="note center" style="margin-top:40px">Loading… · Lädt…</p>`;
-  if(!SH.one) return `${top}<div class="card center"><div style="font-size:40px">🔍</div><h3>This resource isn't available · Nicht verfügbar</h3>
-    <p class="note">It may have been hidden or deleted. · Vielleicht versteckt oder gelöscht.</p><button class="btn secondary" onclick="shOpen()">See all resources · Alle Materialien</button></div>`;
-  return `${top}${!A.user?`<p class="sub">Someone shared a free resource with you. Sign in (free) to open it. · Jemand hat Material mit dir geteilt.</p>`:""}
+  const top=`<div class="topline"><button class="chip" onclick="shOpen()">← PonteShop</button><span>${tr("Resource","Material","Recurso")}</span></div>`;
+  if(SH.one===undefined || SH.one===null) return `${top}<p class="note center" style="margin-top:40px">${tr(`Loading…`,`Lädt…`,`Cargando…`)}</p>`;
+  if(!SH.one) return `${top}<div class="card center"><div style="font-size:40px">🔍</div><h3>${tr(`This resource isn't available`,`Dieses Material ist nicht verfügbar`,`Este recurso no está disponible`)}</h3>
+    <p class="note">${tr(`It may have been hidden or deleted.`,`Es wurde vielleicht versteckt oder gelöscht.`,`Puede que se haya ocultado o eliminado.`)}</p><button class="btn secondary" onclick="shOpen()">${tr(`See all resources`,`Alle Materialien ansehen`,`Ver todos los recursos`)}</button></div>`;
+  return `${top}${!A.user?`<p class="sub">${tr(`Someone shared a free resource with you. Sign in (free) to open it.`,`Jemand hat kostenloses Material mit dir geteilt. Melde dich (kostenlos) an, um es zu öffnen.`,`Alguien compartió un recurso gratis contigo. Entra (gratis) para abrirlo.`)}</p>`:""}
     <div class="shgrid" style="grid-template-columns:1fr">${shCard(SH.one)}</div>
-    <p class="center" style="margin-top:12px"><button class="linkbtn" onclick="shOpen()">See all free resources →</button></p>${legalLinks()}`;
+    <p class="center" style="margin-top:12px"><button class="linkbtn" onclick="shOpen()">${tr("See all free resources →","Alle kostenlosen Materialien →","Ver todos los recursos gratis →")}</button></p>${legalLinks()}`;
 };
 async function shLoad(){
   SH.err="";
@@ -6970,7 +6970,7 @@ async function shPreview(id){
   const o=document.createElement("div"); o.id="pvov"; o.className="pvov"; o._urls=[];
   o.innerHTML=`<div class="pvbox" role="dialog" aria-modal="true" aria-label="Preview">
     <div class="pvhd"><b>👁 ${esc(it.title||"Preview")}</b><button class="chip" onclick="shPvClose()" aria-label="Close">✕</button></div>
-    <div class="pvbody" id="pvbody"><p class="note center" style="margin:40px 0">Loading preview… · Vorschau lädt…</p></div>
+    <div class="pvbody" id="pvbody"><p class="note center" style="margin:40px 0">${tr(`Loading preview…`,`Vorschau lädt…`,`Cargando vista previa…`)}</p></div>
     <div class="pvft"><button class="btn primary" onclick="shPvClose();shGet('${id}')">⬇ Download</button></div></div>`;
   o.addEventListener("click", e=>{ if(e.target===o) shPvClose(); });
   document.body.appendChild(o); document.body.style.overflow="hidden"; document.addEventListener("keydown", shPvKey);
@@ -7006,15 +7006,15 @@ async function shPreview(id){
       else if(/\.(mp3|m4a|wav)$/.test(name)) body.innerHTML=`<div class="center" style="padding:30px 0"><div style="font-size:44px">🎧</div><audio controls src="${url}" style="width:100%;margin-top:10px"></audio></div>`;
       else { const t=await blob.text(); body.innerHTML=`<pre class="pvtxt">${esc(t.slice(0,20000))}${t.length>20000?"\n…":""}</pre>`; }
     }
-  }catch(e){ fail(/pt_shop_preview/.test(String(e&&e.message))?"Preview isn't switched on yet (step 30). · Vorschau noch nicht aktiv.":shErr(e)); }
+  }catch(e){ fail(/pt_shop_preview/.test(String(e&&e.message))?tr(`Preview isn't switched on yet (step 30).`,`Vorschau noch nicht aktiv.`,`La vista previa aún no está activada.`):shErr(e)); }
 }
 function shCard(it){
   const k=shKind(it.kind), t=T[it.language];
-  const lvl = it.level==null ? "All levels · Alle Niveaus" : RANKS[it.level];
+  const lvl = it.level==null ? tr("All levels","Alle Niveaus","Todos los niveles") : RANKS[it.level];
   const busy = SH.busy===it.id;
   const act = !A.user
-    ? `<button class="btn secondary" onclick="A.ret=S.screen==='shopitem'?'shopitem':'shop';A.err='';A.msg='Sign in to open free resources · Melde dich an, um kostenlose Materialien zu öffnen';go('account')">Sign in to ${it.has_link?"open":"download"}</button>`
-    : `<div class="shacts">${shCanPreview(it)?`<button class="btn shpv" onclick="shPreview('${it.id}')">👁 Preview</button>`:""}<button class="btn primary" ${busy?"disabled":""} onclick="shGet('${it.id}')">${busy?"Preparing… · Lädt…":it.has_link?"↗ Open · Öffnen":(it.mine?"⬇ Download again":"⬇ Download")}</button></div>`;
+    ? `<button class="btn secondary" onclick="A.ret=S.screen==='shopitem'?'shopitem':'shop';A.err='';A.msg=tr('Sign in to open free resources','Melde dich an, um kostenlose Materialien zu öffnen','Entra para abrir recursos gratis');go('account')">${it.has_link?tr("Sign in to open","Zum Öffnen anmelden","Entra para abrir"):tr("Sign in to download","Zum Herunterladen anmelden","Entra para descargar")}</button>`
+    : `<div class="shacts">${shCanPreview(it)?`<button class="btn shpv" onclick="shPreview('${it.id}')">👁 ${tr("Preview","Vorschau","Vista previa")}</button>`:""}<button class="btn primary" ${busy?"disabled":""} onclick="shGet('${it.id}')">${busy?tr("Preparing…","Lädt…","Preparando…"):it.has_link?"↗ "+tr("Open","Öffnen","Abrir"):(it.mine?"⬇ "+tr("Download again","Nochmal herunterladen","Descargar otra vez"):"⬇ "+tr("Download","Herunterladen","Descargar"))}</button></div>`;
   const manage = SH.admin || it.is_owner;
   const admin = manage ? `
     ${shStatus(it)}
@@ -7031,37 +7031,37 @@ function shCard(it){
       <div class="shico" style="${t?`background:${t.color}1F`:""}">${k[1]}</div>
       <div style="min-width:0;flex:1">
         <h3>${esc(it.title)}</h3>
-        <div class="shmeta"><span class="shfree">${it.price_cents>0?"Paid":"Free · Gratis"}</span><span>${t?`${t.flag} ${esc(t.nameEn)}`:"🌍 Any language"}</span><span>${lvl}</span><span>${k[2]}</span>${T[it.base_language]?`<span title="Explanations are in ${esc(T[it.base_language].nameEn)}">📖 in ${esc(T[it.base_language].nameEn)}</span>`:""}</div>
+        <div class="shmeta"><span class="shfree">${it.price_cents>0?tr("Paid","Kostenpflichtig","De pago"):tr("Free","Kostenlos","Gratis")}</span><span>${t?`${t.flag} ${esc(lname(it.language))}`:"🌍 "+tr("Any language","Alle Sprachen","Cualquier idioma")}</span><span>${lvl}</span><span>${k[2]}</span>${T[it.base_language]?`<span>📖 ${tr("in","auf","en")} ${esc(UI==="es"?lname(it.base_language).toLowerCase():lname(it.base_language))}</span>`:""}</div>
         ${(it.topics||[]).filter(x=>x!==SH_START).length?`<div class="shtopics" style="margin-top:6px">${it.topics.filter(x=>x!==SH_START).map(x=>{ const tp=shTopic(x); return `<span>${tp[1]} ${esc(tp[2])}</span>`; }).join("")}</div>`:""}
       </div>
     </div>
     ${it.description?`<p class="shdesc">${esc(it.description)}</p>`:""}
-    <p class="note" style="margin:0">${it.has_link?"🔗 Link (opens in a new tab)":`📄 ${esc(it.file_name||"")}${it.file_size?` · ${shSize(it.file_size)}`:""}`}${it.mine&&A.user?" · ✓ You have this":""}</p>
+    <p class="note" style="margin:0">${it.has_link?"🔗 "+tr("Link (opens in a new tab)","Link (öffnet in neuem Tab)","Enlace (se abre en otra pestaña)"):`📄 ${esc(it.file_name||"")}${it.file_size?` · ${shSize(it.file_size)}`:""}`}${it.mine&&A.user?" · ✓ "+tr("You have this","Hast du schon","Ya lo tienes"):""}</p>
     ${act}${admin}
   </div>`;
 }
 
 function shRow(it){
   const k=shKind(it.kind), t=T[it.language], b=T[it.base_language], busy=SH.busy===it.id;
-  const btn = !A.user ? `<button class="btn secondary" onclick="A.ret='shop';A.err='';A.msg='';go('account')">Sign in</button>`
-    : `<button class="btn primary" ${busy?"disabled":""} onclick="shGet('${it.id}')">${busy?"…":it.has_link?"↗":"⬇"}<span> ${it.has_link?"Open":"Download"}</span></button>`;
+  const btn = !A.user ? `<button class="btn secondary" onclick="A.ret='shop';A.err='';A.msg='';go('account')">${tr("Sign in","Anmelden","Entrar")}</button>`
+    : `<button class="btn primary" ${busy?"disabled":""} onclick="shGet('${it.id}')">${busy?"…":it.has_link?"↗":"⬇"}<span> ${it.has_link?tr("Open","Öffnen","Abrir"):tr("Download","Herunterladen","Descargar")}</span></button>`;
   return `<div class="shrow ${it.published?"":"off"}">
     <div class="shico" style="${t?`background:${t.color}1F`:""}">${k[1]}</div>
-    <div style="flex:1;min-width:0"><div class="rt">${esc(it.title)}${it.price_cents>0?"":` <span class="shfree" style="margin-left:6px;vertical-align:2px">Free · Gratis</span>`}</div>
-      <div class="note" style="margin:2px 0 0">${t?`${t.flag} ${esc(t.nameEn)}`:"🌍 Any"} · ${it.level==null?"All levels":RANKS[it.level]} · ${esc(k[2])}${b?` · 📖 in ${esc(b.nameEn)}`:""}${SH.admin?` · ⬇ ${it.downloads||0}`:""}${it.mine&&A.user?" · ✓":""}</div></div>
-    <div class="shract">${SH.admin||it.is_owner?`<button class="chip" style="flex:none" onclick="shEdit('${it.id}')" aria-label="Edit">✏️</button>`:""}${A.user&&shCanPreview(it)?`<button class="chip shrpv" onclick="shPreview('${it.id}')" aria-label="Preview" title="Preview · Vorschau">👁 Preview</button>`:""}${btn}</div></div>`;
+    <div style="flex:1;min-width:0"><div class="rt">${esc(it.title)}${it.price_cents>0?"":` <span class="shfree" style="margin-left:6px;vertical-align:2px">${tr("Free","Kostenlos","Gratis")}</span>`}</div>
+      <div class="note" style="margin:2px 0 0">${t?`${t.flag} ${esc(lname(it.language))}`:"🌍 "+tr("Any","Alle","Cualquiera")} · ${it.level==null?tr("All levels","Alle Niveaus","Todos los niveles"):RANKS[it.level]} · ${esc(k[2])}${b?` · 📖 ${tr("in","auf","en")} ${esc(UI==="es"?lname(it.base_language).toLowerCase():lname(it.base_language))}`:""}${SH.admin?` · ⬇ ${it.downloads||0}`:""}${it.mine&&A.user?" · ✓":""}</div></div>
+    <div class="shract">${SH.admin||it.is_owner?`<button class="chip" style="flex:none" onclick="shEdit('${it.id}')" aria-label="Edit">✏️</button>`:""}${A.user&&shCanPreview(it)?`<button class="chip shrpv" onclick="shPreview('${it.id}')" aria-label="Preview" title="${tr("Preview","Vorschau","Vista previa")}">👁 ${tr("Preview","Vorschau","Vista previa")}</button>`:""}${btn}</div></div>`;
 }
 function shListHtml(){
   const list=SH.list;
-  if(list===null) return `<p class="note center" style="margin-top:30px">Loading… · Lädt…</p>`;
+  if(list===null) return `<p class="note center" style="margin-top:30px">${tr(`Loading…`,`Lädt…`,`Cargando…`)}</p>`;
   if(!list.length) return `<div class="card center"><div style="font-size:44px">🎁</div>
-        <h3>First resources coming soon · Bald gibt's die ersten Materialien</h3>
-        <p class="note">Worksheets, flashcards and conversation guides, made by PonteTalk. Free for members.<br><span class="de">Arbeitsblätter, Karteikarten und Gesprächsleitfäden – kostenlos für Mitglieder.</span></p>
-        ${A.user?"":`<button class="btn secondary" onclick="A.ret='shop';A.err='';A.msg='';go('account')">Create a free account · Kostenloses Konto</button>`}</div>`;
+        <h3>${tr(`First resources coming soon`,`Bald gibt's die ersten Materialien`,`Pronto los primeros recursos`)}</h3>
+        <p class="note">${tr(`Worksheets, flashcards and conversation guides, made by PonteTalk. Free for members.`,`Arbeitsblätter, Karteikarten und Gesprächsleitfäden – kostenlos für Mitglieder.`,`Hojas de ejercicios, tarjetas y guías de conversación hechas por PonteTalk. Gratis para miembros.`)}</p>
+        ${A.user?"":`<button class="btn secondary" onclick="A.ret='shop';A.err='';A.msg='';go('account')">${tr(`Create a free account`,`Kostenloses Konto erstellen`,`Crear una cuenta gratis`)}</button>`}</div>`;
   const shown=list.filter(shMatch);
-  if(!shown.length) return `<div class="card center"><p class="note">Nothing matches these filters yet · Nichts gefunden</p>
-      <p class="note">Missing something? Tell us: <a href="mailto:${esc(LEGAL.email)}">${esc(LEGAL.email)}</a></p>
-      <button class="chip" onclick="shClear()">✕ Clear filters · Filter löschen</button></div>`;
+  if(!shown.length) return `<div class="card center"><p class="note">${tr(`Nothing matches these filters yet`,`Noch nichts passt zu diesen Filtern`,`Aún no hay nada con estos filtros`)}</p>
+      <p class="note">${tr("Missing something? Tell us:","Fehlt etwas? Schreib uns:","¿Echas algo en falta? Escríbenos:")} <a href="mailto:${esc(LEGAL.email)}">${esc(LEGAL.email)}</a></p>
+      <button class="chip" onclick="shClear()">${tr(`✕ Clear filters`,`✕ Filter löschen`,`✕ Quitar filtros`)}</button></div>`;
   return shSections(shown);
 }
 function shPaint(){ const el=document.getElementById("shlist"); if(el) el.innerHTML=shListHtml(); }
@@ -7084,24 +7084,25 @@ function shSections(shown){
   const start = searching ? [] : shown.filter(shIsStart);
   const rest = shown.filter(it=>searching || !shIsStart(it));
   const L=shLearn();
-  let out = start.length ? `<div class="shstart">${shShelf("📘 Start here · Hier starten", start)}</div>` : "";
+  let out = start.length ? `<div class="shstart">${shShelf(tr(`📘 Start here`,`📘 Hier starten`,`📘 Empieza aquí`), start)}</div>` : "";
   if(L){
     const mine=rest.filter(it=>it.language===L || !it.language);
-    if(!mine.length) return out + `<div class="card center"><p class="note">No ${esc(T[L]?T[L].nameEn:L)} resources yet. More are coming! · Noch nichts hier</p>
-      <button class="chip" onclick="shSetLearn('')">🌍 See all languages</button></div>`;
-    RANKS.forEach((r,i)=>{ out += shShelf(`${r}${i===0?" · Absolute beginner":i===1?" · Beginner":i===2?" · Elementary":i===3?" · Intermediate":" · Advanced"}`, mine.filter(it=>it.level===i)); });
-    out += shShelf("🌈 All levels · Alle Niveaus", mine.filter(it=>it.level==null));
+    if(!mine.length) return out + `<div class="card center"><p class="note">${tr(`No ${esc(T[L]?T[L].nameEn:L)} resources yet. More are coming!`,`Noch keine Materialien für ${esc(T[L]?lname(L):L)}. Mehr kommt bald!`,`Aún no hay recursos de ${esc(T[L]?lname(L).toLowerCase():L)}. ¡Pronto habrá más!`)}</p>
+      <button class="chip" onclick="shSetLearn('')">🌍 ${tr("See all languages","Alle Sprachen ansehen","Ver todos los idiomas")}</button></div>`;
+    const LV=[tr("Absolute beginner","Ohne Vorkenntnisse","Principiante absoluto"),tr("Beginner","Anfänger","Principiante"),tr("Elementary","Grundstufe","Elemental"),tr("Intermediate","Mittelstufe","Intermedio"),tr("Advanced","Fortgeschritten","Avanzado")];
+    RANKS.forEach((r,i)=>{ out += shShelf(`${r} · ${LV[Math.min(i,4)]}`, mine.filter(it=>it.level===i)); });
+    out += shShelf(tr(`🌈 All levels`,`🌈 Alle Niveaus`,`🌈 Todos los niveles`), mine.filter(it=>it.level==null));
     return out;
   }
-  XLANGS.forEach(k=>{ out += shShelf(`${T[k].flag} ${esc(T[k].nameEn)}`, rest.filter(it=>it.language===k)); });
-  out += shShelf("🌍 Any language · Alle Sprachen", rest.filter(it=>!it.language || !XLANGS.includes(it.language)));
+  XLANGS.forEach(k=>{ out += shShelf(`${T[k].flag} ${esc(lname(k))}`, rest.filter(it=>it.language===k)); });
+  out += shShelf(tr(`🌍 Any language`,`🌍 Alle Sprachen`,`🌍 Cualquier idioma`), rest.filter(it=>!it.language || !XLANGS.includes(it.language)));
   return out;
 }
 function shLearnBar(list){
   const langs=XLANGS.filter(k=>list.some(it=>it.language===k && !shIsStart(it)));
   if(!langs.length) return "";
   const L=shLearn(), b=(k,l)=>`<button class="chip ${L===k?"on":""}" aria-pressed="${L===k}" onclick="shSetLearn('${k}')">${l}</button>`;
-  return `<div class="shlearn"><b>I want to learn · Ich lerne</b><div class="row" style="margin:6px 0 0">${b("","🌍 All")}${langs.map(k=>b(k,`${T[k].flag} ${esc(T[k].nameEn)}`)).join("")}</div></div>`;
+  return `<div class="shlearn"><b>${tr("I want to learn","Ich lerne","Quiero aprender")}</b><div class="row" style="margin:6px 0 0">${b("","🌍 "+tr("All","Alle","Todos"))}${langs.map(k=>b(k,`${T[k].flag} ${esc(lname(k))}`)).join("")}</div></div>`;
 }
 VIEWS.shop = function(){
   const list=SH.list||[], F=SH.fl, n=shFCount();
@@ -7112,39 +7113,39 @@ VIEWS.shop = function(){
     const sel=groups.flatMap(g=>g[1]).filter(o=>F[o[0]].includes(o[1]));
     const lbl = sel.length===1 ? sel[0][2] : sel.length ? `${title} · ${sel.length}` : title;
     const open=SH.dd===key;
-    return `<div class="ddw"><button class="chip ${sel.length?"on":""}" aria-haspopup="true" aria-expanded="${open}" title="${title} · ${de}" onclick="event.stopPropagation();shDd('${key}')">${lbl} <span class="car">▾</span></button>`
+    return `<div class="ddw"><button class="chip ${sel.length?"on":""}" aria-haspopup="true" aria-expanded="${open}" title="${title}" onclick="event.stopPropagation();shDd('${key}')">${lbl} <span class="car">▾</span></button>`
       + (open?`<div class="ddm ${right?"r":""}" role="menu">${groups.map(g=>(g[0]?`<div class="ddh">${g[0]}</div>`:"")+g[1].map(opt).join("")).join("")}</div>`:"")+`</div>`; };
   const langs=XLANGS.filter(k=>list.some(it=>it.language===k));
   const bases=XLANGS.filter(k=>list.some(it=>(it.base_language||"en")===k));
   const topics=SH_TOPICS.filter(tp=>list.some(it=>(it.topics||[]).includes(tp[0])));
   const kinds=SH_KINDS.filter(kd=>list.some(it=>it.kind===kd[0]));
   const v=shView(), vb=(k,l)=>`<button class="${v===k?"on":""}" aria-pressed="${v===k}" onclick="shSetView('${k}')">${l}</button>`;
-  return `<div class="topline"><button class="chip" onclick="goHome()">← Back</button><span>PonteShop</span></div>
+  return `<div class="topline"><button class="chip" onclick="goHome()">← ${tr("Back","Zurück","Atrás")}</button><span>PonteShop</span></div>
   <div class="shhero">
-    <h2>PonteShop <span class="shfree">Free</span></h2>
-    <p>Free worksheets, flashcards and guides to practise between sessions.<br><span class="de">Kostenlose Materialien zum Üben zwischen den Sessions.</span></p>
+    <h2>PonteShop <span class="shfree">${tr("Free","Kostenlos","Gratis")}</span></h2>
+    <p>${tr(`Free worksheets, flashcards and guides to practise between sessions.`,`Kostenlose Arbeitsblätter, Karteikarten und Leitfäden zum Üben zwischen den Sessions.`,`Hojas de ejercicios, tarjetas y guías gratis para practicar entre sesiones.`)}</p>
   </div>
-  ${A.user?`<button class="btn ${SH.admin?"primary":"secondary"}" style="margin-bottom:12px" onclick="shNew()">＋ ${SH.admin?"Add resource · Material hinzufügen":"Share a resource · Material teilen"}</button>`:""}
+  ${A.user?`<button class="btn ${SH.admin?"primary":"secondary"}" style="margin-bottom:12px" onclick="shNew()">＋ ${SH.admin?tr("Add resource","Material hinzufügen","Añadir recurso"):tr("Share a resource","Material teilen","Compartir un recurso")}</button>`:""}
   ${(()=>{ const L=SH.list||[], mineN=L.filter(x=>x.is_owner).length, pend=L.filter(x=>x.approval==="pending");
      return (mineN?`<div class="vsw" role="group" aria-label="Which resources" style="margin:0 0 12px;width:fit-content">
-        <button class="${!SH.mineOnly?"on":""}" onclick="SH.mineOnly=false;xr()">All resources</button>
-        <button class="${SH.mineOnly?"on":""}" onclick="SH.mineOnly=true;xr()">📂 My resources (${mineN})</button></div>`:"")
+        <button class="${!SH.mineOnly?"on":""}" onclick="SH.mineOnly=false;xr()">${tr("All resources","Alle Materialien","Todos los recursos")}</button>
+        <button class="${SH.mineOnly?"on":""}" onclick="SH.mineOnly=true;xr()">📂 ${tr("My resources","Meine Materialien","Mis recursos")} (${mineN})</button></div>`:"")
       + (SH.admin&&pend.length&&!SH.mineOnly?`<div class="cfadm"><b>⏳ Waiting for your approval · ${pend.length}</b><p class="note" style="margin:2px 0 8px">Shared by hosts for the public Shop.</p><div class="shgrid">${pend.map(shCard).join("")}</div></div>`:""); })()}
   ${SH.msg?`<div class="card center" style="padding:10px;margin-bottom:10px;background:var(--teal-soft)">${esc(SH.msg)}</div>`:""}
   ${list.length?`
   <div class="shftop">
-    <input type="text" placeholder="🔍 Search · Suchen" value="${esc(SH.q)}" oninput="SH.q=this.value;shPaint()" autocomplete="off">
-    <div class="vsw" role="group" aria-label="View">${vb("grid","▦ Grid")}${vb("list","☰ List")}</div>
+    <input type="text" placeholder="🔍 ${tr("Search","Suchen","Buscar")}" value="${esc(SH.q)}" oninput="SH.q=this.value;shPaint()" autocomplete="off">
+    <div class="vsw" role="group" aria-label="View">${vb("grid","▦ "+tr("Grid","Raster","Cuadrícula"))}${vb("list","☰ "+tr("List","Liste","Lista"))}</div>
   </div>
   ${shLearnBar(list)}
   <div class="shdd">
-    ${dd("more","⚙️ More filters","Mehr Filter",[["Topic · Thema",topics.map(tp=>["topic",tp[0],`${tp[1]} ${esc(tp[2])}`])],["Explained in · Erklärt auf",bases.map(k=>["base",k,`${T[k].flag} ${esc(T[k].nameEn)}`])],["Type · Art",kinds.map(kd=>["kind",kd[0],`${kd[1]} ${esc(kd[2])}`])]])}
-    ${n?`<button class="linkbtn" onclick="shClear()">✕ Clear · Löschen</button>`:""}
+    ${dd("more","⚙️ "+tr("More filters","Mehr Filter","Más filtros"),"",[[tr("Topic","Thema","Tema"),topics.map(tp=>["topic",tp[0],`${tp[1]} ${esc(tr(tp[2],tp[3],tp[4]))}`])],[tr("Explained in","Erklärt auf","Explicado en"),bases.map(k=>["base",k,`${T[k].flag} ${esc(lname(k))}`])],[tr("Type","Art","Tipo"),kinds.map(kd=>["kind",kd[0],`${kd[1]} ${esc(tr(kd[2],kd[3],kd[4]))}`])]])}
+    ${n?`<button class="linkbtn" onclick="shClear()">✕ ${tr("Clear","Löschen","Quitar")}</button>`:""}
   </div>
   </div>`:""}
   ${SH.err?`<div class="err">${esc(SH.err)}</div>`:""}
   <div id="shlist">${shListHtml()}</div>
-  <p class="note center" style="margin-top:16px">Ideas for a resource you'd love? Tell us · Wünsche? Schreib uns: <a href="mailto:${esc(LEGAL.email)}">${esc(LEGAL.email)}</a></p>
+  <p class="note center" style="margin-top:16px">${tr("Ideas for a resource you'd love? Tell us:","Wünsche für Materialien? Schreib uns:","¿Ideas para un recurso? Escríbenos:")} <a href="mailto:${esc(LEGAL.email)}">${esc(LEGAL.email)}</a></p>
   ${legalLinks()}`;
 };
 function shStatus(it){
@@ -7178,14 +7179,14 @@ async function shGet(id){
     if(r.error) throw r.error;
     if(r.data.url){
       if(w){ try{ w.opener=null; }catch(e){} w.location.href=r.data.url; } else { window.location.href=r.data.url; }
-      SH.msg="↗ Opened in a new tab · In neuem Tab geöffnet";
+      SH.msg=tr(`↗ Opened in a new tab`,`↗ In neuem Tab geöffnet`,`↗ Abierto en otra pestaña`);
     }else{
       if(w) w.close();
       const u=await A.sb.storage.from("shop").createSignedUrl(r.data.path, 120, { download: r.data.name || true });
       if(u.error) throw u.error;
       const a=document.createElement("a"); a.href=u.data.signedUrl; a.rel="noopener"; a.download=r.data.name||"";
       document.body.appendChild(a); a.click(); a.remove();
-      SH.msg="✓ Download started. Happy practising! · Download gestartet. Viel Spaß beim Üben!";
+      SH.msg=tr(`✓ Download started. Happy practising!`,`✓ Download gestartet. Viel Spaß beim Üben!`,`✓ Descarga iniciada. ¡A practicar!`);
     }
     if(it){ if(SH.admin||it.is_owner){ it.downloads=(it.downloads||0)+1; if(!it.mine) it.people=(it.people||0)+1; } it.mine=true; }
   }catch(e){ if(w) w.close(); SH.err=shErr(e); }
@@ -7213,66 +7214,66 @@ async function shEdit(id){
 function shFTopic(k){ const a=SH.f.topics=(SH.f.topics||[]), i=a.indexOf(k); if(i>=0) a.splice(i,1); else a.push(k); xr(); }
 function shPick(inp){
   const f=inp.files && inp.files[0]; if(!f) return;
-  if(f.size>SH_MAX){ SH.err="File too big (max 50 MB) · Datei zu groß (max. 50 MB)"; inp.value=""; xr(); return; }
+  if(f.size>SH_MAX){ SH.err=tr(`File too big (max 50 MB)`,`Datei zu groß (max. 50 MB)`,`Archivo demasiado grande (máx. 50 MB)`); inp.value=""; xr(); return; }
   SH.err=""; SH.f.file=f;
   if(!SH.f.title.trim()) SH.f.title=f.name.replace(/\.[^.]+$/,"").replace(/[_-]+/g," ").slice(0,120);
   xr();
 }
 VIEWS.shopedit = function(){
-  const f=SH.f, top=`<div class="topline"><button class="chip" onclick="shOpen()">← PonteShop</button><span>${f&&f.id?"✏️ Edit resource":"＋ Share a resource"}</span></div>`;
-  if(!f || !A.user) return `${top}<p class="note center" style="margin-top:40px">Please sign in first · Bitte zuerst anmelden</p>`;
+  const f=SH.f, top=`<div class="topline"><button class="chip" onclick="shOpen()">← PonteShop</button><span>${f&&f.id?"✏️ "+tr("Edit resource","Material bearbeiten","Editar recurso"):"＋ "+tr("Share a resource","Material teilen","Compartir un recurso")}</span></div>`;
+  if(!f || !A.user) return `${top}<p class="note center" style="margin-top:40px">${tr("Please sign in first","Bitte zuerst anmelden","Primero entra en tu cuenta")}</p>`;
   const chip=(on,click,label)=>`<button class="chip ${on?"on":""}" aria-pressed="${on}" onclick="${click}">${label}</button>`;
-  const fileLabel = f.file ? `${esc(f.file.name)} · ${shSize(f.file.size)}` : (f.fileName ? `${esc(f.fileName)} · ${shSize(f.size)} <span class="de">(tap to replace · ersetzen)</span>` : "Choose a file (PDF, image, audio, ZIP… max 50 MB)");
+  const fileLabel = f.file ? `${esc(f.file.name)} · ${shSize(f.file.size)}` : (f.fileName ? `${esc(f.fileName)} · ${shSize(f.size)} <span class="de">(${tr("tap to replace","zum Ersetzen tippen","toca para cambiar")})</span>` : tr("Choose a file (PDF, image, audio, ZIP… max 50 MB)","Datei wählen (PDF, Bild, Audio, ZIP… max. 50 MB)","Elige un archivo (PDF, imagen, audio, ZIP… máx. 50 MB)"));
   return `${top}
-  <h2>${f.id?bi("Edit resource","Material bearbeiten"):bi("Share a resource","Material teilen")}</h2>
+  <h2>${f.id?tr("Edit resource","Material bearbeiten","Editar recurso"):tr("Share a resource","Material teilen","Compartir un recurso")}</h2>
   <div class="card">
-    <label class="lbl">Who can see it · Wer kann es sehen</label>
-    <div class="row">${chip(f.vis==="unlisted","SH.f.vis='unlisted';xr()","🔗 Only people with the link")}${chip(f.vis==="public","SH.f.vis='public';xr()","🌍 Everyone in PonteShop")}</div>
+    <label class="lbl">${tr("Who can see it","Wer kann es sehen","Quién puede verlo")}</label>
+    <div class="row">${chip(f.vis==="unlisted","SH.f.vis='unlisted';xr()","🔗 "+tr("Only people with the link","Nur mit Link","Solo quien tenga el enlace"))}${chip(f.vis==="public","SH.f.vis='public';xr()","🌍 "+tr("Everyone in PonteShop","Alle im PonteShop","Todos en PonteShop"))}</div>
     <p class="note" style="margin:6px 0 0">${f.vis==="unlisted"
-      ? "Not shown in the Shop. Share the link with your students, or attach it to your sessions (📎 Materials). · Nur mit Link."
-      : SH.admin ? "Goes live in the Shop right away. · Sofort im Shop." : "We'll take a quick look before it appears in the Shop. · Wir prüfen es kurz."}</p>
-    <label class="lbl">What are you sharing · Was teilst du</label>
-    <div class="row">${chip(f.src==="file","SH.f.src='file';xr()","📎 Upload a file")}${chip(f.src==="link","SH.f.src='link';xr()","🔗 Add a link")}</div>
+      ? tr("Not shown in the Shop. Share the link with your students, or attach it to your sessions (📎 Materials).","Nicht im Shop sichtbar. Teile den Link mit deinen Lernenden oder hänge es an deine Sessions (📎 Materialien).","No aparece en la tienda. Comparte el enlace con tus alumnos o añádelo a tus sesiones (📎 Materiales).")
+      : SH.admin ? tr("Goes live in the Shop right away.","Sofort im Shop.","Se publica en la tienda al momento.") : tr("We'll take a quick look before it appears in the Shop.","Wir prüfen es kurz, bevor es im Shop erscheint.","Lo revisaremos rápido antes de que aparezca en la tienda.")}</p>
+    <label class="lbl">${tr("What are you sharing","Was teilst du","Qué compartes")}</label>
+    <div class="row">${chip(f.src==="file","SH.f.src='file';xr()","📎 "+tr("Upload a file","Datei hochladen","Subir un archivo"))}${chip(f.src==="link","SH.f.src='link';xr()","🔗 "+tr("Add a link","Link hinzufügen","Añadir un enlace"))}</div>
     ${f.src==="link"
       ? `<input type="text" id="shlink" inputmode="url" maxlength="500" style="margin-top:8px" placeholder="https://drive.google.com/…" value="${esc(f.link)}" oninput="SH.f.link=this.value">
-         <p class="note" style="margin:6px 0 0">💡 Google Drive / Docs: <b>Share → General access → "Anyone with the link" → Viewer</b>. Otherwise people can't open it. Links use no storage on PonteTalk.</p>`
+         <p class="note" style="margin:6px 0 0">💡 ${tr(`Google Drive / Docs: <b>Share → General access → "Anyone with the link" → Viewer</b>. Otherwise people can't open it. Links use no storage on PonteTalk.`,`Google Drive / Docs: <b>Teilen → Allgemeiner Zugriff → „Jeder mit dem Link“ → Betrachter</b>. Sonst kann es niemand öffnen. Links brauchen keinen Speicher auf PonteTalk.`,`Google Drive / Docs: <b>Compartir → Acceso general → “Cualquier persona con el enlace” → Lector</b>. Si no, nadie podrá abrirlo. Los enlaces no ocupan espacio en PonteTalk.`)}</p>`
       : `<label class="shfile" style="margin-top:8px">📎 <span>${fileLabel}</span><input type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.zip,.mp3,.m4a,.wav,.docx,.pptx,.xlsx,.txt" onchange="shPick(this)"></label>`}
-    <label class="lbl" for="shtitle">Title · Titel</label>
-    <input type="text" id="shtitle" maxlength="120" placeholder="e.g. Café German: 20 phrases" value="${esc(f.title)}" oninput="SH.f.title=this.value">
-    <label class="lbl" for="shdesc">Short description · Kurzbeschreibung</label>
-    <textarea id="shdesc" rows="3" maxlength="1000" placeholder="What's inside and who it's for · Was drin ist und für wen" oninput="SH.f.desc=this.value">${esc(f.desc)}</textarea>
+    <label class="lbl" for="shtitle">${tr("Title","Titel","Título")}</label>
+    <input type="text" id="shtitle" maxlength="120" placeholder="${tr("e.g. Café German: 20 phrases","z. B. Café-Deutsch: 20 Sätze","p. ej. Alemán en el café: 20 frases")}" value="${esc(f.title)}" oninput="SH.f.title=this.value">
+    <label class="lbl" for="shdesc">${tr("Short description","Kurzbeschreibung","Descripción breve")}</label>
+    <textarea id="shdesc" rows="3" maxlength="1000" placeholder="${tr("What's inside and who it's for","Was drin ist und für wen","Qué contiene y para quién es")}" oninput="SH.f.desc=this.value">${esc(f.desc)}</textarea>
   </div>
   <div class="card">
-    <label class="lbl">Type · Art</label>
-    <div class="row">${SH_KINDS.map(k=>chip(f.kind===k[0],`SH.f.kind='${k[0]}';xr()`,`${k[1]} ${k[2]}`)).join("")}</div>
-    <label class="lbl">Language being taught · Welche Sprache lernt man?</label>
-    <div class="row">${chip(!f.lang,"SH.f.lang='';xr()","🌍 Any")}${XLANGS.map(k=>chip(f.lang===k,`SH.f.lang='${k}';xr()`,`${T[k].flag} ${esc(T[k].nameEn)}`)).join("")}</div>
-    <label class="lbl">Level · Niveau</label>
-    <div class="row">${chip(f.lvl<0,"SH.f.lvl=-1;xr()","All levels")}${RANKS.map((r,i)=>chip(f.lvl===i,`SH.f.lvl=${i};xr()`,r)).join("")}</div>
-    <label class="lbl">Explained in · Erklärt auf</label>
-    <div class="row">${XLANGS.map(k=>chip((f.base||"en")===k,`SH.f.base='${k}';xr()`,`${T[k].flag} ${esc(T[k].nameEn)}`)).join("")}</div>
-    <p class="note" style="margin:4px 0 0">The language of the translations and tips, e.g. Spanish for "Alemán en el café". · Sprache der Erklärungen.</p>
-    <label class="lbl">Topics (pick all that fit) · Themen</label>
-    <div class="row">${SH_TOPICS.map(tp=>chip((f.topics||[]).includes(tp[0]),`shFTopic('${tp[0]}')`,`${tp[1]} ${esc(tp[2])}`)).join("")}</div>
+    <label class="lbl">${tr("Type","Art","Tipo")}</label>
+    <div class="row">${SH_KINDS.map(k=>chip(f.kind===k[0],`SH.f.kind='${k[0]}';xr()`,`${k[1]} ${tr(k[2],k[3],k[4])}`)).join("")}</div>
+    <label class="lbl">${tr("Language being taught","Welche Sprache lernt man?","Idioma que se enseña")}</label>
+    <div class="row">${chip(!f.lang,"SH.f.lang='';xr()","🌍 "+tr("Any","Alle","Cualquiera"))}${XLANGS.map(k=>chip(f.lang===k,`SH.f.lang='${k}';xr()`,`${T[k].flag} ${esc(lname(k))}`)).join("")}</div>
+    <label class="lbl">${tr("Level","Niveau","Nivel")}</label>
+    <div class="row">${chip(f.lvl<0,"SH.f.lvl=-1;xr()",tr("All levels","Alle Niveaus","Todos los niveles"))}${RANKS.map((r,i)=>chip(f.lvl===i,`SH.f.lvl=${i};xr()`,r)).join("")}</div>
+    <label class="lbl">${tr("Explained in","Erklärt auf","Explicado en")}</label>
+    <div class="row">${XLANGS.map(k=>chip((f.base||"en")===k,`SH.f.base='${k}';xr()`,`${T[k].flag} ${esc(lname(k))}`)).join("")}</div>
+    <p class="note" style="margin:4px 0 0">${tr(`The language of the translations and tips, e.g. Spanish for "Alemán en el café".`,`Die Sprache der Übersetzungen und Tipps, z. B. Spanisch für „Alemán en el café“.`,`El idioma de las traducciones y consejos, p. ej. español para “Alemán en el café”.`)}</p>
+    <label class="lbl">${tr("Topics (pick all that fit)","Themen (alle passenden)","Temas (elige todos los que encajen)")}</label>
+    <div class="row">${SH_TOPICS.map(tp=>chip((f.topics||[]).includes(tp[0]),`shFTopic('${tp[0]}')`,`${tp[1]} ${esc(tr(tp[2],tp[3],tp[4]))}`)).join("")}</div>
     ${SH.admin?`<div class="row" style="margin-top:6px">${chip((f.topics||[]).includes(SH_START),`shFTopic('${SH_START}')`,"📘 Start here (PonteTalk guide, shown at the top)")}</div>`:""}
-    <label class="lbl">Show it now? · Jetzt zeigen?</label>
-    <div class="row">${chip(f.published,"SH.f.published=true;xr()","👁 Yes")}${chip(!f.published,"SH.f.published=false;xr()","🙈 Hidden (draft)")}</div>
-    <p class="note">Price: Free · Preis: kostenlos.</p>
+    <label class="lbl">${tr("Show it now?","Jetzt zeigen?","¿Mostrarlo ya?")}</label>
+    <div class="row">${chip(f.published,"SH.f.published=true;xr()","👁 "+tr("Yes","Ja","Sí"))}${chip(!f.published,"SH.f.published=false;xr()","🙈 "+tr("Hidden (draft)","Versteckt (Entwurf)","Oculto (borrador)"))}</div>
+    <p class="note">${tr("Price: Free","Preis: kostenlos","Precio: gratis")}.</p>
     ${SH.admin?"":`<label style="display:flex;gap:10px;align-items:flex-start;cursor:pointer;margin-top:6px">
       <input type="checkbox" ${f.rights?"checked":""} onchange="SH.f.rights=this.checked" style="width:22px;height:22px;margin-top:2px;flex-shrink:0">
-      <span><b>I made this myself, or I have the right to share it.</b> No copied book pages or paid materials.<br><span class="de">Selbst erstellt oder ich darf es teilen.</span></span></label>`}
+      <span>${tr("<b>I made this myself, or I have the right to share it.</b> No copied book pages or paid materials.","<b>Ich habe das selbst erstellt oder darf es teilen.</b> Keine kopierten Buchseiten oder bezahlten Materialien.","<b>Lo hice yo o tengo derecho a compartirlo.</b> Nada de páginas de libros copiadas ni materiales de pago.")}</span></label>`}
   </div>
   ${SH.err?`<div class="err">${esc(SH.err)}</div>`:""}
-  <button class="btn primary" ${SH.busy?"disabled":""} onclick="shSave()">${SH.busy?"Saving… · Speichert…":(f.id?"💾 Save changes · Speichern":f.vis==="public"&&!SH.admin?"📨 Share and send for review · Teilen":"⬆ Share · Teilen")}</button>
-  <button class="btn ghost" onclick="shOpen()">Cancel · Abbrechen</button>`;
+  <button class="btn primary" ${SH.busy?"disabled":""} onclick="shSave()">${SH.busy?tr(`Saving…`,`Speichert…`,`Guardando…`):(f.id?tr(`💾 Save changes`,`💾 Speichern`,`💾 Guardar cambios`):f.vis==="public"&&!SH.admin?"📨 "+tr("Share and send for review","Teilen und zur Prüfung senden","Compartir y enviar a revisión"):"⬆ "+tr("Share","Teilen","Compartir"))}</button>
+  <button class="btn ghost" onclick="shOpen()">${tr(`Cancel`,`Abbrechen`,`Cancelar`)}</button>`;
 };
 async function shSave(){
   const f=SH.f; if(!f || SH.busy) return;
   const title=(f.title||"").trim(), link=f.src==="link"?vClean(f.link):"";
-  if(title.length<2){ SH.err="Please add a title · Bitte einen Titel eingeben"; xr(); return; }
-  if(f.src==="link" && !vValid(link)){ SH.err="Please paste the full link (https://…) · Bitte vollständigen Link einfügen"; xr(); return; }
-  if(f.src==="file" && !f.file && !f.path){ SH.err="Please choose a file · Bitte eine Datei wählen"; xr(); return; }
-  if(!SH.admin && !f.rights){ SH.err="Please confirm you may share it · Bitte bestätigen"; xr(); return; }
+  if(title.length<2){ SH.err=tr(`Please add a title`,`Bitte einen Titel eingeben`,`Añade un título`); xr(); return; }
+  if(f.src==="link" && !vValid(link)){ SH.err=tr(`Please paste the full link (https://…)`,`Bitte vollständigen Link einfügen (https://…)`,`Pega el enlace completo (https://…)`); xr(); return; }
+  if(f.src==="file" && !f.file && !f.path){ SH.err=tr(`Please choose a file`,`Bitte eine Datei wählen`,`Elige un archivo`); xr(); return; }
+  if(!SH.admin && !f.rights){ SH.err=tr(`Please confirm you may share it`,`Bitte bestätige, dass du es teilen darfst`,`Confirma que puedes compartirlo`); xr(); return; }
   SH.busy=true; SH.err=""; xr();
   try{
     let path=f.src==="file"?f.path:null, name=f.src==="file"?f.fileName:null, size=f.src==="file"?f.size:null, oldPath=null;
@@ -7298,9 +7299,9 @@ async function shSave(){
     }
     if(oldPath) A.sb.storage.from("shop").remove([oldPath]).catch(()=>{});
     SH.busy=false; SH.f=null; go("shop");
-    SH.msg = row.visibility==="unlisted" ? "✓ Saved. Tap 🔗 Share link on your resource to send it · Gespeichert"
-           : SH.admin ? (f.id?"✓ Saved · Gespeichert":"✓ Published · Veröffentlicht")
-           : "📨 Thanks! We'll take a quick look, then it appears in the Shop · Danke, wir prüfen es kurz";
+    SH.msg = row.visibility==="unlisted" ? tr("✓ Saved. Tap 🔗 Share link on your resource to send it","✓ Gespeichert. Tippe bei deinem Material auf 🔗 Link teilen","✓ Guardado. Toca 🔗 Compartir enlace en tu recurso para enviarlo")
+           : SH.admin ? (f.id?tr("✓ Saved","✓ Gespeichert","✓ Guardado"):tr("✓ Published","✓ Veröffentlicht","✓ Publicado"))
+           : tr("📨 Thanks! We'll take a quick look, then it appears in the Shop","📨 Danke! Wir prüfen es kurz, dann erscheint es im Shop","📨 ¡Gracias! Lo revisamos rápido y luego aparece en la tienda");
     SH.mineOnly = !SH.admin; SH.list=null; xr(); shLoad();
     if(row.visibility==="unlisted" && id && !f.id) setTimeout(()=>shShare(id), 400);
   }catch(e){ SH.busy=false; SH.err=shErr(e); xr(); }
@@ -7308,16 +7309,16 @@ async function shSave(){
 async function shToggle(id,on){
   const r=await A.sb.from("shop_items").update({ published:on }).eq("id",id);
   if(r.error){ SH.err=shErr(r.error); xr(); return; }
-  SH.msg = on ? "👁 Visible again · Wieder sichtbar" : "🙈 Hidden. Only you can see it · Versteckt"; shLoad();
+  SH.msg = on ? tr("👁 Visible again","👁 Wieder sichtbar","👁 Visible de nuevo") : tr("🙈 Hidden. Only you can see it","🙈 Versteckt. Nur du siehst es","🙈 Oculto. Solo tú puedes verlo"); shLoad();
 }
 async function shDel(id){
   const it=(SH.list||[]).find(x=>x.id===id); if(!it) return;
-  if(!window.confirm(`Delete "${it.title}"? Download counts are deleted too. · Wirklich löschen?`)) return;
+  if(!window.confirm(tr(`Delete "${it.title}"? Download counts are deleted too.`,`„${it.title}“ löschen? Die Download-Zahlen werden auch gelöscht.`,`¿Eliminar “${it.title}”? También se borran las descargas.`))) return;
   const d=await A.sb.from("shop_items").select("file_path").eq("id",id).single();
   const r=await A.sb.from("shop_items").delete().eq("id",id);
   if(r.error){ SH.err=shErr(r.error); xr(); return; }
   if(d.data && d.data.file_path) A.sb.storage.from("shop").remove([d.data.file_path]).catch(()=>{});
-  SH.msg="🗑 Deleted · Gelöscht"; shLoad();
+  SH.msg=tr(`🗑 Deleted`,`🗑 Gelöscht`,`🗑 Eliminado`); shLoad();
 }
 
 /* ===================== SIGNED-IN HOME DASHBOARD ===================== */
@@ -7734,69 +7735,73 @@ function nbStart(){
 }
 function nbAgo(iso){
   const m=Math.max(0,Math.round((Date.now()-new Date(iso).getTime())/60000));
-  if(m<1) return "just now · gerade eben"; if(m<60) return `${m} min ago`;
-  const h=Math.round(m/60); if(h<24) return `${h} h ago`;
-  const d=Math.round(h/24); return d===1?"yesterday · gestern":`${d} days ago`;
+  if(m<1) return tr("just now","gerade eben","ahora mismo"); if(m<60) return tr(`${m} min ago`,`vor ${m} Min.`,`hace ${m} min`);
+  const h=Math.round(m/60); if(h<24) return tr(`${h} h ago`,`vor ${h} Std.`,`hace ${h} h`);
+  const d=Math.round(h/24); return d===1?tr("yesterday","gestern","ayer"):tr(`${d} days ago`,`vor ${d} Tagen`,`hace ${d} días`);
 }
-function nbClock(iso){ try{ return new Date(iso).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}); }catch(e){ return ""; } }
+function nbClock(iso){ try{ return new Date(iso).toLocaleTimeString(uiLoc(),{hour:"2-digit",minute:"2-digit"}); }catch(e){ return ""; } }
 function nbText(n){
-  const t=`<b>${esc(n.title||"a session")}</b>`, who=esc(n.from_name||"Someone"), d=n.data||{};
+  const t=`<b>${esc(n.title||tr("a session","eine Session","una sesión"))}</b>`, who=esc(n.from_name||tr("Someone","Jemand","Alguien")), d=n.data||{};
+  const ph=`<b>“${esc(d.phrase||"")}”</b>`;
   switch(n.kind){
-    case "seat_offer":   return `🎉 A seat is free for you in ${t}.${d.expires_at?` Accept by ${nbClock(d.expires_at)}.`:""}`;
-    case "join_request": return `🔔 ${who} wants to join ${t}. Tap to approve or decline.`;
+    case "seat_offer":   return "🎉 "+tr(`A seat is free for you in ${t}.`,`Ein Platz in ${t} ist frei für dich.`,`Hay una plaza libre para ti en ${t}.`)+(d.expires_at?" "+tr(`Accept by ${nbClock(d.expires_at)}.`,`Bis ${nbClock(d.expires_at)} annehmen.`,`Acéptala antes de las ${nbClock(d.expires_at)}.`):"");
+    case "join_request": return "🔔 "+tr(`${who} wants to join ${t}. Tap to approve or decline.`,`${who} möchte an ${t} teilnehmen. Tippe zum Annehmen oder Ablehnen.`,`${who} quiere unirse a ${t}. Toca para aprobar o rechazar.`);
     case "report":       if(d.hold) return `⏸️ An account was paused automatically after ${d.reports||3} reports. Tap to review.`;
                          return `🚩 New report (${esc((RP_REASONS.find(r=>r[0]===d.reason)||[0,"other"])[1])}). Tap to review.`;
-    case "chat":         return `💬 ${d.count>1?`${d.count} new messages`:`New message${n.from_name?` from ${who}`:""}`} in ${t}.`;
-    case "invited":      return `📩 ${who} invited you to ${t}. Tap to accept or decline.`;
-    case "reschedule":   return d.answer==="accepted" ? `✅ ${who} accepted the new time for ${t}: ${d.proposed_at?esc(fmtWhen(d.proposed_at)):""}.`
-                              : d.answer==="declined" ? `↩️ ${who} can't make the new time for ${t}. It stays as planned.`
-                              : `🔁 ${who} suggests moving ${t} to ${d.proposed_at?esc(fmtWhen(d.proposed_at)):"a new time"}. Tap to answer.`;
-    case "session_match": return `✨ New session that fits you: ${t}${n.starts_at?` · ${esc(fmtWhen(n.starts_at))}`:""}${d.lang&&T[d.lang]?` · practise ${T[d.lang].flag} ${esc(T[d.lang].nameEn)}`:""}. Tap to sign up.`;
-    case "new_joiner":   return `👋 ${who} joined ${t}.`;
-    case "approved":     return d.waitlist_position ? `🕒 Approved for ${t}. You're #${d.waitlist_position} on the waitlist.` : `✅ You're in: ${t}.`;
-    case "declined":     return `Your request for ${t} wasn't accepted this time.`;
-    case "cancelled":    return `❌ ${t} was cancelled by the host.`;
+    case "chat":         return "💬 "+(d.count>1?tr(`${d.count} new messages in ${t}.`,`${d.count} neue Nachrichten in ${t}.`,`${d.count} mensajes nuevos en ${t}.`):tr(`New message${n.from_name?` from ${who}`:""} in ${t}.`,`Neue Nachricht${n.from_name?` von ${who}`:""} in ${t}.`,`Nuevo mensaje${n.from_name?` de ${who}`:""} en ${t}.`));
+    case "invited":      return "📩 "+tr(`${who} invited you to ${t}. Tap to accept or decline.`,`${who} hat dich zu ${t} eingeladen. Tippe zum Annehmen oder Ablehnen.`,`${who} te invitó a ${t}. Toca para aceptar o rechazar.`);
+    case "reschedule":   { const w=d.proposed_at?esc(fmtWhen(d.proposed_at)):"";
+                           return d.answer==="accepted" ? "✅ "+tr(`${who} accepted the new time for ${t}: ${w}.`,`${who} hat die neue Zeit für ${t} angenommen: ${w}.`,`${who} aceptó la nueva hora para ${t}: ${w}.`)
+                              : d.answer==="declined" ? "↩️ "+tr(`${who} can't make the new time for ${t}. It stays as planned.`,`${who} kann zur neuen Zeit für ${t} nicht. Es bleibt wie geplant.`,`${who} no puede a la nueva hora de ${t}. Se queda como estaba.`)
+                              : "🔁 "+tr(`${who} suggests moving ${t} to ${w||"a new time"}. Tap to answer.`,`${who} schlägt vor, ${t} auf ${w||"eine neue Zeit"} zu verschieben. Tippe zum Antworten.`,`${who} propone mover ${t} a ${w||"otra hora"}. Toca para responder.`); }
+    case "session_match": { const when=n.starts_at?` · ${esc(fmtWhen(n.starts_at))}`:"", lg=d.lang&&T[d.lang]?`${T[d.lang].flag} ${esc(lname(d.lang))}`:"";
+                           return "✨ "+tr(`New session that fits you: ${t}${when}${lg?` · practise ${lg}`:""}. Tap to sign up.`,`Neue passende Session: ${t}${when}${lg?` · übe ${lg}`:""}. Tippe zum Anmelden.`,`Nueva sesión que encaja contigo: ${t}${when}${lg?` · practica ${lg}`:""}. Toca para apuntarte.`); }
+    case "new_joiner":   return "👋 "+tr(`${who} joined ${t}.`,`${who} ist ${t} beigetreten.`,`${who} se unió a ${t}.`);
+    case "approved":     return d.waitlist_position ? "🕒 "+tr(`Approved for ${t}. You're #${d.waitlist_position} on the waitlist.`,`Für ${t} angenommen. Du bist Nr. ${d.waitlist_position} auf der Warteliste.`,`Aprobado para ${t}. Eres el n.º ${d.waitlist_position} en la lista de espera.`) : "✅ "+tr(`You're in: ${t}.`,`Du bist dabei: ${t}.`,`Estás dentro: ${t}.`);
+    case "declined":     return tr(`Your request for ${t} wasn't accepted this time.`,`Deine Anfrage für ${t} wurde diesmal nicht angenommen.`,`Tu solicitud para ${t} no fue aceptada esta vez.`);
+    case "cancelled":    return "❌ "+tr(`${t} was cancelled by the host.`,`${t} wurde vom Host abgesagt.`,`El anfitrión canceló ${t}.`);
     case "changed":      return `📝 ${t}: ${nbChanges(d)}`;
-    case "reminder_24h": return `⏰ Tomorrow: ${t}${n.starts_at?` at ${nbClock(n.starts_at)}`:""}.`;
-    case "reminder_15m": return `⏰ ${t} starts in 15 minutes.`;
-    case "word_fixed":   return `✏️ ${who} fixed your word <b>“${esc(d.old||"")}”</b>: now <b>“${esc(d.word||"")}”</b> (${t}). Tap to see it.`;
-    case "echo_new":     return `🎙️ New Echo Challenge by ${who}: <b>“${esc(d.phrase||"")}”</b>. Listen and record your echo!`;
-    case "echo_result":  return d.winners ? `🏆 The Echo Challenge <b>“${esc(d.phrase||"")}”</b> is over. People's choice: <b>${esc(d.winners)}</b>.${d.host?" Pick your ⭐ favourite!":""}`
-                              : `🏁 The Echo Challenge <b>“${esc(d.phrase||"")}”</b> is over. Tap to see the echoes.`;
-    case "reminder_prep": return `📚 ${t} is in 3 days. ${who==="Someone"?"The host":who} shared materials: have a look before the call. Want to focus on something? Tell them in the chat.`;
-    default:             return `Update for ${t}.`;
+    case "reminder_24h": return "⏰ "+tr(`Tomorrow: ${t}`,`Morgen: ${t}`,`Mañana: ${t}`)+(n.starts_at?" "+tr(`at ${nbClock(n.starts_at)}`,`um ${nbClock(n.starts_at)}`,`a las ${nbClock(n.starts_at)}`):"")+".";
+    case "reminder_15m": return "⏰ "+tr(`${t} starts in 15 minutes.`,`${t} beginnt in 15 Minuten.`,`${t} empieza en 15 minutos.`);
+    case "word_fixed":   return "✏️ "+tr(`${who} fixed your word <b>“${esc(d.old||"")}”</b>: now <b>“${esc(d.word||"")}”</b> (${t}). Tap to see it.`,`${who} hat dein Wort <b>„${esc(d.old||"")}“</b> korrigiert: jetzt <b>„${esc(d.word||"")}“</b> (${t}). Tippe zum Ansehen.`,`${who} corrigió tu palabra <b>“${esc(d.old||"")}”</b>: ahora <b>“${esc(d.word||"")}”</b> (${t}). Toca para verla.`);
+    case "echo_new":     return "🎙️ "+tr(`New Echo Challenge by ${who}: ${ph}. Listen and record your echo!`,`Neue Echo Challenge von ${who}: ${ph}. Hör zu und nimm dich auf!`,`Nuevo reto Echo de ${who}: ${ph}. ¡Escucha y graba tu eco!`);
+    case "echo_result":  return d.winners ? "🏆 "+tr(`The Echo Challenge ${ph} is over. People's choice: <b>${esc(d.winners)}</b>.`,`Die Echo Challenge ${ph} ist vorbei. Publikumsliebling: <b>${esc(d.winners)}</b>.`,`El reto Echo ${ph} terminó. Favorito del público: <b>${esc(d.winners)}</b>.`)+(d.host?" "+tr("Pick your ⭐ favourite!","Wähle deinen ⭐ Favoriten!","¡Elige tu ⭐ favorito!"):"")
+                              : "🏁 "+tr(`The Echo Challenge ${ph} is over. Tap to see the echoes.`,`Die Echo Challenge ${ph} ist vorbei. Tippe, um die Aufnahmen zu sehen.`,`El reto Echo ${ph} terminó. Toca para ver los ecos.`);
+    case "reminder_prep": { const h=n.from_name?who:tr("The host","Der Host","El anfitrión");
+                           return "📚 "+tr(`${t} is in 3 days. ${h} shared materials: have a look before the call. Want to focus on something? Tell them in the chat.`,`${t} ist in 3 Tagen. ${h} hat Materialien geteilt: schau sie dir vorher an. Willst du dich auf etwas konzentrieren? Sag es im Chat.`,`${t} es en 3 días. ${h} compartió materiales: échales un vistazo antes. ¿Quieres centrarte en algo? Díselo en el chat.`); }
+    default:             return tr(`Update for ${t}.`,`Neuigkeit zu ${t}.`,`Novedad sobre ${t}.`);
   }
 }
 function nbChanges(d){
   const ch=Array.isArray(d.changes)?d.changes:[];
-  if(!ch.length) return "updated by the host.";
-  const day=iso=>{ try{ return new Date(iso).toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"}); }catch(e){ return ""; } };
+  if(!ch.length) return tr("updated by the host.","vom Host geändert.","actualizada por el anfitrión.");
+  const day=iso=>{ try{ return new Date(iso).toLocaleDateString(uiLoc(),{weekday:"short",day:"numeric",month:"short"}); }catch(e){ return ""; } };
   const one=c=>{
     if(c.field==="time") return day(c.from)===day(c.to) ? `${nbClock(c.from)} → ${nbClock(c.to)} (${day(c.to)})` : `${fmtWhen(c.from)} → ${fmtWhen(c.to)}`;
     if(c.field==="length") return `${c.from} → ${c.to} min`;
-    if(c.field==="title") return `new title "${esc(c.to)}"`;
-    if(c.field==="place") return "new meeting place 📍";
-    if(c.field==="video") return "new video call link 🎥";
-    if(c.field==="languages") return `languages now ${(c.to||[]).filter(Boolean).map(k=>T[k]?T[k].nameEn:k).join(" ⇄ ")}`;
+    if(c.field==="title") return tr(`new title "${esc(c.to)}"`,`neuer Titel „${esc(c.to)}“`,`nuevo título “${esc(c.to)}”`);
+    if(c.field==="place") return tr("new meeting place 📍","neuer Treffpunkt 📍","nuevo lugar de encuentro 📍");
+    if(c.field==="video") return tr("new video call link 🎥","neuer Videoanruf-Link 🎥","nuevo enlace de videollamada 🎥");
+    if(c.field==="languages") return tr("languages now","Sprachen jetzt","idiomas ahora")+" "+(c.to||[]).filter(Boolean).map(k=>T[k]?lname(k):k).join(" ⇄ ");
     return "";
   };
   return ch.map(one).filter(Boolean).join(" · ")+".";
 }
 function nbItems(){
-  if(!NB.list.length) return `<p class="note center" style="margin:24px 0">No notifications yet · Noch keine Benachrichtigungen</p>`;
+  if(!NB.list.length) return `<p class="note center" style="margin:24px 0">${tr(`No notifications yet`,`Noch keine Benachrichtigungen`,`Aún no hay notificaciones`)}</p>`;
   return NB.list.map(n=>`<div class="nbrow"><button class="nbitem ${n.read_at?"":"unread"}" onclick="nbTap(${n.id})">
       <span class="nbu ${n.read_at?"r":""}"></span><span>${nbText(n)}<small>${nbAgo(n.created_at)}</small></span></button>
-      <button class="nbx" aria-label="Clear this notification" title="Clear · Entfernen" onclick="nbClear(${n.id})">✕</button></div>`).join("");
+      <button class="nbx" aria-label="Clear this notification" title="${tr("Clear","Entfernen","Quitar")}" onclick="nbClear(${n.id})">✕</button></div>`).join("");
 }
 function nbOpen(){
   const old=document.getElementById("nbSheet"); if(old) old.remove();
   const box=document.createElement("div"); box.className="sheet-bg"; box.id="nbSheet";
   box.innerHTML=`<div class="sheet" role="dialog" aria-label="Notifications">
-    <div class="nbhead"><h3 style="margin:0">Notifications · Benachrichtigungen</h3>
+    <div class="nbhead"><h3 style="margin:0">${tr("Notifications","Benachrichtigungen","Notificaciones")}</h3>
       <button class="chip" aria-label="Close" onclick="document.getElementById('nbSheet').remove()">✕</button></div>
     <div id="nbTools" class="row" style="gap:16px;margin:0 0 6px">${nbTools()}</div>
     <div id="nbList">${nbItems()}</div>
-    <p class="note center" style="margin:10px 0 0"><button class="linkbtn" onclick="document.getElementById('nbSheet').remove();A.ret='home';go('account');setTimeout(()=>{const e=document.getElementById('npc');if(e)e.scrollIntoView({behavior:'smooth',block:'start'})},80)">Notification settings · Einstellungen</button></p></div>`;
+    <p class="note center" style="margin:10px 0 0"><button class="linkbtn" onclick="document.getElementById('nbSheet').remove();A.ret='home';go('account');setTimeout(()=>{const e=document.getElementById('npc');if(e)e.scrollIntoView({behavior:'smooth',block:'start'})},80)">${tr("Notification settings","Benachrichtigungs-Einstellungen","Ajustes de notificaciones")}</button></p></div>`;
   box.addEventListener("click",e=>{ if(e.target===box) box.remove(); });
   document.body.appendChild(box);
   nbLoad();
@@ -7811,8 +7816,8 @@ async function nbTap(id){
 }
 function nbTools(){
   if(!NB.list.length) return "";
-  return `${NB.unread?`<button class="linkbtn" onclick="nbReadAll()">Mark all as read · Alle gelesen</button>`:""}
-    <button class="linkbtn" onclick="nbClearAll()">Clear all · Alle entfernen</button>`;
+  return `${NB.unread?`<button class="linkbtn" onclick="nbReadAll()">${tr(`Mark all as read`,`Alle als gelesen markieren`,`Marcar todo como leído`)}</button>`:""}
+    <button class="linkbtn" onclick="nbClearAll()">${tr(`Clear all`,`Alle entfernen`,`Borrar todo`)}</button>`;
 }
 function nbRefreshPanel(){
   const l=document.getElementById("nbList"); if(l) l.innerHTML=nbItems();
@@ -7971,13 +7976,13 @@ VIEWS.vocabq = function(){
         :`<div class="ecmeta">Which German word? · Welches Wort?</div><div class="vcmean" style="font-size:26px" dir="${dir}">${esc(vcTr(w))}</div>`}</div>
       ${c.opts.map((o,k)=>{ let cl=""; if(r.pick!==null){ if(o.id===w.id) cl="ok"; else if(k===r.pick) cl="no"; }
         return `<button class="exopt ${cl}" ${r.pick!==null?"disabled":""} onclick="vcPick(${k})"><span lang="${c.type==="listen"?"":"de"}" dir="${c.type==="listen"?dir:"auto"}">${c.type==="listen"?esc(vcTr(o)):vcWordHtml(o)}</span></button>`; }).join("")}
-      ${r.pick!==null?`<div class="vccard" style="min-height:0;margin-top:10px"><div class="vcw" style="font-size:26px" lang="de">${vcWordHtml(w)} ${vcSpk(w)}</div>${reveal}</div><button class="btn primary qbtn" style="margin-top:10px" onclick="vcNext()">Next · Weiter →</button>`:""}`;
+      ${r.pick!==null?`<div class="vccard" style="min-height:0;margin-top:10px"><div class="vcw" style="font-size:26px" lang="de">${vcWordHtml(w)} ${vcSpk(w)}</div>${reveal}</div><button class="btn primary qbtn" style="margin-top:10px" onclick="vcNext()">${tr("Next →","Weiter →","Siguiente →")}</button>`:""}`;
   } else if(c.type==="gender"){
     const noun=w.w.replace(/^(der|die|das) /,"");
     h+=`<div class="vccard" style="min-height:180px"><div class="ecmeta">der, die or das?</div><div class="vcw" lang="de">${r.pick!==null?vcWordHtml(w):`<span style="color:#9AA1AC">___</span> ${esc(noun)}`}</div>
       ${r.pick!==null?`<div class="vcmean" dir="${dir}">${esc(vcTr(w))}</div>${w.pl?`<div class="vcpl">Plural: ${esc(w.pl)}</div>`:""}`:""}</div>
       <div class="vcg">${[["der","#2F6FD1"],["die","#D9466A"],["das","#2A8C82"]].map(([g,col],k)=>`<button style="background:${col};${r.pick!==null&&g!==w.g?"opacity:.35":""}" ${r.pick!==null?"disabled":""} onclick="vcPick(${k})">${g}</button>`).join("")}</div>
-      ${r.pick!==null?`<div class="${["der","die","das"][r.pick]===w.g?"ok":"err"}" style="margin-top:10px">${["der","die","das"][r.pick]===w.g?"✅ Richtig!":`❌ ${esc(w.w)}`}</div><button class="btn primary qbtn" style="margin-top:10px" onclick="vcNext()">Next · Weiter →</button>`:""}`;
+      ${r.pick!==null?`<div class="${["der","die","das"][r.pick]===w.g?"ok":"err"}" style="margin-top:10px">${["der","die","das"][r.pick]===w.g?"✅ Richtig!":`❌ ${esc(w.w)}`}</div><button class="btn primary qbtn" style="margin-top:10px" onclick="vcNext()">${tr("Next →","Weiter →","Siguiente →")}</button>`:""}`;
   }
   return h;
 };
@@ -7998,7 +8003,7 @@ VIEWS.vocabr = function(){
     <div class="card center"><div style="font-size:54px">${sk>1?"🔥":"🎉"}</div><h2 style="margin:4px 0">Well done! · Super gemacht!</h2>
       <div style="font-size:36px;font-weight:800;margin:6px 0">${x.ok} / ${x.n}</div><p class="note" style="margin:0">correct · richtig${sk?` · 🔥 ${sk} day${sk>1?"s":""} in a row`:""}</p>
       ${(()=>{ const s2=vcStats(vcLv(VC.level)); return `<p class="note">${VC.level}: ${s2.learned} of ${s2.total} words learned · ${s2.mastered} mastered</p>`; })()}
-      <div class="row" style="gap:8px;justify-content:center;margin-top:10px"><button class="btn primary" onclick="vcStart('learn')">Keep going · Weiter</button><button class="btn secondary" onclick="go('vocab')">Done · Fertig</button></div></div>`;
+      <div class="row" style="gap:8px;justify-content:center;margin-top:10px"><button class="btn primary" onclick="vcStart('learn')">Keep going · Weiter</button><button class="btn secondary" onclick="go('vocab')">${tr(`Done`,`Fertig`,`Hecho`)}</button></div></div>`;
 };
 /* ---------- quick level check ---------- */
 function vcCheckStart(){ if(!VC.d) return; const list=[];
@@ -8031,7 +8036,7 @@ VIEWS.vocab = function(){
     <p class="sub" style="margin:0 0 6px">German flashcards that come back at the right time, so words stick.</p>
     <div style="display:inline-block;background:var(--teal-soft);color:var(--teal);font-weight:800;font-size:13px;border-radius:999px;padding:5px 12px;margin:0 0 10px">🎉 Free during our launch · Kostenlos zum Start</div>`;
   if(VC.err) return h+`<div class="err">${esc(VC.err)}</div>`;
-  if(!VC.d) return h+`<p class="note center">Loading… · Lädt…</p>`;
+  if(!VC.d) return h+`<p class="note center">${tr(`Loading…`,`Lädt…`,`Cargando…`)}</p>`;
   const st=vcStats(), sk=vcStreak(), today=VC.days[vcToday()]||{ n:0,c:0,w:0 }, newLeft=Math.max(0,VC.goal-(today.w||0));
   h+=`<div class="card"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end">
       <label class="lbl" style="margin:0">🌍 My language<select onchange="VC.lang=this.value;vcSaveLocal();xr()" style="width:100%;margin-top:4px;border:2px solid var(--line);border-radius:12px;padding:10px;font:600 15px 'Plus Jakarta Sans',sans-serif">${VC_LANGS.map(([k,n])=>`<option value="${k}" ${VC.lang===k?"selected":""}>${n}</option>`).join("")}</select></label>
@@ -8188,7 +8193,7 @@ VIEWS.exam = function(){
   let h=back+`<h2 style="margin:6px 0 2px">Leben in Deutschland · Einbürgerungstest</h2>
     <p class="sub" style="margin:0 0 6px">Practise with all official BAMF questions: 300 general + 10 for your Bundesland. · Alle offiziellen Fragen.</p><div style="display:inline-block;background:var(--teal-soft);color:var(--teal);font-weight:800;font-size:13px;border-radius:999px;padding:5px 12px;margin:0 0 10px">🎉 Free during our launch · Kostenlos zum Start</div>`;
   if(EX.err) return h+`<div class="err">${esc(EX.err)}</div>`;
-  if(!EX.qs) return h+`<p class="note center">Loading… · Lädt…</p>`;
+  if(!EX.qs) return h+`<p class="note center">${tr(`Loading…`,`Lädt…`,`Cargando…`)}</p>`;
   const pool=exPool(), last=exLast(), known=pool.filter(q=>last[q.n]===true).length, wrong=pool.filter(q=>last[q.n]===false).length, unseen=pool.filter(q=>!(q.n in last)).length;
   const mocks=EX.att.filter(a=>a.mode==="mock"), passed=mocks.filter(a=>a.passed).length, best=mocks.reduce((m,a)=>Math.max(m,a.correct),0);
   h+=`<div class="card"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end">
@@ -8242,11 +8247,11 @@ VIEWS.examq = function(){
     </div>`;
   if(mock){
     h+=`<div class="row" style="gap:8px"><button class="btn secondary" ${r.i===0?"disabled":""} onclick="exGo(${r.i-1})">← Back</button>
-      ${r.i<r.list.length-1?`<button class="btn primary" onclick="exGo(${r.i+1})">Next · Weiter →</button>`:`<button class="btn primary" onclick="exFinish()">✓ Finish · Abgeben</button>`}</div>
+      ${r.i<r.list.length-1?`<button class="btn primary" onclick="exGo(${r.i+1})">${tr("Next →","Weiter →","Siguiente →")}</button>`:`<button class="btn primary" onclick="exFinish()">✓ Finish · Abgeben</button>`}</div>
       <div class="exdots">${r.list.map((x,k)=>`<button class="${x.n in r.picks?"done":""} ${k===r.i?"cur":""}" onclick="exGo(${k})" aria-label="Question ${k+1}">${k+1}</button>`).join("")}</div>
       <p class="note">${Object.keys(r.picks).length} of ${r.list.length} answered · beantwortet. <button class="linkbtn" onclick="exFinish()">Finish now · Jetzt abgeben</button></p>`;
   } else if(shown){
-    h+=`<button class="btn primary" onclick="${r.i<r.list.length-1?`exGo(${r.i+1})`:"exFinish()"}">${r.i<r.list.length-1?"Next · Weiter →":"See my result · Ergebnis"}</button>`;
+    h+=`<button class="btn primary" onclick="${r.i<r.list.length-1?`exGo(${r.i+1})`:"exFinish()"}">${r.i<r.list.length-1?tr("Next →","Weiter →","Siguiente →"):"See my result · Ergebnis"}</button>`;
   }
   return h;
 };
@@ -8521,7 +8526,7 @@ VIEWS.dtz = function(){
     <h2 style="margin:6px 0 2px">Deutsch-Prüfung A2–B1 (DTZ)</h2>
     <p class="sub" style="margin:0 0 6px">Practise for the Deutsch-Test für Zuwanderer: Hören, Lesen, Schreiben, Sprechen. Also good practice for telc and Goethe B1.</p><div style="display:inline-block;background:var(--teal-soft);color:var(--teal);font-weight:800;font-size:13px;border-radius:999px;padding:5px 12px;margin:0 0 10px">🎉 Free during our launch · Kostenlos zum Start</div>`;
   if(DT.err) return h+`<div class="err">${esc(DT.err)}</div>`;
-  if(!DT.d) return h+`<p class="note center">Loading… · Lädt…</p>`;
+  if(!DT.d) return h+`<p class="note center">${tr(`Loading…`,`Lädt…`,`Cargando…`)}</p>`;
   h+=`<label class="card" style="display:flex;gap:12px;align-items:center;cursor:pointer"><input type="checkbox" style="width:22px;height:22px" ${DT.es?"checked":""} onchange="dtSetEs(this.checked)"><span><b>🇪🇸 Ayuda en español</b><br><span class="ecmeta">Spanish under the questions and answers. Texts and listening transcripts in Spanish appear after you answer (in practice).</span></span></label>`;
   const last=dtLast(), mocks=DT.att.filter(a=>a.mode==="mock"), best=mocks.reduce((m,a)=>Math.max(m,a.correct),0);
   const wr=DT.att.filter(a=>a.mode==="writing"), sp=DT.att.filter(a=>a.mode==="speaking");
@@ -8601,11 +8606,11 @@ VIEWS.dtzq = function(){
     </div>`;
   if(mock){
     h+=`<div class="row" style="gap:8px"><button class="btn secondary" ${r.i===0?"disabled":""} onclick="dtGo(${r.i-1})">← Back</button>
-      ${r.i<r.list.length-1?`<button class="btn primary" onclick="dtGo(${r.i+1})">Next · Weiter →</button>`:`<button class="btn primary" onclick="dtFinish()">✓ Finish · Abgeben</button>`}</div>
+      ${r.i<r.list.length-1?`<button class="btn primary" onclick="dtGo(${r.i+1})">${tr("Next →","Weiter →","Siguiente →")}</button>`:`<button class="btn primary" onclick="dtFinish()">✓ Finish · Abgeben</button>`}</div>
       <div class="exdots">${r.list.map((y,k)=>`<button class="${y.it.id in r.picks?"done":""} ${k===r.i?"cur":""}" onclick="dtGo(${k})" aria-label="Question ${k+1}">${k+1}</button>`).join("")}</div>
       <p class="note">1–20 Hören · 21–45 Lesen. ${Object.keys(r.picks).length} of ${r.list.length} answered. <button class="linkbtn" onclick="dtFinish()">Finish now · Jetzt abgeben</button></p>`;
   } else if(shown){
-    h+=`<button class="btn primary" onclick="${r.i<r.list.length-1?`dtGo(${r.i+1})`:"dtFinish()"}">${r.i<r.list.length-1?"Next · Weiter →":"See my result · Ergebnis"}</button>`;
+    h+=`<button class="btn primary" onclick="${r.i<r.list.length-1?`dtGo(${r.i+1})`:"dtFinish()"}">${r.i<r.list.length-1?tr("Next →","Weiter →","Siguiente →"):"See my result · Ergebnis"}</button>`;
   }
   return h;
 };
