@@ -3231,8 +3231,8 @@ function xLevel(k,i){ if(X.langs[k]) X.langs[k].level=i; xr(); }
 function xSlot(key){ if(X.slots[key]) delete X.slots[key]; else X.slots[key]=true; xr(); }
 function xInterest(k){ const i=X.interests.indexOf(k); if(i>=0) X.interests.splice(i,1); else if(X.interests.length<6) X.interests.push(k); xr(); }
 async function xSave(){
-  if(!Object.keys(X.langs).length){ X.err="Pick at least one language · Wähle mindestens eine Sprache"; xr(); return; }
-  if(!X.adult){ X.err="Please confirm you are 18 or older · Bitte bestätige, dass du mindestens 18 bist"; xr(); return; }
+  if(!Object.keys(X.langs).length){ X.err=tr(`Pick at least one language`,`Wähle mindestens eine Sprache`,`Elige al menos un idioma`); xr(); return; }
+  if(!X.adult){ X.err=tr(`Please confirm you are 18 or older`,`Bitte bestätige, dass du mindestens 18 bist`,`Confirma que tienes 18 años o más`); xr(); return; }
   X.busy=true; X.err=""; X.msg=""; xr();
   try{
     const uid=A.user.id, adultAt=X.adultAt||new Date().toISOString();
@@ -3242,7 +3242,7 @@ async function xSave(){
     if(!(A.profile&&A.profile.display_name)){
       // No name yet → create the profile now (name + a practice language for games)
       const name=(X.name||"").trim().slice(0,16);
-      if(!name){ X.busy=false; X.err="Please add your name at the top · Bitte oben deinen Namen eingeben"; xr(); return; }
+      if(!name){ X.busy=false; X.err=tr(`Please add your name at the top`,`Bitte oben deinen Namen eingeben`,`Añade tu nombre arriba`); xr(); return; }
       const learn=Object.entries(X.langs).find(([,v])=>v.role==="learning");
       const row=Object.assign({ id:uid, display_name:name, practicing:learn?learn[0]:(Object.keys(X.langs)[0]||"en"), level:learn&&learn[1].level!=null?learn[1].level:0, updated_at:new Date().toISOString() }, fields);
       r = await A.sb.from("profiles").upsert(row).select("id");
@@ -3252,7 +3252,7 @@ async function xSave(){
       r = await A.sb.from("profiles").update(fields).eq("id",uid).select("id");
       if(r.error) throw r.error;
     }
-    if(!r.data || !r.data.length) throw new Error("Your profile wasn't saved. Please try again · Nicht gespeichert");
+    if(!r.data || !r.data.length) throw new Error("wasn't saved: "+tr("Your profile wasn't saved. Please try again","Dein Profil wurde nicht gespeichert. Bitte nochmal versuchen","Tu perfil no se guardó. Inténtalo de nuevo"));
     r = await A.sb.from("user_languages").delete().eq("user_id",uid); if(r.error) throw r.error;
     const langs = Object.entries(X.langs).map(([k,v])=>({ user_id:uid, language_code:k, role:v.role, level: v.role==="learning" && v.level!=null ? lvlRank(v.level) : null }));
     if(langs.length){ r = await A.sb.from("user_languages").insert(langs); if(r.error) throw r.error; }
@@ -3260,8 +3260,8 @@ async function xSave(){
     const av = Object.keys(X.slots).map(key=>{ const [d,sk]=key.split("-"); const s=SLOTS.find(s=>s[0]===sk); return { user_id:uid, weekday:+d, start_time:s[2], end_time:s[3] }; });
     if(av.length){ r = await A.sb.from("availability").insert(av); if(r.error) throw r.error; }
     X.adultAt=adultAt;
-    X.msg="Saved! · Gespeichert! ✅";
-  }catch(e){ const m=String((e&&e.message)||""); X.err=/wasn't saved/.test(m)?m:/adult|row-level/i.test(m)?"Couldn't save. Please sign out and in again, then retry · Bitte neu anmelden":authErr(e); }
+    X.msg=tr(`Saved! ✅`,`Gespeichert! ✅`,`¡Guardado! ✅`);
+  }catch(e){ const m=String((e&&e.message)||""); X.err=/wasn't saved/.test(m)?m.replace("wasn't saved: ",""):/adult|row-level/i.test(m)?tr("Couldn't save. Please sign out and in again, then retry","Speichern ging nicht. Bitte ab- und wieder anmelden und nochmal versuchen","No se pudo guardar. Cierra sesión, vuelve a entrar e inténtalo de nuevo"):authErr(e); }
   X.busy=false; xr();
   // Finish the join that sent the person here
   if(!X.err && X.after){
@@ -3275,71 +3275,72 @@ async function xSave(){
   }
 }
 VIEWS.xprofile = function(){
-  const top=`<div class="topline"><button class="chip" onclick="xBack()">← Back</button><span>🌍 Exchange profile</span></div>`;
-  if(!A.user) return `${top}<p class="note center" style="margin-top:40px">Please sign in first · Bitte zuerst anmelden</p>`;
-  if(!X.loaded) return `${top}<p class="note center" style="margin-top:40px">Loading… · Lädt…</p>`;
+  const top=`<div class="topline"><button class="chip" onclick="xBack()">← ${tr("Back","Zurück","Atrás")}</button><span>🌍 ${tr("Exchange profile","Tandem-Profil","Perfil de intercambio")}</span></div>`;
+  if(!A.user) return `${top}<p class="note center" style="margin-top:40px">${tr("Please sign in first","Bitte zuerst anmelden","Primero entra en tu cuenta")}</p>`;
+  if(!X.loaded) return `${top}<p class="note center" style="margin-top:40px">${tr("Loading…","Lädt…","Cargando…")}</p>`;
   const lvls=LVL_ORDER.map(i=>[LEVELS[i],i]);
   const roleBtn=(k,role,label)=>`<button class="chip ${((X.langs[k]||{}).role||null)===role?"on":""}" aria-pressed="${((X.langs[k]||{}).role||null)===role}" onclick="xRole('${k}',${role?`'${role}'`:"null"})">${label}</button>`;
   let tzs=null; try{ tzs=Intl.supportedValuesOf("timeZone"); if(tzs && X.tz && !tzs.includes(X.tz)) tzs=[X.tz,...tzs]; }catch(e){}
+  const ESD=["lun","mar","mié","jue","vie","sáb","dom"], ESS={morning:"Mañana",afternoon:"Tarde",evening:"Noche"};
+  const dayN=(d,di)=>tr(d[0],d[1],ESD[di]), slotN=s=>tr(s[4],s[5],ESS[s[0]]);
   return `${top}
   ${X.after?`<div class="card" style="border:2px solid var(--coral);background:var(--coral-soft)">
-    <h3 style="margin:0 0 4px">👋 One step before you join${X.after.title?` "${esc(X.after.title)}"`:""}</h3>
-    <p style="margin:0">Add your languages and confirm you're 18 or older, then tap <b>Save</b> at the bottom. <b>We'll join you automatically.</b><br>
-    <span class="de">Sprachen eintragen, 18+ bestätigen und speichern. Danach melden wir dich automatisch an.</span></p></div>`:""}
-  <h2>${bi("Your exchange profile","Dein Tandem-Profil")}</h2>
-  ${!(A.profile&&A.profile.display_name)?`<div class="card" style="border:2px solid var(--coral)"><label class="lbl" for="xname" style="margin-top:0">Your name (others see it) · Dein Name</label>
-    <input type="text" id="xname" maxlength="16" placeholder="e.g. Ana" value="${esc(X.name||"")}" oninput="X.name=this.value" autocomplete="nickname"></div>`:""}
-  <p class="sub">${bi("This helps us find the right partners and sessions for you.","So finden wir passende Partner und Sessions für dich.")}</p>
+    <h3 style="margin:0 0 4px">👋 ${tr("One step before you join","Ein Schritt vor dem Beitreten","Un paso antes de unirte")}${X.after.title?` “${esc(X.after.title)}”`:""}</h3>
+    <p style="margin:0">${tr("Add your languages and confirm you're 18 or older, then tap <b>Save</b> at the bottom. <b>We'll join you automatically.</b>","Trag deine Sprachen ein, bestätige 18+ und tippe unten auf <b>Speichern</b>. <b>Danach melden wir dich automatisch an.</b>","Añade tus idiomas y confirma que tienes 18 años o más; luego toca <b>Guardar</b> abajo. <b>Te apuntaremos automáticamente.</b>")}</p></div>`:""}
+  <h2>${tr("Your exchange profile","Dein Tandem-Profil","Tu perfil de intercambio")}</h2>
+  ${!(A.profile&&A.profile.display_name)?`<div class="card" style="border:2px solid var(--coral)"><label class="lbl" for="xname" style="margin-top:0">${tr("Your name (others see it)","Dein Name (für andere sichtbar)","Tu nombre (otros lo ven)")}</label>
+    <input type="text" id="xname" maxlength="16" placeholder="${tr("e.g. Ana","z. B. Ana","p. ej. Ana")}" value="${esc(X.name||"")}" oninput="X.name=this.value" autocomplete="nickname"></div>`:""}
+  <p class="sub">${tr("This helps us find the right partners and sessions for you.","So finden wir passende Partner und Sessions für dich.","Así encontramos los compañeros y sesiones adecuados para ti.")}</p>
 
-  <div class="card"><h3>🗣️ My languages <span class="de">· Meine Sprachen</span></h3>
-    <p class="note" style="margin-top:0"><b>Native / Fluent</b> = you can help others. <b>Learning</b> = you want to practice.<br><span class="de">Native = Muttersprache · Fluent = fließend (du kannst helfen) · Learning = lerne ich (du willst üben)</span></p>
+  <div class="card"><h3>🗣️ ${tr("My languages","Meine Sprachen","Mis idiomas")}</h3>
+    <p class="note" style="margin-top:0">${tr("<b>Native / Fluent</b> = you can help others. <b>Learning</b> = you want to practice.","<b>Muttersprache / Fließend</b> = du kannst anderen helfen. <b>Lerne ich</b> = du willst üben.","<b>Nativo / Fluido</b> = puedes ayudar a otros. <b>Aprendiendo</b> = quieres practicar.")}</p>
     ${XLANGS.map(k=>{ const v=X.langs[k]; return `<div class="xlang">
-      <div style="font-weight:800;margin-bottom:6px">${T[k].flag} ${esc(T[k].nameEn)}${T[k].nameEn!==T[k].name?` <span class="note">· ${esc(T[k].name)}</span>`:""}</div>
-      <div class="row xrole">${roleBtn(k,null,"–")}${roleBtn(k,"native","Native")}${roleBtn(k,"fluent","Fluent")}${roleBtn(k,"learning","Learning")}</div>
+      <div style="font-weight:800;margin-bottom:6px">${T[k].flag} ${esc(lname(k))}${lname(k)!==T[k].name?` <span class="note">· ${esc(T[k].name)}</span>`:""}</div>
+      <div class="row xrole">${roleBtn(k,null,"–")}${roleBtn(k,"native",tr("Native","Muttersprache","Nativo"))}${roleBtn(k,"fluent",tr("Fluent","Fließend","Fluido"))}${roleBtn(k,"learning",tr("Learning","Lerne ich","Aprendiendo"))}</div>
       ${v&&v.role==="learning"?`<div class="row" style="margin-top:8px">${lvls.map(([l,i])=>`<button class="chip ${v.level===i?"on":""}" aria-pressed="${v.level===i}" onclick="xLevel('${k}',${i})">${l.code}</button>`).join("")}</div>`:""}
     </div>`; }).join("")}
   </div>
 
-  <div class="card"><h3>🗓️ When I'm usually free <span class="de">· Wann ich meistens Zeit habe</span></h3>
-    <p class="note" style="margin-top:0">Tap the times that usually work for you. Times are in your time zone.<br><span class="de">Tippe auf passende Zeiten (in deiner Zeitzone).</span></p>
+  <div class="card"><h3>🗓️ ${tr("When I'm usually free","Wann ich meistens Zeit habe","Cuándo suelo estar libre")}</h3>
+    <p class="note" style="margin-top:0">${tr("Tap the times that usually work for you. Times are in your time zone.","Tippe auf Zeiten, die dir meistens passen. Die Zeiten sind in deiner Zeitzone.","Toca las horas que normalmente te vienen bien. Están en tu zona horaria.")}</p>
     <div class="xgrid">
-      <span></span>${SLOTS.map(s=>`<span class="note center" style="margin:0;font-size:12px">${s[1]} ${s[4]}<br>${s[2]}–${s[3]}</span>`).join("")}
-      ${DAYS.map((d,di)=>`<b style="font-size:14px">${d[0]} <span class="de">${d[1]}</span></b>${SLOTS.map(s=>{ const key=di+"-"+s[0], on=!!X.slots[key]; return `<button class="chip xslot ${on?"on":""}" aria-pressed="${on}" aria-label="${d[0]} ${s[4]}" onclick="xSlot('${key}')">${on?"✓":""}</button>`; }).join("")}`).join("")}
+      <span></span>${SLOTS.map(s=>`<span class="note center" style="margin:0;font-size:12px">${s[1]} ${slotN(s)}<br>${s[2]}–${s[3]}</span>`).join("")}
+      ${DAYS.map((d,di)=>`<b style="font-size:14px">${dayN(d,di)}</b>${SLOTS.map(s=>{ const key=di+"-"+s[0], on=!!X.slots[key]; return `<button class="chip xslot ${on?"on":""}" aria-pressed="${on}" aria-label="${dayN(d,di)} ${slotN(s)}" onclick="xSlot('${key}')">${on?"✓":""}</button>`; }).join("")}`).join("")}
     </div>
   </div>
 
-  <div class="card"><h3>💜 Interests <span class="de">· Interessen</span></h3>
-    <p class="note" style="margin-top:0">Pick up to 6 · Bis zu 6 auswählen</p>
-    <div class="row">${INTERESTS.map(([k,e,en,de])=>`<button class="chip ${X.interests.includes(k)?"on":""}" aria-pressed="${X.interests.includes(k)}" title="${esc(de)}" onclick="xInterest('${k}')">${e} ${esc(en)}</button>`).join("")}</div>
+  <div class="card"><h3>💜 ${tr("Interests","Interessen","Intereses")}</h3>
+    <p class="note" style="margin-top:0">${tr("Pick up to 6","Bis zu 6 auswählen","Elige hasta 6")}</p>
+    <div class="row">${INTERESTS.map(it=>`<button class="chip ${X.interests.includes(it[0])?"on":""}" aria-pressed="${X.interests.includes(it[0])}" onclick="xInterest('${it[0]}')">${it[1]} ${esc(intName(it))}</button>`).join("")}</div>
   </div>
 
-  <div class="card"><h3>📍 Where I am <span class="de">· Wo ich bin</span></h3>
-    <p class="lbl" style="margin-top:0">Time zone · Zeitzone</p>
+  <div class="card"><h3>📍 ${tr("Where I am","Wo ich bin","Dónde estoy")}</h3>
+    <p class="lbl" style="margin-top:0">${tr("Time zone","Zeitzone","Zona horaria")}</p>
     <p style="margin:0 0 4px;font-weight:800">🕒 ${esc(tzName(X.tz))} <span class="note" style="font-weight:600">(${esc(X.tz)})</span></p>
-    <p class="note" style="margin:0 0 6px">Set automatically from your phone, so emails and reminders use your time. Travelling? It updates by itself.<br><span class="de">Automatisch vom Handy übernommen.</span></p>
-    <label class="lbl" for="xcity">City (optional) · Stadt (optional)</label>
-    <input type="text" id="xcity" maxlength="60" placeholder="e.g. Erfurt" value="${esc(X.city)}" oninput="X.city=this.value">
+    <p class="note" style="margin:0 0 6px">${tr("Set automatically from your phone, so emails and reminders use your time. Travelling? It updates by itself.","Automatisch vom Handy übernommen, damit E-Mails und Erinnerungen deine Zeit nutzen. Auf Reisen? Aktualisiert sich von selbst.","Se toma automáticamente de tu móvil, para que los correos y recordatorios usen tu hora. ¿Viajas? Se actualiza sola.")}</p>
+    <label class="lbl" for="xcity">${tr("City (optional)","Stadt (optional)","Ciudad (opcional)")}</label>
+    <input type="text" id="xcity" maxlength="60" placeholder="${tr("e.g. Erfurt","z. B. Erfurt","p. ej. Erfurt")}" value="${esc(X.city)}" oninput="X.city=this.value">
   </div>
 
-  ${X.noPC?"":`<div class="card"><h3>👥 Find partners <span class="de">· Tandempartner finden</span></h3>
-    <p class="note" style="margin-top:0">Let other members find you to practice. Off by default. Shown: your first name, photo, country, languages, interests, the text below, and when you're <i>both</i> free. Never your email, city or exact times.<br><span class="de">Andere Mitglieder können dich finden. Standardmäßig aus.</span></p>
-    <div class="row">${[[true,"👁 Show me in Find partners"],[false,"🙈 Hidden"]].map(([v,l])=>`<button class="chip ${!!X.pv===v?"on":""}" aria-pressed="${!!X.pv===v}" onclick="X.pv=${v};xr()">${l}</button>`).join("")}</div>
-    ${X.pv?`<label class="lbl" for="xbio">About me (optional, 160 characters) · Über mich</label>
-      <textarea id="xbio" rows="2" maxlength="160" placeholder="e.g. Boricua in Erfurt, love cooking and salsa. Happy to help with Spanish!" oninput="X.bio=this.value">${esc(X.bio||"")}</textarea>
-      <label class="lbl" for="xcountry">Country (optional) · Land</label>
-      <input type="text" id="xcountry" maxlength="40" placeholder="e.g. Germany" value="${esc(X.country||"")}" oninput="X.country=this.value">
-      <div class="row" style="margin-top:8px"><button class="chip" onclick="ptShare('${A.user.id}','${esc(String((A.profile&&A.profile.display_name)||"").replace(/'/g,""))}')">🔗 Share my profile link</button></div>`:""}
+  ${X.noPC?"":`<div class="card"><h3>👥 ${tr("Find partners","Tandempartner finden","Buscar compañeros")}</h3>
+    <p class="note" style="margin-top:0">${tr("Let other members find you to practice. Off by default. Shown: your first name, photo, country, languages, interests, the text below, and when you're <i>both</i> free. Never your email, city or exact times.","Andere Mitglieder können dich zum Üben finden. Standardmäßig aus. Sichtbar: Vorname, Foto, Land, Sprachen, Interessen, der Text unten und wann ihr <i>beide</i> Zeit habt. Nie deine E-Mail, Stadt oder genauen Zeiten.","Deja que otros miembros te encuentren para practicar. Desactivado por defecto. Se muestra: tu nombre, foto, país, idiomas, intereses, el texto de abajo y cuándo estáis <i>los dos</i> libres. Nunca tu correo, ciudad ni horas exactas.")}</p>
+    <div class="row">${[[true,"👁 "+tr("Show me in Find partners","Zeig mich bei Partner finden","Mostrarme en Buscar compañeros")],[false,"🙈 "+tr("Hidden","Verborgen","Oculto")]].map(([v,l])=>`<button class="chip ${!!X.pv===v?"on":""}" aria-pressed="${!!X.pv===v}" onclick="X.pv=${v};xr()">${l}</button>`).join("")}</div>
+    ${X.pv?`<label class="lbl" for="xbio">${tr("About me (optional, 160 characters)","Über mich (optional, 160 Zeichen)","Sobre mí (opcional, 160 caracteres)")}</label>
+      <textarea id="xbio" rows="2" maxlength="160" placeholder="${tr("e.g. Boricua in Erfurt, love cooking and salsa. Happy to help with Spanish!","z. B. Boricua in Erfurt, liebe Kochen und Salsa. Helfe gern mit Spanisch!","p. ej. Boricua en Erfurt, me encanta cocinar y la salsa. ¡Encantada de ayudar con el español!")}" oninput="X.bio=this.value">${esc(X.bio||"")}</textarea>
+      <label class="lbl" for="xcountry">${tr("Country (optional)","Land (optional)","País (opcional)")}</label>
+      <input type="text" id="xcountry" maxlength="40" placeholder="${tr(`e.g. Germany`,`z. B. Deutschland`,`p. ej. Alemania`)}" value="${esc(X.country||"")}" oninput="X.country=this.value">
+      <div class="row" style="margin-top:8px"><button class="chip" onclick="ptShare('${A.user.id}','${esc(String((A.profile&&A.profile.display_name)||"").replace(/'/g,""))}')">🔗 ${tr("Share my profile link","Profil-Link teilen","Compartir el enlace de mi perfil")}</button></div>`:""}
   </div>`}
 
   <div class="card">
     <label style="display:flex;gap:10px;align-items:flex-start;cursor:pointer">
       <input type="checkbox" ${X.adult?"checked":""} ${X.adultAt?"disabled":""} onchange="X.adult=this.checked" style="width:22px;height:22px;margin-top:2px;flex-shrink:0">
-      <span><b>I am 18 or older.</b> Needed to join or host sessions with other people.<br><span class="de">Ich bin mindestens 18 Jahre alt. Nötig, um an Sessions teilzunehmen oder sie zu leiten.</span></span>
+      <span>${tr("<b>I am 18 or older.</b> Needed to join or host sessions with other people.","<b>Ich bin mindestens 18 Jahre alt.</b> Nötig, um an Sessions teilzunehmen oder sie zu leiten.","<b>Tengo 18 años o más.</b> Necesario para unirte u organizar sesiones con otras personas.")}</span>
     </label>
     ${X.err?`<div class="err">${esc(X.err)}</div>`:""}${X.msg?`<p class="note center okmsg">${esc(X.msg)}</p>`:""}
-    <button class="btn primary" onclick="xSave()" ${X.busy?"disabled":""}>${X.busy?"Saving… · Speichert…":"💾 Save · Speichern"}</button>
+    <button class="btn primary" onclick="xSave()" ${X.busy?"disabled":""}>${X.busy?tr("Saving…","Speichert…","Guardando…"):"💾 "+tr("Save","Speichern","Guardar")}</button>
   </div>
-  <p class="note center">Other members only see your languages. Your free times and city stay private.<br><span class="de">Andere sehen nur deine Sprachen. Zeiten und Stadt bleiben privat.</span></p>`;
+  <p class="note center">${tr("Other members only see your languages. Your free times and city stay private.","Andere sehen nur deine Sprachen. Zeiten und Stadt bleiben privat.","Otros miembros solo ven tus idiomas. Tus horarios y tu ciudad son privados.")}</p>`;
 };
 
 /* ===================== SESSION BOARD ===================== */
@@ -3440,13 +3441,13 @@ function langsLine(arr){
 
 /* ===================== REPORTS ===================== */
 const RP_REASONS = [
-  ["inappropriate","😕 Inappropriate behaviour","Unangemessenes Verhalten"],
-  ["harassment","🛑 Harassment or bullying","Belästigung"],
-  ["unsafe","⚠️ I felt unsafe","Ich habe mich unsicher gefühlt"],
-  ["spam","📢 Spam or advertising","Spam oder Werbung"],
-  ["fake","🎭 Fake or misleading","Fake oder irreführend"],
-  ["no_show","🙈 Didn't show up","Nicht erschienen"],
-  ["other","💬 Something else","Etwas anderes"]
+  ["inappropriate","😕 Inappropriate behaviour","Unangemessenes Verhalten","Comportamiento inapropiado"],
+  ["harassment","🛑 Harassment or bullying","Belästigung","Acoso o intimidación"],
+  ["unsafe","⚠️ I felt unsafe","Ich habe mich unsicher gefühlt","Me sentí inseguro/a"],
+  ["spam","📢 Spam or advertising","Spam oder Werbung","Spam o publicidad"],
+  ["fake","🎭 Fake or misleading","Fake oder irreführend","Falso o engañoso"],
+  ["no_show","🙈 Didn't show up","Nicht erschienen","No se presentó"],
+  ["other","💬 Something else","Etwas anderes","Otra cosa"]
 ];
 const RPT = { t:null, reason:"", busy:false, err:"" };
 function repOpen(type, user, activity, message, who, whoName){
@@ -3459,28 +3460,29 @@ function repShow(){
   let box=document.getElementById("repSheet");
   if(!box){ box=document.createElement("div"); box.className="sheet-bg"; box.id="repSheet";
     box.addEventListener("click",e=>{ if(e.target===box) box.remove(); }); document.body.appendChild(box); }
-  const t=RPT.t, what={ user:"this person", session:"this session", message:"this message" }[t.type];
+  const t=RPT.t, what={ user:tr("this person","diese Person","a esta persona"), session:tr("this session","diese Session","esta sesión"), message:tr("this message","diese Nachricht","este mensaje") }[t.type];
   const reasons=RP_REASONS.filter(r=>r[0]!=="no_show" || t.type!=="message");
   const det=(document.getElementById("repDet")||{}).value||"";
   box.innerHTML=`<div class="sheet" role="dialog" aria-label="Report">
-    <div class="nbhead"><h3 style="margin:0">🚩 Report ${what} · Melden</h3><button class="chip" aria-label="Close" onclick="document.getElementById('repSheet').remove()">✕</button></div>
-    <p class="note" style="margin:0 0 10px">Only the PonteTalk team sees this. <b>They won't know it was you.</b> · Nur das Team sieht das, anonym.</p>
-    <label class="lbl">What happened? · Was ist passiert?</label>
-    <div class="row">${reasons.map(r=>`<button class="chip ${RPT.reason===r[0]?"on":""}" aria-pressed="${RPT.reason===r[0]}" onclick="RPT.reason='${r[0]}';repShow()">${r[1]}</button>`).join("")}</div>
-    <label class="lbl" for="repDet">Anything else? (optional) · Details</label>
-    <textarea id="repDet" rows="3" maxlength="500" placeholder="A few words help us understand · Ein paar Worte helfen uns">${esc(det)}</textarea>
+    <div class="nbhead"><h3 style="margin:0">${tr(`🚩 Report ${what}`,`🚩 ${what} melden`,`🚩 Reportar ${what}`)}</h3><button class="chip" aria-label="Close" onclick="document.getElementById('repSheet').remove()">✕</button></div>
+    <p class="note" style="margin:0 0 10px">${tr(`Only the PonteTalk team sees this. <b>They won't know it was you.</b>`,`Nur das PonteTalk-Team sieht das. <b>Niemand erfährt, dass du es warst.</b>`,`Solo el equipo de PonteTalk lo ve. <b>No sabrán que fuiste tú.</b>`)}</p>
+    <label class="lbl">${tr(`What happened?`,`Was ist passiert?`,`¿Qué pasó?`)}</label>
+    <div class="row">${reasons.map(r=>`<button class="chip ${RPT.reason===r[0]?"on":""}" aria-pressed="${RPT.reason===r[0]}" onclick="RPT.reason='${r[0]}';repShow()">${r[1].split(" ")[0]} ${tr(r[1].slice(r[1].indexOf(" ")+1),r[2],r[3])}</button>`).join("")}</div>
+    <label class="lbl" for="repDet">${tr(`Anything else? (optional)`,`Noch etwas? (optional)`,`¿Algo más? (opcional)`)}</label>
+    <textarea id="repDet" rows="3" maxlength="500" placeholder="${tr(`A few words help us understand`,`Ein paar Worte helfen uns`,`Unas palabras nos ayudan a entender`)}">${esc(det)}</textarea>
     ${RPT.err?`<div class="err">${esc(RPT.err)}</div>`:""}
-    ${RPT.who && !(A.user && RPT.who===A.user.id) && !blIs(RPT.who) ? `<label class="blchk"><input type="checkbox" ${RPT.block?"checked":""} onchange="RPT.block=this.checked"> 🚫 Also block ${RPT.whoName?esc(RPT.whoName):"this person"} <span class="note" style="margin:0">(they won't be told · wird nicht informiert)</span></label>`:""}
-    <button class="btn primary" ${RPT.busy?"disabled":""} onclick="repSend()">${RPT.busy?"Sending… · Sendet…":"Send report · Melden"}</button>
-    ${RPT.who && !(A.user && RPT.who===A.user.id) && !blIs(RPT.who) ? `<button class="btn ghost" onclick="repBlockOnly()">🚫 Just block, don't report · Nur blockieren</button>`:""}
-    <p class="note center" style="margin:8px 0 0">⚠️ In danger right now? Call <b>112</b> (EU emergency number). · Akute Gefahr? Ruf 112 an.</p>
+    ${RPT.who && !(A.user && RPT.who===A.user.id) && !blIs(RPT.who) ? `<label class="blchk"><input type="checkbox" ${RPT.block?"checked":""} onchange="RPT.block=this.checked"> 🚫 ${tr("Also block","Auch blockieren:","Bloquear también a")} ${RPT.whoName?esc(RPT.whoName):tr("this person","diese Person","esta persona")} <span class="note" style="margin:0">(${tr("they won't be told","wird nicht informiert","no se le avisará")})</span></label>`:""}
+    <button class="btn primary" ${RPT.busy?"disabled":""} onclick="repSend()">${RPT.busy?tr(`Sending…`,`Sendet…`,`Enviando…`):tr(`Send report`,`Melden`,`Enviar reporte`)}</button>
+    ${RPT.who && !(A.user && RPT.who===A.user.id) && !blIs(RPT.who) ? `<button class="btn ghost" onclick="repBlockOnly()">${tr(`🚫 Just block, don't report`,`🚫 Nur blockieren, nicht melden`,`🚫 Solo bloquear, sin reportar`)}</button>`:""}
+    <p class="note center" style="margin:8px 0 0">${tr(`⚠️ In danger right now? Call <b>112</b> (EU emergency number).`,`⚠️ Akute Gefahr? Ruf die <b>112</b> an (EU-Notruf).`,`⚠️ ¿Estás en peligro ahora? Llama al <b>112</b> (número de emergencias de la UE).`)}</p>
   </div>`;
 }
 const RP_ERR = { already_reported:"You already reported this. We're on it · Schon gemeldet", too_many_reports:"Thanks! Please try again tomorrow · Bitte morgen wieder",
   not_found:"This can't be reported anymore · Nicht mehr verfügbar" };
+const RP_ERR3 = { already_reported:["You already reported this. We're on it","Schon gemeldet. Wir kümmern uns darum","Ya lo reportaste. Lo estamos revisando"], too_many_reports:["Thanks! Please try again tomorrow","Danke! Bitte morgen wieder","¡Gracias! Inténtalo de nuevo mañana"], not_found:["This can't be reported anymore","Nicht mehr verfügbar","Esto ya no se puede reportar"] };
 async function repSend(){
   if(RPT.busy) return;
-  if(!RPT.reason){ RPT.err="Please pick what happened · Bitte einen Grund wählen"; repShow(); return; }
+  if(!RPT.reason){ RPT.err=tr(`Please pick what happened`,`Bitte einen Grund wählen`,`Elige qué pasó`); repShow(); return; }
   const t=RPT.t, details=((document.getElementById("repDet")||{}).value||"").trim();
   RPT.busy=true; RPT.err=""; repShow();
   try{
@@ -3489,7 +3491,7 @@ async function repSend(){
     const b=document.getElementById("repSheet"); if(b) b.remove();
     bToast(tr("🙏 Thanks. Your report was sent privately","🙏 Danke. Deine Meldung wurde privat gesendet","🙏 Gracias. Tu reporte se envió de forma privada"));
     if(RPT.block && RPT.who) setTimeout(()=>blBlock(RPT.who, RPT.whoName), 1500);
-  }catch(e){ const m=String((e&&e.message)||e); const k=Object.keys(RP_ERR).find(x=>m.includes(x)); RPT.busy=false; RPT.err=k?RP_ERR[k]:bErr(e); repShow(); }
+  }catch(e){ const m=String((e&&e.message)||e); const k=Object.keys(RP_ERR).find(x=>m.includes(x)); RPT.busy=false; RPT.err=k?tr(...RP_ERR3[k]):bErr(e); repShow(); }
 }
 
 /* ===================== BLOCKING ===================== */
@@ -3506,7 +3508,7 @@ async function blBlock(uid, name){
   if(!uid || (A.user && uid===A.user.id)) return false;
   try{ const { error } = await A.sb.rpc("pt_block",{ p_user:uid }); if(error) throw error;
     BL.ids.add(uid); blLoad();
-    bToast(`🚫 ${name?esc(name)+" is":"They're"} blocked. They won't be told · Blockiert`);
+    bToast("🚫 "+tr(`${name?esc(name)+" is":"They're"} blocked. They won't be told`,`${name?esc(name):"Die Person"} ist blockiert und wird nicht informiert`,`${name?esc(name):"Esta persona"} está bloqueada. No se le avisará`));
     if(S.screen==="lounge"){ LU.msgs=LU.msgs.filter(m=>m.user_id!==uid); luPaint(); luFreeLoad(); }
     if(S.screen==="chat" && typeof chPaint==="function") chPaint();
     return true;
@@ -3520,12 +3522,12 @@ async function blUnblock(uid){
 }
 function blOpen(){ go("blocks"); blLoad(); }
 VIEWS.blocks = function(){
-  const top=`<div class="topline"><button class="chip" onclick="A.ret='home';go('account')">← Profile</button><span>🚫 Blocked people</span></div>`;
+  const top=`<div class="topline"><button class="chip" onclick="A.ret='home';go('account')">← ${tr("Profile","Profil","Perfil")}</button><span>🚫 ${tr("Blocked people","Blockiert","Bloqueados")}</span></div>`;
   const list=BL.list;
-  return `${top}<h2 style="margin-bottom:4px">🚫 Blocked people <span class="de">· Blockiert</span></h2>
-    <p class="sub" style="margin-top:0">People you block can't join your sessions or invite you, and you won't see each other's lounge messages. They aren't told.<br><span class="de">Blockierte Personen können deinen Sessions nicht beitreten. Sie werden nicht informiert.</span></p>
+  return `${top}<h2 style="margin-bottom:4px">${tr(`🚫 Blocked people`,`🚫 Blockierte Personen`,`🚫 Personas bloqueadas`)}</h2>
+    <p class="sub" style="margin-top:0">${tr(`People you block can't join your sessions or invite you, and you won't see each other's lounge messages. They aren't told.`,`Blockierte Personen können deinen Sessions nicht beitreten. Sie werden nicht informiert.`,`Las personas que bloqueas no pueden unirse a tus sesiones ni invitarte, y no veréis los mensajes del otro en las salas. No se les avisa.`)}</p>
     ${list===null?`<p class="note center">Loading… · Lädt…</p>`
-     : !list.length?`<div class="card center"><div style="font-size:36px">🕊️</div><p class="note">You haven't blocked anyone. To block someone, tap 🚩 on their message or name. · Niemand blockiert.</p></div>`
+     : !list.length?`<div class="card center"><div style="font-size:36px">🕊️</div><p class="note">${tr(`You haven't blocked anyone. To block someone, tap 🚩 on their message or name.`,`Du hast niemanden blockiert. Tippe zum Blockieren auf 🚩 bei einer Nachricht oder einem Namen.`,`No has bloqueado a nadie. Para bloquear, toca 🚩 en su mensaje o nombre.`)}</p></div>`
      : `<div class="card">${list.map(x=>`<div class="qzrow">${x.avatar_url?`<img class="avs" src="${esc(x.avatar_url)}" alt="">`:"👤"} <b>${esc(x.name)}</b>
          <span class="note" style="margin:0 0 0 auto">${new Date(x.created_at).toLocaleDateString("en-GB",{day:"numeric",month:"short"})}</span>
          <button class="chip" onclick="blUnblock('${x.user_id}')">Unblock</button></div>`).join("")}</div>`}`;
@@ -3706,21 +3708,21 @@ function rsBlock(s){
   if(!A.user || s.seats!==1 || !(s.is_host || s.my_status==="joined") || new Date(s.starts_at)<=new Date()) return "";
   const id=s.activity_id, r=(RS.list||[]).find(x=>x.activity_id===id);
   const W=d=>fmtWhen(d);
-  if(r && r.mine) return `<div class="rsbox"><b>🔁 You suggested ${esc(W(r.proposed_at))}</b> <span class="yt">your time</span><br><span class="note" style="margin:0">Waiting for an answer · Warten auf Antwort</span>
-    <div class="row" style="margin:6px 0 0"><button class="chip" onclick="rsCancel(${r.id})">Withdraw · Zurückziehen</button></div></div>`;
-  if(r) return `<div class="rsbox in"><b>🔁 ${esc(r.from_name||"Your partner")} suggests a new time</b><br>${esc(W(s.starts_at))} → <b>${esc(W(r.proposed_at))}</b> <span class="yt">your time</span>
+  if(r && r.mine) return `<div class="rsbox"><b>🔁 ${tr(`You suggested ${esc(W(r.proposed_at))}`,`Du hast ${esc(W(r.proposed_at))} vorgeschlagen`,`Propusiste ${esc(W(r.proposed_at))}`)}</b> <span class="yt">${tr("your time","deine Zeit","tu hora")}</span><br><span class="note" style="margin:0">${tr("Waiting for an answer","Warten auf Antwort","Esperando respuesta")}</span>
+    <div class="row" style="margin:6px 0 0"><button class="chip" onclick="rsCancel(${r.id})">${tr(`Withdraw`,`Zurückziehen`,`Retirar`)}</button></div></div>`;
+  if(r) return `<div class="rsbox in"><b>🔁 ${tr(`${esc(r.from_name||"Your partner")} suggests a new time`,`${esc(r.from_name||"Dein Partner")} schlägt eine neue Zeit vor`,`${esc(r.from_name||"Tu compañero")} propone una nueva hora`)}</b><br>${esc(W(s.starts_at))} → <b>${esc(W(r.proposed_at))}</b> <span class="yt">${tr("your time","deine Zeit","tu hora")}</span>
     ${r.note?`<p class="note" style="margin:6px 0 0">💬 “${esc(r.note)}”</p>`:""}
-    <div class="row" style="margin:8px 0 0"><button class="chip on" onclick="rsAnswer(${r.id},true)" ${RS.busy?"disabled":""}>✓ Accept · Annehmen</button><button class="chip" onclick="rsAnswer(${r.id},false)" ${RS.busy?"disabled":""}>✕ Decline · Ablehnen</button></div></div>`;
+    <div class="row" style="margin:8px 0 0"><button class="chip on" onclick="rsAnswer(${r.id},true)" ${RS.busy?"disabled":""}>${tr(`✓ Accept`,`✓ Annehmen`,`✓ Aceptar`)}</button><button class="chip" onclick="rsAnswer(${r.id},false)" ${RS.busy?"disabled":""}>${tr(`✕ Decline`,`✕ Ablehnen`,`✕ Rechazar`)}</button></div></div>`;
   if(RS.form && RS.form.id===id){
     const f=RS.form;
-    return `<div class="rsbox"><b>🔁 Suggest a new time · Neuen Termin vorschlagen</b>
+    return `<div class="rsbox"><b>${tr(`🔁 Suggest a new time`,`🔁 Neuen Termin vorschlagen`,`🔁 Proponer otra hora`)}</b>
       <div class="row" style="margin:8px 0 0;gap:8px"><input type="date" value="${esc(f.date)}" min="${new Date().toISOString().slice(0,10)}" oninput="RS.form.date=this.value" style="width:auto">
       <input type="time" value="${esc(f.time)}" step="900" oninput="RS.form.time=this.value" style="width:auto"></div>
-      <input type="text" maxlength="300" placeholder="Short note (optional) · Kurze Nachricht" value="${esc(f.note)}" oninput="RS.form.note=this.value" style="margin-top:8px">
+      <input type="text" maxlength="300" placeholder="${tr(`Short note (optional)`,`Kurze Nachricht (optional)`,`Nota breve (opcional)`)}" value="${esc(f.note)}" oninput="RS.form.note=this.value" style="margin-top:8px">
       <p class="note" style="margin:6px 0 0">Your time (${esc(tzName(detectTz()))}). They see it in their own time.</p>
-      <div class="row" style="margin:8px 0 0"><button class="chip on" onclick="rsSend()" ${RS.busy?"disabled":""}>Send · Senden</button><button class="chip" onclick="RS.form=null;xr()">Cancel</button></div></div>`;
+      <div class="row" style="margin:8px 0 0"><button class="chip on" onclick="rsSend()" ${RS.busy?"disabled":""}>${tr("Send","Senden","Enviar")}</button><button class="chip" onclick="RS.form=null;xr()">${tr("Cancel","Abbrechen","Cancelar")}</button></div></div>`;
   }
-  return `<button class="btn secondary" style="margin-top:8px" onclick="rsStart('${id}')">🔁 Suggest a new time · Neuen Termin vorschlagen</button>`;
+  return `<button class="btn secondary" style="margin-top:8px" onclick="rsStart('${id}')">${tr(`🔁 Suggest a new time`,`🔁 Neuen Termin vorschlagen`,`🔁 Proponer otra hora`)}</button>`;
 }
 function rsStart(id){
   const s=(B.list||[]).find(x=>x.activity_id===id); const d=new Date(s?s.starts_at:Date.now()+86400000);
@@ -3733,13 +3735,13 @@ async function rsSend(){
   RS.busy=true; xr();
   try{ const { error } = await A.sb.rpc("pt_request_reschedule",{ p_activity:f.id, p_when:when.toISOString(), p_note:f.note||null }); if(error) throw error;
     RS.form=null; bToast(tr("🔁 Suggestion sent","🔁 Vorschlag gesendet","🔁 Propuesta enviada")); await rsLoad(); }
-  catch(e){ bToast(/not_future/.test(String(e&&e.message))?"Pick a time at least 1 hour from now · Mindestens 1 Stunde im Voraus":bErr(e)); }
+  catch(e){ bToast(/not_future/.test(String(e&&e.message))?tr(`Pick a time at least 1 hour from now`,`Mindestens 1 Stunde im Voraus`,`Elige una hora al menos 1 hora a partir de ahora`):bErr(e)); }
   RS.busy=false; xr();
 }
 async function rsAnswer(rid, ok){
   RS.busy=true; xr();
   try{ const { error } = await A.sb.rpc("pt_answer_reschedule",{ p_id:rid, p_accept:ok }); if(error) throw error;
-    bToast(ok?"✅ New time confirmed · Neue Zeit bestätigt":"Declined · Abgelehnt"); await rsLoad(); if(ok) bLoad(); }
+    bToast(ok?tr(`✅ New time confirmed`,`✅ Neue Zeit bestätigt`,`✅ Nueva hora confirmada`):tr(`Declined`,`Abgelehnt`,`Rechazado`)); await rsLoad(); if(ok) bLoad(); }
   catch(e){ bToast(bErr(e)); }
   RS.busy=false; xr();
 }
@@ -3749,7 +3751,7 @@ async function rsCancel(rid){
 }
 function chBtn(s){
   if(!A.user || !(s.is_host || s.my_status==="joined") || !chWindow(s)) return "";
-  return `<button class="btn secondary" style="margin-top:8px" onclick="chOpen('${s.activity_id}')">💬 Chat · Gruppenchat${chBadge(s.activity_id)}</button>`;
+  return `<button class="btn secondary" style="margin-top:8px" onclick="chOpen('${s.activity_id}')">💬 ${tr("Chat","Gruppenchat","Chat")}${chBadge(s.activity_id)}</button>`;
 }
 function chOpen(id){
   chStop(); CH.id=id; CH.list=[]; CH.last=0; CH.err=""; CH.draft="";
@@ -3780,11 +3782,11 @@ async function chFetch(first){
       CU[CH.id]=0;
       A.sb.rpc("pt_chat_mark_read",{ p_activity:CH.id, p_last:CH.last }).then(()=>{ if(typeof nbFresh==="function") nbFresh(); },()=>{});
     }
-  }catch(e){ CH.err=/not_in_session/.test(String(e&&e.message))?"Only people in this session can see the chat · Nur für Teilnehmende":bErr(e); if(S.screen==="chat") xr(); }
+  }catch(e){ CH.err=/not_in_session/.test(String(e&&e.message))?tr(`Only people in this session can see the chat`,`Nur für Teilnehmende`,`Solo los participantes pueden ver el chat`):bErr(e); if(S.screen==="chat") xr(); }
 }
 function chLinkify(t){ return esc(t).replace(/(https:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener nofollow">$1</a>').replace(/\n/g,"<br>"); }
 function chListHtml(){
-  if(!CH.list.length) return `<p class="note center" style="margin:auto">No messages yet. Say hi 👋 · Noch keine Nachrichten</p>`;
+  if(!CH.list.length) return `<p class="note center" style="margin:auto">${tr(`No messages yet. Say hi 👋`,`Noch keine Nachrichten. Sag Hallo 👋`,`Aún no hay mensajes. Saluda 👋`)}</p>`;
   const s=bRowOf({ activity_id:CH.id })||{}; let lastDay="";
   return CH.list.filter(m=>!blIs(m.user_id)).map(m=>{
     const d=new Date(m.created_at), day=d.toDateString(), mine=A.user&&m.user_id===A.user.id;
@@ -3792,7 +3794,7 @@ function chListHtml(){
     const t=d.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
     const canDel = mine || s.is_host;
     return `${sep}<div class="cm ${mine?"me":""}">${mine?"":`<div class="who">${m.avatar_url?`<img class="avs" src="${esc(m.avatar_url)}" alt="">`:""}${esc(m.name||"Member")}${m.is_host?" · ⭐ host":""}</div>`}
-      ${chLinkify(m.body)}<span class="tm">${t}</span>${!mine?`<button class="cx" aria-label="Report message" title="Report · Melden" onclick="repOpen('message',null,null,${m.id},'${m.user_id}','${esc(String(m.name||'').replace(/'/g,''))}')">🚩</button>`:""}${canDel?`<button class="cx" aria-label="Delete message" title="Delete" onclick="chDel(${m.id})">✕</button>`:""}</div>`;
+      ${chLinkify(m.body)}<span class="tm">${t}</span>${!mine?`<button class="cx" aria-label="Report message" title="${tr("Report","Melden","Reportar")}" onclick="repOpen('message',null,null,${m.id},'${m.user_id}','${esc(String(m.name||'').replace(/'/g,''))}')">🚩</button>`:""}${canDel?`<button class="cx" aria-label="Delete message" title="Delete" onclick="chDel(${m.id})">✕</button>`:""}</div>`;
   }).join("");
 }
 function chPaint(){
@@ -3804,15 +3806,15 @@ function chPaint(){
 VIEWS.chat = function(){
   const s=bRowOf({ activity_id:CH.id })||{};
   const open=chWindow(s.starts_at?s:{ starts_at:new Date().toISOString(), duration_min:60 });
-  return `<div class="topline"><button class="chip" onclick="chStop();sOpen('${CH.id}')">← Session</button><span>💬 Chat</span></div>
-  <div class="chhead"><div style="flex:1;min-width:0"><h2 style="margin:0;font-size:20px">${esc(s.title||"Session chat")}</h2>
+  return `<div class="topline"><button class="chip" onclick="chStop();sOpen('${CH.id}')">← ${tr("Session","Session","Sesión")}</button><span>💬 Chat</span></div>
+  <div class="chhead"><div style="flex:1;min-width:0"><h2 style="margin:0;font-size:20px">${esc(s.title||tr("Session chat","Session-Chat","Chat de la sesión"))}</h2>
     ${s.starts_at?`<p class="note" style="margin:0">${fmtWhen(s.starts_at)}${s.format==="in_person"&&s.place_name?` · 📍 ${esc(s.place_name)}`:""}</p>`:""}</div></div>
-  <div class="chsafe">🔒 Only the host and people who joined can read this. Keep it here: no need to share phone numbers or home addresses.${s.format==="in_person"?" Meet at the public place from the session.":""} · Nur für Teilnehmende.</div>
+  <div class="chsafe">🔒 ${tr("Only the host and people who joined can read this. Keep it here: no need to share phone numbers or home addresses.","Nur der Host und Teilnehmende können das lesen. Bleibt hier: Telefonnummern oder Adressen müsst ihr nicht teilen.","Solo el anfitrión y los participantes pueden leer esto. Quedaos aquí: no hace falta compartir teléfonos ni direcciones.")}${s.format==="in_person"?" "+tr("Meet at the public place from the session.","Trefft euch am öffentlichen Ort der Session.","Quedad en el lugar público de la sesión."):""}</div>
   ${CH.err?`<div class="err">${esc(CH.err)}</div>`:""}
   <div class="chlist" id="chlist" aria-live="polite">${chListHtml()}</div>
-  ${open?`<div class="chin"><textarea id="chtxt" rows="1" maxlength="500" placeholder="Message · Nachricht…" oninput="CH.draft=this.value;this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();chSend();}">${esc(CH.draft)}</textarea>
+  ${open?`<div class="chin"><textarea id="chtxt" rows="1" maxlength="500" placeholder="${tr(`Message…`,`Nachricht…`,`Mensaje…`)}" oninput="CH.draft=this.value;this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();chSend();}">${esc(CH.draft)}</textarea>
       ${emoBtn('chtxt')}<button class="btn primary" ${CH.busy?"disabled":""} onclick="chSend()" aria-label="Send">Send</button></div>`
-    : `<p class="note center" style="margin-top:10px">This chat is closed. Chats close 24 hours after the session. · Chat geschlossen.</p>`}`;
+    : `<p class="note center" style="margin-top:10px">${tr(`This chat is closed. Chats close 24 hours after the session.`,`Dieser Chat ist geschlossen. Chats schließen 24 Stunden nach der Session.`,`Este chat está cerrado. Los chats se cierran 24 horas después de la sesión.`)}</p>`}`;
 };
 AFTER.chat = function(){ const el=document.getElementById("chlist"); if(el) el.scrollTop=el.scrollHeight; };
 async function chSend(){
@@ -3825,7 +3827,7 @@ async function chSend(){
     CH.draft=""; if(ta){ ta.value=""; ta.style.height="auto"; ta.focus(); }
     await chFetch(false);
     const el=document.getElementById("chlist"); if(el) el.scrollTop=el.scrollHeight;
-  }catch(e){ const m=String((e&&e.message)||e); bToast(/chat_slow_down/.test(m)?"Slow down a little 🙂 Try again in a minute · Bitte kurz warten":/row-level/.test(m)?"The chat is closed, or you're not in this session · Chat geschlossen":bErr(e)); }
+  }catch(e){ const m=String((e&&e.message)||e); bToast(/chat_slow_down/.test(m)?tr(`Slow down a little 🙂 Try again in a minute`,`Bitte kurz warten`,`Más despacio 🙂 Inténtalo en un minuto`):/row-level/.test(m)?tr(`The chat is closed, or you're not in this session`,`Chat geschlossen`,`El chat está cerrado o no estás en esta sesión`):bErr(e)); }
   CH.busy=false;
 }
 async function chDel(id){
@@ -3862,15 +3864,15 @@ function placeLine(s0){
   return `<p class="pline">📍 <span>${esc(s.place_name||"")}${s.area?` · ${esc(s.area)}`:""}, ${esc(s.city||"")}</span></p>`;
 }
 function pMapBtn(s, small){
-  return `<a class="btn ${small?"qbtn":""} vbtn" href="${esc(pMapsUrl(s))}" target="_blank" rel="noopener noreferrer">📍 Open in Maps</a>`;
+  return `<a class="btn ${small?"qbtn":""} vbtn" href="${esc(pMapsUrl(s))}" target="_blank" rel="noopener noreferrer">📍 ${tr("Open in Maps","In Karten öffnen","Abrir en Mapas")}</a>`;
 }
 function pDetails(s){
   const d=PL[s.activity_id]||{};
   return `<div class="pdet"><b>📍 ${esc(s.place_name||"")}</b>${d.address?`<br>${esc(d.address)}`:`<br>${esc([s.area,s.city].filter(Boolean).join(", "))}`}
     ${d.directions?`<div class="note" style="margin:4px 0 0">🧭 ${esc(d.directions)}</div>`:""}
-    ${s.is_host&&!d.address?`<div class="note" style="margin:4px 0 0">Add the exact address with ✏️ Edit, so people find you.</div>`:""}
+    ${s.is_host&&!d.address?`<div class="note" style="margin:4px 0 0">${tr("Add the exact address with ✏️ Edit, so people find you.","Füge mit ✏️ Bearbeiten die genaue Adresse hinzu, damit man dich findet.","Añade la dirección exacta con ✏️ Editar para que te encuentren.")}</div>`:""}
     ${pMapBtn(s,false)}
-    <p class="note center" style="margin:4px 0 0">🔒 Only people in this meetup see the address</p></div>`;
+    <p class="note center" style="margin:4px 0 0">🔒 ${tr("Only people in this meetup see the address","Nur Teilnehmende sehen die Adresse","Solo los participantes ven la dirección")}</p></div>`;
 }
 function rVisible(){
   return (R.list||[]).filter(x=>{ const b=bRowOf(x); if(!b || b.format!=="in_person") return true;
@@ -3881,9 +3883,9 @@ async function hPickCafe(){
   const L=(CF.list||[]).filter(c=>c.status==="approved" && !c.online && c.city);
   const box=document.createElement("div"); box.className="sheet-bg"; box.id="cafePick";
   box.innerHTML=`<div class="sheet" role="dialog" aria-label="Pick a café">
-    <div class="nbhead"><h3 style="margin:0">☕ Pick a language café</h3><button class="chip" aria-label="Close" onclick="document.getElementById('cafePick').remove()">✕</button></div>
+    <div class="nbhead"><h3 style="margin:0">☕ ${tr("Pick a language café","Sprachcafé wählen","Elige un café de idiomas")}</h3><button class="chip" aria-label="Close" onclick="document.getElementById('cafePick').remove()">✕</button></div>
     ${L.length?L.map(c=>`<button class="mlink" style="width:100%;margin-top:6px;display:flex;gap:8px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font:700 14px 'Plus Jakarta Sans',sans-serif;cursor:pointer;text-align:left" onclick="hCafeSet('${c.id}')">☕ ${esc(c.name)}<span class="note" style="margin:0 0 0 auto">📍 ${esc(c.city)}</span></button>`).join("")
-      :`<p class="note center">No cafés in the directory yet · Noch keine Cafés</p>`}</div>`;
+      :`<p class="note center">${tr(`No cafés in the directory yet`,`Noch keine Cafés im Verzeichnis`,`Aún no hay cafés en el directorio`)}</p>`}</div>`;
   box.addEventListener("click",e=>{ if(e.target===box) box.remove(); });
   document.body.appendChild(box);
 }
@@ -3907,17 +3909,17 @@ function safetyOk(){ try{ return localStorage.getItem("pt_safe_ip")==="1"; }catc
 function safetyOpen(fn,id){
   const box=document.createElement("div"); box.className="sheet-bg"; box.id="safeSheet";
   box.innerHTML=`<div class="sheet" role="dialog" aria-label="Meeting in person">
-    <h3 style="margin:0 0 6px">📍 Meeting in person · Persönliches Treffen</h3>
-    <p class="note" style="margin:0 0 10px">A few simple tips for your first in-person meetup. · Ein paar Tipps.</p>
+    <h3 style="margin:0 0 6px">${tr(`📍 Meeting in person`,`📍 Persönliches Treffen`,`📍 Quedar en persona`)}</h3>
+    <p class="note" style="margin:0 0 10px">${tr(`A few simple tips for your first in-person meetup.`,`Ein paar einfache Tipps für dein erstes Treffen vor Ort.`,`Unos consejos sencillos para tu primer encuentro en persona.`)}</p>
     <div style="display:flex;flex-direction:column;gap:8px;font-size:15px">
-      <div>☕ <b>Public places only.</b> Cafés, libraries, bars. Never a private home. · Nur öffentliche Orte.</div>
-      <div>👋 <b>Tell someone</b> where you're going and when. · Sag jemandem Bescheid.</div>
-      <div>🚶 <b>Get there and back on your own.</b> No need to share your address. · Eigene An- und Abreise.</div>
-      <div>🙅 <b>Leave anytime</b> if something feels off, and tell us. · Du kannst jederzeit gehen.</div>
-      <div>🗓️ <b>Can't make it?</b> Leave the session early so someone else gets your seat. · Rechtzeitig absagen.</div>
+      <div>${tr(`☕ <b>Public places only.</b> Cafés, libraries, bars. Never a private home.`,`☕ <b>Nur öffentliche Orte.</b> Cafés, Bibliotheken, Bars. Nie eine Privatwohnung.`,`☕ <b>Solo lugares públicos.</b> Cafés, bibliotecas, bares. Nunca una casa particular.`)}</div>
+      <div>${tr(`👋 <b>Tell someone</b> where you're going and when.`,`👋 <b>Sag jemandem Bescheid</b>, wohin du gehst und wann.`,`👋 <b>Avisa a alguien</b> de adónde vas y cuándo.`)}</div>
+      <div>${tr(`🚶 <b>Get there and back on your own.</b> No need to share your address.`,`🚶 <b>Eigene An- und Abreise.</b> Du musst deine Adresse nicht teilen.`,`🚶 <b>Ve y vuelve por tu cuenta.</b> No hace falta compartir tu dirección.`)}</div>
+      <div>${tr(`🙅 <b>Leave anytime</b> if something feels off, and tell us.`,`🙅 <b>Du kannst jederzeit gehen</b>, wenn sich etwas komisch anfühlt, und sag uns Bescheid.`,`🙅 <b>Vete cuando quieras</b> si algo no te cuadra, y avísanos.`)}</div>
+      <div>${tr(`🗓️ <b>Can't make it?</b> Leave the session early so someone else gets your seat.`,`🗓️ <b>Du kannst nicht?</b> Sag rechtzeitig ab, damit jemand anderes deinen Platz bekommt.`,`🗓️ <b>¿No puedes ir?</b> Sal de la sesión con tiempo para que otra persona tenga tu plaza.`)}</div>
     </div>
-    <button class="btn primary" style="margin-top:14px" id="safeOk">Got it, join · Verstanden</button>
-    <button class="btn ghost" onclick="document.getElementById('safeSheet').remove()">Not now · Jetzt nicht</button></div>`;
+    <button class="btn primary" style="margin-top:14px" id="safeOk">${tr(`Got it, join`,`Verstanden, beitreten`,`Entendido, unirme`)}</button>
+    <button class="btn ghost" onclick="document.getElementById('safeSheet').remove()">${tr(`Not now`,`Jetzt nicht`,`Ahora no`)}</button></div>`;
   document.body.appendChild(box);
   box.querySelector("#safeOk").onclick=async()=>{
     try{ localStorage.setItem("pt_safe_ip","1"); }catch(e){ window._ptSafe=true; }
@@ -3961,32 +3963,32 @@ function invShow(){
   const s=(B.list||[]).concat(D.board||[]).find(x=>x.activity_id===INV.id)||{};
   const ps=(B.people||{})[INV.id]||[];
   const stOf=uid=>{ if(INV.done[uid]) return INV.done[uid]; const p=ps.find(x=>x.user_id===uid); return p?p.status:""; };
-  const lab={ invited:"✓ Invited", joined:"✓ In", pending:"✓ Asked to join", waitlisted:"✓ Waitlist", offered:"✓ Seat offered" };
+  const lab={ invited:"✓ "+tr("Invited","Eingeladen","Invitado/a"), joined:"✓ "+tr("In","Dabei","Dentro"), pending:"✓ "+tr("Asked to join","Angefragt","Pidió unirse"), waitlisted:"✓ "+tr("Waitlist","Warteliste","Lista de espera"), offered:"✓ "+tr("Seat offered","Platz angeboten","Plaza ofrecida") };
   const prevEmail=(document.getElementById("invEmail")||{}).value;
   if(prevEmail!==undefined) INV.email=prevEmail;
   box.innerHTML=`<div class="sheet" role="dialog" aria-label="Invite people">
-    <div class="nbhead"><h3 style="margin:0">📩 Invite people · Einladen</h3><button class="chip" aria-label="Close" onclick="document.getElementById('invSheet').remove();bLoad()">✕</button></div>
+    <div class="nbhead"><h3 style="margin:0">${tr(`📩 Invite people`,`📩 Leute einladen`,`📩 Invitar a gente`)}</h3><button class="chip" aria-label="Close" onclick="document.getElementById('invSheet').remove();bLoad()">✕</button></div>
     ${s.title?`<p class="note" style="margin:0 0 8px"><b>${esc(s.title)}</b>${s.starts_at?` · ${fmtWhen(s.starts_at)}`:""}</p>`:""}
-    <p class="note" style="margin:0 0 10px">They'll see it in their sessions with <b>Accept / Decline</b> and get an email. Accepting skips "I approve each person". · Sie bekommen eine E-Mail und können annehmen.</p>
-    <label class="lbl" for="invEmail">By email · Per E-Mail</label>
-    <div style="display:flex;gap:8px"><input type="text" id="invEmail" inputmode="email" autocomplete="off" placeholder="their email address" value="${esc(INV.email)}" style="flex:1;min-width:0" onkeydown="if(event.key==='Enter')invSend(null)">
-      <button class="btn primary" style="width:auto;margin:0;padding:0 16px" ${INV.busy?"disabled":""} onclick="invSend(null)">Invite</button></div>
-    <p class="note" style="margin:4px 0 0">They need a PonteTalk account with this email. · Sie brauchen ein Konto mit dieser E-Mail.</p>
+    <p class="note" style="margin:0 0 10px">${tr(`They'll see it in their sessions with <b>Accept / Decline</b> and get an email. Accepting skips "I approve each person".`,`Sie sehen es in ihren Sessions mit <b>Annehmen / Ablehnen</b> und bekommen eine E-Mail. Wer annimmt, braucht keine Bestätigung.`,`Lo verán en sus sesiones con <b>Aceptar / Rechazar</b> y recibirán un correo. Al aceptar se salta “Yo apruebo a cada persona”.`)}</p>
+    <label class="lbl" for="invEmail">${tr(`By email`,`Per E-Mail`,`Por correo`)}</label>
+    <div style="display:flex;gap:8px"><input type="text" id="invEmail" inputmode="email" autocomplete="off" placeholder="${tr(`their email address`,`ihre E-Mail-Adresse`,`su correo electrónico`)}" value="${esc(INV.email)}" style="flex:1;min-width:0" onkeydown="if(event.key==='Enter')invSend(null)">
+      <button class="btn primary" style="width:auto;margin:0;padding:0 16px" ${INV.busy?"disabled":""} onclick="invSend(null)">${tr("Invite","Einladen","Invitar")}</button></div>
+    <p class="note" style="margin:4px 0 0">${tr(`They need a PonteTalk account with this email.`,`Sie brauchen ein PonteTalk-Konto mit dieser E-Mail.`,`Necesita una cuenta de PonteTalk con este correo.`)}</p>
     ${INV.err?`<div class="err">${esc(INV.err)}</div>`:""}
-    <label class="lbl">People you've met · Bekannte aus Sessions</label>
+    <label class="lbl">${tr(`People you've met`,`Bekannte aus Sessions`,`Personas que conociste`)}</label>
     ${INV.contacts===null?`<p class="note">Loading… · Lädt…</p>`
-      : !INV.contacts.length?`<p class="note">Nobody yet. After your first sessions, people you met show up here. · Noch niemand.</p>`
+      : !INV.contacts.length?`<p class="note">${tr(`Nobody yet. After your first sessions, people you met show up here.`,`Noch niemand. Nach deinen ersten Sessions erscheinen hier die Leute, die du getroffen hast.`,`Aún nadie. Después de tus primeras sesiones, aquí aparecerán las personas que conociste.`)}</p>`
       : INV.contacts.map(c=>{ const st=stOf(c.user_id);
           return `<div class="prow" style="align-items:center">${c.avatar_url?`<img class="pav" src="${esc(c.avatar_url)}" alt="">`:`<span class="pav" aria-hidden="true">${esc((c.name||"?").charAt(0).toUpperCase())}</span>`}
             <div style="flex:1;min-width:0"><b>${esc(c.name||"Member")}</b></div>
             ${st && lab[st] ? `<span class="note" style="margin:0;font-weight:800;color:var(--teal)">${lab[st]}</span>`
-              : `<button class="chip" ${INV.busy?"disabled":""} onclick="invSend('${c.user_id}')">📩 Invite</button>`}</div>`; }).join("")}
+              : `<button class="chip" ${INV.busy?"disabled":""} onclick="invSend('${c.user_id}')">📩 ${tr("Invite","Einladen","Invitar")}</button>`}</div>`; }).join("")}
   </div>`;
 }
 async function invSend(uid){
   if(INV.busy) return;
   const email=uid?null:((document.getElementById("invEmail")||{}).value||"").trim();
-  if(!uid && !/^\S+@\S+\.\S+$/.test(email)){ INV.err="Please type a full email address · Bitte vollständige E-Mail"; invShow(); return; }
+  if(!uid && !/^\S+@\S+\.\S+$/.test(email)){ INV.err=tr(`Please type a full email address`,`Bitte vollständige E-Mail eingeben`,`Escribe un correo completo`); invShow(); return; }
   INV.busy=true; INV.err=""; invShow();
   try{
     const { data, error } = await A.sb.rpc("pt_invite",{ p_activity:INV.id, p_email:email, p_user:uid });
@@ -3994,7 +3996,7 @@ async function invSend(uid){
     const st=data&&data.status, nm=(data&&data.name)||"They";
     if(uid) INV.done[uid]=st;
     if(!uid){ const el=document.getElementById("invEmail"); if(el) el.value=""; INV.email=""; }
-    bToast(st==="invited" ? `📩 ${nm} is invited · eingeladen` : `${nm} is already in this session · schon dabei`);
+    bToast(st==="invited" ? "📩 "+tr(`${nm} is invited`,`${nm} ist eingeladen`,`${nm} está invitado/a`) : tr(`${nm} is already in this session`,`${nm} ist schon dabei`,`${nm} ya está en esta sesión`));
   }catch(e){ INV.err=invErr(e); }
   INV.busy=false; invShow();
 }
@@ -4026,7 +4028,7 @@ function bExportPanel(){
       <select class="xsel" style="width:auto" onchange="B.expO.lang=this.value"><option value="">All languages</option>${langs.map(k=>`<option value="${k}" ${o.lang===k?"selected":""}>${T[k]?T[k].flag+" "+esc(T[k].nameEn):k}</option>`).join("")}</select>
       <select class="xsel" style="width:auto" onchange="B.expO.tz2=this.value">${EXP_TZ.filter(z=>z[0]!==detectTz()).map(([v,l])=>`<option value="${v}" ${o.tz2===v?"selected":""}>${l}</option>`).join("")}</select>
     </div>
-    <div class="row" style="margin:0"><button class="btn primary qbtn" style="width:auto;margin:0" onclick="bExport()">Create PDF · PDF erstellen</button><button class="chip" onclick="B.exp=false;xr()">Close</button></div>
+    <div class="row" style="margin:0"><button class="btn primary qbtn" style="width:auto;margin:0" onclick="bExport()">${tr(`Create PDF`,`PDF erstellen`,`Crear PDF`)}</button><button class="chip" onclick="B.exp=false;xr()">${tr("Close","Schließen","Cerrar")}</button></div>
     <p class="note" style="margin:8px 0 0">A new tab opens with the page. Choose <b>Save as PDF</b> (on a phone: Share → Print → pinch out → Save).</p></div>`;
 }
 function bExport(){
@@ -4142,7 +4144,7 @@ async function mLoad(){
 function mList(s){
   const id=s.activity_id, L=ML[id]||[];
   if(!L.length || !A.user || !(s.is_host || s.my_status==="joined")) return "";
-  return `<div class="mats"><div class="note" style="margin:0;font-weight:800">📎 Materials · Materialien</div>
+  return `<div class="mats"><div class="note" style="margin:0;font-weight:800">${tr(`📎 Materials`,`📎 Materialien`,`📎 Materiales`)}</div>
     ${L.map(m=>m.shop_item
       ? `<button class="mlink" onclick="shGet('${m.shop_item}')">🛍 ${esc(m.label)} <span class="note" style="margin:0 0 0 auto">PonteShop ⬇</span></button>`
       : `<a href="${esc(m.url)}" target="_blank" rel="noopener noreferrer">📄 ${esc(m.label)} <span style="margin-left:auto">↗</span></a>`).join("")}</div>`;
@@ -4155,10 +4157,10 @@ async function hMatShop(){
   const list=(SH.list||[]).filter(it=>it.published);
   const box=document.createElement("div"); box.className="sheet-bg"; box.id="matShop";
   box.innerHTML=`<div class="sheet" role="dialog" aria-label="Pick from PonteShop">
-    <div class="nbhead"><h3 style="margin:0">🛍 Pick from PonteShop</h3><button class="chip" aria-label="Close" onclick="document.getElementById('matShop').remove()">✕</button></div>
+    <div class="nbhead"><h3 style="margin:0">🛍 ${tr("Pick from PonteShop","Aus PonteShop wählen","Elegir de PonteShop")}</h3><button class="chip" aria-label="Close" onclick="document.getElementById('matShop').remove()">✕</button></div>
     ${list.length ? list.map(it=>{ const k=shKind(it.kind), t=T[it.language];
         return `<button class="mlink" style="width:100%;margin-top:6px;display:flex;gap:8px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font:700 14px 'Plus Jakarta Sans',sans-serif;cursor:pointer;text-align:left" onclick="hMatPick('${it.id}')">${k[1]} ${esc(it.title)}<span class="note" style="margin:0 0 0 auto">${t?t.flag:"🌍"} ${it.level==null?"":RANKS[it.level]}</span></button>`; }).join("")
-      : `<p class="note center">No resources in PonteShop yet · Noch keine Materialien</p>`}
+      : `<p class="note center">${tr(`No resources in PonteShop yet`,`Noch keine Materialien im PonteShop`,`Aún no hay recursos en PonteShop`)}</p>`}
   </div>`;
   box.addEventListener("click",e=>{ if(e.target===box) box.remove(); });
   document.body.appendChild(box);
@@ -4175,7 +4177,7 @@ function hMatsClean(){
     if(m.shop_item){ out.push({ label:label||"PonteShop resource", url:null, shop_item:m.shop_item }); continue; }
     const url=vClean(m.url);
     if(!url && !label) continue;
-    if(!vValid(url)) return { err:`Material ${i+1}: please paste the full link (https://…) · Bitte vollständigen Link einfügen` };
+    if(!vValid(url)) return { err:tr(`Material ${i+1}: please paste the full link (https://…)`,`Material ${i+1}: Bitte vollständigen Link einfügen (https://…)`,`Material ${i+1}: pega el enlace completo (https://…)`) };
     out.push({ label:label||`Material ${out.length+1}`, url, shop_item:null });
   }
   return { list:out.slice(0,3) };
@@ -4406,7 +4408,7 @@ function qzGuestView(d){
     </div>
     ${QZ.err?`<div class="err">${esc(QZ.err)}</div>`:""}
     <div class="brow2">${i>0?`<button class="btn ghost" onclick="qzGo(-1)">← Back</button>`:"<span></span>"}
-      ${last?`<button class="btn primary" ${QZ.busy?"disabled":""} onclick="qzSubmit()">${QZ.busy?"Sending… · Sendet…":"📨 Send answers · Senden"}</button>`
+      ${last?`<button class="btn primary" ${QZ.busy?"disabled":""} onclick="qzSubmit()">${QZ.busy?tr(`Sending…`,`Sendet…`,`Enviando…`):"📨 Send answers · Senden"}</button>`
             :`<button class="btn primary" onclick="qzGo(1)">Next · Weiter →</button>`}</div>`;
 }
 VIEWS.quiz = function(){
@@ -4811,15 +4813,16 @@ const LU_QS = [
   { en:"What makes you smile?", es:"¿Qué te hace sonreír?", de:"Was bringt dich zum Lächeln?", it:"Cosa ti fa sorridere?", ur:"آپ کو کیا چیز مسکرانے پر مجبور کرتی ہے؟", urR:"Aap ko kya cheez muskuraane par majboor karti hai?" }
 ];
 function luFlag(k){ return cfLang(k)[0]; }
-function luName(l){ return `${LU_NAMES[l.lang_a]||cfLang(l.lang_a)[1]} ⇄ ${LU_NAMES[l.lang_b]||cfLang(l.lang_b)[1]}`; }
+function luLN(k){ return UI==="en" ? (LU_NAMES[k]||cfLang(k)[1]) : lname(k); }
+function luName(l){ return `${luLN(l.lang_a)} ⇄ ${luLN(l.lang_b)}`; }
 function luRoom(){ return (LU.list||[]).find(x=>x.id===LU.id) || { id:LU.id, lang_a:(LU.id||"").split("-")[0], lang_b:(LU.id||"").split("-")[1] }; }
 function luErr(e){
   const m=String((e&&e.message)||e||"");
-  if(/lounge_profile_needed/.test(m)) return "Add your name and confirm 18+ in your exchange profile first · Erst Name und 18+ im Profil";
-  if(/lounge_slow_down/.test(m)) return "Slow down a little 🙂 Try again in a moment · Kurz warten";
-  if(/lounge_no_links_yet/.test(m)) return "New members can post links after their first week · Links ab der zweiten Woche";
-  if(/lounge_too_many_times/.test(m)) return "You can mark up to 21 times per lounge · Maximal 21 Zeiten";
-  if(/lounge_length/.test(m)) return "Messages can be up to 500 characters · Maximal 500 Zeichen";
+  if(/lounge_profile_needed/.test(m)) return tr(`Add your name and confirm 18+ in your exchange profile first`,`Erst Name und 18+ im Profil`,`Primero añade tu nombre y confirma 18+ en tu perfil de intercambio`);
+  if(/lounge_slow_down/.test(m)) return tr(`Slow down a little 🙂 Try again in a moment`,`Kurz warten`,`Más despacio 🙂 Inténtalo en un momento`);
+  if(/lounge_no_links_yet/.test(m)) return tr(`New members can post links after their first week`,`Links ab der zweiten Woche`,`Los miembros nuevos pueden publicar enlaces después de su primera semana`);
+  if(/lounge_too_many_times/.test(m)) return tr(`You can mark up to 21 times per lounge`,`Maximal 21 Zeiten`,`Puedes marcar hasta 21 horas por sala`);
+  if(/lounge_length/.test(m)) return tr(`Messages can be up to 500 characters`,`Maximal 500 Zeichen`,`Los mensajes pueden tener hasta 500 caracteres`);
   return bErr(e);
 }
 // Weekly times are stored in UTC (day 0 = Sunday). These helpers convert to and from the viewer's local time.
@@ -4831,7 +4834,7 @@ function luNextUtc(dow, hour){ // next Date with this UTC weekday + hour
   const d=new Date(); d.setUTCMinutes(0,0,0); d.setUTCHours(hour);
   let add=(dow-d.getUTCDay()+7)%7; if(add===0 && d<=new Date()) add=7; d.setUTCDate(d.getUTCDate()+add); return d;
 }
-function luWhen(d){ return d.toLocaleDateString("en-GB",{ weekday:"short" })+" "+d.toLocaleTimeString("en-GB",{ hour:"2-digit", minute:"2-digit" }); }
+function luWhen(d){ return d.toLocaleDateString(uiLoc(),{ weekday:"short" })+" "+d.toLocaleTimeString(uiLoc(),{ hour:"2-digit", minute:"2-digit" }); }
 
 /* ---- list ---- */
 async function luOpen(){
@@ -4844,18 +4847,18 @@ async function luOpen(){
   if(S.screen==="lounges") xr();
 }
 VIEWS.lounges = function(){
-  const top=`<div class="topline"><button class="chip" onclick="goHome()">← Back</button><span>Language lounges</span></div>
-    <h1 style="margin-bottom:4px">🛋️ Language lounges</h1>${sessTabs("lounges")}
-    <p class="sub" style="margin-top:0">Chat with people learning the same languages, and agree on a time to talk.<br><span class="de">Plaudern und gemeinsam eine Zeit finden.</span></p>`;
-  if(!A.user) return `${top}<div class="card center"><div style="font-size:40px">🛋️</div><h3>Sign in to join the lounges</h3>
-    <button class="btn primary" onclick="A.ret='lounges';go('account')">Sign in · Anmelden</button></div>`;
+  const top=`<div class="topline"><button class="chip" onclick="goHome()">← ${tr("Back","Zurück","Atrás")}</button><span>${tr("Language lounges","Sprach-Lounges","Salas de idiomas")}</span></div>
+    <h1 style="margin-bottom:4px">🛋️ ${tr("Language lounges","Sprach-Lounges","Salas de idiomas")}</h1>${sessTabs("lounges")}
+    <p class="sub" style="margin-top:0">${tr(`Chat with people learning the same languages, and agree on a time to talk.`,`Chatte mit Leuten, die dieselben Sprachen lernen, und findet gemeinsam eine Zeit zum Reden.`,`Chatea con gente que aprende los mismos idiomas y quedad a una hora para hablar.`)}</p>`;
+  if(!A.user) return `${top}<div class="card center"><div style="font-size:40px">🛋️</div><h3>${tr("Sign in to join the lounges","Melde dich an, um mitzumachen","Entra para unirte a las salas")}</h3>
+    <button class="btn primary" onclick="A.ret='lounges';go('account')">${tr("Sign in","Anmelden","Entrar")}</button></div>`;
   if(LU.err && !LU.list) return `${top}<div class="err">${esc(LU.err)}</div>`;
   if(!LU.list) return `${top}<p class="note center">Loading… · Lädt…</p>`;
   return `${top}<div class="lugrid">${LU.list.map(l=>`<button class="card lucard" onclick="luEnter('${esc(l.id)}')">
       <div class="luflags">${luFlag(l.lang_a)}<span>⇄</span>${luFlag(l.lang_b)}</div>
       <span class="lucorner" data-lupres-badge="${esc(l.id)}">${lpBadge(l.id)}</span>
       <b>${esc(luName(l))}</b>
-      <span class="note" style="margin:4px 0 0">${l.msgs_7d?`💬 ${l.msgs_7d} message${l.msgs_7d===1?"":"s"} this week`:"💬 Be the first to say hi"}${l.free_24h?` · <b class="lufree">🙋 ${l.free_24h} free in the next 24 h</b>`:""}</span>
+      <span class="note" style="margin:4px 0 0">${l.msgs_7d?"💬 "+tr(`${l.msgs_7d} message${l.msgs_7d===1?"":"s"} this week`,`${l.msgs_7d} Nachricht${l.msgs_7d===1?"":"en"} diese Woche`,`${l.msgs_7d} mensaje${l.msgs_7d===1?"":"s"} esta semana`):"💬 "+tr("Be the first to say hi","Sag als Erste/r Hallo","Sé el primero en saludar")}${l.free_24h?` · <b class="lufree">🙋 ${tr(`${l.free_24h} free in the next 24 h`,`${l.free_24h} frei in den nächsten 24 Std.`,`${l.free_24h} libres en las próximas 24 h`)}</b>`:""}</span>
     </button>`).join("")}</div>
     ${luSugHtml()}`;
 };
@@ -4871,30 +4874,30 @@ async function luSugLoad(){
 }
 function luSugErr(e){
   const m=String((e&&e.message)||e||"");
-  if(/lounge_exists/.test(m)) return "That lounge already exists. Find it in the list above 🙂 · Gibt es schon";
-  if(/lounge_bad_pair/.test(m)) return "Pick two different languages · Zwei verschiedene Sprachen wählen";
-  if(/lounge_too_many_suggestions/.test(m)) return "You can have up to 10 suggestions at a time · Maximal 10 Vorschläge";
+  if(/lounge_exists/.test(m)) return tr(`That lounge already exists. Find it in the list above 🙂`,`Gibt es schon`,`Esa sala ya existe. Búscala en la lista de arriba 🙂`);
+  if(/lounge_bad_pair/.test(m)) return tr(`Pick two different languages`,`Zwei verschiedene Sprachen wählen`,`Elige dos idiomas distintos`);
+  if(/lounge_too_many_suggestions/.test(m)) return tr(`You can have up to 10 suggestions at a time`,`Maximal 10 Vorschläge`,`Puedes tener hasta 10 sugerencias a la vez`);
   return luErr(e);
 }
-function luPairName(a,b){ return `${luFlag(a)}⇄${luFlag(b)} ${esc(LU_NAMES[a]||cfLang(a)[1])} ⇄ ${esc(LU_NAMES[b]||cfLang(b)[1])}`; }
+function luPairName(a,b){ return `${luFlag(a)}⇄${luFlag(b)} ${esc(luLN(a))} ⇄ ${esc(luLN(b))}`; }
 function luSugHtml(){
   if(LU.sug===null){ LU.sug=[]; luSugLoad(); }
   const langs=CF_LANGS.filter(k=>k!=="multi");
-  const opt=(sel)=>`<option value="">Choose · Wählen</option>`+langs.map(k=>`<option value="${k}" ${sel===k?"selected":""}>${cfLang(k)[0]} ${esc(LU_NAMES[k]||cfLang(k)[1])}</option>`).join("");
+  const opt=(sel)=>`<option value="">${tr("Choose","Wählen","Elegir")}</option>`+langs.map(k=>`<option value="${k}" ${sel===k?"selected":""}>${cfLang(k)[0]} ${esc(luLN(k))}</option>`).join("");
   const form = LU.sugOpen ? `<div class="card" style="margin-top:10px">
-      <h3 style="margin:0 0 8px">＋ Suggest a lounge · Lounge vorschlagen</h3>
+      <h3 style="margin:0 0 8px">${tr(`＋ Suggest a lounge`,`＋ Lounge vorschlagen`,`＋ Sugerir una sala`)}</h3>
       <div class="row" style="margin:0;gap:8px;align-items:center;flex-wrap:wrap">
         <select aria-label="First language" onchange="LU.sa=this.value" style="width:auto;flex:1;min-width:140px">${opt(LU.sa)}</select>
         <b>⇄</b>
         <select aria-label="Second language" onchange="LU.sb=this.value" style="width:auto;flex:1;min-width:140px">${opt(LU.sb)}</select></div>
-      <input type="text" maxlength="140" placeholder="Why? e.g. lots of Polish speakers in my city (optional)" value="${esc(LU.snote)}" oninput="LU.snote=this.value" style="margin-top:8px">
-      <div class="row" style="margin:8px 0 0"><button class="chip on" ${LU.sbusy?"disabled":""} onclick="luSugSend()">Send suggestion · Senden</button><button class="chip" onclick="LU.sugOpen=false;xr()">Cancel</button></div>
-    </div>` : `<button class="btn secondary" style="margin-top:14px" onclick="LU.sugOpen=true;xr()">💡 Suggest a new lounge · Lounge vorschlagen</button>`;
-  const list = (LU.sug||[]).length ? `<h3 style="margin:16px 0 6px">Suggested by members · Vorschläge</h3>
+      <input type="text" maxlength="140" placeholder="${tr(`Why? e.g. lots of Polish speakers in my city (optional)`,`Warum? z. B. viele Polnisch-Sprechende in meiner Stadt (optional)`,`¿Por qué? p. ej. hay muchos hablantes de polaco en mi ciudad (opcional)`)}" value="${esc(LU.snote)}" oninput="LU.snote=this.value" style="margin-top:8px">
+      <div class="row" style="margin:8px 0 0"><button class="chip on" ${LU.sbusy?"disabled":""} onclick="luSugSend()">${tr("Send suggestion","Vorschlag senden","Enviar sugerencia")}</button><button class="chip" onclick="LU.sugOpen=false;xr()">${tr("Cancel","Abbrechen","Cancelar")}</button></div>
+    </div>` : `<button class="btn secondary" style="margin-top:14px" onclick="LU.sugOpen=true;xr()">${tr(`💡 Suggest a new lounge`,`💡 Lounge vorschlagen`,`💡 Sugerir una sala nueva`)}</button>`;
+  const list = (LU.sug||[]).length ? `<h3 style="margin:16px 0 6px">${tr(`Suggested by members`,`Vorschläge von Mitgliedern`,`Sugeridas por miembros`)}</h3>
     ${LU.sug.map(x=>`<div class="lusug"><div><b>${luPairName(x.lang_a,x.lang_b)}</b>
-        <span class="note" style="margin:0 0 0 6px">👍 ${x.votes} ${x.votes===1?"person wants":"people want"} this</span>
+        <span class="note" style="margin:0 0 0 6px">👍 ${tr(`${x.votes} ${x.votes===1?"person wants":"people want"} this`,`${x.votes} ${x.votes===1?"Person möchte":"Personen möchten"} das`,`${x.votes} ${x.votes===1?"persona quiere":"personas quieren"} esto`)}</span>
         ${(x.notes||[]).length?`<div class="note" style="margin:2px 0 0">💬 ${x.notes.map(esc).join(" · ")}</div>`:""}</div>
-      <div class="row" style="margin:6px 0 0">${x.mine?`<button class="chip" onclick="luUnvote('${esc(x.pair)}')" title="Take back">✓ You want this</button>`:`<button class="chip" onclick="luVote('${esc(x.lang_a)}','${esc(x.lang_b)}')">👍 Me too</button>`}
+      <div class="row" style="margin:6px 0 0">${x.mine?`<button class="chip" onclick="luUnvote('${esc(x.pair)}')" title="${tr("Take back","Zurücknehmen","Retirar")}">✓ ${tr("You want this","Du willst das","Lo quieres")}</button>`:`<button class="chip" onclick="luVote('${esc(x.lang_a)}','${esc(x.lang_b)}')">👍 ${tr("Me too","Ich auch","Yo también")}</button>`}
       ${LU.admin?`<button class="chip on" onclick="luCreate('${esc(x.lang_a)}','${esc(x.lang_b)}')">✅ Create</button><button class="chip" aria-label="Dismiss" onclick="luDismiss('${esc(x.pair)}')">✕</button>`:""}</div>
     </div>`).join("")}` : "";
   return form + `<div class="lufind" style="margin-top:4px">${list}</div>`;
@@ -4955,7 +4958,7 @@ function lpPaint(){ document.querySelectorAll("[data-lupres]").forEach(el=>{ el.
 async function luEnter(id){
   luStop(); Object.assign(LU,{ id, msgs:[], last:0, free:[], err:"", draft:"", findOpen:false, pickDay:null });
   go("lounge");
-  const known=()=>{ if(LU.list && !LU.list.some(x=>x.id===LU.id)){ LU.err="This lounge doesn't exist (any more). Pick one from the list · Diese Lounge gibt es nicht"; } };
+  const known=()=>{ if(LU.list && !LU.list.some(x=>x.id===LU.id)){ LU.err=tr("This lounge doesn't exist (any more). Pick one from the list","Diese Lounge gibt es nicht (mehr). Wähl eine aus der Liste","Esta sala no existe (ya). Elige una de la lista"); } };
   if(!LU.list) A.sb.rpc("pt_lounges").then(r=>{ if(!r.error){ LU.list=r.data||[]; known(); if(S.screen==="lounge") xr(); } },()=>{}); else known();
   try{ sessionStorage.removeItem("pt_lounge"); }catch(e){}
   if(LU.canPost===null) A.sb.rpc("pt_lounge_can_post").then(r=>{ LU.canPost=!!r.data; if(S.screen==="lounge") xr(); },()=>{});
@@ -4988,14 +4991,14 @@ async function luFetch(first){
   }catch(e){ LU.err=luErr(e); if(S.screen==="lounge") xr(); }
 }
 function luListHtml(){
-  if(!LU.msgs.length) return `<p class="note center" style="margin:auto">No messages yet. Answer today's question to get things going 👋 · Noch nichts hier</p>`;
+  if(!LU.msgs.length) return `<p class="note center" style="margin:auto">${tr(`No messages yet. Answer today's question to get things going 👋`,`Noch keine Nachrichten. Beantworte die Frage des Tages, um loszulegen 👋`,`Aún no hay mensajes. Responde a la pregunta del día para empezar 👋`)}</p>`;
   let lastDay="";
   return LU.msgs.filter(m=>!blIs(m.user_id)).map(m=>{
     const d=new Date(m.created_at), day=d.toDateString(), mine=A.user&&m.user_id===A.user.id;
     const sep = day!==lastDay ? `<div class="chday">${esc(bDayLabel(m.created_at).split(" · ")[0])}</div>` : ""; lastDay=day;
     const t=d.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
     const canDel = mine || LU.admin;
-    const tools = `${!mine?`<button class="cx" aria-label="Report message" title="Report · Melden" onclick="luReport(${m.id})">🚩</button>`:""}${canDel?`<button class="cx" aria-label="Delete message" title="Delete" onclick="luDel(${m.id})">✕</button>`:""}`;
+    const tools = `${!mine?`<button class="cx" aria-label="Report message" title="${tr("Report","Melden","Reportar")}" onclick="luReport(${m.id})">🚩</button>`:""}${canDel?`<button class="cx" aria-label="Delete message" title="Delete" onclick="luDel(${m.id})">✕</button>`:""}`;
     if(m.kind==="session"){
       const past = m.starts_at && new Date(m.starts_at) < new Date();
       return `${sep}<div class="lusess"><div class="note" style="margin:0">📅 ${esc(m.name)} is hosting</div><b>${esc(m.body)}</b>
@@ -5040,7 +5043,7 @@ document.addEventListener("click",ev=>{ const box=document.getElementById("emobo
 function luQuestion(l){
   const day=Math.floor(Date.now()/86400000), q=LU_QS[day % LU_QS.length];
   const a=q[l.lang_a], b=q[l.lang_b];
-  return `<div class="luq"><span class="note" style="margin:0">💡 Question of the day · Frage des Tages</span>
+  return `<div class="luq"><span class="note" style="margin:0">${tr(`💡 Question of the day`,`💡 Frage des Tages`,`💡 Pregunta del día`)}</span>
     ${a?`<div lang="${l.lang_a}" dir="auto" class="luql"><b>${luFlag(l.lang_a)} ${esc(a)}</b></div>${q[l.lang_a+"R"]?`<div class="luroman">${esc(q[l.lang_a+"R"])}</div>`:""}`:""}${b?`<div lang="${l.lang_b}" dir="auto" class="luql"><b>${luFlag(l.lang_b)} ${esc(b)}</b></div>${q[l.lang_b+"R"]?`<div class="luroman">${esc(q[l.lang_b+"R"])}</div>`:""}`:""}
     ${!a&&!b?`<div><b>🇬🇧 ${esc(q.en)}</b></div>`:""}</div>`;
 }
@@ -5051,19 +5054,19 @@ const EC={ lounge:null, data:null, loading:false, err:"", urls:{}, playing:null,
   recFor:null, busy:false, form:null, tick:null, cleaned:false };
 function ecErr(e){
   const m=String((e&&e.message)||e||"");
-  if(/echo_cannot_host/.test(m)) return "To start a challenge you need this language as native or fluent in your profile, your name + 18+, and an account older than 7 days · Nur Muttersprachler/fließend, Konto älter als 7 Tage";
-  if(/echo_one_each/.test(m)) return "You already have a challenge running or waiting. One at a time · Du hast schon eine Challenge";
-  if(/echo_busy/.test(m)){ const t=(m.match(/echo_busy: (.+)$/)||[])[1]; return `Another challenge runs then${t?` (until ${fmtWhen(t)})`:""}. Pick a later start · Wähle einen späteren Start`; }
-  if(/echo_queue_full/.test(m)) return "3 challenges are already waiting in this lounge. Try again later · Warteschlange voll";
-  if(/echo_window/.test(m)) return "Pick a start within 14 days and a length between 1 hour and 7 days · Start in 14 Tagen, 1 Std. bis 7 Tage";
-  if(/echo_phrase/.test(m)) return "Write the word or sentence (up to 200 characters) · Wort oder Satz eingeben";
-  if(/echo_audio/.test(m)) return "The recording didn't upload. Please try again · Aufnahme fehlgeschlagen";
-  if(/echo_closed/.test(m)) return "This challenge is closed · Diese Challenge ist geschlossen";
-  if(/echo_own/.test(m)) return "That's your own 🙂 · Das ist deins";
-  if(/echo_length/.test(m)) return "That recording is too long or too short · Aufnahme zu lang oder zu kurz";
-  if(/echo_too_new/.test(m)) return "New accounts can vote after 24 hours (in 1-day challenges: once your name + 18+ are in your profile) · Neue Konten: nach 24 Std.";
-  if(/echo_no_likes_left/.test(m)) return "You've used your 3 likes. Take one back to give it to someone else · Alle 3 Likes vergeben";
-  if(/echo_pick_time/.test(m)) return "You can pick your favourite in the 7 days after the end · Auswahl bis 7 Tage nach Ende";
+  if(/echo_cannot_host/.test(m)) return tr(`To start a challenge you need this language as native or fluent in your profile, your name + 18+, and an account older than 7 days`,`Nur Muttersprachler/fließend, Konto älter als 7 Tage`,`Para crear un reto necesitas este idioma como nativo o fluido en tu perfil, tu nombre + 18+ y una cuenta de más de 7 días`);
+  if(/echo_one_each/.test(m)) return tr(`You already have a challenge running or waiting. One at a time`,`Du hast schon eine Challenge`,`Ya tienes un reto activo o en espera. Uno a la vez`);
+  if(/echo_busy/.test(m)){ const t=(m.match(/echo_busy: (.+)$/)||[])[1]; return tr(`Another challenge runs then${t?` (until ${fmtWhen(t)})`:""}. Pick a later start`,`Dann läuft schon eine andere Challenge${t?` (bis ${fmtWhen(t)})`:""}. Wähle einen späteren Start`,`Ya hay otro reto entonces${t?` (hasta ${fmtWhen(t)})`:""}. Elige un inicio más tarde`); }
+  if(/echo_queue_full/.test(m)) return tr(`3 challenges are already waiting in this lounge. Try again later`,`Warteschlange voll`,`Ya hay 3 retos esperando en esta sala. Inténtalo más tarde`);
+  if(/echo_window/.test(m)) return tr(`Pick a start within 14 days and a length between 1 hour and 7 days`,`Start in 14 Tagen, 1 Std. bis 7 Tage`,`Elige un inicio dentro de 14 días y una duración entre 1 hora y 7 días`);
+  if(/echo_phrase/.test(m)) return tr(`Write the word or sentence (up to 200 characters)`,`Wort oder Satz eingeben`,`Escribe la palabra o frase (hasta 200 caracteres)`);
+  if(/echo_audio/.test(m)) return tr(`The recording didn't upload. Please try again`,`Aufnahme fehlgeschlagen`,`La grabación no se subió. Inténtalo de nuevo`);
+  if(/echo_closed/.test(m)) return tr(`This challenge is closed`,`Diese Challenge ist geschlossen`,`Este reto está cerrado`);
+  if(/echo_own/.test(m)) return tr(`That's your own 🙂`,`Das ist deins`,`Es tuyo 🙂`);
+  if(/echo_length/.test(m)) return tr(`That recording is too long or too short`,`Aufnahme zu lang oder zu kurz`,`La grabación es demasiado larga o corta`);
+  if(/echo_too_new/.test(m)) return tr(`New accounts can vote after 24 hours (in 1-day challenges: once your name + 18+ are in your profile)`,`Neue Konten: nach 24 Std.`,`Las cuentas nuevas pueden votar después de 24 horas (en retos de 1 día: cuando tu nombre + 18+ estén en tu perfil)`);
+  if(/echo_no_likes_left/.test(m)) return tr(`You've used your 3 likes. Take one back to give it to someone else`,`Alle 3 Likes vergeben`,`Ya usaste tus 3 likes. Retira uno para dárselo a otra persona`);
+  if(/echo_pick_time/.test(m)) return tr(`You can pick your favourite in the 7 days after the end`,`Auswahl bis 7 Tage nach Ende`,`Puedes elegir tu favorito en los 7 días después del final`);
   return luErr(e);
 }
 function ecLeft(iso){
@@ -5100,7 +5103,7 @@ function ecPlay(path){
 }
 function ecPlayBtn(path, label){
   const on=EC.playing===path;
-  return `<button class="ecplay ${on?"on":""}" onclick="ecPlay('${esc(path)}')" aria-label="${on?"Stop":"Play"} ${esc(label||"recording")}">${on?"■":"▶"}</button>`;
+  return `<button class="ecplay ${on?"on":""}" onclick="ecPlay('${esc(path)}')" aria-label="${on?"Stop":"Play"} ${esc(label||"")}">${on?"■":"▶"}</button>`;
 }
 /* --- the card inside the lounge --- */
 function ecCard(l){
@@ -5109,18 +5112,18 @@ function ecCard(l){
   let body="";
   if(c){
     const live=c.state==="live";
-    body=`<div class="ectop"><b>🎙️ Echo Challenge <button class="linkbtn" style="font-size:13px;margin-left:4px" onclick="ecHow()">ℹ️ How it works</button></b><span class="ecmeta">${live?`⏳ ends in ${esc(ecLeft(c.ends_at))}`:`🕒 starts ${esc(fmtWhen(c.starts_at))}`}</span></div>
+    body=`<div class="ectop"><b>🎙️ Echo Challenge <button class="linkbtn" style="font-size:13px;margin-left:4px" onclick="ecHow()">ℹ️ ${tr("How it works","So funktioniert's","Cómo funciona")}</button></b><span class="ecmeta">${live?`⏳ ${tr("ends in","endet in","termina en")} ${esc(ecLeft(c.ends_at))}`:`🕒 ${tr("starts","beginnt","empieza")} ${esc(fmtWhen(c.starts_at))}`}</span></div>
       <div style="display:flex;align-items:center;gap:10px">${live?ecPlayBtn(c.audio_path,"the phrase"):""}
         <div style="min-width:0"><div class="ecphrase" lang="${esc(c.language)}" dir="auto">${luFlag(c.language)} ${esc(c.phrase)}</div>
-        ${c.meaning?`<div class="ecmean">${esc(c.meaning)}</div>`:""}<div class="ecmeta">by ${esc(c.host_name)}${live?` · 🎧 ${c.entries_count} echoes · 👏 ${c.likes_given} likes given`:""}</div></div></div>
-      <button class="btn ${live?"primary":"secondary"}" style="margin-top:10px" onclick="ecOpen()">${live?((c.entries||[]).some(e=>e.mine)?"🎧 Listen & vote · Anhören":"🎙️ Record my echo · Mitmachen"):"See the challenge · Ansehen"}</button>`;
+        ${c.meaning?`<div class="ecmean">${esc(c.meaning)}</div>`:""}<div class="ecmeta">${tr("by","von","de")} ${esc(c.host_name)}${live?` · 🎧 ${c.entries_count} ${tr("echoes","Aufnahmen","ecos")} · 👏 ${c.likes_given} ${tr("likes given","Likes vergeben","likes dados")}`:""}</div></div></div>
+      <button class="btn ${live?"primary":"secondary"}" style="margin-top:10px" onclick="ecOpen()">${live?((c.entries||[]).some(e=>e.mine)?tr(`🎧 Listen & vote`,`🎧 Anhören`,`🎧 Escuchar y votar`):tr(`🎙️ Record my echo`,`🎙️ Mitmachen`,`🎙️ Grabar mi eco`)):tr(`See the challenge`,`Ansehen`,`Ver el reto`)}</button>`;
   } else {
-    body=`<div class="ectop"><b>🎙️ Echo Challenge</b><button class="linkbtn" style="font-size:13px" onclick="ecHow()">ℹ️ How it works</button></div>
-      <p class="note" style="margin:4px 0 8px">A native speaker records a phrase, everyone echoes it, the best echo wins 🏆 · Nachsprechen und gewinnen</p>
-      ${canAny&&!EC.data.mine_active?`<button class="btn primary" onclick="ecNew()">＋ Start a challenge · Challenge starten</button>`
-        :`<p class="note" style="margin:0">Native or fluent speakers can start one. · Muttersprachler können eine starten.</p>`}`;
+    body=`<div class="ectop"><b>🎙️ Echo Challenge</b><button class="linkbtn" style="font-size:13px" onclick="ecHow()">ℹ️ ${tr("How it works","So funktioniert's","Cómo funciona")}</button></div>
+      <p class="note" style="margin:4px 0 8px">${tr(`A native speaker records a phrase, everyone echoes it, the best echo wins 🏆`,`Jemand mit dieser Muttersprache nimmt einen Satz auf, alle sprechen nach, die beste Aufnahme gewinnt 🏆`,`Un hablante nativo graba una frase, todos la repiten y el mejor eco gana 🏆`)}</p>
+      ${canAny&&!EC.data.mine_active?`<button class="btn primary" onclick="ecNew()">${tr(`＋ Start a challenge`,`＋ Challenge starten`,`＋ Crear un reto`)}</button>`
+        :`<p class="note" style="margin:0">${tr(`Native or fluent speakers can start one.`,`Muttersprachler oder fließend Sprechende können eine starten.`,`Los hablantes nativos o fluidos pueden crear uno.`)}</p>`}`;
   }
-  const lastLine=last&&!c?`<button class="linkbtn" style="margin-top:8px" onclick="ecOpen()">🏆 Last challenge: “${esc(last.phrase)}”: see the results</button>`:"";
+  const lastLine=last&&!c?`<button class="linkbtn" style="margin-top:8px" onclick="ecOpen()">🏆 ${tr(`Last challenge: “${esc(last.phrase)}”: see the results`,`Letzte Challenge: „${esc(last.phrase)}“: Ergebnis ansehen`,`Último reto: “${esc(last.phrase)}”: ver resultados`)}</button>`:"";
   return `<div class="eccard">${body}${lastLine}</div>`;
 }
 function ecHow(){
@@ -5128,17 +5131,16 @@ function ecHow(){
   const c=EC.data&&EC.data.current, sec=(c&&c.max_sec)||15, short=c&&c.short;
   const old=document.getElementById("ecHow"); if(old) old.remove();
   const box=document.createElement("div"); box.className="sheet-bg"; box.id="ecHow";
-  const step=(n,e,en,de)=>`<div style="display:flex;gap:12px;align-items:flex-start;margin:0 0 14px"><span style="flex:none;width:30px;height:30px;border-radius:50%;background:var(--coral);color:#fff;display:grid;place-items:center;font-weight:800">${n}</span>
-    <div><b>${e} ${en}</b><br><span class="de" style="color:var(--muted)">${de}</span></div></div>`;
-  box.innerHTML=`<div class="sheet" role="dialog" aria-label="How Echo Challenge works"><h3 style="margin:0 0 4px">🎙️ How it works · So funktioniert's</h3>
-    <p class="note" style="margin:0 0 14px">A native speaker says a phrase. You repeat it. The best echo wins! · Nachsprechen und gewinnen!</p>
-    ${step(1,"▶","Listen to the phrase","Hör dir den Satz an")}
-    ${step(2,"🎙️",`Record your echo (up to ${sec} s). Not happy? Record again: the new one replaces the old.`,`Nimm dich auf (bis ${sec} Sek.). Neu aufnehmen ersetzt die alte Aufnahme.`)}
-    ${step(3,"👏","Listen to the others and give your 3 likes. Likes stay secret until the end.","Hör die anderen an und vergib 3 Likes. Sie bleiben bis zum Ende geheim.")}
-    ${step(4,"🏆","When time is up: most likes = 🏆 People's choice, and the host picks a ⭐ favourite.","Am Ende: meiste Likes = 🏆 Publikumsliebling, der Host wählt einen ⭐ Favoriten.")}
-    <div class="note" style="background:var(--sun-soft);border-radius:12px;padding:10px 12px;margin:0 0 12px">💡 ${short?"New here? In this challenge you can vote right away once your name + 18+ are in your profile.":"New here? You can record right away (name + 18+ in your profile). Voting opens 24 h after you join."}
-      <br><span class="de">${short?"Neu? Hier darfst du sofort abstimmen (Name + 18+ im Profil).":"Neu? Aufnehmen geht sofort, abstimmen nach 24 Std."}</span></div>
-    <button class="btn primary" onclick="document.getElementById('ecHow').remove()">Got it! · Alles klar!</button></div>`;
+  const step=(n,e,en,de,es)=>`<div style="display:flex;gap:12px;align-items:flex-start;margin:0 0 14px"><span style="flex:none;width:30px;height:30px;border-radius:50%;background:var(--coral);color:#fff;display:grid;place-items:center;font-weight:800">${n}</span>
+    <div><b>${e} ${es===undefined?en:tr(en,de,es)}</b>${es===undefined?`<br><span class="de" style="color:var(--muted)">${de}</span>`:""}</div></div>`;
+  box.innerHTML=`<div class="sheet" role="dialog" aria-label="How Echo Challenge works"><h3 style="margin:0 0 4px">${tr(`🎙️ How it works`,`🎙️ So funktioniert's`,`🎙️ Cómo funciona`)}</h3>
+    <p class="note" style="margin:0 0 14px">${tr(`A native speaker says a phrase. You repeat it. The best echo wins!`,`Jemand sagt einen Satz vor. Du sprichst nach. Die beste Aufnahme gewinnt!`,`Un hablante nativo dice una frase. Tú la repites. ¡El mejor eco gana!`)}</p>
+    ${step(1,"▶","Listen to the phrase","Hör dir den Satz an","Escucha la frase")}
+    ${step(2,"🎙️",`Record your echo (up to ${sec} s). Not happy? Record again: the new one replaces the old.`,`Nimm dich auf (bis ${sec} Sek.). Neu aufnehmen ersetzt die alte Aufnahme.`,`Graba tu eco (hasta ${sec} s). ¿No te gusta? Graba otra vez: la nueva sustituye a la anterior.`)}
+    ${step(3,"👏","Listen to the others and give your 3 likes. Likes stay secret until the end.","Hör die anderen an und vergib 3 Likes. Sie bleiben bis zum Ende geheim.","Escucha a los demás y da tus 3 likes. Los likes son secretos hasta el final.")}
+    ${step(4,"🏆","When time is up: most likes = 🏆 People's choice, and the host picks a ⭐ favourite.","Am Ende: meiste Likes = 🏆 Publikumsliebling, der Host wählt einen ⭐ Favoriten.","Al terminar: más likes = 🏆 Favorito del público, y el anfitrión elige un ⭐ favorito.")}
+    <div class="note" style="background:var(--sun-soft);border-radius:12px;padding:10px 12px;margin:0 0 12px">💡 ${short?tr("New here? In this challenge you can vote right away once your name + 18+ are in your profile.","Neu? Hier darfst du sofort abstimmen, sobald Name + 18+ im Profil sind.","¿Eres nuevo? En este reto puedes votar enseguida cuando tu nombre + 18+ estén en tu perfil."):tr("New here? You can record right away (name + 18+ in your profile). Voting opens 24 h after you join.","Neu? Aufnehmen geht sofort (Name + 18+ im Profil), abstimmen 24 Std. nach der Anmeldung.","¿Eres nuevo? Puedes grabar enseguida (nombre + 18+ en tu perfil). Votar se abre 24 h después de registrarte.")}</div>
+    <button class="btn primary" onclick="document.getElementById('ecHow').remove()">${tr("Got it!","Alles klar!","¡Entendido!")}</button></div>`;
   box.addEventListener("click",e=>{ if(e.target===box) box.remove(); });
   document.body.appendChild(box);
 }
@@ -5146,52 +5148,52 @@ function ecOpen(){ go("echo"); if(!EC.data) ecLoad(); let seen=false; try{ seen=
 /* --- the full challenge screen --- */
 VIEWS.echo = function(){
   const l=luRoom(); const d=EC.data;
-  const back=`<div class="topline"><button class="chip" onclick="ecStopRec();go('lounge')">← ${esc(luName(l))}</button><button class="chip" onclick="ecHow()">ℹ️ How it works</button></div>`;
-  if(!d) return back+`<p class="note center">${EC.err?esc(EC.err):"Loading… · Lädt…"}</p>`;
+  const back=`<div class="topline"><button class="chip" onclick="ecStopRec();go('lounge')">← ${esc(luName(l))}</button><button class="chip" onclick="ecHow()">ℹ️ ${tr("How it works","So funktioniert's","Cómo funciona")}</button></div>`;
+  if(!d) return back+`<p class="note center">${EC.err?esc(EC.err):tr(`Loading…`,`Lädt…`,`Cargando…`)}</p>`;
   if(EC.form) return back+ecFormHtml(l);
   const c=d.current, last=d.last;
   let h=back+(EC.err?`<div class="err">${esc(EC.err)}</div>`:"");
   if(c) h+=ecChallengeHtml(c, true);
-  else h+=`<div class="card"><h3 style="margin:0 0 4px">No challenge right now · Gerade keine Challenge</h3>
-    ${Object.values(d.can_host||{}).some(Boolean)&&!d.mine_active?`<button class="btn primary" onclick="ecNew()">＋ Start a challenge · Challenge starten</button>`:`<p class="note" style="margin:0">Native or fluent speakers can start one. · Muttersprachler können eine starten.</p>`}</div>`;
-  if((d.queue||[]).length) h+=`<div class="card"><h3 style="margin:0 0 6px">⏭️ Next up · Als Nächstes</h3>${d.queue.map(q=>`<div class="ecrow"><div class="nm">${luFlag(q.language)} ${esc(q.phrase)}<small>${esc(q.host_name)} · starts ${esc(fmtWhen(q.starts_at))}</small></div></div>`).join("")}</div>`;
-  if(c&&Object.values(d.can_host||{}).some(Boolean)&&!d.mine_active&&(d.queue||[]).length<3) h+=`<button class="btn secondary" style="margin-top:6px" onclick="ecNew()">＋ Queue the next challenge · Nächste Challenge planen</button>`;
-  if(last) h+=`<h3 style="margin:18px 0 6px">🏆 Last challenge · Letzte Challenge</h3>`+ecChallengeHtml(last, false);
-  h+=`<p class="note" style="margin-top:14px">🔒 Recordings are only for PonteTalk members and are deleted 14 days after a challenge ends. · Aufnahmen werden 14 Tage nach Ende gelöscht.</p>`;
+  else h+=`<div class="card"><h3 style="margin:0 0 4px">${tr(`No challenge right now`,`Gerade keine Challenge`,`Ahora no hay ningún reto`)}</h3>
+    ${Object.values(d.can_host||{}).some(Boolean)&&!d.mine_active?`<button class="btn primary" onclick="ecNew()">${tr(`＋ Start a challenge`,`＋ Challenge starten`,`＋ Crear un reto`)}</button>`:`<p class="note" style="margin:0">${tr(`Native or fluent speakers can start one.`,`Muttersprachler oder fließend Sprechende können eine starten.`,`Los hablantes nativos o fluidos pueden crear uno.`)}</p>`}</div>`;
+  if((d.queue||[]).length) h+=`<div class="card"><h3 style="margin:0 0 6px">⏭️ ${tr("Next up","Als Nächstes","A continuación")}</h3>${d.queue.map(q=>`<div class="ecrow"><div class="nm">${luFlag(q.language)} ${esc(q.phrase)}<small>${esc(q.host_name)} · ${tr("starts","beginnt","empieza")} ${esc(fmtWhen(q.starts_at))}</small></div></div>`).join("")}</div>`;
+  if(c&&Object.values(d.can_host||{}).some(Boolean)&&!d.mine_active&&(d.queue||[]).length<3) h+=`<button class="btn secondary" style="margin-top:6px" onclick="ecNew()">${tr(`＋ Queue the next challenge`,`＋ Nächste Challenge planen`,`＋ Programar el próximo reto`)}</button>`;
+  if(last) h+=`<h3 style="margin:18px 0 6px">${tr(`🏆 Last challenge`,`🏆 Letzte Challenge`,`🏆 Último reto`)}</h3>`+ecChallengeHtml(last, false);
+  h+=`<p class="note" style="margin-top:14px">${tr(`🔒 Recordings are only for PonteTalk members and are deleted 14 days after a challenge ends.`,`🔒 Aufnahmen sind nur für PonteTalk-Mitglieder und werden 14 Tage nach Ende gelöscht.`,`🔒 Las grabaciones son solo para miembros de PonteTalk y se eliminan 14 días después de que termine el reto.`)}</p>`;
   return h;
 };
 function ecChallengeHtml(c, isCurrent){
   const me=A.user&&A.user.id, host=c.host_id===me, live=c.state==="live", ended=c.state==="ended", up=c.state==="upcoming";
   const mine=(c.entries||[]).find(e=>e.mine), left=3-(c.my_likes||0);
   let h=`<div class="card">
-    <div class="ectop"><span class="ecmeta">${luFlag(c.language)} by ${esc(c.host_name)}</span>
-      <span class="ecmeta">${live?`⏳ ends in ${esc(ecLeft(c.ends_at))}`:up?`🕒 starts ${esc(fmtWhen(c.starts_at))}`:`✅ ended ${esc(fmtWhen(c.ends_at))}`}</span></div>
+    <div class="ectop"><span class="ecmeta">${luFlag(c.language)} ${tr("by","von","de")} ${esc(c.host_name)}</span>
+      <span class="ecmeta">${live?`⏳ ${tr("ends in","endet in","termina en")} ${esc(ecLeft(c.ends_at))}`:up?`🕒 ${tr("starts","beginnt","empieza")} ${esc(fmtWhen(c.starts_at))}`:`✅ ${tr("ended","beendet","terminó")} ${esc(fmtWhen(c.ends_at))}`}</span></div>
     <div style="display:flex;align-items:center;gap:12px;margin-top:6px">${up?"":ecPlayBtn(c.audio_path,"the phrase")}
       <div style="min-width:0"><div class="ecphrase" lang="${esc(c.language)}" dir="auto" style="font-size:22px">${esc(c.phrase)}</div>${c.meaning?`<div class="ecmean">${esc(c.meaning)}</div>`:""}</div></div>
-    <div class="ecmeta" style="margin-top:8px">🎧 ${c.entries_count} echoes · 👏 ${c.likes_given} likes given${live?" · likes stay hidden until the end":""}</div>`;
+    <div class="ecmeta" style="margin-top:8px">🎧 ${c.entries_count} ${tr("echoes","Aufnahmen","ecos")} · 👏 ${c.likes_given} ${tr("likes given","Likes vergeben","likes dados")}${live?" · "+tr("likes stay hidden until the end","Likes bleiben bis zum Ende verborgen","los likes se ocultan hasta el final"):""}</div>`;
   if(live && !host && isCurrent){
     h+=`<div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--line)">${ecRecHtml(c, mine)}</div>`;
   }
-  if(host && live) h+=`<p class="note" style="margin:10px 0 0">This is your challenge 🎙️ You can listen, but not vote or enter. · Deine Challenge.</p>`;
+  if(host && live) h+=`<p class="note" style="margin:10px 0 0">${tr(`This is your challenge 🎙️ You can listen, but not vote or enter.`,`Das ist deine Challenge 🎙️ Du kannst zuhören, aber nicht abstimmen oder mitmachen.`,`Este es tu reto 🎙️ Puedes escuchar, pero no votar ni participar.`)}</p>`;
   h+=`</div>`;
   const others=(c.entries||[]);
   if(!up){
-    h+=`<div class="card"><div class="ectop"><h3 style="margin:0">${ended?"Results · Ergebnis":"Echoes · Aufnahmen"}</h3>
-      ${live&&!host?`<span class="ecmeta">${c.can_vote?`👏 ${left} of 3 likes left`:(c.short?"Add your name + 18+ in your profile to vote":"Voting opens 24 h after you joined")}</span>`:""}</div>
-      ${others.length?others.map(e=>ecEntryHtml(c,e,host,live,ended,left)).join(""):`<p class="note" style="margin:6px 0 0">No echoes yet. Be the first! · Noch keine Aufnahmen.</p>`}</div>`;
+    h+=`<div class="card"><div class="ectop"><h3 style="margin:0">${ended?tr(`Results`,`Ergebnis`,`Resultados`):tr(`Echoes`,`Aufnahmen`,`Ecos`)}</h3>
+      ${live&&!host?`<span class="ecmeta">${c.can_vote?"👏 "+tr(`${left} of 3 likes left`,`noch ${left} von 3 Likes`,`te quedan ${left} de 3 likes`):(c.short?tr("Add your name + 18+ in your profile to vote","Trag Name + 18+ im Profil ein, um abzustimmen","Añade tu nombre + 18+ en tu perfil para votar"):tr("Voting opens 24 h after you joined","Abstimmen ab 24 Std. nach der Anmeldung","Votar se abre 24 h después de registrarte"))}</span>`:""}</div>
+      ${others.length?others.map(e=>ecEntryHtml(c,e,host,live,ended,left)).join(""):`<p class="note" style="margin:6px 0 0">${tr(`No echoes yet. Be the first!`,`Noch keine Aufnahmen. Sei die/der Erste!`,`Aún no hay ecos. ¡Sé el primero!`)}</p>`}</div>`;
   }
-  if(host && (up||live)) h+=`<button class="linkbtn" style="color:var(--muted)" onclick="ecRemove('${c.id}')">Cancel this challenge · Challenge absagen</button>`;
-  else if(!host) h+=`<button class="linkbtn" style="color:var(--muted)" onclick="ecReport('${c.id}',null)">🚩 Report this challenge · Melden</button>`;
+  if(host && (up||live)) h+=`<button class="linkbtn" style="color:var(--muted)" onclick="ecRemove('${c.id}')">${tr(`Cancel this challenge`,`Challenge absagen`,`Cancelar este reto`)}</button>`;
+  else if(!host) h+=`<button class="linkbtn" style="color:var(--muted)" onclick="ecReport('${c.id}',null)">${tr(`🚩 Report this challenge`,`🚩 Challenge melden`,`🚩 Reportar este reto`)}</button>`;
   return h;
 }
 function ecEntryHtml(c,e,host,live,ended,left){
-  const badges=`${e.people_choice?`<span class="ecbadge" style="background:var(--sun-soft)">🏆 People's choice</span>`:""}${e.host_pick?`<span class="ecbadge" style="background:var(--teal-soft)">⭐ Host's pick</span>`:""}`;
+  const badges=`${e.people_choice?`<span class="ecbadge" style="background:var(--sun-soft)">🏆 ${tr("People's choice","Publikumsliebling","Favorito del público")}</span>`:""}${e.host_pick?`<span class="ecbadge" style="background:var(--teal-soft)">⭐ ${tr("Host's pick","Favorit des Hosts","Elegido por el anfitrión")}</span>`:""}`;
   let act="";
-  if(live && !e.mine && !host) act=`<button class="eclike ${e.liked?"on":""}" ${(!c.can_vote||(!e.liked&&left<=0))?"disabled":""} onclick="ecLike('${e.id}',${!e.liked})" aria-label="${e.liked?"Take back like":"Like"}">👏${e.liked?" Liked":""}</button>`;
-  if(ended) act=`<span class="ecmeta" style="flex:none">👏 ${e.likes||0}</span>`+(host&&!c.host_pick?`<button class="eclike" onclick="ecPick('${e.id}')">⭐ Pick</button>`:"");
-  const tools=e.mine?`<button class="cx" title="Delete my echo · Löschen" aria-label="Delete my echo" onclick="ecDelEntry('${e.id}')">✕</button>`
-    :`<button class="cx" title="Report · Melden" aria-label="Report this echo" onclick="ecReport(null,'${e.id}')">🚩</button>`;
-  return `<div class="ecrow">${ecPlayBtn(e.audio_path, e.name)}<div class="nm">${esc(e.name)}${e.mine?" (you)":""}${badges}<small>${(e.duration_ms/1000).toFixed(1)} s</small></div>${act}${tools}</div>`;
+  if(live && !e.mine && !host) act=`<button class="eclike ${e.liked?"on":""}" ${(!c.can_vote||(!e.liked&&left<=0))?"disabled":""} onclick="ecLike('${e.id}',${!e.liked})" aria-label="${e.liked?"Take back like":"Like"}">👏${e.liked?" "+tr("Liked","Geliked","Te gusta"):""}</button>`;
+  if(ended) act=`<span class="ecmeta" style="flex:none">👏 ${e.likes||0}</span>`+(host&&!c.host_pick?`<button class="eclike" onclick="ecPick('${e.id}')">⭐ ${tr("Pick","Wählen","Elegir")}</button>`:"");
+  const tools=e.mine?`<button class="cx" title="${tr("Delete my echo","Meine Aufnahme löschen","Eliminar mi eco")}" aria-label="Delete my echo" onclick="ecDelEntry('${e.id}')">✕</button>`
+    :`<button class="cx" title="${tr("Report","Melden","Reportar")}" aria-label="Report this echo" onclick="ecReport(null,'${e.id}')">🚩</button>`;
+  return `<div class="ecrow">${ecPlayBtn(e.audio_path, e.name)}<div class="nm">${esc(e.name)}${e.mine?" ("+tr("you","du","tú")+")":""}${badges}<small>${(e.duration_ms/1000).toFixed(1)} s</small></div>${act}${tools}</div>`;
 }
 /* --- recording (works with iPhone Safari = mp4/aac and Android/desktop = webm/opus) --- */
 function ecMime(){
@@ -5204,21 +5206,21 @@ function ecRecHtml(c, mine){
   if(r && EC.recFor===c.id){
     const pct=Math.min(100,(Date.now()-r.t0)/maxMs*100);
     return `<div class="ecrec"><button class="ecmic rec" onclick="ecStop()" aria-label="Stop recording">■</button>
-      <div class="ecbar"><i style="width:${pct}%"></i></div><span class="ecmeta">Recording… max ${c.max_sec} s · Aufnahme läuft</span></div>`;
+      <div class="ecbar"><i style="width:${pct}%"></i></div><span class="ecmeta">${tr(`Recording… max ${c.max_sec} s`,`Aufnahme läuft… max. ${c.max_sec} s`,`Grabando… máx. ${c.max_sec} s`)}</span></div>`;
   }
   if(EC.blob && EC.recFor===c.id){
-    return `<div class="ecrec"><div style="display:flex;align-items:center;gap:10px">${ecPlayBtn("__mine","my new recording")}<b>Your echo · ${(EC.recMs/1000).toFixed(1)} s</b></div>
-      <div class="row" style="gap:8px;justify-content:center"><button class="btn secondary" onclick="ecDiscard()">↺ Again · Nochmal</button>
-      <button class="btn primary" ${EC.busy?"disabled":""} onclick="ecSendEntry('${c.id}')">${EC.busy?"Sending…":"✓ Send my echo · Senden"}</button></div></div>`;
+    return `<div class="ecrec"><div style="display:flex;align-items:center;gap:10px">${ecPlayBtn("__mine","my new recording")}<b>${tr("Your echo","Deine Aufnahme","Tu eco")} · ${(EC.recMs/1000).toFixed(1)} s</b></div>
+      <div class="row" style="gap:8px;justify-content:center"><button class="btn secondary" onclick="ecDiscard()">${tr(`↺ Again`,`↺ Nochmal`,`↺ Otra vez`)}</button>
+      <button class="btn primary" ${EC.busy?"disabled":""} onclick="ecSendEntry('${c.id}')">${EC.busy?tr("Sending…","Sendet…","Enviando…"):tr(`✓ Send my echo`,`✓ Senden`,`✓ Enviar mi eco`)}</button></div></div>`;
   }
-  return `<div class="ecrec"><p class="note center" style="margin:0">${mine?"You've sent your echo ✅ Want to try again? The new one replaces it (and its likes).":"Listen ▶, then repeat it. Tap the mic to record."}<br><span class="de">${mine?"Neue Aufnahme ersetzt die alte.":"Anhören, dann nachsprechen."}</span></p>
+  return `<div class="ecrec"><p class="note center" style="margin:0">${mine?tr("You've sent your echo ✅ Want to try again? The new one replaces it (and its likes).","Deine Aufnahme ist gesendet ✅ Nochmal? Die neue ersetzt die alte (und ihre Likes).","Tu eco está enviado ✅ ¿Quieres repetir? El nuevo sustituye al anterior (y sus likes)."):(c.id==="__new"?tr("Tap the mic and say it clearly, at a natural speed.","Tippe aufs Mikro und sprich deutlich und natürlich.","Toca el micro y dilo con claridad, a velocidad natural."):tr("Listen ▶, then repeat it. Tap the mic to record.","Anhören ▶, dann nachsprechen. Tippe zum Aufnehmen aufs Mikro.","Escucha ▶ y repítelo. Toca el micro para grabar."))}</p>
     <button class="ecmic" onclick="ecStart('${c.id}',${c.max_sec||15})" aria-label="Record">🎙️</button><span class="ecmeta">Up to ${c.max_sec||15} s</span></div>`;
 }
 async function ecStart(cid, maxSec){
-  if(!navigator.mediaDevices||!window.MediaRecorder){ EC.err="Recording isn't supported in this browser. Try Chrome or Safari (iOS 14.5+) · Aufnahme nicht möglich"; xr(); return; }
+  if(!navigator.mediaDevices||!window.MediaRecorder){ EC.err=tr("Recording isn't supported in this browser. Try Chrome or Safari (iOS 14.5+)","Aufnahme geht in diesem Browser nicht. Probier Chrome oder Safari (iOS 14.5+)","Este navegador no permite grabar. Prueba Chrome o Safari (iOS 14.5+)"); xr(); return; }
   ecDiscard(true);
   let stream; try{ stream=await navigator.mediaDevices.getUserMedia({ audio:true }); }
-  catch(e){ EC.err="Your browser blocked the microphone. Allow it (tap the 🔒 or aA next to the address), then try again · Mikrofon erlauben"; bToast(tr("Please allow the microphone to record","Bitte Mikrofon erlauben, um aufzunehmen","Permite el micrófono para grabar")); xr(); return; }
+  catch(e){ EC.err=tr("Your browser blocked the microphone. Allow it (tap the 🔒 or aA next to the address), then try again","Dein Browser blockiert das Mikrofon. Erlaube es (🔒 oder aA neben der Adresse) und versuch es nochmal","Tu navegador bloqueó el micrófono. Permítelo (toca 🔒 o aA junto a la dirección) e inténtalo de nuevo"); bToast(tr("Please allow the microphone to record","Bitte Mikrofon erlauben, um aufzunehmen","Permite el micrófono para grabar")); xr(); return; }
   const mime=ecMime(); let mr; try{ mr=mime?new MediaRecorder(stream,{ mimeType:mime }):new MediaRecorder(stream); }catch(e){ mr=new MediaRecorder(stream); }
   const chunks=[]; mr.ondataavailable=ev=>{ if(ev.data&&ev.data.size) chunks.push(ev.data); };
   mr.onstop=()=>{ stream.getTracks().forEach(t=>t.stop()); const r=EC.rec; EC.rec=null; if(!r||r.cancel){ xr(); return; }
@@ -5264,10 +5266,10 @@ async function ecRemove(id){
 function ecReport(cid, eid){
   const old=document.getElementById("ecRep"); if(old) old.remove();
   const box=document.createElement("div"); box.className="sheet-bg"; box.id="ecRep";
-  box.innerHTML=`<div class="sheet" role="dialog" aria-label="Report"><h3 style="margin:0 0 6px">🚩 Report · Melden</h3>
-    <p class="note" style="margin:0 0 10px">Only the PonteTalk team sees this. Your name isn't shown. · Nur das Team sieht das.</p>
-    <div class="row" style="flex-wrap:wrap;gap:8px">${RP_REASONS.filter(r=>r[0]!=="no_show").map(r=>`<button class="chip" onclick="ecReportSend(${cid?`'${cid}'`:"null"},${eid?`'${eid}'`:"null"},'${r[0]}')">${esc(r[1])}</button>`).join("")}</div>
-    <button class="btn secondary" style="margin-top:12px" onclick="document.getElementById('ecRep').remove()">Cancel · Abbrechen</button></div>`;
+  box.innerHTML=`<div class="sheet" role="dialog" aria-label="Report"><h3 style="margin:0 0 6px">🚩 ${tr("Report","Melden","Reportar")}</h3>
+    <p class="note" style="margin:0 0 10px">${tr("Only the PonteTalk team sees this. Your name isn't shown.","Nur das PonteTalk-Team sieht das. Dein Name wird nicht gezeigt.","Solo el equipo de PonteTalk lo ve. Tu nombre no se muestra.")}</p>
+    <div class="row" style="flex-wrap:wrap;gap:8px">${RP_REASONS.filter(r=>r[0]!=="no_show").map(r=>`<button class="chip" onclick="ecReportSend(${cid?`'${cid}'`:"null"},${eid?`'${eid}'`:"null"},'${r[0]}')">${r[1].split(" ")[0]} ${esc(tr(r[1].slice(r[1].indexOf(" ")+1),r[2],r[3]))}</button>`).join("")}</div>
+    <button class="btn secondary" style="margin-top:12px" onclick="document.getElementById('ecRep').remove()">${tr("Cancel","Abbrechen","Cancelar")}</button></div>`;
   box.addEventListener("click",e=>{ if(e.target===box) box.remove(); }); document.body.appendChild(box);
 }
 async function ecReportSend(cid, eid, reason){
@@ -5285,33 +5287,33 @@ function ecNew(){
   ecDiscard(true); EC.err=""; go("echo");
 }
 function ecFormHtml(l){
-  const f=EC.form, durs=[[1,"1 hour"],[3,"3 hours"],[24,"1 day"],[72,"3 days"],[168,"7 days"]];
+  const f=EC.form, durs=[[1,tr("1 hour","1 Stunde","1 hora")],[3,tr("3 hours","3 Stunden","3 horas")],[24,tr("1 day","1 Tag","1 día")],[72,tr("3 days","3 Tage","3 días")],[168,tr("7 days","7 Tage","7 días")]];
   const fakeC={ id:"__new", max_sec:f.max };
-  return `<div class="card"><h2 style="margin:0 0 4px">🎙️ Start an Echo Challenge</h2>
-    <p class="note" style="margin:0 0 12px">Say a word or sentence in your language. Others echo it, and the best echo wins. · Sag etwas vor, die anderen sprechen nach.</p>
-    ${f.langs.length>1?`<label class="lbl">Language · Sprache</label><div class="row" style="gap:8px;margin-bottom:10px">${f.langs.map(k=>`<button class="chip ${f.lang===k?"on":""}" onclick="EC.form.lang='${k}';xr()">${luFlag(k)} ${esc(cfLang(k)[1])}</button>`).join("")}</div>`:`<p class="ecmeta">${luFlag(f.lang)} ${esc(cfLang(f.lang)[1])}</p>`}
-    <label class="lbl" for="ecPh">Word or sentence · Wort oder Satz</label>
+  return `<div class="card"><h2 style="margin:0 0 4px">🎙️ ${tr("Start an Echo Challenge","Echo Challenge starten","Crear un reto Echo")}</h2>
+    <p class="note" style="margin:0 0 12px">${tr(`Say a word or sentence in your language. Others echo it, and the best echo wins.`,`Sag ein Wort oder einen Satz in deiner Sprache. Die anderen sprechen nach, die beste Aufnahme gewinnt.`,`Di una palabra o frase en tu idioma. Los demás la repiten y gana el mejor eco.`)}</p>
+    ${f.langs.length>1?`<label class="lbl">${tr("Language","Sprache","Idioma")}</label><div class="row" style="gap:8px;margin-bottom:10px">${f.langs.map(k=>`<button class="chip ${f.lang===k?"on":""}" onclick="EC.form.lang='${k}';xr()">${luFlag(k)} ${esc(luLN(k))}</button>`).join("")}</div>`:`<p class="ecmeta">${luFlag(f.lang)} ${esc(cfLang(f.lang)[1])}</p>`}
+    <label class="lbl" for="ecPh">${tr(`Word or sentence`,`Wort oder Satz`,`Palabra o frase`)}</label>
     <input id="ecPh" type="text" maxlength="200" value="${esc(f.phrase)}" oninput="EC.form.phrase=this.value" placeholder="${f.lang==="de"?"z. B. Ich hätte gern ein Brötchen.":f.lang==="es"?"p. ej. ¿Me pones un café, por favor?":"e.g. Could I have a coffee, please?"}">
-    <label class="lbl" for="ecMe">Meaning (optional) · Bedeutung</label>
-    <input id="ecMe" type="text" maxlength="200" value="${esc(f.meaning)}" oninput="EC.form.meaning=this.value" placeholder="Translation or a hint · Übersetzung oder Tipp">
-    <label class="lbl">Your recording · Deine Aufnahme</label>
-    ${ecRecHtml(fakeC, false).replace("Listen ▶, then repeat it. Tap the mic to record.","Tap the mic and say it clearly, at a natural speed.").replace("Anhören, dann nachsprechen.","Deutlich und natürlich sprechen.")}
-    <label class="lbl" for="ecSt">Starts · Beginn</label>
+    <label class="lbl" for="ecMe">${tr(`Meaning (optional)`,`Bedeutung (optional)`,`Significado (opcional)`)}</label>
+    <input id="ecMe" type="text" maxlength="200" value="${esc(f.meaning)}" oninput="EC.form.meaning=this.value" placeholder="${tr(`Translation or a hint`,`Übersetzung oder Tipp`,`Traducción o una pista`)}">
+    <label class="lbl">${tr(`Your recording`,`Deine Aufnahme`,`Tu grabación`)}</label>
+    ${ecRecHtml(fakeC, false)}
+    <label class="lbl" for="ecSt">${tr(`Starts`,`Beginn`,`Empieza`)}</label>
     <input id="ecSt" type="datetime-local" style="width:100%;border:2px solid var(--line);border-radius:14px;padding:12px 14px;font:600 16px 'Plus Jakarta Sans',sans-serif;color:var(--ink);background:#fff" value="${esc(f.start)}" onchange="EC.form.start=this.value">
-    <label class="lbl">Open for · Dauer</label>
+    <label class="lbl">${tr(`Open for`,`Dauer`,`Abierto durante`)}</label>
     <div class="row" style="gap:8px;flex-wrap:wrap">${durs.map(([h,t])=>`<button class="chip ${f.hours===h?"on":""}" onclick="EC.form.hours=${h};xr()">${t}</button>`).join("")}</div>
-    <label class="lbl">Max length of each echo · Max. Länge</label>
+    <label class="lbl">${tr(`Max length of each echo`,`Max. Länge pro Aufnahme`,`Duración máx. de cada eco`)}</label>
     <div class="row" style="gap:8px;flex-wrap:wrap">${[10,15,20,30].map(s=>`<button class="chip ${f.max===s?"on":""}" onclick="EC.form.max=${s};ecDiscard(true);xr()">${s} s</button>`).join("")}</div>
     ${EC.err?`<div class="err">${esc(EC.err)}</div>`:""}
-    <div class="row" style="gap:8px;margin-top:14px"><button class="btn secondary" onclick="ecStopRec();ecDiscard(true);EC.form=null;EC.err='';xr()">Cancel · Abbrechen</button>
-      <button class="btn primary" ${EC.busy?"disabled":""} style="${EC.blob?"":"opacity:.6"}" onclick="ecCreate()">${EC.busy?"Starting…":"🚀 Start challenge · Starten"}</button></div>
-    ${!EC.blob&&!EC.rec?`<p class="note" style="margin:8px 0 0;color:var(--coral);font-weight:700">🎙️ Step 1: tap the mic above and record your phrase. · Erst aufnehmen.</p>`:""}
-    <p class="note" style="margin:10px 0 0">One live challenge per lounge, up to 3 in the queue. Likes stay hidden until the end. In challenges of 1 day or less, new members can vote right away. · Bei 1-Tages-Challenges dürfen neue Mitglieder sofort abstimmen.</p></div>`;
+    <div class="row" style="gap:8px;margin-top:14px"><button class="btn secondary" onclick="ecStopRec();ecDiscard(true);EC.form=null;EC.err='';xr()">${tr("Cancel","Abbrechen","Cancelar")}</button>
+      <button class="btn primary" ${EC.busy?"disabled":""} style="${EC.blob?"":"opacity:.6"}" onclick="ecCreate()">${EC.busy?tr("Starting…","Startet…","Iniciando…"):tr(`🚀 Start challenge`,`🚀 Starten`,`🚀 Iniciar reto`)}</button></div>
+    ${!EC.blob&&!EC.rec?`<p class="note" style="margin:8px 0 0;color:var(--coral);font-weight:700">${tr(`🎙️ Step 1: tap the mic above and record your phrase.`,`🎙️ Schritt 1: Tippe oben aufs Mikro und nimm deinen Satz auf.`,`🎙️ Paso 1: toca el micro de arriba y graba tu frase.`)}</p>`:""}
+    <p class="note" style="margin:10px 0 0">${tr(`One live challenge per lounge, up to 3 in the queue. Likes stay hidden until the end. In challenges of 1 day or less, new members can vote right away.`,`Eine laufende Challenge pro Lounge, bis zu 3 in der Warteschlange. Likes bleiben bis zum Ende verborgen. Bei Challenges bis 1 Tag dürfen neue Mitglieder sofort abstimmen.`,`Un reto activo por sala, hasta 3 en cola. Los likes se ocultan hasta el final. En retos de 1 día o menos, los miembros nuevos pueden votar enseguida.`)}</p></div>`;
 }
 async function ecCreate(){
   const f=EC.form; if(!f||EC.busy) return;
   if(!f.phrase.trim()){ EC.err=ecErr("echo_phrase"); xr(); return; }
-  if(!EC.blob){ EC.err="Record the phrase first: tap the 🎙️ mic, say it, then tap ■ to stop · Erst aufnehmen"; xr(); const m=document.querySelector(".ecmic"); if(m) m.scrollIntoView({behavior:"smooth",block:"center"}); return; }
+  if(!EC.blob){ EC.err=tr("Record the phrase first: tap the 🎙️ mic, say it, then tap ■ to stop","Erst aufnehmen: Tippe aufs 🎙️ Mikro, sprich, dann ■ zum Stoppen","Primero graba la frase: toca el 🎙️ micro, dila y toca ■ para parar"); xr(); const m=document.querySelector(".ecmic"); if(m) m.scrollIntoView({behavior:"smooth",block:"center"}); return; }
   const st=new Date(f.start); if(isNaN(st)){ EC.err=ecErr("echo_window"); xr(); return; }
   const start=st<new Date()?new Date():st, end=new Date(start.getTime()+f.hours*3600000);
   EC.busy=true; EC.err=""; xr(); let path=null;
@@ -5331,22 +5333,22 @@ AFTER.echo = function(){
 VIEWS.lounge = function(){
   const l=luRoom();
   const best=luBest();
-  return `<div class="topline"><button class="chip" onclick="luStop();luOpen()">← Lounges</button><span>🛋️ Lounge</span></div>
+  return `<div class="topline"><button class="chip" onclick="luStop();luOpen()">← ${tr("Lounges","Lounges","Salas")}</button><span>🛋️ ${tr("Lounge","Lounge","Sala")}</span></div>
   <div class="chhead"><div class="luflags" style="font-size:26px">${luFlag(l.lang_a)}<span>⇄</span>${luFlag(l.lang_b)}</div>
     <div style="flex:1;min-width:0"><h2 style="margin:0;font-size:20px">${esc(luName(l))}</h2>
-    <p class="note" style="margin:0">Open to all members · Für alle Mitglieder <span data-lupres="${esc(l.id)}">${lpHere(l.id)}</span></p></div>
-    <button class="chip" style="flex:none" onclick="luShare()" aria-label="Share link to this lounge">🔗 Share</button></div>
+    <p class="note" style="margin:0">${tr(`Open to all members`,`Für alle Mitglieder`,`Abierta a todos los miembros`)} <span data-lupres="${esc(l.id)}">${lpHere(l.id)}</span></p></div>
+    <button class="chip" style="flex:none" onclick="luShare()" aria-label="Share link to this lounge">🔗 ${tr("Share","Teilen","Compartir")}</button></div>
   ${luQuestion(l)}
   ${ecCard(l)}
-  <button class="btn secondary" style="margin:8px 0" aria-expanded="${LU.findOpen}" onclick="LU.findOpen=!LU.findOpen;xr()">📅 Find a time to talk${best.length?` · ${best[0].n} free ${esc(luWhen(best[0].when))}: ${esc((best[0].people||[]).slice(0,3).map(x=>A.user&&x.user_id===A.user.id?"you":x.name).join(", "))}${best[0].n>3?"…":""}`:""} ${LU.findOpen?"▲":"▼"}</button>
+  <button class="btn secondary" style="margin:8px 0" aria-expanded="${LU.findOpen}" onclick="LU.findOpen=!LU.findOpen;xr()">📅 ${tr("Find a time to talk","Zeit zum Reden finden","Encontrar una hora para hablar")}${best.length?` · ${tr(`${best[0].n} free`,`${best[0].n} frei`,`${best[0].n} libres`)} ${esc(luWhen(best[0].when))}: ${esc((best[0].people||[]).slice(0,3).map(x=>A.user&&x.user_id===A.user.id?tr("you","du","tú"):x.name).join(", "))}${best[0].n>3?"…":""}`:""} ${LU.findOpen?"▲":"▼"}</button>
   ${LU.findOpen?luFindHtml(l, best):""}
-  <div class="chsafe">🌍 Everyone in PonteTalk can read this lounge. Don't share phone numbers or addresses. To meet, host a session. · Öffentlich: keine Telefonnummern.</div>
+  <div class="chsafe">${tr(`🌍 Everyone in PonteTalk can read this lounge. Don't share phone numbers or addresses. To meet, host a session.`,`🌍 Alle auf PonteTalk können diese Lounge lesen. Teile keine Telefonnummern oder Adressen. Zum Treffen: Session anbieten.`,`🌍 Todos en PonteTalk pueden leer esta sala. No compartas teléfonos ni direcciones. Para quedar, organiza una sesión.`)}</div>
   ${LU.err?`<div class="err">${esc(LU.err)}</div>`:""}
   <div class="chlist lulist" id="lulist" aria-live="polite">${luListHtml()}</div>
-  ${LU.canPost===false ? `<div class="card center" style="margin-top:10px"><p style="margin:0 0 8px">To post, add your name and confirm you're 18+ in your exchange profile. · Zum Schreiben: Name und 18+ im Profil.</p>
-      <button class="btn primary" onclick="luStop();xOpen()">Complete my profile · Profil ergänzen</button></div>`
-    : `<div class="chin"><textarea id="lutxt" rows="1" maxlength="500" placeholder="Message · Nachricht…" oninput="LU.draft=this.value;this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();luSend();}">${esc(LU.draft)}</textarea>
-      ${emoBtn('lutxt')}<button class="btn primary" ${LU.busy?"disabled":""} onclick="luSend()" aria-label="Send">Send</button></div>`}`;
+  ${LU.canPost===false ? `<div class="card center" style="margin-top:10px"><p style="margin:0 0 8px">${tr(`To post, add your name and confirm you're 18+ in your exchange profile.`,`Zum Schreiben: Trag deinen Namen ein und bestätige 18+ im Tandem-Profil.`,`Para escribir, añade tu nombre y confirma que tienes 18+ en tu perfil de intercambio.`)}</p>
+      <button class="btn primary" onclick="luStop();xOpen()">${tr(`Complete my profile`,`Profil ergänzen`,`Completar mi perfil`)}</button></div>`
+    : `<div class="chin"><textarea id="lutxt" rows="1" maxlength="500" placeholder="${tr(`Message…`,`Nachricht…`,`Mensaje…`)}" oninput="LU.draft=this.value;this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();luSend();}">${esc(LU.draft)}</textarea>
+      ${emoBtn('lutxt')}<button class="btn primary" ${LU.busy?"disabled":""} onclick="luSend()" aria-label="Send">${tr("Send","Senden","Enviar")}</button></div>`}`;
 };
 AFTER.lounge = function(){ const el=document.getElementById("lulist"); if(el) el.scrollTop=el.scrollHeight; };
 async function luSend(){
@@ -5400,22 +5402,22 @@ function luAddPicked(){
   luToggle(d.getUTCDay(), d.getUTCHours(), true);
 }
 function luFindHtml(l, best){
-  const days=[1,2,3,4,5,6,0], dn=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const days=[1,2,3,4,5,6,0], dn=tr("Sun Mon Tue Wed Thu Fri Sat","So Mo Di Mi Do Fr Sa","dom lun mar mié jue vie sáb").split(" ");
   const hours=[]; for(let h=7;h<=22;h++) hours.push(h);
   const mine=(LU.free||[]).filter(f=>f.mine).map(f=>({ dow:f.dow, hour:f.hour, when:luNextUtc(f.dow,f.hour) })).sort((a,b)=>a.when.getDay()-b.when.getDay()||a.when.getHours()-b.when.getHours());
   return `<div class="card lufind">
-    <h3 style="margin:0 0 4px">Best times · Beste Zeiten</h3>
-    <p class="note" style="margin:0 0 8px">Every week, in your time (${esc(tzName(detectTz()))}). Members see your first name next to the times you mark.</p>
-    ${best.length ? best.map(b=>`<div class="lurow"><div style="flex:1"><b>${esc(luWhen(b.when))}</b><br><span class="note" style="margin:0">👥 ${b.n} free: ${luWho(b.people)}</span></div>
-        ${b.mine?`<button class="chip" ${LU.busy?"disabled":""} onclick="luToggle(${b.dow},${b.hour},false)">✓ I'm free</button>`
-                :`<button class="chip" ${LU.busy?"disabled":""} onclick="luToggle(${b.dow},${b.hour},true)">＋ Me too</button>`}
-        <button class="chip on" onclick="luHost(${b.dow},${b.hour})">📅 Host this</button></div>`).join("")
-      : `<p class="note" style="margin:0 0 6px">No times yet. Add when you're usually free 👇</p>`}
-    <h3 style="margin:14px 0 6px">When are you usually free? · Wann hast du Zeit?</h3>
+    <h3 style="margin:0 0 4px">${tr(`Best times`,`Beste Zeiten`,`Mejores horas`)}</h3>
+    <p class="note" style="margin:0 0 8px">${tr(`Every week, in your time (${esc(tzName(detectTz()))}). Members see your first name next to the times you mark.`,`Jede Woche, in deiner Zeit (${esc(tzName(detectTz()))}). Mitglieder sehen deinen Vornamen bei den Zeiten, die du markierst.`,`Cada semana, en tu hora (${esc(tzName(detectTz()))}). Los miembros ven tu nombre junto a las horas que marques.`)}</p>
+    ${best.length ? best.map(b=>`<div class="lurow"><div style="flex:1"><b>${esc(luWhen(b.when))}</b><br><span class="note" style="margin:0">👥 ${tr(`${b.n} free`,`${b.n} frei`,`${b.n} libres`)}: ${luWho(b.people)}</span></div>
+        ${b.mine?`<button class="chip" ${LU.busy?"disabled":""} onclick="luToggle(${b.dow},${b.hour},false)">✓ ${tr("I'm free","Ich habe Zeit","Estoy libre")}</button>`
+                :`<button class="chip" ${LU.busy?"disabled":""} onclick="luToggle(${b.dow},${b.hour},true)">＋ ${tr("Me too","Ich auch","Yo también")}</button>`}
+        <button class="chip on" onclick="luHost(${b.dow},${b.hour})">📅 ${tr("Host this","Session dazu","Organizar")}</button></div>`).join("")
+      : `<p class="note" style="margin:0 0 6px">${tr("No times yet. Add when you're usually free 👇","Noch keine Zeiten. Trag ein, wann du meistens Zeit hast 👇","Aún no hay horas. Añade cuándo sueles estar libre 👇")}</p>`}
+    <h3 style="margin:14px 0 6px">${tr(`When are you usually free?`,`Wann hast du meistens Zeit?`,`¿Cuándo sueles estar libre?`)}</h3>
     <div class="row" style="margin:0">${days.map(d=>`<button class="chip ${LU.pickDay===d?"on":""}" aria-pressed="${LU.pickDay===d}" onclick="LU.pickDay=${d};xr()">${dn[d]}</button>`).join("")}</div>
     <div class="row" style="margin:8px 0 0;align-items:center"><select onchange="LU.pickHour=+this.value" aria-label="Time" style="width:auto">${hours.map(h=>`<option value="${h}" ${LU.pickHour===h?"selected":""}>${String(h).padStart(2,"0")}:00</option>`).join("")}</select>
-      <button class="chip on" ${LU.busy?"disabled":""} onclick="luAddPicked()">＋ Add my time</button></div>
-    ${mine.length?`<p class="note" style="margin:10px 0 4px">Your times · Deine Zeiten:</p><div class="row" style="margin:0">${mine.map(f=>`<button class="chip" onclick="luToggle(${f.dow},${f.hour},false)" aria-label="Remove ${esc(luWhen(f.when))}">${esc(luWhen(f.when))} ✕</button>`).join("")}</div>`:""}
+      <button class="chip on" ${LU.busy?"disabled":""} onclick="luAddPicked()">＋ ${tr("Add my time","Meine Zeit hinzufügen","Añadir mi hora")}</button></div>
+    ${mine.length?`<p class="note" style="margin:10px 0 4px">${tr(`Your times:`,`Deine Zeiten:`,`Tus horas:`)}</p><div class="row" style="margin:0">${mine.map(f=>`<button class="chip" onclick="luToggle(${f.dow},${f.hour},false)" aria-label="Remove ${esc(luWhen(f.when))}">${esc(luWhen(f.when))} ✕</button>`).join("")}</div>`:""}
   </div>`;
 }
 function luHost(dow, hour){
@@ -5465,28 +5467,29 @@ function ptScore(p){
   return { speaksMine, learnsMine, both:speaksMine&&learnsMine, score:(speaksMine?3:0)+(learnsMine?3:0)+shared+((p.both_free||[]).length?1:0) };
 }
 function ptFree(p){
-  const out=(p.both_free||[]).map(f=>{ const s=SLOTS.find(s=>s[2]===f.start); return s?`${DAYS[f.weekday]?DAYS[f.weekday][0]:""} ${s[4].toLowerCase()}`:""; }).filter(Boolean);
-  return out.length ? `<div class="ptfree">🗓️ You're both usually free: <b>${esc(out.slice(0,4).join(" · "))}</b>${out.length>4?"…":""}</div>` : "";
+  const ESD=["lun","mar","mié","jue","vie","sáb","dom"], ESS={morning:"mañana",afternoon:"tarde",evening:"noche"};
+  const out=(p.both_free||[]).map(f=>{ const s=SLOTS.find(s=>s[2]===f.start); const d=DAYS[f.weekday]; return s?`${d?tr(d[0],d[1],ESD[f.weekday]):""} ${tr(s[4].toLowerCase(),s[5],ESS[s[0]])}`:""; }).filter(Boolean);
+  return out.length ? `<div class="ptfree">🗓️ ${tr("You're both usually free","Ihr habt beide meistens Zeit","Los dos soléis estar libres")}: <b>${esc(out.slice(0,4).join(" · "))}</b>${out.length>4?"…":""}</div>` : "";
 }
 function ptCard(p, solo){
   const sc=ptScore(p), L=p.languages||[];
   const speaks=L.filter(x=>x.role!=="learning"), learns=L.filter(x=>x.role==="learning");
-  const lang=x=>T[x.code]?`<span class="ptl">${T[x.code].flag} ${esc(T[x.code].nameEn)}${x.role==="learning"&&ptLvl(x.level)?` <b>${ptLvl(x.level)}</b>`:""}</span>`:"";
+  const lang=x=>T[x.code]?`<span class="ptl">${T[x.code].flag} ${esc(lname(x.code))}${x.role==="learning"&&ptLvl(x.level)?` <b>${ptLvl(x.level)}</b>`:""}</span>`:"";
   const me=A.user&&p.user_id===A.user.id;
   return `<div class="card ptcard">
     <div class="pttop">${p.avatar_url?`<img class="ptav" src="${esc(p.avatar_url)}" alt="">`:`<div class="ptav ptav0">${esc((p.name||"?").charAt(0).toUpperCase())}</div>`}
-      <div style="flex:1;min-width:0"><h3 style="margin:0">${esc(p.name)}${me?` <span class="note" style="margin:0">(you)</span>`:""}</h3>
+      <div style="flex:1;min-width:0"><h3 style="margin:0">${esc(p.name)}${me?` <span class="note" style="margin:0">(${tr("you","du","tú")})</span>`:""}</h3>
         ${p.country?`<div class="note" style="margin:0">📍 ${esc(p.country)}</div>`:""}
-        ${!me&&sc.both?`<span class="ptmatch">⭐ Perfect match</span>`:!me&&(sc.speaksMine||sc.learnsMine)?`<span class="ptmatch soft">${sc.speaksMine?"Speaks what you learn":"Learns what you speak"}</span>`:""}</div></div>
-    ${speaks.length?`<div class="ptrow"><span class="ptk">🗣️ Speaks</span>${speaks.map(lang).join("")}</div>`:""}
-    ${learns.length?`<div class="ptrow"><span class="ptk">📖 Learning</span>${learns.map(lang).join("")}</div>`:""}
-    ${(p.interests||[]).length?`<div class="ptrow"><span class="ptk">💜</span>${p.interests.map(k=>{ const i=INTERESTS.find(x=>x[0]===k); return i?`<span class="ptl">${i[1]} ${esc(i[2])}</span>`:""; }).join("")}</div>`:""}
+        ${!me&&sc.both?`<span class="ptmatch">⭐ ${tr("Perfect match","Perfekter Treffer","Encaje perfecto")}</span>`:!me&&(sc.speaksMine||sc.learnsMine)?`<span class="ptmatch soft">${sc.speaksMine?tr("Speaks what you learn","Spricht, was du lernst","Habla lo que aprendes"):tr("Learns what you speak","Lernt, was du sprichst","Aprende lo que hablas")}</span>`:""}</div></div>
+    ${speaks.length?`<div class="ptrow"><span class="ptk">🗣️ ${tr("Speaks","Spricht","Habla")}</span>${speaks.map(lang).join("")}</div>`:""}
+    ${learns.length?`<div class="ptrow"><span class="ptk">📖 ${tr("Learning","Lernt","Aprende")}</span>${learns.map(lang).join("")}</div>`:""}
+    ${(p.interests||[]).length?`<div class="ptrow"><span class="ptk">💜</span>${p.interests.map(k=>{ const i=INTERESTS.find(x=>x[0]===k); return i?`<span class="ptl">${i[1]} ${esc(intName(i))}</span>`:""; }).join("")}</div>`:""}
     ${p.bio?`<p class="ptbio">“${esc(p.bio)}”</p>`:""}
     ${me?"":ptFree(p)}
     <div class="row" style="margin:8px 0 0">
-      <button class="chip" onclick="ptShare('${p.user_id}','${esc(String(p.name||"").replace(/'/g,""))}')">🔗 Share</button>
-      ${me?`<button class="chip" onclick="xOpen()">✏️ Edit my profile</button>`:`<button class="chip" title="Report or block" onclick="repOpen('user','${p.user_id}',null,null,'${p.user_id}','${esc(String(p.name||"").replace(/'/g,""))}')">🚩</button>`}
-      ${!me?`<button class="chip on" style="margin-left:auto" onclick="trOpen('${p.user_id}')">🤝 Let's trade?</button>`:""}
+      <button class="chip" onclick="ptShare('${p.user_id}','${esc(String(p.name||"").replace(/'/g,""))}')">🔗 ${tr("Share","Teilen","Compartir")}</button>
+      ${me?`<button class="chip" onclick="xOpen()">✏️ ${tr("Edit my profile","Profil bearbeiten","Editar mi perfil")}</button>`:`<button class="chip" title="${tr("Report or block","Melden oder blockieren","Reportar o bloquear")}" onclick="repOpen('user','${p.user_id}',null,null,'${p.user_id}','${esc(String(p.name||"").replace(/'/g,""))}')">🚩</button>`}
+      ${!me?`<button class="chip on" style="margin-left:auto" onclick="trOpen('${p.user_id}')">🤝 ${tr("Let's trade?","Tandem?","¿Intercambiamos?")}</button>`:""}
     </div></div>`;
 }
 function ptLink(id){ return (location.protocol.startsWith("http")?location.origin:"https://pontetalk.setzio.com")+"/?partner="+id; }
@@ -5497,15 +5500,15 @@ async function ptShare(id, name){
   catch(e){ window.prompt(tr("Copy this link:","Link kopieren:","Copia este enlace:"), url); }
 }
 VIEWS.partners = function(){
-  const top=`<div class="topline"><button class="chip" onclick="goHome()">← Back</button><span>Find partners</span></div>
-    <h1 style="margin-bottom:4px">👥 Find partners</h1>${sessTabs("partners")}
-    <p class="sub" style="margin-top:0">Find people to practice with: they help with your language, you help with theirs.<br><span class="de">Finde Tandempartner.</span></p>`;
-  if(!A.user) return `${top}<div class="card center"><div style="font-size:40px">👥</div><h3>Sign in to find partners</h3>
-    <button class="btn primary" onclick="A.ret='partners';go('account')">Sign in · Anmelden</button></div>`;
+  const top=`<div class="topline"><button class="chip" onclick="goHome()">← ${tr("Back","Zurück","Atrás")}</button><span>${tr("Find partners","Partner finden","Buscar compañeros")}</span></div>
+    <h1 style="margin-bottom:4px">👥 ${tr("Find partners","Partner finden","Buscar compañeros")}</h1>${sessTabs("partners")}
+    <p class="sub" style="margin-top:0">${tr(`Find people to practice with: they help with your language, you help with theirs.`,`Finde Leute zum Üben: Sie helfen dir mit deiner Sprache, du ihnen mit ihrer.`,`Encuentra gente con quien practicar: te ayudan con tu idioma y tú con el suyo.`)}</p>`;
+  if(!A.user) return `${top}<div class="card center"><div style="font-size:40px">👥</div><h3>${tr("Sign in to find partners","Melde dich an, um Partner zu finden","Entra para buscar compañeros")}</h3>
+    <button class="btn primary" onclick="A.ret='partners';go('account')">${tr("Sign in","Anmelden","Entrar")}</button></div>`;
   if(PT.err==="optin") return `${top}<div class="card center"><div style="font-size:40px">👋</div>
-    <h3 style="margin:4px 0">Show yourself to see others</h3>
-    <p class="note">Find partners is opt-in and fair both ways: switch on <b>"Show me in Find partners"</b> in your exchange profile, then come back. You can switch it off anytime.<br><span class="de">Erst im Tandem-Profil sichtbar machen.</span></p>
-    <button class="btn primary" onclick="X.after=null;xOpen()">🗣️ Open my exchange profile</button></div>`;
+    <h3 style="margin:4px 0">${tr("Show yourself to see others","Zeig dich, um andere zu sehen","Muéstrate para ver a los demás")}</h3>
+    <p class="note">${tr(`Find partners is opt-in and fair both ways: switch on <b>"Show me in Find partners"</b> in your exchange profile, then come back. You can switch it off anytime.`,`Partner finden ist freiwillig und fair: Schalte im Tandem-Profil <b>„Zeig mich bei Partner finden“</b> ein und komm zurück. Du kannst es jederzeit ausschalten.`,`Buscar compañeros es voluntario y justo para todos: activa <b>“Mostrarme en Buscar compañeros”</b> en tu perfil de intercambio y vuelve. Puedes desactivarlo cuando quieras.`)}</p>
+    <button class="btn primary" onclick="X.after=null;xOpen()">🗣️ ${tr("Open my exchange profile","Mein Tandem-Profil öffnen","Abrir mi perfil de intercambio")}</button></div>`;
   if(PT.err) return `${top}<div class="err">${esc(PT.err)}</div>`;
   if(PT.list===null) return `${top}<p class="note center">Loading… · Lädt…</p>`;
   const all=PT.list.map(p=>Object.assign({ _s:ptScore(p) }, p));
@@ -5517,13 +5520,13 @@ VIEWS.partners = function(){
   shown.sort((a,b)=>b._s.score-a._s.score);
   const ch=(on,click,label)=>`<button class="chip ${on?"on":""}" aria-pressed="${on}" onclick="${click}">${label}</button>`;
   return `${top}
-    <div class="shlearn"><b>Speaks · Spricht</b><div class="row" style="margin:6px 0 0">${ch(!PT.fl.speak,"PT.fl.speak='';xr()","🌍 Any")}${speakOpts.sort((a,b)=>iLearn.includes(b)-iLearn.includes(a)).map(k=>ch(PT.fl.speak===k,`PT.fl.speak='${k}';xr()`,`${T[k].flag} ${esc(T[k].nameEn)}`)).join("")}</div>
-      <b style="display:block;margin-top:10px">Their learning level · Ihr Niveau</b><div class="row" style="margin:6px 0 0">${["A0","A1","A2","B1","B2+"].filter(c=>LEVELS.some(l=>l.code===c)||c==="A0").map(c=>ch(PT.fl.learnLvl.includes(c),`ptLvlT('${c}')`,c)).join("")}</div>
-      <label class="blchk" style="margin-top:10px;flex-wrap:nowrap;align-items:flex-start;font-size:14px"><input type="checkbox" style="flex:none;margin-top:2px" ${PT.onlyBoth?"checked":""} onchange="PT.onlyBoth=this.checked;xr()"> ⭐ Only perfect matches (they speak what I learn AND learn what I speak)</label></div>
-    <p class="note" style="margin:6px 0 10px">${shown.length} ${shown.length===1?"person":"people"} · best matches first</p>
+    <div class="shlearn"><b>${tr("Speaks","Spricht","Habla")}</b><div class="row" style="margin:6px 0 0">${ch(!PT.fl.speak,"PT.fl.speak='';xr()","🌍 "+tr("Any","Alle","Cualquiera"))}${speakOpts.sort((a,b)=>iLearn.includes(b)-iLearn.includes(a)).map(k=>ch(PT.fl.speak===k,`PT.fl.speak='${k}';xr()`,`${T[k].flag} ${esc(lname(k))}`)).join("")}</div>
+      <b style="display:block;margin-top:10px">${tr(`Their learning level`,`Ihr Lernniveau`,`Su nivel de aprendizaje`)}</b><div class="row" style="margin:6px 0 0">${["A0","A1","A2","B1","B2+"].filter(c=>LEVELS.some(l=>l.code===c)||c==="A0").map(c=>ch(PT.fl.learnLvl.includes(c),`ptLvlT('${c}')`,c)).join("")}</div>
+      <label class="blchk" style="margin-top:10px;flex-wrap:nowrap;align-items:flex-start;font-size:14px"><input type="checkbox" style="flex:none;margin-top:2px" ${PT.onlyBoth?"checked":""} onchange="PT.onlyBoth=this.checked;xr()"> ⭐ ${tr("Only perfect matches (they speak what I learn AND learn what I speak)","Nur perfekte Treffer (spricht, was ich lerne, UND lernt, was ich spreche)","Solo encajes perfectos (habla lo que aprendo Y aprende lo que hablo)")}</label></div>
+    <p class="note" style="margin:6px 0 10px">${tr(`${shown.length} ${shown.length===1?"person":"people"} · best matches first`,`${shown.length} ${shown.length===1?"Person":"Personen"} · beste Treffer zuerst`,`${shown.length} ${shown.length===1?"persona":"personas"} · mejores coincidencias primero`)}</p>
     ${shown.length?`<div class="ptgrid">${shown.map(p=>ptCard(p)).join("")}</div>`
-      :`<div class="card center"><p class="note">No one matches yet. Try "Any", or share PonteTalk with a friend! · Noch niemand passend.</p></div>`}
-    <p class="note center" style="margin-top:14px">🔒 Only signed-in members who also show themselves can see profiles. Never share phone numbers or addresses. Meet in sessions.</p>`;
+      :`<div class="card center"><p class="note">${tr(`No one matches yet. Try "Any", or share PonteTalk with a friend!`,`Noch niemand passend. Probier „Alle“ oder teile PonteTalk mit Freunden!`,`Aún no hay coincidencias. ¡Prueba “Cualquiera” o comparte PonteTalk con un amigo!`)}</p></div>`}
+    <p class="note center" style="margin-top:14px">🔒 ${tr("Only signed-in members who also show themselves can see profiles. Never share phone numbers or addresses. Meet in sessions.","Nur angemeldete Mitglieder, die sich selbst zeigen, sehen Profile. Teile nie Telefonnummern oder Adressen. Trefft euch in Sessions.","Solo los miembros con sesión que también se muestran pueden ver perfiles. Nunca compartas teléfonos ni direcciones. Quedad en sesiones.")}</p>`;
 };
 /* Home badge: how many good matches are waiting (refreshed at most every 5 minutes) */
 const PTC={ n:null, at:0, busy:false };
@@ -5563,36 +5566,36 @@ function trShow(){
   let box=document.getElementById("trSheet");
   if(!box){ box=document.createElement("div"); box.className="sheet-bg"; box.id="trSheet"; box.addEventListener("click",e=>{ if(e.target===box) box.remove(); }); document.body.appendChild(box); }
   const p=TR.p, L=p.languages||[], ch=(on,click,label)=>`<button class="chip ${on?"on":""}" aria-pressed="${on}" onclick="${click}">${label}</button>`;
-  const fl=k=>T[k]?`${T[k].flag} ${esc(T[k].nameEn)}`:k;
+  const fl=k=>T[k]?`${T[k].flag} ${esc(lname(k))}`:k;
   const theySpeak=L.filter(x=>x.role!=="learning").map(x=>x.code), theyLearn=L.filter(x=>x.role==="learning").map(x=>x.code);
   const times=trTimes(p);
   box.innerHTML=`<div class="sheet" role="dialog" aria-label="Let's trade">
-    <div class="nbhead"><h3 style="margin:0">🤝 Trade with ${esc(p.name)}</h3><button class="chip" aria-label="Close" onclick="document.getElementById('trSheet').remove()">✕</button></div>
-    <p class="note" style="margin:0 0 8px">This creates a private one-to-one session and invites ${esc(p.name)}. They can <b>Accept</b> or <b>Decline</b>. · Private Tandem-Session mit Einladung.</p>
-    <label class="lbl">You practice · Du übst</label>
-    <div class="row">${theySpeak.map(k=>ch(TR.a===k,`TR.a='${k}';if(TR.b==='${k}')TR.b='';trShow()`,fl(k))).join("")||`<span class="note">They haven't added a language they speak.</span>`}</div>
-    <label class="lbl">They practice · Sie üben</label>
-    <div class="row">${ch(!TR.b,"TR.b='';trShow()","– None")}${theyLearn.filter(k=>k!==TR.a).map(k=>ch(TR.b===k,`TR.b='${k}';trShow()`,fl(k))).join("")}</div>
-    <label class="lbl">When · Wann <span class="note" style="margin:0">(your time)</span></label>
-    <div class="row">${times.map(d=>ch(TR.when===d.toISOString(),`TR.when='${d.toISOString()}';trShow()`,`🗓️ ${esc(d.toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"}))} ${hPad(d.getHours())}:${hPad(d.getMinutes())}`)).join("")}${ch(TR.when==="custom","TR.when='custom';trShow()","✏️ Other time")}</div>
-    ${times.length?`<p class="note" style="margin:4px 0 0">🗓️ = you're both usually free then</p>`:""}
+    <div class="nbhead"><h3 style="margin:0">🤝 ${tr(`Trade with ${esc(p.name)}`,`Tandem mit ${esc(p.name)}`,`Intercambio con ${esc(p.name)}`)}</h3><button class="chip" aria-label="Close" onclick="document.getElementById('trSheet').remove()">✕</button></div>
+    <p class="note" style="margin:0 0 8px">${tr(`This creates a private one-to-one session and invites ${esc(p.name)}. They can <b>Accept</b> or <b>Decline</b>.`,`Das erstellt eine private Eins-zu-eins-Session und lädt ${esc(p.name)} ein. Annehmen oder ablehnen ist möglich.`,`Esto crea una sesión privada uno a uno e invita a ${esc(p.name)}. Puede <b>Aceptar</b> o <b>Rechazar</b>.`)}</p>
+    <label class="lbl">${tr(`You practice`,`Du übst`,`Tú practicas`)}</label>
+    <div class="row">${theySpeak.map(k=>ch(TR.a===k,`TR.a='${k}';if(TR.b==='${k}')TR.b='';trShow()`,fl(k))).join("")||`<span class="note">${tr("They haven't added a language they speak.","Noch keine gesprochene Sprache eingetragen.","Aún no ha añadido un idioma que hable.")}</span>`}</div>
+    <label class="lbl">${tr(`They practice`,`Die andere Person übt`,`Practica`)}</label>
+    <div class="row">${ch(!TR.b,"TR.b='';trShow()","– "+tr("None","Keine","Ninguno"))}${theyLearn.filter(k=>k!==TR.a).map(k=>ch(TR.b===k,`TR.b='${k}';trShow()`,fl(k))).join("")}</div>
+    <label class="lbl">${tr("When","Wann","Cuándo")} <span class="note" style="margin:0">(${tr("your time","deine Zeit","tu hora")})</span></label>
+    <div class="row">${times.map(d=>ch(TR.when===d.toISOString(),`TR.when='${d.toISOString()}';trShow()`,`🗓️ ${esc(d.toLocaleDateString(uiLoc(),{weekday:"short",day:"numeric",month:"short"}))} ${hPad(d.getHours())}:${hPad(d.getMinutes())}`)).join("")}${ch(TR.when==="custom","TR.when='custom';trShow()","✏️ "+tr("Other time","Andere Zeit","Otra hora"))}</div>
+    ${times.length?`<p class="note" style="margin:4px 0 0">🗓️ = ${tr("you're both usually free then","ihr habt dann beide meistens Zeit","los dos soléis estar libres entonces")}</p>`:""}
     ${TR.when==="custom"?`<div class="row" style="margin:8px 0 0;gap:8px"><input type="date" value="${esc(TR.date)}" min="${new Date().toISOString().slice(0,10)}" oninput="TR.date=this.value" style="width:auto"><input type="time" step="900" value="${esc(TR.time)}" oninput="TR.time=this.value" style="width:auto"></div>`:""}
-    <label class="lbl">Length · Dauer</label>
+    <label class="lbl">${tr(`Length`,`Dauer`,`Duración`)}</label>
     <div class="row">${[30,45,60].map(m=>ch(TR.dur===m,`TR.dur=${m};trShow()`,`${m} min`)).join("")}</div>
     ${TR.err?`<div class="err">${esc(TR.err)}</div>`:""}
-    <button class="btn primary" ${TR.busy?"disabled":""} onclick="trSend()">${TR.busy?"Sending… · Sendet…":`🤝 Send invitation to ${esc(p.name)}`}</button>
-    <p class="note center" style="margin:8px 0 0">Online by default: add a video link (or a free Jitsi room) in the session after they accept. Up to 5 trade invites a day.</p>
+    <button class="btn primary" ${TR.busy?"disabled":""} onclick="trSend()">${TR.busy?tr(`Sending…`,`Sendet…`,`Enviando…`):"🤝 "+tr(`Send invitation to ${esc(p.name)}`,`Einladung an ${esc(p.name)} senden`,`Enviar invitación a ${esc(p.name)}`)}</button>
+    <p class="note center" style="margin:8px 0 0">${tr("Online by default: add a video link (or a free Jitsi room) in the session after they accept. Up to 5 trade invites a day.","Standardmäßig online: Nach dem Annehmen kannst du in der Session einen Video-Link (oder einen kostenlosen Jitsi-Raum) hinzufügen. Bis zu 5 Einladungen pro Tag.","Online por defecto: cuando acepte, añade un enlace de vídeo (o una sala Jitsi gratis) en la sesión. Hasta 5 invitaciones al día.")}</p>
   </div>`;
 }
-const TR_ERR = { trade_daily_limit:"You've sent 5 trade invites today. Try again tomorrow · Heute schon 5 Einladungen",
-  trade_weekly_limit:"You already invited this person this week · Diese Woche schon eingeladen",
-  trade_not_available:"This person isn't available for trades right now · Gerade nicht verfügbar",
-  partner_optin_needed:"Switch on “Show me in Find partners” in your exchange profile first · Erst im Profil sichtbar machen" };
+const TR_ERR_F = ()=>({ trade_daily_limit:tr("You've sent 5 trade invites today. Try again tomorrow","Heute schon 5 Einladungen gesendet. Versuch es morgen","Hoy ya enviaste 5 invitaciones. Inténtalo mañana"),
+  trade_weekly_limit:tr("You already invited this person this week","Diese Person diese Woche schon eingeladen","Ya invitaste a esta persona esta semana"),
+  trade_not_available:tr("This person isn't available for trades right now","Diese Person ist gerade nicht verfügbar","Esta persona no está disponible ahora"),
+  partner_optin_needed:tr("Switch on “Show me in Find partners” in your exchange profile first","Schalte erst „Zeig mich bei Partner finden“ im Tandem-Profil ein","Primero activa “Mostrarme en Buscar compañeros” en tu perfil") });
 async function trSend(){
   if(TR.busy) return;
-  if(!TR.a){ TR.err="Pick a language to practice · Sprache wählen"; trShow(); return; }
+  if(!TR.a){ TR.err=tr(`Pick a language to practice`,`Sprache zum Üben wählen`,`Elige un idioma para practicar`); trShow(); return; }
   const start = TR.when==="custom" ? new Date(`${TR.date}T${TR.time}`) : new Date(TR.when);
-  if(isNaN(start.getTime()) || start.getTime() < Date.now()+30*60000){ TR.err="Pick a time at least 30 minutes from now · Mindestens 30 Minuten im Voraus"; trShow(); return; }
+  if(isNaN(start.getTime()) || start.getTime() < Date.now()+30*60000){ TR.err=tr(`Pick a time at least 30 minutes from now`,`Mindestens 30 Minuten im Voraus`,`Elige una hora al menos 30 minutos a partir de ahora`); trShow(); return; }
   TR.busy=true; TR.err=""; trShow();
   const p=TR.p, nA=T[TR.a]?T[TR.a].nameEn:TR.a, nB=TR.b&&T[TR.b]?T[TR.b].nameEn:"";
   let made=null;
@@ -5608,8 +5611,8 @@ async function trSend(){
     TR.busy=false; sOpen(made);
   }catch(e){
     if(made){ try{ await A.sb.from("activities").delete().eq("id",made); }catch(x){} }
-    const m=String((e&&e.message)||e); const k=Object.keys(TR_ERR).find(x=>m.includes(x));
-    TR.busy=false; TR.err=k?TR_ERR[k]:bErr(e); trShow();
+    const m=String((e&&e.message)||e); const k=Object.keys(TR_ERR_F()).find(x=>m.includes(x));
+    TR.busy=false; TR.err=k?TR_ERR_F()[k]:bErr(e); trShow();
   }
 }
 /* one shared profile: /?partner=<id> */
@@ -5622,10 +5625,10 @@ async function ptOneOpen(id){
   if(S.screen==="partner") xr();
 }
 VIEWS.partner = function(){
-  const top=`<div class="topline"><button class="chip" onclick="ptOpen()">← Find partners</button><span>Profile</span></div>`;
+  const top=`<div class="topline"><button class="chip" onclick="ptOpen()">← ${tr("Find partners","Partner finden","Buscar compañeros")}</button><span>${tr("Profile","Profil","Perfil")}</span></div>`;
   if(PT.one===undefined) return `${top}<p class="note center" style="margin-top:40px">Loading… · Lädt…</p>`;
-  if(!PT.one) return `${top}<div class="card center"><div style="font-size:40px">🔍</div><h3>This profile isn't available</h3><p class="note">It may be hidden. · Nicht verfügbar.</p>
-    <button class="btn secondary" onclick="ptOpen()">👥 Find partners</button></div>`;
+  if(!PT.one) return `${top}<div class="card center"><div style="font-size:40px">🔍</div><h3>${tr("This profile isn't available","Dieses Profil ist nicht verfügbar","Este perfil no está disponible")}</h3><p class="note">${tr("It may be hidden.","Es ist vielleicht verborgen.","Puede que esté oculto.")}</p>
+    <button class="btn secondary" onclick="ptOpen()">👥 ${tr("Find partners","Partner finden","Buscar compañeros")}</button></div>`;
   return `${top}<div style="max-width:560px">${ptCard(PT.one,true)}</div>`;
 };
 
@@ -5687,7 +5690,7 @@ async function avPick(inp){
     A.profile.avatar_url=url;
     if(old) avRemoveFile(old).catch(()=>{});
     bToast(tr("📷 Photo saved","📷 Foto gespeichert","📷 Foto guardada"));
-  }catch(e){ bToast(/not_image|convert/.test(String(e&&e.message))?"This file can't be used as a photo. Try a JPG or PNG · Bitte JPG oder PNG":bErr(e)); }
+  }catch(e){ bToast(/not_image|convert/.test(String(e&&e.message))?tr(`This file can't be used as a photo. Try a JPG or PNG`,`Bitte JPG oder PNG`,`Este archivo no sirve como foto. Prueba con JPG o PNG`):bErr(e)); }
   AV_BUSY=false; render();
 }
 async function avRemove(){
@@ -5727,7 +5730,7 @@ async function cfLoad(){
       const a=await sb.rpc("pt_is_admin").then(x=>x,()=>({data:false})); CF.admin=!!a.data;
       if(CF.admin){ const rr=await sb.from("cafe_reports").select("cafe_id,reason"); CF.reports={}; (rr.data||[]).forEach(x=>{ (CF.reports[x.cafe_id]=CF.reports[x.cafe_id]||[]).push(x.reason); }); }
     }
-  }catch(e){ CF.err=/fetch|offline/i.test(String(e&&e.message||e))?"No connection. Try again · Keine Verbindung":String((e&&e.message)||e); if(!CF.list) CF.list=[]; }
+  }catch(e){ CF.err=/fetch|offline/i.test(String(e&&e.message||e))?tr(`No connection. Try again`,`Keine Verbindung`,`Sin conexión. Inténtalo de nuevo`):String((e&&e.message)||e); if(!CF.list) CF.list=[]; }
   if(S.screen==="cafes") xr();
 }
 function cfShown(){
@@ -5739,16 +5742,16 @@ function cfShown(){
 }
 function cfCard(c){
   const rep=CF.reports[c.id]||[];
-  const where = c.online ? `🌐 Online${c.city?` · based in ${esc(c.city)}`:""}` : `📍 ${esc(c.city||"")}${c.country?`, ${esc(c.country)}`:""}`;
+  const where = c.online ? `🌐 Online${c.city?` · ${tr("based in","aus","con sede en")} ${esc(c.city)}`:""}` : `📍 ${esc(c.city||"")}${c.country?`, ${esc(c.country)}`:""}`;
   return `<div class="cfcard ${c.status!=="approved"?"off":""}">
     <div class="cfname">${esc(c.name)}</div>
     <div class="note" style="margin:0">${where}</div>
-    ${(c.languages||[]).length?`<div class="cfflags">${c.languages.map(k=>{ const l=cfLang(k); return `<span>${l[0]} ${esc(l[1])}</span>`; }).join("")}</div>`:""}
+    ${(c.languages||[]).length?`<div class="cfflags">${c.languages.map(k=>{ const l=cfLang(k); return `<span>${l[0]} ${esc(luLN(k))}</span>`; }).join("")}</div>`:""}
     ${c.note?`<p class="note" style="margin:0">🗓️ ${esc(c.note)}</p>`:""}
     ${c.address?`<p class="note" style="margin:0">📍 ${esc(c.address)}</p>`:""}
-    ${c.url?`<a class="btn secondary" href="${esc(c.url)}" target="_blank" rel="noopener nofollow ugc">Visit their page ↗</a>`:""}
-    ${!c.online&&(c.address||!c.url)?`<a class="btn ${c.url?"ghost":"secondary"}" href="${esc(cfMaps(c))}" target="_blank" rel="noopener noreferrer">📍 Open in Maps</a>`:""}
-    ${!c.url?`<p class="note" style="margin:0;font-size:12px">No website. Details come from the community. · Keine Website.</p>`:""}
+    ${c.url?`<a class="btn secondary" href="${esc(c.url)}" target="_blank" rel="noopener nofollow ugc">${tr("Visit their page ↗","Zur Seite ↗","Visitar su página ↗")}</a>`:""}
+    ${!c.online&&(c.address||!c.url)?`<a class="btn ${c.url?"ghost":"secondary"}" href="${esc(cfMaps(c))}" target="_blank" rel="noopener noreferrer">📍 ${tr("Open in Maps","In Karten öffnen","Abrir en Mapas")}</a>`:""}
+    ${!c.url?`<p class="note" style="margin:0;font-size:12px">${tr(`No website. Details come from the community.`,`Keine Website. Die Angaben kommen aus der Community.`,`Sin web. Los detalles vienen de la comunidad.`)}</p>`:""}
     ${CF.admin ? `<div class="row" style="margin:4px 0 0;gap:6px">
         ${rep.length?`<span class="feat" style="background:#FBE3DF">🚩 ${rep.length} flag${rep.length>1?"s":""}: ${esc([...new Set(rep)].join(", "))}</span>`:""}
         ${c.status!=="approved"?`<span class="feat">${c.status==="pending"?"⏳ Waiting":c.status==="hidden"?"🙈 Hidden":"✗ Rejected"}</span>`:""}
@@ -5760,18 +5763,18 @@ function cfCard(c){
         <button class="chip" onclick="cfEdit('${c.id}')">✏️ Edit</button>
         ${rep.length?`<button class="chip" onclick="cfClear('${c.id}')">✓ Link is fine</button>`:""}
         <button class="chip" style="color:#B54530" onclick="cfDel('${c.id}')">🗑 Delete · Löschen</button></div>`
-      : `<p class="center" style="margin:2px 0 0"><button class="linkbtn" style="font-size:12px" onclick="cfReport('${c.id}')">${c.url?"Link broken or café closed?":"Café closed or details wrong?"}</button></p>`}
+      : `<p class="center" style="margin:2px 0 0"><button class="linkbtn" style="font-size:12px" onclick="cfReport('${c.id}')">${c.url?tr("Link broken or café closed?","Link kaputt oder Café geschlossen?","¿Enlace roto o café cerrado?"):tr("Café closed or details wrong?","Café geschlossen oder Angaben falsch?","¿Café cerrado o datos incorrectos?")}</button></p>`}
   </div>`;
 }
 function cfListHtml(){
   if(CF.list===null) return `<p class="note center" style="margin-top:30px">Loading… · Lädt…</p>`;
   const sh=cfShown();
   if(!(CF.list||[]).some(c=>c.status==="approved")) return `<div class="card center"><div style="font-size:40px">☕</div>
-      <h3>First cafés coming soon · Bald die ersten Sprachcafés</h3>
-      <p class="note">Know a language café? Suggest it below and help others find it.<br><span class="de">Kennst du ein Sprachcafé? Schlag es vor!</span></p></div>`;
-  if(!sh.length) return `<div class="card center"><p class="note">No café found${CF.q?` for "${esc(CF.q)}"`:""} · Nichts gefunden</p>
-      <p class="note">Try another city, or practise online: <button class="linkbtn" onclick="bOpen()">see online sessions</button></p></div>`;
-  const v=cfView(), head=`<p class="note" style="margin:0 0 8px">${sh.length} café${sh.length>1?"s":""}</p>`;
+      <h3>${tr(`First cafés coming soon`,`Bald die ersten Sprachcafés`,`Pronto los primeros cafés`)}</h3>
+      <p class="note">${tr(`Know a language café? Suggest it below and help others find it.`,`Kennst du ein Sprachcafé? Schlag es unten vor und hilf anderen, es zu finden.`,`¿Conoces un café de idiomas? Sugiérelo abajo y ayuda a otros a encontrarlo.`)}</p></div>`;
+  if(!sh.length) return `<div class="card center"><p class="note">${tr("No café found","Nichts gefunden","No se encontró ningún café")}${CF.q?` (“${esc(CF.q)}”)`:""}</p>
+      <p class="note">${tr("Try another city, or practise online:","Probier eine andere Stadt oder übe online:","Prueba otra ciudad o practica online:")} <button class="linkbtn" onclick="bOpen()">${tr("see online sessions","Online-Sessions ansehen","ver sesiones online")}</button></p></div>`;
+  const v=cfView(), head=`<p class="note" style="margin:0 0 8px">${sh.length} ${sh.length>1?tr("cafés","Cafés","cafés"):"café"}</p>`;
   if(v==="list") return head+`<div class="cflist">${sh.map(cfRow).join("")}</div>`;
   if(v==="city"){
     const groups={}; sh.forEach(c=>{ const k=c.online?"🌐 Online":`${c.city||"?"}${c.country?`, ${c.country}`:""}`; (groups[k]=groups[k]||[]).push(c); });
@@ -5791,7 +5794,7 @@ function cfRow(c, noCity){
   return `<div class="cfrow ${c.status!=="approved"?"off":""}"><div class="ci">☕</div>
     <div style="flex:1;min-width:0"><div class="rt">${esc(c.name)}</div>
       <div class="note" style="margin:2px 0 0">${noCity&&!c.online?"":where+" · "}${flags}${c.note?` · ${esc(c.note)}`:""}${c.address&&noCity?` · ${esc(c.address)}`:""}</div></div>
-    ${CF.admin?`<button class="chip" style="flex:none" onclick="cfEdit('${c.id}')" aria-label="Edit">✏️</button><button class="chip" style="flex:none;color:#B54530" onclick="cfDel('${c.id}')" aria-label="Delete ${esc(c.name)}" title="Delete · Löschen">🗑</button>`:""}${go}</div>`;
+    ${CF.admin?`<button class="chip" style="flex:none" onclick="cfEdit('${c.id}')" aria-label="Edit">✏️</button><button class="chip" style="flex:none;color:#B54530" onclick="cfDel('${c.id}')" aria-label="Delete ${esc(c.name)}" title="${tr("Delete","Löschen","Eliminar")}">🗑</button>`:""}${go}</div>`;
 }
 function cfPaint(){ const el=document.getElementById("cflist"); if(el) el.innerHTML=cfListHtml(); }
 VIEWS.cafes = function(){
@@ -5799,10 +5802,10 @@ VIEWS.cafes = function(){
   const used=CF_LANGS.filter(k=>k!=="multi" && (CF.list||[]).some(c=>c.status==="approved" && (c.languages||[]).includes(k)));
   const pend=(CF.list||[]).filter(c=>c.status==="pending"), flagged=(CF.list||[]).filter(c=>(CF.reports[c.id]||[]).length);
   const other=(CF.list||[]).filter(c=>c.status==="hidden"||c.status==="rejected");
-  return `<div class="topline"><button class="chip" onclick="goHome()">← Back</button><span>Language cafés</span></div>
-  <h2>${bi("Sessions","Sessions")}</h2>
+  return `<div class="topline"><button class="chip" onclick="goHome()">← ${tr("Back","Zurück","Atrás")}</button><span>${tr("Language cafés","Sprachcafés","Cafés de idiomas")}</span></div>
+  <h2>${tr("Sessions","Sessions","Sesiones")}</h2>
   ${sessTabs("cafes")}
-  <p class="sub" style="margin-top:0">Language cafés around the world, in person and online. Check each café's page or details for the latest dates.<br><span class="de">Sprachcafés weltweit. Aktuelle Termine findest du auf der Seite des Cafés.</span></p>
+  <p class="sub" style="margin-top:0">${tr(`Language cafés around the world, in person and online. Check each café's page or details for the latest dates.`,`Sprachcafés weltweit, vor Ort und online. Aktuelle Termine findest du auf der Seite des Cafés.`,`Cafés de idiomas de todo el mundo, presenciales y online. Mira la página o los detalles de cada café para ver las fechas.`)}</p>
   ${CF.msg?`<div class="card center" style="padding:10px;margin-bottom:10px;background:var(--teal-soft)">${esc(CF.msg)}</div>`:""}
   ${CF.admin?`<div class="cfadm"><b>🛠 Admin</b> · ${pend.length} waiting · ${flagged.length} flagged
       <button class="btn primary" style="margin-top:8px" onclick="cfNew()">＋ Add a café · Café hinzufügen</button>
@@ -5810,15 +5813,15 @@ VIEWS.cafes = function(){
       ${flagged.filter(c=>c.status==="approved").length?`<h4 style="margin:12px 0 6px">🚩 Flagged links</h4><div class="cfgrid">${flagged.filter(c=>c.status==="approved").map(cfCard).join("")}</div>`:""}
       ${other.length?`<details style="margin-top:10px"><summary class="note">Hidden / rejected (${other.length})</summary><div class="cfgrid" style="margin-top:8px">${other.map(cfCard).join("")}</div></details>`:""}
     </div>`:""}
-  <div class="cfbar"><input type="text" id="cfq" placeholder="🔍 City or café name · Stadt oder Name" value="${esc(CF.q)}" oninput="CF.q=this.value;cfPaint()" autocomplete="off">
-    <div class="vsw" role="group" aria-label="View"><button class="${cfView()==="grid"?"on":""}" onclick="cfSetView('grid')">▦ Grid</button><button class="${cfView()==="list"?"on":""}" onclick="cfSetView('list')">☰ List</button><button class="${cfView()==="city"?"on":""}" onclick="cfSetView('city')">🏙️ By city</button></div></div>
-  <div class="shfl">${chip(!CF.lang&&!CF.online,"CF.lang='';CF.online=false;xr()","🌍 All")}${chip(CF.online,"CF.online=!CF.online;xr()","🌐 Online")}${used.map(k=>{ const l=cfLang(k); return chip(CF.lang===k,`CF.lang=CF.lang==='${k}'?'':'${k}';xr()`,`${l[0]} ${esc(l[1])}`); }).join("")}</div>
+  <div class="cfbar"><input type="text" id="cfq" placeholder="🔍 ${tr(`City or café name`,`Stadt oder Name`,`Ciudad o nombre del café`)}" value="${esc(CF.q)}" oninput="CF.q=this.value;cfPaint()" autocomplete="off">
+    <div class="vsw" role="group" aria-label="View"><button class="${cfView()==="grid"?"on":""}" onclick="cfSetView('grid')">▦ ${tr("Grid","Raster","Cuadrícula")}</button><button class="${cfView()==="list"?"on":""}" onclick="cfSetView('list')">☰ ${tr("List","Liste","Lista")}</button><button class="${cfView()==="city"?"on":""}" onclick="cfSetView('city')">🏙️ ${tr("By city","Nach Stadt","Por ciudad")}</button></div></div>
+  <div class="shfl">${chip(!CF.lang&&!CF.online,"CF.lang='';CF.online=false;xr()","🌍 "+tr("All","Alle","Todos"))}${chip(CF.online,"CF.online=!CF.online;xr()","🌐 Online")}${used.map(k=>{ const l=cfLang(k); return chip(CF.lang===k,`CF.lang=CF.lang==='${k}'?'':'${k}';xr()`,`${l[0]} ${esc(luLN(k))}`); }).join("")}</div>
   ${CF.err?`<div class="err">${esc(CF.err)}</div>`:""}
   <div id="cflist">${cfListHtml()}</div>
-  <div class="card center" style="margin-top:16px"><h3 style="margin:0 0 4px">Know a language café? · Kennst du ein Sprachcafé?</h3>
-    <p class="note" style="margin:0 0 10px">Suggest it, with a link if it has one, or the address. We check it before it goes live.</p>
-    <button class="btn secondary" onclick="cfNew()">＋ Suggest a café · Café vorschlagen</button></div>
-  <p class="note center" style="margin-top:10px">We only link to each café's own page and aren't responsible for its content. · Wir verlinken nur auf die Seiten der Cafés.</p>
+  <div class="card center" style="margin-top:16px"><h3 style="margin:0 0 4px">${tr(`Know a language café?`,`Kennst du ein Sprachcafé?`,`¿Conoces un café de idiomas?`)}</h3>
+    <p class="note" style="margin:0 0 10px">${tr("Suggest it, with a link if it has one, or the address. We check it before it goes live.","Schlag es vor, mit Link oder Adresse. Wir prüfen es vor der Freigabe.","Sugiérelo, con enlace si tiene, o la dirección. Lo revisamos antes de publicarlo.")}</p>
+    <button class="btn secondary" onclick="cfNew()">${tr(`＋ Suggest a café`,`＋ Café vorschlagen`,`＋ Sugerir un café`)}</button></div>
+  <p class="note center" style="margin-top:10px">${tr(`We only link to each café's own page and aren't responsible for its content.`,`Wir verlinken nur auf die Seiten der Cafés und sind für deren Inhalt nicht verantwortlich.`,`Solo enlazamos a la página de cada café y no somos responsables de su contenido.`)}</p>
   ${legalLinks()}`;
 };
 async function cfReport(id){
@@ -5853,7 +5856,7 @@ async function cfDel(id){
   cfLoad();
 }
 function cfNew(){
-  if(!A.user){ A.ret="cafes"; A.err=""; A.msg="Sign in to suggest a café · Melde dich an, um ein Café vorzuschlagen"; go("account"); return; }
+  if(!A.user){ A.ret="cafes"; A.err=""; A.msg=tr("Sign in to suggest a café","Melde dich an, um ein Café vorzuschlagen","Entra para sugerir un café"); go("account"); return; }
   CF.err=""; CF.msg=""; CF.f={ id:null, name:"", city:"", country:"", online:false, languages:[], url:"", note:"", address:"" }; go("cafeedit");
 }
 function cfEdit(id){
@@ -5863,51 +5866,51 @@ function cfEdit(id){
 }
 function cfToggleLang(k){ const L=CF.f.languages, i=L.indexOf(k); if(i>=0) L.splice(i,1); else if(L.length<10) L.push(k); xr(); }
 VIEWS.cafeedit = function(){
-  const f=CF.f, top=`<div class="topline"><button class="chip" onclick="cfOpen()">← Language cafés</button><span>${f&&f.id?"✏️ Edit café":CF.admin?"＋ Add café":"＋ Suggest a café"}</span></div>`;
+  const f=CF.f, top=`<div class="topline"><button class="chip" onclick="cfOpen()">← ${tr("Language cafés","Sprachcafés","Cafés de idiomas")}</button><span>${f&&f.id?"✏️ "+tr("Edit café","Café bearbeiten","Editar café"):CF.admin?"＋ "+tr("Add café","Café hinzufügen","Añadir café"):"＋ "+tr("Suggest a café","Café vorschlagen","Sugerir un café")}</span></div>`;
   if(!f) return `${top}<p class="note center">–</p>`;
   const chip=(on,click,label)=>`<button class="chip ${on?"on":""}" aria-pressed="${on}" onclick="${click}">${label}</button>`;
   return `${top}
-  <h2>${f.id?bi("Edit café","Café bearbeiten"):CF.admin?bi("Add a café","Café hinzufügen"):bi("Suggest a café","Café vorschlagen")}</h2>
-  ${CF.admin?"":`<p class="sub">We check every suggestion before it goes live. · Wir prüfen jeden Vorschlag.</p>`}
+  <h2>${f.id?tr("Edit café","Café bearbeiten","Editar café"):CF.admin?tr("Add a café","Café hinzufügen","Añadir un café"):tr("Suggest a café","Café vorschlagen","Sugerir un café")}</h2>
+  ${CF.admin?"":`<p class="sub">${tr(`We check every suggestion before it goes live.`,`Wir prüfen jeden Vorschlag vor der Freigabe.`,`Revisamos cada sugerencia antes de publicarla.`)}</p>`}
   <div class="card">
-    <label class="lbl" for="cfname">Name · Name</label>
-    <input type="text" id="cfname" maxlength="100" placeholder="e.g. Sprachcafé Erfurt" value="${esc(f.name)}" oninput="CF.f.name=this.value">
-    <label class="lbl" for="cfurl">Link to their page${f.online?"":" (optional)"} · Link zur Seite</label>
+    <label class="lbl" for="cfname">${tr("Name","Name","Nombre")}</label>
+    <input type="text" id="cfname" maxlength="100" placeholder="${tr(`e.g. Sprachcafé Erfurt`,`z. B. Sprachcafé Erfurt`,`p. ej. Sprachcafé Erfurt`)}" value="${esc(f.name)}" oninput="CF.f.name=this.value">
+    <label class="lbl" for="cfurl">${tr("Link to their page","Link zur Seite","Enlace a su página")}${f.online?"":" ("+tr("optional","optional","opcional")+")"}</label>
     <input type="text" id="cfurl" inputmode="url" maxlength="500" placeholder="Website, Meetup, Instagram, Facebook…" value="${esc(f.url)}" oninput="CF.f.url=this.value">
-    <label class="lbl">Where · Wo</label>
-    <div class="row">${chip(!f.online,"CF.f.online=false;xr()","📍 In person")}${chip(f.online,"CF.f.online=true;xr()","🌐 Online")}</div>
-    ${f.online?"":`<label class="lbl" for="cfaddr">Address (optional) · Adresse</label>
-    <input type="text" id="cfaddr" maxlength="200" placeholder="e.g. Krämerbrücke 5, Erfurt" value="${esc(f.address||"")}" oninput="CF.f.address=this.value">
-    <p class="note" style="margin:4px 0 0">No website? Then add the address or a note on when and where they meet. · Keine Website? Dann Adresse oder Notiz.</p>`}
-    <label class="lbl" for="cfcity">City${f.online?" (optional)":""} · Stadt</label>
-    <input type="text" id="cfcity" maxlength="80" placeholder="e.g. Erfurt" value="${esc(f.city)}" oninput="CF.f.city=this.value">
-    <label class="lbl" for="cfcountry">Country · Land</label>
-    <input type="text" id="cfcountry" maxlength="60" placeholder="e.g. Germany" value="${esc(f.country)}" oninput="CF.f.country=this.value">
+    <label class="lbl">${tr("Where","Wo","Dónde")}</label>
+    <div class="row">${chip(!f.online,"CF.f.online=false;xr()","📍 "+tr("In person","Vor Ort","Presencial"))}${chip(f.online,"CF.f.online=true;xr()","🌐 Online")}</div>
+    ${f.online?"":`<label class="lbl" for="cfaddr">${tr(`Address (optional)`,`Adresse (optional)`,`Dirección (opcional)`)}</label>
+    <input type="text" id="cfaddr" maxlength="200" placeholder="${tr(`e.g. Krämerbrücke 5, Erfurt`,`z. B. Krämerbrücke 5, Erfurt`,`p. ej. Krämerbrücke 5, Erfurt`)}" value="${esc(f.address||"")}" oninput="CF.f.address=this.value">
+    <p class="note" style="margin:4px 0 0">${tr(`No website? Then add the address or a note on when and where they meet.`,`Keine Website? Dann Adresse oder eine Notiz, wann und wo sie sich treffen.`,`¿Sin web? Añade la dirección o una nota sobre cuándo y dónde se reúnen.`)}</p>`}
+    <label class="lbl" for="cfcity">${tr("City","Stadt","Ciudad")}${f.online?" ("+tr("optional","optional","opcional")+")":""}</label>
+    <input type="text" id="cfcity" maxlength="80" placeholder="${tr(`e.g. Erfurt`,`z. B. Erfurt`,`p. ej. Erfurt`)}" value="${esc(f.city)}" oninput="CF.f.city=this.value">
+    <label class="lbl" for="cfcountry">${tr(`Country`,`Land`,`País`)}</label>
+    <input type="text" id="cfcountry" maxlength="60" placeholder="${tr(`e.g. Germany`,`z. B. Deutschland`,`p. ej. Alemania`)}" value="${esc(f.country)}" oninput="CF.f.country=this.value">
   </div>
   <div class="card">
-    <label class="lbl">Languages · Sprachen</label>
-    <div class="row">${CF_LANGS.map(k=>{ const l=cfLang(k); return chip(f.languages.includes(k),`cfToggleLang('${k}')`,`${l[0]} ${esc(l[1])}`); }).join("")}</div>
-    <label class="lbl" for="cfnote">Short note (optional) · Kurze Notiz</label>
-    <input type="text" id="cfnote" maxlength="140" placeholder="e.g. Weekly, usually Thursday evenings" value="${esc(f.note)}" oninput="CF.f.note=this.value">
-    <p class="note">Keep it general. Their own page has the exact dates. · Genaue Termine stehen auf ihrer Seite.</p>
+    <label class="lbl">${tr(`Languages`,`Sprachen`,`Idiomas`)}</label>
+    <div class="row">${CF_LANGS.map(k=>{ const l=cfLang(k); return chip(f.languages.includes(k),`cfToggleLang('${k}')`,`${l[0]} ${esc(luLN(k))}`); }).join("")}</div>
+    <label class="lbl" for="cfnote">${tr(`Short note (optional)`,`Kurze Notiz (optional)`,`Nota breve (opcional)`)}</label>
+    <input type="text" id="cfnote" maxlength="140" placeholder="${tr(`e.g. Weekly, usually Thursday evenings`,`z. B. Wöchentlich, meist donnerstagabends`,`p. ej. Semanal, normalmente los jueves por la tarde`)}" value="${esc(f.note)}" oninput="CF.f.note=this.value">
+    <p class="note">${tr(`Keep it general. Their own page has the exact dates.`,`Bleib allgemein. Genaue Termine stehen auf ihrer Seite.`,`Mantenlo general. Su propia página tiene las fechas exactas.`)}</p>
   </div>
   ${CF.err?`<div class="err">${esc(CF.err)}</div>`:""}
-  <button class="btn primary" ${CF.busy?"disabled":""} onclick="cfSave()">${CF.busy?"Saving… · Speichert…":f.id?"💾 Save · Speichern":CF.admin?"✓ Add and publish · Veröffentlichen":"📨 Send suggestion · Vorschlag senden"}</button>
-  <button class="btn ghost" onclick="cfOpen()">Cancel · Abbrechen</button>
+  <button class="btn primary" ${CF.busy?"disabled":""} onclick="cfSave()">${CF.busy?tr("Saving…","Speichert…","Guardando…"):f.id?"💾 "+tr("Save","Speichern","Guardar"):CF.admin?"✓ "+tr("Add and publish","Veröffentlichen","Añadir y publicar"):"📨 "+tr("Send suggestion","Vorschlag senden","Enviar sugerencia")}</button>
+  <button class="btn ghost" onclick="cfOpen()">${tr("Cancel","Abbrechen","Cancelar")}</button>
   ${f.id && CF.admin ? `<p class="center" style="margin:10px 0 0"><button class="linkbtn dangertext" style="font-size:14px" onclick="cfDel('${f.id}')">🗑 Delete this café · Café löschen</button></p>` : ""}`;
 };
-const CF_ERR = { already_listed:"This café is already listed (or waiting for approval) · Schon eingetragen",
-  too_many_suggestions:"Thanks for all the suggestions! Please try again tomorrow · Bitte morgen wieder" };
+const CF_ERR = { get already_listed(){ return tr("This café is already listed (or waiting for approval)","Dieses Café ist schon eingetragen (oder wartet auf Freigabe)","Este café ya está en la lista (o esperando aprobación)"); },
+  get too_many_suggestions(){ return tr("Thanks for all the suggestions! Please try again tomorrow","Danke für die vielen Vorschläge! Bitte morgen wieder","¡Gracias por tantas sugerencias! Inténtalo mañana"); } };
 async function cfSave(){
   const f=CF.f; if(!f || CF.busy) return;
   const name=f.name.trim(), url=vClean(f.url), city=f.city.trim(), country=f.country.trim(), address=f.online?"":(f.address||"").trim().slice(0,200);
   CF.err="";
-  if(name.length<2) CF.err="Please add the café's name · Bitte Namen eingeben";
-  else if(url && !vValid(url)) CF.err="Please paste the full link to their page (https://…) · Bitte vollständigen Link einfügen";
-  else if(f.online && !url) CF.err="Online cafés need a link, so people can join · Online-Cafés brauchen einen Link";
-  else if(!f.online && !url && !address && !f.note.trim()) CF.err="No website? Please add the address or a short note (when / where) · Bitte Adresse oder Notiz";
-  else if(!f.online && !city) CF.err="Please add the city · Bitte Stadt eingeben";
-  else if(!f.languages.length) CF.err="Pick at least one language · Mindestens eine Sprache wählen";
+  if(name.length<2) CF.err=tr(`Please add the café's name`,`Bitte Namen des Cafés eingeben`,`Añade el nombre del café`);
+  else if(url && !vValid(url)) CF.err=tr(`Please paste the full link to their page (https://…)`,`Bitte vollständigen Link einfügen (https://…)`,`Pega el enlace completo a su página (https://…)`);
+  else if(f.online && !url) CF.err=tr(`Online cafés need a link, so people can join`,`Online-Cafés brauchen einen Link zum Mitmachen`,`Los cafés online necesitan un enlace para que la gente se una`);
+  else if(!f.online && !url && !address && !f.note.trim()) CF.err=tr(`No website? Please add the address or a short note (when / where)`,`Keine Website? Bitte Adresse oder kurze Notiz (wann / wo)`,`¿Sin web? Añade la dirección o una nota breve (cuándo / dónde)`);
+  else if(!f.online && !city) CF.err=tr(`Please add the city`,`Bitte Stadt eingeben`,`Añade la ciudad`);
+  else if(!f.languages.length) CF.err=tr(`Pick at least one language`,`Mindestens eine Sprache wählen`,`Elige al menos un idioma`);
   if(CF.err){ xr(); return; }
   CF.busy=true; xr();
   try{
@@ -5916,11 +5919,11 @@ async function cfSave(){
       const r = f.id ? await A.sb.from("cafes").update(row).eq("id",f.id)
                      : await A.sb.from("cafes").insert(Object.assign({ status:"approved", submitted_by:A.user.id }, row));
       if(r.error) throw r.error;
-      CF.msg = f.id ? "✓ Saved · Gespeichert" : "✓ Added and live · Veröffentlicht";
+      CF.msg = f.id ? "✓ "+tr("Saved","Gespeichert","Guardado") : "✓ "+tr("Added and live","Veröffentlicht","Añadido y publicado");
     }else{
       const { error } = await A.sb.rpc("pt_suggest_cafe",{ p_name:name, p_city:city, p_country:country, p_online:!!f.online, p_languages:f.languages, p_url:url||null, p_note:f.note.trim(), p_address:address||null });
       if(error) throw error;
-      CF.msg="🙏 Thanks! Your suggestion is waiting for a quick check · Danke! Wir prüfen deinen Vorschlag.";
+      CF.msg=tr(`🙏 Thanks! Your suggestion is waiting for a quick check`,`🙏 Danke! Wir prüfen deinen Vorschlag kurz.`,`🙏 ¡Gracias! Tu sugerencia espera una revisión rápida`);
     }
     CF.busy=false; CF.f=null; go("cafes"); cfLoad();
   }catch(e){ CF.busy=false; const m=String((e&&e.message)||e); const k=Object.keys(CF_ERR).find(x=>m.includes(x)); CF.err=k?CF_ERR[k]:bErr(e); xr(); }
@@ -6257,7 +6260,7 @@ async function bRespond(id,uid,yes){
   try{
     const { data, error } = await A.sb.rpc("pt_respond_request",{ p_activity:id, p_user:uid, p_approve:yes });
     if(error) throw error;
-    bToast(!yes ? "Declined · Abgelehnt" : data.status==="joined" ? "Approved ✅ · Angenommen" : "Approved. The session is full, so they're on the waitlist · Warteliste");
+    bToast(!yes ? tr(`Declined`,`Abgelehnt`,`Rechazado`) : data.status==="joined" ? tr("Approved ✅","Angenommen ✅","Aprobado ✅") : tr("Approved. The session is full, so they're on the waitlist","Angenommen. Die Session ist voll, daher auf der Warteliste","Aprobado. La sesión está llena, así que queda en lista de espera"));
   }catch(e){ bToast(bErr(e)); }
   await bLoad();
 }
@@ -6271,21 +6274,21 @@ async function bCancel(id){
   bLoad();
 }
 function speaksLearns(arr){
-  const L=arr||[], nm=k=>T[k]?`${T[k].flag} ${esc(T[k].nameEn)}`:esc(k);
+  const L=arr||[], nm=k=>T[k]?`${T[k].flag} ${esc(lname(k))}`:esc(k);
   const sp=L.filter(l=>l.role!=="learning").map(l=>nm(l.code)), le=L.filter(l=>l.role==="learning").map(l=>`${nm(l.code)}${l.level!=null?` (${RANKS[l.level]})`:""}`);
-  return [sp.length?`Speaks ${sp.join(", ")}`:"", le.length?`Learning ${le.join(", ")}`:""].filter(Boolean).join(" · ") || "No languages set yet";
+  return [sp.length?`${tr("Speaks","Spricht","Habla")} ${sp.join(", ")}`:"", le.length?`${tr("Learning","Lernt","Aprende")} ${le.join(", ")}`:""].filter(Boolean).join(" · ") || tr("No languages set yet","Noch keine Sprachen","Aún sin idiomas");
 }
 function bPeopleHtml(s){
   const ps=B.people[s.activity_id];
   if(!ps) return `<p class="note center">Loading… · Lädt…</p>`;
-  if(!ps.length) return `<p class="note center">Nobody yet · Noch niemand</p>`;
-  const lab={ pending:"🔔 Asks to join", joined:"✅ In", offered:"🎁 Seat offered", waitlisted:"🕒 Waitlist" };
+  if(!ps.length) return `<p class="note center">${tr(`Nobody yet`,`Noch niemand`,`Aún nadie`)}</p>`;
+  const lab={ pending:"🔔 "+tr("Asks to join","Möchte teilnehmen","Pide unirse"), joined:"✅ "+tr("In","Dabei","Dentro"), offered:"🎁 "+tr("Seat offered","Platz angeboten","Plaza ofrecida"), waitlisted:"🕒 "+tr("Waitlist","Warteliste","Lista de espera") };
   return `<div style="margin:6px 0 4px">${ps.map(p=>`<div style="padding:8px 0;border-top:1px solid var(--line)">
-      <b>${esc(p.name||"Member")}</b>${relBadges(p.reliability)} <span class="note">${lab[p.status]||""}${p.wait_position?" #"+p.wait_position:""}${p.reliability&&p.reliability.percent!=null?` · ${p.reliability.percent}% shows up`:""}</span>
-      <br><span class="note">${langsLine(p.languages)||"No languages set yet"}</span>
+      <b>${esc(p.name||"Member")}</b>${relBadges(p.reliability)} <span class="note">${lab[p.status]||""}${p.wait_position?" #"+p.wait_position:""}${p.reliability&&p.reliability.percent!=null?" · "+tr(`${p.reliability.percent}% shows up`,`erscheint zu ${p.reliability.percent} %`,`asiste el ${p.reliability.percent} %`):""}</span>
+      <br><span class="note">${langsLine(p.languages)||tr("No languages set yet","Noch keine Sprachen","Aún sin idiomas")}</span>
       ${p.status==="pending"?`<div class="row" style="margin-top:6px">
-        <button class="chip on" onclick="bRespond('${s.activity_id}','${p.user_id}',true)">✓ Approve · Annehmen</button>
-        <button class="chip" onclick="bRespond('${s.activity_id}','${p.user_id}',false)">✕ Decline · Ablehnen</button></div>`:""}
+        <button class="chip on" onclick="bRespond('${s.activity_id}','${p.user_id}',true)">${tr(`✓ Approve`,`✓ Annehmen`,`✓ Aprobar`)}</button>
+        <button class="chip" onclick="bRespond('${s.activity_id}','${p.user_id}',false)">${tr(`✕ Decline`,`✕ Ablehnen`,`✕ Rechazar`)}</button></div>`:""}
     </div>`).join("")}</div>`;
 }
 function bCard(s){
@@ -6439,19 +6442,19 @@ async function hostPeopleLoad(){
 function hostList(s){
   const ps=B.people[s.activity_id];
   const taken=s.seats-s.seats_open;
-  if(!ps) return `<div class="plist"><h4>Who's coming · ${taken} of ${s.seats}</h4><p class="note" style="margin:0">Loading… · Lädt…</p></div>`;
+  if(!ps) return `<div class="plist"><h4>${tr("Who's coming","Wer kommt","Quién viene")} · ${taken}/${s.seats}</h4><p class="note" style="margin:0">${tr("Loading…","Lädt…","Cargando…")}</p></div>`;
   const pend=ps.filter(p=>p.status==="pending"), inn=ps.filter(p=>p.status==="joined"||p.status==="offered"), wait=ps.filter(p=>p.status==="waitlisted"), inv=ps.filter(p=>p.status==="invited");
   const row=(p,extra,cls)=>`<div class="prow ${cls||""}">${avSpan(p.user_id,p.name)}
-      <div style="flex:1;min-width:0"><b>${esc(p.name||"Member")}</b>${relBadges(p.reliability)}${s.balanced&&p.side?`<span class="sidetag">${(()=>{ const l=p.side==="a"?s.language_a:s.language_b; return T[l]?`${T[l].flag} ${esc(T[l].nameEn)} side`:""; })()}</span>`:""}${p.reliability&&p.reliability.percent!=null?` <span class="pl">· ${p.reliability.percent}% shows up</span>`:""}
-      <div class="pl">${speaksLearns(p.languages)}</div>${extra||""}</div><button class="repf" title="Report · Melden" aria-label="Report ${esc(p.name||"member")}" onclick="repOpen('user','${p.user_id}','${s.activity_id}',null,'${p.user_id}','${esc(String(p.name||p.display_name||'').replace(/'/g,''))}')">🚩</button></div>`;
+      <div style="flex:1;min-width:0"><b>${esc(p.name||"Member")}</b>${relBadges(p.reliability)}${s.balanced&&p.side?`<span class="sidetag">${(()=>{ const l=p.side==="a"?s.language_a:s.language_b; return T[l]?`${T[l].flag} ${tr(`${esc(lname(l))} side`,`Seite ${esc(lname(l))}`,`lado ${esc(lname(l).toLowerCase())}`)}`:""; })()}</span>`:""}${p.reliability&&p.reliability.percent!=null?` <span class="pl">· ${tr(`${p.reliability.percent}% shows up`,`erscheint zu ${p.reliability.percent} %`,`asiste el ${p.reliability.percent} %`)}</span>`:""}
+      <div class="pl">${speaksLearns(p.languages)}</div>${extra||""}</div><button class="repf" title="${tr("Report","Melden","Reportar")}" aria-label="Report ${esc(p.name||"member")}" onclick="repOpen('user','${p.user_id}','${s.activity_id}',null,'${p.user_id}','${esc(String(p.name||p.display_name||'').replace(/'/g,''))}')">🚩</button></div>`;
   return `<div class="plist">
-    ${pend.length?`<h4>🔔 Asking to join · ${pend.length}</h4>${pend.map(p=>row(p,`<div class="row" style="margin-top:6px">
-        <button class="chip on" onclick="bRespond('${s.activity_id}','${p.user_id}',true)">✓ Approve · Annehmen</button>
-        <button class="chip" onclick="bRespond('${s.activity_id}','${p.user_id}',false)">✕ Decline · Ablehnen</button></div>`,"pend")).join("")}`:""}
-    <h4 style="${pend.length?"margin-top:10px":""}">Who's coming · ${taken} of ${s.seats}</h4>
-    ${inn.length?inn.map(p=>row(p,p.status==="offered"?`<div class="pl">🎁 Seat offered, waiting for reply</div>`:"")).join(""):`<p class="note" style="margin:0">Nobody yet. Share your invite link! · Noch niemand. Teile deinen Link!</p>`}
-    ${inv.length?`<h4 style="margin-top:10px">📩 Invited, not answered yet · ${inv.length}</h4>${inv.map(p=>row(p,`<div class="row" style="margin-top:4px"><button class="chip" style="font-size:12px;padding:4px 10px" onclick="invCancel('${s.activity_id}','${p.user_id}')">✕ Take back invite</button></div>`)).join("")}`:""}
-    ${wait.length?`<h4 style="margin-top:10px">🕒 Waitlist · ${wait.length}</h4>${wait.map(p=>row(p,`<div class="pl">#${p.wait_position||"?"}</div>`)).join("")}`:""}
+    ${pend.length?`<h4>🔔 ${tr("Asking to join","Möchten teilnehmen","Piden unirse")} · ${pend.length}</h4>${pend.map(p=>row(p,`<div class="row" style="margin-top:6px">
+        <button class="chip on" onclick="bRespond('${s.activity_id}','${p.user_id}',true)">${tr(`✓ Approve`,`✓ Annehmen`,`✓ Aprobar`)}</button>
+        <button class="chip" onclick="bRespond('${s.activity_id}','${p.user_id}',false)">${tr(`✕ Decline`,`✕ Ablehnen`,`✕ Rechazar`)}</button></div>`,"pend")).join("")}`:""}
+    <h4 style="${pend.length?"margin-top:10px":""}">${tr("Who's coming","Wer kommt","Quién viene")} · ${taken}/${s.seats}</h4>
+    ${inn.length?inn.map(p=>row(p,p.status==="offered"?`<div class="pl">🎁 ${tr("Seat offered, waiting for reply","Platz angeboten, wartet auf Antwort","Plaza ofrecida, esperando respuesta")}</div>`:"")).join(""):`<p class="note" style="margin:0">${tr("Nobody yet. Share your invite link!","Noch niemand. Teile deinen Link!","Aún nadie. ¡Comparte tu enlace!")}</p>`}
+    ${inv.length?`<h4 style="margin-top:10px">📩 ${tr("Invited, not answered yet","Eingeladen, noch keine Antwort","Invitados, sin respuesta aún")} · ${inv.length}</h4>${inv.map(p=>row(p,`<div class="row" style="margin-top:4px"><button class="chip" style="font-size:12px;padding:4px 10px" onclick="invCancel('${s.activity_id}','${p.user_id}')">✕ ${tr("Take back invite","Einladung zurücknehmen","Retirar invitación")}</button></div>`)).join("")}`:""}
+    ${wait.length?`<h4 style="margin-top:10px">🕒 ${tr("Waitlist","Warteliste","Lista de espera")} · ${wait.length}</h4>${wait.map(p=>row(p,`<div class="pl">#${p.wait_position||"?"}</div>`)).join("")}`:""}
   </div>`;
 }
 
@@ -6911,7 +6914,7 @@ function shErr(e){
   if(/not found/i.test(m)) return "This resource isn't available any more · Nicht mehr verfügbar";
   if(/row-level security|violates row|Unauthorized|403/i.test(m)) return "Only admins can do this · Nur für Admins";
   if(/exceeded|too large|413/i.test(m)) return "File too big (max 50 MB) · Datei zu groß";
-  if(/fetch|network|offline/i.test(m)) return "No connection. Try again · Keine Verbindung";
+  if(/fetch|network|offline/i.test(m)) return tr(`No connection. Try again`,`Keine Verbindung`,`Sin conexión. Inténtalo de nuevo`);
   return m || "Something went wrong · Etwas ist schiefgelaufen";
 }
 function shOpen(){ SH.err=""; SH.msg=""; SH.f=null; go("shop"); shLoad(); }
@@ -7909,8 +7912,8 @@ function vcHow(){
   try{ localStorage.setItem("pt_vc_how","1"); }catch(e){}
   const old=document.getElementById("vcHow"); if(old) old.remove();
   const box=document.createElement("div"); box.className="sheet-bg"; box.id="vcHow";
-  const step=(n,e,en,de)=>`<div style="display:flex;gap:12px;align-items:flex-start;margin:0 0 14px"><span style="flex:none;width:30px;height:30px;border-radius:50%;background:var(--coral);color:#fff;display:grid;place-items:center;font-weight:800">${n}</span>
-    <div><b>${e} ${en}</b><br><span class="de" style="color:var(--muted)">${de}</span></div></div>`;
+  const step=(n,e,en,de,es)=>`<div style="display:flex;gap:12px;align-items:flex-start;margin:0 0 14px"><span style="flex:none;width:30px;height:30px;border-radius:50%;background:var(--coral);color:#fff;display:grid;place-items:center;font-weight:800">${n}</span>
+    <div><b>${e} ${es===undefined?en:tr(en,de,es)}</b>${es===undefined?`<br><span class="de" style="color:var(--muted)">${de}</span>`:""}</div></div>`;
   box.innerHTML=`<div class="sheet" role="dialog" aria-label="How flashcards work"><h3 style="margin:0 0 4px">🃏 How it works · So funktioniert's</h3>
     <p class="note" style="margin:0 0 14px">A few minutes a day. Words come back right before you'd forget them. · Ein paar Minuten am Tag.</p>
     ${step(1,"👀","Look at the word and think: what does it mean? Say it out loud.","Schau das Wort an: Was bedeutet es? Sag es laut.")}
