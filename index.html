@@ -7722,6 +7722,28 @@ function vcStreak(){ let n=0; const d=new Date(); if(!(VC.days[vcToday()]||{}).n
 function vcStats(list){ list=list||(VC.d?VC.d.words:[]); let learned=0, mastered=0, due=0; const now=Date.now();
   for(const w of list){ const x=VC.p[w.id]; if(x&&x.r){ learned++; if(x.i>=21) mastered++; if(x.d<=now) due++; } } return { learned, mastered, due, total:list.length }; }
 function vcNoun(w){ return w.g&&!(w.pl||"").startsWith("("); }
+function vcHow(){
+  try{ localStorage.setItem("pt_vc_how","1"); }catch(e){}
+  const old=document.getElementById("vcHow"); if(old) old.remove();
+  const box=document.createElement("div"); box.className="sheet-bg"; box.id="vcHow";
+  const step=(n,e,en,de)=>`<div style="display:flex;gap:12px;align-items:flex-start;margin:0 0 14px"><span style="flex:none;width:30px;height:30px;border-radius:50%;background:var(--coral);color:#fff;display:grid;place-items:center;font-weight:800">${n}</span>
+    <div><b>${e} ${en}</b><br><span class="de" style="color:var(--muted)">${de}</span></div></div>`;
+  box.innerHTML=`<div class="sheet" role="dialog" aria-label="How flashcards work"><h3 style="margin:0 0 4px">🃏 How it works · So funktioniert's</h3>
+    <p class="note" style="margin:0 0 14px">A few minutes a day. Words come back right before you'd forget them. · Ein paar Minuten am Tag.</p>
+    ${step(1,"👀","Look at the word and think: what does it mean? Say it out loud.","Schau das Wort an: Was bedeutet es? Sag es laut.")}
+    ${step(2,"👆","Tap “Show” to see the meaning and an example.","Tippe auf „Zeigen“: Bedeutung und Beispiel.")}
+    ${step(3,"✅","Be honest: how well did you know it?","Ehrlich: Wie gut wusstest du es?")}
+    <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 10px;font-size:14px;margin:-4px 0 14px 42px">
+      <b style="color:#D9466A">Again</b><span>didn't know it → back in a few minutes</span>
+      <b style="color:#E59A2F">Hard</b><span>knew it, but hard → back tomorrow</span>
+      <b style="color:#2A8C82">Good</b><span>knew it → back in a few days</span>
+      <b style="color:#2F6FD1">Easy</b><span>too easy → back much later</span></div>
+    ${step(4,"🔁","Later, reviews mix it up: pick the German word, or der / die / das.","Später gemischt: richtiges Wort wählen oder der / die / das.")}
+    <div class="note" style="background:var(--sun-soft);border-radius:12px;padding:10px 12px;margin:0 0 12px">💡 Colours help you remember: <b style="color:#2F6FD1">der</b> · <b style="color:#D9466A">die</b> · <b style="color:#2A8C82">das</b>. Come back every day for your 🔥 streak.</div>
+    <button class="btn primary" onclick="document.getElementById('vcHow').remove()">Got it! · Alles klar!</button></div>`;
+  box.addEventListener("click",e=>{ if(e.target===box) box.remove(); });
+  document.body.appendChild(box);
+}
 /* ---------- session ---------- */
 function vcStart(mode, theme){
   if(!VC.d) return; const now=Date.now(), W=VC.d.words, list=[];
@@ -7737,6 +7759,7 @@ function vcStart(mode, theme){
   if(!list.length){ bToast(mode==="gender"?"Nothing yet":"All done for today 🎉 · Alles erledigt"); return; }
   VC.run={ list:mode==="gender"?list:[...list.filter(c=>c.type!=="new").slice(0,10), ...list.filter(c=>c.type==="new"), ...list.filter(c=>c.type!=="new").slice(10)], i:0, show:false, pick:null, ok:0, n:0, mode, seen:{} };
   go("vocabq");
+  let seen=false; try{ seen=!!localStorage.getItem("pt_vc_how"); }catch(e){} if(!seen&&mode!=="gender") setTimeout(vcHow,250);
 }
 function vcOpts(w){ const pool=VC.d.words.filter(x=>x.id!==w.id&&x.t===w.t), more=VC.d.words.filter(x=>x.id!==w.id);
   const o=exShuffle(pool.length>=3?pool:more).slice(0,3); return exShuffle([w,...o]); }
@@ -7747,15 +7770,15 @@ VIEWS.vocabq = function(){
   const r=VC.run; if(!r) return `<p class="note center">…</p>`;
   const c=r.list[r.i], w=VC.byId[c.id], dir=vcRtl()?"rtl":"auto";
   if(!c.opts&&(c.type==="pick"||c.type==="listen")) c.opts=vcOpts(w);
-  const back=`<div class="topline"><button class="chip" onclick="vcQuit()">✕ Stop</button><span class="ecmeta">${r.i+1} / ${r.list.length}</span></div>
+  const back=`<div class="topline"><button class="chip" onclick="vcQuit()">✕ Stop</button><span class="ecmeta"><button class="linkbtn" style="margin-right:8px" onclick="vcHow()">ℹ️ How it works</button>${r.i+1} / ${r.list.length}</span></div>
     <div class="exbar" style="margin:0 0 12px"><i style="width:${Math.round((r.i)/r.list.length*100)}%;background:var(--coral)"></i></div>`;
   const reveal=`<div class="vcmean" dir="${dir}">${esc(vcTr(w))}</div>${w.pl?`<div class="vcpl">Plural: ${esc(w.pl)}</div>`:""}<div class="vcex" lang="de">${esc(w.ex)}</div>`;
   const rate=`<div class="vcrate">${[["Again","Nochmal","#D9466A",0],["Hard","Schwer","#E59A2F",1],["Good","Gut","#2A8C82",2],["Easy","Leicht","#2F6FD1",3]].map(([a,b,col,g])=>`<button style="background:${col}" onclick="vcRate(${g})">${a}<small>${b}</small></button>`).join("")}</div>`;
   let h=back;
   if(c.type==="new"||c.type==="flip"){
     h+=`<div class="vccard">${c.type==="new"?`<div class="ecmeta">🆕 New word · Neues Wort</div>`:""}<div class="vcw" lang="de">${vcWordHtml(w)} ${vcSpk(w)}</div>
-      ${r.show?reveal:`<div class="note">What does it mean? · Was bedeutet das?</div>`}</div>
-      ${r.show?rate:`<button class="btn primary qbtn" style="margin-top:12px" onclick="VC.run.show=true;xr()">Show · Zeigen</button>`}`;
+      ${r.show?reveal:`<div class="note">💭 Think of the meaning, then tap Show<br>Überlege, dann tippe auf Zeigen</div>`}</div>
+      ${r.show?`<p class="note center" style="margin:12px 0 0">How well did you know it? · Wie gut wusstest du es?</p>`+rate:`<button class="btn primary qbtn" style="margin-top:12px" onclick="VC.run.show=true;xr()">Show · Zeigen</button>`}`;
   } else if(c.type==="pick"||c.type==="listen"){
     h+=`<div class="vccard" style="min-height:150px">${c.type==="listen"?`<div class="ecmeta">🔊 Listen and choose · Hören</div><button class="btn primary" style="width:auto;margin:6px auto" onclick="vcSay(VC.byId['${w.id}'])">🔊 Play</button>`
         :`<div class="ecmeta">Which German word? · Welches Wort?</div><div class="vcmean" style="font-size:26px" dir="${dir}">${esc(vcTr(w))}</div>`}</div>
@@ -7823,6 +7846,7 @@ VIEWS.vocab = function(){
     <div class="card" style="border:2px solid var(--coral)"><div class="ectop"><h3 style="margin:0">📅 Today · Heute</h3><b>🔥 ${sk} day${sk===1?"":"s"}</b></div>
       <p class="note" style="margin:6px 0 10px">${st.due} to review · ${newLeft} new words left today${today.n?` · done today: ${today.n}`:""}</p>
       <button class="btn primary qbtn" onclick="vcStart('learn')">${st.due||newLeft?"▶️ Start · Los geht's":"➕ Learn more words"}</button>
+      <button class="linkbtn" onclick="vcHow()">ℹ️ How it works · So funktioniert's</button>
       ${!st.learned?`<button class="btn secondary qbtn" onclick="vcCheckStart()">📊 Quick level check (2 min)</button>`:""}</div>
     <div class="card"><h3 style="margin:0 0 6px">📈 My level · Mein Niveau</h3>
       <div class="ectop"><b>A1</b><span class="ecmeta">${st.learned} learned · ${st.mastered} mastered · ${st.total}</span></div>
