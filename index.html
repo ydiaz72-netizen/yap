@@ -8217,7 +8217,7 @@ function dtPlay(key){
 
 /* ---------- Admin: Audio studio (ElevenLabs) ---------- */
 /* The admin pastes their own ElevenLabs API key. It stays in this page's memory only: never saved, never sent anywhere except api.elevenlabs.io. */
-const DS={ key:"", voices:null, f:"", m:"", n:"", busy:false, log:[], done:0, total:0, err:"", redo:false, stop:false, grp:{ dtz:true, lid:true, vocab:true, vocabex:false, lidst:true }, showLid:false };
+const DS={ key:"", voices:null, f:"", m:"", n:"", busy:false, log:[], done:0, total:0, err:"", redo:false, stop:false, grp:{ dtz:true, lid:true, vocab:true, vocabex:false, lidst:true, phr:true }, showLid:false };
 const DS_MODEL="eleven_multilingual_v2";
 async function dsOpen(){
   go("dtzstudio");
@@ -8232,13 +8232,16 @@ function dsClips(grp){ const seen={}, out=[];
   if(!grp||grp==="dtz") for(const x of (DT.items||[])){ if(!x.akey||seen[x.akey]) continue; seen[x.akey]=1; out.push({ id:x.akey.split("-").pop(), part:x.part, lines:x.it.s }); }
   if(!grp||grp==="vocab") for(const w of ((VC.d&&VC.d.words)||[])) out.push({ id:"V-"+w.id, part:"VOCAB", lines:[{ v:"F", t:w.w }] });
   if(!grp||grp==="vocabex") for(const w of ((VC.d&&VC.d.words)||[])) out.push({ id:"VX-"+w.id, part:"VOCABEX", lines:[{ v:"M", t:w.ex }] });
+  if(!grp||grp==="phr") for(const c of ((DT.d&&DT.d.sprechen)||[])){ const say=t=>t.replace(/\s*\/\s*/g," oder ");
+    c.phr.forEach((t,k)=>out.push({ id:`SP-${c.id}-${k}`, part:"PHR", lines:[{ v:"F", t:say(t) }] }));
+    (c.follow||[]).forEach((t,k)=>out.push({ id:`SQ-${c.id}-${k}`, part:"PHR", lines:[{ v:"M", t }] })); }
   if(!grp||grp==="lidst") for(const q of (EX.qs||[])){ if(!q.s||q.i) continue; // Bundesland questions without pictures; "A/B" is read as "A oder B"
     const say=t=>t.replace(/\s*\/\s*/g," oder ");
     out.push({ id:`L${q.n}q`, part:"LIDST", lines:[{ v:"F", t:say(q.q) }] }, { id:`L${q.n}a`, part:"LIDST", lines:[{ v:"M", t:say(q.a[q.c]) }] }); }
   if(!grp||grp==="lid") for(const q of (EX.qs||[])){ if(q.s||q.i) continue; // general questions without pictures
     out.push({ id:`L${q.n}q`, part:"LID", lines:[{ v:"F", t:q.q }] }, { id:`L${q.n}a`, part:"LID", lines:[{ v:"M", t:q.a[q.c] }] }); }
   return out; }
-function dsLabel(c){ return c.part==="LID"?"Leben in Deutschland":c.part==="LIDST"?"Bundesland":c.part==="VOCAB"?"Vocabulary":c.part==="VOCABEX"?"Example sentence":DT_TEIL[c.part]; }
+function dsLabel(c){ return c.part==="LID"?"Leben in Deutschland":c.part==="LIDST"?"Bundesland":c.part==="PHR"?"Speaking phrase":c.part==="VOCAB"?"Vocabulary":c.part==="VOCABEX"?"Example sentence":DT_TEIL[c.part]; }
 function dsChars(list){ return list.reduce((n,c)=>n+c.lines.reduce((m,l)=>m+l.t.length,0),0); }
 async function dsApi(path, opt){
   let r; try{ r=await fetch("https://api.elevenlabs.io"+path, { ...opt, headers:{ "xi-api-key":DS.key, ...(opt&&opt.headers||{}) } }); }
@@ -8277,7 +8280,7 @@ async function dsGenerate(onlyId){
   if(!DS.f||!DS.m){ DS.err="Choose a female and a male voice."; xr(); return; }
   dsSaveVoices(); DS.err=""; DS.busy=true; DS.stop=false; DS.log=[];
   const man={ v:1, model:DS_MODEL, voices:{ f:DS.f, m:DS.m, n:DS.n||DS.f }, clips:{ ...((DT.man&&DT.man.clips)||{}) } };
-  const all=dsClips(), todo=all.filter(c=>onlyId?c.id===onlyId:((c.part==="LID"?DS.grp.lid:c.part==="LIDST"?DS.grp.lidst:c.part==="VOCAB"?DS.grp.vocab:c.part==="VOCABEX"?DS.grp.vocabex:DS.grp.dtz)&&(DS.redo||!man.clips[c.id])));
+  const all=dsClips(), todo=all.filter(c=>onlyId?c.id===onlyId:((c.part==="LID"?DS.grp.lid:c.part==="LIDST"?DS.grp.lidst:c.part==="PHR"?DS.grp.phr:c.part==="VOCAB"?DS.grp.vocab:c.part==="VOCABEX"?DS.grp.vocabex:DS.grp.dtz)&&(DS.redo||!man.clips[c.id])));
   DS.total=todo.length; DS.done=0; xr();
   const saveMan=async()=>{ const mu=await A.sb.storage.from("dtz-audio").upload("manifest.json", new Blob([JSON.stringify(man)],{ type:"application/json" }), { upsert:true, contentType:"application/json", cacheControl:"0" });
     if(mu.error) throw new Error("Saving the list failed: "+mu.error.message); DT.man=JSON.parse(JSON.stringify(man)); };
@@ -8299,8 +8302,8 @@ async function dsGenerate(onlyId){
 }
 VIEWS.dtzstudio = function(){
   const has=c=>DT.man&&DT.man.clips&&DT.man.clips[c.id];
-  const clips=DT.d?dsClips("dtz"):[], have=clips.filter(has).length, lclips=EX.qs?dsClips("lid"):[], lhave=lclips.filter(has).length, vclips=VC.d?dsClips("vocab"):[], vhave=vclips.filter(has).length, xclips=VC.d?dsClips("vocabex"):[], xhave=xclips.filter(has).length, sclips=EX.qs?dsClips("lidst"):[], shave=sclips.filter(has).length;
-  const missing=[...(DS.grp.dtz?clips:[]),...(DS.grp.lid?lclips:[]),...(DS.grp.vocab?vclips:[]),...(DS.grp.vocabex?xclips:[]),...(DS.grp.lidst?sclips:[])].filter(c=>DS.redo||!has(c)), est=dsChars(missing);
+  const clips=DT.d?dsClips("dtz"):[], have=clips.filter(has).length, lclips=EX.qs?dsClips("lid"):[], lhave=lclips.filter(has).length, vclips=VC.d?dsClips("vocab"):[], vhave=vclips.filter(has).length, xclips=VC.d?dsClips("vocabex"):[], xhave=xclips.filter(has).length, sclips=EX.qs?dsClips("lidst"):[], shave=sclips.filter(has).length, pclips=DT.d?dsClips("phr"):[], phave=pclips.filter(has).length;
+  const missing=[...(DS.grp.dtz?clips:[]),...(DS.grp.lid?lclips:[]),...(DS.grp.vocab?vclips:[]),...(DS.grp.vocabex?xclips:[]),...(DS.grp.lidst?sclips:[]),...(DS.grp.phr?pclips:[])].filter(c=>DS.redo||!has(c)), est=dsChars(missing);
   const sel=(k,label)=>`<label class="lbl" style="margin:8px 0 0">${label}<select onchange="DS.${k}=this.value;dsSaveVoices()" style="width:100%;margin-top:4px;border:2px solid var(--line);border-radius:12px;padding:10px;font:600 15px 'Plus Jakarta Sans',sans-serif">
       <option value="">${k==="n"?"Same as female voice":"Choose…"}</option>${(DS.voices||[]).map(v=>`<option value="${esc(v.id)}" ${DS[k]===v.id?"selected":""}>${esc(v.name)}${v.l.gender?` · ${esc(v.l.gender)}`:""}${v.l.accent?` · ${esc(v.l.accent)}`:""}${v.l.language?` · ${esc(v.l.language)}`:""}</option>`).join("")}</select></label>
       ${DS[k]?`<button class="linkbtn" onclick="dsTest('${k==="m"?"M":k==="n"?"N":"F"}')">▶ Test this voice</button>`:""}`;
@@ -8319,6 +8322,7 @@ VIEWS.dtzstudio = function(){
       <label style="display:flex;gap:8px;align-items:flex-start;font-size:14px;margin:4px 0"><input type="checkbox" ${DS.grp.dtz?"checked":""} onchange="DS.grp.dtz=this.checked;xr()"> 🎓 German exam listening (${clips.length-have} missing)</label>
       <label style="display:flex;gap:8px;align-items:flex-start;font-size:14px;margin:4px 0"><input type="checkbox" ${DS.grp.lid?"checked":""} onchange="DS.grp.lid=this.checked;xr()"> 🇩🇪 Leben in Deutschland: question + right answer (${lclips.length-lhave} missing)</label>
       <label style="display:flex;gap:8px;align-items:flex-start;font-size:14px;margin:4px 0"><input type="checkbox" ${DS.grp.lidst?"checked":""} onchange="DS.grp.lidst=this.checked;xr()"> 📍 Leben in Deutschland: Bundesland questions (${sclips.length-shave} missing)</label>
+      <label style="display:flex;gap:8px;align-items:flex-start;font-size:14px;margin:4px 0"><input type="checkbox" ${DS.grp.phr?"checked":""} onchange="DS.grp.phr=this.checked;xr()"> 🗣️ German exam: speaking phrases + examiner questions (${pclips.length-phave} missing)</label>
       <label style="display:flex;gap:8px;align-items:flex-start;font-size:14px;margin:4px 0"><input type="checkbox" ${DS.grp.vocab?"checked":""} onchange="DS.grp.vocab=this.checked;xr()"> 🃏 Vocabulary words, A1–B1 (${vclips.length-vhave} missing)</label>
       <label style="display:flex;gap:8px;align-items:flex-start;font-size:14px;margin:4px 0"><input type="checkbox" ${DS.grp.vocabex?"checked":""} onchange="DS.grp.vocabex=this.checked;xr()"> 💬 Vocabulary example sentences, A1 first (${xclips.length-xhave} missing)</label>
       <p class="note" style="margin:6px 0">To make: <b>${missing.length} clips ≈ ${est.toLocaleString()} characters</b> (credits). Keep this page open and the screen on; a laptop works best.</p>
@@ -8548,8 +8552,9 @@ VIEWS.dtzs = function(){
     <div class="card"><h3 style="margin:0 0 4px">${esc(c.title)}</h3><p class="note" style="margin:0 0 8px">${esc(c.en)}${E?`<br><span lang="es">🇪🇸 ${esc(E.desc)}</span>`:""}</p>
       <div class="ecmeta">${c.teil===3?"Talk about · Besprechen Sie:":"Talk about · Sprechen Sie über:"}</div>
       <ul style="margin:6px 0 0 20px;padding:0" lang="de">${c.pts.map((p,i)=>`<li style="margin:3px 0">${esc(p)}${E?dtEsLine(E.pts[i]):""}</li>`).join("")}</ul>
-      ${c.follow.length?`<div class="ecmeta" style="margin-top:8px">The examiner may ask · Mögliche Fragen:</div><ul style="margin:6px 0 0 20px;padding:0" lang="de">${c.follow.map((p,i)=>`<li>${esc(p)}${E?dtEsLine(E.follow[i]):""}</li>`).join("")}</ul>`:""}
-      <details style="margin-top:8px"><summary class="linkbtn" style="cursor:pointer">💬 Useful phrases · Redemittel</summary><div class="dttext" lang="de">${c.phr.map(esc).join("\n")}</div></details></div>
+      ${c.follow.length?`<div class="ecmeta" style="margin-top:8px">The examiner may ask · Mögliche Fragen:</div><ul style="margin:6px 0 0 20px;padding:0" lang="de">${c.follow.map((p,i)=>{ const id=`SQ-${c.id}-${i}`, v=DT.man&&DT.man.clips&&DT.man.clips[id]; return `<li>${esc(p)}${v?` <button class="linkbtn" style="text-decoration:none" onclick="exSay('${id}',DT.d.sprechen.find(x=>x.id==='${c.id}').follow[${i}])" aria-label="Listen">🔊</button>`:""}${E?dtEsLine(E.follow[i]):""}</li>`; }).join("")}</ul>`:""}
+      <details style="margin-top:8px" open><summary class="linkbtn" style="cursor:pointer">💬 Useful phrases · Redemittel</summary><div class="dttext" lang="de" style="white-space:normal">${c.phr.map((t,k)=>{ const id=`SP-${c.id}-${k}`, v=DT.man&&DT.man.clips&&DT.man.clips[id];
+        return `<div style="display:flex;gap:8px;align-items:center;padding:4px 0">${v?`<button class="linkbtn" style="text-decoration:none;font-size:18px" onclick="exSay('${id}',DT.d.sprechen.find(x=>x.id==='${c.id}').phr[${k}])" aria-label="Listen">🔊</button>`:"•"}<span>${esc(t)}</span></div>`; }).join("")}</div></details></div>
     <div class="card"><h3 style="margin:0 0 6px">🎙️ Practise · Üben</h3>
       ${sp.prep&&sp.prep>Date.now()?`<p class="note">⏳ Prepare: <b id="dtprep">${exClock(sp.prep-Date.now())}</b> · Notizen machen</p>`:`<button class="btn secondary qbtn" onclick="dtPrep()">⏳ 1 minute to prepare · Vorbereitung</button>`}
       <button class="btn ${rec?"secondary":"primary"} qbtn" onclick="dtRec()">${rec?`⏹ Stop recording · <span id="dtrect">0:00</span>`:sp.url?"🎙️ Record again":"🎙️ Record myself · Aufnehmen"}</button>
