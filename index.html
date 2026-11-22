@@ -2807,7 +2807,7 @@ async function loadGames(){
 async function sendCode(){
   const inp=$("aemail"), email=((inp&&inp.value)||A.email||"").trim().toLowerCase();
   A.email=email;
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ A.err="Please type a valid email · Bitte gültige E-Mail eingeben"; render(); return; }
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ A.err=tr("Please type a valid email","Bitte gültige E-Mail eingeben","Escribe un correo válido"); render(); return; }
   const sb=authClient(); if(!sb){ A.err=offlineMsg(); render(); return; }
   A.busy=true; A.err=""; A.msg=""; render();
   try{
@@ -2820,7 +2820,7 @@ async function sendCode(){
 async function verifyCode(){
   const inp=$("acode"), token=((inp&&inp.value)||A.code||"").replace(/\D/g,"");
   A.code=token;
-  if(token.length<6){ A.err="Type the code from the email · Code aus der E-Mail eingeben"; render(); return; }
+  if(token.length<6){ A.err=tr("Type the code from the email","Code aus der E-Mail eingeben","Escribe el código del correo"); render(); return; }
   A.busy=true; A.err=""; render();
   try{
     const { data, error } = await A.sb.auth.verifyOtp({ email:A.email, token, type:"email" });
@@ -2863,21 +2863,22 @@ function authReturn(){
 function authErr(e){
   const m=String((e&&e.message)||e||"").toLowerCase();
   if(!navigator.onLine) return offlineMsg();
-  if(m.includes("rate") || m.includes("security purposes") || m.includes("too many")) return "Too many tries — please wait a minute and try again · Bitte kurz warten";
-  if(m.includes("expired") || m.includes("invalid") || m.includes("otp") || m.includes("token")) return "That code is wrong or expired. Try again or send a new one · Code falsch oder abgelaufen";
-  if(m.includes("provider is not enabled") || m.includes("unsupported provider")) return "Google sign-in isn't switched on yet · Google-Anmeldung noch nicht aktiv";
-  return "Something went wrong — please try again · Etwas ist schiefgelaufen";
+  if(m.includes("rate") || m.includes("security purposes") || m.includes("too many")) return tr("Too many tries — please wait a minute and try again","Zu viele Versuche – bitte kurz warten und nochmal probieren","Demasiados intentos: espera un minuto y vuelve a probar");
+  if(m.includes("expired") || m.includes("invalid") || m.includes("otp") || m.includes("token")) return tr("That code is wrong or expired. Try again or send a new one","Der Code ist falsch oder abgelaufen. Versuch es nochmal oder schick einen neuen","El código es incorrecto o caducó. Inténtalo otra vez o pide uno nuevo");
+  if(m.includes("provider is not enabled") || m.includes("unsupported provider")) return tr("Google sign-in isn't switched on yet","Google-Anmeldung ist noch nicht aktiv","El acceso con Google aún no está activado");
+  return GENERIC_ERR();
 }
-function offlineMsg(){ return "You need internet to sign in · Zum Anmelden brauchst du Internet"; }
+function GENERIC_ERR(){ return tr("Something went wrong — please try again","Etwas ist schiefgelaufen – bitte nochmal versuchen","Algo salió mal: inténtalo de nuevo"); }
+function offlineMsg(){ return tr("You need internet to sign in","Zum Anmelden brauchst du Internet","Necesitas internet para entrar"); }
 async function signOut(){
   try{ await A.sb.auth.signOut(); }catch(e){}
-  A.user=null; A.profile=null; A.games=null; A.status="out"; A.step="email"; A.code=""; A.msg="Signed out · Abgemeldet"; render();
+  A.user=null; A.profile=null; A.games=null; A.status="out"; A.step="email"; A.code=""; A.msg=tr("Signed out","Abgemeldet","Sesión cerrada"); render();
 }
 
 /* ---- profile ---- */
 async function saveProfile(){
   const name=(($("pfname")||{}).value||"").trim().slice(0,30);
-  if(!name){ A.err="Please type your name · Bitte Namen eingeben"; render(); return; }
+  if(!name){ A.err=tr("Please type your name","Bitte Namen eingeben","Escribe tu nombre"); render(); return; }
   const pf=A.pf||{};
   const row={ id:A.user.id, display_name:name, practicing:pf.lang||S.draft.lang, level:pf.level!=null?pf.level:S.draft.level, updated_at:new Date().toISOString() };
   A.busy=true; A.err=""; render();
@@ -3177,12 +3178,13 @@ AFTER.account = function(){
 function lvlRank(i){ return i===4 ? 0 : i+1; }
 function rankLvl(r){ return r===0 ? 4 : r-1; }
 const INTERESTS = [
-  ["food","🍲","Food","Essen"],["travel","✈️","Travel","Reisen"],["music","🎵","Music","Musik"],
-  ["movies","🎬","Movies & series","Filme & Serien"],["sports","⚽","Sports","Sport"],["work","💼","Work & careers","Arbeit & Karriere"],
-  ["culture","🎭","Culture & traditions","Kultur & Traditionen"],["tech","💻","Tech","Technik"],["books","📚","Books","Bücher"],
-  ["family","👨‍👩‍👧","Family","Familie"],["nature","🌿","Nature","Natur"],["gaming","🎮","Gaming","Gaming"],
-  ["germany","🏠","Life in Germany","Leben in Deutschland"]
+  ["food","🍲","Food","Essen","Comida"],["travel","✈️","Travel","Reisen","Viajes"],["music","🎵","Music","Musik","Música"],
+  ["movies","🎬","Movies & series","Filme & Serien","Cine y series"],["sports","⚽","Sports","Sport","Deportes"],["work","💼","Work & careers","Arbeit & Karriere","Trabajo y carrera"],
+  ["culture","🎭","Culture & traditions","Kultur & Traditionen","Cultura y tradiciones"],["tech","💻","Tech","Technik","Tecnología"],["books","📚","Books","Bücher","Libros"],
+  ["family","👨‍👩‍👧","Family","Familie","Familia"],["nature","🌿","Nature","Natur","Naturaleza"],["gaming","🎮","Gaming","Gaming","Videojuegos"],
+  ["germany","🏠","Life in Germany","Leben in Deutschland","Vida en Alemania"]
 ];
+function intName(it){ return it ? tr(it[2],it[3],it[4]) : ""; }
 const DAYS = [["Mon","Mo"],["Tue","Di"],["Wed","Mi"],["Thu","Do"],["Fri","Fr"],["Sat","Sa"],["Sun","So"]];
 const SLOTS = [
   ["morning","🌅","08:00","12:00","Morning","Vormittag"],
@@ -3346,44 +3348,44 @@ const RANKS = ["A0","A1","A2","B1","B2+"];
 const B = { list:null, err:"", busy:false, lang:"", open:null, people:{} };
 const H = { started:false, checked:false };
 const BERR = {
-  account_on_hold:"⏸️ Your account is paused while we review a few reports. You can still browse. · Dein Konto ist pausiert, während wir Meldungen prüfen. Stöbern geht weiter.",
-  cannot_hold_admin:"Admins can't be paused · Admins können nicht pausiert werden",
-  blocked_user:"You can't join this session · Du kannst dieser Session nicht beitreten",
-  block_self:"You can't block yourself 🙂 · Du kannst dich nicht selbst blockieren",
-  sign_in_required:"Please sign in first · Bitte zuerst anmelden",
-  adult_required:"Please confirm you're 18+ in your exchange profile · Bitte bestätige im Tandem-Profil, dass du 18+ bist",
-  not_open:"This session already started or was cancelled · Diese Session hat schon begonnen oder wurde abgesagt",
-  host_cannot_join:"You're the host of this session · Du leitest diese Session",
-  kicked:"You can't join this host's sessions · Du kannst bei diesem Host nicht teilnehmen",
-  declined:"The host declined your request · Der Host hat deine Anfrage abgelehnt",
-  not_in_session:"You're not in this session · Du bist nicht dabei",
-  already_started:"The session already started · Die Session hat schon begonnen",
-  no_offer:"This seat offer isn't available anymore · Dieses Angebot gilt nicht mehr",
-  not_host:"Only the host can do this · Nur der Host kann das",
-  no_request:"That request was already answered · Die Anfrage wurde schon beantwortet",
-  not_found:"Session not found · Session nicht gefunden",
-  too_early:"The game room opens 30 min before the start · Der Spielraum öffnet 30 Min. vor Beginn",
-  not_open_yet:"The host hasn't opened the game room yet. Try again in a moment · Der Host hat den Raum noch nicht geöffnet",
-  not_allowed:"Only people who joined this session can enter · Nur Teilnehmende können rein",
-  not_game:"This session isn't a game · Diese Session ist kein Spiel",
-  seats_below_joined:"You can't have fewer seats than people already in · Weniger Plätze als Teilnehmende geht nicht",
-  too_many_seats:"That's more seats than allowed · Zu viele Plätze",
-  not_future:"Pick a time in the future · Wähle eine Zeit in der Zukunft",
-  no_side:"This session is for speakers of its two languages. Add one of them as native or fluent in your exchange profile to join · Füge eine der Sprachen als Mutter- oder fließende Sprache hinzu",
-  balanced_needs_two_languages:"A balanced exchange needs two languages · Ausgewogener Austausch braucht zwei Sprachen",
-  balanced_needs_seats:"Each side needs at least 1 seat · Jede Seite braucht mindestens 1 Platz"
+  account_on_hold:["⏸️ Your account is paused while we review a few reports. You can still browse.","⏸️ Dein Konto ist pausiert, während wir Meldungen prüfen. Stöbern geht weiter.","⏸️ Tu cuenta está en pausa mientras revisamos algunos reportes. Puedes seguir mirando."],
+  cannot_hold_admin:["Admins can't be paused","Admins können nicht pausiert werden","No se puede pausar a un admin"],
+  blocked_user:["You can't join this session","Du kannst dieser Session nicht beitreten","No puedes unirte a esta sesión"],
+  block_self:["You can't block yourself 🙂","Du kannst dich nicht selbst blockieren 🙂","No puedes bloquearte a ti mismo 🙂"],
+  sign_in_required:["Please sign in first","Bitte zuerst anmelden","Primero entra en tu cuenta"],
+  adult_required:["Please confirm you're 18+ in your exchange profile","Bitte bestätige im Tandem-Profil, dass du 18+ bist","Confirma en tu perfil de intercambio que tienes 18+"],
+  not_open:["This session already started or was cancelled","Diese Session hat schon begonnen oder wurde abgesagt","Esta sesión ya empezó o se canceló"],
+  host_cannot_join:["You're the host of this session","Du leitest diese Session","Eres el anfitrión de esta sesión"],
+  kicked:["You can't join this host's sessions","Du kannst bei diesem Host nicht teilnehmen","No puedes unirte a las sesiones de este anfitrión"],
+  declined:["The host declined your request","Der Host hat deine Anfrage abgelehnt","El anfitrión rechazó tu solicitud"],
+  not_in_session:["You're not in this session","Du bist nicht dabei","No estás en esta sesión"],
+  already_started:["The session already started","Die Session hat schon begonnen","La sesión ya empezó"],
+  no_offer:["This seat offer isn't available anymore","Dieses Angebot gilt nicht mehr","Esta oferta de plaza ya no está disponible"],
+  not_host:["Only the host can do this","Nur der Host kann das","Solo el anfitrión puede hacer esto"],
+  no_request:["That request was already answered","Die Anfrage wurde schon beantwortet","Esa solicitud ya fue respondida"],
+  not_found:["Session not found","Session nicht gefunden","Sesión no encontrada"],
+  too_early:["The game room opens 30 min before the start","Der Spielraum öffnet 30 Min. vor Beginn","La sala de juego abre 30 min antes"],
+  not_open_yet:["The host hasn't opened the game room yet. Try again in a moment","Der Host hat den Raum noch nicht geöffnet. Versuch es gleich nochmal","El anfitrión aún no abrió la sala. Inténtalo en un momento"],
+  not_allowed:["Only people who joined this session can enter","Nur Teilnehmende können rein","Solo pueden entrar quienes se apuntaron"],
+  not_game:["This session isn't a game","Diese Session ist kein Spiel","Esta sesión no es un juego"],
+  seats_below_joined:["You can't have fewer seats than people already in","Weniger Plätze als Teilnehmende geht nicht","No puede haber menos plazas que personas apuntadas"],
+  too_many_seats:["That's more seats than allowed","Zu viele Plätze","Son más plazas de las permitidas"],
+  not_future:["Pick a time in the future","Wähle eine Zeit in der Zukunft","Elige una hora en el futuro"],
+  no_side:["This session is for speakers of its two languages. Add one of them as native or fluent in your exchange profile to join","Diese Session ist für Sprechende ihrer zwei Sprachen. Füge eine davon als Mutter- oder fließende Sprache in deinem Tandem-Profil hinzu","Esta sesión es para hablantes de sus dos idiomas. Añade uno como nativo o fluido en tu perfil de intercambio para unirte"],
+  balanced_needs_two_languages:["A balanced exchange needs two languages","Ausgewogener Austausch braucht zwei Sprachen","Un intercambio equilibrado necesita dos idiomas"],
+  balanced_needs_seats:["Each side needs at least 1 seat","Jede Seite braucht mindestens 1 Platz","Cada lado necesita al menos 1 plaza"]
 };
 function bErr(e){
   const m=String((e&&e.message)||e||"");
   const sb=m.match(/strike_block:\s*([^"\n]+)/);
-  if(sb) return `⏸️ You can join sessions again on ${sb[1].trim()} (missed or late-cancelled sessions). · Ab ${sb[1].trim()} kannst du wieder beitreten.`;
+  if(sb) return "⏸️ "+tr(`You can join sessions again on ${sb[1].trim()} (missed or late-cancelled sessions).`,`Ab ${sb[1].trim()} kannst du wieder beitreten (verpasste oder spät abgesagte Sessions).`,`Podrás unirte otra vez el ${sb[1].trim()} (sesiones perdidas o canceladas tarde).`);
   const tc=m.match(/time_clash:\s*(.+)/);
-  if(tc) return `⏰ You already have “${tc[1].trim()}” at this time. You can't be in two sessions at once. · Du hast zu dieser Zeit schon „${tc[1].trim()}“.`;
-  for(const k in BERR) if(m.includes(k)) return BERR[k];
-  if(/row-level security|violates row/i.test(m)) return "Not allowed. Check your exchange profile (18+) and pick a future time · Nicht erlaubt";
+  if(tc) return "⏰ "+tr(`You already have “${tc[1].trim()}” at this time. You can't be in two sessions at once.`,`Du hast zu dieser Zeit schon „${tc[1].trim()}“. Zwei Sessions gleichzeitig geht nicht.`,`Ya tienes “${tc[1].trim()}” a esta hora. No puedes estar en dos sesiones a la vez.`);
+  for(const k in BERR) if(m.includes(k)) return tr(...BERR[k]);
+  if(/row-level security|violates row/i.test(m)) return tr("Not allowed. Check your exchange profile (18+) and pick a future time","Nicht erlaubt. Prüfe dein Tandem-Profil (18+) und wähle eine Zeit in der Zukunft","No permitido. Revisa tu perfil de intercambio (18+) y elige una hora futura");
   const g=authErr(e);
   // Unknown problem: show the database's own words too, so it can be fixed
-  return (g.startsWith("Something went wrong") && m) ? `${g} (${m.slice(0,160)})` : g;
+  return (g===GENERIC_ERR() && m) ? `${g} (${m.slice(0,160)})` : g;
 }
 function bToast(msg){
   const old=document.querySelector(".ptoast"); if(old) old.remove();
@@ -3448,7 +3450,7 @@ const RP_REASONS = [
 ];
 const RPT = { t:null, reason:"", busy:false, err:"" };
 function repOpen(type, user, activity, message, who, whoName){
-  if(!A.user){ bToast("Please sign in to report · Bitte anmelden"); return; }
+  if(!A.user){ bToast(tr("Please sign in to report","Bitte zum Melden anmelden","Entra para reportar")); return; }
   RPT.t={ type, user:user||null, activity:activity||null, message:message||null }; RPT.reason=""; RPT.err=""; RPT.busy=false;
   RPT.who = who || (type==="user" ? user : null); RPT.whoName = whoName || ""; RPT.block = false;
   repShow();
@@ -3485,7 +3487,7 @@ async function repSend(){
     const { error } = await A.sb.rpc("pt_report",{ p_type:t.type, p_user:t.user, p_activity:t.activity, p_message:t.message, p_reason:RPT.reason, p_details:details||null });
     if(error) throw error;
     const b=document.getElementById("repSheet"); if(b) b.remove();
-    bToast("🙏 Thanks. Your report was sent privately · Danke, Meldung gesendet");
+    bToast(tr("🙏 Thanks. Your report was sent privately","🙏 Danke. Deine Meldung wurde privat gesendet","🙏 Gracias. Tu reporte se envió de forma privada"));
     if(RPT.block && RPT.who) setTimeout(()=>blBlock(RPT.who, RPT.whoName), 1500);
   }catch(e){ const m=String((e&&e.message)||e); const k=Object.keys(RP_ERR).find(x=>m.includes(x)); RPT.busy=false; RPT.err=k?RP_ERR[k]:bErr(e); repShow(); }
 }
@@ -3511,9 +3513,9 @@ async function blBlock(uid, name){
   }catch(e){ bToast(bErr(e)); return false; }
 }
 async function blUnblock(uid){
-  if(!window.confirm("Unblock this person? · Blockierung aufheben?")) return;
+  if(!window.confirm(tr("Unblock this person?","Blockierung aufheben?","¿Desbloquear a esta persona?"))) return;
   try{ const { error } = await A.sb.rpc("pt_unblock",{ p_user:uid }); if(error) throw error;
-    BL.ids.delete(uid); bToast("Unblocked · Blockierung aufgehoben"); blLoad(); }
+    BL.ids.delete(uid); bToast(tr("Unblocked","Blockierung aufgehoben","Desbloqueado")); blLoad(); }
   catch(e){ bToast(bErr(e)); }
 }
 function blOpen(){ go("blocks"); blLoad(); }
@@ -3671,14 +3673,14 @@ async function raSet(id, status){
   catch(e){ bToast(bErr(e)); }
 }
 async function raDelMsg(rid, mid){
-  if(!window.confirm("Delete this chat message for everyone? · Nachricht für alle löschen?")) return;
+  if(!window.confirm(tr("Delete this chat message for everyone?","Nachricht für alle löschen?","¿Eliminar este mensaje para todos?"))) return;
   const { error } = await A.sb.from("session_messages").delete().eq("id",mid);
-  if(error){ bToast(bErr(error)); return; } bToast("🗑 Message deleted · Gelöscht"); raLoad();
+  if(error){ bToast(bErr(error)); return; } bToast(tr("🗑 Message deleted","🗑 Nachricht gelöscht","🗑 Mensaje eliminado")); raLoad();
 }
 async function raRemovePhoto(uid){
-  if(!window.confirm("Remove this person's profile photo? · Profilfoto entfernen?")) return;
+  if(!window.confirm(tr("Remove this person's profile photo?","Profilfoto dieser Person entfernen?","¿Quitar la foto de perfil de esta persona?"))) return;
   const { error } = await A.sb.rpc("pt_admin_remove_avatar",{ p_user:uid });
-  if(error){ bToast(bErr(error)); return; } bToast("🙈 Photo removed · Foto entfernt"); delete AV[uid];
+  if(error){ bToast(bErr(error)); return; } bToast(tr("🙈 Photo removed","🙈 Foto entfernt","🙈 Foto quitada")); delete AV[uid];
 }
 
 /* ===================== SESSION CHAT ===================== */
@@ -3726,11 +3728,11 @@ function rsStart(id){
   RS.form={ id, date:`${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`, time:`${p(d.getHours())}:${p(d.getMinutes())}`, note:"" }; xr();
 }
 async function rsSend(){
-  const f=RS.form; if(!f||!f.date||!f.time){ bToast("Pick a date and time · Datum und Uhrzeit wählen"); return; }
-  const when=new Date(`${f.date}T${f.time}:00`); if(isNaN(when)){ bToast("Pick a date and time · Datum und Uhrzeit wählen"); return; }
+  const f=RS.form; if(!f||!f.date||!f.time){ bToast(tr("Pick a date and time","Datum und Uhrzeit wählen","Elige fecha y hora")); return; }
+  const when=new Date(`${f.date}T${f.time}:00`); if(isNaN(when)){ bToast(tr("Pick a date and time","Datum und Uhrzeit wählen","Elige fecha y hora")); return; }
   RS.busy=true; xr();
   try{ const { error } = await A.sb.rpc("pt_request_reschedule",{ p_activity:f.id, p_when:when.toISOString(), p_note:f.note||null }); if(error) throw error;
-    RS.form=null; bToast("🔁 Suggestion sent · Vorschlag gesendet"); await rsLoad(); }
+    RS.form=null; bToast(tr("🔁 Suggestion sent","🔁 Vorschlag gesendet","🔁 Propuesta enviada")); await rsLoad(); }
   catch(e){ bToast(/not_future/.test(String(e&&e.message))?"Pick a time at least 1 hour from now · Mindestens 1 Stunde im Voraus":bErr(e)); }
   RS.busy=false; xr();
 }
@@ -3742,7 +3744,7 @@ async function rsAnswer(rid, ok){
   RS.busy=false; xr();
 }
 async function rsCancel(rid){
-  try{ const { error } = await A.sb.rpc("pt_cancel_reschedule",{ p_id:rid }); if(error) throw error; bToast("Withdrawn · Zurückgezogen"); await rsLoad(); }
+  try{ const { error } = await A.sb.rpc("pt_cancel_reschedule",{ p_id:rid }); if(error) throw error; bToast(tr("Withdrawn","Zurückgezogen","Retirado")); await rsLoad(); }
   catch(e){ bToast(bErr(e)); }
 }
 function chBtn(s){
@@ -3827,7 +3829,7 @@ async function chSend(){
   CH.busy=false;
 }
 async function chDel(id){
-  if(!window.confirm("Delete this message? · Nachricht löschen?")) return;
+  if(!window.confirm(tr("Delete this message?","Nachricht löschen?","¿Eliminar este mensaje?"))) return;
   const { error } = await A.sb.from("session_messages").delete().eq("id",id);
   if(error){ bToast(bErr(error)); return; }
   CH.list=CH.list.filter(m=>m.id!==id); chPaint();
@@ -3935,14 +3937,14 @@ function invCard(){
       <button class="linkbtn" onclick="sOpen('${x.activity_id}')">${tr("Details","Details","Detalles")}</button></div></div>`).join("")}</div>`;
 }
 const INV_ERR = {
-  no_account:"No PonteTalk account with that email. Send them your invite link instead (🔗 Share invite link) · Kein Konto mit dieser E-Mail",
-  not_contact:"You can only pick people you've been in a session with · Nur Personen aus früheren Sessions",
-  cannot_invite_self:"That's you 🙂 · Das bist du",
-  too_many_invites:"Max 20 open invites per session · Maximal 20 offene Einladungen",
-  kicked_user:"This person was removed from your sessions · Diese Person wurde entfernt",
-  not_open:"This session already started or was cancelled · Session läuft schon oder ist abgesagt"
+  no_account:["No PonteTalk account with that email. Send them your invite link instead (🔗 Share invite link)","Kein PonteTalk-Konto mit dieser E-Mail. Schick stattdessen deinen Einladungslink (🔗 Einladungslink teilen)","No hay cuenta de PonteTalk con ese correo. Envíale tu enlace de invitación (🔗 Compartir enlace)"],
+  not_contact:["You can only pick people you've been in a session with","Nur Personen aus früheren Sessions","Solo puedes elegir a personas con las que ya estuviste en una sesión"],
+  cannot_invite_self:["That's you 🙂","Das bist du 🙂","Ese eres tú 🙂"],
+  too_many_invites:["Max 20 open invites per session","Maximal 20 offene Einladungen pro Session","Máximo 20 invitaciones abiertas por sesión"],
+  kicked_user:["This person was removed from your sessions","Diese Person wurde aus deinen Sessions entfernt","Esta persona fue retirada de tus sesiones"],
+  not_open:["This session already started or was cancelled","Session läuft schon oder ist abgesagt","Esta sesión ya empezó o se canceló"]
 };
-function invErr(e){ const m=String((e&&e.message)||e); const k=Object.keys(INV_ERR).find(x=>m.includes(x)); return k?INV_ERR[k]:bErr(e); }
+function invErr(e){ const m=String((e&&e.message)||e); const k=Object.keys(INV_ERR).find(x=>m.includes(x)); return k?tr(...INV_ERR[k]):bErr(e); }
 async function invOpen(id){
   INV.id=id; INV.err=""; INV.email=""; INV.busy=false; INV.done={};
   invShow();
@@ -3997,8 +3999,8 @@ async function invSend(uid){
   INV.busy=false; invShow();
 }
 async function invCancel(aid, uid){
-  if(!window.confirm("Take back this invite? · Einladung zurücknehmen?")) return;
-  try{ const { error } = await A.sb.rpc("pt_cancel_invite",{ p_activity:aid, p_user:uid }); if(error) throw error; bToast("Invite taken back · Zurückgenommen"); }
+  if(!window.confirm(tr("Take back this invite?","Einladung zurücknehmen?","¿Retirar esta invitación?"))) return;
+  try{ const { error } = await A.sb.rpc("pt_cancel_invite",{ p_activity:aid, p_user:uid }); if(error) throw error; bToast(tr("Invite taken back","Einladung zurückgenommen","Invitación retirada")); }
   catch(e){ bToast(bErr(e)); }
   bLoad();
 }
@@ -4031,7 +4033,7 @@ function bExport(){
   const o=B.expO||{days:7,tz2:"",lang:""}, now=Date.now(), until=now+o.days*86400000, me=detectTz();
   const L=(B.list||[]).filter(s=>s.visibility!=="private" && new Date(s.starts_at).getTime()>now && new Date(s.starts_at).getTime()<until && (!o.lang||s.language_a===o.lang||s.language_b===o.lang))
     .sort((a,b)=>new Date(a.starts_at)-new Date(b.starts_at));
-  const w=window.open("","_blank"); if(!w){ bToast("Please allow pop-ups for this site · Pop-ups erlauben"); return; }
+  const w=window.open("","_blank"); if(!w){ bToast(tr("Please allow pop-ups for this site","Bitte Pop-ups für diese Seite erlauben","Permite las ventanas emergentes en este sitio")); return; }
   const origin=location.protocol.startsWith("http")?location.origin:"https://pontetalk.setzio.com";
   const t=(iso,tz)=>new Date(iso).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit",...(tz?{timeZone:tz}:{})});
   const dayKey=iso=>new Date(iso).toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"});
@@ -4290,14 +4292,14 @@ function qzClean(){
 }
 async function qzSave(thenStart){
   const c=qzClean(); if(c.err){ QZ.err=c.err; xr(); return; }
-  if(QZ.data && QZ.data.status==="closed" && (QZ.data.answered||0)>0 && !window.confirm("Saving clears the old answers so you can run it again. OK? · Alte Antworten werden gelöscht. OK?")) return;
+  if(QZ.data && QZ.data.status==="closed" && (QZ.data.answered||0)>0 && !window.confirm(tr("Saving clears the old answers so you can run it again. OK?","Beim Speichern werden alte Antworten gelöscht, damit du es nochmal starten kannst. OK?","Guardar borra las respuestas antiguas para poder repetirlo. ¿De acuerdo?"))) return;
   QZ.busy=true; QZ.err=""; xr();
   try{
     const { error } = await A.sb.rpc("pt_quiz_save",{ p_activity:QZ.id, p_questions:c.list }); if(error) throw error;
     QZ.edit=null; QZ.busy=false;
     QZS[QZ.id]={ status:"draft", n:c.list.length, answered:0, mine:false };
     if(thenStart) return qzStart();
-    bToast("💾 Quiz saved. Start it during the session · Gespeichert"); await qzFetch();
+    bToast(tr("💾 Quiz saved. Start it during the session","💾 Quiz gespeichert. Starte es während der Session","💾 Quiz guardado. Empiézalo durante la sesión")); await qzFetch();
   }catch(e){ QZ.busy=false; QZ.err=qzErr(e); xr(); }
 }
 async function qzStatus(st){
@@ -4310,19 +4312,19 @@ async function qzStatus(st){
 }
 async function qzStart(){
   if(!await qzStatus("live")) return;
-  bToast("🚀 Quiz started! · Quiz gestartet!");
+  bToast(tr("🚀 Quiz started!","🚀 Quiz gestartet!","🚀 ¡Quiz iniciado!"));
   // Let everyone know in the session chat (they also see a button on the session)
   try{ await A.sb.from("session_messages").insert({ activity_id:QZ.id, user_id:A.user.id, body:"📝 Pop quiz time! Open the session and tap “Take it now”. · Quiz-Zeit! Öffne die Session." }); }catch(e){}
 }
-async function qzStop(){ if(await qzStatus("closed")) bToast("✅ Answers are now shown to everyone · Lösungen sind sichtbar"); }
+async function qzStop(){ if(await qzStatus("closed")) bToast(tr("✅ Answers are now shown to everyone","✅ Lösungen sind jetzt für alle sichtbar","✅ Ahora todos ven las respuestas")); }
 async function qzReset(){
-  if(!window.confirm("Run it again? This clears everyone's answers. · Nochmal? Alle Antworten werden gelöscht.")) return;
+  if(!window.confirm(tr("Run it again? This clears everyone's answers.","Nochmal starten? Alle Antworten werden gelöscht.","¿Repetirlo? Se borran las respuestas de todos."))) return;
   await qzStatus("draft");
 }
 async function qzDelete(){
-  if(!window.confirm("Delete this quiz? · Quiz löschen?")) return;
+  if(!window.confirm(tr("Delete this quiz?","Quiz löschen?","¿Eliminar este quiz?"))) return;
   try{ const { error } = await A.sb.rpc("pt_quiz_delete",{ p_activity:QZ.id }); if(error) throw error;
-    delete QZS[QZ.id]; bToast("🗑 Quiz deleted · Gelöscht"); qzBack(); }
+    delete QZS[QZ.id]; bToast(tr("🗑 Quiz deleted","🗑 Quiz gelöscht","🗑 Quiz eliminado")); qzBack(); }
   catch(e){ QZ.err=qzErr(e); xr(); }
 }
 
@@ -4336,7 +4338,7 @@ async function qzSubmit(){
   try{
     const { data, error } = await A.sb.rpc("pt_quiz_submit",{ p_activity:QZ.id, p_answers:QZ.pick }); if(error) throw error;
     QZ.busy=false; if(QZS[QZ.id]) QZS[QZ.id].mine=true;
-    bToast(`🎉 ${data.score} of ${data.total} right! · ${data.score} von ${data.total} richtig!`);
+    bToast("🎉 "+tr(`${data.score} of ${data.total} right!`,`${data.score} von ${data.total} richtig!`,`¡${data.score} de ${data.total} correctas!`));
     await qzFetch();
   }catch(e){ QZ.busy=false; QZ.err=qzErr(e); await qzFetch(); }
 }
@@ -4500,10 +4502,10 @@ function wdEditStart(id){
 }
 function wdEditCancel(){ WD.edit=null; WD.err=""; WD.form=wdBlankForm(WD.data.langs); xr(); }
 async function wdDelete(id){
-  if(!window.confirm("Delete this word? · Wort löschen?")) return;
+  if(!window.confirm(tr("Delete this word?","Wort löschen?","¿Eliminar esta palabra?"))) return;
   try{ const { error } = await A.sb.rpc("pt_words_delete",{ p_id:id }); if(error) throw error;
     if(WD.edit===id) WD.edit=null;
-    bToast("🗑 Deleted · Gelöscht");
+    bToast(tr("🗑 Deleted","🗑 Gelöscht","🗑 Eliminado"));
     if(WD.id==="all") await wdAllFetch(); else await wdFetch();
   }catch(e){ WD.err=wdErr(e); xr(); }
 }
@@ -4513,14 +4515,14 @@ async function wdAsk(){
     const { error } = await A.sb.from("session_messages").insert({ activity_id:WD.id, user_id:A.user.id,
       body:`📚 I saved ${n} word${n===1?"":"s"} from our session. Can you check ${n===1?"it":"them"}? Open the session and tap “My words”. · Kannst du meine Wörter prüfen?` });
     if(error) throw error;
-    bToast("📨 Asked in the session chat · Im Chat gefragt");
+    bToast(tr("📨 Asked in the session chat","📨 Im Session-Chat gefragt","📨 Preguntado en el chat de la sesión"));
   }catch(e){ WD.err=bErr(e); xr(); }
 }
 
 /* ---- partner: check ---- */
 async function wdCheckOk(id){
   try{ const { error } = await A.sb.rpc("pt_words_check",{ p_id:id, p_ok:true }); if(error) throw error;
-    bToast("✓ Thanks for checking! · Danke!"); await wdFetch();
+    bToast(tr("✓ Thanks for checking!","✓ Danke fürs Prüfen!","✓ ¡Gracias por revisar!")); await wdFetch();
   }catch(e){ WD.err=wdErr(e); xr(); }
 }
 function wdFixStart(id){
@@ -4533,7 +4535,7 @@ async function wdFixSave(){
   WD.busy=true; WD.err=""; xr();
   try{ const { error } = await A.sb.rpc("pt_words_check",{ p_id:WD.fix, p_ok:false, p_word:word, p_meaning:meaning, p_note:(v.note||"").trim()||null });
     if(error) throw error;
-    WD.busy=false; WD.fix=null; bToast("✏️ Fixed. Thanks! · Korrigiert. Danke!"); await wdFetch();
+    WD.busy=false; WD.fix=null; bToast(tr("✏️ Fixed. Thanks!","✏️ Korrigiert. Danke!","✏️ Corregido. ¡Gracias!")); await wdFetch();
   }catch(e){ WD.busy=false; WD.err=wdErr(e); xr(); }
 }
 
@@ -4898,10 +4900,10 @@ function luSugHtml(){
   return form + `<div class="lufind" style="margin-top:4px">${list}</div>`;
 }
 async function luSugSend(){
-  if(!LU.sa || !LU.sb){ bToast("Pick both languages · Beide Sprachen wählen"); return; }
+  if(!LU.sa || !LU.sb){ bToast(tr("Pick both languages","Beide Sprachen wählen","Elige los dos idiomas")); return; }
   LU.sbusy=true; xr();
   try{ const { error } = await A.sb.rpc("pt_lounge_suggest",{ p_a:LU.sa, p_b:LU.sb, p_note:LU.snote||null }); if(error) throw error;
-    Object.assign(LU,{ sugOpen:false, sa:"", sb:"", snote:"" }); bToast("💡 Thanks! Others can 👍 your idea too · Danke!"); await luSugLoad(); }
+    Object.assign(LU,{ sugOpen:false, sa:"", sb:"", snote:"" }); bToast(tr("💡 Thanks! Others can 👍 your idea too","💡 Danke! Andere können deine Idee auch 👍","💡 ¡Gracias! Otros también pueden dar 👍 a tu idea")); await luSugLoad(); }
   catch(e){ bToast(luSugErr(e)); }
   LU.sbusy=false; xr();
 }
@@ -4916,11 +4918,11 @@ async function luUnvote(pair){
 async function luCreate(a,b){
   if(!window.confirm(`Create the ${LU_NAMES[a]||cfLang(a)[1]} ⇄ ${LU_NAMES[b]||cfLang(b)[1]} lounge? · Lounge erstellen?`)) return;
   try{ const { error } = await A.sb.rpc("pt_admin_create_lounge",{ p_a:a, p_b:b }); if(error) throw error;
-    bToast("✅ Lounge created! · Lounge erstellt!"); LU.list=null; LU.sug=null; luOpen(); }
+    bToast(tr("✅ Lounge created!","✅ Lounge erstellt!","✅ ¡Sala creada!")); LU.list=null; LU.sug=null; luOpen(); }
   catch(e){ bToast(luSugErr(e)); }
 }
 async function luDismiss(pair){
-  if(!window.confirm("Remove this suggestion? · Vorschlag entfernen?")) return;
+  if(!window.confirm(tr("Remove this suggestion?","Vorschlag entfernen?","¿Quitar esta sugerencia?"))) return;
   try{ const { error } = await A.sb.rpc("pt_admin_dismiss_lounge_suggestion",{ p_pair:pair }); if(error) throw error; await luSugLoad(); }
   catch(e){ bToast(luSugErr(e)); }
 }
@@ -5015,8 +5017,8 @@ async function luShare(){
   const l=luRoom(), url=luLink(LU.id), title=`${luName(l)} lounge · PonteTalk`;
   const text=`Practice ${luName(l)} with me on PonteTalk! Join the lounge (free, sign in to enter):`;
   try{ if(navigator.share){ await navigator.share({ title, text, url }); return; } }catch(e){ if(e && e.name==="AbortError") return; }
-  try{ await navigator.clipboard.writeText(url); bToast("🔗 Link copied! Only signed-in members can open it · Link kopiert"); }
-  catch(e){ window.prompt("Copy this link · Link kopieren", url); }
+  try{ await navigator.clipboard.writeText(url); bToast(tr("🔗 Link copied! Only signed-in members can open it","🔗 Link kopiert! Nur angemeldete Mitglieder können ihn öffnen","🔗 ¡Enlace copiado! Solo miembros con sesión pueden abrirlo")); }
+  catch(e){ window.prompt(tr("Copy this link:","Link kopieren:","Copia este enlace:"), url); }
 }
 const EMO=["😀","😂","🥰","😊","😉","😎","🤔","😅","😮","😢","🙏","👍","👏","🙌","💪","🤝","👋","❤️","🔥","🎉","✨","⭐","✅","❌","☕","🍕","🌍","📚","🗣️","💬","⏰","📅"];
 function emoBtn(ta){ return `<button class="chip emob" type="button" aria-label="Emoji" title="Emoji" onclick="emoToggle('${ta}')">😊</button>`; }
@@ -5092,7 +5094,7 @@ async function ecSign(){
 function ecPlay(path){
   if(EC.audio){ EC.audio.pause(); }
   if(EC.playing===path){ EC.playing=null; xr(); return; }
-  const url=path==="__mine"?EC.blobUrl:EC.urls[path]; if(!url){ bToast("Loading… try again in a second · Lädt…"); ecSign(); return; }
+  const url=path==="__mine"?EC.blobUrl:EC.urls[path]; if(!url){ bToast(tr("Loading… try again in a second","Lädt… versuch es gleich nochmal","Cargando… inténtalo en un segundo")); ecSign(); return; }
   EC.audio=new Audio(url); EC.playing=path; EC.audio.onended=()=>{ EC.playing=null; xr(); };
   EC.audio.play().catch(()=>{ EC.playing=null; xr(); }); xr();
 }
@@ -5216,7 +5218,7 @@ async function ecStart(cid, maxSec){
   if(!navigator.mediaDevices||!window.MediaRecorder){ EC.err="Recording isn't supported in this browser. Try Chrome or Safari (iOS 14.5+) · Aufnahme nicht möglich"; xr(); return; }
   ecDiscard(true);
   let stream; try{ stream=await navigator.mediaDevices.getUserMedia({ audio:true }); }
-  catch(e){ EC.err="Your browser blocked the microphone. Allow it (tap the 🔒 or aA next to the address), then try again · Mikrofon erlauben"; bToast("Please allow the microphone to record · Bitte Mikrofon erlauben"); xr(); return; }
+  catch(e){ EC.err="Your browser blocked the microphone. Allow it (tap the 🔒 or aA next to the address), then try again · Mikrofon erlauben"; bToast(tr("Please allow the microphone to record","Bitte Mikrofon erlauben, um aufzunehmen","Permite el micrófono para grabar")); xr(); return; }
   const mime=ecMime(); let mr; try{ mr=mime?new MediaRecorder(stream,{ mimeType:mime }):new MediaRecorder(stream); }catch(e){ mr=new MediaRecorder(stream); }
   const chunks=[]; mr.ondataavailable=ev=>{ if(ev.data&&ev.data.size) chunks.push(ev.data); };
   mr.onstop=()=>{ stream.getTracks().forEach(t=>t.stop()); const r=EC.rec; EC.rec=null; if(!r||r.cancel){ xr(); return; }
@@ -5239,7 +5241,7 @@ async function ecSendEntry(cid){
     path=await ecUpload(EC.blob, "e-"+cid.slice(0,8));
     const { data:old, error } = await A.sb.rpc("pt_echo_enter",{ p_challenge:cid, p_path:path, p_duration_ms:Math.round(EC.recMs) }); if(error) throw error;
     if(old){ try{ await A.sb.storage.from("echo").remove([old]); }catch(e){} }
-    ecDiscard(true); bToast("Your echo is in! 🎙️ · Deine Aufnahme ist drin!"); await ecLoad();
+    ecDiscard(true); bToast(tr("Your echo is in! 🎙️","Deine Aufnahme ist drin! 🎙️","¡Tu grabación está dentro! 🎙️")); await ecLoad();
   }catch(e){ EC.err=ecErr(e); if(path){ try{ await A.sb.storage.from("echo").remove([path]); }catch(x){} } }
   EC.busy=false; xr();
 }
@@ -5248,15 +5250,15 @@ async function ecLike(id, on){
   catch(e){ bToast(ecErr(e)); }
 }
 async function ecPick(id){
-  if(!window.confirm("Make this your ⭐ Host's pick? · Als Favorit wählen?")) return;
+  if(!window.confirm(tr("Make this your ⭐ Host's pick?","Als ⭐ Favorit des Hosts wählen?","¿Elegir como ⭐ favorito del anfitrión?"))) return;
   try{ const { error } = await A.sb.rpc("pt_echo_pick",{ p_entry:id }); if(error) throw error; await ecLoad(); }catch(e){ bToast(ecErr(e)); }
 }
 async function ecDelEntry(id){
-  if(!window.confirm("Delete your echo? · Deine Aufnahme löschen?")) return;
+  if(!window.confirm(tr("Delete your echo?","Deine Aufnahme löschen?","¿Eliminar tu grabación?"))) return;
   try{ const { error } = await A.sb.rpc("pt_echo_entry_remove",{ p_entry:id }); if(error) throw error; await ecLoad(); }catch(e){ bToast(ecErr(e)); }
 }
 async function ecRemove(id){
-  if(!window.confirm("Cancel this challenge for everyone? · Challenge für alle absagen?")) return;
+  if(!window.confirm(tr("Cancel this challenge for everyone?","Challenge für alle absagen?","¿Cancelar este reto para todos?"))) return;
   try{ const { error } = await A.sb.rpc("pt_echo_remove",{ p_challenge:id }); if(error) throw error; await ecLoad(); }catch(e){ bToast(ecErr(e)); }
 }
 function ecReport(cid, eid){
@@ -5270,14 +5272,14 @@ function ecReport(cid, eid){
 }
 async function ecReportSend(cid, eid, reason){
   const b=document.getElementById("ecRep"); if(b) b.remove();
-  try{ const { error } = await A.sb.rpc("pt_echo_report",{ p_challenge:cid, p_entry:eid, p_reason:reason, p_details:null }); if(error) throw error; bToast("Thanks, we'll take a look · Danke, wir schauen es uns an"); }
+  try{ const { error } = await A.sb.rpc("pt_echo_report",{ p_challenge:cid, p_entry:eid, p_reason:reason, p_details:null }); if(error) throw error; bToast(tr("Thanks, we'll take a look","Danke, wir schauen es uns an","Gracias, lo revisaremos")); }
   catch(e){ bToast(ecErr(e)); }
 }
 /* --- start a challenge --- */
 function ecLocalInput(iso){ const d=new Date(iso); d.setSeconds(0,0); const p=n=>String(n).padStart(2,"0"); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`; }
 function ecNew(){
   const d=EC.data||{}, langs=Object.keys(d.can_host||{}).filter(k=>d.can_host[k]);
-  if(!langs.length){ bToast("Native or fluent speakers can start one · Nur für Muttersprachler"); return; }
+  if(!langs.length){ bToast(tr("Native or fluent speakers can start one","Nur Muttersprachler oder fließend Sprechende können eine starten","Solo hablantes nativos o fluidos pueden crear uno")); return; }
   const free=d.next_free&&new Date(d.next_free)>new Date()?d.next_free:new Date().toISOString();
   EC.form={ lang:langs[0], langs, phrase:"", meaning:"", start:ecLocalInput(free), hours:24, max:15 };
   ecDiscard(true); EC.err=""; go("echo");
@@ -5317,7 +5319,7 @@ async function ecCreate(){
     path=await ecUpload(EC.blob, "c");
     const { error } = await A.sb.rpc("pt_echo_create",{ p_lounge:EC.lounge, p_language:f.lang, p_phrase:f.phrase.trim(), p_meaning:f.meaning.trim()||null,
       p_path:path, p_max_sec:f.max, p_starts:start.toISOString(), p_ends:end.toISOString() }); if(error) throw error;
-    EC.form=null; ecDiscard(true); bToast("Your challenge is set! 🎙️ · Challenge erstellt!"); await ecLoad();
+    EC.form=null; ecDiscard(true); bToast(tr("Your challenge is set! 🎙️","Challenge erstellt! 🎙️","¡Tu reto está listo! 🎙️")); await ecLoad();
   }catch(e){ EC.err=ecErr(e); if(path){ try{ await A.sb.storage.from("echo").remove([path]); }catch(x){} } }
   EC.busy=false; xr();
 }
@@ -5359,7 +5361,7 @@ async function luSend(){
   }catch(e){ LU.busy=false; LU.err=luErr(e); if(/lounge_profile_needed/.test(String(e&&e.message))) LU.canPost=false; xr(); }
 }
 async function luDel(id){
-  if(!window.confirm("Delete this message? · Nachricht löschen?")) return;
+  if(!window.confirm(tr("Delete this message?","Nachricht löschen?","¿Eliminar este mensaje?"))) return;
   try{ const { error } = await A.sb.rpc("pt_lounge_delete",{ p_id:id }); if(error) throw error;
     LU.msgs=LU.msgs.filter(m=>m.id!==id); luPaint(); }
   catch(e){ bToast(luErr(e)); }
@@ -5388,12 +5390,12 @@ function luBest(){
 async function luToggle(dow, hour, on){
   LU.busy=true; xr();
   try{ const { error } = await A.sb.rpc("pt_lounge_free_set",{ p_lounge:LU.id, p_dow:dow, p_hour:hour, p_on:on }); if(error) throw error;
-    if(on) bToast("🙋 Added! Others in this lounge can see you're free then · Hinzugefügt"); await luFreeLoad(); }
+    if(on) bToast(tr("🙋 Added! Others in this lounge can see you're free then","🙋 Hinzugefügt! Andere in dieser Lounge sehen, dass du dann Zeit hast","🙋 ¡Añadido! Otros en esta sala verán que estás libre entonces")); await luFreeLoad(); }
   catch(e){ bToast(luErr(e)); if(/lounge_profile_needed/.test(String(e&&e.message))) LU.canPost=false; }
   LU.busy=false; xr();
 }
 function luAddPicked(){
-  if(LU.pickDay===null){ bToast("Pick a day first · Erst einen Tag wählen"); return; }
+  if(LU.pickDay===null){ bToast(tr("Pick a day first","Erst einen Tag wählen","Primero elige un día")); return; }
   const d=luNextLocal(LU.pickDay, LU.pickHour);
   luToggle(d.getUTCDay(), d.getUTCHours(), true);
 }
@@ -5427,7 +5429,7 @@ function luHost(dow, hour){
     date:`${when.getFullYear()}-${hPad(when.getMonth()+1)}-${hPad(when.getDate())}`, time:`${hPad(when.getHours())}:${hPad(when.getMinutes())}`,
     fmt:"online", lounge });
   xr();
-  bToast("📅 Time and languages filled in. Check the rest and post! · Bitte prüfen und posten");
+  bToast(tr("📅 Time and languages filled in. Check the rest and post!","📅 Zeit und Sprachen eingetragen. Prüf den Rest und veröffentliche!","📅 Hora e idiomas rellenados. ¡Revisa el resto y publica!"));
 }
 async function luAnnounce(lounge, activity){
   try{ await A.sb.rpc("pt_lounge_announce",{ p_lounge:lounge, p_activity:activity }); }catch(e){}
@@ -5491,8 +5493,8 @@ function ptLink(id){ return (location.protocol.startsWith("http")?location.origi
 async function ptShare(id, name){
   const url=ptLink(id);
   try{ if(navigator.share){ await navigator.share({ title:`${name} on PonteTalk`, text:`Practice languages with ${name} on PonteTalk (sign in to view):`, url }); return; } }catch(e){ if(e && e.name==="AbortError") return; }
-  try{ await navigator.clipboard.writeText(url); bToast("🔗 Link copied! Only signed-in members can open it · Link kopiert"); }
-  catch(e){ window.prompt("Copy this link · Link kopieren", url); }
+  try{ await navigator.clipboard.writeText(url); bToast(tr("🔗 Link copied! Only signed-in members can open it","🔗 Link kopiert! Nur angemeldete Mitglieder können ihn öffnen","🔗 ¡Enlace copiado! Solo miembros con sesión pueden abrirlo")); }
+  catch(e){ window.prompt(tr("Copy this link:","Link kopieren:","Copia este enlace:"), url); }
 }
 VIEWS.partners = function(){
   const top=`<div class="topline"><button class="chip" onclick="goHome()">← Back</button><span>Find partners</span></div>
@@ -5602,7 +5604,7 @@ async function trSend(){
     const r=await A.sb.from("activities").insert(row).select("id").single(); if(r.error) throw r.error; made=r.data.id;
     const { error } = await A.sb.rpc("pt_trade_invite",{ p_activity:made, p_user:p.user_id }); if(error) throw error;
     const box=document.getElementById("trSheet"); if(box) box.remove();
-    bToast(`🤝 Invitation sent to ${p.name}! You'll be notified when they answer · Einladung gesendet`);
+    bToast("🤝 "+tr(`Invitation sent to ${p.name}! You'll be notified when they answer`,`Einladung an ${p.name} gesendet! Du bekommst Bescheid, wenn geantwortet wird`,`¡Invitación enviada a ${p.name}! Te avisaremos cuando responda`));
     TR.busy=false; sOpen(made);
   }catch(e){
     if(made){ try{ await A.sb.from("activities").delete().eq("id",made); }catch(x){} }
@@ -5672,8 +5674,8 @@ function avShrink(file){
 let AV_BUSY=false;
 async function avPick(inp){
   const f=inp.files&&inp.files[0]; inp.value=""; if(!f || AV_BUSY) return;
-  if(!/^image\//.test(f.type||"image/")){ bToast("Please pick a photo · Bitte ein Foto wählen"); return; }
-  if(f.size>20*1024*1024){ bToast("That photo is too big · Foto zu groß"); return; }
+  if(!/^image\//.test(f.type||"image/")){ bToast(tr("Please pick a photo","Bitte ein Foto wählen","Elige una foto")); return; }
+  if(f.size>20*1024*1024){ bToast(tr("That photo is too big","Das Foto ist zu groß","Esa foto es demasiado grande")); return; }
   AV_BUSY=true; xr();
   try{
     const blob=await avShrink(f), uid=A.user.id, path=`${uid}/${Date.now()}.jpg`;
@@ -5684,19 +5686,19 @@ async function avPick(inp){
     const r=await A.sb.from("profiles").update({ avatar_url:url }).eq("id",uid); if(r.error) throw r.error;
     A.profile.avatar_url=url;
     if(old) avRemoveFile(old).catch(()=>{});
-    bToast("📷 Photo saved · Foto gespeichert");
+    bToast(tr("📷 Photo saved","📷 Foto gespeichert","📷 Foto guardada"));
   }catch(e){ bToast(/not_image|convert/.test(String(e&&e.message))?"This file can't be used as a photo. Try a JPG or PNG · Bitte JPG oder PNG":bErr(e)); }
   AV_BUSY=false; render();
 }
 async function avRemove(){
   if(!A.profile || !A.profile.avatar_url || AV_BUSY) return;
-  if(!window.confirm("Remove your photo? · Foto entfernen?")) return;
+  if(!window.confirm(tr("Remove your photo?","Foto entfernen?","¿Quitar tu foto?"))) return;
   AV_BUSY=true; xr();
   try{
     const old=A.profile.avatar_url;
     const r=await A.sb.from("profiles").update({ avatar_url:null }).eq("id",A.user.id); if(r.error) throw r.error;
     A.profile.avatar_url=null; avRemoveFile(old).catch(()=>{});
-    bToast("Photo removed · Foto entfernt");
+    bToast(tr("Photo removed","Foto entfernt","Foto quitada"));
   }catch(e){ bToast(bErr(e)); }
   AV_BUSY=false; render();
 }
@@ -5820,9 +5822,9 @@ VIEWS.cafes = function(){
   ${legalLinks()}`;
 };
 async function cfReport(id){
-  if(!A.user){ bToast("Sign in to flag a link · Zum Melden bitte anmelden"); return; }
+  if(!A.user){ bToast(tr("Sign in to flag a link","Zum Melden bitte anmelden","Entra para reportar un enlace")); return; }
   try{ const { error } = await A.sb.rpc("pt_report_cafe",{ p_cafe:id, p_reason:"broken" }); if(error) throw error;
-    bToast("🙏 Thanks! We'll check it · Danke, wir prüfen das"); }catch(e){ bToast(bErr(e)); }
+    bToast(tr("🙏 Thanks! We'll check it","🙏 Danke, wir prüfen das","🙏 ¡Gracias! Lo revisaremos")); }catch(e){ bToast(bErr(e)); }
 }
 async function cfSet(id,status){
   const { error } = await A.sb.from("cafes").update({ status }).eq("id",id);
@@ -5949,14 +5951,14 @@ function ciBtn(s, small){
   if(c) return `<p class="okmsg" style="margin:8px 0 0">✓ ${tr("Checked in","Eingecheckt","Registrado/a")}${c.on_time?" · "+tr("on time 👏","pünktlich 👏","puntual 👏"):""}</p>`;
   return `<button class="btn primary ${small?"qbtn":""}" onclick="ciGo('${s.activity_id}')">🙋 ${tr("I'm here","Ich bin da","Estoy aquí")}</button>`;
 }
-const CI_ERR = { too_early:"Check-in opens 10 minutes before the start · Check-in ab 10 Min. vorher",
-  too_late:"This session is over · Die Session ist vorbei", not_joined:"Only people in this session can check in · Nur Teilnehmende" };
+const CI_ERR = { too_early:["Check-in opens 10 minutes before the start","Check-in ab 10 Min. vorher","El registro abre 10 minutos antes"],
+  too_late:["This session is over","Die Session ist vorbei","Esta sesión ya terminó"], not_joined:["Only people in this session can check in","Nur Teilnehmende können einchecken","Solo los participantes pueden registrarse"] };
 async function ciGo(id){
   try{
     const { data, error } = await A.sb.rpc("pt_check_in",{ p_activity:id }); if(error) throw error;
     CI[id]={ on_time:!!(data&&data.on_time) };
-    bToast(data&&data.on_time ? "🙋 You're checked in, right on time! · Pünktlich eingecheckt!" : "🙋 You're checked in · Eingecheckt");
-  }catch(e){ const m=String((e&&e.message)||e); bToast(Object.keys(CI_ERR).find(k=>m.includes(k)) ? CI_ERR[Object.keys(CI_ERR).find(k=>m.includes(k))] : bErr(e)); }
+    bToast(data&&data.on_time ? "🙋 "+tr("You're checked in, right on time!","Pünktlich eingecheckt!","¡Registrado/a, justo a tiempo!") : "🙋 "+tr("You're checked in","Eingecheckt","Registrado/a"));
+  }catch(e){ const m=String((e&&e.message)||e); bToast(Object.keys(CI_ERR).find(k=>m.includes(k)) ? tr(...CI_ERR[Object.keys(CI_ERR).find(k=>m.includes(k))]) : bErr(e)); }
   xr();
 }
 
@@ -6075,7 +6077,7 @@ async function attSave(){
   try{
     const { error } = await A.sb.rpc("pt_save_attendance",{ p_activity:AT.id, p_marks:marks }); if(error) throw error;
     const b=document.getElementById("attSheet"); if(b) b.remove();
-    bToast("✅ Thanks! Attendance saved · Danke, gespeichert!");
+    bToast(tr("✅ Thanks! Attendance saved","✅ Danke! Anwesenheit gespeichert","✅ ¡Gracias! Asistencia guardada"));
     acLoad(); if(S.screen==="board"||S.screen==="session") bLoad(); else if(S.screen==="home"){ R.at=0; rLoad(); }
   }catch(e){ AT.busy=false; AT.err=bErr(e); attShow(); }
 }
@@ -6163,7 +6165,7 @@ function vBtn(id, primary, s){
 }
 function vLockClick(a){
   const open=+a.dataset.open; if(!open || Date.now()>=open) return true;
-  bToast(`🎥 The video link opens ${V_EARLY} min before the start · Der Link öffnet ${V_EARLY} Min. vorher`); return false;
+  bToast("🎥 "+tr(`The video link opens ${V_EARLY} min before the start`,`Der Link öffnet ${V_EARLY} Min. vorher`,`El enlace de vídeo abre ${V_EARLY} min antes`)); return false;
 }
 setInterval(()=>{ if(document.querySelector(".vlock[data-open]") && [...document.querySelectorAll(".vlock[data-open]")].some(a=>Date.now()>=+a.dataset.open)) xr(); }, 30000);
 function vLine(s){
@@ -6207,7 +6209,7 @@ async function bAct(fn,id){
     const x=(D.board||[]).concat(B.list||[], R.list||[]).find(q=>q.activity_id===id);
     if(x && x.my_status==="joined" && x.starts_at){
       const left=new Date(x.starts_at)-Date.now();
-      if(left>0 && left<2*3600000 && !window.confirm("Leaving less than 2h before the start counts as a late cancel (½ strike). Your free monthly pass covers the first one. Leave anyway? · Spät absagen zählt als ½ Verwarnung. Trotzdem absagen?")) return;
+      if(left>0 && left<2*3600000 && !window.confirm(tr("Leaving less than 2h before the start counts as a late cancel (½ strike). Your free monthly pass covers the first one. Leave anyway?","Absagen weniger als 2 Std. vorher zählt als spät abgesagt (½ Verwarnung). Dein freier Monatspass deckt die erste ab. Trotzdem absagen?","Salir menos de 2 h antes cuenta como cancelación tardía (½ falta). Tu pase mensual gratis cubre la primera. ¿Salir igualmente?"))) return;
     }
   }
   if(["pt_join_activity","pt_accept_invite","pt_accept_offer"].includes(fn) && !safetyOk()){
@@ -6220,14 +6222,14 @@ async function bAct(fn,id){
     if(error) throw error;
     const st=data&&data.status;
     if(st==="cancelled" && data.late){ MR.data=null; MR.strikes=null; }
-    const sideTxt = data && data.side ? (()=>{ const x=(B.list||[]).concat(R.list||[]).find(q=>q.activity_id===id); const k=x?(data.side==="a"?x.language_a:x.language_b):null; return k&&T[k]?` (${T[k].nameEn} speakers)`:""; })() : "";
-    bToast( st==="joined" ? `✅ You're in${sideTxt}! · Du bist dabei!`
-          : st==="pending" ? "⏳ Request sent. The host will reply · Anfrage gesendet"
-          : st==="waitlisted" ? `🕒 You're #${data.position} on the waitlist${sideTxt} · Platz ${data.position} auf der Warteliste`
-          : st==="declined_invite" ? "Invite declined · Einladung abgelehnt"
-          : st==="expired" ? "Sorry, the offer ran out · Das Angebot ist abgelaufen"
-          : st==="cancelled" ? (data.late ? "Done. Leaving less than 2h before start counts as a late cancel · Spät abgesagt" : "Done · Erledigt")
-          : "Done · Erledigt");
+    const sideTxt = data && data.side ? (()=>{ const x=(B.list||[]).concat(R.list||[]).find(q=>q.activity_id===id); const k=x?(data.side==="a"?x.language_a:x.language_b):null; return k&&T[k]?" ("+tr(`${lname(k)} speakers`,`${lname(k)}-Sprechende`,`hablantes de ${lname(k).toLowerCase()}`)+")":""; })() : "";
+    bToast( st==="joined" ? "✅ "+tr(`You're in${sideTxt}!`,`Du bist dabei${sideTxt}!`,`¡Estás dentro${sideTxt}!`)
+          : st==="pending" ? "⏳ "+tr("Request sent. The host will reply","Anfrage gesendet. Der Host antwortet","Solicitud enviada. El anfitrión responderá")
+          : st==="waitlisted" ? "🕒 "+tr(`You're #${data.position} on the waitlist${sideTxt}`,`Platz ${data.position} auf der Warteliste${sideTxt}`,`Eres el n.º ${data.position} en la lista de espera${sideTxt}`)
+          : st==="declined_invite" ? tr("Invite declined","Einladung abgelehnt","Invitación rechazada")
+          : st==="expired" ? tr("Sorry, the offer ran out","Das Angebot ist leider abgelaufen","Lo siento, la oferta caducó")
+          : st==="cancelled" ? (data.late ? tr("Done. Leaving less than 2h before start counts as a late cancel","Erledigt. Absagen weniger als 2 Std. vorher zählt als spät abgesagt","Hecho. Salir menos de 2 h antes cuenta como cancelación tardía") : tr("Done","Erledigt","Hecho"))
+          : tr("Done","Erledigt","Hecho"));
   }catch(e){
     if(/adult_required/.test(String(e&&e.message))){
       B.busy=false;
@@ -6260,11 +6262,11 @@ async function bRespond(id,uid,yes){
   await bLoad();
 }
 async function bCancel(id){
-  if(!window.confirm("Cancel this session for everyone? · Session für alle absagen?")) return;
+  if(!window.confirm(tr("Cancel this session for everyone?","Session für alle absagen?","¿Cancelar esta sesión para todos?"))) return;
   try{
     const { error } = await A.sb.from("activities").update({ status:"cancelled" }).eq("id",id);
     if(error) throw error;
-    bToast("Session cancelled · Session abgesagt");
+    bToast(tr("Session cancelled","Session abgesagt","Sesión cancelada"));
   }catch(e){ bToast(bErr(e)); }
   bLoad();
 }
@@ -6340,7 +6342,7 @@ function bCard(s){
     <div class="bwhen">🗓️ ${fmtWhen(s.starts_at)} <span class="yt">${tr("your time","deine Zeit","tu hora")}</span> · ${s.duration_min} min${hostT?`<small>${esc(hostT)}</small>`:""}</div>${zonesLine(s)}
     ${placeLine(s)}
     <div class="note" style="margin:0">${avSmall(s.host_id)} ${esc(s.host_name||"Host")}${relBadges(s.host_reliability)}${rel}${s.host_languages&&s.host_languages.length?` · ${langsLine(s.host_languages)}`:""}</div>
-    ${(s.topics||[]).length?`<div class="row" style="margin-top:8px">${s.topics.map(k=>{ const it=INTERESTS.find(x=>x[0]===k); return it?`<span class="feat">${it[1]} ${esc(it[2])}</span>`:""; }).join("")}</div>`:""}
+    ${(s.topics||[]).length?`<div class="row" style="margin-top:8px">${s.topics.map(k=>{ const it=INTERESTS.find(x=>x[0]===k); return it?`<span class="feat">${it[1]} ${esc(intName(it))}</span>`:""; }).join("")}</div>`:""}
     ${s.note?`<p class="note" style="margin:8px 0 0">💬 ${esc(s.note)}</p>`:""}
     ${act}
     ${ciBtn(s)}
@@ -6456,7 +6458,7 @@ function hostList(s){
 /* ---- Host a session ---- */
 function hPad(n){ return String(n).padStart(2,"0"); }
 function hOpen(){
-  if(!A.user){ A.ret="board"; A.err=""; A.msg="Sign in to host a session · Melde dich an, um eine Session anzubieten"; go("account"); return; }
+  if(!A.user){ A.ret="board"; A.err=""; A.msg=tr("Sign in to host a session","Melde dich an, um eine Session anzubieten","Entra para organizar una sesión"); go("account"); return; }
   H.err=""; H.busy=false; H.checked=false;
   if(H.editId || H.dupFrom){ H.editId=null; H.dupFrom=null; H.started=false; }
   if(!H.started){
@@ -6497,12 +6499,12 @@ function hSet(k,v){
 const H_MAX_GUESTS=15, H_MAX_SIDES=16;   // 15 guests + host = 16 people = 8 pairs
 function hSide(k,d){ const v=(H[k]||1)+d; if(v<1 || (d>0 && H.sa+H.sb>=H_MAX_SIDES)) return; H[k]=v; xr(); }
 function hSeats(d){ const v=(H.seats||1)+d; if(v<Math.max(1,H.editId?(H.editTaken||0):1) || v>H_MAX_GUESTS) return; H.seats=v; xr(); }
-function hPairTip(people){ return people>8 ? `<p class="note" style="margin:6px 0 0">💡 Big group (${people} people incl. you)? Try pairs or small groups so everyone gets to talk. · Große Gruppe? Arbeitet in Paaren.</p>` : ""; }
+function hPairTip(people){ return people>8 ? `<p class="note" style="margin:6px 0 0">💡 ${tr(`Big group (${people} people incl. you)? Try pairs or small groups so everyone gets to talk.`,`Große Gruppe (${people} Personen inkl. dir)? Arbeitet in Paaren oder kleinen Gruppen, damit alle sprechen.`,`¿Grupo grande (${people} personas contigo)? Trabajad en parejas o grupos pequeños para que todos hablen.`)}</p>` : ""; }
 function hTopic(k){ const i=H.topics.indexOf(k); if(i>=0) H.topics.splice(i,1); else if(H.topics.length<3) H.topics.push(k); xr(); }
 function hDefaultTitle(){
-  if(H.type==="game"){ const g=GAMES_BOARD.find(x=>x[0]===H.game); return `${g?g[2]:"Game"}${H.a&&T[H.a]?" · "+T[H.a].nameEn:""}`; }
-  if(H.a && T[H.a]) return `${T[H.a].nameEn}${H.b&&T[H.b]?" ⇄ "+T[H.b].nameEn:""} chat`;
-  return "e.g. Weekend plans";
+  if(H.type==="game"){ const g=GAMES_BOARD.find(x=>x[0]===H.game); return `${g?g[2]:tr("Game","Spiel","Juego")}${H.a&&T[H.a]?" · "+lname(H.a):""}`; }
+  if(H.a && T[H.a]){ const p=`${lname(H.a)}${H.b&&T[H.b]?" ⇄ "+lname(H.b):""}`; return tr(`${p} chat`,`${p} Gespräch`,`Charla ${p}`); }
+  return tr("e.g. Weekend plans","z. B. Pläne fürs Wochenende","p. ej. Planes para el fin de semana");
 }
 function hEdit(id){
   const s=(B.list||[]).concat(D.board||[]).find(x=>x.activity_id===id); if(!s) return;
@@ -6545,22 +6547,22 @@ function hHostSide(){
 function hCancelEdit(){ H.editId=null; H.dupFrom=null; H.started=false; bOpen(); }
 async function hPost(){
   H.err="";
-  if(!H.a){ H.err="Pick the main language · Wähle die Hauptsprache"; xr(); return; }
+  if(!H.a){ H.err=tr("Pick the main language","Wähle die Hauptsprache","Elige el idioma principal"); xr(); return; }
   const start=new Date(`${H.date}T${H.time}`);
-  if(isNaN(start.getTime())){ H.err="Check the date and time · Prüfe Datum und Uhrzeit"; xr(); return; }
-  if(start.getTime() <= Date.now()+(H.editId?60000:5*60000)){ H.err="Pick a time in the future · Wähle eine Zeit in der Zukunft"; xr(); return; }
-  if(H.editId && H.seats < (H.editTaken||0)){ H.err=BERR.seats_below_joined; xr(); return; }
+  if(isNaN(start.getTime())){ H.err=tr("Check the date and time","Prüfe Datum und Uhrzeit","Revisa la fecha y la hora"); xr(); return; }
+  if(start.getTime() <= Date.now()+(H.editId?60000:5*60000)){ H.err=tr("Pick a time in the future","Wähle eine Zeit in der Zukunft","Elige una hora en el futuro"); xr(); return; }
+  if(H.editId && H.seats < (H.editTaken||0)){ H.err=bErr("seats_below_joined"); xr(); return; }
   const title=((H.title||"").trim() || hDefaultTitle()).slice(0,80);
-  if(title.length<3){ H.err="Add a short title · Gib einen kurzen Titel ein"; xr(); return; }
+  if(title.length<3){ H.err=tr("Add a short title","Gib einen kurzen Titel ein","Añade un título corto"); xr(); return; }
   if(H.fmt==="in_person"){
-    if((H.city||"").trim().length<2){ H.err="Add the city · Bitte die Stadt eingeben"; xr(); return; }
-    if((H.place||"").trim().length<2){ H.err="Add the place, e.g. the café's name · Bitte den Ort eingeben"; xr(); return; }
-    if(!H.pub){ H.err="Please confirm it's a public place · Bitte bestätige, dass es ein öffentlicher Ort ist"; xr(); return; }
+    if((H.city||"").trim().length<2){ H.err=tr("Add the city","Bitte die Stadt eingeben","Añade la ciudad"); xr(); return; }
+    if((H.place||"").trim().length<2){ H.err=tr("Add the place, e.g. the café's name","Bitte den Ort eingeben, z. B. den Namen des Cafés","Añade el lugar, p. ej. el nombre del café"); xr(); return; }
+    if(!H.pub){ H.err=tr("Please confirm it's a public place","Bitte bestätige, dass es ein öffentlicher Ort ist","Confirma que es un lugar público"); xr(); return; }
   }
   const mc=hMatsClean();
   if(mc.err){ H.err=mc.err; xr(); return; }
   const video=H.fmt==="in_person" ? "" : vClean(H.video);
-  if(video && !vValid(video)){ H.err="The video link doesn't look right. It should start with https:// · Der Video-Link sieht falsch aus"; xr(); return; }
+  if(video && !vValid(video)){ H.err=tr("The video link doesn't look right. It should start with https://","Der Video-Link sieht falsch aus. Er sollte mit https:// beginnen","El enlace de vídeo no parece correcto. Debe empezar por https://"); xr(); return; }
   H.busy=true; xr();
   try{
     const row={ host_id:A.user.id, type:H.type, game:H.type==="game"?H.game:null, title,
@@ -6582,7 +6584,7 @@ async function hPost(){
       await hSaveMats(H.editId, mc.list, H.matsWas);
       await hSavePlace(H.editId, H.placeWas);
       H.editId=null; H.started=false; H.busy=false;
-      bToast("✅ Changes saved. People in the session are told about time changes · Gespeichert");
+      bToast("✅ "+tr("Changes saved. People in the session are told about time changes","Gespeichert. Teilnehmende werden über Zeitänderungen informiert","Cambios guardados. Se avisa a los participantes de los cambios de hora"));
       bOpen(); return;
     }
     const { data:made, error } = await A.sb.from("activities").insert(row).select("id").single();
@@ -6591,129 +6593,131 @@ async function hPost(){
     H.lounge=null;
     if((video || mc.list.length || H.fmt==="in_person") && made && made.id){
       try{ await hSaveLink(made.id, video, ""); await hSaveMats(made.id, mc.list, []); await hSavePlace(made.id, null); }
-      catch(e){ H.started=false; H.busy=false; bToast("📣 Session posted, but the video link or materials didn't save. Tap ✏️ Edit to add them · Nicht alles gespeichert"); bOpen(); return; }
+      catch(e){ H.started=false; H.busy=false; bToast("📣 "+tr("Session posted, but the video link or materials didn't save. Tap ✏️ Edit to add them","Session veröffentlicht, aber Video-Link oder Materialien wurden nicht gespeichert. Tippe auf ✏️ Bearbeiten","Sesión publicada, pero el enlace de vídeo o los materiales no se guardaron. Toca ✏️ Editar para añadirlos")); bOpen(); return; }
     }
     let again=0;
     if(H.dupFrom && H.inviteAgain && made && made.id){
       try{ const r=await A.sb.rpc("pt_invite_again",{ p_from:H.dupFrom, p_to:made.id }); if(!r.error) again=r.data||0; }catch(e){}
     }
     if(H.dupFrom){ FU.list=(FU.list||[]).filter(x=>x.activity_id!==H.dupFrom); const was=H.dupFrom; H.dupFrom=null; H.started=false; H.busy=false;
-      bToast(`⧉ Copied to the new date!${again?` ${again} ${again===1?"person":"people"} invited again`:""} · Kopiert!`); bOpen(); return; }
+      bToast("⧉ "+tr("Copied to the new date!","Auf das neue Datum kopiert!","¡Copiada a la nueva fecha!")+(again?" "+tr(`${again} ${again===1?"person":"people"} invited again`,`${again} ${again===1?"Person":"Personen"} wieder eingeladen`,`${again} ${again===1?"persona invitada":"personas invitadas"} otra vez`):"")); bOpen(); return; }
     H.started=false; H.busy=false;
-    bToast(H.vis==="private" ? "🔒 Private session created. Tap 🔗 Share invite link to send it · Private Session erstellt" : "📣 Your session is on the board! · Deine Session ist online!");
+    bToast(H.vis==="private" ? "🔒 "+tr("Private session created. Tap 🔗 Share invite link to send it","Private Session erstellt. Tippe auf 🔗 Einladungslink teilen","Sesión privada creada. Toca 🔗 Compartir enlace para enviarla") : "📣 "+tr("Your session is on the board!","Deine Session ist online!","¡Tu sesión ya está publicada!"));
     bOpen();
   }catch(e){ H.busy=false; H.err=bErr(e); xr(); }
 }
 VIEWS.host = function(){
-  const top=`<div class="topline"><button class="chip" onclick="${H.editId?"hCancelEdit()":"bOpen()"}">← Sessions</button><span>${H.editId?"✏️ Edit session":H.dupFrom?"⧉ Duplicate session":"＋ Host a session"}</span></div>`;
-  if(!A.user) return `${top}<p class="note center" style="margin-top:40px">Please sign in first · Bitte zuerst anmelden</p>`;
-  if(!H.checked) return `${top}<p class="note center" style="margin-top:40px">Loading… · Lädt…</p>`;
+  const top=`<div class="topline"><button class="chip" onclick="${H.editId?"hCancelEdit()":"bOpen()"}">← ${tr("Sessions","Sessions","Sesiones")}</button><span>${H.editId?"✏️ "+tr("Edit session","Session bearbeiten","Editar sesión"):H.dupFrom?"⧉ "+tr("Duplicate session","Session kopieren","Duplicar sesión"):"＋ "+tr("Host a session","Session anbieten","Organizar una sesión")}</span></div>`;
+  if(!A.user) return `${top}<p class="note center" style="margin-top:40px">${tr("Please sign in first","Bitte zuerst anmelden","Primero entra en tu cuenta")}</p>`;
+  if(!H.checked) return `${top}<p class="note center" style="margin-top:40px">${tr("Loading…","Lädt…","Cargando…")}</p>`;
   if(!H.adult) return `${top}<div class="card center" style="margin-top:20px"><div style="font-size:40px">🪪</div>
-      <h3>One step first · Ein Schritt vorher</h3>
-      <p>To host, fill in your exchange profile and confirm you're 18 or older.<br><span class="de">Fülle zuerst dein Tandem-Profil aus und bestätige, dass du mindestens 18 bist.</span></p>
-      <button class="btn primary" onclick="xOpen()">🗣️ My exchange profile · Mein Tandem-Profil</button></div>`;
+      <h3>${tr("One step first","Ein Schritt vorher","Un paso antes")}</h3>
+      <p>${tr("To host, fill in your exchange profile and confirm you're 18 or older.","Fülle zuerst dein Tandem-Profil aus und bestätige, dass du mindestens 18 bist.","Para organizar, completa tu perfil de intercambio y confirma que tienes 18 años o más.")}</p>
+      <button class="btn primary" onclick="xOpen()">🗣️ ${tr("My exchange profile","Mein Tandem-Profil","Mi perfil de intercambio")}</button></div>`;
   const chip=(on,click,label)=>`<button class="chip ${on?"on":""}" aria-pressed="${on}" onclick="${click}">${label}</button>`;
+  const LN=k=>T[k]?lname(k):String(k||"");
+  const spk=(k,n)=>tr(`${LN(k)} speaker${n===1?"":"s"}`,`${LN(k)}-Sprechende`,`hablante${n===1?"":"s"} de ${LN(k).toLowerCase()}`);
   return `${top}
-  <h2>${H.editId?bi("Edit session","Session bearbeiten"):bi("Host a session","Session anbieten")}</h2>
-  ${H.editId&&H.editTaken?`<p class="note">${H.editTaken} ${H.editTaken===1?"person is":"people are"} already in. If you change the time, length, title or languages, they'll be told by email and in the app. · Teilnehmende werden bei Änderungen informiert.</p>`:""}
+  <h2>${H.editId?tr("Edit session","Session bearbeiten","Editar sesión"):tr("Host a session","Session anbieten","Organizar una sesión")}</h2>
+  ${H.editId&&H.editTaken?`<p class="note">${tr(`${H.editTaken} ${H.editTaken===1?"person is":"people are"} already in. If you change the time, length, title or languages, they'll be told by email and in the app.`,`${H.editTaken} ${H.editTaken===1?"Person ist":"Personen sind"} schon dabei. Bei Änderungen an Zeit, Dauer, Titel oder Sprachen werden sie per E-Mail und in der App informiert.`,`${H.editTaken} ${H.editTaken===1?"persona ya está apuntada":"personas ya están apuntadas"}. Si cambias la hora, la duración, el título o los idiomas, se les avisará por correo y en la app.`)}</p>`:""}
   <div class="card">
-    <label class="lbl">Where · Wo</label>
-    <div class="row">${chip((H.fmt||"online")==="online","hSet('fmt','online')","💻 Online")}${chip(H.fmt==="in_person","hSet('fmt','in_person')","📍 In person")}</div>
+    <label class="lbl">${tr("Where","Wo","Dónde")}</label>
+    <div class="row">${chip((H.fmt||"online")==="online","hSet('fmt','online')","💻 Online")}${chip(H.fmt==="in_person","hSet('fmt','in_person')","📍 "+tr("In person","Vor Ort","Presencial"))}</div>
     ${H.fmt==="in_person"?`<div class="ipbox">
-      <label class="lbl" for="hcity">City · Stadt</label>
-      <input type="text" id="hcity" maxlength="80" placeholder="e.g. Erfurt" value="${esc(H.city||"")}" oninput="H.city=this.value">
-      <label class="lbl" for="hplace">Place · Ort</label>
-      <input type="text" id="hplace" maxlength="100" placeholder="e.g. Café Wildfang" value="${esc(H.place||"")}" oninput="H.place=this.value;H.cafe=null">
-      <div class="row" style="margin-top:6px"><button class="chip" onclick="hPickCafe()">☕ Pick from Language cafés</button></div>
-      <label class="lbl" for="harea">Area (optional) · Viertel</label>
-      <input type="text" id="harea" maxlength="80" placeholder="e.g. Altstadt" value="${esc(H.area||"")}" oninput="H.area=this.value">
-      <p class="note" style="margin:6px 0 0">👀 Everyone sees city, place and area. · Für alle sichtbar.</p>
-      <label class="lbl" for="haddr">Exact address · Genaue Adresse</label>
-      <input type="text" id="haddr" maxlength="200" placeholder="e.g. Domplatz 1, 99084 Erfurt" value="${esc(H.addr||"")}" oninput="H.addr=this.value">
-      <label class="lbl" for="hdirs">How to find us (optional) · So findet ihr uns</label>
-      <input type="text" id="hdirs" maxlength="200" placeholder="e.g. Table by the window, look for the 🇩🇪🇪🇸 flag" value="${esc(H.dirs||"")}" oninput="H.dirs=this.value">
-      <p class="note" style="margin:6px 0 10px">🔒 Only people who joined see the address and directions. · Nur Teilnehmende.</p>
+      <label class="lbl" for="hcity">${tr("City","Stadt","Ciudad")}</label>
+      <input type="text" id="hcity" maxlength="80" placeholder="${tr("e.g. Erfurt","z. B. Erfurt","p. ej. Erfurt")}" value="${esc(H.city||"")}" oninput="H.city=this.value">
+      <label class="lbl" for="hplace">${tr("Place","Ort","Lugar")}</label>
+      <input type="text" id="hplace" maxlength="100" placeholder="${tr("e.g. Café Wildfang","z. B. Café Wildfang","p. ej. Café Wildfang")}" value="${esc(H.place||"")}" oninput="H.place=this.value;H.cafe=null">
+      <div class="row" style="margin-top:6px"><button class="chip" onclick="hPickCafe()">☕ ${tr("Pick from Language cafés","Aus Sprachcafés wählen","Elegir de los cafés de idiomas")}</button></div>
+      <label class="lbl" for="harea">${tr("Area (optional)","Viertel (optional)","Zona (opcional)")}</label>
+      <input type="text" id="harea" maxlength="80" placeholder="${tr("e.g. Altstadt","z. B. Altstadt","p. ej. Altstadt")}" value="${esc(H.area||"")}" oninput="H.area=this.value">
+      <p class="note" style="margin:6px 0 0">👀 ${tr("Everyone sees city, place and area.","Stadt, Ort und Viertel sind für alle sichtbar.","Todos ven la ciudad, el lugar y la zona.")}</p>
+      <label class="lbl" for="haddr">${tr("Exact address","Genaue Adresse","Dirección exacta")}</label>
+      <input type="text" id="haddr" maxlength="200" placeholder="${tr("e.g. Domplatz 1, 99084 Erfurt","z. B. Domplatz 1, 99084 Erfurt","p. ej. Domplatz 1, 99084 Erfurt")}" value="${esc(H.addr||"")}" oninput="H.addr=this.value">
+      <label class="lbl" for="hdirs">${tr("How to find us (optional)","So findet ihr uns (optional)","Cómo encontrarnos (opcional)")}</label>
+      <input type="text" id="hdirs" maxlength="200" placeholder="${tr("e.g. Table by the window, look for the 🇩🇪🇪🇸 flag","z. B. Tisch am Fenster, achtet auf die 🇩🇪🇪🇸 Flagge","p. ej. Mesa junto a la ventana, busca la bandera 🇩🇪🇪🇸")}" value="${esc(H.dirs||"")}" oninput="H.dirs=this.value">
+      <p class="note" style="margin:6px 0 10px">🔒 ${tr("Only people who joined see the address and directions.","Nur Teilnehmende sehen Adresse und Wegbeschreibung.","Solo quienes se apuntaron ven la dirección y las indicaciones.")}</p>
       <label style="display:flex;gap:10px;align-items:flex-start;cursor:pointer">
         <input type="checkbox" ${H.pub?"checked":""} onchange="H.pub=this.checked" style="width:22px;height:22px;margin-top:2px;flex-shrink:0">
-        <span><b>It's a public place</b> (café, library, bar…), not a private home.<br><span class="de">Öffentlicher Ort, keine Privatwohnung.</span></span></label>
+        <span>${tr("<b>It's a public place</b> (café, library, bar…), not a private home.","<b>Es ist ein öffentlicher Ort</b> (Café, Bibliothek, Bar…), keine Privatwohnung.","<b>Es un lugar público</b> (café, biblioteca, bar…), no una casa particular.")}</span></label>
     </div>`:""}
-    <label class="lbl">Type · Art</label>
-    <div class="row">${chip(H.type==="conversation","hSet('type','conversation')","💬 Free conversation")}${chip(H.type==="game","hSet('type','game')","🎲 PonteTalk game")}</div>
+    <label class="lbl">${tr("Type","Art","Tipo")}</label>
+    <div class="row">${chip(H.type==="conversation","hSet('type','conversation')","💬 "+tr("Free conversation","Freies Gespräch","Conversación libre"))}${chip(H.type==="game","hSet('type','game')","🎲 "+tr("PonteTalk game","PonteTalk-Spiel","Juego de PonteTalk"))}</div>
     ${H.type==="game"
-      ? `<label class="lbl">Game · Spiel</label><div class="row">${GAMES_BOARD.map(g=>chip(H.game===g[0],`hSet('game','${g[0]}')`,`${g[1]} ${g[2]}`)).join("")}</div>
-         <p class="note">${H.game==="charades"?"🎥 Acting on camera: everyone needs a video call (Zoom, WhatsApp…). · Alle brauchen einen Videoanruf.<br>":""}Everyone who joins gets into the game room. · Alle Teilnehmenden kommen in den Spielraum.</p>`
-      : `<p class="note">Open chat on any topic, with starter questions. · Freies Gespräch mit Einstiegsfragen.</p>`}
-    <label class="lbl" for="htitle">Title · Titel</label>
+      ? `<label class="lbl">${tr("Game","Spiel","Juego")}</label><div class="row">${GAMES_BOARD.map(g=>chip(H.game===g[0],`hSet('game','${g[0]}')`,`${g[1]} ${g[2]}`)).join("")}</div>
+         <p class="note">${H.game==="charades"?"🎥 "+tr("Acting on camera: everyone needs a video call (Zoom, WhatsApp…).","Vor der Kamera spielen: Alle brauchen einen Videoanruf (Zoom, WhatsApp…).","Se actúa ante la cámara: todos necesitan una videollamada (Zoom, WhatsApp…).")+"<br>":""}${tr("Everyone who joins gets into the game room.","Alle Teilnehmenden kommen in den Spielraum.","Todos los que se apunten entran a la sala de juego.")}</p>`
+      : `<p class="note">${tr("Open chat on any topic, with starter questions.","Freies Gespräch zu jedem Thema, mit Einstiegsfragen.","Charla abierta sobre cualquier tema, con preguntas para empezar.")}</p>`}
+    <label class="lbl" for="htitle">${tr("Title","Titel","Título")}</label>
     <input type="text" id="htitle" maxlength="80" placeholder="${esc(hDefaultTitle())}" value="${esc(H.title)}" oninput="H.title=this.value">
   </div>
   <div class="card">
-    <label class="lbl">Main language · Hauptsprache</label>
-    <div class="row">${XLANGS.map(k=>chip(H.a===k,`hSet('a','${k}')`,`${T[k].flag} ${esc(T[k].nameEn)}`)).join("")}</div>
-    <label class="lbl">Exchanged with (optional) · Getauscht mit (optional)</label>
-    <div class="row">${chip(!H.b,"hSet('b','')","– None")}${XLANGS.filter(k=>k!==H.a).map(k=>chip(H.b===k,`hSet('b','${k}')`,`${T[k].flag} ${esc(T[k].nameEn)}`)).join("")}</div>
-    <label class="lbl">Level from · Niveau von</label>
+    <label class="lbl">${tr("Main language","Hauptsprache","Idioma principal")}</label>
+    <div class="row">${XLANGS.map(k=>chip(H.a===k,`hSet('a','${k}')`,`${T[k].flag} ${esc(LN(k))}`)).join("")}</div>
+    <label class="lbl">${tr("Exchanged with (optional)","Getauscht mit (optional)","Intercambiado con (opcional)")}</label>
+    <div class="row">${chip(!H.b,"hSet('b','')","– "+tr("None","Keine","Ninguno"))}${XLANGS.filter(k=>k!==H.a).map(k=>chip(H.b===k,`hSet('b','${k}')`,`${T[k].flag} ${esc(LN(k))}`)).join("")}</div>
+    <label class="lbl">${tr("Level from","Niveau von","Nivel desde")}</label>
     <div class="row">${RANKS.map((r,i)=>chip(H.min===i,`hSet('min',${i})`,r)).join("")}</div>
-    <label class="lbl">Level to · bis</label>
+    <label class="lbl">${tr("Level to","bis","hasta")}</label>
     <div class="row">${RANKS.map((r,i)=>chip(H.max===i,`hSet('max',${i})`,r)).join("")}</div>
   </div>
   <div class="card">
-    <label class="lbl" for="hdate">Date · Datum</label>
+    <label class="lbl" for="hdate">${tr("Date","Datum","Fecha")}</label>
     <input type="date" id="hdate" class="xsel" value="${esc(H.date)}" oninput="H.date=this.value">
-    <label class="lbl" for="htime">Start time (your time: ${esc(detectTz())}) · Uhrzeit</label>
+    <label class="lbl" for="htime">${tr(`Start time (your time: ${esc(detectTz())})`,`Uhrzeit (deine Zeit: ${esc(detectTz())})`,`Hora de inicio (tu hora: ${esc(detectTz())})`)}</label>
     <input type="time" id="htime" class="xsel" value="${esc(H.time)}" oninput="H.time=this.value">
-    <label class="lbl">Length · Dauer</label>
+    <label class="lbl">${tr("Length","Dauer","Duración")}</label>
     <div class="row">${[30,45,60,90].map(m=>chip(H.dur===m,`hSet('dur',${m})`,m+" min")).join("")}</div>
-    ${H.b ? `<label class="lbl">How should seats work? · Plätze</label>
-      <div class="row">${chip(!H.bal,"hSet('bal',false)","👥 Any mix")}${chip(!!H.bal,"hSet('bal',true)","⚖️ Balanced exchange")}</div>
-      ${H.bal?(()=>{ const hs=hHostSide(), hl=hs?T[hs==="sa"?H.a:H.b]:null;
-        return `<p class="note" style="margin:6px 0 0">People per language: those who speak it natively or fluently${hs?", <b>you included</b>":""}. · Personen pro Sprache${hs?", du zählst mit":""}.</p>
-        ${[["sa",H.a],["sb",H.b]].map(([k,l])=>`<div class="stepper2"><button aria-label="Fewer" onclick="hSide('${k}',-1)" ${H[k]<=1?"disabled":""}>−</button><b>${H[k]}</b>
-          <button aria-label="More" onclick="hSide('${k}',1)" ${H.sa+H.sb>=H_MAX_SIDES?"disabled":""}>+</button><span>${T[l]?`${T[l].flag} ${esc(T[l].nameEn)}`:l} speakers${hs===k?" (incl. you)":""}</span></div>`).join("")}
+    ${H.b ? `<label class="lbl">${tr("How should seats work?","Wie sollen die Plätze funktionieren?","¿Cómo funcionan las plazas?")}</label>
+      <div class="row">${chip(!H.bal,"hSet('bal',false)","👥 "+tr("Any mix","Beliebig gemischt","Cualquier mezcla"))}${chip(!!H.bal,"hSet('bal',true)","⚖️ "+tr("Balanced exchange","Ausgewogener Austausch","Intercambio equilibrado"))}</div>
+      ${H.bal?(()=>{ const hs=hHostSide(), other=hs==="sa"?"sb":"sa";
+        return `<p class="note" style="margin:6px 0 0">${tr(`People per language: those who speak it natively or fluently${hs?", <b>you included</b>":""}.`,`Personen pro Sprache: wer sie als Mutter- oder fließende Sprache spricht${hs?", <b>du zählst mit</b>":""}.`,`Personas por idioma: quienes lo hablan como nativos o con fluidez${hs?", <b>tú incluido/a</b>":""}.`)}</p>
+        ${[["sa",H.a],["sb",H.b]].map(([k,l])=>`<div class="stepper2"><button aria-label="−" onclick="hSide('${k}',-1)" ${H[k]<=1?"disabled":""}>−</button><b>${H[k]}</b>
+          <button aria-label="+" onclick="hSide('${k}',1)" ${H.sa+H.sb>=H_MAX_SIDES?"disabled":""}>+</button><span>${T[l]?T[l].flag+" ":""}${spk(l,H[k])}${hs===k?" ("+tr("incl. you","inkl. dir","contigo")+")":""}</span></div>`).join("")}
         <p class="note" style="margin:2px 0 0">${hs
-          ? `${H.sa+H.sb} people incl. you → ${H[hs]-1} more ${esc(hl?hl.nameEn:"")} speaker${H[hs]-1===1?"":"s"} + ${H[hs==="sa"?"sb":"sa"]} ${esc((T[hs==="sa"?H.b:H.a]||{}).nameEn||"")} speaker${H[hs==="sa"?"sb":"sa"]===1?"":"s"} can join (max 16)`
-          : `Total: ${H.sa+H.sb} seats (max 16). You don't count on a side, because your exchange profile doesn't list ${esc((T[H.a]||{}).nameEn||"")} or ${esc((T[H.b]||{}).nameEn||"")} as native/fluent.`}</p>${hPairTip(H.sa+H.sb+(hs?0:1))}`; })():""}` : ""}
-    ${H.b && H.bal ? "" : `<label class="lbl">Seats (people besides you) · Plätze</label>
-    <div class="stepper2"><button aria-label="Fewer" onclick="hSeats(-1)" ${H.seats<=Math.max(1,H.editId?(H.editTaken||0):1)?"disabled":""}>−</button><b>${H.seats}</b>
-      <button aria-label="More" onclick="hSeats(1)" ${H.seats>=H_MAX_GUESTS?"disabled":""}>+</button><span>${H.seats===1?"one-to-one":`${H.seats+1} people incl. you`} · max ${H_MAX_GUESTS}</span></div>
-    <div class="row" style="margin-top:6px">${[1,3,5,7,11,15].map(n=>H.editId&&n<(H.editTaken||0)?"":chip(H.seats===n,`hSet('seats',${n})`,n===1?"1 · one-to-one":`${n} → ${(n+1)/2} pairs`)).join("")}</div>
+          ? tr(`${H.sa+H.sb} people incl. you → ${H[hs]-1} more ${spk(hs==="sa"?H.a:H.b,H[hs]-1)} + ${H[other]} ${spk(hs==="sa"?H.b:H.a,H[other])} can join (max 16)`,`${H.sa+H.sb} Personen inkl. dir → noch ${H[hs]-1} ${spk(hs==="sa"?H.a:H.b,H[hs]-1)} + ${H[other]} ${spk(hs==="sa"?H.b:H.a,H[other])} können beitreten (max. 16)`,`${H.sa+H.sb} personas contigo → pueden unirse ${H[hs]-1} ${spk(hs==="sa"?H.a:H.b,H[hs]-1)} más + ${H[other]} ${spk(hs==="sa"?H.b:H.a,H[other])} (máx. 16)`)
+          : tr(`Total: ${H.sa+H.sb} seats (max 16). You don't count on a side, because your exchange profile doesn't list ${esc(LN(H.a))} or ${esc(LN(H.b))} as native/fluent.`,`Gesamt: ${H.sa+H.sb} Plätze (max. 16). Du zählst auf keiner Seite, weil dein Tandem-Profil ${esc(LN(H.a))} oder ${esc(LN(H.b))} nicht als Mutter- oder fließende Sprache hat.`,`Total: ${H.sa+H.sb} plazas (máx. 16). No cuentas en ningún lado porque tu perfil no incluye ${esc(LN(H.a))} ni ${esc(LN(H.b))} como nativo o fluido.`)}</p>${hPairTip(H.sa+H.sb+(hs?0:1))}`; })():""}` : ""}
+    ${H.b && H.bal ? "" : `<label class="lbl">${tr("Seats (people besides you)","Plätze (Personen außer dir)","Plazas (personas además de ti)")}</label>
+    <div class="stepper2"><button aria-label="−" onclick="hSeats(-1)" ${H.seats<=Math.max(1,H.editId?(H.editTaken||0):1)?"disabled":""}>−</button><b>${H.seats}</b>
+      <button aria-label="+" onclick="hSeats(1)" ${H.seats>=H_MAX_GUESTS?"disabled":""}>+</button><span>${H.seats===1?tr("one-to-one","eins zu eins","uno a uno"):tr(`${H.seats+1} people incl. you`,`${H.seats+1} Personen inkl. dir`,`${H.seats+1} personas contigo`)} · max ${H_MAX_GUESTS}</span></div>
+    <div class="row" style="margin-top:6px">${[1,3,5,7,11,15].map(n=>H.editId&&n<(H.editTaken||0)?"":chip(H.seats===n,`hSet('seats',${n})`,n===1?"1 · "+tr("one-to-one","eins zu eins","uno a uno"):`${n} → ${(n+1)/2} ${tr("pairs","Paare","parejas")}`)).join("")}</div>
     ${hPairTip(H.seats+1)}`}
-    <label class="lbl">Who can see it · Wer kann sie sehen</label>
-    <div class="row">${chip((H.vis||"public")==="public","hSet('vis','public')","🌍 Everyone on PonteTalk")}${chip(H.vis==="private","hSet('vis','private')","🔒 Private: only people I invite")}</div>
-    ${H.vis==="private"?`<div class="pvbox"><p class="note" style="margin:0">🔒 It won't appear in the session list or suggestions. After posting, tap <b>🔗 Share invite link</b> and send it to your student or friends. Only people with the link can see and join it.<br><span class="de">Erscheint nicht in der Liste. Teile den Einladungslink.</span></p>
-      <p class="note" style="margin:6px 0 0">💡 Teaching one student? Set <b>1 seat</b>, or choose <b>"I approve each person"</b> below, so nobody else can get in if the link is forwarded.</p></div>`:""}
-    <label class="lbl">Who can join · Wer kann teilnehmen</label>
-    <div class="row">${chip(H.mode==="instant","hSet('mode','instant')","⚡ Anyone, instantly")}${chip(H.mode==="approval","hSet('mode','approval')","✋ I approve each person")}</div>
+    <label class="lbl">${tr("Who can see it","Wer kann sie sehen","Quién puede verla")}</label>
+    <div class="row">${chip((H.vis||"public")==="public","hSet('vis','public')","🌍 "+tr("Everyone on PonteTalk","Alle auf PonteTalk","Todos en PonteTalk"))}${chip(H.vis==="private","hSet('vis','private')","🔒 "+tr("Private: only people I invite","Privat: nur Eingeladene","Privada: solo quien yo invite"))}</div>
+    ${H.vis==="private"?`<div class="pvbox"><p class="note" style="margin:0">🔒 ${tr("It won't appear in the session list or suggestions. After posting, tap <b>🔗 Share invite link</b> and send it to your student or friends. Only people with the link can see and join it.","Sie erscheint nicht in der Liste oder in Vorschlägen. Tippe nach dem Veröffentlichen auf <b>🔗 Einladungslink teilen</b>. Nur wer den Link hat, kann sie sehen und beitreten.","No aparecerá en la lista ni en las sugerencias. Después de publicarla, toca <b>🔗 Compartir enlace</b> y envíalo a tu alumno o amigos. Solo quien tenga el enlace podrá verla y unirse.")}</p>
+      <p class="note" style="margin:6px 0 0">💡 ${tr(`Teaching one student? Set <b>1 seat</b>, or choose <b>"I approve each person"</b> below, so nobody else can get in if the link is forwarded.`,`Unterrichtest du eine Person? Stell <b>1 Platz</b> ein oder wähle unten <b>„Ich bestätige jede Person“</b>, damit niemand sonst reinkommt, falls der Link weitergeleitet wird.`,`¿Das clase a una persona? Pon <b>1 plaza</b> o elige <b>“Yo apruebo a cada persona”</b> abajo, para que nadie más entre si reenvían el enlace.`)}</p></div>`:""}
+    <label class="lbl">${tr("Who can join","Wer kann teilnehmen","Quién puede unirse")}</label>
+    <div class="row">${chip(H.mode==="instant","hSet('mode','instant')","⚡ "+tr("Anyone, instantly","Alle, sofort","Cualquiera, al instante"))}${chip(H.mode==="approval","hSet('mode','approval')","✋ "+tr("I approve each person","Ich bestätige jede Person","Yo apruebo a cada persona"))}</div>
   </div>
   <div class="card">
-    <label class="lbl">Topics (up to 3) · Themen (bis zu 3)</label>
-    <div class="row">${INTERESTS.map(([k,e,en])=>chip(H.topics.includes(k),`hTopic('${k}')`,`${e} ${esc(en)}`)).join("")}</div>
-    <label class="lbl" for="hnote">Note (optional) · Notiz (optional)</label>
-    <input type="text" id="hnote" maxlength="200" placeholder="e.g. Beginners welcome! · Anfänger willkommen!" value="${esc(H.note)}" oninput="H.note=this.value">
-    ${H.fmt==="in_person"?"":`<label class="lbl" for="hvideo">🎥 Video call link (optional) · Videoanruf-Link</label>
-    <input type="text" id="hvideo" inputmode="url" autocomplete="off" maxlength="500" placeholder="Paste a Zoom, Meet, WhatsApp or Teams link" value="${esc(H.video||"")}" oninput="H.video=this.value">
+    <label class="lbl">${tr("Topics (up to 3)","Themen (bis zu 3)","Temas (hasta 3)")}</label>
+    <div class="row">${INTERESTS.map(it=>chip(H.topics.includes(it[0]),`hTopic('${it[0]}')`,`${it[1]} ${esc(intName(it))}`)).join("")}</div>
+    <label class="lbl" for="hnote">${tr("Note (optional)","Notiz (optional)","Nota (opcional)")}</label>
+    <input type="text" id="hnote" maxlength="200" placeholder="${tr("e.g. Beginners welcome!","z. B. Anfänger willkommen!","p. ej. ¡Principiantes bienvenidos!")}" value="${esc(H.note)}" oninput="H.note=this.value">
+    ${H.fmt==="in_person"?"":`<label class="lbl" for="hvideo">🎥 ${tr("Video call link (optional)","Videoanruf-Link (optional)","Enlace de videollamada (opcional)")}</label>
+    <input type="text" id="hvideo" inputmode="url" autocomplete="off" maxlength="500" placeholder="${tr("Paste a Zoom, Meet, WhatsApp or Teams link","Zoom-, Meet-, WhatsApp- oder Teams-Link einfügen","Pega un enlace de Zoom, Meet, WhatsApp o Teams")}" value="${esc(H.video||"")}" oninput="H.video=this.value">
     <div class="vbox">
       <div class="row" style="margin:0">
-        <button class="chip" onclick="hJitsi()">✨ Create a free video room for me</button>
-        ${H.video?`<button class="chip" onclick="H.video='';xr()">✕ Remove link</button>`:""}
+        <button class="chip" onclick="hJitsi()">✨ ${tr("Create a free video room for me","Kostenlosen Videoraum erstellen","Crear una sala de vídeo gratis")}</button>
+        ${H.video?`<button class="chip" onclick="H.video='';xr()">✕ ${tr("Remove link","Link entfernen","Quitar enlace")}</button>`:""}
       </div>
-      <p class="note" style="margin:8px 0 0">🔒 Only people who joined see the link. It's also in their reminder emails and calendar file. · Nur Teilnehmende sehen den Link.</p>
-      ${vProvider(H.video)==="jitsi"?`<p class="note" style="margin:6px 0 0">Jitsi is free and people join without an account. As the host, you sign in once (Google or GitHub) to start the room. Free rooms last up to 95 minutes. · Jitsi ist kostenlos; als Host meldest du dich kurz an. Räume laufen bis zu 95 Minuten.</p>`:""}
+      <p class="note" style="margin:8px 0 0">🔒 ${tr("Only people who joined see the link. It's also in their reminder emails and calendar file.","Nur Teilnehmende sehen den Link. Er steht auch in Erinnerungs-E-Mails und im Kalendereintrag.","Solo quienes se apuntaron ven el enlace. También va en los correos de recordatorio y en el archivo de calendario.")}</p>
+      ${vProvider(H.video)==="jitsi"?`<p class="note" style="margin:6px 0 0">${tr("Jitsi is free and people join without an account. As the host, you sign in once (Google or GitHub) to start the room. Free rooms last up to 95 minutes.","Jitsi ist kostenlos, Teilnehmende brauchen kein Konto. Als Host meldest du dich einmal an (Google oder GitHub), um den Raum zu starten. Räume laufen bis zu 95 Minuten.","Jitsi es gratis y la gente entra sin cuenta. Como anfitrión, inicias sesión una vez (Google o GitHub) para abrir la sala. Las salas gratis duran hasta 95 minutos.")}</p>`:""}
     </div>
     `}
-    <label class="lbl">📎 Materials (optional) · Materialien</label>
+    <label class="lbl">📎 ${tr("Materials (optional)","Materialien (optional)","Materiales (opcional)")}</label>
     ${(H.mats||[]).map((m,i)=>`<div class="mrow">
       ${m.shop_item ? `<div class="mshop">🛍 ${esc(m.label)} <span class="note" style="margin:0">· PonteShop</span></div>`
-        : `<input type="text" maxlength="60" placeholder="Label, e.g. Vocabulary list" value="${esc(m.label||"")}" oninput="H.mats[${i}].label=this.value" aria-label="Material ${i+1} label">
-           <input type="text" inputmode="url" maxlength="500" placeholder="https://docs.google.com/…" value="${esc(m.url||"")}" oninput="H.mats[${i}].url=this.value" aria-label="Material ${i+1} link">`}
-      <button class="chip mx" aria-label="Remove material ${i+1}" onclick="hMatDel(${i})">✕</button></div>`).join("")}
-    ${(H.mats||[]).length<3?`<div class="row" style="margin-top:8px"><button class="chip" onclick="hMatAdd()">＋ Add a link</button><button class="chip" onclick="hMatShop()">🛍 Pick from PonteShop</button></div>`:""}
-    <p class="note" style="margin:6px 0 0">Up to 3. Only people who joined see them. Tip: set Google Docs to <b>"Viewer"</b> before sharing, so nobody can change your file. · Nur Teilnehmende sehen sie.</p>
+        : `<input type="text" maxlength="60" placeholder="${tr("Label, e.g. Vocabulary list","Name, z. B. Vokabelliste","Nombre, p. ej. Lista de vocabulario")}" value="${esc(m.label||"")}" oninput="H.mats[${i}].label=this.value" aria-label="${i+1}">
+           <input type="text" inputmode="url" maxlength="500" placeholder="https://docs.google.com/…" value="${esc(m.url||"")}" oninput="H.mats[${i}].url=this.value" aria-label="${i+1} link">`}
+      <button class="chip mx" aria-label="✕ ${i+1}" onclick="hMatDel(${i})">✕</button></div>`).join("")}
+    ${(H.mats||[]).length<3?`<div class="row" style="margin-top:8px"><button class="chip" onclick="hMatAdd()">＋ ${tr("Add a link","Link hinzufügen","Añadir un enlace")}</button><button class="chip" onclick="hMatShop()">🛍 ${tr("Pick from PonteShop","Aus PonteShop wählen","Elegir de PonteShop")}</button></div>`:""}
+    <p class="note" style="margin:6px 0 0">${tr(`Up to 3. Only people who joined see them. Tip: set Google Docs to <b>"Viewer"</b> before sharing, so nobody can change your file.`,`Bis zu 3. Nur Teilnehmende sehen sie. Tipp: Stell Google Docs vor dem Teilen auf <b>„Betrachter“</b>, damit niemand deine Datei ändert.`,`Hasta 3. Solo quienes se apuntaron los ven. Consejo: pon Google Docs en <b>“Lector”</b> antes de compartir, para que nadie cambie tu archivo.`)}</p>
     ${H.dupFrom?`<label style="display:flex;gap:10px;align-items:flex-start;margin-top:14px;padding:12px;border-radius:14px;background:var(--teal-soft);cursor:pointer">
       <input type="checkbox" ${H.inviteAgain?"checked":""} onchange="H.inviteAgain=this.checked" style="width:22px;height:22px;margin-top:2px;flex-shrink:0">
-      <span><b>👥 Invite the same people again</b><br><span class="note" style="margin:0">Everyone from “${esc(H.dupTitle||"")}” gets an invite to accept. · Alle von damals werden eingeladen.</span></span></label>`:""}
+      <span><b>👥 ${tr("Invite the same people again","Dieselben Leute wieder einladen","Invitar otra vez a las mismas personas")}</b><br><span class="note" style="margin:0">${tr(`Everyone from “${esc(H.dupTitle||"")}” gets an invite to accept.`,`Alle von „${esc(H.dupTitle||"")}“ bekommen eine Einladung.`,`Todos los de “${esc(H.dupTitle||"")}” recibirán una invitación.`)}</span></span></label>`:""}
     ${H.err?`<div class="err">${esc(H.err)}</div>`:""}
-    <button class="btn primary" onclick="hPost()" ${H.busy?"disabled":""}>${H.busy?"Saving… · Speichert…":H.editId?"💾 Save changes · Speichern":H.dupFrom?"⧉ Post the copy · Kopie veröffentlichen":"📣 Post session · Veröffentlichen"}</button>
-    ${H.editId||H.dupFrom?`<button class="btn ghost" onclick="hCancelEdit()">Cancel · Abbrechen</button>`:""}
+    <button class="btn primary" onclick="hPost()" ${H.busy?"disabled":""}>${H.busy?tr("Saving…","Speichert…","Guardando…"):H.editId?"💾 "+tr("Save changes","Speichern","Guardar cambios"):H.dupFrom?"⧉ "+tr("Post the copy","Kopie veröffentlichen","Publicar la copia"):"📣 "+tr("Post session","Veröffentlichen","Publicar sesión")}</button>
+    ${H.editId||H.dupFrom?`<button class="btn ghost" onclick="hCancelEdit()">${tr("Cancel","Abbrechen","Cancelar")}</button>`:""}
   </div>`;
 };
 
@@ -6758,7 +6762,7 @@ function rPrompt(s){
 async function rAct(fn,id){ await bAct(fn,id); R.at=0; rLoad(); }
 async function rHide(id){
   try{ const { error } = await A.sb.rpc("pt_hide_session",{ p_activity:id }); if(error) throw error;
-    R.list=(R.list||[]).filter(x=>x.activity_id!==id); bToast("Hidden. We won't show it again · Ausgeblendet"); xr();
+    R.list=(R.list||[]).filter(x=>x.activity_id!==id); bToast(tr("Hidden. We won't show it again","Ausgeblendet. Wir zeigen sie nicht mehr","Oculta. No la volveremos a mostrar")); xr();
   }catch(e){ bToast(bErr(e)); }
 }
 async function rShare(id){
@@ -6766,7 +6770,7 @@ async function rShare(id){
   const url=(location.protocol.startsWith("http")?location.origin:"https://pontetalk.setzio.com")+"/?board";
   const text=`${s.title} · ${fmtWhen(s.starts_at)} on PonteTalk`;
   try{ if(navigator.share){ await navigator.share({ title:"PonteTalk", text, url }); return; } }catch(e){ return; }
-  try{ await navigator.clipboard.writeText(text+" "+url); bToast("Link copied · Link kopiert 📋"); }catch(e){ bToast(url); }
+  try{ await navigator.clipboard.writeText(text+" "+url); bToast(tr("Link copied 📋","Link kopiert 📋","Enlace copiado 📋")); }catch(e){ bToast(url); }
 }
 function rCard(s){
   const id=s.activity_id, g=s.type==="game"?GAMES_BOARD.find(x=>x[0]===s.game):null;
@@ -7152,8 +7156,8 @@ function shLink(id){ return (location.protocol.startsWith("http")?location.origi
 async function shShare(id){
   const it=(SH.list||[]).concat(SH.one?[SH.one]:[]).find(x=>x.id===id), url=shLink(id), text=it?`${it.title} · PonteTalk`:"PonteTalk resource";
   try{ if(navigator.share){ await navigator.share({ title:"PonteTalk", text, url }); return; } }catch(e){ if(e && e.name==="AbortError") return; }
-  try{ await navigator.clipboard.writeText(url); bToast("🔗 Link copied. Send it to your students · Link kopiert"); }
-  catch(e){ window.prompt("Copy this link · Link kopieren:", url); }
+  try{ await navigator.clipboard.writeText(url); bToast(tr("🔗 Link copied. Send it to your students","🔗 Link kopiert. Schick ihn deinen Lernenden","🔗 Enlace copiado. Envíalo a tus alumnos")); }
+  catch(e){ window.prompt(tr("Copy this link:","Link kopieren:","Copia este enlace:"), url); }
 }
 async function shReview(id, ok){
   const { error } = await A.sb.rpc("pt_shop_review",{ p_id:id, p_approve:ok });
@@ -7411,7 +7415,7 @@ function addToCal(id){
   const blob=new Blob([icsFor(s)],{type:"text/calendar"}), a=document.createElement("a");
   a.href=URL.createObjectURL(blob); a.download="pontetalk-session.ics"; document.body.appendChild(a); a.click();
   setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },1000);
-  bToast("📅 Calendar file downloaded. Open it to add the session · Kalenderdatei geladen");
+  bToast(tr("📅 Calendar file downloaded. Open it to add the session","📅 Kalenderdatei geladen. Öffne sie, um die Session einzutragen","📅 Archivo de calendario descargado. Ábrelo para añadir la sesión"));
 }
 function nextCard(){
   const s=nextSession();
@@ -7617,8 +7621,8 @@ async function sShare(id){
   const text = s && s.visibility==="private" ? `You're invited to my private PonteTalk session "${s.title}" · ${fmtWhen(s.starts_at)} (${detectTz().split("/").pop().replace(/_/g," ")} time)`
     : s ? `${s.is_host?"Join my":"Join"} ${s.title} on PonteTalk · ${fmtWhen(s.starts_at)} (${detectTz().split("/").pop().replace(/_/g," ")} time)` : "Join this session on PonteTalk";
   try{ if(navigator.share){ await navigator.share({ title:"PonteTalk", text, url }); return; } }catch(e){ if(e && e.name==="AbortError") return; }
-  try{ await navigator.clipboard.writeText(`${text}\n${url}`); bToast("🔗 Link copied. Paste it in WhatsApp, email… · Link kopiert"); }
-  catch(e){ window.prompt("Copy this link · Link kopieren:", url); }
+  try{ await navigator.clipboard.writeText(`${text}\n${url}`); bToast(tr("🔗 Link copied. Paste it in WhatsApp, email…","🔗 Link kopiert. Füg ihn in WhatsApp, E-Mail… ein","🔗 Enlace copiado. Pégalo en WhatsApp, correo…")); }
+  catch(e){ window.prompt(tr("Copy this link:","Link kopieren:","Copia este enlace:"), url); }
 }
 function sOpen(id){ if(!id) return bOpen(); S.sid=id; go("session"); bLoad(); }
 VIEWS.session = function(){
@@ -7817,7 +7821,7 @@ async function nbClear(id){
   try{ await A.sb.rpc("pt_clear_notifications",{ p_id:id }); }catch(e){}
 }
 async function nbClearAll(){
-  if(!window.confirm("Clear all notifications? · Alle Benachrichtigungen entfernen?")) return;
+  if(!window.confirm(tr("Clear all notifications?","Alle Benachrichtigungen entfernen?","¿Borrar todas las notificaciones?"))) return;
   NB.list=[]; NB.unread=0; nbRefreshPanel();
   try{ await A.sb.rpc("pt_clear_notifications",{ p_id:null }); }catch(e){}
 }
@@ -8247,7 +8251,7 @@ AFTER.examq = function(){
   const r=EX.run; if(!r||r.mode!=="mock"||r.timer) return;
   r.timer=setInterval(()=>{ if(S.screen!=="examq"||EX.run!==r){ clearInterval(r.timer); return; }
     const left=r.end-Date.now(); const el=document.getElementById("exclock"); if(el) el.textContent=exClock(left);
-    if(left<=0){ clearInterval(r.timer); bToast("Time's up! · Die Zeit ist um!"); exFinish(true); } },1000);
+    if(left<=0){ clearInterval(r.timer); bToast(tr("Time's up!","Die Zeit ist um!","¡Se acabó el tiempo!")); exFinish(true); } },1000);
 };
 function exPick(k){
   const r=EX.run, q=r.list[r.i];
@@ -8258,7 +8262,7 @@ function exGo(i){ exHush(); const r=EX.run; if(!r) return; r.i=Math.max(0,Math.m
 function exQuit(){
   exHush(); const r=EX.run; if(!r) return go("exam");
   const n=Object.keys(r.picks).length;
-  if(r.mode==="mock"&&n&&!window.confirm("End the test without a result? · Test ohne Ergebnis beenden?")) return;
+  if(r.mode==="mock"&&n&&!window.confirm(tr("End the test without a result?","Test ohne Ergebnis beenden?","¿Terminar el test sin resultado?"))) return;
   if(r.mode==="practice"&&n){ exFinish(); return; }
   if(r.timer) clearInterval(r.timer); EX.run=null; go("exam");
 }
@@ -8364,7 +8368,7 @@ function dtPlayUi(){ document.querySelectorAll("[data-dtplay]").forEach(b=>{ con
 function dtPlay(key){
   const x=DT.items.find(y=>y.akey===key); if(!x) return;
   if(DT.playing===key){ dtStop(); return; }
-  const r=DT.run; if(r&&r.mode==="mock"){ const n=r.plays[key]||0; if(n>=2){ bToast("You can listen twice in the mock test · Nur zweimal hören"); return; } r.plays[key]=n+1; }
+  const r=DT.run; if(r&&r.mode==="mock"){ const n=r.plays[key]||0; if(n>=2){ bToast(tr("You can listen twice in the mock test","Im Probetest darfst du zweimal hören","En el simulacro puedes escuchar dos veces")); return; } r.plays[key]=n+1; }
   if(dtHasClip(key)){
     dtStop(); const id=key.split("-").pop(), a=new Audio(dtClipUrl(id, DT.man.clips[id]));
     a.playbackRate=(r&&r.mode==="mock")||!DT.slow?1:0.8; DT_AUDIO=a; DT.playing=key; dtPlayUi();
@@ -8606,7 +8610,7 @@ AFTER.dtzq = function(){
   const r=DT.run; if(!r||r.mode!=="mock"||r.timer) return;
   r.timer=setInterval(()=>{ if(S.screen!=="dtzq"||DT.run!==r){ clearInterval(r.timer); return; }
     const left=r.end-Date.now(); const el=document.getElementById("dtclock"); if(el) el.textContent=exClock(left);
-    if(left<=0){ clearInterval(r.timer); bToast("Time's up! · Die Zeit ist um!"); dtFinish(true); } },1000);
+    if(left<=0){ clearInterval(r.timer); bToast(tr("Time's up!","Die Zeit ist um!","¡Se acabó el tiempo!")); dtFinish(true); } },1000);
 };
 function dtPick(k){
   const r=DT.run, it=r.list[r.i].it;
@@ -8617,7 +8621,7 @@ function dtGo(i){ const r=DT.run; if(!r) return; const prev=r.list[r.i]; r.i=Mat
 function dtQuit(){
   const r=DT.run; dtStop(); if(!r) return go("dtz");
   const n=Object.keys(r.picks).length;
-  if(r.mode==="mock"&&n&&!window.confirm("End the test without a result? · Test ohne Ergebnis beenden?")) return;
+  if(r.mode==="mock"&&n&&!window.confirm(tr("End the test without a result?","Test ohne Ergebnis beenden?","¿Terminar el test sin resultado?"))) return;
   if(r.mode==="practice"&&n){ dtFinish(); return; }
   if(r.timer) clearInterval(r.timer); DT.run=null; go("dtz");
 }
@@ -8739,7 +8743,7 @@ AFTER.dtzs = function(){
   const sp=DT.sp; if(!sp||sp.timer) return;
   sp.timer=setInterval(()=>{ if(S.screen!=="dtzs"||DT.sp!==sp){ clearInterval(sp.timer); return; }
     const a=document.getElementById("dtrect"); if(a&&sp.rec) a.textContent=exClock(Date.now()-sp.t0);
-    const b=document.getElementById("dtprep"); if(b){ const l=sp.prep-Date.now(); if(l<=0){ sp.prep=0; bToast("Time to speak! · Los geht's!"); xr(); } else b.textContent=exClock(l); } },500);
+    const b=document.getElementById("dtprep"); if(b){ const l=sp.prep-Date.now(); if(l<=0){ sp.prep=0; bToast(tr("Time to speak!","Los geht's, sprich!","¡A hablar!")); xr(); } else b.textContent=exClock(l); } },500);
 };
 async function dtSSave(){
   const sp=DT.sp, keys=["all","sent","long","q"], correct=keys.filter(k=>sp.checks[k]).length;
