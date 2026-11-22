@@ -215,6 +215,20 @@
   .ecbar i{display:block;height:100%;background:var(--coral)}
   .ecbadge{display:inline-block;border-radius:999px;padding:2px 8px;font-size:12px;font-weight:800;margin-left:4px}
 
+
+  /* ---- German exam practice (DTZ) ---- */
+  .dttext{white-space:pre-line;background:#F7F4EE;border-radius:14px;padding:12px 14px;font-size:15px;line-height:1.5;margin:8px 0}
+  .dttext mark{background:var(--coral-soft);color:var(--coral);font-weight:800;border-radius:6px;padding:0 4px}
+  .dtplay{display:flex;align-items:center;gap:10px;margin:8px 0}
+  .dtgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+  .dtgrid .exopt{justify-content:center;margin:0;padding:10px 6px}
+  .dtquote{border-left:4px solid var(--plum);padding:6px 12px;margin:8px 0;font-size:16px;line-height:1.45}
+  .dtteil{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin:6px 0}
+  .dtteil button{text-align:left;border:2px solid var(--line);background:#fff;border-radius:14px;padding:10px;font:700 14px 'Plus Jakarta Sans',sans-serif;color:var(--ink);cursor:pointer}
+  .dtteil small{display:block;font-weight:600;color:var(--muted);font-size:12px;margin-top:2px}
+  .dtta{width:100%;min-height:260px;border:2px solid var(--line);border-radius:14px;padding:12px;font:500 16px/1.5 'Plus Jakarta Sans',sans-serif;box-sizing:border-box}
+  .dtchk{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--line);font-size:15px}
+  .dtchk input{width:22px;height:22px;flex:none;margin-top:1px}
   /* ---- Test practice (Leben in Deutschland) ---- */
   .exopt{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;border:2px solid var(--line);background:#fff;border-radius:16px;padding:12px 14px;margin:8px 0;font:600 16px 'Plus Jakarta Sans',sans-serif;color:var(--ink);cursor:pointer}
   .exopt .k{flex:none;width:28px;height:28px;border-radius:50%;background:#F1EEE8;display:grid;place-items:center;font-weight:800;font-size:14px}
@@ -2945,7 +2959,7 @@ function saveCardOnline(){
 const GAME_ICON = { speak:"🗣️", charades:"🎭", emoji:"😀" };
 const GAME_NAME = { speak:"Speak Up", charades:"Charades", emoji:"Emoji Charades" };
 function fmtDate(iso){ try{ const d=new Date(iso); return `${String(d.getDate()).padStart(2,"0")}.${String(d.getMonth()+1).padStart(2,"0")}.${d.getFullYear()}`; }catch(e){ return ""; } }
-function acctBack(){ const r=A.ret||"home"; A.ret="home"; A.editing=false; if(r==="results" && S.players.length && S.gid) go("results"); else if(r==="lobby" && O.G) go("lobby"); else if(r==="board") bOpen(); else if(r==="session") sOpen(S.sid); else go("home"); }
+function acctBack(){ const r=A.ret||"home"; A.ret="home"; A.editing=false; if(r==="results" && S.players.length && S.gid) go("results"); else if(r==="lobby" && O.G) go("lobby"); else if(r==="board") bOpen(); else if(r==="session") sOpen(S.sid); else if(r==="exam") exOpen(); else if(r==="dtz") dtOpen(); else go("home"); }
 
 function acctStats(gs){
   if(!gs.length) return `<p class="note center" style="margin:10px 0">No games yet. Finish a game and tap <b>Save</b> on the results screen!<br><span class="de">Noch keine Spiele gespeichert.</span></p>`;
@@ -7307,6 +7321,7 @@ function quickCard(){
     <button class="btn secondary qbtn" onclick="ptOpen()">👥 Find a partner <span data-ptcount>${ptCountHtml()}</span></button>
     <button class="btn secondary qbtn" onclick="cfOpen()">☕ Find a language café</button>
     <button class="btn secondary qbtn" onclick="exOpen()">🇩🇪 Leben in Deutschland test</button>
+    <button class="btn secondary qbtn" onclick="dtOpen()">🎓 German exam A2–B1 (DTZ)</button>
     <button class="btn secondary qbtn" onclick="shOpen()">📘 Free resources</button>
     <button class="btn secondary qbtn" onclick="go('games')">${ICO.play} Play a game now</button></div>`;
 }
@@ -7605,7 +7620,7 @@ async function nbReadAll(){
 /* Data: /lid/questions.json (official BAMF catalogue), /lid/tr/<lang>.json, /lid/img/. History: sql/exam_practice.sql */
 const LID_V="2025-05-07";
 const LID_STATES=[["BW","Baden-Württemberg"],["BY","Bayern"],["BE","Berlin"],["BB","Brandenburg"],["HB","Bremen"],["HH","Hamburg"],["HE","Hessen"],["MV","Mecklenburg-Vorpommern"],["NI","Niedersachsen"],["NW","Nordrhein-Westfalen"],["RP","Rheinland-Pfalz"],["SL","Saarland"],["SN","Sachsen"],["ST","Sachsen-Anhalt"],["SH","Schleswig-Holstein"],["TH","Thüringen"]];
-const LID_LANGS=[["","Off · Aus"],["en","English"],["tr","Türkçe"],["ru","Русский"],["fr","Français"],["ar","العربية"],["uk","Українська"],["hi","हिन्दी"]];
+const LID_LANGS=[["","Off · Aus"],["en","English"],["es","Español"],["tr","Türkçe"],["ru","Русский"],["fr","Français"],["ar","العربية"],["uk","Українська"],["hi","हिन्दी"]];
 const LID_TOPICS={"History & Geography":"🏛️ History & geography · Geschichte","Law & Governance":"⚖️ Law & government · Recht","Elections":"🗳️ Elections · Wahlen","Education & Religion":"🎓 Education & religion · Bildung","Economy & Employment":"💼 Work & economy · Arbeit","Democracy & Politics":"🏛️ Democracy · Demokratie","Rights & Freedoms":"🕊️ Rights & freedoms · Grundrechte","Federal System":"🗺️ Federal system · Bundesländer","Constitution":"📜 Constitution · Grundgesetz","Assembly & Protests":"📣 Assembly · Versammlung"};
 const EX={ qs:null, tr:{}, lang:"", state:"TH", err:"", run:null, res:null, ans:[], att:[], hist:false, loading:false };
 try{ const v=JSON.parse(localStorage.getItem("pt_lid")||"{}"); if(v.state) EX.state=v.state; if(typeof v.lang==="string") EX.lang=v.lang; }catch(e){}
@@ -7700,7 +7715,8 @@ VIEWS.exam = function(){
       ${Object.entries(LID_TOPICS).map(([k,l])=>{ const qq=pool.filter(q=>q.t===k&&!q.s); if(!qq.length) return ""; const ok=qq.filter(q=>last[q.n]===true).length;
         return `<button class="btn secondary qbtn" onclick="exStart('practice','${k.replace(/'/g,"\\'")}')">${esc(l)} <span class="ecmeta">${ok}/${qq.length}</span></button>`; }).join("")}
       <button class="btn secondary qbtn" onclick="exStart('practice','__all')">🗂️ All ${pool.length} in order · Alle der Reihe nach</button></div>
-    <p class="note">Questions: official BAMF catalogue (as of 07.05.2025). Translations and explanations: open-source project “Leben in Deutschland” (MIT). PonteTalk is not an official BAMF app. · Keine offizielle BAMF-App.</p>`;
+    <button class="btn secondary qbtn" onclick="dtOpen()">🎓 German exam A2–B1 (DTZ) →</button>
+    <p class="note">Questions: official BAMF catalogue (as of 07.05.2025). Translations and explanations: open-source project “Leben in Deutschland” (MIT); Spanish by PonteTalk. PonteTalk is not an official BAMF app. · Keine offizielle BAMF-App.</p>`;
   return h;
 };
 function exHistHtml(mocks){
@@ -7784,6 +7800,320 @@ VIEWS.examr = function(){
   }
   return h;
 };
+
+/* ===================== TEST PRACTICE: German exam (DTZ A2–B1) ===================== */
+/* Original practice material in /dtz/dtz.json, modelled on the DTZ format. History: sql/exam_practice(_dtz).sql */
+const DT_V="2026-11-22";
+const DT_TEIL={ H1:"Hören 1 · Ansagen", H2:"Hören 2 · Radio", H3:"Hören 3 · Gespräche", H4:"Hören 4 · Meinungen",
+  L1:"Lesen 1 · Wegweiser", L2:"Lesen 2 · Anzeigen", L3:"Lesen 3 · Kurze Texte", L4:"Lesen 4 · Meinungen", L5:"Lesen 5 · Brief" };
+const DT={ d:null, err:"", att:[], ans:[], run:null, res:null, w:null, sp:null, slow:false, playing:null, es:false, esd:null };
+try{ DT.es=localStorage.getItem("pt_dtz_es")==="1"; }catch(e){}
+const DT_ESW={ Richtig:"Verdadero", Falsch:"Falso", Ja:"Sí", Nein:"No" };
+function dtE(){ return DT.es&&DT.esd; }
+async function dtEsLoad(){ if(DT.esd) return; try{ const r=await fetch(`/dtz/es.json?v=${DT_V}`); DT.esd=await r.json(); }catch(e){} }
+async function dtSetEs(on){ DT.es=on; try{ localStorage.setItem("pt_dtz_es", on?"1":"0"); }catch(e){} if(on) await dtEsLoad(); xr(); }
+function dtEsLine(t){ return t?`<span class="extr" lang="es">${esc(t)}</span>`:""; }
+function dtLevel(n){ return n>=33?"B1":n>=20?"A2":"–"; }
+async function dtOpen(){
+  go("dtz");
+  try{ if(!DT.d){ const r=await fetch(`/dtz/dtz.json?v=${DT_V}`); DT.d=await r.json(); dtIndex(); } if(DT.es) await dtEsLoad(); await dtLoadHist(); }
+  catch(e){ DT.err="Couldn't load the exercises. Check your connection · Übungen konnten nicht geladen werden"; }
+  try{ if(window.speechSynthesis) speechSynthesis.getVoices(); }catch(e){}
+  if(/^dtz/.test(S.screen)) xr();
+}
+function dtIndex(){ // flatten: every item knows its set, group and audio key
+  DT.items=[]; DT.byId={};
+  for(const st of DT.d.sets) st.groups.forEach((g,gi)=>{ let lastS="", key="";
+    g.items.forEach(it=>{ const sTxt=it.s?it.s.map(x=>x.t).join("|"):""; if(sTxt&&sTxt!==lastS){ key=`${st.id}-${gi}-${it.id}`; lastS=sTxt; }
+      const x={ set:st.id, g, it, part:g.k+g.t, akey:it.s?key:null }; DT.items.push(x); DT.byId[it.id]=x; }); });
+}
+/* history: database when signed in, this phone otherwise */
+function dtLocal(){ try{ return JSON.parse(localStorage.getItem("pt_dtz_hist")||'{"ans":[],"att":[]}'); }catch(e){ return { ans:[], att:[] }; } }
+async function dtLoadHist(){
+  if(A.user&&A.sb){
+    try{
+      const [a,b]=await Promise.all([
+        A.sb.from("exam_attempts").select("mode,state,topic,total,correct,passed,seconds,wrong,created_at").eq("exam","dtz").order("created_at",{ ascending:false }).limit(300),
+        A.sb.from("exam_answers").select("qnum,correct,created_at").eq("exam","dtz").order("created_at",{ ascending:false }).limit(3000)]);
+      if(a.error) throw a.error; if(b.error) throw b.error;
+      DT.att=a.data||[]; DT.ans=(b.data||[]).map(x=>({ n:x.qnum, ok:x.correct, t:x.created_at })); return;
+    }catch(e){}
+  }
+  const l=dtLocal(); DT.att=l.att||[]; DT.ans=l.ans||[];
+}
+async function dtSave(att, answers){
+  const now=new Date().toISOString();
+  DT.att.unshift({ ...att, created_at:now }); answers.forEach(a=>DT.ans.unshift({ n:a.n, ok:a.ok, t:now }));
+  if(A.user&&A.sb){
+    try{
+      const r=await A.sb.from("exam_attempts").insert({ exam:"dtz", ...att }); if(r.error) throw r.error;
+      if(answers.length){ const r2=await A.sb.from("exam_answers").insert(answers.map(a=>({ exam:"dtz", qnum:a.n, correct:a.ok }))); if(r2.error) throw r2.error; }
+      return;
+    }catch(e){}
+  }
+  const l=dtLocal(); l.att=[{ ...att, created_at:now }, ...(l.att||[])].slice(0,300);
+  l.ans=[...answers.map(a=>({ n:a.n, ok:a.ok, t:now })), ...(l.ans||[])].slice(0,3000);
+  try{ localStorage.setItem("pt_dtz_hist", JSON.stringify(l)); }catch(e){}
+}
+function dtLast(){ const m={}; for(const a of DT.ans){ if(!(a.n in m)) m[a.n]=a.ok; } return m; }
+/* ---------- listening: the phone's German voice reads the texts ---------- */
+function dtVoices(){ try{ return speechSynthesis.getVoices().filter(v=>/^de(-|_|$)/i.test(v.lang)); }catch(e){ return []; } }
+function dtCanSpeak(){ return !!(window.speechSynthesis&&window.SpeechSynthesisUtterance); }
+function dtStop(){ try{ speechSynthesis.cancel(); }catch(e){} DT.playing=null; dtPlayUi(); }
+function dtPlayUi(){ document.querySelectorAll("[data-dtplay]").forEach(b=>{ const on=b.dataset.dtplay===DT.playing; b.textContent=on?"⏹ Stop":"▶️ Hören · Listen"; }); }
+function dtPlay(key){
+  const x=DT.items.find(y=>y.akey===key); if(!x) return;
+  if(DT.playing===key){ dtStop(); return; }
+  const r=DT.run; if(r&&r.mode==="mock"){ const n=r.plays[key]||0; if(n>=2){ bToast("You can listen twice in the mock test · Nur zweimal hören"); return; } r.plays[key]=n+1; }
+  if(!dtCanSpeak()){ bToast("This browser can't read texts aloud. Try Chrome or Safari."); return; }
+  try{ speechSynthesis.cancel(); }catch(e){}
+  const vs=dtVoices(), fv=vs.find(v=>/female|anna|petra|helena|katja|hedda|marlene|vicki|frau/i.test(v.name))||vs[0], mv=vs.find(v=>v!==fv&&/male|markus|yannick|stefan|hans|conrad|daniel|google deutsch/i.test(v.name))||vs.find(v=>v!==fv)||fv;
+  DT.playing=key; dtPlayUi();
+  const lines=x.it.s;
+  lines.forEach((l,i)=>{ const u=new SpeechSynthesisUtterance(l.t); u.lang="de-DE";
+    const v=l.v==="M"?mv:fv; if(v) u.voice=v; u.pitch=(l.v==="M"&&mv===fv)?0.75:1; u.rate=DT.slow?0.75:0.95;
+    if(i===lines.length-1) u.onend=()=>{ if(DT.playing===key){ DT.playing=null; dtPlayUi(); xr(); } };
+    speechSynthesis.speak(u); });
+  if(r&&r.mode==="mock") setTimeout(xr,50);
+}
+/* ---------- hub ---------- */
+VIEWS.dtz = function(){
+  let h=`<div class="topline"><button class="chip" onclick="dtStop();go('home')">← Home</button><span>🇩🇪 Test practice</span></div>
+    <h2 style="margin:6px 0 2px">Deutsch-Prüfung A2–B1 (DTZ)</h2>
+    <p class="sub" style="margin:0 0 10px">Practise for the Deutsch-Test für Zuwanderer: Hören, Lesen, Schreiben, Sprechen. Also good practice for telc and Goethe B1.</p>`;
+  if(DT.err) return h+`<div class="err">${esc(DT.err)}</div>`;
+  if(!DT.d) return h+`<p class="note center">Loading… · Lädt…</p>`;
+  h+=`<label class="card" style="display:flex;gap:12px;align-items:center;cursor:pointer"><input type="checkbox" style="width:22px;height:22px" ${DT.es?"checked":""} onchange="dtSetEs(this.checked)"><span><b>🇪🇸 Ayuda en español</b><br><span class="ecmeta">Spanish under the questions and answers. Texts and listening transcripts in Spanish appear after you answer (in practice).</span></span></label>`;
+  const last=dtLast(), mocks=DT.att.filter(a=>a.mode==="mock"), best=mocks.reduce((m,a)=>Math.max(m,a.correct),0);
+  const wr=DT.att.filter(a=>a.mode==="writing"), sp=DT.att.filter(a=>a.mode==="speaking");
+  const wrong=DT.items.filter(x=>last[x.it.id]===false).length;
+  const noVoice=!dtCanSpeak();
+  h+=`<div class="card" style="border:2px solid var(--coral)"><h3 style="margin:0 0 4px">📝 Mock test · Probetest</h3>
+      <p class="note" style="margin:0 0 10px">Hören (20 questions) + Lesen (25 questions), 70 minutes. Out of 45 points: about <b>20 = A2</b>, about <b>33 = B1</b>. You can listen to each text twice.</p>
+      ${DT.d.sets.map(st=>{ const mine=mocks.filter(a=>a.topic===`set${st.id}`); const b=mine.reduce((m,a)=>Math.max(m,a.correct),-1);
+        return `<button class="btn primary qbtn" onclick="dtStart('mock','${st.id}')">${esc(st.title)}${b>=0?` <span style="opacity:.85;font-weight:600">· best ${b}/45 (${dtLevel(b)})</span>`:""}</button>`; }).join("")}
+      ${noVoice?`<p class="note">🔇 Your browser can't read the listening texts aloud. Try Chrome or Safari.</p>`:""}</div>
+    <div class="card"><h3 style="margin:0 0 6px">📈 My progress · Mein Fortschritt</h3>
+      <div class="extiles"><div><b>${mocks.length}</b><span class="ecmeta">mock tests</span></div><div><b>${mocks.length?best:"–"}<small style="font-size:12px">/45</small></b><span class="ecmeta">best · ${mocks.length?dtLevel(best):"–"}</span></div><div><b>${wr.length+sp.length}</b><span class="ecmeta">letters + speaking</span></div></div>
+      ${mocks.length?dtHistHtml(mocks):""}
+      ${Object.keys(DT_TEIL).map(k=>{ const its=DT.items.filter(x=>x.part===k), done=its.filter(x=>x.it.id in last), ok=its.filter(x=>last[x.it.id]===true).length;
+        return `<div style="margin-top:8px"><div style="display:flex;justify-content:space-between;gap:8px"><span class="ecmeta">${esc(DT_TEIL[k])}</span><span class="ecmeta">${done.length?`${ok}/${its.length} right`:"not tried"}</span></div><div class="exbar"><i style="width:${Math.round(ok/its.length*100)}%"></i></div></div>`; }).join("")}
+      ${!A.user?`<p class="note" style="margin:8px 0 0">💾 Saved on this phone only. <button class="linkbtn" onclick="A.ret='dtz';go('account')">Sign in</button> to keep your history everywhere.</p>`:""}</div>
+    <div class="card"><h3 style="margin:0 0 4px">🎧 Hören · Listening</h3><p class="note" style="margin:0 0 6px">The answer and the text appear after each question.</p>
+      <div class="dtteil">${["H1","H2","H3","H4"].map(k=>`<button onclick="dtStart('practice','${k}')">${esc(DT_TEIL[k])}<small>${DT.items.filter(x=>x.part===k).length} questions</small></button>`).join("")}</div>
+      <label class="row" style="gap:8px;margin-top:6px;font-size:14px"><input type="checkbox" ${DT.slow?"checked":""} onchange="DT.slow=this.checked"> 🐢 Read slower in practice · Langsamer</label></div>
+    <div class="card"><h3 style="margin:0 0 6px">📖 Lesen · Reading</h3>
+      <div class="dtteil">${["L1","L2","L3","L4","L5"].map(k=>`<button onclick="dtStart('practice','${k}')">${esc(DT_TEIL[k])}<small>${DT.items.filter(x=>x.part===k).length} questions</small></button>`).join("")}</div>
+      <button class="btn secondary qbtn" style="margin-top:8px" onclick="dtStart('practice','wrong')">🔁 My mistakes · Meine Fehler (${wrong})</button></div>
+    <div class="card"><h3 style="margin:0 0 4px">✍️ Schreiben · Writing</h3><p class="note" style="margin:0 0 6px">Write a letter in 30 minutes, check it, then compare with a sample answer.</p>
+      ${DT.d.schreiben.map(w=>{ const d=wr.filter(a=>a.topic===w.id).length; return `<button class="btn secondary qbtn" onclick="dtWrite('${w.id}')">${d?"✅ ":""}${esc(w.title)} <span class="ecmeta">${w.to==="informal"?"informal":"formal"}</span></button>`; }).join("")}</div>
+    <div class="card"><h3 style="margin:0 0 4px">🗣️ Sprechen · Speaking</h3><p class="note" style="margin:0 0 6px">Prompt cards for the 3 parts of the oral exam. Record yourself, or practise with a partner in a German lounge.</p>
+      ${DT.d.sprechen.map(c=>{ const d=sp.filter(a=>a.topic===c.id).length; return `<button class="btn secondary qbtn" onclick="dtSpeak('${c.id}')">${d?"✅ ":""}Teil ${c.teil} · ${esc(c.title)}</button>`; }).join("")}
+      <button class="btn secondary qbtn" onclick="dtStop();luOpen()">👥 Find a partner in a lounge</button></div>
+    <p class="note">All exercises are original PonteTalk practice material in the style of the DTZ format. Not official telc, Goethe-Institut or BAMF material. Levels shown are estimates.</p>
+    <button class="btn secondary qbtn" onclick="exOpen()">🇩🇪 Leben in Deutschland test →</button>`;
+  return h;
+};
+function dtHistHtml(mocks){
+  const l=mocks.slice(0,12).reverse();
+  return `<div class="ecmeta" style="margin-top:8px">Last mock tests (dashed line = 33, about B1)</div>
+    <div class="exhist"><div class="pl" style="bottom:${33/45*100}%"></div>${l.map(a=>`<i class="${a.correct>=33?"":"f"}" style="height:${Math.max(4,a.correct/45*100)}%" title="${a.correct}/45"></i>`).join("")}</div>
+    <div class="ecmeta">${l.map(a=>a.correct).join(" · ")}</div>`;
+}
+/* ---------- questions ---------- */
+function dtStart(mode, what){
+  if(!DT.d) return; dtStop();
+  let list;
+  if(mode==="mock") list=DT.items.filter(x=>x.set===what);
+  else if(what==="wrong"){ const last=dtLast(); list=DT.items.filter(x=>last[x.it.id]===false); }
+  else list=DT.items.filter(x=>x.part===what);
+  if(!list.length){ bToast(what==="wrong"?"No mistakes to practise 🎉 · Keine Fehler":"Nothing here yet"); return; }
+  DT.run={ mode, what, list, i:0, picks:{}, shown:{}, plays:{}, t0:Date.now(), end:mode==="mock"?Date.now()+70*60000:0 };
+  DT.res=null; go("dtzq");
+}
+function dtGapText(x){
+  let t=esc(x.g.text);
+  if(x.part==="L5"){ const n=x.g.items.indexOf(x.it)+1; t=t.replace(`(${n}) ___`,`<mark>(${n}) ___</mark>`); }
+  return t;
+}
+function dtTranscript(x){
+  const E=dtE();
+  if(!x.it.s&&x.g.text){ const et=E&&E.text[x.g.items[0].id];
+    return `<details style="margin-top:8px"><summary class="linkbtn" style="cursor:pointer">📄 Show the text · Text zeigen</summary><div class="dttext" lang="de">${esc(x.g.text)}</div>${et?`<div class="ecmeta">🇪🇸 Español</div><div class="dttext" lang="es">${esc(et)}</div>`:""}</details>`; }
+  if(x.it.s&&E){ const es=E.script[(x.akey||"").split("-").pop()]; if(es) return `<details style="margin-top:8px"><summary class="linkbtn" style="cursor:pointer">📄 Show the text · Text zeigen</summary><div class="dttext">${x.it.s.map(l=>`${l.v==="N"?"":`<b>${l.v==="M"?"👨":"👩"}</b> `}${esc(l.t)}`).join("\n")}</div><div class="ecmeta">🇪🇸 Español</div><div class="dttext" lang="es">${es.map((t,i)=>`${x.it.s[i].v==="N"?"":`<b>${x.it.s[i].v==="M"?"👨":"👩"}</b> `}${esc(t)}`).join("\n")}</div></details>`; }
+  return x.it.s?`<details style="margin-top:8px"><summary class="linkbtn" style="cursor:pointer">📄 Show the text · Text zeigen</summary><div class="dttext">${x.it.s.map(l=>`${l.v==="N"?"":`<b>${l.v==="M"?"👨":"👩"}</b> `}${esc(l.t)}`).join("\n")}</div></details>`:""; }
+VIEWS.dtzq = function(){
+  const r=DT.run; if(!r) return `<p class="note center">…</p>`;
+  const x=r.list[r.i], it=x.it, g=x.g, mock=r.mode==="mock", pick=r.picks[it.id], shown=!mock&&r.shown[it.id];
+  const plays=r.plays[x.akey]||0, grid=it.a.length>4;
+  let h=`<div class="topline"><button class="chip" onclick="dtQuit()">✕ ${mock?"End test":"Stop"}</button><span class="ecmeta">${mock?`⏱ <span id="dtclock">${exClock(r.end-Date.now())}</span> · `:""}${r.i+1} / ${r.list.length}</span></div>
+    <div class="exbar" style="margin:0 0 10px"><i style="width:${Math.round((r.i+1)/r.list.length*100)}%;background:var(--coral)"></i></div>
+    <div class="card"><div class="ecmeta">${g.k==="H"?"Hören":"Lesen"} ${g.t} · ${esc(g.intro[0])}</div><div class="note" style="margin:2px 0 6px">${esc(g.intro[1])}${dtE()?`<br><span lang="es">🇪🇸 ${esc(dtE().intro[x.part]||"")}</span>`:""}</div>
+      ${g.topic?`<div style="font-weight:800;margin:4px 0">Thema: ${esc(g.topic)}${dtE()&&dtE().topic[g.items[0].id]?dtEsLine(dtE().topic[g.items[0].id]):""}</div>`:""}
+      ${x.akey?`<div class="dtplay"><button class="btn primary" style="width:auto;padding:10px 18px" data-dtplay="${x.akey}" onclick="dtPlay('${x.akey}')">${DT.playing===x.akey?"⏹ Stop":"▶️ Hören · Listen"}</button>${mock?`<span class="ecmeta">${plays}/2 played</span>`:""}</div>`:""}
+      ${g.text?`<div class="dttext" lang="de">${dtGapText(x)}</div>`:""}
+      ${(()=>{ const eq=dtE()&&dtE().q[it.id];
+        return x.part==="L4"?`<div class="dtquote" lang="de">${esc(it.q)}${eq?dtEsLine(eq.q):""}</div><div class="exq" style="font-size:17px">Ist die Person dafür? · Is this person in favour?${dtE()?dtEsLine("¿La persona está a favor?"):""}</div>`
+        :x.part==="L5"?`<div class="exq" style="font-size:17px">Welches Wort passt in ${esc(it.q)}?${dtE()?dtEsLine("¿Qué palabra encaja en el hueco "+it.q.replace("Lücke ","")+"?"):""}</div>`
+        :`<div class="exq" lang="de">${esc(it.q)}</div>${eq?dtEsLine(eq.q):""}`; })()}
+      <div class="${grid?"dtgrid":""}">${it.a.map((a,k)=>{ let c=""; if(shown){ if(k===it.c) c="ok"; else if(k===pick) c="no"; } else if(pick===k) c="sel";
+        return `<button class="exopt ${c}" ${shown?"disabled":""} onclick="dtPick(${k})">${grid?"":`<span class="k">${shown&&k===it.c?"✓":shown&&k===pick?"✕":"abcdefghi"[k]}</span>`}<span lang="de">${esc(a)}${(()=>{ if(!dtE()||grid||x.part==="L5") return ""; const ea=(dtE().q[it.id]||{}).a; const t=ea?ea[k]:DT_ESW[a]; return t?`<span class="extr" lang="es">${esc(t)}</span>`:""; })()}</span></button>`; }).join("")}</div>
+      ${shown?`<div class="${pick===it.c?"ok":"err"}" style="margin-top:8px">${pick===it.c?"✅ Richtig! · Correct!":`❌ Richtig ist · Correct: <b>${esc(it.a[it.c])}</b>`}</div>${dtTranscript(x)}`:""}
+    </div>`;
+  if(mock){
+    h+=`<div class="row" style="gap:8px"><button class="btn secondary" ${r.i===0?"disabled":""} onclick="dtGo(${r.i-1})">← Back</button>
+      ${r.i<r.list.length-1?`<button class="btn primary" onclick="dtGo(${r.i+1})">Next · Weiter →</button>`:`<button class="btn primary" onclick="dtFinish()">✓ Finish · Abgeben</button>`}</div>
+      <div class="exdots">${r.list.map((y,k)=>`<button class="${y.it.id in r.picks?"done":""} ${k===r.i?"cur":""}" onclick="dtGo(${k})" aria-label="Question ${k+1}">${k+1}</button>`).join("")}</div>
+      <p class="note">1–20 Hören · 21–45 Lesen. ${Object.keys(r.picks).length} of ${r.list.length} answered. <button class="linkbtn" onclick="dtFinish()">Finish now · Jetzt abgeben</button></p>`;
+  } else if(shown){
+    h+=`<button class="btn primary" onclick="${r.i<r.list.length-1?`dtGo(${r.i+1})`:"dtFinish()"}">${r.i<r.list.length-1?"Next · Weiter →":"See my result · Ergebnis"}</button>`;
+  }
+  return h;
+};
+AFTER.dtzq = function(){
+  const r=DT.run; if(!r||r.mode!=="mock"||r.timer) return;
+  r.timer=setInterval(()=>{ if(S.screen!=="dtzq"||DT.run!==r){ clearInterval(r.timer); return; }
+    const left=r.end-Date.now(); const el=document.getElementById("dtclock"); if(el) el.textContent=exClock(left);
+    if(left<=0){ clearInterval(r.timer); bToast("Time's up! · Die Zeit ist um!"); dtFinish(true); } },1000);
+};
+function dtPick(k){
+  const r=DT.run, it=r.list[r.i].it;
+  if(r.mode==="mock"){ r.picks[it.id]=k; xr(); return; }
+  if(r.shown[it.id]) return; r.picks[it.id]=k; r.shown[it.id]=true; xr();
+}
+function dtGo(i){ const r=DT.run; if(!r) return; const prev=r.list[r.i]; r.i=Math.max(0,Math.min(r.list.length-1,i)); if(prev.akey!==r.list[r.i].akey) dtStop(); xr(); }
+function dtQuit(){
+  const r=DT.run; dtStop(); if(!r) return go("dtz");
+  const n=Object.keys(r.picks).length;
+  if(r.mode==="mock"&&n&&!window.confirm("End the test without a result? · Test ohne Ergebnis beenden?")) return;
+  if(r.mode==="practice"&&n){ dtFinish(); return; }
+  if(r.timer) clearInterval(r.timer); DT.run=null; go("dtz");
+}
+async function dtFinish(timeUp){
+  const r=DT.run; if(!r) return;
+  if(r.mode==="mock"&&!timeUp){ const miss=r.list.length-Object.keys(r.picks).length; if(miss&&!window.confirm(`${miss} question(s) not answered. Finish anyway? · Trotzdem abgeben?`)) return; }
+  if(r.timer) clearInterval(r.timer); dtStop();
+  const list=r.mode==="mock"?r.list:r.list.filter(x=>x.it.id in r.picks);
+  const answers=list.filter(x=>x.it.id in r.picks).map(x=>({ n:x.it.id, ok:r.picks[x.it.id]===x.it.c }));
+  const okOf=f=>list.filter(x=>f(x)&&r.picks[x.it.id]===x.it.c).length;
+  const correct=okOf(()=>true);
+  const att={ mode:r.mode, state:r.mode==="mock"?r.what:null, topic:r.mode==="mock"?`set${r.what}`:r.what, total:Math.max(1,list.length), correct,
+    passed:r.mode==="mock"?correct>=33:null, seconds:Math.round((Date.now()-r.t0)/1000), wrong:list.filter(x=>r.picks[x.it.id]!==x.it.c).map(x=>x.it.id) };
+  DT.res={ ...att, list, picks:{ ...r.picks }, h:okOf(x=>x.g.k==="H"), l:okOf(x=>x.g.k==="L") };
+  DT.run=null; go("dtzr");
+  if(list.length) await dtSave(att, answers);
+}
+VIEWS.dtzr = function(){
+  const x=DT.res; if(!x) return `<p class="note center">…</p>`;
+  const mock=x.mode==="mock", lv=dtLevel(x.correct), wrong=x.list.filter(y=>x.picks[y.it.id]!==y.it.c);
+  let h=`<div class="topline"><button class="chip" onclick="go('dtz')">← German exam</button><span></span></div>
+    <div class="card center">${mock?`<div style="font-size:54px">${lv==="B1"?"🎉":lv==="A2"?"👍":"💪"}</div><h2 style="margin:4px 0">${lv==="B1"?"B1 level! · Niveau B1":lv==="A2"?"A2 level · Niveau A2":"Keep going · Weiter üben"}</h2>`:`<div style="font-size:48px">📚</div><h2 style="margin:4px 0">Practice done · Geschafft!</h2>`}
+      <div style="font-size:40px;font-weight:800;margin:6px 0">${x.correct} / ${x.total}</div>
+      ${mock?`<p class="note" style="margin:0">Hören ${x.h}/20 · Lesen ${x.l}/25. About 20 points = A2, about 33 = B1 (estimate). Time: ${exClock(x.seconds*1000)}.</p>`:`<p class="note" style="margin:0">${Math.round(x.correct/x.total*100)}% correct · richtig</p>`}
+      <div class="row" style="gap:8px;justify-content:center;margin-top:12px"><button class="btn primary" onclick="go('dtz')">Back to German exam</button>
+      ${wrong.length?`<button class="btn secondary" onclick="dtStart('practice','wrong')">🔁 Practise mistakes</button>`:""}</div></div>`;
+  if(wrong.length) h+=`<div class="card"><h3 style="margin:0 0 8px">To review · Zum Wiederholen (${wrong.length})</h3>${wrong.map(y=>`<div style="padding:10px 0;border-top:1px solid var(--line)">
+      <div class="ecmeta">${esc(DT_TEIL[y.part])}</div><b lang="de">${esc(y.part==="L4"?"„"+y.it.q+"“ – dafür?":y.it.q)}</b>${dtE()&&dtE().q[y.it.id]?dtEsLine(dtE().q[y.it.id].q):""}
+      ${y.it.id in x.picks?`<div style="color:var(--coral);font-weight:700;margin-top:4px">✕ ${esc(y.it.a[x.picks[y.it.id]])}</div>`:`<div class="ecmeta" style="margin-top:4px">Not answered · Nicht beantwortet</div>`}
+      <div style="color:var(--teal);font-weight:800">✓ ${esc(y.it.a[y.it.c])}</div>${dtTranscript(y)}</div>`).join("")}</div>`;
+  return h;
+};
+/* ---------- writing ---------- */
+function dtWrite(id){
+  const t=DT.d.schreiben.find(w=>w.id===id); if(!t) return;
+  let draft=""; try{ draft=localStorage.getItem("pt_dtz_w_"+id)||""; }catch(e){}
+  DT.w={ t, text:draft, end:Date.now()+30*60000, done:false, checks:{} }; go("dtzw");
+}
+function dtWords(s){ return (s.trim().match(/\S+/g)||[]).length; }
+function dtWInput(el){ DT.w.text=el.value; try{ localStorage.setItem("pt_dtz_w_"+DT.w.t.id, el.value); }catch(e){} const c=document.getElementById("dtwc"); if(c) c.textContent=dtWords(el.value); }
+function dtAuto(w){ const s=w.text.trim(); return {
+  anrede: /^(liebe|lieber|hallo|sehr geehrte|guten tag)/i.test(s),
+  gruss: /(grüße|grüßen|gruß|bis bald|tschüss)\s*[\s\S]{0,40}$/i.test(s),
+  words: dtWords(s)>=70 }; }
+VIEWS.dtzw = function(){
+  const w=DT.w; if(!w) return `<p class="note center">…</p>`;
+  const t=w.t;
+  let h=`<div class="topline"><button class="chip" onclick="go('dtz')">← German exam</button><span class="ecmeta">${w.done?"":`⏱ <span id="dtwclock">${exClock(w.end-Date.now())}</span>`}</span></div>
+    <div class="card"><div class="ecmeta">Schreiben · ${t.to==="informal"?"informal letter (du)":"formal letter (Sie)"}</div><h3 style="margin:4px 0">${esc(t.title)}</h3>
+      <div class="dttext" lang="de">${esc(t.sit)}${dtE()&&dtE().w[t.id]?`\n<span class="extr" lang="es">🇪🇸 ${esc(dtE().w[t.id].sit)}</span>`:""}</div>
+      <div class="ecmeta">Write about all 4 points · Schreiben Sie zu allen 4 Punkten:</div>
+      <ol style="margin:6px 0 0 20px;padding:0" lang="de">${t.pts.map((p,i)=>`<li style="margin:3px 0">${esc(p)}${dtE()&&dtE().w[t.id]?dtEsLine(dtE().w[t.id].pts[i]):""}</li>`).join("")}</ol>
+      <p class="note">Don't forget: greeting (${t.to==="informal"?"Liebe/Lieber …":"Sehr geehrte …"}), the 4 points, a closing sentence and your name.</p></div>`;
+  if(!w.done){
+    h+=`<textarea class="dtta" lang="de" spellcheck="false" placeholder="${t.to==="informal"?"Liebe …,":"Sehr geehrte …,"}" oninput="dtWInput(this)">${esc(w.text)}</textarea>
+      <div class="ectop" style="margin:4px 0 10px"><span class="ecmeta"><b id="dtwc">${dtWords(w.text)}</b> words · Wörter (aim for 80–120)</span><span class="ecmeta">Draft saved ✓</span></div>
+      <button class="btn primary" onclick="DT.w.done=true;xr();window.scrollTo(0,0)">✓ Done · Check my letter</button>`;
+  } else {
+    const a=dtAuto(w);
+    const row=(k,label,auto)=>`<label class="dtchk"><input type="checkbox" ${w.checks[k]??auto?"checked":""} onchange="DT.w.checks['${k}']=this.checked"><span>${label}</span></label>`;
+    h+=`<div class="card"><h3 style="margin:0 0 4px">Check your letter · Prüfen</h3><p class="note" style="margin:0 0 4px">Tick what's true. Be honest, it helps you more.</p>
+      ${row("anrede",`Greeting fits (${t.to==="informal"?"Liebe/Lieber …":"Sehr geehrte/r …"})`,a.anrede)}
+      ${t.pts.map((p,i)=>row("p"+i,`I wrote about: <b lang="de">${esc(p)}</b>`,false)).join("")}
+      ${row("gruss","Closing and name (Viele Grüße / Mit freundlichen Grüßen)",a.gruss)}
+      ${row("words",`At least about 80 words (you wrote ${dtWords(w.text)})`,a.words)}
+      <button class="btn primary qbtn" style="margin-top:8px" onclick="dtWSave()">💾 Save result · Speichern</button>
+      <button class="btn secondary qbtn" onclick="DT.w.done=false;xr()">✏️ Keep writing</button></div>
+      <div class="card"><h3 style="margin:0 0 4px">Your letter</h3><div class="dttext" lang="de">${esc(w.text||"–")}</div></div>
+      <div class="card"><h3 style="margin:0 0 4px">Sample answer · Musterlösung</h3><p class="note" style="margin:0 0 4px">One good way to answer. Yours can be different.</p><div class="dttext" lang="de">${esc(t.model)}</div>
+      <button class="btn secondary qbtn" onclick="dtStop();luOpen()">👥 Ask a native speaker in a lounge to correct it</button></div>`;
+  }
+  return h;
+};
+AFTER.dtzw = function(){
+  const w=DT.w; if(!w||w.done||w.timer) return;
+  w.timer=setInterval(()=>{ if(S.screen!=="dtzw"||DT.w!==w||w.done){ clearInterval(w.timer); w.timer=null; return; }
+    const el=document.getElementById("dtwclock"); if(el) el.textContent=exClock(w.end-Date.now()); },1000);
+};
+async function dtWSave(){
+  const w=DT.w, a=dtAuto(w), keys=["anrede","gruss","words",...w.t.pts.map((p,i)=>"p"+i)];
+  const correct=keys.filter(k=>w.checks[k]??(a[k]||false)).length;
+  await dtSave({ mode:"writing", state:null, topic:w.t.id, total:keys.length, correct, passed:null, seconds:Math.max(0,Math.round((30*60000-(w.end-Date.now()))/1000)), wrong:[] }, []);
+  bToast(`Saved: ${correct}/${keys.length} ✓`); go("dtz");
+}
+/* ---------- speaking ---------- */
+function dtSpeak(id){ const c=DT.d.sprechen.find(x=>x.id===id); if(!c) return; DT.sp={ c, rec:null, url:null, err:"", checks:{}, prep:0 }; go("dtzs"); }
+async function dtRec(){
+  const sp=DT.sp; if(sp.rec){ try{ sp.rec.stop(); }catch(e){} return; }
+  if(!navigator.mediaDevices||!window.MediaRecorder){ sp.err="Recording isn't supported in this browser. Try Chrome or Safari."; xr(); return; }
+  let stream; try{ stream=await navigator.mediaDevices.getUserMedia({ audio:true }); }catch(e){ sp.err="Please allow the microphone to record · Mikrofon erlauben"; xr(); return; }
+  const mime=ecMime(); let mr; try{ mr=mime?new MediaRecorder(stream,{ mimeType:mime }):new MediaRecorder(stream); }catch(e){ mr=new MediaRecorder(stream); }
+  const parts=[]; mr.ondataavailable=e=>{ if(e.data&&e.data.size) parts.push(e.data); };
+  mr.onstop=()=>{ stream.getTracks().forEach(t=>t.stop()); clearTimeout(sp.stopT); if(sp.url) URL.revokeObjectURL(sp.url);
+    sp.url=URL.createObjectURL(new Blob(parts,{ type:mr.mimeType||mime||"audio/webm" })); sp.rec=null; sp.secs=Math.round((Date.now()-sp.t0)/1000); xr(); };
+  sp.err=""; sp.rec=mr; sp.t0=Date.now(); mr.start(); sp.stopT=setTimeout(()=>{ try{ mr.stop(); }catch(e){} },4*60000); xr();
+}
+function dtPrep(){ const sp=DT.sp; sp.prep=Date.now()+60000; xr(); }
+VIEWS.dtzs = function(){
+  const sp=DT.sp; if(!sp) return `<p class="note center">…</p>`;
+  const c=sp.c, rec=!!sp.rec, E=dtE()&&dtE().s[c.id];
+  const row=(k,label)=>`<label class="dtchk"><input type="checkbox" ${sp.checks[k]?"checked":""} onchange="DT.sp.checks['${k}']=this.checked"><span>${label}</span></label>`;
+  return `<div class="topline"><button class="chip" onclick="if(DT.sp.rec)DT.sp.rec.stop();go('dtz')">← German exam</button><span class="ecmeta">Sprechen · Teil ${c.teil}</span></div>
+    <div class="card"><h3 style="margin:0 0 4px">${esc(c.title)}</h3><p class="note" style="margin:0 0 8px">${esc(c.en)}${E?`<br><span lang="es">🇪🇸 ${esc(E.desc)}</span>`:""}</p>
+      <div class="ecmeta">${c.teil===3?"Talk about · Besprechen Sie:":"Talk about · Sprechen Sie über:"}</div>
+      <ul style="margin:6px 0 0 20px;padding:0" lang="de">${c.pts.map((p,i)=>`<li style="margin:3px 0">${esc(p)}${E?dtEsLine(E.pts[i]):""}</li>`).join("")}</ul>
+      ${c.follow.length?`<div class="ecmeta" style="margin-top:8px">The examiner may ask · Mögliche Fragen:</div><ul style="margin:6px 0 0 20px;padding:0" lang="de">${c.follow.map((p,i)=>`<li>${esc(p)}${E?dtEsLine(E.follow[i]):""}</li>`).join("")}</ul>`:""}
+      <details style="margin-top:8px"><summary class="linkbtn" style="cursor:pointer">💬 Useful phrases · Redemittel</summary><div class="dttext" lang="de">${c.phr.map(esc).join("\n")}</div></details></div>
+    <div class="card"><h3 style="margin:0 0 6px">🎙️ Practise · Üben</h3>
+      ${sp.prep&&sp.prep>Date.now()?`<p class="note">⏳ Prepare: <b id="dtprep">${exClock(sp.prep-Date.now())}</b> · Notizen machen</p>`:`<button class="btn secondary qbtn" onclick="dtPrep()">⏳ 1 minute to prepare · Vorbereitung</button>`}
+      <button class="btn ${rec?"secondary":"primary"} qbtn" onclick="dtRec()">${rec?`⏹ Stop recording · <span id="dtrect">0:00</span>`:sp.url?"🎙️ Record again":"🎙️ Record myself · Aufnehmen"}</button>
+      ${sp.err?`<div class="err">${esc(sp.err)}</div>`:""}
+      ${sp.url&&!rec?`<audio controls src="${sp.url}" style="width:100%;margin:8px 0"></audio><p class="note" style="margin:0">${exClock((sp.secs||0)*1000)} recorded. Your recording stays on this phone.</p>`:""}
+      <div style="margin-top:8px">${row("all","I talked about every point")}${row("sent","I spoke in full sentences")}${row("long",c.teil===1?"I spoke for about 1–2 minutes":"I spoke for about 2–3 minutes")}${row("q",c.teil===3?"I made suggestions and reacted to my partner":"I could answer extra questions")}</div>
+      <button class="btn primary qbtn" style="margin-top:8px" onclick="dtSSave()">💾 Save · Speichern</button>
+      <button class="btn secondary qbtn" onclick="if(DT.sp.rec)DT.sp.rec.stop();luOpen()">👥 Practise with a partner in a lounge</button></div>`;
+};
+AFTER.dtzs = function(){
+  const sp=DT.sp; if(!sp||sp.timer) return;
+  sp.timer=setInterval(()=>{ if(S.screen!=="dtzs"||DT.sp!==sp){ clearInterval(sp.timer); return; }
+    const a=document.getElementById("dtrect"); if(a&&sp.rec) a.textContent=exClock(Date.now()-sp.t0);
+    const b=document.getElementById("dtprep"); if(b){ const l=sp.prep-Date.now(); if(l<=0){ sp.prep=0; bToast("Time to speak! · Los geht's!"); xr(); } else b.textContent=exClock(l); } },500);
+};
+async function dtSSave(){
+  const sp=DT.sp, keys=["all","sent","long","q"], correct=keys.filter(k=>sp.checks[k]).length;
+  if(sp.rec) try{ sp.rec.stop(); }catch(e){}
+  await dtSave({ mode:"speaking", state:null, topic:sp.c.id, total:4, correct, passed:null, seconds:sp.secs||null, wrong:[] }, []);
+  bToast(`Saved: ${correct}/4 ✓`); go("dtz");
+}
 
 /* ===================== GAMES ===================== */
 VIEWS.games = function(){
@@ -7894,6 +8224,7 @@ try{ const lid=new URLSearchParams(location.search).get("lounge"); if(lid && /^[
     else if((A.status==="out"&&n>2)||n>20){ clearInterval(w); A.ret="lounge"; const pr=lid.split("-");
       A.msg=`Sign in (free) to join the ${cfLang(pr[0])[1]} ⇄ ${cfLang(pr[1])[1]} lounge · Melde dich an, um der Lounge beizutreten`; go("account"); } },500); } }catch(e){}
 try{ if(new URLSearchParams(location.search).has("lid")) setTimeout(()=>exOpen(),0); }catch(e){}
+try{ if(new URLSearchParams(location.search).has("dtz")) setTimeout(()=>dtOpen(),0); }catch(e){}
 try{ if(new URLSearchParams(location.search).has("cafes")){ S.screen="cafes"; document.addEventListener("DOMContentLoaded", ()=>cfLoad()); } }catch(e){}
 try{ if(new URLSearchParams(location.search).has("board")){ S.screen="board"; document.addEventListener("DOMContentLoaded", ()=>bLoad()); } }catch(e){}
 
