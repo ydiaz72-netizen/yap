@@ -7626,12 +7626,59 @@ const LID_TOPICS={"History & Geography":"🏛️ History & geography · Geschich
 const EX={ qs:null, tr:{}, lang:"", state:"TH", err:"", run:null, res:null, ans:[], att:[], hist:false, loading:false };
 try{ const v=JSON.parse(localStorage.getItem("pt_lid")||"{}"); if(v.state) EX.state=v.state; if(typeof v.lang==="string") EX.lang=v.lang; }catch(e){}
 function exSavePrefs(){ try{ localStorage.setItem("pt_lid", JSON.stringify({ state:EX.state, lang:EX.lang })); }catch(e){} }
+/* reading aloud: recorded clip (Audio studio) when there is one, otherwise the phone's German voice */
+let EX_AUDIO=null;
+function exHush(){ try{ speechSynthesis.cancel(); }catch(e){} if(EX_AUDIO){ try{ EX_AUDIO.pause(); }catch(e){} EX_AUDIO=null; } }
+function exSay(id, text, onend, rate){
+  exHush(); const v=DT.man&&DT.man.clips&&DT.man.clips[id]; let done=false; const fin=()=>{ if(done) return; done=true; if(onend) onend(); };
+  if(v){ const a=new Audio(dtClipUrl(id,v)); a.playbackRate=rate||1; EX_AUDIO=a; a.onended=fin; a.onerror=()=>{ EX_AUDIO=null; exTts(text,fin,rate); }; a.play().catch(()=>{ EX_AUDIO=null; exTts(text,fin,rate); }); return; }
+  exTts(text,fin,rate);
+}
+function exTts(text, fin, rate){
+  if(!dtCanSpeak()){ fin(); return; }
+  const u=new SpeechSynthesisUtterance(text.replace(/…/g,"…")); u.lang="de-DE"; const vs=dtVoices(); if(vs[0]) u.voice=vs[0]; u.rate=(rate||1)*0.95; u.onend=fin; u.onerror=fin;
+  try{ speechSynthesis.speak(u); }catch(e){ fin(); }
+}
+function exReadQ(){ const r=EX.run; if(!r) return; const q=r.list[r.i], shown=r.mode!=="mock"&&r.shown[q.n];
+  if(shown) exSay(`L${q.n}a`, q.a[q.c]); else exSay(`L${q.n}q`, q.q); }
+/* listening mode: question → short pause → right answer → next */
+const EXL={ list:[], i:0, phase:"", on:false, t:null, slow:false };
+function exlStart(topic){
+  const pool=exPool().filter(q=>!q.i), last=exLast(); let list;
+  if(topic==="__state") list=pool.filter(q=>q.s);
+  else if(topic==="__wrong") list=pool.filter(q=>last[q.n]===false);
+  else if(topic==="__all") list=pool.filter(q=>!q.s);
+  else list=pool.filter(q=>q.t===topic&&!q.s);
+  if(!list.length){ bToast(topic==="__wrong"?"No mistakes 🎉 · Keine Fehler":"Nothing here yet"); return; }
+  EXL.list=list; EXL.i=0; EXL.phase="q"; EXL.on=true; go("exlisten"); exlRun();
+}
+function exlRun(){
+  clearTimeout(EXL.t); if(!EXL.on||S.screen!=="exlisten") return;
+  const q=EXL.list[EXL.i]; if(!q){ EXL.on=false; xr(); return; }
+  const rate=EXL.slow?0.85:1;
+  if(EXL.phase==="q"){ xr(); exSay(`L${q.n}q`, q.q, ()=>{ EXL.t=setTimeout(()=>{ if(!EXL.on) return; EXL.phase="a"; exlRun(); }, 2500); }, rate); }
+  else { xr(); exSay(`L${q.n}a`, q.a[q.c], ()=>{ EXL.t=setTimeout(()=>{ if(!EXL.on) return; EXL.i++; EXL.phase="q"; exlRun(); }, 1800); }, rate); }
+}
+function exlToggle(){ EXL.on=!EXL.on; if(EXL.on) exlRun(); else { clearTimeout(EXL.t); exHush(); xr(); } }
+function exlGo(d){ clearTimeout(EXL.t); exHush(); EXL.i=Math.max(0,Math.min(EXL.list.length-1,EXL.i+d)); EXL.phase="q"; EXL.on=true; exlRun(); }
+function exlQuit(){ EXL.on=false; clearTimeout(EXL.t); exHush(); go("exam"); }
+VIEWS.exlisten = function(){
+  const q=EXL.list[EXL.i]; const tr=EX.lang&&EX.tr[EX.lang]; const t=q&&tr&&tr[q.n];
+  if(!q) return `<div class="topline"><button class="chip" onclick="exlQuit()">← Back</button><span></span></div><div class="card center"><div style="font-size:48px">🎧</div><h2>Fertig! · Done!</h2><p class="note">You listened to ${EXL.list.length} questions.</p><button class="btn primary" onclick="exlQuit()">Back · Zurück</button></div>`;
+  return `<div class="topline"><button class="chip" onclick="exlQuit()">✕ Stop</button><span class="ecmeta">🎧 ${EXL.i+1} / ${EXL.list.length}</span></div>
+    <div class="exbar" style="margin:0 0 10px"><i style="width:${Math.round((EXL.i+1)/EXL.list.length*100)}%;background:var(--coral)"></i></div>
+    <div class="card"><div class="ecmeta">Frage ${esc(q.n)}</div><div class="exq" lang="de">${esc(q.q)}</div>${t?`<div class="extr" dir="${EX.lang==="ar"?"rtl":"auto"}">${esc(t.q)}</div>`:""}
+      ${EXL.phase==="a"?`<div class="ok" style="margin-top:10px;font-size:18px">✓ <b lang="de">${esc(q.a[q.c])}</b>${t&&t.a[q.c]?`<span class="extr">${esc(t.a[q.c])}</span>`:""}</div>`:`<p class="note" style="margin-top:10px">🤔 Think of the answer… · Überlege…</p>`}</div>
+    <div style="display:flex;gap:8px"><button class="btn secondary" style="flex:1" onclick="exlGo(-1)">⏮</button><button class="btn primary" style="flex:2" onclick="exlToggle()">${EXL.on?"⏸ Pause":"▶️ Play"}</button><button class="btn secondary" style="flex:1" onclick="exlGo(1)">⏭</button></div>
+    <label class="row" style="gap:8px;margin-top:10px;font-size:14px"><input type="checkbox" ${EXL.slow?"checked":""} onchange="EXL.slow=this.checked"> 🐢 Slower · Langsamer</label>
+    <p class="note">Keep listening like a podcast: question, a short pause to think, then the right answer. Works with the screen on.</p>`;
+};
 async function exOpen(){
   go("exam");
   try{
     if(!EX.qs){ const r=await fetch(`/lid/questions.json?v=${LID_V}`); EX.qs=(await r.json()).questions; }
     if(EX.lang) await exTr(EX.lang);
-    await exLoadHist();
+    await Promise.all([exLoadHist(), DT.man===undefined?dtLoadManifest():null]);
   }catch(e){ EX.err="Couldn't load the questions. Check your connection · Fragen konnten nicht geladen werden"; }
   if(S.screen==="exam") xr();
 }
@@ -7708,6 +7755,11 @@ VIEWS.exam = function(){
       ${mocks.length?exHistHtml(mocks):`<p class="note" style="margin:6px 0 0">Your test scores will show up here. · Hier erscheinen deine Ergebnisse.</p>`}
       ${!A.user?`<p class="note" style="margin:8px 0 0">💾 Saved on this phone only. <button class="linkbtn" onclick="A.ret='exam';go('account')">Sign in</button> to keep your history everywhere. · Anmelden, um den Verlauf zu speichern.</p>`:""}
     </div>
+    <div class="card exprac"><h3 style="margin:0 0 4px">🎧 Listening mode · Hörmodus</h3>
+      <p class="note" style="margin:0 0 8px">Learn by listening, like a podcast: each question, a pause to think, then the right answer. Great on the bus.</p>
+      <button class="btn secondary qbtn" onclick="exlStart('__all')">🎧 All general questions · Alle (${pool.filter(q=>!q.s&&!q.i).length})</button>
+      <button class="btn secondary qbtn" onclick="exlStart('__wrong')">🎧 My mistakes · Meine Fehler (${wrong})</button>
+      <button class="btn secondary qbtn" onclick="exlStart('__state')">🎧 My Bundesland · Mein Bundesland</button></div>
     <div class="card exprac"><h3 style="margin:0 0 6px">📚 Practise · Üben</h3>
       <p class="note" style="margin:0 0 8px">You see the right answer after each question. · Nach jeder Frage siehst du die Lösung.</p>
       <button class="btn secondary qbtn" onclick="exStart('practice','__wrong')">🔁 My mistakes · Meine Fehler (${wrong})</button>
@@ -7732,7 +7784,7 @@ VIEWS.examq = function(){
   const left=mock?r.end-Date.now():0;
   let h=`<div class="topline"><button class="chip" onclick="exQuit()">✕ ${mock?"End test":"Stop"}</button><span class="ecmeta">${mock?`⏱ <span id="exclock">${exClock(left)}</span> · `:""}${r.i+1} / ${r.list.length}</span></div>
     <div class="exbar" style="margin:0 0 10px"><i style="width:${Math.round((r.i+1)/r.list.length*100)}%;background:var(--coral)"></i></div>
-    <div class="card"><div class="ecmeta">Frage ${esc(q.n)}${q.s?` · ${esc((LID_STATES.find(x=>x[0]===q.s)||[0,""])[1])}`:""}</div>
+    <div class="card"><div class="ectop"><span class="ecmeta">Frage ${esc(q.n)}${q.s?` · ${esc((LID_STATES.find(x=>x[0]===q.s)||[0,""])[1])}`:""}</span><button class="linkbtn" onclick="exReadQ()" aria-label="Read aloud">🔊 ${shown?"Antwort":"Vorlesen"}</button></div>
       <div class="exq" lang="de">${esc(q.q)}</div>${t?`<div class="extr" dir="${tq.rtl?"rtl":"auto"}">${esc(t.q)}</div>`:""}
       ${exImg(q)}
       ${q.a.map((a,k)=>{ let c=""; if(shown){ if(k===q.c) c="ok"; else if(k===pick) c="no"; } else if(pick===k) c="sel";
@@ -7760,9 +7812,9 @@ function exPick(k){
   if(r.mode==="mock"){ r.picks[q.n]=k; xr(); return; }
   if(r.shown[q.n]) return; r.picks[q.n]=k; r.shown[q.n]=true; xr();
 }
-function exGo(i){ const r=EX.run; if(!r) return; r.i=Math.max(0,Math.min(r.list.length-1,i)); xr(); }
+function exGo(i){ exHush(); const r=EX.run; if(!r) return; r.i=Math.max(0,Math.min(r.list.length-1,i)); xr(); }
 function exQuit(){
-  const r=EX.run; if(!r) return go("exam");
+  exHush(); const r=EX.run; if(!r) return go("exam");
   const n=Object.keys(r.picks).length;
   if(r.mode==="mock"&&n&&!window.confirm("End the test without a result? · Test ohne Ergebnis beenden?")) return;
   if(r.mode==="practice"&&n){ exFinish(); return; }
@@ -7804,7 +7856,7 @@ VIEWS.examr = function(){
 
 /* ===================== TEST PRACTICE: German exam (DTZ A2–B1) ===================== */
 /* Original practice material in /dtz/dtz.json, modelled on the DTZ format. History: sql/exam_practice(_dtz).sql */
-const DT_V="2026-11-22b";
+const DT_V="2026-11-22c";
 const DT_TEIL={ H1:"Hören 1 · Ansagen", H2:"Hören 2 · Radio", H3:"Hören 3 · Gespräche", H4:"Hören 4 · Meinungen",
   L1:"Lesen 1 · Wegweiser", L2:"Lesen 2 · Anzeigen", L3:"Lesen 3 · Kurze Texte", L4:"Lesen 4 · Meinungen", L5:"Lesen 5 · Brief" };
 const DT={ d:null, err:"", att:[], ans:[], run:null, res:null, w:null, sp:null, slow:false, playing:null, es:false, esd:null };
@@ -7894,15 +7946,23 @@ function dtPlay(key){
 
 /* ---------- Admin: Audio studio (ElevenLabs) ---------- */
 /* The admin pastes their own ElevenLabs API key. It stays in this page's memory only: never saved, never sent anywhere except api.elevenlabs.io. */
-const DS={ key:"", voices:null, f:"", m:"", n:"", busy:false, log:[], done:0, total:0, err:"", redo:false, stop:false };
+const DS={ key:"", voices:null, f:"", m:"", n:"", busy:false, log:[], done:0, total:0, err:"", redo:false, stop:false, grp:{ dtz:true, lid:true }, showLid:false };
 const DS_MODEL="eleven_multilingual_v2";
 async function dsOpen(){
   go("dtzstudio");
-  try{ if(!DT.d){ const r=await fetch(`/dtz/dtz.json?v=${DT_V}`); DT.d=await r.json(); dtIndex(); } await dtLoadManifest(); }catch(e){ DS.err="Couldn't load the exercises."; }
+  try{ if(!DT.d){ const r=await fetch(`/dtz/dtz.json?v=${DT_V}`); DT.d=await r.json(); dtIndex(); }
+    if(!EX.qs){ const r=await fetch(`/lid/questions.json?v=${LID_V}`); EX.qs=(await r.json()).questions; }
+    await dtLoadManifest(); }catch(e){ DS.err="Couldn't load the exercises."; }
   try{ const v=JSON.parse(localStorage.getItem("pt_ds_voices")||"{}"); DS.f=DS.f||v.f||""; DS.m=DS.m||v.m||""; DS.n=DS.n||v.n||""; }catch(e){}
   if(S.screen==="dtzstudio") xr();
 }
-function dsClips(){ const seen={}, out=[]; for(const x of (DT.items||[])){ if(!x.akey||seen[x.akey]) continue; seen[x.akey]=1; out.push({ id:x.akey.split("-").pop(), part:x.part, lines:x.it.s }); } return out; }
+function dsClips(grp){ const seen={}, out=[];
+  if(!grp||grp==="dtz") for(const x of (DT.items||[])){ if(!x.akey||seen[x.akey]) continue; seen[x.akey]=1; out.push({ id:x.akey.split("-").pop(), part:x.part, lines:x.it.s }); }
+  if(!grp||grp==="lid") for(const q of (EX.qs||[])){ if(q.s||q.i) continue; // general questions without pictures
+    out.push({ id:`L${q.n}q`, part:"LID", lines:[{ v:"F", t:q.q }] }, { id:`L${q.n}a`, part:"LID", lines:[{ v:"M", t:q.a[q.c] }] }); }
+  return out; }
+function dsLabel(c){ return c.part==="LID"?"Leben in Deutschland":DT_TEIL[c.part]; }
+function dsChars(list){ return list.reduce((n,c)=>n+c.lines.reduce((m,l)=>m+l.t.length,0),0); }
 async function dsApi(path, opt){
   let r; try{ r=await fetch("https://api.elevenlabs.io"+path, { ...opt, headers:{ "xi-api-key":DS.key, ...(opt&&opt.headers||{}) } }); }
   catch(e){ throw new Error("ElevenLabs blocked the request from this browser (network/CORS). Use the backup plan: create the clips on elevenlabs.io and send them to Claude."); }
@@ -7937,8 +7997,11 @@ async function dsGenerate(onlyId){
   if(!DS.f||!DS.m){ DS.err="Choose a female and a male voice."; xr(); return; }
   dsSaveVoices(); DS.err=""; DS.busy=true; DS.stop=false; DS.log=[];
   const man={ v:1, model:DS_MODEL, voices:{ f:DS.f, m:DS.m, n:DS.n||DS.f }, clips:{ ...((DT.man&&DT.man.clips)||{}) } };
-  const all=dsClips(), todo=all.filter(c=>onlyId?c.id===onlyId:(DS.redo||!man.clips[c.id]));
+  const all=dsClips(), todo=all.filter(c=>onlyId?c.id===onlyId:((c.part==="LID"?DS.grp.lid:DS.grp.dtz)&&(DS.redo||!man.clips[c.id])));
   DS.total=todo.length; DS.done=0; xr();
+  const saveMan=async()=>{ const mu=await A.sb.storage.from("dtz-audio").upload("manifest.json", new Blob([JSON.stringify(man)],{ type:"application/json" }), { upsert:true, contentType:"application/json", cacheControl:"0" });
+    if(mu.error) throw new Error("Saving the list failed: "+mu.error.message); DT.man=JSON.parse(JSON.stringify(man)); };
+  let unsaved=0;
   try{
     for(const c of todo){
       if(DS.stop) break;
@@ -7946,22 +8009,24 @@ async function dsGenerate(onlyId){
       const len=parts.reduce((n,p)=>n+p.length,0), buf=new Uint8Array(len); let o=0; for(const p of parts){ buf.set(p,o); o+=p.length; }
       const up=await A.sb.storage.from("dtz-audio").upload(`${c.id}.mp3`, new Blob([buf],{ type:"audio/mpeg" }), { upsert:true, contentType:"audio/mpeg", cacheControl:"31536000" });
       if(up.error) throw new Error("Upload failed: "+up.error.message+" (did you run sql/dtz_audio.sql and sign in as admin?)");
-      man.clips[c.id]=Date.now(); DS.done++; DS.log.unshift(`✅ ${c.id} (${DT_TEIL[c.part]})`);
-      const mu=await A.sb.storage.from("dtz-audio").upload("manifest.json", new Blob([JSON.stringify(man)],{ type:"application/json" }), { upsert:true, contentType:"application/json", cacheControl:"0" });
-      if(mu.error) throw new Error("Saving the list failed: "+mu.error.message);
-      DT.man=man; xr();
+      man.clips[c.id]=Date.now(); DS.done++; unsaved++; DS.log.unshift(`✅ ${c.id} (${dsLabel(c)})`); if(DS.log.length>60) DS.log.length=60;
+      if(unsaved>=10){ await saveMan(); unsaved=0; }
+      xr();
     }
   }catch(e){ DS.err=e.message; }
+  try{ if(unsaved) await saveMan(); }catch(e){ DS.err=DS.err||e.message; }
   DS.busy=false; xr();
 }
 VIEWS.dtzstudio = function(){
-  const clips=DT.d?dsClips():[], have=clips.filter(c=>DT.man&&DT.man.clips&&DT.man.clips[c.id]).length;
+  const has=c=>DT.man&&DT.man.clips&&DT.man.clips[c.id];
+  const clips=DT.d?dsClips("dtz"):[], have=clips.filter(has).length, lclips=EX.qs?dsClips("lid"):[], lhave=lclips.filter(has).length;
+  const missing=[...(DS.grp.dtz?clips:[]),...(DS.grp.lid?lclips:[])].filter(c=>DS.redo||!has(c)), est=dsChars(missing);
   const sel=(k,label)=>`<label class="lbl" style="margin:8px 0 0">${label}<select onchange="DS.${k}=this.value;dsSaveVoices()" style="width:100%;margin-top:4px;border:2px solid var(--line);border-radius:12px;padding:10px;font:600 15px 'Plus Jakarta Sans',sans-serif">
       <option value="">${k==="n"?"Same as female voice":"Choose…"}</option>${(DS.voices||[]).map(v=>`<option value="${esc(v.id)}" ${DS[k]===v.id?"selected":""}>${esc(v.name)}${v.l.gender?` · ${esc(v.l.gender)}`:""}${v.l.accent?` · ${esc(v.l.accent)}`:""}${v.l.language?` · ${esc(v.l.language)}`:""}</option>`).join("")}</select></label>
       ${DS[k]?`<button class="linkbtn" onclick="dsTest('${k==="m"?"M":k==="n"?"N":"F"}')">▶ Test this voice</button>`:""}`;
   return `<div class="topline"><button class="chip" onclick="go('account')">← Account</button><span>🎙️ Audio studio</span></div>
-    <h2 style="margin:6px 0 2px">Listening audio · German exam</h2>
-    <p class="sub" style="margin:0 0 10px">Creates natural voices for the ${clips.length} listening texts with ElevenLabs and saves them for everyone. ${have}/${clips.length} done.</p>
+    <h2 style="margin:6px 0 2px">Listening audio</h2>
+    <p class="sub" style="margin:0 0 10px">Creates natural voices with ElevenLabs and saves them for everyone.<br>🎓 German exam: ${have}/${clips.length} clips · 🇩🇪 Leben in Deutschland: ${lhave}/${lclips.length} clips</p>
     ${DS.err?`<div class="err" style="margin-bottom:8px">${esc(DS.err)}</div>`:""}
     <div class="card"><h3 style="margin:0 0 4px">1 · Your ElevenLabs key</h3>
       <p class="note" style="margin:0 0 6px">ElevenLabs → Developers → API keys. It stays on this phone only while this page is open and is never saved.</p>
@@ -7971,12 +8036,16 @@ VIEWS.dtzstudio = function(){
       <p class="note" style="margin:0">Tip: in ElevenLabs open the Voice Library, search “German”, and add 2–3 native German voices first. Then tap “Reload my voices”.</p>
       ${sel("f","👩 Female voice · Frau")}${sel("m","👨 Male voice · Mann")}${sel("n","📢 Announcements · Durchsagen")}</div>
     <div class="card"><h3 style="margin:0 0 4px">3 · Create the audio</h3>
-      <p class="note" style="margin:0 0 6px">About 8,000 characters for all clips. Takes a few minutes; keep this page open.</p>
+      <label style="display:flex;gap:8px;align-items:flex-start;font-size:14px;margin:4px 0"><input type="checkbox" ${DS.grp.dtz?"checked":""} onchange="DS.grp.dtz=this.checked;xr()"> 🎓 German exam listening (${clips.length-have} missing)</label>
+      <label style="display:flex;gap:8px;align-items:flex-start;font-size:14px;margin:4px 0"><input type="checkbox" ${DS.grp.lid?"checked":""} onchange="DS.grp.lid=this.checked;xr()"> 🇩🇪 Leben in Deutschland: question + right answer (${lclips.length-lhave} missing)</label>
+      <p class="note" style="margin:6px 0">To make: <b>${missing.length} clips ≈ ${est.toLocaleString()} characters</b> (credits). Keep this page open and the screen on; a laptop works best.</p>
       <label class="row" style="gap:8px;font-size:14px"><input type="checkbox" ${DS.redo?"checked":""} onchange="DS.redo=this.checked"> Redo clips that already exist</label>
       ${DS.busy?`<div class="exbar" style="margin:10px 0"><i style="width:${DS.total?Math.round(DS.done/DS.total*100):0}%"></i></div><p class="note">${DS.done} / ${DS.total}…</p><button class="btn secondary qbtn" onclick="DS.stop=true">Stop</button>`
         :`<button class="btn primary qbtn" style="margin-top:8px" onclick="dsGenerate()">🎙️ Generate ${DS.redo?"all":"missing"} clips</button>`}
       ${DS.log.length?`<div class="note" style="margin-top:8px;max-height:160px;overflow:auto">${DS.log.map(esc).join("<br>")}</div>`:""}</div>`:""}
-    ${clips.length?`<div class="card"><h3 style="margin:0 0 6px">Clips</h3>${clips.map(c=>{ const ok=DT.man&&DT.man.clips&&DT.man.clips[c.id];
+    ${lclips.length?`<div class="card"><h3 style="margin:0 0 6px">Leben in Deutschland clips (${lhave}/${lclips.length})</h3><button class="linkbtn" onclick="DS.showLid=!DS.showLid;xr()">${DS.showLid?"Hide list":"Show list"}</button>
+      ${DS.showLid?lclips.map(c=>{ const ok=has(c); return `<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-top:1px solid var(--line)"><span style="flex:1;font-size:13px">${ok?"✅":"⬜️"} <b>${esc(c.id)}</b> <span class="ecmeta">${esc(c.lines[0].t.slice(0,50))}</span></span>${ok?`<button class="linkbtn" onclick="new Audio(dtClipUrl('${c.id}',${ok})).play()">▶</button>`:""}${DS.voices&&!DS.busy?`<button class="linkbtn" onclick="dsGenerate('${c.id}')">${ok?"redo":"make"}</button>`:""}</div>`; }).join(""):""}</div>`:""}
+    ${clips.length?`<div class="card"><h3 style="margin:0 0 6px">German exam clips</h3>${clips.map(c=>{ const ok=DT.man&&DT.man.clips&&DT.man.clips[c.id];
       return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--line)"><span style="flex:1;font-size:14px">${ok?"✅":"⬜️"} <b>${esc(c.id)}</b> <span class="ecmeta">${esc(DT_TEIL[c.part])} · ${esc(c.lines[0].t.slice(0,40))}…</span></span>
         ${ok?`<button class="linkbtn" onclick="new Audio(dtClipUrl('${c.id}',${ok})).play()">▶</button>`:""}${DS.voices&&!DS.busy?`<button class="linkbtn" onclick="dsGenerate('${c.id}')">${ok?"redo":"make"}</button>`:""}</div>`; }).join("")}</div>`:""}
     <p class="note">Model: ${DS_MODEL}. Use a paid ElevenLabs plan (Starter) so PonteTalk may use the audio commercially.</p>`;
