@@ -865,7 +865,7 @@
 <script>/* Extra interface languages live in /i18n/<code>.js (English text → translation). Load the chosen one before the app starts. */
 (function(){ try{ var X=["tr","uk","fa","ur"], v=localStorage.getItem("pt_ui");
   if(!v){ var n=String((navigator.languages&&navigator.languages[0])||navigator.language||"").slice(0,2).toLowerCase(); if(X.indexOf(n)>-1) v=n; }
-  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=5"><\/script>'); }catch(e){} })();</script>
+  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=6"><\/script>'); }catch(e){} })();</script>
 
 <script>
 /* ===================== CONTENT ===================== */
@@ -1238,7 +1238,7 @@ function bi(en,de,es){ if(es!==undefined) return tr(en,de,es); return `${en} <sp
 function uiSet(l){
   if(!UI_CODES.includes(l)) return;
   if(UI_EXTRA.includes(l) && !I18N_DATA[l]){
-    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=5";
+    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=6";
     sc.onload=()=>uiSet(l); sc.onerror=()=>bToast(offlineMsg()); document.head.appendChild(sc); return;
   }
   UI=l; I18N_T=null; I18N_M.clear();
@@ -6341,8 +6341,10 @@ function bCard(s){
   const isGame=s.type==="game", nowMs=Date.now(), startMs=new Date(s.starts_at).getTime();
   const roomWindow = isGame && nowMs >= startMs-30*60000 && nowMs < startMs+s.duration_min*60000;
   const roomSoon = isGame && nowMs < startMs-30*60000;
+  const talkWindow = !isGame && nowMs >= startMs-15*60000 && nowMs < startMs+(s.duration_min+60)*60000;
+  const talkBtn = talkWindow ? `<button class="btn primary" onclick="rmOpen('${id}')">⏱️ ${tr("Open session room","Session-Raum öffnen","Abrir sala de la sesión")}</button>` : "";
   if(s.is_host){
-    act = (roomWindow ? `<button class="btn primary" onclick="bRoom('${id}',true)">🎮 ${tr("Open game room","Spielraum öffnen","Abrir sala de juego")}</button>`
+    act = talkBtn + (roomWindow ? `<button class="btn primary" onclick="bRoom('${id}',true)">🎮 ${tr("Open game room","Spielraum öffnen","Abrir sala de juego")}</button>`
           : roomSoon ? `<p class="note" style="margin:8px 0 0">🎮 ${tr("You can open the game room 30 min before the start.","Spielraum ab 30 Min. vorher.","Puedes abrir la sala de juego 30 min antes.")}</p>` : "");
     act+=`<div class="row" style="margin-top:6px"><span class="feat">⭐ ${tr("You're hosting","Du leitest","Eres el anfitrión")}</span>${s.pending?`<span class="feat" style="background:#FFF1C2">🔔 ${tr(`${s.pending} request${s.pending>1?"s":""}`,`${s.pending} Anfrage${s.pending>1?"n":""}`,`${s.pending} solicitud${s.pending>1?"es":""}`)}</span>`:""}</div>
       ${hostList(s)}
@@ -6353,7 +6355,7 @@ function bCard(s){
     act=`<button class="btn primary" onclick="A.ret='board';go('account')">${tr("Sign in to join","Zum Beitreten anmelden","Entra para unirte")}</button>`;
   } else switch(s.my_status){
     case "joined":
-      act=`<p class="okmsg">✅ ${tr("You're in!","Du bist dabei!","¡Estás dentro!")}</p>${started?"":`<button class="btn secondary" onclick="addToCal('${id}')">${ICO.cal} ${tr("Add to calendar","Zum Kalender","Añadir al calendario")}</button>`}${roomWindow?`<button class="btn primary" onclick="bRoom('${id}',false)">🎮 ${tr("Enter game room","Zum Spielraum","Entrar a la sala de juego")}</button>`:roomSoon?`<p class="note" style="margin:4px 0 0">🎮 ${tr("The game room opens 30 min before the start.","Spielraum öffnet 30 Min. vorher.","La sala de juego abre 30 min antes.")}</p>`:""}${started?"":`<button class="btn ghost" onclick="bAct('pt_leave_activity','${id}')">${tr("Leave","Absagen","Salir")}</button>`}`; break;
+      act=`<p class="okmsg">✅ ${tr("You're in!","Du bist dabei!","¡Estás dentro!")}</p>${talkBtn}${started?"":`<button class="btn secondary" onclick="addToCal('${id}')">${ICO.cal} ${tr("Add to calendar","Zum Kalender","Añadir al calendario")}</button>`}${roomWindow?`<button class="btn primary" onclick="bRoom('${id}',false)">🎮 ${tr("Enter game room","Zum Spielraum","Entrar a la sala de juego")}</button>`:roomSoon?`<p class="note" style="margin:4px 0 0">🎮 ${tr("The game room opens 30 min before the start.","Spielraum öffnet 30 Min. vorher.","La sala de juego abre 30 min antes.")}</p>`:""}${started?"":`<button class="btn ghost" onclick="bAct('pt_leave_activity','${id}')">${tr("Leave","Absagen","Salir")}</button>`}`; break;
     case "invited":
       act=`<p class="okmsg">📩 ${tr(`${esc(s.host_name||"The host")} invited you!`,`${esc(s.host_name||"Der Host")} hat dich eingeladen!`,`¡${esc(s.host_name||"El anfitrión")} te invitó!`)}</p>
         <div class="brow2"><button class="btn primary" onclick="bAct('pt_accept_invite','${id}')" ${B.busy?"disabled":""}>${tr("Accept","Annehmen","Aceptar")}</button>
@@ -7743,6 +7745,99 @@ VIEWS.session = function(){
     <p class="center"><button class="linkbtn" onclick="bOpen()">${tr("See all sessions →","Alle Sessions →","Ver todas las sesiones →")}</button></p>
     ${legalLinks()}`;
 };
+
+/* ===================== SESSION ROOM: language timer + conversation cards ===================== */
+const RM={ id:null, st:null, off:0, chan:null, poll:null, tick:null, busy:false, err:"" };
+const RM_ERR={ room_not_member:["Only people in this session can use the room","Nur Leute aus dieser Session können den Raum nutzen","Solo la gente de esta sesión puede usar la sala"],
+  room_closed:["The room is open from 15 minutes before the start until an hour after the end","Der Raum ist ab 15 Minuten vor dem Start bis eine Stunde nach dem Ende offen","La sala está abierta desde 15 minutos antes hasta una hora después del final"],
+  room_host_only:["Only the host can do this","Nur der Host kann das","Solo el anfitrión puede hacer esto"],
+  room_bad_lang:["Pick one of the session's languages","Wähle eine der Sprachen der Session","Elige uno de los idiomas de la sesión"] };
+function rmErr(e){ const m=String(e&&e.message||e); const k=Object.keys(RM_ERR).find(k=>m.includes(k)); return k?tr(...RM_ERR[k]):bErr(e); }
+function rmOpen(id){ RM.id=id; RM.st=null; RM.err=""; S.rid=id; go("room"); }
+function rmStop(){ try{ if(RM.chan) A.sb.removeChannel(RM.chan); }catch(e){} RM.chan=null; clearInterval(RM.poll); clearInterval(RM.tick); RM.poll=RM.tick=null; }
+function rmSet(st){ if(!st) return; RM.st=st; RM.off=new Date(st.now).getTime()-Date.now(); }
+async function rmFetch(redraw){
+  if(!RM.id||!A.sb) return;
+  try{ const { data, error } = await A.sb.rpc("pt_room_state",{ p_activity:RM.id }); if(error) throw error; rmSet(data); RM.err=""; }
+  catch(e){ RM.err=rmErr(e); }
+  if(S.screen==="room" && redraw!==false) xr();
+}
+function rmStart(){
+  rmStop(); if(!RM.id||!A.sb) return;
+  rmFetch();
+  try{ RM.chan=A.sb.channel("room-"+RM.id,{ config:{ broadcast:{ self:false } } }).on("broadcast",{ event:"r" },()=>rmFetch()).subscribe(); }catch(e){}
+  RM.poll=setInterval(()=>{ if(S.screen!=="room"){ rmStop(); return; } if(!document.hidden) rmFetch(); },10000);
+  RM.tick=setInterval(()=>{ if(S.screen!=="room"){ rmStop(); return; } rmPaint(); },1000);
+}
+async function rmDo(fn, args){
+  if(RM.busy) return; RM.busy=true;
+  try{ const { data, error } = await A.sb.rpc(fn,{ p_activity:RM.id, ...(args||{}) }); if(error) throw error; rmSet(data);
+    try{ RM.chan && RM.chan.send({ type:"broadcast", event:"r", payload:{} }); }catch(e){} }
+  catch(e){ bToast(rmErr(e)); }
+  RM.busy=false; xr();
+}
+function rmSecs(lang){
+  const st=RM.st; if(!st) return 0;
+  let n=(st.totals&&st.totals[lang])||0;
+  // the server total for the running language counts up to the server's "now"; add what passed since then
+  if(st.current_lang===lang && st.now) n+=Math.max(0,Math.round((Date.now()+RM.off-new Date(st.now).getTime())/1000));
+  return n;
+}
+function rmFmt(n){ n=Math.max(0,Math.round(n)); const h=Math.floor(n/3600), m=Math.floor(n%3600/60), s=n%60; return (h?h+":"+String(m).padStart(2,"0"):m)+":"+String(s).padStart(2,"0"); }
+function rmPaint(){
+  const st=RM.st; if(!st) return;
+  const langs=[st.language_a,st.language_b].filter(Boolean), tot=langs.reduce((a,l)=>a+rmSecs(l),0);
+  langs.forEach((l,i)=>{ const el=document.getElementById("rmt-"+l); if(el) el.textContent=rmFmt(rmSecs(l));
+    const bar=document.getElementById("rmb-"+i); if(bar) bar.style.width=(tot?Math.round(100*rmSecs(l)/tot):(langs.length>1?50:100))+"%"; });
+  const seg=document.getElementById("rmseg");
+  if(seg && st.current_lang && st.seg_started) seg.textContent=rmFmt((Date.now()+RM.off-new Date(st.seg_started).getTime())/1000);
+}
+function rmPrompt(s, lang){
+  try{
+    const low=s.level_min!=null && s.level_min<=1, pool=(low?P1:P)[lang]||P[lang]; if(!pool) return null;
+    const cat=TOPIC_CAT[(s.topics||[])[0]]||"everyday";
+    const list=[].concat((pool[cat]&&pool[cat].quick)||[], (pool.everyday&&pool.everyday.quick)||[]).filter((q,i,a)=>a.findIndex(x=>x.t===q.t)===i);
+    if(!list.length) return null;
+    return { lang, q:list[(rHash(s.activity_id)+(RM.st?RM.st.prompt_idx:0))%list.length], n:list.length };
+  }catch(e){ return null; }
+}
+VIEWS.room = function(){
+  const s=calRow(RM.id);
+  const top=`<div class="topline"><button class="chip" onclick="rmStop();sOpen('${RM.id}')">${uiBack()} ${tr("Session","Session","Sesión")}</button><span>⏱️ ${tr("Session room","Session-Raum","Sala de la sesión")}</span></div>`;
+  if(!s||!RM.st) return `${top}${RM.err?`<div class="card center" style="margin-top:16px"><p>${esc(RM.err)}</p></div>`:`<p class="note center" style="margin-top:40px">${tr("Loading…","Lädt…","Cargando…")}</p>`}`;
+  const st=RM.st, langs=[st.language_a,st.language_b].filter(Boolean), cur=st.current_lang;
+  const nm=l=>`${T[l]?T[l].flag:""} ${esc(lname(l))}`;
+  const pr=rmPrompt(s, cur||langs[0]);
+  const COL=["var(--coral)","var(--teal)"];
+  return `${top}
+    <h2 style="margin:4px 0 2px">${esc(s.title)}</h2>
+    <p class="note" style="margin:0 0 10px">${fmtWhen(s.starts_at)} · ${s.duration_min} min</p>
+    ${vBtn(s.activity_id,false,s)}
+    ${!st.open?`<p class="note" style="color:#B54530">${tr(...RM_ERR.room_closed)}</p>`:""}
+    <div class="card center" style="margin-top:10px">
+      <p class="note" style="margin:0 0 4px">${cur?tr("Now speaking","Jetzt sprechen wir","Ahora hablamos"):tr("Timer paused","Timer pausiert","Temporizador en pausa")}</p>
+      <div style="font-size:30px;font-weight:800;line-height:1.2">${cur?nm(cur):"⏸️"}</div>
+      ${cur?`<div id="rmseg" style="font-size:40px;font-weight:800;font-variant-numeric:tabular-nums;margin:4px 0" dir="ltr">0:00</div>`:""}
+      <div class="brow2" style="margin-top:10px">${langs.map((l,i)=>`<button class="btn ${cur===l?"secondary":"primary"}" style="${cur===l?"":`background:${COL[i]}`}" ${cur===l||!st.open||RM.busy?"disabled":""} onclick="rmDo('pt_room_switch',{p_lang:'${l}'})">🗣️ ${nm(l)}</button>`).join("")}</div>
+      <p class="note" style="margin:8px 0 0">${tr("Anyone can switch when the conversation changes language.","Jede/r kann wechseln, wenn ihr die Sprache wechselt.","Cualquiera puede cambiar cuando la conversación cambie de idioma.")}</p>
+    </div>
+    <div class="card">
+      <h3 style="margin:0 0 8px">⚖️ ${tr("Balance","Balance","Equilibrio")}</h3>
+      <div style="display:flex;height:16px;border-radius:8px;overflow:hidden;background:var(--line)" dir="ltr">${langs.map((l,i)=>`<div id="rmb-${i}" style="background:${COL[i]};width:${langs.length>1?50:100}%;transition:width .6s"></div>`).join("")}</div>
+      <div style="display:flex;justify-content:space-between;gap:10px;margin-top:8px" dir="ltr">${langs.map(l=>`<span dir="auto">${nm(l)} <b id="rmt-${l}" dir="ltr" style="font-variant-numeric:tabular-nums">0:00</b></span>`).join("")}</div>
+      <p class="note" style="margin:8px 0 0">${tr("No need to split exactly 50/50: it just helps you notice.","Ihr müsst nicht genau 50/50 teilen: es hilft nur, es zu merken.","No hace falta dividir 50/50 exacto: solo ayuda a darte cuenta.")}</p>
+      ${st.is_host?`<div class="brow2" style="margin-top:10px"><button class="btn secondary" ${!cur||RM.busy?"disabled":""} onclick="rmDo('pt_room_pause')">⏸️ ${tr("Pause","Pause","Pausa")}</button><button class="btn ghost" ${RM.busy?"disabled":""} onclick="if(confirm(tr('Reset the times for everyone?','Zeiten für alle zurücksetzen?','¿Reiniciar los tiempos para todos?')))rmDo('pt_room_reset')">↺ ${tr("Reset","Zurücksetzen","Reiniciar")}</button></div>`:""}
+    </div>
+    ${pr?`<div class="card">
+      <h3 style="margin:0 0 8px">💬 ${tr("Conversation card","Gesprächskarte","Tarjeta de conversación")}</h3>
+      <p style="font-size:20px;font-weight:700;margin:0 0 10px;line-height:1.35" dir="${T[pr.lang]?T[pr.lang].dir:"auto"}" lang="${pr.lang}">${esc(pr.q.t)}</p>
+      ${pr.q.w&&pr.q.w.length?`<div class="row" style="margin:0 0 10px">${pr.q.w.map(w=>`<span class="feat" dir="auto">${esc(w)}</span>`).join("")}</div>`:""}
+      <button class="btn secondary" ${!st.open||RM.busy?"disabled":""} onclick="rmDo('pt_room_next_prompt')">➡️ ${tr("Next question","Nächste Frage","Siguiente pregunta")}</button>
+      <p class="note" style="margin:6px 0 0">${tr("Everyone sees the same card. It follows the language you're speaking.","Alle sehen dieselbe Karte. Sie folgt der Sprache, die ihr gerade sprecht.","Todos ven la misma tarjeta. Sigue el idioma que estáis hablando.")}</p>
+    </div>`:""}
+`;
+};
+AFTER.room = function(){ if(!RM.chan) rmStart(); else rmPaint(); };
 
 /* ===================== NOTIFICATION SETTINGS ===================== */
 const NP = { loaded:false, busy:false, v:{ all_emails:true, in_app:true, seat_offers:true, approvals:true, join_requests:true, reminders:true, cancellations:true, session_matches:true } };
