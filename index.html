@@ -214,6 +214,34 @@
   .ecbar{width:100%;height:8px;border-radius:999px;background:#F1EEE8;overflow:hidden}
   .ecbar i{display:block;height:100%;background:var(--coral)}
   .ecbadge{display:inline-block;border-radius:999px;padding:2px 8px;font-size:12px;font-weight:800;margin-left:4px}
+
+  /* ---- Test practice (Leben in Deutschland) ---- */
+  .exopt{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;border:2px solid var(--line);background:#fff;border-radius:16px;padding:12px 14px;margin:8px 0;font:600 16px 'Plus Jakarta Sans',sans-serif;color:var(--ink);cursor:pointer}
+  .exopt .k{flex:none;width:28px;height:28px;border-radius:50%;background:#F1EEE8;display:grid;place-items:center;font-weight:800;font-size:14px}
+  .exopt.sel{border-color:var(--plum);background:var(--plum-soft)}
+  .exopt.sel .k{background:var(--plum);color:#fff}
+  .exopt.ok{border-color:var(--teal);background:var(--teal-soft)}
+  .exopt.ok .k{background:var(--teal);color:#fff}
+  .exopt.no{border-color:var(--coral);background:var(--coral-soft)}
+  .exopt.no .k{background:var(--coral);color:#fff}
+  .exopt:disabled{cursor:default}
+  .extr{display:block;font-size:13.5px;color:var(--muted);font-weight:600;margin-top:2px}
+  .exq{font-size:19px;font-weight:800;line-height:1.35;margin:4px 0 6px}
+  .exdots{display:flex;flex-wrap:wrap;gap:5px;margin:10px 0}
+  .exdots button{width:26px;height:26px;border-radius:7px;border:1.5px solid var(--line);background:#fff;font:700 11px 'Plus Jakarta Sans',sans-serif;color:var(--muted);cursor:pointer;padding:0}
+  .exdots button.done{background:var(--plum-soft);border-color:var(--plum);color:var(--plum)}
+  .exdots button.cur{outline:2px solid var(--coral)}
+  .exbar{height:10px;border-radius:999px;background:#F1EEE8;overflow:hidden}
+  .exbar i{display:block;height:100%;background:var(--teal)}
+  .extiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}
+  .extiles div{background:#F7F4EE;border-radius:14px;padding:10px;text-align:center}
+  .extiles b{display:block;font-size:22px}
+  .exhist{display:flex;align-items:flex-end;gap:5px;height:90px;border-bottom:1.5px solid var(--line);position:relative;margin:8px 0 4px}
+  .exhist i{flex:1;max-width:26px;border-radius:6px 6px 0 0;background:var(--teal)}
+  .exhist i.f{background:var(--coral)}
+  .exhist .pl{position:absolute;left:0;right:0;border-top:1.5px dashed var(--muted)}
+  .exprac .qbtn{white-space:normal;height:auto;min-height:48px;line-height:1.25;padding-top:10px;padding-bottom:10px}
+  .eximg{width:100%;max-width:520px;border-radius:12px;border:1px solid var(--line);margin:6px 0;background:#fff}
   /* ---- Pop quiz ---- */
   .qzb.live{animation:qzpulse 1.6s ease-in-out infinite}
   @keyframes qzpulse{0%,100%{box-shadow:0 0 0 0 rgba(42,140,130,.45)}50%{box-shadow:0 0 0 8px rgba(42,140,130,0)}}
@@ -7278,6 +7306,7 @@ function quickCard(){
     <button class="btn secondary qbtn" onclick="luOpen()">🛋️ Chat in a lounge <span data-lupres-all>${lpAll()}</span></button>
     <button class="btn secondary qbtn" onclick="ptOpen()">👥 Find a partner <span data-ptcount>${ptCountHtml()}</span></button>
     <button class="btn secondary qbtn" onclick="cfOpen()">☕ Find a language café</button>
+    <button class="btn secondary qbtn" onclick="exOpen()">🇩🇪 Leben in Deutschland test</button>
     <button class="btn secondary qbtn" onclick="shOpen()">📘 Free resources</button>
     <button class="btn secondary qbtn" onclick="go('games')">${ICO.play} Play a game now</button></div>`;
 }
@@ -7571,6 +7600,191 @@ async function nbReadAll(){
   try{ await A.sb.rpc("pt_mark_read",{ p_id:null }); }catch(e){}
 }
 
+
+/* ===================== TEST PRACTICE: Leben in Deutschland / Einbürgerungstest ===================== */
+/* Data: /lid/questions.json (official BAMF catalogue), /lid/tr/<lang>.json, /lid/img/. History: sql/exam_practice.sql */
+const LID_V="2025-05-07";
+const LID_STATES=[["BW","Baden-Württemberg"],["BY","Bayern"],["BE","Berlin"],["BB","Brandenburg"],["HB","Bremen"],["HH","Hamburg"],["HE","Hessen"],["MV","Mecklenburg-Vorpommern"],["NI","Niedersachsen"],["NW","Nordrhein-Westfalen"],["RP","Rheinland-Pfalz"],["SL","Saarland"],["SN","Sachsen"],["ST","Sachsen-Anhalt"],["SH","Schleswig-Holstein"],["TH","Thüringen"]];
+const LID_LANGS=[["","Off · Aus"],["en","English"],["tr","Türkçe"],["ru","Русский"],["fr","Français"],["ar","العربية"],["uk","Українська"],["hi","हिन्दी"]];
+const LID_TOPICS={"History & Geography":"🏛️ History & geography · Geschichte","Law & Governance":"⚖️ Law & government · Recht","Elections":"🗳️ Elections · Wahlen","Education & Religion":"🎓 Education & religion · Bildung","Economy & Employment":"💼 Work & economy · Arbeit","Democracy & Politics":"🏛️ Democracy · Demokratie","Rights & Freedoms":"🕊️ Rights & freedoms · Grundrechte","Federal System":"🗺️ Federal system · Bundesländer","Constitution":"📜 Constitution · Grundgesetz","Assembly & Protests":"📣 Assembly · Versammlung"};
+const EX={ qs:null, tr:{}, lang:"", state:"TH", err:"", run:null, res:null, ans:[], att:[], hist:false, loading:false };
+try{ const v=JSON.parse(localStorage.getItem("pt_lid")||"{}"); if(v.state) EX.state=v.state; if(typeof v.lang==="string") EX.lang=v.lang; }catch(e){}
+function exSavePrefs(){ try{ localStorage.setItem("pt_lid", JSON.stringify({ state:EX.state, lang:EX.lang })); }catch(e){} }
+async function exOpen(){
+  go("exam");
+  try{
+    if(!EX.qs){ const r=await fetch(`/lid/questions.json?v=${LID_V}`); EX.qs=(await r.json()).questions; }
+    if(EX.lang) await exTr(EX.lang);
+    await exLoadHist();
+  }catch(e){ EX.err="Couldn't load the questions. Check your connection · Fragen konnten nicht geladen werden"; }
+  if(S.screen==="exam") xr();
+}
+async function exTr(l){ if(!l||EX.tr[l]) return; try{ const r=await fetch(`/lid/tr/${l}.json?v=${LID_V}`); EX.tr[l]=await r.json(); }catch(e){} }
+async function exSetLang(l){ EX.lang=l; exSavePrefs(); await exTr(l); xr(); }
+function exSetState(v){ EX.state=v; exSavePrefs(); xr(); }
+/* history: database when signed in, this phone otherwise */
+function exLocal(){ try{ return JSON.parse(localStorage.getItem("pt_lid_hist")||'{"ans":[],"att":[]}'); }catch(e){ return { ans:[], att:[] }; } }
+async function exLoadHist(){
+  if(A.user&&A.sb){
+    try{
+      const [a,b]=await Promise.all([
+        A.sb.from("exam_attempts").select("mode,state,topic,total,correct,passed,seconds,wrong,created_at").eq("exam","lid").order("created_at",{ ascending:false }).limit(200),
+        A.sb.from("exam_answers").select("qnum,correct,created_at").eq("exam","lid").order("created_at",{ ascending:false }).limit(5000)]);
+      if(a.error) throw a.error; if(b.error) throw b.error;
+      EX.att=a.data||[]; EX.ans=(b.data||[]).map(x=>({ n:x.qnum, ok:x.correct, t:x.created_at })); return;
+    }catch(e){ /* table not there yet: fall back to this phone */ }
+  }
+  const l=exLocal(); EX.att=l.att||[]; EX.ans=l.ans||[];
+}
+async function exSave(att, answers){
+  const now=new Date().toISOString();
+  EX.att.unshift({ ...att, created_at:now }); answers.forEach(a=>EX.ans.unshift({ n:a.n, ok:a.ok, t:now }));
+  if(A.user&&A.sb){
+    try{
+      const r=await A.sb.from("exam_attempts").insert({ exam:"lid", ...att }); if(r.error) throw r.error;
+      if(answers.length){ const r2=await A.sb.from("exam_answers").insert(answers.map(a=>({ exam:"lid", qnum:a.n, correct:a.ok }))); if(r2.error) throw r2.error; }
+      return;
+    }catch(e){ /* keep it on the phone */ }
+  }
+  const l=exLocal(); l.att=[{ ...att, created_at:now }, ...(l.att||[])].slice(0,200);
+  l.ans=[...answers.map(a=>({ n:a.n, ok:a.ok, t:now })), ...(l.ans||[])].slice(0,5000);
+  try{ localStorage.setItem("pt_lid_hist", JSON.stringify(l)); }catch(e){}
+}
+function exLast(){ const m={}; for(const a of EX.ans){ if(!(a.n in m)) m[a.n]=a.ok; } return m; } // newest answer per question
+function exPool(){ return (EX.qs||[]).filter(q=>!q.s||q.s===EX.state); }
+function exShuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function exStart(mode, topic){
+  const pool=exPool(), last=exLast(); let list;
+  if(mode==="mock") list=[...exShuffle(pool.filter(q=>!q.s)).slice(0,30), ...exShuffle(pool.filter(q=>q.s)).slice(0,3)];
+  else if(topic==="__state") list=pool.filter(q=>q.s);
+  else if(topic==="__wrong") list=exShuffle(pool.filter(q=>last[q.n]===false));
+  else if(topic==="__new") list=exShuffle(pool.filter(q=>!(q.n in last))).slice(0,20);
+  else if(topic==="__all") list=pool.slice();
+  else list=exShuffle(pool.filter(q=>q.t===topic)).slice(0,20);
+  if(!list.length){ bToast(topic==="__wrong"?"No mistakes to practise 🎉 · Keine Fehler":"Nothing here yet · Noch nichts da"); return; }
+  EX.run={ mode, topic:topic||null, list, i:0, picks:{}, shown:{}, t0:Date.now(), end:mode==="mock"?Date.now()+60*60000:0 };
+  EX.res=null; go("examq");
+}
+function exQText(q){
+  const t=EX.lang&&EX.tr[EX.lang]&&EX.tr[EX.lang][q.n];
+  return { q, t, rtl:EX.lang==="ar" };
+}
+function exImg(q){ return q.i?`<img class="eximg" src="/lid/img/${esc(q.i)}?v=${LID_V}" alt="Pictures 1 to 4 for question ${esc(q.n)} · Bilder 1 bis 4" loading="lazy">`:""; }
+function exClock(ms){ const s=Math.max(0,Math.round(ms/1000)); return `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`; }
+VIEWS.exam = function(){
+  const back=`<div class="topline"><button class="chip" onclick="go('home')">← Home</button><span>🇩🇪 Test practice</span></div>`;
+  let h=back+`<h2 style="margin:6px 0 2px">Leben in Deutschland · Einbürgerungstest</h2>
+    <p class="sub" style="margin:0 0 10px">Practise with all official BAMF questions: 300 general + 10 for your Bundesland. · Alle offiziellen Fragen.</p>`;
+  if(EX.err) return h+`<div class="err">${esc(EX.err)}</div>`;
+  if(!EX.qs) return h+`<p class="note center">Loading… · Lädt…</p>`;
+  const pool=exPool(), last=exLast(), known=pool.filter(q=>last[q.n]===true).length, wrong=pool.filter(q=>last[q.n]===false).length, unseen=pool.filter(q=>!(q.n in last)).length;
+  const mocks=EX.att.filter(a=>a.mode==="mock"), passed=mocks.filter(a=>a.passed).length, best=mocks.reduce((m,a)=>Math.max(m,a.correct),0);
+  h+=`<div class="card"><div class="row" style="gap:10px;flex-wrap:wrap">
+      <label class="lbl" style="margin:0;flex:1;min-width:150px">Bundesland<select onchange="exSetState(this.value)" style="width:100%;margin-top:4px;border:2px solid var(--line);border-radius:12px;padding:10px;font:600 15px 'Plus Jakarta Sans',sans-serif">${LID_STATES.map(([k,n])=>`<option value="${k}" ${EX.state===k?"selected":""}>${n}</option>`).join("")}</select></label>
+      <label class="lbl" style="margin:0;flex:1;min-width:150px">Translation · Übersetzung<select onchange="exSetLang(this.value)" style="width:100%;margin-top:4px;border:2px solid var(--line);border-radius:12px;padding:10px;font:600 15px 'Plus Jakarta Sans',sans-serif">${LID_LANGS.map(([k,n])=>`<option value="${k}" ${EX.lang===k?"selected":""}>${n}</option>`).join("")}</select></label></div></div>
+    <div class="card" style="border:2px solid var(--coral)"><h3 style="margin:0 0 4px">📝 Mock test · Probetest</h3>
+      <p class="note" style="margin:0 0 10px">33 questions (30 general + 3 ${esc((LID_STATES.find(x=>x[0]===EX.state)||[0,""])[1])}), 60 minutes. Pass: 17 correct (Einbürgerungstest), 15 for "Leben in Deutschland". · Wie in der echten Prüfung.</p>
+      <button class="btn primary" onclick="exStart('mock')">Start mock test · Probetest starten</button></div>
+    <div class="card"><h3 style="margin:0 0 6px">📈 My progress · Mein Fortschritt</h3>
+      <div class="ectop" style="gap:8px"><span class="ecmeta">Questions answered right (last try) · Richtig beantwortet</span><b>${known} / ${pool.length}</b></div>
+      <div class="exbar" style="margin:6px 0 10px"><i style="width:${pool.length?Math.round(known/pool.length*100):0}%"></i></div>
+      <div class="extiles"><div><b>${mocks.length}</b><span class="ecmeta">mock tests</span></div><div><b>${passed}</b><span class="ecmeta">passed ✅</span></div><div><b>${mocks.length?best:"–"}<small style="font-size:12px">/33</small></b><span class="ecmeta">best score</span></div></div>
+      ${mocks.length?exHistHtml(mocks):`<p class="note" style="margin:6px 0 0">Your test scores will show up here. · Hier erscheinen deine Ergebnisse.</p>`}
+      ${!A.user?`<p class="note" style="margin:8px 0 0">💾 Saved on this phone only. <button class="linkbtn" onclick="A.ret='exam';go('account')">Sign in</button> to keep your history everywhere. · Anmelden, um den Verlauf zu speichern.</p>`:""}
+    </div>
+    <div class="card exprac"><h3 style="margin:0 0 6px">📚 Practise · Üben</h3>
+      <p class="note" style="margin:0 0 8px">You see the right answer after each question. · Nach jeder Frage siehst du die Lösung.</p>
+      <button class="btn secondary qbtn" onclick="exStart('practice','__wrong')">🔁 My mistakes · Meine Fehler (${wrong})</button>
+      <button class="btn secondary qbtn" onclick="exStart('practice','__new')">🆕 Questions I haven't tried · Neue Fragen (${unseen})</button>
+      <button class="btn secondary qbtn" onclick="exStart('practice','__state')">📍 My Bundesland · Mein Bundesland (10)</button>
+      ${Object.entries(LID_TOPICS).map(([k,l])=>{ const qq=pool.filter(q=>q.t===k&&!q.s); if(!qq.length) return ""; const ok=qq.filter(q=>last[q.n]===true).length;
+        return `<button class="btn secondary qbtn" onclick="exStart('practice','${k.replace(/'/g,"\\'")}')">${esc(l)} <span class="ecmeta">${ok}/${qq.length}</span></button>`; }).join("")}
+      <button class="btn secondary qbtn" onclick="exStart('practice','__all')">🗂️ All ${pool.length} in order · Alle der Reihe nach</button></div>
+    <p class="note">Questions: official BAMF catalogue (as of 07.05.2025). Translations and explanations: open-source project “Leben in Deutschland” (MIT). PonteTalk is not an official BAMF app. · Keine offizielle BAMF-App.</p>`;
+  return h;
+};
+function exHistHtml(mocks){
+  const l=mocks.slice(0,12).reverse();
+  return `<div class="ecmeta" style="margin-top:8px">Last mock tests · Letzte Probetests (dashed line = 17 to pass)</div>
+    <div class="exhist"><div class="pl" style="bottom:${17/33*100}%"></div>${l.map(a=>`<i class="${a.passed?"":"f"}" style="height:${Math.max(4,a.correct/33*100)}%" title="${a.correct}/33 · ${esc(fmtWhen(a.created_at))}"></i>`).join("")}</div>
+    <div class="ecmeta">${l.map(a=>a.correct).join(" · ")}</div>`;
+}
+VIEWS.examq = function(){
+  const r=EX.run; if(!r) return `<p class="note center">…</p>`;
+  const q=r.list[r.i], tq=exQText(q), t=tq.t, mock=r.mode==="mock", pick=r.picks[q.n], shown=!mock&&r.shown[q.n];
+  const left=mock?r.end-Date.now():0;
+  let h=`<div class="topline"><button class="chip" onclick="exQuit()">✕ ${mock?"End test":"Stop"}</button><span class="ecmeta">${mock?`⏱ <span id="exclock">${exClock(left)}</span> · `:""}${r.i+1} / ${r.list.length}</span></div>
+    <div class="exbar" style="margin:0 0 10px"><i style="width:${Math.round((r.i+1)/r.list.length*100)}%;background:var(--coral)"></i></div>
+    <div class="card"><div class="ecmeta">Frage ${esc(q.n)}${q.s?` · ${esc((LID_STATES.find(x=>x[0]===q.s)||[0,""])[1])}`:""}</div>
+      <div class="exq" lang="de">${esc(q.q)}</div>${t?`<div class="extr" dir="${tq.rtl?"rtl":"auto"}">${esc(t.q)}</div>`:""}
+      ${exImg(q)}
+      ${q.a.map((a,k)=>{ let c=""; if(shown){ if(k===q.c) c="ok"; else if(k===pick) c="no"; } else if(pick===k) c="sel";
+        return `<button class="exopt ${c}" ${shown?"disabled":""} onclick="exPick(${k})"><span class="k">${shown&&k===q.c?"✓":shown&&k===pick?"✕":"ABCD"[k]}</span><span lang="de">${esc(a)}${t&&t.a[k]&&!/^Bild \d/.test(a)?`<span class="extr" dir="${tq.rtl?"rtl":"auto"}">${esc(t.a[k])}</span>`:""}</span></button>`; }).join("")}
+      ${shown?`<div class="${pick===q.c?"ok":"err"}" style="margin-top:8px">${pick===q.c?"✅ Richtig! · Correct!":`❌ Richtig ist · Correct: <b>${esc(q.a[q.c])}</b>`}${t&&t.x?`<div class="extr" style="margin-top:6px" dir="${tq.rtl?"rtl":"auto"}">💡 ${esc(t.x)}</div>`:""}</div>`:""}
+    </div>`;
+  if(mock){
+    h+=`<div class="row" style="gap:8px"><button class="btn secondary" ${r.i===0?"disabled":""} onclick="exGo(${r.i-1})">← Back</button>
+      ${r.i<r.list.length-1?`<button class="btn primary" onclick="exGo(${r.i+1})">Next · Weiter →</button>`:`<button class="btn primary" onclick="exFinish()">✓ Finish · Abgeben</button>`}</div>
+      <div class="exdots">${r.list.map((x,k)=>`<button class="${x.n in r.picks?"done":""} ${k===r.i?"cur":""}" onclick="exGo(${k})" aria-label="Question ${k+1}">${k+1}</button>`).join("")}</div>
+      <p class="note">${Object.keys(r.picks).length} of ${r.list.length} answered · beantwortet. <button class="linkbtn" onclick="exFinish()">Finish now · Jetzt abgeben</button></p>`;
+  } else if(shown){
+    h+=`<button class="btn primary" onclick="${r.i<r.list.length-1?`exGo(${r.i+1})`:"exFinish()"}">${r.i<r.list.length-1?"Next · Weiter →":"See my result · Ergebnis"}</button>`;
+  }
+  return h;
+};
+AFTER.examq = function(){
+  const r=EX.run; if(!r||r.mode!=="mock"||r.timer) return;
+  r.timer=setInterval(()=>{ if(S.screen!=="examq"||EX.run!==r){ clearInterval(r.timer); return; }
+    const left=r.end-Date.now(); const el=document.getElementById("exclock"); if(el) el.textContent=exClock(left);
+    if(left<=0){ clearInterval(r.timer); bToast("Time's up! · Die Zeit ist um!"); exFinish(true); } },1000);
+};
+function exPick(k){
+  const r=EX.run, q=r.list[r.i];
+  if(r.mode==="mock"){ r.picks[q.n]=k; xr(); return; }
+  if(r.shown[q.n]) return; r.picks[q.n]=k; r.shown[q.n]=true; xr();
+}
+function exGo(i){ const r=EX.run; if(!r) return; r.i=Math.max(0,Math.min(r.list.length-1,i)); xr(); }
+function exQuit(){
+  const r=EX.run; if(!r) return go("exam");
+  const n=Object.keys(r.picks).length;
+  if(r.mode==="mock"&&n&&!window.confirm("End the test without a result? · Test ohne Ergebnis beenden?")) return;
+  if(r.mode==="practice"&&n){ exFinish(); return; }
+  if(r.timer) clearInterval(r.timer); EX.run=null; go("exam");
+}
+async function exFinish(timeUp){
+  const r=EX.run; if(!r) return;
+  if(r.mode==="mock"&&!timeUp){ const miss=r.list.length-Object.keys(r.picks).length; if(miss&&!window.confirm(`${miss} question(s) not answered. Finish anyway? · Trotzdem abgeben?`)) return; }
+  if(r.timer) clearInterval(r.timer);
+  const list=r.mode==="mock"?r.list:r.list.filter(q=>q.n in r.picks);
+  const answers=list.filter(q=>q.n in r.picks).map(q=>({ n:q.n, ok:r.picks[q.n]===q.c }));
+  const correct=list.filter(q=>r.picks[q.n]===q.c).length, wrongQ=list.filter(q=>r.picks[q.n]!==q.c);
+  const att={ mode:r.mode, state:EX.state, topic:r.topic, total:Math.max(1,list.length), correct, passed:r.mode==="mock"?correct>=17:null,
+    seconds:Math.round((Date.now()-r.t0)/1000), wrong:wrongQ.map(q=>q.n) };
+  EX.res={ ...att, list, picks:{ ...r.picks } }; EX.run=null; go("examr");
+  if(list.length) await exSave(att, answers);
+}
+VIEWS.examr = function(){
+  const x=EX.res; if(!x) return `<p class="note center">…</p>`;
+  const mock=x.mode==="mock", pct=Math.round(x.correct/x.total*100);
+  const wrong=x.list.filter(q=>x.picks[q.n]!==q.c);
+  let h=`<div class="topline"><button class="chip" onclick="go('exam')">← Test practice</button><span></span></div>
+    <div class="card center">${mock?`<div style="font-size:54px">${x.passed?"🎉":"💪"}</div><h2 style="margin:4px 0">${x.passed?"Bestanden! · Passed!":"Noch nicht · Not yet"}</h2>`:`<div style="font-size:48px">📚</div><h2 style="margin:4px 0">Practice done · Geschafft!</h2>`}
+      <div style="font-size:40px;font-weight:800;margin:6px 0">${x.correct} / ${x.total}</div>
+      <p class="note" style="margin:0">${mock?`You need 17 for the Einbürgerungstest (15 for “Leben in Deutschland”). Time: ${exClock(x.seconds*1000)} of 60:00.`:`${pct}% correct · richtig`}</p>
+      <div class="row" style="gap:8px;justify-content:center;margin-top:12px"><button class="btn primary" onclick="exStart('${mock?"mock":"practice"}'${mock?"":`,'${(x.topic||"__all").replace(/'/g,"\\'")}'`})">${mock?"New mock test · Neuer Test":"Again · Nochmal"}</button>
+      ${wrong.length?`<button class="btn secondary" onclick="exStart('practice','__wrong')">🔁 Practise mistakes</button>`:""}</div></div>`;
+  if(wrong.length){
+    const tr=EX.lang&&EX.tr[EX.lang];
+    h+=`<div class="card"><h3 style="margin:0 0 8px">To review · Zum Wiederholen (${wrong.length})</h3>${wrong.map(q=>{ const t=tr&&tr[q.n];
+      return `<div style="padding:10px 0;border-top:1px solid var(--line)"><div class="ecmeta">Frage ${esc(q.n)}</div><b lang="de">${esc(q.q)}</b>${t?`<span class="extr">${esc(t.q)}</span>`:""}
+        ${q.i?exImg(q):""}
+        ${q.n in x.picks?`<div style="color:var(--coral);font-weight:700;margin-top:4px">✕ ${esc(q.a[x.picks[q.n]])}</div>`:`<div class="ecmeta" style="margin-top:4px">Not answered · Nicht beantwortet</div>`}
+        <div style="color:var(--teal);font-weight:800">✓ ${esc(q.a[q.c])}${t&&t.a[q.c]&&!/^Bild \d/.test(q.a[q.c])?` <span class="extr" style="display:inline">· ${esc(t.a[q.c])}</span>`:""}</div>
+        ${t&&t.x?`<div class="extr">💡 ${esc(t.x)}</div>`:""}</div>`; }).join("")}</div>`;
+  }
+  return h;
+};
+
 /* ===================== GAMES ===================== */
 VIEWS.games = function(){
   return `<h2>${bi("Games","Spiele")}</h2>
@@ -7679,6 +7893,7 @@ try{ const lid=new URLSearchParams(location.search).get("lounge"); if(lid && /^[
     if(A.status==="in"&&A.user){ clearInterval(w); luEnter(lid); }
     else if((A.status==="out"&&n>2)||n>20){ clearInterval(w); A.ret="lounge"; const pr=lid.split("-");
       A.msg=`Sign in (free) to join the ${cfLang(pr[0])[1]} ⇄ ${cfLang(pr[1])[1]} lounge · Melde dich an, um der Lounge beizutreten`; go("account"); } },500); } }catch(e){}
+try{ if(new URLSearchParams(location.search).has("lid")) setTimeout(()=>exOpen(),0); }catch(e){}
 try{ if(new URLSearchParams(location.search).has("cafes")){ S.screen="cafes"; document.addEventListener("DOMContentLoaded", ()=>cfLoad()); } }catch(e){}
 try{ if(new URLSearchParams(location.search).has("board")){ S.screen="board"; document.addEventListener("DOMContentLoaded", ()=>bLoad()); } }catch(e){}
 
