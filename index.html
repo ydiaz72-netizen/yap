@@ -865,7 +865,7 @@
 <script>/* Extra interface languages live in /i18n/<code>.js (English text → translation). Load the chosen one before the app starts. */
 (function(){ try{ var X=["tr","uk","fa","ur"], v=localStorage.getItem("pt_ui");
   if(!v){ var n=String((navigator.languages&&navigator.languages[0])||navigator.language||"").slice(0,2).toLowerCase(); if(X.indexOf(n)>-1) v=n; }
-  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=6"><\/script>'); }catch(e){} })();</script>
+  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=7"><\/script>'); }catch(e){} })();</script>
 
 <script>
 /* ===================== CONTENT ===================== */
@@ -1238,7 +1238,7 @@ function bi(en,de,es){ if(es!==undefined) return tr(en,de,es); return `${en} <sp
 function uiSet(l){
   if(!UI_CODES.includes(l)) return;
   if(UI_EXTRA.includes(l) && !I18N_DATA[l]){
-    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=6";
+    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=7";
     sc.onload=()=>uiSet(l); sc.onerror=()=>bToast(offlineMsg()); document.head.appendChild(sc); return;
   }
   UI=l; I18N_T=null; I18N_M.clear();
@@ -6156,7 +6156,7 @@ function mrStrikes(){
   else if(k.next_rule && (+k.recent||0) > 0 && (+k.next_rule.strikes - +k.recent) <= 0.5){ const d=k.next_rule.days; warn=`<p class="note" style="margin:6px 0 0">${tr(`<b>Heads up:</b> one more missed session could pause joining for ${d} days.`,`<b>Achtung:</b> Noch eine verpasste Session kann das Beitreten für ${d} Tage pausieren.`,`<b>Ojo:</b> una sesión más sin asistir podría pausar tu acceso durante ${d} días.`)}</p>`; }
   return `<div style="margin-top:10px;border-top:1px solid var(--line,#e5e0d8);padding-top:8px">
     <div style="font-weight:800">${tr("Strikes","Verwarnungen","Faltas")}: ${mrNum(k.recent)} <span class="note" style="margin:0;font-weight:400">(${tr(`last ${k.window_days} days`,`letzte ${k.window_days} Tage`,`últimos ${k.window_days} días`)})</span></div>
-    ${ev.slice(0,6).map(e=>`<div class="note" style="margin:3px 0 0">${e.kind==="no_show"?"🚫 "+tr("Missed","Verpasst","No asististe"):"⏰ "+tr("Late cancel","Spät abgesagt","Cancelación tardía")} · ${esc(e.title||"Session")} · ${D2(e.at)} · ${e.waived?`<b>${tr("covered by your free pass","durch deinen Pass abgedeckt","cubierto por tu pase gratis")}</b>`:tr(`<b>${mrNum(e.weight)}</b> strike, gone on ${D2(e.expires_at)}`,`<b>${mrNum(e.weight)}</b> Verwarnung, weg am ${D2(e.expires_at)}`,`<b>${mrNum(e.weight)}</b> falta, desaparece el ${D2(e.expires_at)}`)}</div>`).join("")}
+    ${ev.slice(0,6).map(e=>`<div class="note" style="margin:3px 0 0">${e.kind==="no_show"?"🚫 "+tr("Missed","Verpasst","No asististe"):e.kind==="host_late_cancel"?"⏰ "+tr("Cancelled as host <2 h before","Als Host <2 Std. vorher abgesagt","Cancelada como anfitrión <2 h antes"):"⏰ "+tr("Late cancel","Spät abgesagt","Cancelación tardía")} · ${esc(e.title||"Session")} · ${D2(e.at)} · ${e.waived?`<b>${tr("covered by your free pass","durch deinen Pass abgedeckt","cubierto por tu pase gratis")}</b>`:tr(`<b>${mrNum(e.weight)}</b> strike, gone on ${D2(e.expires_at)}`,`<b>${mrNum(e.weight)}</b> Verwarnung, weg am ${D2(e.expires_at)}`,`<b>${mrNum(e.weight)}</b> falta, desaparece el ${D2(e.expires_at)}`)}</div>`).join("")}
     ${warn}
     <div class="note" style="margin:6px 0 0;font-size:12px">${pass}. ${tr("Leaving less than 2h before start = ½ strike, missing a session = 1. Strikes go away after 60 days.","Absagen weniger als 2 Std. vorher = ½ Verwarnung, Session verpasst = 1. Verwarnungen verschwinden nach 60 Tagen.","Salir menos de 2 h antes = ½ falta, no asistir = 1. Las faltas desaparecen a los 60 días.")}</div></div>`;
 }
@@ -6303,7 +6303,9 @@ async function bRespond(id,uid,yes){
   await bLoad();
 }
 async function bCancel(id){
-  if(!window.confirm(tr("Cancel this session for everyone?","Session für alle absagen?","¿Cancelar esta sesión para todos?"))) return;
+  const cs=calRow(id), soon=cs && new Date(cs.starts_at)-Date.now() < 2*3600000 && (cs.seats-(cs.seats_open||0))>0;
+  if(!window.confirm(tr("Cancel this session for everyone?","Session für alle absagen?","¿Cancelar esta sesión para todos?")
+     +(soon?"\n\n⚠️ "+tr("It starts in less than 2 hours and people are coming, so this counts as a late cancel (½ strike). Your free monthly pass covers the first one.","Sie beginnt in weniger als 2 Stunden und es kommen Leute: das zählt als späte Absage (½ Strike). Dein freier Monatspass deckt die erste ab.","Empieza en menos de 2 horas y viene gente: cuenta como cancelación tardía (½ strike). Tu pase mensual gratis cubre la primera."):""))) return;
   try{
     const { error } = await A.sb.from("activities").update({ status:"cancelled" }).eq("id",id);
     if(error) throw error;
@@ -6327,7 +6329,15 @@ function bPeopleHtml(s){
       ${p.status==="pending"?`<div class="row" style="margin-top:6px">
         <button class="chip on" onclick="bRespond('${s.activity_id}','${p.user_id}',true)">${tr(`✓ Approve`,`✓ Annehmen`,`✓ Aprobar`)}</button>
         <button class="chip" onclick="bRespond('${s.activity_id}','${p.user_id}',false)">${tr(`✕ Decline`,`✕ Ablehnen`,`✕ Rechazar`)}</button></div>`:""}
+      ${["joined","waitlisted","offered"].includes(p.status)?`<div class="row" style="margin-top:6px"><button class="chip" onclick="bRemove('${s.activity_id}','${p.user_id}','${esc(String(p.name||"").replace(/'/g,""))}')">🚪 ${tr("Remove","Entfernen","Quitar")}</button></div>`:""}
     </div>`).join("")}</div>`;
+}
+async function bRemove(act, uid, name){
+  if(!window.confirm(tr(`Remove ${name||"this person"} from this session? They won't be able to join your sessions again.`,`${name||"Diese Person"} aus der Session entfernen? Sie kann deinen Sessions dann nicht mehr beitreten.`,`¿Quitar a ${name||"esta persona"} de la sesión? No podrá volver a unirse a tus sesiones.`))) return;
+  try{ const { error } = await A.sb.rpc("pt_host_remove",{ p_activity:act, p_user:uid }); if(error) throw error;
+    bToast(tr("Removed. If someone was waiting, they've been offered the seat.","Entfernt. Wer auf der Warteliste war, bekommt den Platz angeboten.","Quitado. Si alguien esperaba, se le ofreció la plaza."));
+    B.people[act]=null; B.open=null; await bLoad(); bPeople(act);
+  }catch(e){ bToast(bErr(e)); }
 }
 function bCard(s){
   const id=s.activity_id, started=new Date(s.starts_at)<=new Date();
