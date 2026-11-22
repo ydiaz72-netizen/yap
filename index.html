@@ -564,6 +564,7 @@
   .wdots span{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;color:var(--muted)}
   .wdots i{width:26px;height:26px;border-radius:13px;background:#F1F4F9;display:block}
   .wdots i.done{background:var(--teal)}
+  .wdots i.today{box-shadow:0 0 0 2px var(--ink) inset}
   .wdots i.plan{border:2px dashed var(--teal);background:#fff;box-sizing:border-box}
   .wbar{height:10px;border-radius:5px;background:#F1F4F9;overflow:hidden}
   .wbar div{height:100%;background:var(--teal)}
@@ -7280,6 +7281,43 @@ async function shDel(id){
 
 /* ===================== SIGNED-IN HOME DASHBOARD ===================== */
 const D = { board:null, week:null };
+/* Weekly practice goal: days a week with any practice (sessions, flashcards, tests, Echo) */
+const PG = { goal:3, rows:null, edit:false, busy:false };
+function pgKey(d){ const x=new Date(d); return x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0"); }
+async function pgLoad(){
+  if(!A.user || !A.sb) return;
+  let tz="Europe/Berlin"; try{ tz=Intl.DateTimeFormat().resolvedOptions().timeZone||tz; }catch(e){}
+  try{
+    const [r,g]=await Promise.all([A.sb.rpc("pt_my_practice",{ p_tz:tz, p_days:70 }), A.sb.from("practice_goals").select("days_per_week").maybeSingle()]);
+    if(!r.error) PG.rows=r.data||[];
+    if(!g.error && g.data) PG.goal=g.data.days_per_week||3;
+  }catch(e){}
+  if(S.screen==="home") xr();
+}
+async function pgSet(n){
+  if(PG.busy) return; PG.busy=true; const old=PG.goal; PG.goal=n; PG.edit=false; xr();
+  try{ const { error } = await A.sb.from("practice_goals").upsert({ user_id:A.user.id, days_per_week:n, updated_at:new Date().toISOString() },{ onConflict:"user_id" }); if(error) throw error;
+    bToast(`🎯 Goal: ${n} day${n===1?"":"s"} a week · Ziel gespeichert`); }
+  catch(e){ PG.goal=old; bToast(bErr(e)); }
+  PG.busy=false; xr();
+}
+function pgStats(){
+  if(!PG.rows) return null;
+  const days=new Map(); PG.rows.forEach(r=>{ const k=String(r.day).slice(0,10); const o=days.get(k)||{}; o[r.kind]=(o[r.kind]||0)+(r.n||0); days.set(k,o); });
+  const ws=weekStart(new Date()), today=pgKey(new Date());
+  const week=[...Array(7)].map((_,i)=>pgKey(new Date(ws.getTime()+i*864e5+43200000)));
+  const tot={ session:0, cards:0, test:0, echo:0 };
+  week.forEach(k=>{ const o=days.get(k); if(o) for(const t in tot) tot[t]+=o[t]||0; });
+  const done=week.filter(k=>days.has(k)).length;
+  // weeks in a row with the goal met (this week counts once it's met)
+  let wk=0; for(let w=0; w<10; w++){
+    const start=ws.getTime()-w*7*864e5, n=[...Array(7)].filter((_,i)=>days.has(pgKey(new Date(start+i*864e5+43200000)))).length;
+    if(n>=PG.goal) wk++; else if(w>0) break; }
+  // days in a row (today, or up to yesterday if not practised yet today)
+  let ds=0, t=new Date(); t.setHours(12,0,0,0); if(!days.has(pgKey(t))) t=new Date(t.getTime()-864e5);
+  while(days.has(pgKey(t))){ ds++; t=new Date(t.getTime()-864e5); }
+  return { week, days, done, tot, wk, ds, today };
+}
 const _rLoadOrig = rLoad;
 rLoad = async function(){
   if(!A.user || !A.sb) return;
@@ -7290,6 +7328,7 @@ rLoad = async function(){
     A.sb.from("activities").select("starts_at,status").eq("host_id",uid).neq("status","cancelled").then(r=>r, e=>({error:e}))
   ]);
   if(!b.error){ D.board=b.data||[]; vLoad(); acLoad(); fuLoad(); }
+  pgLoad();
   if(!p.error && !h.error){
     const times=[].concat((p.data||[]).filter(x=>x.activities && x.activities.status!=="cancelled").map(x=>x.activities.starts_at), (h.data||[]).map(x=>x.starts_at));
     D.week=weekStats(times);
@@ -7400,17 +7439,35 @@ function dOpen(id){
   box.querySelectorAll("button").forEach(b=>{ if(b.id!=="dClose") b.addEventListener("click",()=>setTimeout(()=>box.remove(),50)); });
 }
 function weekCard(){
-  const w=D.week;
-  if(!w) return `<div class="card"><h3>My week · Meine Woche</h3><p class="note" style="margin:0">Loading… · Lädt…</p></div>`;
-  const pct=Math.min(100,Math.round(100*w.count/w.goal));
-  const L=["M","T","W","T","F","S","S"];
-  return `<div class="card"><h3 style="margin-bottom:2px">My week · Meine Woche</h3>
-    <p class="note" style="margin:0 0 10px">${w.done>=w.goal?`<b style="color:var(--ink)">${w.done} of ${w.goal}</b> done · goal reached! 🎉`
-      : w.count>=w.goal?`<b style="color:var(--ink)">${w.count} booked</b> this week · goal of ${w.goal} on track ✓`
-      : `<b style="color:var(--ink)">${w.count} of ${w.goal}</b> sessions · keep it going`}</p>
-    <div class="wbar" role="img" aria-label="${w.count} of ${w.goal} sessions this week"><div style="width:${pct}%"></div></div>
-    <div class="wdots">${L.map((l,i)=>`<span><i class="${w.days[i]}"></i>${l}</span>`).join("")}</div>
-    ${w.streak>1?`<p class="note" style="margin:10px 0 0">🔥 ${w.streak} weeks in a row</p>`:""}
+  const w=D.week, g=pgStats();
+  if(!w && !g) return `<div class="card"><h3>My week · Meine Woche</h3><p class="note" style="margin:0">Loading… · Lädt…</p></div>`;
+  if(!g){
+    const pct=Math.min(100,Math.round(100*w.count/w.goal));
+    return `<div class="card"><h3 style="margin-bottom:2px">My week · Meine Woche</h3>
+      <p class="note" style="margin:0 0 10px"><b style="color:var(--ink)">${w.count}</b> session${w.count===1?"":"s"} this week</p>
+      <div class="wbar"><div style="width:${pct}%"></div></div></div>`;
+  }
+  const L=["M","T","W","T","F","S","S"], goal=PG.goal, pct=Math.min(100,Math.round(100*g.done/goal));
+  const dot=(k,i)=>g.days.has(k)?"done":(w&&w.days[i]==="plan"?"plan":"");
+  const bits=[]; const T2=g.tot;
+  if(T2.session) bits.push(`🗣️ ${T2.session} session${T2.session===1?"":"s"}`);
+  if(T2.cards) bits.push(`🃏 ${T2.cards} card${T2.cards===1?"":"s"}`);
+  if(T2.test) bits.push(`📝 ${T2.test} test${T2.test===1?"":"s"}`);
+  if(T2.echo) bits.push(`🎙️ ${T2.echo} Echo`);
+  const left=goal-g.done, todayDone=g.days.has(g.today);
+  const msg = g.done>=goal ? `<b style="color:var(--ink)">${g.done} day${g.done===1?"":"s"}</b> practised · goal of ${goal} reached! 🎉`
+            : `<b style="color:var(--ink)">${g.done} of ${goal} days</b> practised · ${left} to go${todayDone?"":" · practise today?"}`;
+  return `<div class="card"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px">
+      <h3 style="margin-bottom:2px">My week · Meine Woche</h3>
+      <button class="linkbtn" style="white-space:nowrap;flex:none" onclick="PG.edit=!PG.edit;xr()">${PG.edit?"Close":"🎯 "+goal+"/week"}</button></div>
+    ${PG.edit?`<div style="margin:6px 0 10px"><p class="note" style="margin:0 0 6px">How many days a week do you want to practise? · Wie viele Tage pro Woche?</p>
+      <div class="row">${[1,2,3,4,5,6,7].map(n=>`<button class="chip ${n===goal?"on":""}" onclick="pgSet(${n})">${n}</button>`).join("")}</div></div>`:""}
+    <p class="note" style="margin:0 0 10px">${msg}</p>
+    <div class="wbar" role="img" aria-label="${g.done} of ${goal} practice days this week"><div style="width:${pct}%"></div></div>
+    <div class="wdots">${g.week.map((k,i)=>`<span><i class="${dot(k,i)}${k===g.today?" today":""}"></i>${L[i]}</span>`).join("")}</div>
+    ${bits.length?`<p class="note" style="margin:10px 0 0">This week · Diese Woche: ${bits.join(" · ")}</p>`
+      :`<p class="note" style="margin:10px 0 0">Sessions, flashcards, test practice and Echo all count. · Alles zählt.</p>`}
+    ${g.ds>1||g.wk>1?`<p class="note" style="margin:4px 0 0">${g.ds>1?`🔥 ${g.ds} days in a row`:""}${g.ds>1&&g.wk>1?" · ":""}${g.wk>1?`🏆 goal met ${g.wk} weeks in a row`:""}</p>`:""}
   </div>`;
 }
 function quickCard(){
