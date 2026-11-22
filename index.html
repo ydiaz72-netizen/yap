@@ -7659,8 +7659,8 @@ async function nbReadAll(){
 /* ===================== VOCABULARY FLASHCARDS (spaced repetition) ===================== */
 /* Words: /vocab/de-a1.json (original list). Progress: sql/vocab.sql when signed in, this phone otherwise.
    🔊 appears only for words that have a recorded clip (Admin → Audio studio), never the phone voice. */
-const VC_V="2026-11-22b";
-const VC_LEVELS=["A1","A2"];
+const VC_V="2026-11-22c";
+const VC_LEVELS=["A1","A2","B1"];
 const VC_DECK="de";
 const VC_LANGS=[["en","English"],["es","Español"],["ar","العربية"],["fa","فارسی / دری"]];
 const VC={ d:null, err:"", p:{}, days:{}, goal:10, lang:"en", level:"A1", run:null, dirty:{}, dayDirty:false, chk:null };
@@ -7675,7 +7675,7 @@ async function vcLoadData(){
   if(VC.d) return;
   const files=await Promise.all(VC_LEVELS.map(l=>fetch(`/vocab/de-${l.toLowerCase()}.json?v=${VC_V}`).then(r=>{ if(!r.ok) throw new Error(r.status); return r.json(); })));
   const words=[]; files.forEach((f,k)=>f.words.forEach(w=>{ w.lv=VC_LEVELS[k]; words.push(w); }));
-  VC.d={ themes:files[0].themes, words }; VC.byId={}; words.forEach(w=>VC.byId[w.id]=w);
+  VC.d={ themes:Object.assign({}, ...files.map(f=>f.themes)), words }; VC.byId={}; words.forEach(w=>VC.byId[w.id]=w);
 }
 function vcLv(lv){ return VC.d?VC.d.words.filter(w=>w.lv===lv):[]; }
 async function vcOpen(){
@@ -7870,7 +7870,7 @@ VIEWS.vocab = function(){
           <div class="ectop"><b>${on?"▶ ":""}${lv}</b><span class="ecmeta">${s2.learned} learned · ${s2.mastered} mastered · ${s2.total}</span></div>
           <div class="exbar" style="margin:6px 0 2px"><i style="width:${Math.round(s2.learned/s2.total*100)}%"></i></div>
           <div class="exbar"><i style="width:${Math.round(s2.mastered/s2.total*100)}%;background:var(--plum)"></i></div></button>`; }).join("")}
-      <div class="ectop" style="opacity:.55;padding:0 4px"><b>B1 · B2 · C1</b><span class="ecmeta">coming soon · bald</span></div>
+      <div class="ectop" style="opacity:.55;padding:0 4px"><b>B2 · C1</b><span class="ecmeta">coming soon · bald</span></div>
       ${vcDaysHtml()}
       ${st.learned?`<button class="linkbtn" onclick="vcCheckStart()">📊 Level check</button>`:""}
       ${!A.user?`<p class="note" style="margin:8px 0 0">💾 Saved on this phone only. <button class="linkbtn" onclick="A.ret='vocab';go('account')">Sign in</button> to keep your progress everywhere.</p>`:""}</div>
@@ -8319,7 +8319,7 @@ VIEWS.dtzstudio = function(){
       <label style="display:flex;gap:8px;align-items:flex-start;font-size:14px;margin:4px 0"><input type="checkbox" ${DS.grp.dtz?"checked":""} onchange="DS.grp.dtz=this.checked;xr()"> 🎓 German exam listening (${clips.length-have} missing)</label>
       <label style="display:flex;gap:8px;align-items:flex-start;font-size:14px;margin:4px 0"><input type="checkbox" ${DS.grp.lid?"checked":""} onchange="DS.grp.lid=this.checked;xr()"> 🇩🇪 Leben in Deutschland: question + right answer (${lclips.length-lhave} missing)</label>
       <label style="display:flex;gap:8px;align-items:flex-start;font-size:14px;margin:4px 0"><input type="checkbox" ${DS.grp.lidst?"checked":""} onchange="DS.grp.lidst=this.checked;xr()"> 📍 Leben in Deutschland: Bundesland questions (${sclips.length-shave} missing)</label>
-      <label style="display:flex;gap:8px;align-items:flex-start;font-size:14px;margin:4px 0"><input type="checkbox" ${DS.grp.vocab?"checked":""} onchange="DS.grp.vocab=this.checked;xr()"> 🃏 Vocabulary words, A1 + A2 (${vclips.length-vhave} missing)</label>
+      <label style="display:flex;gap:8px;align-items:flex-start;font-size:14px;margin:4px 0"><input type="checkbox" ${DS.grp.vocab?"checked":""} onchange="DS.grp.vocab=this.checked;xr()"> 🃏 Vocabulary words, A1–B1 (${vclips.length-vhave} missing)</label>
       <label style="display:flex;gap:8px;align-items:flex-start;font-size:14px;margin:4px 0"><input type="checkbox" ${DS.grp.vocabex?"checked":""} onchange="DS.grp.vocabex=this.checked;xr()"> 💬 Vocabulary example sentences, A1 first (${xclips.length-xhave} missing)</label>
       <p class="note" style="margin:6px 0">To make: <b>${missing.length} clips ≈ ${est.toLocaleString()} characters</b> (credits). Keep this page open and the screen on; a laptop works best.</p>
       <label class="row" style="gap:8px;font-size:14px"><input type="checkbox" ${DS.redo?"checked":""} onchange="DS.redo=this.checked"> Redo clips that already exist</label>
