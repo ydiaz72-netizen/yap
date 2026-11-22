@@ -194,7 +194,7 @@
 
   /* ---- Echo Challenge ---- */
   .eccard{border:1.5px solid #F7C2B3;background:linear-gradient(135deg,#FFF4EF,#FFFFFF);border-radius:18px;padding:12px 14px;margin:8px 0}
-  .eccard .ectop{display:flex;align-items:center;gap:8px;justify-content:space-between;flex-wrap:wrap}
+  .ectop{display:flex;align-items:center;gap:8px;justify-content:space-between;flex-wrap:wrap}
   .ecphrase{font-size:19px;font-weight:800;line-height:1.3;margin:6px 0 2px}
   .ecmean{color:var(--muted);font-size:14px}
   .ecmeta{font-size:13px;color:var(--muted);font-weight:600}
@@ -7761,14 +7761,14 @@ VIEWS.exam = function(){
   if(!EX.qs) return h+`<p class="note center">Loading… · Lädt…</p>`;
   const pool=exPool(), last=exLast(), known=pool.filter(q=>last[q.n]===true).length, wrong=pool.filter(q=>last[q.n]===false).length, unseen=pool.filter(q=>!(q.n in last)).length;
   const mocks=EX.att.filter(a=>a.mode==="mock"), passed=mocks.filter(a=>a.passed).length, best=mocks.reduce((m,a)=>Math.max(m,a.correct),0);
-  h+=`<div class="card"><div class="row" style="gap:10px;flex-wrap:wrap">
-      <label class="lbl" style="margin:0;flex:1;min-width:150px">Bundesland<select onchange="exSetState(this.value)" style="width:100%;margin-top:4px;border:2px solid var(--line);border-radius:12px;padding:10px;font:600 15px 'Plus Jakarta Sans',sans-serif">${LID_STATES.map(([k,n])=>`<option value="${k}" ${EX.state===k?"selected":""}>${n}</option>`).join("")}</select></label>
-      <label class="lbl" style="margin:0;flex:1;min-width:150px">Translation · Übersetzung<select onchange="exSetLang(this.value)" style="width:100%;margin-top:4px;border:2px solid var(--line);border-radius:12px;padding:10px;font:600 15px 'Plus Jakarta Sans',sans-serif">${LID_LANGS.map(([k,n])=>`<option value="${k}" ${EX.lang===k?"selected":""}>${n}</option>`).join("")}</select></label></div></div>
+  h+=`<div class="card"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end">
+      <label class="lbl" style="margin:0">🗺️ Bundesland<select onchange="exSetState(this.value)" style="width:100%;margin-top:4px;border:2px solid var(--line);border-radius:12px;padding:10px;font:600 15px 'Plus Jakarta Sans',sans-serif">${LID_STATES.map(([k,n])=>`<option value="${k}" ${EX.state===k?"selected":""}>${n}</option>`).join("")}</select></label>
+      <label class="lbl" style="margin:0">🌍 Translation<select onchange="exSetLang(this.value)" style="width:100%;margin-top:4px;border:2px solid var(--line);border-radius:12px;padding:10px;font:600 15px 'Plus Jakarta Sans',sans-serif">${LID_LANGS.map(([k,n])=>`<option value="${k}" ${EX.lang===k?"selected":""}>${n}</option>`).join("")}</select></label></div></div>
     <div class="card" style="border:2px solid var(--coral)"><h3 style="margin:0 0 4px">📝 Mock test · Probetest</h3>
-      <p class="note" style="margin:0 0 10px">33 questions (30 general + 3 ${esc((LID_STATES.find(x=>x[0]===EX.state)||[0,""])[1])}), 60 minutes. Pass: 17 correct (Einbürgerungstest), 15 for "Leben in Deutschland". · Wie in der echten Prüfung.</p>
+      <p class="note" style="margin:0 0 10px">33 questions (30 general + 3 ${esc((LID_STATES.find(x=>x[0]===EX.state)||[0,""])[1])}), 60 minutes. Pass: 17 correct (Einbürgerungstest), 15 for “Leben in Deutschland” · Wie in der echten Prüfung.</p>
       <button class="btn primary" onclick="exStart('mock')">Start mock test · Probetest starten</button></div>
     <div class="card"><h3 style="margin:0 0 6px">📈 My progress · Mein Fortschritt</h3>
-      <div class="ectop" style="gap:8px"><span class="ecmeta">Questions answered right (last try) · Richtig beantwortet</span><b>${known} / ${pool.length}</b></div>
+      <div class="ectop"><span class="ecmeta" style="flex:1;min-width:0">Answered right (last try) · Richtig beantwortet</span><b>${known} / ${pool.length}</b></div>
       <div class="exbar" style="margin:6px 0 10px"><i style="width:${pool.length?Math.round(known/pool.length*100):0}%"></i></div>
       <div class="extiles"><div><b>${mocks.length}</b><span class="ecmeta">mock tests</span></div><div><b>${passed}</b><span class="ecmeta">passed ✅</span></div><div><b>${mocks.length?best:"–"}<small style="font-size:12px">/33</small></b><span class="ecmeta">best score</span></div></div>
       ${mocks.length?exHistHtml(mocks):`<p class="note" style="margin:6px 0 0">Your test scores will show up here. · Hier erscheinen deine Ergebnisse.</p>`}
