@@ -1203,7 +1203,7 @@ function langBadge(l){ const t=T[l]; return `<span class="badge" style="backgrou
 function avatar(p,i){ return `<div class="avatar" style="background:${COLORS[i%COLORS.length]}">${esc(p.name.charAt(0).toUpperCase())}</div>`; }
 /* Interface language (one at a time). Screens that are translated use tr()/bi(en,de,es);
    screens not translated yet still show English · Deutsch. */
-const UI_LANGS=[["en","English","🇬🇧"],["de","Deutsch","🇩🇪"],["es","Español","🇪🇸"],["tr","Türkçe","🇹🇷"]];
+const UI_LANGS=[["en","English","🇬🇧"],["de","Deutsch","🇩🇪"],["es","Español","🇪🇸"],["tr","Türkçe","🇹🇷"],["uk","Українська","🇺🇦"]];
 const UI_CODES=UI_LANGS.map(x=>x[0]), UI_EXTRA=["tr","uk","fa"], UI_RTL=["fa"];
 window.I18N_DATA=window.I18N_DATA||{};
 let UI=(()=>{ const ok=v=>UI_CODES.includes(v) && (!UI_EXTRA.includes(v) || I18N_DATA[v]);
