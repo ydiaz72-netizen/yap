@@ -1,0 +1,4979 @@
+{
+ "v": "2026-11-22",
+ "lang": "de",
+ "level": "B2",
+ "themes": {
+  "people": [
+   "👨‍👩‍👧",
+   "Family & people",
+   "Familia y gente",
+   "العائلة والناس",
+   "خانواده و مردم"
+  ],
+  "home": [
+   "🏠",
+   "Home",
+   "La casa",
+   "البيت",
+   "خانه"
+  ],
+  "city": [
+   "🚌",
+   "City & travel",
+   "Ciudad y viajes",
+   "المدينة والسفر",
+   "شهر و سفر"
+  ],
+  "work": [
+   "💼",
+   "Work & school",
+   "Trabajo y escuela",
+   "العمل والمدرسة",
+   "کار و مدرسه"
+  ],
+  "health": [
+   "🩺",
+   "Body & health",
+   "Cuerpo y salud",
+   "الجسم والصحة",
+   "بدن و سلامت"
+  ],
+  "verbs": [
+   "🏃",
+   "Everyday verbs",
+   "Verbos frecuentes",
+   "أفعال يومية",
+   "فعل‌های روزمره"
+  ],
+  "adj": [
+   "🎨",
+   "Describing words",
+   "Adjetivos",
+   "الصفات",
+   "صفت‌ها"
+  ],
+  "small": [
+   "🔤",
+   "Small words",
+   "Palabras pequeñas",
+   "كلمات صغيرة",
+   "کلمات کوچک"
+  ],
+  "society": [
+   "🏛️",
+   "Society & politics",
+   "Sociedad y política",
+   "المجتمع والسياسة",
+   "جامعه و سیاست"
+  ],
+  "media": [
+   "📱",
+   "Media & tech",
+   "Medios y tecnología",
+   "الإعلام والتقنية",
+   "رسانه و فناوری"
+  ],
+  "nature": [
+   "🌱",
+   "Environment & climate",
+   "Medio ambiente y clima",
+   "البيئة والمناخ",
+   "محیط زیست و اقلیم"
+  ]
+ },
+ "words": [
+  {
+   "id": "die-bewerbungsfrist",
+   "w": "die Bewerbungsfrist",
+   "t": "work",
+   "ex": "Die Bewerbungsfrist endet am Freitag.",
+   "tr": {
+    "en": "application deadline",
+    "es": "el plazo de solicitud",
+    "ar": "الموعد النهائي للتقديم",
+    "fa": "مهلت درخواست"
+   },
+   "g": "die",
+   "pl": "Bewerbungsfristen"
+  },
+  {
+   "id": "die-opposition",
+   "w": "die Opposition",
+   "t": "society",
+   "ex": "Die Opposition kritisiert den Plan.",
+   "tr": {
+    "en": "opposition",
+    "es": "la oposición",
+    "ar": "المعارضة",
+    "fa": "مخالفان / اپوزیسیون"
+   },
+   "g": "die",
+   "pl": "Oppositionen"
+  },
+  {
+   "id": "die-auseinandersetzung",
+   "w": "die Auseinandersetzung",
+   "t": "people",
+   "ex": "Nach der Auseinandersetzung haben wir lange nicht gesprochen.",
+   "tr": {
+    "en": "argument, dispute",
+    "es": "la discusión, el conflicto",
+    "ar": "الخلاف / المشادة",
+    "fa": "درگیری / مشاجره"
+   },
+   "g": "die",
+   "pl": "Auseinandersetzungen"
+  },
+  {
+   "id": "die-schlagzeile",
+   "w": "die Schlagzeile",
+   "t": "media",
+   "ex": "Die Geschichte machte Schlagzeilen.",
+   "tr": {
+    "en": "headline",
+    "es": "el titular",
+    "ar": "العنوان الرئيسي",
+    "fa": "تیتر"
+   },
+   "g": "die",
+   "pl": "Schlagzeilen"
+  },
+  {
+   "id": "der-umweltschutz",
+   "w": "der Umweltschutz",
+   "t": "nature",
+   "ex": "Umweltschutz fängt im Alltag an.",
+   "tr": {
+    "en": "environmental protection",
+    "es": "la protección del medio ambiente",
+    "ar": "حماية البيئة",
+    "fa": "حفاظت از محیط زیست"
+   },
+   "g": "der"
+  },
+  {
+   "id": "die-vorbeugung",
+   "w": "die Vorbeugung",
+   "t": "health",
+   "ex": "Vorbeugung ist besser als Heilung.",
+   "tr": {
+    "en": "prevention",
+    "es": "la prevención",
+    "ar": "الوقاية",
+    "fa": "پیشگیری"
+   },
+   "g": "die"
+  },
+  {
+   "id": "der-eigentuemer",
+   "w": "der Eigentümer",
+   "t": "home",
+   "ex": "Der Eigentümer will die Wohnung verkaufen.",
+   "tr": {
+    "en": "owner",
+    "es": "el propietario",
+    "ar": "المالك",
+    "fa": "مالک"
+   },
+   "g": "der",
+   "pl": "Eigentümer"
+  },
+  {
+   "id": "die-infrastruktur",
+   "w": "die Infrastruktur",
+   "t": "city",
+   "ex": "Die Infrastruktur auf dem Land muss besser werden.",
+   "tr": {
+    "en": "infrastructure",
+    "es": "la infraestructura",
+    "ar": "البنية التحتية",
+    "fa": "زیرساخت"
+   },
+   "g": "die",
+   "pl": "Infrastrukturen"
+  },
+  {
+   "id": "sich-auseinandersetzen-mit",
+   "w": "sich auseinandersetzen mit",
+   "t": "verbs",
+   "ex": "Wir müssen uns mit dem Problem auseinandersetzen.",
+   "tr": {
+    "en": "to deal with, to engage with",
+    "es": "ocuparse de",
+    "ar": "يتعامل مع / يناقش",
+    "fa": "پرداختن به"
+   }
+  },
+  {
+   "id": "angemessen",
+   "w": "angemessen",
+   "t": "adj",
+   "ex": "Der Preis ist angemessen.",
+   "tr": {
+    "en": "appropriate, reasonable",
+    "es": "adecuado",
+    "ar": "مناسب / معقول",
+    "fa": "مناسب / معقول"
+   }
+  },
+  {
+   "id": "anscheinend",
+   "w": "anscheinend",
+   "t": "small",
+   "ex": "Anscheinend ist niemand zu Hause.",
+   "tr": {
+    "en": "apparently",
+    "es": "al parecer",
+    "ar": "على ما يبدو",
+    "fa": "ظاهراً"
+   }
+  },
+  {
+   "id": "die-kuendigungsfrist",
+   "w": "die Kündigungsfrist",
+   "t": "work",
+   "ex": "Die Kündigungsfrist beträgt drei Monate.",
+   "tr": {
+    "en": "notice period",
+    "es": "el plazo de preaviso",
+    "ar": "مهلة الإشعار",
+    "fa": "مهلت اخطار فسخ قرارداد"
+   },
+   "g": "die",
+   "pl": "Kündigungsfristen"
+  },
+  {
+   "id": "der-abgeordnete",
+   "w": "der Abgeordnete",
+   "t": "society",
+   "ex": "Der Abgeordnete spricht im Bundestag.",
+   "tr": {
+    "en": "member of parliament",
+    "es": "el diputado",
+    "ar": "النائب",
+    "fa": "نماینده‌ی مجلس"
+   },
+   "g": "der",
+   "pl": "Abgeordneten"
+  },
+  {
+   "id": "der-kompromiss",
+   "w": "der Kompromiss",
+   "t": "people",
+   "ex": "Am Ende haben wir einen Kompromiss gefunden.",
+   "tr": {
+    "en": "compromise",
+    "es": "el compromiso, el acuerdo",
+    "ar": "الحل الوسط",
+    "fa": "سازش / مصالحه"
+   },
+   "g": "der",
+   "pl": "Kompromisse"
+  },
+  {
+   "id": "der-artikel",
+   "w": "der Artikel",
+   "t": "media",
+   "ex": "Ich habe einen interessanten Artikel gelesen.",
+   "tr": {
+    "en": "article",
+    "es": "el artículo",
+    "ar": "المقالة",
+    "fa": "مقاله"
+   },
+   "g": "der",
+   "pl": "Artikel"
+  },
+  {
+   "id": "die-erderwaermung",
+   "w": "die Erderwärmung",
+   "t": "nature",
+   "ex": "Die Erderwärmung führt zu mehr Hitzewellen.",
+   "tr": {
+    "en": "global warming",
+    "es": "el calentamiento global",
+    "ar": "الاحتباس الحراري",
+    "fa": "گرمایش زمین"
+   },
+   "g": "die"
+  },
+  {
+   "id": "die-heilung",
+   "w": "die Heilung",
+   "t": "health",
+   "ex": "Die Heilung dauert einige Wochen.",
+   "tr": {
+    "en": "healing, cure",
+    "es": "la curación",
+    "ar": "الشفاء",
+    "fa": "بهبود / درمان"
+   },
+   "g": "die",
+   "pl": "Heilungen"
+  },
+  {
+   "id": "die-eigentumswohnung",
+   "w": "die Eigentumswohnung",
+   "t": "home",
+   "ex": "Sie haben eine Eigentumswohnung gekauft.",
+   "tr": {
+    "en": "owner-occupied flat",
+    "es": "el piso en propiedad",
+    "ar": "شقة مملوكة",
+    "fa": "آپارتمان شخصی"
+   },
+   "g": "die",
+   "pl": "Eigentumswohnungen"
+  },
+  {
+   "id": "der-nahverkehr",
+   "w": "der Nahverkehr",
+   "t": "city",
+   "ex": "Der Nahverkehr in Erfurt ist gut ausgebaut.",
+   "tr": {
+    "en": "local public transport",
+    "es": "el transporte público local",
+    "ar": "النقل المحلي",
+    "fa": "حمل‌ونقل عمومی شهری"
+   },
+   "g": "der"
+  },
+  {
+   "id": "sich-durchsetzen",
+   "w": "sich durchsetzen",
+   "t": "verbs",
+   "ex": "Am Ende hat sich die beste Idee durchgesetzt.",
+   "tr": {
+    "en": "to prevail, to assert oneself",
+    "es": "imponerse",
+    "ar": "يفرض نفسه / ينتصر",
+    "fa": "خود را جا انداختن / غالب شدن"
+   }
+  },
+  {
+   "id": "anspruchsvoll",
+   "w": "anspruchsvoll",
+   "t": "adj",
+   "ex": "Die Arbeit ist anspruchsvoll, aber spannend.",
+   "tr": {
+    "en": "demanding",
+    "es": "exigente",
+    "ar": "متطلّب / صعب",
+    "fa": "پرچالش"
+   }
+  },
+  {
+   "id": "ausgerechnet",
+   "w": "ausgerechnet",
+   "t": "small",
+   "ex": "Ausgerechnet heute regnet es!",
+   "tr": {
+    "en": "of all things, of all days",
+    "es": "precisamente",
+    "ar": "بالذات",
+    "fa": "درست همین (امروز)"
+   }
+  },
+  {
+   "id": "der-auftrag",
+   "w": "der Auftrag",
+   "t": "work",
+   "ex": "Wir haben einen großen Auftrag bekommen.",
+   "tr": {
+    "en": "order, assignment",
+    "es": "el encargo, el pedido",
+    "ar": "الطلبية / التكليف",
+    "fa": "سفارش / مأموریت"
+   },
+   "g": "der",
+   "pl": "Aufträge"
+  },
+  {
+   "id": "die-verfassung",
+   "w": "die Verfassung",
+   "t": "society",
+   "ex": "Das Grundgesetz ist die Verfassung Deutschlands.",
+   "tr": {
+    "en": "constitution",
+    "es": "la constitución",
+    "ar": "الدستور",
+    "fa": "قانون اساسی"
+   },
+   "g": "die",
+   "pl": "Verfassungen"
+  },
+  {
+   "id": "die-ruecksicht",
+   "w": "die Rücksicht",
+   "t": "people",
+   "ex": "Bitte nehmen Sie Rücksicht auf die Nachbarn.",
+   "tr": {
+    "en": "consideration",
+    "es": "la consideración",
+    "ar": "المراعاة",
+    "fa": "ملاحظه"
+   },
+   "g": "die"
+  },
+  {
+   "id": "der-journalist",
+   "w": "der Journalist",
+   "t": "media",
+   "ex": "Der Journalist recherchiert seit Wochen.",
+   "tr": {
+    "en": "journalist",
+    "es": "el periodista",
+    "ar": "الصحفي",
+    "fa": "روزنامه‌نگار"
+   },
+   "g": "der",
+   "pl": "Journalisten"
+  },
+  {
+   "id": "der-treibhauseffekt",
+   "w": "der Treibhauseffekt",
+   "t": "nature",
+   "ex": "Kohlendioxid verstärkt den Treibhauseffekt.",
+   "tr": {
+    "en": "greenhouse effect",
+    "es": "el efecto invernadero",
+    "ar": "الاحتباس الحراري / ظاهرة الدفيئة",
+    "fa": "اثر گلخانه‌ای"
+   },
+   "g": "der"
+  },
+  {
+   "id": "die-genesung",
+   "w": "die Genesung",
+   "t": "health",
+   "ex": "Ich wünsche Ihnen eine schnelle Genesung.",
+   "tr": {
+    "en": "recovery",
+    "es": "la recuperación",
+    "ar": "التعافي",
+    "fa": "بهبودی"
+   },
+   "g": "die"
+  },
+  {
+   "id": "die-mieterhoehung",
+   "w": "die Mieterhöhung",
+   "t": "home",
+   "ex": "Wir haben eine Mieterhöhung bekommen.",
+   "tr": {
+    "en": "rent increase",
+    "es": "la subida del alquiler",
+    "ar": "زيادة الإيجار",
+    "fa": "افزایش اجاره"
+   },
+   "g": "die",
+   "pl": "Mieterhöhungen"
+  },
+  {
+   "id": "die-baustelle",
+   "w": "die Baustelle",
+   "t": "city",
+   "ex": "Wegen der Baustelle fährt die Straßenbahn nicht.",
+   "tr": {
+    "en": "construction site",
+    "es": "la obra",
+    "ar": "موقع البناء",
+    "fa": "محل ساخت‌وساز"
+   },
+   "g": "die",
+   "pl": "Baustellen"
+  },
+  {
+   "id": "sich-auswirken-auf",
+   "w": "sich auswirken auf",
+   "t": "verbs",
+   "ex": "Der Stress wirkt sich auf die Gesundheit aus.",
+   "tr": {
+    "en": "to have an effect on",
+    "es": "repercutir en",
+    "ar": "يؤثر على",
+    "fa": "تأثیر گذاشتن بر"
+   }
+  },
+  {
+   "id": "ausfuehrlich",
+   "w": "ausführlich",
+   "t": "adj",
+   "ex": "Er hat mir alles ausführlich erklärt.",
+   "tr": {
+    "en": "detailed",
+    "es": "detallado",
+    "ar": "مفصّل",
+    "fa": "مفصل"
+   }
+  },
+  {
+   "id": "bekanntlich",
+   "w": "bekanntlich",
+   "t": "small",
+   "ex": "Bekanntlich ist Erfurt die Hauptstadt Thüringens.",
+   "tr": {
+    "en": "as is well known",
+    "es": "como es sabido",
+    "ar": "كما هو معروف",
+    "fa": "چنان‌که معلوم است"
+   }
+  },
+  {
+   "id": "die-fuehrungskraft",
+   "w": "die Führungskraft",
+   "t": "work",
+   "ex": "Gute Führungskräfte hören ihrem Team zu.",
+   "tr": {
+    "en": "manager, leader",
+    "es": "el directivo",
+    "ar": "المدير / القائد",
+    "fa": "مدیر"
+   },
+   "g": "die",
+   "pl": "Führungskräfte"
+  },
+  {
+   "id": "die-meinungsfreiheit",
+   "w": "die Meinungsfreiheit",
+   "t": "society",
+   "ex": "Meinungsfreiheit ist ein Grundrecht.",
+   "tr": {
+    "en": "freedom of speech",
+    "es": "la libertad de expresión",
+    "ar": "حرية التعبير",
+    "fa": "آزادی بیان"
+   },
+   "g": "die"
+  },
+  {
+   "id": "das-mitgefuehl",
+   "w": "das Mitgefühl",
+   "t": "people",
+   "ex": "Ich habe großes Mitgefühl mit den Opfern.",
+   "tr": {
+    "en": "sympathy, compassion",
+    "es": "la compasión",
+    "ar": "التعاطف",
+    "fa": "همدردی"
+   },
+   "g": "das"
+  },
+  {
+   "id": "die-quelle",
+   "w": "die Quelle",
+   "t": "media",
+   "ex": "Prüfen Sie immer die Quelle einer Nachricht.",
+   "tr": {
+    "en": "source",
+    "es": "la fuente",
+    "ar": "المصدر",
+    "fa": "منبع"
+   },
+   "g": "die",
+   "pl": "Quellen"
+  },
+  {
+   "id": "der-ausstoss",
+   "w": "der Ausstoß",
+   "t": "nature",
+   "ex": "Der Ausstoß von CO₂ muss sinken.",
+   "tr": {
+    "en": "emissions, output",
+    "es": "la emisión",
+    "ar": "الانبعاث",
+    "fa": "انتشار (گاز)"
+   },
+   "g": "der"
+  },
+  {
+   "id": "die-entzuendung",
+   "w": "die Entzündung",
+   "t": "health",
+   "ex": "Der Arzt hat eine Entzündung festgestellt.",
+   "tr": {
+    "en": "inflammation",
+    "es": "la inflamación",
+    "ar": "الالتهاب",
+    "fa": "التهاب"
+   },
+   "g": "die",
+   "pl": "Entzündungen"
+  },
+  {
+   "id": "die-kaltmiete",
+   "w": "die Kaltmiete",
+   "t": "home",
+   "ex": "Die Kaltmiete beträgt 600 Euro.",
+   "tr": {
+    "en": "rent without utilities",
+    "es": "el alquiler sin gastos",
+    "ar": "الإيجار الصافي (بدون التكاليف)",
+    "fa": "اجاره بدون هزینه‌های جانبی"
+   },
+   "g": "die",
+   "pl": "Kaltmieten"
+  },
+  {
+   "id": "die-umleitung",
+   "w": "die Umleitung",
+   "t": "city",
+   "ex": "Bitte folgen Sie der Umleitung.",
+   "tr": {
+    "en": "diversion",
+    "es": "el desvío",
+    "ar": "التحويلة",
+    "fa": "مسیر انحرافی"
+   },
+   "g": "die",
+   "pl": "Umleitungen"
+  },
+  {
+   "id": "sich-befassen-mit",
+   "w": "sich befassen mit",
+   "t": "verbs",
+   "ex": "Der Kurs befasst sich mit deutscher Geschichte.",
+   "tr": {
+    "en": "to deal with, to look at",
+    "es": "ocuparse de",
+    "ar": "يتناول",
+    "fa": "پرداختن به"
+   }
+  },
+  {
+   "id": "ausgeglichen",
+   "w": "ausgeglichen",
+   "t": "adj",
+   "ex": "Seit dem Urlaub bin ich viel ausgeglichener.",
+   "tr": {
+    "en": "balanced, calm",
+    "es": "equilibrado",
+    "ar": "متوازن",
+    "fa": "متعادل"
+   }
+  },
+  {
+   "id": "dennoch",
+   "w": "dennoch",
+   "t": "small",
+   "ex": "Es war schwer, dennoch haben wir es geschafft.",
+   "tr": {
+    "en": "nevertheless",
+    "es": "sin embargo",
+    "ar": "ومع ذلك",
+    "fa": "با این حال"
+   }
+  },
+  {
+   "id": "das-protokoll",
+   "w": "das Protokoll",
+   "t": "work",
+   "ex": "Wer schreibt heute das Protokoll?",
+   "tr": {
+    "en": "minutes, record",
+    "es": "el acta",
+    "ar": "المحضر",
+    "fa": "صورت‌جلسه"
+   },
+   "g": "das",
+   "pl": "Protokolle"
+  },
+  {
+   "id": "die-minderheit",
+   "w": "die Minderheit",
+   "t": "society",
+   "ex": "Auch Minderheiten haben Rechte.",
+   "tr": {
+    "en": "minority",
+    "es": "la minoría",
+    "ar": "الأقلية",
+    "fa": "اقلیت"
+   },
+   "g": "die",
+   "pl": "Minderheiten"
+  },
+  {
+   "id": "die-zuneigung",
+   "w": "die Zuneigung",
+   "t": "people",
+   "ex": "Kinder brauchen Zuneigung und Zeit.",
+   "tr": {
+    "en": "affection",
+    "es": "el cariño",
+    "ar": "المودة",
+    "fa": "محبت"
+   },
+   "g": "die"
+  },
+  {
+   "id": "die-falschmeldung",
+   "w": "die Falschmeldung",
+   "t": "media",
+   "ex": "Im Internet verbreiten sich Falschmeldungen schnell.",
+   "tr": {
+    "en": "fake news",
+    "es": "la noticia falsa",
+    "ar": "الخبر الكاذب",
+    "fa": "خبر جعلی"
+   },
+   "g": "die",
+   "pl": "Falschmeldungen"
+  },
+  {
+   "id": "die-erneuerbare-energie",
+   "w": "die erneuerbare Energie",
+   "t": "nature",
+   "ex": "Deutschland setzt auf erneuerbare Energien.",
+   "tr": {
+    "en": "renewable energy",
+    "es": "la energía renovable",
+    "ar": "الطاقة المتجددة",
+    "fa": "انرژی تجدیدپذیر"
+   },
+   "g": "die",
+   "pl": "erneuerbaren Energien"
+  },
+  {
+   "id": "die-infektion",
+   "w": "die Infektion",
+   "t": "health",
+   "ex": "Gegen die Infektion bekam sie Antibiotika.",
+   "tr": {
+    "en": "infection",
+    "es": "la infección",
+    "ar": "العدوى",
+    "fa": "عفونت"
+   },
+   "g": "die",
+   "pl": "Infektionen"
+  },
+  {
+   "id": "die-warmmiete",
+   "w": "die Warmmiete",
+   "t": "home",
+   "ex": "Die Warmmiete liegt bei 780 Euro.",
+   "tr": {
+    "en": "rent including utilities",
+    "es": "el alquiler con gastos",
+    "ar": "الإيجار الشامل",
+    "fa": "اجاره با هزینه‌های جانبی"
+   },
+   "g": "die",
+   "pl": "Warmmieten"
+  },
+  {
+   "id": "der-pendler",
+   "w": "der Pendler",
+   "t": "city",
+   "ex": "Viele Pendler fahren täglich nach Jena.",
+   "tr": {
+    "en": "commuter",
+    "es": "el viajero diario",
+    "ar": "المتنقل اليومي",
+    "fa": "کسی که هر روز برای کار رفت‌وآمد می‌کند"
+   },
+   "g": "der",
+   "pl": "Pendler"
+  },
+  {
+   "id": "sich-bewaehren",
+   "w": "sich bewähren",
+   "t": "verbs",
+   "ex": "Die neue Methode hat sich bewährt.",
+   "tr": {
+    "en": "to prove itself",
+    "es": "dar buen resultado",
+    "ar": "يثبت جدارته",
+    "fa": "کارآمد بودن خود را نشان دادن"
+   }
+  },
+  {
+   "id": "begeistert",
+   "w": "begeistert",
+   "t": "adj",
+   "ex": "Die Kinder waren von dem Ausflug begeistert.",
+   "tr": {
+    "en": "enthusiastic",
+    "es": "entusiasmado",
+    "ar": "متحمس",
+    "fa": "مشتاق / ذوق‌زده"
+   }
+  },
+  {
+   "id": "derzeit",
+   "w": "derzeit",
+   "t": "small",
+   "ex": "Derzeit ist das Büro geschlossen.",
+   "tr": {
+    "en": "currently",
+    "es": "actualmente",
+    "ar": "حالياً",
+    "fa": "در حال حاضر"
+   }
+  },
+  {
+   "id": "der-gewinn",
+   "w": "der Gewinn",
+   "t": "work",
+   "ex": "Die Firma hat einen hohen Gewinn gemacht.",
+   "tr": {
+    "en": "profit",
+    "es": "la ganancia",
+    "ar": "الربح",
+    "fa": "سود"
+   },
+   "g": "der",
+   "pl": "Gewinne"
+  },
+  {
+   "id": "die-mehrheit",
+   "w": "die Mehrheit",
+   "t": "society",
+   "ex": "Die Mehrheit hat dafür gestimmt.",
+   "tr": {
+    "en": "majority",
+    "es": "la mayoría",
+    "ar": "الأغلبية",
+    "fa": "اکثریت"
+   },
+   "g": "die",
+   "pl": "Mehrheiten"
+  },
+  {
+   "id": "die-einsamkeit",
+   "w": "die Einsamkeit",
+   "t": "people",
+   "ex": "Im Alter leiden viele Menschen unter Einsamkeit.",
+   "tr": {
+    "en": "loneliness",
+    "es": "la soledad",
+    "ar": "الوحدة",
+    "fa": "تنهایی"
+   },
+   "g": "die"
+  },
+  {
+   "id": "die-pressefreiheit",
+   "w": "die Pressefreiheit",
+   "t": "media",
+   "ex": "Pressefreiheit ist wichtig für die Demokratie.",
+   "tr": {
+    "en": "freedom of the press",
+    "es": "la libertad de prensa",
+    "ar": "حرية الصحافة",
+    "fa": "آزادی مطبوعات"
+   },
+   "g": "die"
+  },
+  {
+   "id": "die-windkraft",
+   "w": "die Windkraft",
+   "t": "nature",
+   "ex": "In Thüringen gibt es viele Anlagen für Windkraft.",
+   "tr": {
+    "en": "wind power",
+    "es": "la energía eólica",
+    "ar": "طاقة الرياح",
+    "fa": "انرژی بادی"
+   },
+   "g": "die"
+  },
+  {
+   "id": "der-erreger",
+   "w": "der Erreger",
+   "t": "health",
+   "ex": "Der Erreger wird über die Luft übertragen.",
+   "tr": {
+    "en": "pathogen",
+    "es": "el patógeno",
+    "ar": "العامل الممرض",
+    "fa": "عامل بیماری‌زا"
+   },
+   "g": "der",
+   "pl": "Erreger"
+  },
+  {
+   "id": "der-wohnungsmangel",
+   "w": "der Wohnungsmangel",
+   "t": "home",
+   "ex": "In großen Städten herrscht Wohnungsmangel.",
+   "tr": {
+    "en": "housing shortage",
+    "es": "la escasez de vivienda",
+    "ar": "نقص المساكن",
+    "fa": "کمبود مسکن"
+   },
+   "g": "der"
+  },
+  {
+   "id": "die-fussgaengerzone",
+   "w": "die Fußgängerzone",
+   "t": "city",
+   "ex": "In der Fußgängerzone gibt es viele Geschäfte.",
+   "tr": {
+    "en": "pedestrian zone",
+    "es": "la zona peatonal",
+    "ar": "منطقة المشاة",
+    "fa": "پیاده‌راه"
+   },
+   "g": "die",
+   "pl": "Fußgängerzonen"
+  },
+  {
+   "id": "sich-einigen",
+   "w": "sich einigen",
+   "t": "verbs",
+   "ex": "Wir haben uns auf einen Termin geeinigt.",
+   "tr": {
+    "en": "to agree",
+    "es": "ponerse de acuerdo",
+    "ar": "يتفق",
+    "fa": "به توافق رسیدن"
+   }
+  },
+  {
+   "id": "beliebt",
+   "w": "beliebt",
+   "t": "adj",
+   "ex": "Das Café ist bei Studenten sehr beliebt.",
+   "tr": {
+    "en": "popular",
+    "es": "popular",
+    "ar": "محبوب",
+    "fa": "محبوب"
+   }
+  },
+  {
+   "id": "diesbezueglich",
+   "w": "diesbezüglich",
+   "t": "small",
+   "ex": "Diesbezüglich habe ich noch eine Frage.",
+   "tr": {
+    "en": "in this regard",
+    "es": "al respecto",
+    "ar": "بهذا الخصوص",
+    "fa": "در این باره"
+   }
+  },
+  {
+   "id": "der-verlust",
+   "w": "der Verlust",
+   "t": "work",
+   "ex": "Das Geschäft macht seit Monaten Verlust.",
+   "tr": {
+    "en": "loss",
+    "es": "la pérdida",
+    "ar": "الخسارة",
+    "fa": "زیان"
+   },
+   "g": "der",
+   "pl": "Verluste"
+  },
+  {
+   "id": "der-wohlstand",
+   "w": "der Wohlstand",
+   "t": "society",
+   "ex": "Der Wohlstand ist nicht gerecht verteilt.",
+   "tr": {
+    "en": "prosperity",
+    "es": "la prosperidad",
+    "ar": "الرخاء",
+    "fa": "رفاه"
+   },
+   "g": "der"
+  },
+  {
+   "id": "die-unsicherheit",
+   "w": "die Unsicherheit",
+   "t": "people",
+   "ex": "Seine Unsicherheit merkt man sofort.",
+   "tr": {
+    "en": "insecurity, uncertainty",
+    "es": "la inseguridad",
+    "ar": "عدم الثقة / الشك",
+    "fa": "ناامنی / تردید"
+   },
+   "g": "die",
+   "pl": "Unsicherheiten"
+  },
+  {
+   "id": "der-rundfunkbeitrag",
+   "w": "der Rundfunkbeitrag",
+   "t": "media",
+   "ex": "Jeder Haushalt zahlt den Rundfunkbeitrag.",
+   "tr": {
+    "en": "broadcasting fee",
+    "es": "la tasa de radiodifusión",
+    "ar": "رسوم البث",
+    "fa": "حق پخش رادیو و تلویزیون"
+   },
+   "g": "der",
+   "pl": "Rundfunkbeiträge"
+  },
+  {
+   "id": "der-rohstoff",
+   "w": "der Rohstoff",
+   "t": "nature",
+   "ex": "Rohstoffe werden immer teurer.",
+   "tr": {
+    "en": "raw material",
+    "es": "la materia prima",
+    "ar": "المادة الخام",
+    "fa": "ماده‌ی خام"
+   },
+   "g": "der",
+   "pl": "Rohstoffe"
+  },
+  {
+   "id": "das-immunsystem",
+   "w": "das Immunsystem",
+   "t": "health",
+   "ex": "Schlaf stärkt das Immunsystem.",
+   "tr": {
+    "en": "immune system",
+    "es": "el sistema inmunológico",
+    "ar": "جهاز المناعة",
+    "fa": "سیستم ایمنی"
+   },
+   "g": "das",
+   "pl": "Immunsysteme"
+  },
+  {
+   "id": "die-hausverwaltung",
+   "w": "die Hausverwaltung",
+   "t": "home",
+   "ex": "Die Hausverwaltung schickt einen Handwerker.",
+   "tr": {
+    "en": "property management",
+    "es": "la administración de la finca",
+    "ar": "إدارة العقار",
+    "fa": "مدیریت ساختمان"
+   },
+   "g": "die",
+   "pl": "Hausverwaltungen"
+  },
+  {
+   "id": "die-innenstadt",
+   "w": "die Innenstadt",
+   "t": "city",
+   "ex": "Am Samstag ist die Innenstadt sehr voll.",
+   "tr": {
+    "en": "city centre",
+    "es": "el centro de la ciudad",
+    "ar": "وسط المدينة",
+    "fa": "مرکز شهر"
+   },
+   "g": "die",
+   "pl": "Innenstädte"
+  },
+  {
+   "id": "sich-engagieren",
+   "w": "sich engagieren",
+   "t": "verbs",
+   "ex": "Sie engagiert sich für Geflüchtete.",
+   "tr": {
+    "en": "to be committed, to get involved",
+    "es": "comprometerse",
+    "ar": "ينخرط / يلتزم",
+    "fa": "فعالیت داوطلبانه کردن"
+   }
+  },
+  {
+   "id": "berechtigt",
+   "w": "berechtigt",
+   "t": "adj",
+   "ex": "Ihre Kritik ist berechtigt.",
+   "tr": {
+    "en": "justified, entitled",
+    "es": "justificado",
+    "ar": "مبرَّر / مخوَّل",
+    "fa": "موجه / محق"
+   }
+  },
+  {
+   "id": "ebenso",
+   "w": "ebenso",
+   "t": "small",
+   "ex": "Ich freue mich ebenso wie du.",
+   "tr": {
+    "en": "just as, likewise",
+    "es": "igualmente",
+    "ar": "بالمثل",
+    "fa": "به همان اندازه"
+   }
+  },
+  {
+   "id": "das-unternehmen",
+   "w": "das Unternehmen",
+   "t": "work",
+   "ex": "Das Unternehmen hat 200 Mitarbeiter.",
+   "tr": {
+    "en": "company",
+    "es": "la empresa",
+    "ar": "الشركة",
+    "fa": "شرکت"
+   },
+   "g": "das",
+   "pl": "Unternehmen"
+  },
+  {
+   "id": "die-sozialversicherung",
+   "w": "die Sozialversicherung",
+   "t": "society",
+   "ex": "Die Sozialversicherung schützt bei Krankheit und Alter.",
+   "tr": {
+    "en": "social insurance",
+    "es": "la seguridad social",
+    "ar": "التأمين الاجتماعي",
+    "fa": "تأمین اجتماعی"
+   },
+   "g": "die",
+   "pl": "Sozialversicherungen"
+  },
+  {
+   "id": "die-erwartung",
+   "w": "die Erwartung",
+   "t": "people",
+   "ex": "Die Erwartungen der Eltern sind hoch.",
+   "tr": {
+    "en": "expectation",
+    "es": "la expectativa",
+    "ar": "التوقع",
+    "fa": "انتظار"
+   },
+   "g": "die",
+   "pl": "Erwartungen"
+  },
+  {
+   "id": "der-sender",
+   "w": "der Sender",
+   "t": "media",
+   "ex": "Auf welchem Sender läuft das Spiel?",
+   "tr": {
+    "en": "channel, station",
+    "es": "la cadena",
+    "ar": "القناة / المحطة",
+    "fa": "شبکه / ایستگاه"
+   },
+   "g": "der",
+   "pl": "Sender"
+  },
+  {
+   "id": "die-artenvielfalt",
+   "w": "die Artenvielfalt",
+   "t": "nature",
+   "ex": "Die Artenvielfalt in den Wäldern nimmt ab.",
+   "tr": {
+    "en": "biodiversity",
+    "es": "la biodiversidad",
+    "ar": "التنوع البيولوجي",
+    "fa": "تنوع زیستی"
+   },
+   "g": "die"
+  },
+  {
+   "id": "die-untersuchungsergebnisse",
+   "w": "die Untersuchungsergebnisse",
+   "t": "health",
+   "ex": "Die Untersuchungsergebnisse kommen nächste Woche.",
+   "tr": {
+    "en": "test results",
+    "es": "los resultados de las pruebas",
+    "ar": "نتائج الفحوصات",
+    "fa": "نتایج آزمایش"
+   },
+   "g": "die",
+   "pl": "(Plural)"
+  },
+  {
+   "id": "die-instandhaltung",
+   "w": "die Instandhaltung",
+   "t": "home",
+   "ex": "Der Vermieter ist für die Instandhaltung zuständig.",
+   "tr": {
+    "en": "maintenance",
+    "es": "el mantenimiento",
+    "ar": "الصيانة",
+    "fa": "نگهداری و تعمیر"
+   },
+   "g": "die"
+  },
+  {
+   "id": "der-stadtrand",
+   "w": "der Stadtrand",
+   "t": "city",
+   "ex": "Wir wohnen am Stadtrand.",
+   "tr": {
+    "en": "outskirts",
+    "es": "las afueras",
+    "ar": "أطراف المدينة",
+    "fa": "حاشیه‌ی شهر"
+   },
+   "g": "der",
+   "pl": "Stadtränder"
+  },
+  {
+   "id": "sich-ergeben",
+   "w": "sich ergeben",
+   "t": "verbs",
+   "ex": "Aus dem Gespräch hat sich eine gute Idee ergeben.",
+   "tr": {
+    "en": "to result, to arise",
+    "es": "resultar",
+    "ar": "ينتج عن",
+    "fa": "حاصل شدن"
+   }
+  },
+  {
+   "id": "bescheiden",
+   "w": "bescheiden",
+   "t": "adj",
+   "ex": "Trotz des Erfolgs ist sie bescheiden geblieben.",
+   "tr": {
+    "en": "modest",
+    "es": "modesto",
+    "ar": "متواضع",
+    "fa": "فروتن"
+   }
+  },
+  {
+   "id": "eher",
+   "w": "eher",
+   "t": "small",
+   "ex": "Ich gehe eher zu Fuß als mit dem Bus.",
+   "tr": {
+    "en": "rather",
+    "es": "más bien",
+    "ar": "بالأحرى",
+    "fa": "ترجیحاً / بیشتر"
+   }
+  },
+  {
+   "id": "die-branche",
+   "w": "die Branche",
+   "t": "work",
+   "ex": "In welcher Branche arbeiten Sie?",
+   "tr": {
+    "en": "industry, sector",
+    "es": "el sector",
+    "ar": "القطاع",
+    "fa": "صنعت / رشته"
+   },
+   "g": "die",
+   "pl": "Branchen"
+  },
+  {
+   "id": "der-asylantrag",
+   "w": "der Asylantrag",
+   "t": "society",
+   "ex": "Er hat einen Asylantrag gestellt.",
+   "tr": {
+    "en": "asylum application",
+    "es": "la solicitud de asilo",
+    "ar": "طلب اللجوء",
+    "fa": "درخواست پناهندگی"
+   },
+   "g": "der",
+   "pl": "Asylanträge"
+  },
+  {
+   "id": "die-verpflichtung",
+   "w": "die Verpflichtung",
+   "t": "people",
+   "ex": "Ich habe am Wochenende viele Verpflichtungen.",
+   "tr": {
+    "en": "obligation, commitment",
+    "es": "el compromiso, la obligación",
+    "ar": "الالتزام",
+    "fa": "تعهد"
+   },
+   "g": "die",
+   "pl": "Verpflichtungen"
+  },
+  {
+   "id": "die-reportage",
+   "w": "die Reportage",
+   "t": "media",
+   "ex": "Gestern lief eine spannende Reportage über Erfurt.",
+   "tr": {
+    "en": "report, documentary",
+    "es": "el reportaje",
+    "ar": "التقرير / الريبورتاج",
+    "fa": "گزارش مستند"
+   },
+   "g": "die",
+   "pl": "Reportagen"
+  },
+  {
+   "id": "die-duerre",
+   "w": "die Dürre",
+   "t": "nature",
+   "ex": "Nach der Dürre war die Ernte schlecht.",
+   "tr": {
+    "en": "drought",
+    "es": "la sequía",
+    "ar": "الجفاف",
+    "fa": "خشکسالی"
+   },
+   "g": "die",
+   "pl": "Dürren"
+  },
+  {
+   "id": "die-ueberweisung-zum-facharzt",
+   "w": "die Überweisung zum Facharzt",
+   "t": "health",
+   "ex": "Für den Orthopäden brauche ich eine Überweisung zum Facharzt.",
+   "tr": {
+    "en": "referral to a specialist",
+    "es": "la derivación al especialista",
+    "ar": "التحويل إلى الطبيب المختص",
+    "fa": "ارجاع به متخصص"
+   },
+   "g": "die"
+  },
+  {
+   "id": "die-ruhestoerung",
+   "w": "die Ruhestörung",
+   "t": "home",
+   "ex": "Laute Musik nach 22 Uhr ist Ruhestörung.",
+   "tr": {
+    "en": "disturbance of the peace",
+    "es": "la perturbación del descanso",
+    "ar": "الإزعاج",
+    "fa": "برهم زدن آرامش"
+   },
+   "g": "die",
+   "pl": "Ruhestörungen"
+  },
+  {
+   "id": "sich-herausstellen",
+   "w": "sich herausstellen",
+   "t": "verbs",
+   "ex": "Es hat sich herausgestellt, dass er recht hatte.",
+   "tr": {
+    "en": "to turn out",
+    "es": "resultar, revelarse",
+    "ar": "يتضح",
+    "fa": "معلوم شدن"
+   }
+  },
+  {
+   "id": "bestaendig",
+   "w": "beständig",
+   "t": "adj",
+   "ex": "Das Wetter bleibt beständig.",
+   "tr": {
+    "en": "stable, constant",
+    "es": "estable",
+    "ar": "ثابت",
+    "fa": "پایدار"
+   }
+  },
+  {
+   "id": "einerseits-andererseits",
+   "w": "einerseits … andererseits",
+   "t": "small",
+   "ex": "Einerseits ist die Stadt schön, andererseits ist sie teuer.",
+   "tr": {
+    "en": "on the one hand … on the other hand",
+    "es": "por un lado … por otro",
+    "ar": "من ناحية … ومن ناحية أخرى",
+    "fa": "از یک سو … از سوی دیگر"
+   }
+  },
+  {
+   "id": "die-kollegin",
+   "w": "die Kollegin",
+   "t": "work",
+   "ex": "Meine Kollegin hilft mir immer.",
+   "tr": {
+    "en": "(female) colleague",
+    "es": "la compañera de trabajo",
+    "ar": "الزميلة",
+    "fa": "همکار (زن)"
+   },
+   "g": "die",
+   "pl": "Kolleginnen"
+  },
+  {
+   "id": "die-buerokratie",
+   "w": "die Bürokratie",
+   "t": "society",
+   "ex": "Die Bürokratie in Deutschland ist kompliziert.",
+   "tr": {
+    "en": "bureaucracy",
+    "es": "la burocracia",
+    "ar": "البيروقراطية",
+    "fa": "دیوان‌سالاری"
+   },
+   "g": "die"
+  },
+  {
+   "id": "der-konflikt",
+   "w": "der Konflikt",
+   "t": "people",
+   "ex": "Wie lösen Sie Konflikte im Team?",
+   "tr": {
+    "en": "conflict",
+    "es": "el conflicto",
+    "ar": "النزاع",
+    "fa": "تعارض / درگیری"
+   },
+   "g": "der",
+   "pl": "Konflikte"
+  },
+  {
+   "id": "das-interview",
+   "w": "das Interview",
+   "t": "media",
+   "ex": "Die Ministerin gab ein langes Interview.",
+   "tr": {
+    "en": "interview",
+    "es": "la entrevista",
+    "ar": "المقابلة",
+    "fa": "مصاحبه"
+   },
+   "g": "das",
+   "pl": "Interviews"
+  },
+  {
+   "id": "die-ueberschwemmung",
+   "w": "die Überschwemmung",
+   "t": "nature",
+   "ex": "Nach dem Regen gab es Überschwemmungen.",
+   "tr": {
+    "en": "flood",
+    "es": "la inundación",
+    "ar": "الفيضان",
+    "fa": "سیل"
+   },
+   "g": "die",
+   "pl": "Überschwemmungen"
+  },
+  {
+   "id": "die-vorsorgeuntersuchung",
+   "w": "die Vorsorgeuntersuchung",
+   "t": "health",
+   "ex": "Ab 35 gibt es eine kostenlose Vorsorgeuntersuchung.",
+   "tr": {
+    "en": "check-up",
+    "es": "el chequeo preventivo",
+    "ar": "الفحص الوقائي",
+    "fa": "معاینه‌ی پیشگیرانه"
+   },
+   "g": "die",
+   "pl": "Vorsorgeuntersuchungen"
+  },
+  {
+   "id": "die-wohnungsuebergabe",
+   "w": "die Wohnungsübergabe",
+   "t": "home",
+   "ex": "Bei der Wohnungsübergabe machen wir ein Protokoll.",
+   "tr": {
+    "en": "handover of the flat",
+    "es": "la entrega del piso",
+    "ar": "تسليم الشقة",
+    "fa": "تحویل آپارتمان"
+   },
+   "g": "die",
+   "pl": "Wohnungsübergaben"
+  },
+  {
+   "id": "sich-verlassen-auf",
+   "w": "sich verlassen auf",
+   "t": "verbs",
+   "ex": "Auf meine Kollegin kann ich mich verlassen.",
+   "tr": {
+    "en": "to rely on",
+    "es": "contar con",
+    "ar": "يعتمد على",
+    "fa": "اعتماد کردن به"
+   }
+  },
+  {
+   "id": "dauerhaft",
+   "w": "dauerhaft",
+   "t": "adj",
+   "ex": "Wir suchen eine dauerhafte Lösung.",
+   "tr": {
+    "en": "lasting, permanent",
+    "es": "duradero",
+    "ar": "دائم",
+    "fa": "ماندگار"
+   }
+  },
+  {
+   "id": "folglich",
+   "w": "folglich",
+   "t": "small",
+   "ex": "Er war krank, folglich konnte er nicht kommen.",
+   "tr": {
+    "en": "consequently",
+    "es": "por consiguiente",
+    "ar": "وبالتالي",
+    "fa": "در نتیجه"
+   }
+  },
+  {
+   "id": "die-leistung",
+   "w": "die Leistung",
+   "t": "work",
+   "ex": "Der Chef ist mit meiner Leistung zufrieden.",
+   "tr": {
+    "en": "performance, achievement",
+    "es": "el rendimiento",
+    "ar": "الأداء",
+    "fa": "عملکرد"
+   },
+   "g": "die",
+   "pl": "Leistungen"
+  },
+  {
+   "id": "die-wahlbeteiligung",
+   "w": "die Wahlbeteiligung",
+   "t": "society",
+   "ex": "Die Wahlbeteiligung war dieses Jahr hoch.",
+   "tr": {
+    "en": "voter turnout",
+    "es": "la participación electoral",
+    "ar": "نسبة المشاركة في الانتخابات",
+    "fa": "میزان مشارکت در انتخابات"
+   },
+   "g": "die",
+   "pl": "Wahlbeteiligungen"
+  },
+  {
+   "id": "die-kritik",
+   "w": "die Kritik",
+   "t": "people",
+   "ex": "Mit Kritik kann er schlecht umgehen.",
+   "tr": {
+    "en": "criticism",
+    "es": "la crítica",
+    "ar": "النقد",
+    "fa": "انتقاد"
+   },
+   "g": "die",
+   "pl": "Kritiken"
+  },
+  {
+   "id": "der-leserbrief",
+   "w": "der Leserbrief",
+   "t": "media",
+   "ex": "Ich habe einen Leserbrief an die Zeitung geschrieben.",
+   "tr": {
+    "en": "letter to the editor",
+    "es": "la carta al director",
+    "ar": "رسالة القراء",
+    "fa": "نامه به سردبیر"
+   },
+   "g": "der",
+   "pl": "Leserbriefe"
+  },
+  {
+   "id": "das-unwetter",
+   "w": "das Unwetter",
+   "t": "nature",
+   "ex": "Wegen des Unwetters fiel der Strom aus.",
+   "tr": {
+    "en": "severe weather, storm",
+    "es": "el temporal",
+    "ar": "العاصفة / الطقس العاصف",
+    "fa": "توفان / هوای نامساعد"
+   },
+   "g": "das",
+   "pl": "Unwetter"
+  },
+  {
+   "id": "die-reha",
+   "w": "die Reha",
+   "t": "health",
+   "ex": "Nach der Operation war er drei Wochen in der Reha.",
+   "tr": {
+    "en": "rehab",
+    "es": "la rehabilitación",
+    "ar": "إعادة التأهيل",
+    "fa": "توان‌بخشی"
+   },
+   "g": "die",
+   "pl": "Rehas"
+  },
+  {
+   "id": "die-renovierung",
+   "w": "die Renovierung",
+   "t": "home",
+   "ex": "Die Renovierung hat zwei Monate gedauert.",
+   "tr": {
+    "en": "renovation",
+    "es": "la reforma",
+    "ar": "الترميم",
+    "fa": "بازسازی"
+   },
+   "g": "die",
+   "pl": "Renovierungen"
+  },
+  {
+   "id": "sich-zurechtfinden",
+   "w": "sich zurechtfinden",
+   "t": "verbs",
+   "ex": "Ich finde mich in der neuen Stadt gut zurecht.",
+   "tr": {
+    "en": "to find one's way",
+    "es": "orientarse",
+    "ar": "يتأقلم / يجد طريقه",
+    "fa": "از پس کار برآمدن / راه را پیدا کردن"
+   }
+  },
+  {
+   "id": "eindeutig",
+   "w": "eindeutig",
+   "t": "adj",
+   "ex": "Das Ergebnis ist eindeutig.",
+   "tr": {
+    "en": "clear, unambiguous",
+    "es": "inequívoco",
+    "ar": "واضح / قاطع",
+    "fa": "روشن / بی‌ابهام"
+   }
+  },
+  {
+   "id": "hingegen",
+   "w": "hingegen",
+   "t": "small",
+   "ex": "Ich mag Kaffee, mein Mann hingegen trinkt nur Tee.",
+   "tr": {
+    "en": "on the other hand, whereas",
+    "es": "en cambio",
+    "ar": "في المقابل",
+    "fa": "در عوض"
+   }
+  },
+  {
+   "id": "die-stellenbeschreibung",
+   "w": "die Stellenbeschreibung",
+   "t": "work",
+   "ex": "Die Stellenbeschreibung passt genau zu mir.",
+   "tr": {
+    "en": "job description",
+    "es": "la descripción del puesto",
+    "ar": "الوصف الوظيفي",
+    "fa": "شرح وظایف شغل"
+   },
+   "g": "die",
+   "pl": "Stellenbeschreibungen"
+  },
+  {
+   "id": "die-umfrage",
+   "w": "die Umfrage",
+   "t": "society",
+   "ex": "Laut einer Umfrage sind viele Leute unzufrieden.",
+   "tr": {
+    "en": "survey, poll",
+    "es": "la encuesta",
+    "ar": "الاستطلاع",
+    "fa": "نظرسنجی"
+   },
+   "g": "die",
+   "pl": "Umfragen"
+  },
+  {
+   "id": "die-gelassenheit",
+   "w": "die Gelassenheit",
+   "t": "people",
+   "ex": "Mit Gelassenheit geht vieles leichter.",
+   "tr": {
+    "en": "calmness, composure",
+    "es": "la serenidad",
+    "ar": "الهدوء / رباطة الجأش",
+    "fa": "آرامش"
+   },
+   "g": "die"
+  },
+  {
+   "id": "der-bericht",
+   "w": "der Bericht",
+   "t": "media",
+   "ex": "Laut dem Bericht steigen die Preise weiter.",
+   "tr": {
+    "en": "report",
+    "es": "el informe",
+    "ar": "التقرير",
+    "fa": "گزارش"
+   },
+   "g": "der",
+   "pl": "Berichte"
+  },
+  {
+   "id": "die-naturkatastrophe",
+   "w": "die Naturkatastrophe",
+   "t": "nature",
+   "ex": "Erdbeben sind schlimme Naturkatastrophen.",
+   "tr": {
+    "en": "natural disaster",
+    "es": "el desastre natural",
+    "ar": "الكارثة الطبيعية",
+    "fa": "بلای طبیعی"
+   },
+   "g": "die",
+   "pl": "Naturkatastrophen"
+  },
+  {
+   "id": "die-physiotherapie",
+   "w": "die Physiotherapie",
+   "t": "health",
+   "ex": "Gegen die Rückenschmerzen hilft Physiotherapie.",
+   "tr": {
+    "en": "physiotherapy",
+    "es": "la fisioterapia",
+    "ar": "العلاج الطبيعي",
+    "fa": "فیزیوتراپی"
+   },
+   "g": "die"
+  },
+  {
+   "id": "die-daemmung",
+   "w": "die Dämmung",
+   "t": "home",
+   "ex": "Gute Dämmung spart Heizkosten.",
+   "tr": {
+    "en": "insulation",
+    "es": "el aislamiento",
+    "ar": "العزل",
+    "fa": "عایق‌کاری"
+   },
+   "g": "die",
+   "pl": "Dämmungen"
+  },
+  {
+   "id": "sich-zurueckziehen",
+   "w": "sich zurückziehen",
+   "t": "verbs",
+   "ex": "Nach dem Streit hat er sich zurückgezogen.",
+   "tr": {
+    "en": "to withdraw",
+    "es": "retirarse",
+    "ar": "ينسحب",
+    "fa": "کناره‌گیری کردن"
+   }
+  },
+  {
+   "id": "einflussreich",
+   "w": "einflussreich",
+   "t": "adj",
+   "ex": "Sie ist eine einflussreiche Politikerin.",
+   "tr": {
+    "en": "influential",
+    "es": "influyente",
+    "ar": "مؤثّر / ذو نفوذ",
+    "fa": "بانفوذ"
+   }
+  },
+  {
+   "id": "immerhin",
+   "w": "immerhin",
+   "t": "small",
+   "ex": "Immerhin haben wir es versucht.",
+   "tr": {
+    "en": "at least, after all",
+    "es": "al menos",
+    "ar": "على الأقل",
+    "fa": "دست‌کم"
+   }
+  },
+  {
+   "id": "das-anschreiben",
+   "w": "das Anschreiben",
+   "t": "work",
+   "ex": "Im Anschreiben erklären Sie, warum Sie die Stelle wollen.",
+   "tr": {
+    "en": "cover letter",
+    "es": "la carta de presentación",
+    "ar": "رسالة التقديم",
+    "fa": "نامه‌ی درخواست کار"
+   },
+   "g": "das",
+   "pl": "Anschreiben"
+  },
+  {
+   "id": "die-debatte",
+   "w": "die Debatte",
+   "t": "society",
+   "ex": "Im Parlament gab es eine lange Debatte.",
+   "tr": {
+    "en": "debate",
+    "es": "el debate",
+    "ar": "النقاش",
+    "fa": "بحث / مناظره"
+   },
+   "g": "die",
+   "pl": "Debatten"
+  },
+  {
+   "id": "die-ehrlichkeit",
+   "w": "die Ehrlichkeit",
+   "t": "people",
+   "ex": "Ehrlichkeit ist mir in einer Freundschaft wichtig.",
+   "tr": {
+    "en": "honesty",
+    "es": "la honestidad",
+    "ar": "الصدق",
+    "fa": "صداقت"
+   },
+   "g": "die"
+  },
+  {
+   "id": "die-zielgruppe",
+   "w": "die Zielgruppe",
+   "t": "media",
+   "ex": "Die Zielgruppe sind junge Leute.",
+   "tr": {
+    "en": "target group",
+    "es": "el público objetivo",
+    "ar": "الفئة المستهدفة",
+    "fa": "گروه هدف"
+   },
+   "g": "die",
+   "pl": "Zielgruppen"
+  },
+  {
+   "id": "die-landwirtschaft",
+   "w": "die Landwirtschaft",
+   "t": "nature",
+   "ex": "Die Landwirtschaft braucht viel Wasser.",
+   "tr": {
+    "en": "agriculture",
+    "es": "la agricultura",
+    "ar": "الزراعة",
+    "fa": "کشاورزی"
+   },
+   "g": "die"
+  },
+  {
+   "id": "die-arbeitsunfaehigkeit",
+   "w": "die Arbeitsunfähigkeit",
+   "t": "health",
+   "ex": "Der Arzt bescheinigt die Arbeitsunfähigkeit.",
+   "tr": {
+    "en": "inability to work",
+    "es": "la incapacidad laboral",
+    "ar": "العجز عن العمل",
+    "fa": "ناتوانی از کار"
+   },
+   "g": "die"
+  },
+  {
+   "id": "sich-anpassen",
+   "w": "sich anpassen",
+   "t": "verbs",
+   "ex": "Kinder passen sich schnell an.",
+   "tr": {
+    "en": "to adapt",
+    "es": "adaptarse",
+    "ar": "يتكيف",
+    "fa": "سازگار شدن"
+   }
+  },
+  {
+   "id": "empfindlich",
+   "w": "empfindlich",
+   "t": "adj",
+   "ex": "Meine Haut ist sehr empfindlich.",
+   "tr": {
+    "en": "sensitive",
+    "es": "sensible",
+    "ar": "حسّاس",
+    "fa": "حساس"
+   }
+  },
+  {
+   "id": "infolge",
+   "w": "infolge",
+   "t": "small",
+   "ex": "Infolge des Streiks fielen viele Züge aus.",
+   "tr": {
+    "en": "as a result of",
+    "es": "a consecuencia de",
+    "ar": "نتيجةً لـ",
+    "fa": "در پی"
+   }
+  },
+  {
+   "id": "die-gehaltsvorstellung",
+   "w": "die Gehaltsvorstellung",
+   "t": "work",
+   "ex": "Bitte nennen Sie Ihre Gehaltsvorstellung.",
+   "tr": {
+    "en": "salary expectation",
+    "es": "la pretensión salarial",
+    "ar": "الراتب المتوقع",
+    "fa": "حقوق مورد انتظار"
+   },
+   "g": "die",
+   "pl": "Gehaltsvorstellungen"
+  },
+  {
+   "id": "die-vorschrift",
+   "w": "die Vorschrift",
+   "t": "society",
+   "ex": "Bitte beachten Sie die Vorschriften.",
+   "tr": {
+    "en": "regulation, rule",
+    "es": "la norma",
+    "ar": "اللائحة / القاعدة",
+    "fa": "مقررات"
+   },
+   "g": "die",
+   "pl": "Vorschriften"
+  },
+  {
+   "id": "die-zuverlaessigkeit",
+   "w": "die Zuverlässigkeit",
+   "t": "people",
+   "ex": "Arbeitgeber schätzen Zuverlässigkeit.",
+   "tr": {
+    "en": "reliability",
+    "es": "la fiabilidad",
+    "ar": "الموثوقية",
+    "fa": "قابل‌اعتماد بودن"
+   },
+   "g": "die"
+  },
+  {
+   "id": "der-nutzer",
+   "w": "der Nutzer",
+   "t": "media",
+   "ex": "Die App hat schon eine Million Nutzer.",
+   "tr": {
+    "en": "user",
+    "es": "el usuario",
+    "ar": "المستخدم",
+    "fa": "کاربر"
+   },
+   "g": "der",
+   "pl": "Nutzer"
+  },
+  {
+   "id": "der-anbau",
+   "w": "der Anbau",
+   "t": "nature",
+   "ex": "Der Anbau von Gemüse ist hier üblich.",
+   "tr": {
+    "en": "cultivation",
+    "es": "el cultivo",
+    "ar": "الزراعة / الغرس",
+    "fa": "کشت"
+   },
+   "g": "der"
+  },
+  {
+   "id": "die-behinderung",
+   "w": "die Behinderung",
+   "t": "health",
+   "ex": "Menschen mit Behinderung haben besondere Rechte.",
+   "tr": {
+    "en": "disability",
+    "es": "la discapacidad",
+    "ar": "الإعاقة",
+    "fa": "معلولیت"
+   },
+   "g": "die",
+   "pl": "Behinderungen"
+  },
+  {
+   "id": "sich-aeussern",
+   "w": "sich äußern",
+   "t": "verbs",
+   "ex": "Der Minister wollte sich nicht äußern.",
+   "tr": {
+    "en": "to comment, to express oneself",
+    "es": "pronunciarse",
+    "ar": "يدلي برأيه",
+    "fa": "اظهار نظر کردن"
+   }
+  },
+  {
+   "id": "entscheidend",
+   "w": "entscheidend",
+   "t": "adj",
+   "ex": "Der erste Eindruck ist oft entscheidend.",
+   "tr": {
+    "en": "decisive",
+    "es": "decisivo",
+    "ar": "حاسم",
+    "fa": "تعیین‌کننده"
+   }
+  },
+  {
+   "id": "insbesondere",
+   "w": "insbesondere",
+   "t": "small",
+   "ex": "Insbesondere im Winter ist das ein Problem.",
+   "tr": {
+    "en": "in particular",
+    "es": "especialmente",
+    "ar": "خصوصاً",
+    "fa": "به‌ویژه"
+   }
+  },
+  {
+   "id": "die-einarbeitung",
+   "w": "die Einarbeitung",
+   "t": "work",
+   "ex": "Die Einarbeitung dauert etwa vier Wochen.",
+   "tr": {
+    "en": "induction, onboarding",
+    "es": "el periodo de formación inicial",
+    "ar": "فترة التأهيل",
+    "fa": "دوره‌ی آشنایی با کار"
+   },
+   "g": "die"
+  },
+  {
+   "id": "die-ausnahme",
+   "w": "die Ausnahme",
+   "t": "society",
+   "ex": "Diesmal machen wir eine Ausnahme.",
+   "tr": {
+    "en": "exception",
+    "es": "la excepción",
+    "ar": "الاستثناء",
+    "fa": "استثنا"
+   },
+   "g": "die",
+   "pl": "Ausnahmen"
+  },
+  {
+   "id": "die-mentalitaet",
+   "w": "die Mentalität",
+   "t": "people",
+   "ex": "Die Mentalität im Norden ist anders als im Süden.",
+   "tr": {
+    "en": "mentality",
+    "es": "la mentalidad",
+    "ar": "العقلية",
+    "fa": "طرز فکر"
+   },
+   "g": "die",
+   "pl": "Mentalitäten"
+  },
+  {
+   "id": "die-plattform",
+   "w": "die Plattform",
+   "t": "media",
+   "ex": "Auf welcher Plattform bist du aktiv?",
+   "tr": {
+    "en": "platform",
+    "es": "la plataforma",
+    "ar": "المنصة",
+    "fa": "پلتفرم"
+   },
+   "g": "die",
+   "pl": "Plattformen"
+  },
+  {
+   "id": "die-ernte",
+   "w": "die Ernte",
+   "t": "nature",
+   "ex": "Im Herbst helfen wir bei der Ernte.",
+   "tr": {
+    "en": "harvest",
+    "es": "la cosecha",
+    "ar": "الحصاد",
+    "fa": "برداشت محصول"
+   },
+   "g": "die",
+   "pl": "Ernten"
+  },
+  {
+   "id": "barrierefrei",
+   "w": "barrierefrei",
+   "t": "health",
+   "ex": "Der neue Bahnhof ist barrierefrei.",
+   "tr": {
+    "en": "accessible, step-free",
+    "es": "accesible",
+    "ar": "خالٍ من العوائق",
+    "fa": "بدون مانع / دسترس‌پذیر"
+   }
+  },
+  {
+   "id": "sich-bemuehen-um",
+   "w": "sich bemühen um",
+   "t": "verbs",
+   "ex": "Die Stadt bemüht sich um mehr Wohnungen.",
+   "tr": {
+    "en": "to strive for",
+    "es": "esforzarse por",
+    "ar": "يسعى إلى",
+    "fa": "تلاش کردن برای"
+   }
+  },
+  {
+   "id": "erheblich",
+   "w": "erheblich",
+   "t": "adj",
+   "ex": "Die Kosten sind erheblich gestiegen.",
+   "tr": {
+    "en": "considerable",
+    "es": "considerable",
+    "ar": "كبير / ملحوظ",
+    "fa": "قابل‌توجه"
+   }
+  },
+  {
+   "id": "keineswegs",
+   "w": "keineswegs",
+   "t": "small",
+   "ex": "Das ist keineswegs selbstverständlich.",
+   "tr": {
+    "en": "by no means",
+    "es": "de ninguna manera",
+    "ar": "على الإطلاق (نفي)",
+    "fa": "به هیچ وجه"
+   }
+  },
+  {
+   "id": "die-arbeitsbedingungen",
+   "w": "die Arbeitsbedingungen",
+   "t": "work",
+   "ex": "Die Arbeitsbedingungen in der Pflege müssen besser werden.",
+   "tr": {
+    "en": "working conditions",
+    "es": "las condiciones laborales",
+    "ar": "ظروف العمل",
+    "fa": "شرایط کار"
+   },
+   "g": "die",
+   "pl": "(Plural)"
+  },
+  {
+   "id": "die-veraenderung",
+   "w": "die Veränderung",
+   "t": "society",
+   "ex": "Der Klimawandel bringt große Veränderungen.",
+   "tr": {
+    "en": "change",
+    "es": "el cambio",
+    "ar": "التغيير",
+    "fa": "تغییر"
+   },
+   "g": "die",
+   "pl": "Veränderungen"
+  },
+  {
+   "id": "das-klischee",
+   "w": "das Klischee",
+   "t": "people",
+   "ex": "Dass alle Deutschen pünktlich sind, ist ein Klischee.",
+   "tr": {
+    "en": "cliché, stereotype",
+    "es": "el cliché",
+    "ar": "الصورة النمطية",
+    "fa": "کلیشه"
+   },
+   "g": "das",
+   "pl": "Klischees"
+  },
+  {
+   "id": "der-algorithmus",
+   "w": "der Algorithmus",
+   "t": "media",
+   "ex": "Der Algorithmus zeigt mir immer ähnliche Videos.",
+   "tr": {
+    "en": "algorithm",
+    "es": "el algoritmo",
+    "ar": "الخوارزمية",
+    "fa": "الگوریتم"
+   },
+   "g": "der",
+   "pl": "Algorithmen"
+  },
+  {
+   "id": "das-gewaesser",
+   "w": "das Gewässer",
+   "t": "nature",
+   "ex": "Viele Gewässer sind verschmutzt.",
+   "tr": {
+    "en": "body of water",
+    "es": "las aguas",
+    "ar": "المسطحات المائية",
+    "fa": "آب‌ها / پهنه‌ی آبی"
+   },
+   "g": "das",
+   "pl": "Gewässer"
+  },
+  {
+   "id": "die-sucht",
+   "w": "die Sucht",
+   "t": "health",
+   "ex": "Rauchen kann zur Sucht werden.",
+   "tr": {
+    "en": "addiction",
+    "es": "la adicción",
+    "ar": "الإدمان",
+    "fa": "اعتیاد"
+   },
+   "g": "die",
+   "pl": "Süchte"
+  },
+  {
+   "id": "sich-verschlechtern",
+   "w": "sich verschlechtern",
+   "t": "verbs",
+   "ex": "Das Wetter verschlechtert sich am Abend.",
+   "tr": {
+    "en": "to get worse",
+    "es": "empeorar",
+    "ar": "يسوء",
+    "fa": "بدتر شدن"
+   }
+  },
+  {
+   "id": "fortschrittlich",
+   "w": "fortschrittlich",
+   "t": "adj",
+   "ex": "Die Firma ist sehr fortschrittlich.",
+   "tr": {
+    "en": "progressive",
+    "es": "progresista, avanzado",
+    "ar": "تقدمي",
+    "fa": "پیشرو"
+   }
+  },
+  {
+   "id": "mittlerweile",
+   "w": "mittlerweile",
+   "t": "small",
+   "ex": "Mittlerweile verstehe ich fast alles.",
+   "tr": {
+    "en": "meanwhile, by now",
+    "es": "entretanto, ya",
+    "ar": "في هذه الأثناء / الآن",
+    "fa": "تا حالا / در این میان"
+   }
+  },
+  {
+   "id": "der-fachkraeftemangel",
+   "w": "der Fachkräftemangel",
+   "t": "work",
+   "ex": "Viele Branchen leiden unter Fachkräftemangel.",
+   "tr": {
+    "en": "skills shortage",
+    "es": "la escasez de profesionales",
+    "ar": "نقص العمالة الماهرة",
+    "fa": "کمبود نیروی متخصص"
+   },
+   "g": "der"
+  },
+  {
+   "id": "die-wahlurne",
+   "w": "die Wahlurne",
+   "t": "society",
+   "ex": "Am Sonntag gehen die Bürger an die Wahlurnen.",
+   "tr": {
+    "en": "ballot box",
+    "es": "la urna",
+    "ar": "صندوق الاقتراع",
+    "fa": "صندوق رأی"
+   },
+   "g": "die",
+   "pl": "Wahlurnen"
+  },
+  {
+   "id": "die-herkunft",
+   "w": "die Herkunft",
+   "t": "people",
+   "ex": "Die Herkunft spielt bei uns keine Rolle.",
+   "tr": {
+    "en": "origin, background",
+    "es": "el origen",
+    "ar": "الأصل",
+    "fa": "اصل و نسب"
+   },
+   "g": "die"
+  },
+  {
+   "id": "die-kuenstliche-intelligenz",
+   "w": "die künstliche Intelligenz",
+   "t": "media",
+   "ex": "Künstliche Intelligenz verändert viele Berufe.",
+   "tr": {
+    "en": "artificial intelligence",
+    "es": "la inteligencia artificial",
+    "ar": "الذكاء الاصطناعي",
+    "fa": "هوش مصنوعی"
+   },
+   "g": "die"
+  },
+  {
+   "id": "der-lebensraum",
+   "w": "der Lebensraum",
+   "t": "nature",
+   "ex": "Der Wald ist Lebensraum für viele Tiere.",
+   "tr": {
+    "en": "habitat",
+    "es": "el hábitat",
+    "ar": "الموطن",
+    "fa": "زیستگاه"
+   },
+   "g": "der",
+   "pl": "Lebensräume"
+  },
+  {
+   "id": "die-belastung",
+   "w": "die Belastung",
+   "t": "health",
+   "ex": "Die Pflege der Mutter ist eine große Belastung.",
+   "tr": {
+    "en": "burden, strain",
+    "es": "la carga",
+    "ar": "العبء",
+    "fa": "فشار / بار"
+   },
+   "g": "die",
+   "pl": "Belastungen"
+  },
+  {
+   "id": "sich-verbessern",
+   "w": "sich verbessern",
+   "t": "verbs",
+   "ex": "Mein Deutsch hat sich stark verbessert.",
+   "tr": {
+    "en": "to improve",
+    "es": "mejorar",
+    "ar": "يتحسن",
+    "fa": "بهتر شدن"
+   }
+  },
+  {
+   "id": "gewissenhaft",
+   "w": "gewissenhaft",
+   "t": "adj",
+   "ex": "Sie arbeitet sehr gewissenhaft.",
+   "tr": {
+    "en": "conscientious",
+    "es": "concienzudo",
+    "ar": "دقيق / ضميري",
+    "fa": "باوجدان / دقیق"
+   }
+  },
+  {
+   "id": "naemlich",
+   "w": "nämlich",
+   "t": "small",
+   "ex": "Ich komme nicht, ich bin nämlich krank.",
+   "tr": {
+    "en": "namely, you see",
+    "es": "es que",
+    "ar": "إذ / لأن",
+    "fa": "آخه / چون"
+   }
+  },
+  {
+   "id": "die-fachkraft",
+   "w": "die Fachkraft",
+   "t": "work",
+   "ex": "Deutschland sucht Fachkräfte aus dem Ausland.",
+   "tr": {
+    "en": "skilled worker",
+    "es": "el profesional cualificado",
+    "ar": "العامل الماهر",
+    "fa": "نیروی متخصص"
+   },
+   "g": "die",
+   "pl": "Fachkräfte"
+  },
+  {
+   "id": "die-bundestagswahl",
+   "w": "die Bundestagswahl",
+   "t": "society",
+   "ex": "Die Bundestagswahl findet alle vier Jahre statt.",
+   "tr": {
+    "en": "federal election",
+    "es": "las elecciones federales",
+    "ar": "الانتخابات البرلمانية الاتحادية",
+    "fa": "انتخابات پارلمان فدرال"
+   },
+   "g": "die",
+   "pl": "Bundestagswahlen"
+  },
+  {
+   "id": "die-muttersprache",
+   "w": "die Muttersprache",
+   "t": "people",
+   "ex": "Meine Muttersprache ist Arabisch.",
+   "tr": {
+    "en": "mother tongue",
+    "es": "la lengua materna",
+    "ar": "اللغة الأم",
+    "fa": "زبان مادری"
+   },
+   "g": "die",
+   "pl": "Muttersprachen"
+  },
+  {
+   "id": "die-digitalisierung",
+   "w": "die Digitalisierung",
+   "t": "media",
+   "ex": "Die Digitalisierung der Schulen geht langsam voran.",
+   "tr": {
+    "en": "digitalisation",
+    "es": "la digitalización",
+    "ar": "الرقمنة",
+    "fa": "دیجیتالی‌سازی"
+   },
+   "g": "die"
+  },
+  {
+   "id": "die-verschwendung",
+   "w": "die Verschwendung",
+   "t": "nature",
+   "ex": "Das ist reine Verschwendung von Lebensmitteln.",
+   "tr": {
+    "en": "waste",
+    "es": "el despilfarro",
+    "ar": "الهدر",
+    "fa": "هدر / اسراف"
+   },
+   "g": "die"
+  },
+  {
+   "id": "das-wohlbefinden",
+   "w": "das Wohlbefinden",
+   "t": "health",
+   "ex": "Bewegung verbessert das Wohlbefinden.",
+   "tr": {
+    "en": "well-being",
+    "es": "el bienestar",
+    "ar": "الرفاهية / الشعور بالراحة",
+    "fa": "سلامت روانی و جسمی"
+   },
+   "g": "das"
+  },
+  {
+   "id": "sich-verstaendigen",
+   "w": "sich verständigen",
+   "t": "verbs",
+   "ex": "Wir haben uns auf Englisch verständigt.",
+   "tr": {
+    "en": "to communicate, to make oneself understood",
+    "es": "entenderse",
+    "ar": "يتفاهم",
+    "fa": "با هم ارتباط برقرار کردن"
+   }
+  },
+  {
+   "id": "gruendlich",
+   "w": "gründlich",
+   "t": "adj",
+   "ex": "Lesen Sie den Vertrag gründlich.",
+   "tr": {
+    "en": "thorough",
+    "es": "minucioso",
+    "ar": "دقيق / شامل",
+    "fa": "دقیق / کامل"
+   }
+  },
+  {
+   "id": "offenbar",
+   "w": "offenbar",
+   "t": "small",
+   "ex": "Er hat offenbar den Bus verpasst.",
+   "tr": {
+    "en": "evidently",
+    "es": "por lo visto",
+    "ar": "على ما يبدو",
+    "fa": "ظاهراً / پیداست"
+   }
+  },
+  {
+   "id": "die-ausbildungsstelle",
+   "w": "die Ausbildungsstelle",
+   "t": "work",
+   "ex": "Er hat eine Ausbildungsstelle als Koch gefunden.",
+   "tr": {
+    "en": "apprenticeship place",
+    "es": "la plaza de formación profesional",
+    "ar": "مقعد التدريب المهني",
+    "fa": "جای کارآموزی"
+   },
+   "g": "die",
+   "pl": "Ausbildungsstellen"
+  },
+  {
+   "id": "der-bundeskanzler",
+   "w": "der Bundeskanzler",
+   "t": "society",
+   "ex": "Der Bundeskanzler hält eine Rede.",
+   "tr": {
+    "en": "federal chancellor",
+    "es": "el canciller federal",
+    "ar": "المستشار الاتحادي",
+    "fa": "صدراعظم"
+   },
+   "g": "der",
+   "pl": "Bundeskanzler"
+  },
+  {
+   "id": "die-zweisprachigkeit",
+   "w": "die Zweisprachigkeit",
+   "t": "people",
+   "ex": "Zweisprachigkeit ist für Kinder ein Vorteil.",
+   "tr": {
+    "en": "bilingualism",
+    "es": "el bilingüismo",
+    "ar": "ثنائية اللغة",
+    "fa": "دوزبانگی"
+   },
+   "g": "die"
+  },
+  {
+   "id": "die-bildschirmzeit",
+   "w": "die Bildschirmzeit",
+   "t": "media",
+   "ex": "Wir begrenzen die Bildschirmzeit unserer Kinder.",
+   "tr": {
+    "en": "screen time",
+    "es": "el tiempo de pantalla",
+    "ar": "وقت الشاشة",
+    "fa": "زمان استفاده از صفحه‌نمایش"
+   },
+   "g": "die",
+   "pl": "Bildschirmzeiten"
+  },
+  {
+   "id": "der-verpackungsmuell",
+   "w": "der Verpackungsmüll",
+   "t": "nature",
+   "ex": "Ich versuche, Verpackungsmüll zu vermeiden.",
+   "tr": {
+    "en": "packaging waste",
+    "es": "los residuos de envases",
+    "ar": "نفايات التغليف",
+    "fa": "زباله‌ی بسته‌بندی"
+   },
+   "g": "der"
+  },
+  {
+   "id": "die-schlafstoerung",
+   "w": "die Schlafstörung",
+   "t": "health",
+   "ex": "Viele Menschen haben Schlafstörungen.",
+   "tr": {
+    "en": "sleep disorder",
+    "es": "el trastorno del sueño",
+    "ar": "اضطراب النوم",
+    "fa": "اختلال خواب"
+   },
+   "g": "die",
+   "pl": "Schlafstörungen"
+  },
+  {
+   "id": "ablenken",
+   "w": "ablenken",
+   "t": "verbs",
+   "ex": "Das Handy lenkt mich beim Lernen ab.",
+   "tr": {
+    "en": "to distract",
+    "es": "distraer",
+    "ar": "يشتت الانتباه",
+    "fa": "حواس را پرت کردن"
+   }
+  },
+  {
+   "id": "gleichberechtigt",
+   "w": "gleichberechtigt",
+   "t": "adj",
+   "ex": "Männer und Frauen sind gleichberechtigt.",
+   "tr": {
+    "en": "having equal rights",
+    "es": "con igualdad de derechos",
+    "ar": "متساوٍ في الحقوق",
+    "fa": "دارای حقوق برابر"
+   }
+  },
+  {
+   "id": "schliesslich",
+   "w": "schließlich",
+   "t": "small",
+   "ex": "Ich helfe dir, du bist schließlich mein Freund.",
+   "tr": {
+    "en": "after all, finally",
+    "es": "al fin y al cabo",
+    "ar": "في النهاية / فبعد كل شيء",
+    "fa": "بالاخره / آخر"
+   }
+  },
+  {
+   "id": "der-auszubildende",
+   "w": "der Auszubildende",
+   "t": "work",
+   "ex": "Unsere Auszubildenden lernen in der Firma und in der Schule.",
+   "tr": {
+    "en": "trainee, apprentice",
+    "es": "el aprendiz",
+    "ar": "المتدرب",
+    "fa": "کارآموز"
+   },
+   "g": "der",
+   "pl": "Auszubildenden"
+  },
+  {
+   "id": "das-parlament",
+   "w": "das Parlament",
+   "t": "society",
+   "ex": "Das Parlament stimmt über das Gesetz ab.",
+   "tr": {
+    "en": "parliament",
+    "es": "el parlamento",
+    "ar": "البرلمان",
+    "fa": "پارلمان"
+   },
+   "g": "das",
+   "pl": "Parlamente"
+  },
+  {
+   "id": "das-heimweh",
+   "w": "das Heimweh",
+   "t": "people",
+   "ex": "Im ersten Winter hatte ich starkes Heimweh.",
+   "tr": {
+    "en": "homesickness",
+    "es": "la nostalgia",
+    "ar": "الحنين إلى الوطن",
+    "fa": "دلتنگی برای وطن"
+   },
+   "g": "das"
+  },
+  {
+   "id": "die-privatsphaere",
+   "w": "die Privatsphäre",
+   "t": "media",
+   "ex": "Schützen Sie Ihre Privatsphäre im Netz.",
+   "tr": {
+    "en": "privacy",
+    "es": "la privacidad",
+    "ar": "الخصوصية",
+    "fa": "حریم خصوصی"
+   },
+   "g": "die"
+  },
+  {
+   "id": "der-kohleausstieg",
+   "w": "der Kohleausstieg",
+   "t": "nature",
+   "ex": "Der Kohleausstieg ist für 2038 geplant.",
+   "tr": {
+    "en": "coal phase-out",
+    "es": "el abandono del carbón",
+    "ar": "التخلي عن الفحم",
+    "fa": "کنار گذاشتن زغال‌سنگ"
+   },
+   "g": "der"
+  },
+  {
+   "id": "die-psychotherapie",
+   "w": "die Psychotherapie",
+   "t": "health",
+   "ex": "Auf einen Platz in der Psychotherapie wartet man lange.",
+   "tr": {
+    "en": "psychotherapy",
+    "es": "la psicoterapia",
+    "ar": "العلاج النفسي",
+    "fa": "روان‌درمانی"
+   },
+   "g": "die"
+  },
+  {
+   "id": "abschaffen",
+   "w": "abschaffen",
+   "t": "verbs",
+   "ex": "Die Regierung will die Gebühr abschaffen.",
+   "tr": {
+    "en": "to abolish",
+    "es": "abolir",
+    "ar": "يلغي",
+    "fa": "لغو کردن"
+   }
+  },
+  {
+   "id": "hartnaeckig",
+   "w": "hartnäckig",
+   "t": "adj",
+   "ex": "Der Husten ist sehr hartnäckig.",
+   "tr": {
+    "en": "persistent, stubborn",
+    "es": "persistente",
+    "ar": "عنيد / مستمر",
+    "fa": "سمج / مداوم"
+   }
+  },
+  {
+   "id": "weder-noch",
+   "w": "weder … noch",
+   "t": "small",
+   "ex": "Ich habe weder Zeit noch Geld.",
+   "tr": {
+    "en": "neither … nor",
+    "es": "ni … ni",
+    "ar": "لا … ولا",
+    "fa": "نه … و نه"
+   }
+  },
+  {
+   "id": "die-zusammenarbeit",
+   "w": "die Zusammenarbeit",
+   "t": "work",
+   "ex": "Vielen Dank für die gute Zusammenarbeit.",
+   "tr": {
+    "en": "cooperation",
+    "es": "la colaboración",
+    "ar": "التعاون",
+    "fa": "همکاری"
+   },
+   "g": "die"
+  },
+  {
+   "id": "die-koalition",
+   "w": "die Koalition",
+   "t": "society",
+   "ex": "Drei Parteien bilden die Koalition.",
+   "tr": {
+    "en": "coalition",
+    "es": "la coalición",
+    "ar": "الائتلاف",
+    "fa": "ائتلاف"
+   },
+   "g": "die",
+   "pl": "Koalitionen"
+  },
+  {
+   "id": "die-sehnsucht",
+   "w": "die Sehnsucht",
+   "t": "people",
+   "ex": "Sie hat Sehnsucht nach ihrer Familie.",
+   "tr": {
+    "en": "longing",
+    "es": "el anhelo",
+    "ar": "الشوق",
+    "fa": "اشتیاق / دلتنگی"
+   },
+   "g": "die",
+   "pl": "Sehnsüchte"
+  },
+  {
+   "id": "die-sicherheitsluecke",
+   "w": "die Sicherheitslücke",
+   "t": "media",
+   "ex": "Das Update schließt eine Sicherheitslücke.",
+   "tr": {
+    "en": "security gap",
+    "es": "la vulnerabilidad",
+    "ar": "الثغرة الأمنية",
+    "fa": "حفره‌ی امنیتی"
+   },
+   "g": "die",
+   "pl": "Sicherheitslücken"
+  },
+  {
+   "id": "der-klimaschutz",
+   "w": "der Klimaschutz",
+   "t": "nature",
+   "ex": "Für den Klimaschutz fahre ich mit dem Rad.",
+   "tr": {
+    "en": "climate protection",
+    "es": "la protección del clima",
+    "ar": "حماية المناخ",
+    "fa": "حفاظت از اقلیم"
+   },
+   "g": "der"
+  },
+  {
+   "id": "die-organspende",
+   "w": "die Organspende",
+   "t": "health",
+   "ex": "Haben Sie einen Ausweis für Organspende?",
+   "tr": {
+    "en": "organ donation",
+    "es": "la donación de órganos",
+    "ar": "التبرع بالأعضاء",
+    "fa": "اهدای عضو"
+   },
+   "g": "die",
+   "pl": "Organspenden"
+  },
+  {
+   "id": "abschliessen",
+   "w": "abschließen",
+   "t": "verbs",
+   "ex": "Sie hat ihr Studium erfolgreich abgeschlossen.",
+   "tr": {
+    "en": "to complete, to conclude",
+    "es": "terminar, concluir",
+    "ar": "يكمل / ينهي",
+    "fa": "به پایان رساندن"
+   }
+  },
+  {
+   "id": "hilflos",
+   "w": "hilflos",
+   "t": "adj",
+   "ex": "Ohne Sprache fühlte ich mich hilflos.",
+   "tr": {
+    "en": "helpless",
+    "es": "indefenso",
+    "ar": "عاجز",
+    "fa": "درمانده"
+   }
+  },
+  {
+   "id": "zudem",
+   "w": "zudem",
+   "t": "small",
+   "ex": "Die Wohnung ist groß und zudem günstig.",
+   "tr": {
+    "en": "moreover",
+    "es": "además",
+    "ar": "علاوة على ذلك",
+    "fa": "افزون بر این"
+   }
+  },
+  {
+   "id": "die-rueckmeldung",
+   "w": "die Rückmeldung",
+   "t": "work",
+   "ex": "Ich warte noch auf eine Rückmeldung.",
+   "tr": {
+    "en": "feedback, reply",
+    "es": "la respuesta",
+    "ar": "الرد / الملاحظات",
+    "fa": "بازخورد / پاسخ"
+   },
+   "g": "die",
+   "pl": "Rückmeldungen"
+  },
+  {
+   "id": "der-rechtsstaat",
+   "w": "der Rechtsstaat",
+   "t": "society",
+   "ex": "Im Rechtsstaat gelten die Gesetze für alle.",
+   "tr": {
+    "en": "state under the rule of law",
+    "es": "el estado de derecho",
+    "ar": "دولة القانون",
+    "fa": "دولت قانون‌مدار"
+   },
+   "g": "der",
+   "pl": "Rechtsstaaten"
+  },
+  {
+   "id": "die-dankbarkeit",
+   "w": "die Dankbarkeit",
+   "t": "people",
+   "ex": "Ich möchte meine Dankbarkeit zeigen.",
+   "tr": {
+    "en": "gratitude",
+    "es": "la gratitud",
+    "ar": "الامتنان",
+    "fa": "سپاسگزاری"
+   },
+   "g": "die"
+  },
+  {
+   "id": "der-kommentar",
+   "w": "der Kommentar",
+   "t": "media",
+   "ex": "Lies lieber nicht die Kommentare.",
+   "tr": {
+    "en": "comment",
+    "es": "el comentario",
+    "ar": "التعليق",
+    "fa": "نظر / کامنت"
+   },
+   "g": "der",
+   "pl": "Kommentare"
+  },
+  {
+   "id": "die-elektromobilitaet",
+   "w": "die Elektromobilität",
+   "t": "nature",
+   "ex": "Die Stadt fördert die Elektromobilität.",
+   "tr": {
+    "en": "electric mobility",
+    "es": "la movilidad eléctrica",
+    "ar": "التنقل الكهربائي",
+    "fa": "خودروهای برقی"
+   },
+   "g": "die"
+  },
+  {
+   "id": "die-notfallnummer",
+   "w": "die Notfallnummer",
+   "t": "health",
+   "ex": "Die Notfallnummer in Europa ist 112.",
+   "tr": {
+    "en": "emergency number",
+    "es": "el número de emergencia",
+    "ar": "رقم الطوارئ",
+    "fa": "شماره‌ی اورژانس"
+   },
+   "g": "die",
+   "pl": "Notfallnummern"
+  },
+  {
+   "id": "abwaegen",
+   "w": "abwägen",
+   "t": "verbs",
+   "ex": "Wir müssen die Vor- und Nachteile abwägen.",
+   "tr": {
+    "en": "to weigh up",
+    "es": "sopesar",
+    "ar": "يوازن",
+    "fa": "سبک‌سنگین کردن"
+   }
+  },
+  {
+   "id": "kritisch",
+   "w": "kritisch",
+   "t": "adj",
+   "ex": "Wir sollten Nachrichten kritisch lesen.",
+   "tr": {
+    "en": "critical",
+    "es": "crítico",
+    "ar": "نقدي / حرج",
+    "fa": "انتقادی"
+   }
+  },
+  {
+   "id": "zunaechst",
+   "w": "zunächst",
+   "t": "small",
+   "ex": "Zunächst müssen Sie sich anmelden.",
+   "tr": {
+    "en": "first, initially",
+    "es": "primero",
+    "ar": "أولاً",
+    "fa": "ابتدا"
+   }
+  },
+  {
+   "id": "die-zustaendigkeit",
+   "w": "die Zuständigkeit",
+   "t": "work",
+   "ex": "Das liegt nicht in meiner Zuständigkeit.",
+   "tr": {
+    "en": "responsibility, remit",
+    "es": "la competencia",
+    "ar": "الاختصاص",
+    "fa": "حوزه‌ی مسئولیت"
+   },
+   "g": "die",
+   "pl": "Zuständigkeiten"
+  },
+  {
+   "id": "die-gewaltenteilung",
+   "w": "die Gewaltenteilung",
+   "t": "society",
+   "ex": "Gewaltenteilung schützt vor Machtmissbrauch.",
+   "tr": {
+    "en": "separation of powers",
+    "es": "la separación de poderes",
+    "ar": "الفصل بين السلطات",
+    "fa": "تفکیک قوا"
+   },
+   "g": "die"
+  },
+  {
+   "id": "die-scham",
+   "w": "die Scham",
+   "t": "people",
+   "ex": "Aus Scham hat er nichts gesagt.",
+   "tr": {
+    "en": "shame",
+    "es": "la vergüenza",
+    "ar": "الخجل / العار",
+    "fa": "شرم"
+   },
+   "g": "die"
+  },
+  {
+   "id": "die-meinungsbildung",
+   "w": "die Meinungsbildung",
+   "t": "media",
+   "ex": "Medien spielen eine große Rolle bei der Meinungsbildung.",
+   "tr": {
+    "en": "forming opinions",
+    "es": "la formación de opinión",
+    "ar": "تكوين الرأي",
+    "fa": "شکل‌گیری افکار"
+   },
+   "g": "die"
+  },
+  {
+   "id": "der-wasserverbrauch",
+   "w": "der Wasserverbrauch",
+   "t": "nature",
+   "ex": "Unser Wasserverbrauch ist zu hoch.",
+   "tr": {
+    "en": "water consumption",
+    "es": "el consumo de agua",
+    "ar": "استهلاك المياه",
+    "fa": "مصرف آب"
+   },
+   "g": "der"
+  },
+  {
+   "id": "die-patientenverfuegung",
+   "w": "die Patientenverfügung",
+   "t": "health",
+   "ex": "Meine Oma hat eine Patientenverfügung geschrieben.",
+   "tr": {
+    "en": "living will",
+    "es": "el testamento vital",
+    "ar": "وصية المريض",
+    "fa": "وصیت‌نامه‌ی درمانی"
+   },
+   "g": "die",
+   "pl": "Patientenverfügungen"
+  },
+  {
+   "id": "ankuendigen",
+   "w": "ankündigen",
+   "t": "verbs",
+   "ex": "Die Firma hat neue Stellen angekündigt.",
+   "tr": {
+    "en": "to announce",
+    "es": "anunciar",
+    "ar": "يعلن",
+    "fa": "اعلام کردن"
+   }
+  },
+  {
+   "id": "kurzfristig",
+   "w": "kurzfristig",
+   "t": "adj",
+   "ex": "Der Termin wurde kurzfristig abgesagt.",
+   "tr": {
+    "en": "at short notice, short-term",
+    "es": "a corto plazo",
+    "ar": "على المدى القصير / في وقت قصير",
+    "fa": "کوتاه‌مدت / در آخرین لحظه"
+   }
+  },
+  {
+   "id": "zwar-aber",
+   "w": "zwar … aber",
+   "t": "small",
+   "ex": "Das Auto ist zwar alt, aber es fährt gut.",
+   "tr": {
+    "en": "admittedly … but",
+    "es": "es cierto que … pero",
+    "ar": "صحيح أن … لكن",
+    "fa": "درست است که … اما"
+   }
+  },
+  {
+   "id": "die-arbeitsbelastung",
+   "w": "die Arbeitsbelastung",
+   "t": "work",
+   "ex": "Die Arbeitsbelastung ist im Dezember sehr hoch.",
+   "tr": {
+    "en": "workload",
+    "es": "la carga de trabajo",
+    "ar": "عبء العمل",
+    "fa": "حجم کار"
+   },
+   "g": "die"
+  },
+  {
+   "id": "das-grundrecht",
+   "w": "das Grundrecht",
+   "t": "society",
+   "ex": "Religionsfreiheit ist ein Grundrecht.",
+   "tr": {
+    "en": "fundamental right",
+    "es": "el derecho fundamental",
+    "ar": "الحق الأساسي",
+    "fa": "حق بنیادین"
+   },
+   "g": "das",
+   "pl": "Grundrechte"
+  },
+  {
+   "id": "die-angewohnheit",
+   "w": "die Angewohnheit",
+   "t": "people",
+   "ex": "Er hat die Angewohnheit, immer zu spät zu kommen.",
+   "tr": {
+    "en": "habit (often bad)",
+    "es": "la costumbre, la manía",
+    "ar": "العادة",
+    "fa": "عادت (اغلب بد)"
+   },
+   "g": "die",
+   "pl": "Angewohnheiten"
+  },
+  {
+   "id": "die-werbekampagne",
+   "w": "die Werbekampagne",
+   "t": "media",
+   "ex": "Die Werbekampagne war sehr erfolgreich.",
+   "tr": {
+    "en": "advertising campaign",
+    "es": "la campaña publicitaria",
+    "ar": "الحملة الإعلانية",
+    "fa": "کمپین تبلیغاتی"
+   },
+   "g": "die",
+   "pl": "Werbekampagnen"
+  },
+  {
+   "id": "die-waermepumpe",
+   "w": "die Wärmepumpe",
+   "t": "nature",
+   "ex": "Wir heizen jetzt mit einer Wärmepumpe.",
+   "tr": {
+    "en": "heat pump",
+    "es": "la bomba de calor",
+    "ar": "المضخة الحرارية",
+    "fa": "پمپ حرارتی"
+   },
+   "g": "die",
+   "pl": "Wärmepumpen"
+  },
+  {
+   "id": "anregen",
+   "w": "anregen",
+   "t": "verbs",
+   "ex": "Der Film regt zum Nachdenken an.",
+   "tr": {
+    "en": "to stimulate, to encourage",
+    "es": "estimular",
+    "ar": "يحفّز",
+    "fa": "برانگیختن"
+   }
+  },
+  {
+   "id": "langfristig",
+   "w": "langfristig",
+   "t": "adj",
+   "ex": "Langfristig wollen wir ein Haus kaufen.",
+   "tr": {
+    "en": "long-term",
+    "es": "a largo plazo",
+    "ar": "على المدى الطويل",
+    "fa": "بلندمدت"
+   }
+  },
+  {
+   "id": "anhand",
+   "w": "anhand",
+   "t": "small",
+   "ex": "Anhand der Daten können wir das zeigen.",
+   "tr": {
+    "en": "on the basis of",
+    "es": "a partir de",
+    "ar": "بناءً على",
+    "fa": "بر اساس"
+   }
+  },
+  {
+   "id": "der-termindruck",
+   "w": "der Termindruck",
+   "t": "work",
+   "ex": "Unter Termindruck mache ich mehr Fehler.",
+   "tr": {
+    "en": "time pressure",
+    "es": "la presión de plazos",
+    "ar": "ضغط المواعيد",
+    "fa": "فشار زمانی"
+   },
+   "g": "der"
+  },
+  {
+   "id": "die-menschenwuerde",
+   "w": "die Menschenwürde",
+   "t": "society",
+   "ex": "Die Menschenwürde ist unantastbar.",
+   "tr": {
+    "en": "human dignity",
+    "es": "la dignidad humana",
+    "ar": "الكرامة الإنسانية",
+    "fa": "کرامت انسانی"
+   },
+   "g": "die"
+  },
+  {
+   "id": "der-umgang",
+   "w": "der Umgang",
+   "t": "people",
+   "ex": "Der Umgang mit Kunden macht mir Spaß.",
+   "tr": {
+    "en": "dealing with, contact",
+    "es": "el trato",
+    "ar": "التعامل",
+    "fa": "برخورد / رفتار با"
+   },
+   "g": "der"
+  },
+  {
+   "id": "die-abhaengigkeit",
+   "w": "die Abhängigkeit",
+   "t": "media",
+   "ex": "Handysucht ist eine Form von Abhängigkeit.",
+   "tr": {
+    "en": "dependence, addiction",
+    "es": "la dependencia",
+    "ar": "الإدمان / التبعية",
+    "fa": "وابستگی"
+   },
+   "g": "die",
+   "pl": "Abhängigkeiten"
+  },
+  {
+   "id": "das-oekosystem",
+   "w": "das Ökosystem",
+   "t": "nature",
+   "ex": "Das Ökosystem im See ist empfindlich.",
+   "tr": {
+    "en": "ecosystem",
+    "es": "el ecosistema",
+    "ar": "النظام البيئي",
+    "fa": "اکوسیستم"
+   },
+   "g": "das",
+   "pl": "Ökosysteme"
+  },
+  {
+   "id": "aufklaeren",
+   "w": "aufklären",
+   "t": "verbs",
+   "ex": "Die Polizei hat den Fall aufgeklärt.",
+   "tr": {
+    "en": "to clear up, to inform",
+    "es": "aclarar, informar",
+    "ar": "يوضح / يكشف",
+    "fa": "روشن کردن / آگاه کردن"
+   }
+  },
+  {
+   "id": "leistungsfaehig",
+   "w": "leistungsfähig",
+   "t": "adj",
+   "ex": "Der neue Computer ist sehr leistungsfähig.",
+   "tr": {
+    "en": "powerful, efficient",
+    "es": "potente",
+    "ar": "قوي الأداء",
+    "fa": "پرقدرت / کارآمد"
+   }
+  },
+  {
+   "id": "bezueglich",
+   "w": "bezüglich",
+   "t": "small",
+   "ex": "Bezüglich Ihrer Anfrage melde ich mich morgen.",
+   "tr": {
+    "en": "regarding",
+    "es": "con respecto a",
+    "ar": "بخصوص",
+    "fa": "درباره‌ی"
+   }
+  },
+  {
+   "id": "die-abfindung",
+   "w": "die Abfindung",
+   "t": "work",
+   "ex": "Nach 15 Jahren bekam sie eine Abfindung.",
+   "tr": {
+    "en": "severance pay",
+    "es": "la indemnización",
+    "ar": "مكافأة نهاية الخدمة",
+    "fa": "غرامت پایان کار"
+   },
+   "g": "die",
+   "pl": "Abfindungen"
+  },
+  {
+   "id": "die-chancengleichheit",
+   "w": "die Chancengleichheit",
+   "t": "society",
+   "ex": "Bildung soll Chancengleichheit schaffen.",
+   "tr": {
+    "en": "equal opportunities",
+    "es": "la igualdad de oportunidades",
+    "ar": "تكافؤ الفرص",
+    "fa": "برابری فرصت‌ها"
+   },
+   "g": "die"
+  },
+  {
+   "id": "die-koerpersprache",
+   "w": "die Körpersprache",
+   "t": "people",
+   "ex": "Körpersprache sagt oft mehr als Worte.",
+   "tr": {
+    "en": "body language",
+    "es": "el lenguaje corporal",
+    "ar": "لغة الجسد",
+    "fa": "زبان بدن"
+   },
+   "g": "die"
+  },
+  {
+   "id": "die-aufmerksamkeit",
+   "w": "die Aufmerksamkeit",
+   "t": "media",
+   "ex": "Das Video hat viel Aufmerksamkeit bekommen.",
+   "tr": {
+    "en": "attention",
+    "es": "la atención",
+    "ar": "الانتباه",
+    "fa": "توجه"
+   },
+   "g": "die"
+  },
+  {
+   "id": "die-wiederverwendung",
+   "w": "die Wiederverwendung",
+   "t": "nature",
+   "ex": "Wiederverwendung ist besser als Recycling.",
+   "tr": {
+    "en": "reuse",
+    "es": "la reutilización",
+    "ar": "إعادة الاستخدام",
+    "fa": "استفاده‌ی دوباره"
+   },
+   "g": "die"
+  },
+  {
+   "id": "aufloesen",
+   "w": "auflösen",
+   "t": "verbs",
+   "ex": "Der Verein wurde aufgelöst.",
+   "tr": {
+    "en": "to dissolve",
+    "es": "disolver",
+    "ar": "يحل",
+    "fa": "منحل کردن"
+   }
+  },
+  {
+   "id": "mehrsprachig",
+   "w": "mehrsprachig",
+   "t": "adj",
+   "ex": "Unsere Tochter wächst mehrsprachig auf.",
+   "tr": {
+    "en": "multilingual",
+    "es": "plurilingüe",
+    "ar": "متعدد اللغات",
+    "fa": "چندزبانه"
+   }
+  },
+  {
+   "id": "gemaess",
+   "w": "gemäß",
+   "t": "small",
+   "ex": "Gemäß dem Vertrag haben Sie 30 Tage Urlaub.",
+   "tr": {
+    "en": "according to",
+    "es": "según",
+    "ar": "وفقاً لـ",
+    "fa": "طبق"
+   }
+  },
+  {
+   "id": "der-tarifvertrag",
+   "w": "der Tarifvertrag",
+   "t": "work",
+   "ex": "Der Tarifvertrag regelt Lohn und Urlaub.",
+   "tr": {
+    "en": "collective agreement",
+    "es": "el convenio colectivo",
+    "ar": "الاتفاقية الجماعية",
+    "fa": "قرارداد دسته‌جمعی"
+   },
+   "g": "der",
+   "pl": "Tarifverträge"
+  },
+  {
+   "id": "die-zuwanderung",
+   "w": "die Zuwanderung",
+   "t": "society",
+   "ex": "Ohne Zuwanderung fehlen Arbeitskräfte.",
+   "tr": {
+    "en": "immigration",
+    "es": "la inmigración",
+    "ar": "الهجرة الوافدة",
+    "fa": "مهاجرت به داخل"
+   },
+   "g": "die"
+  },
+  {
+   "id": "die-hoeflichkeit",
+   "w": "die Höflichkeit",
+   "t": "people",
+   "ex": "Aus Höflichkeit habe ich nichts gesagt.",
+   "tr": {
+    "en": "politeness",
+    "es": "la cortesía",
+    "ar": "الأدب / اللباقة",
+    "fa": "ادب"
+   },
+   "g": "die"
+  },
+  {
+   "id": "der-einfluss",
+   "w": "der Einfluss",
+   "t": "media",
+   "ex": "Influencer haben großen Einfluss auf Jugendliche.",
+   "tr": {
+    "en": "influence",
+    "es": "la influencia",
+    "ar": "التأثير",
+    "fa": "نفوذ / تأثیر"
+   },
+   "g": "der",
+   "pl": "Einflüsse"
+  },
+  {
+   "id": "der-fussabdruck",
+   "w": "der Fußabdruck",
+   "t": "nature",
+   "ex": "Wie groß ist dein ökologischer Fußabdruck?",
+   "tr": {
+    "en": "footprint",
+    "es": "la huella",
+    "ar": "البصمة",
+    "fa": "ردپا"
+   },
+   "g": "der",
+   "pl": "Fußabdrücke"
+  },
+  {
+   "id": "aufrechterhalten",
+   "w": "aufrechterhalten",
+   "t": "verbs",
+   "ex": "Wir wollen den Kontakt aufrechterhalten.",
+   "tr": {
+    "en": "to maintain",
+    "es": "mantener",
+    "ar": "يحافظ على",
+    "fa": "حفظ کردن"
+   }
+  },
+  {
+   "id": "nachvollziehbar",
+   "w": "nachvollziehbar",
+   "t": "adj",
+   "ex": "Deine Entscheidung ist nachvollziehbar.",
+   "tr": {
+    "en": "understandable",
+    "es": "comprensible",
+    "ar": "مفهوم",
+    "fa": "قابل درک"
+   }
+  },
+  {
+   "id": "hinsichtlich",
+   "w": "hinsichtlich",
+   "t": "small",
+   "ex": "Hinsichtlich der Kosten gibt es noch Fragen.",
+   "tr": {
+    "en": "with regard to",
+    "es": "en cuanto a",
+    "ar": "فيما يتعلق بـ",
+    "fa": "از لحاظ"
+   }
+  },
+  {
+   "id": "die-elternzeit",
+   "w": "die Elternzeit",
+   "t": "work",
+   "ex": "Nach der Geburt nimmt er ein Jahr Elternzeit.",
+   "tr": {
+    "en": "parental leave",
+    "es": "el permiso parental",
+    "ar": "إجازة الوالدين",
+    "fa": "مرخصی والدین"
+   },
+   "g": "die"
+  },
+  {
+   "id": "die-vielfalt",
+   "w": "die Vielfalt",
+   "t": "society",
+   "ex": "Die Vielfalt der Kulturen macht die Stadt spannend.",
+   "tr": {
+    "en": "diversity",
+    "es": "la diversidad",
+    "ar": "التنوع",
+    "fa": "تنوع"
+   },
+   "g": "die"
+  },
+  {
+   "id": "die-gleichgueltigkeit",
+   "w": "die Gleichgültigkeit",
+   "t": "people",
+   "ex": "Seine Gleichgültigkeit hat mich verletzt.",
+   "tr": {
+    "en": "indifference",
+    "es": "la indiferencia",
+    "ar": "اللامبالاة",
+    "fa": "بی‌تفاوتی"
+   },
+   "g": "die"
+  },
+  {
+   "id": "der-zugang",
+   "w": "der Zugang",
+   "t": "media",
+   "ex": "Nicht alle haben Zugang zum Internet.",
+   "tr": {
+    "en": "access",
+    "es": "el acceso",
+    "ar": "الوصول",
+    "fa": "دسترسی"
+   },
+   "g": "der",
+   "pl": "Zugänge"
+  },
+  {
+   "id": "ausdruecken",
+   "w": "ausdrücken",
+   "t": "verbs",
+   "ex": "Ich weiß nicht, wie ich das ausdrücken soll.",
+   "tr": {
+    "en": "to express",
+    "es": "expresar",
+    "ar": "يعبّر",
+    "fa": "بیان کردن"
+   }
+  },
+  {
+   "id": "offensichtlich",
+   "w": "offensichtlich",
+   "t": "adj",
+   "ex": "Er hat offensichtlich keine Lust.",
+   "tr": {
+    "en": "obvious",
+    "es": "evidente",
+    "ar": "واضح",
+    "fa": "آشکار"
+   }
+  },
+  {
+   "id": "mithilfe",
+   "w": "mithilfe",
+   "t": "small",
+   "ex": "Mithilfe einer App lerne ich Vokabeln.",
+   "tr": {
+    "en": "with the help of",
+    "es": "con ayuda de",
+    "ar": "بمساعدة",
+    "fa": "به کمک"
+   }
+  },
+  {
+   "id": "der-mutterschutz",
+   "w": "der Mutterschutz",
+   "t": "work",
+   "ex": "Im Mutterschutz darf sie nicht arbeiten.",
+   "tr": {
+    "en": "maternity protection",
+    "es": "la baja por maternidad",
+    "ar": "حماية الأمومة",
+    "fa": "مرخصی زایمان"
+   },
+   "g": "der"
+  },
+  {
+   "id": "der-rassismus",
+   "w": "der Rassismus",
+   "t": "society",
+   "ex": "Wir müssen gemeinsam gegen Rassismus kämpfen.",
+   "tr": {
+    "en": "racism",
+    "es": "el racismo",
+    "ar": "العنصرية",
+    "fa": "نژادپرستی"
+   },
+   "g": "der"
+  },
+  {
+   "id": "der-zusammenhalt",
+   "w": "der Zusammenhalt",
+   "t": "people",
+   "ex": "Der Zusammenhalt in der Familie ist stark.",
+   "tr": {
+    "en": "solidarity, cohesion",
+    "es": "la unión",
+    "ar": "التماسك / الترابط",
+    "fa": "همبستگی"
+   },
+   "g": "der"
+  },
+  {
+   "id": "die-verbreitung",
+   "w": "die Verbreitung",
+   "t": "media",
+   "ex": "Die Verbreitung von Hass im Netz ist ein Problem.",
+   "tr": {
+    "en": "spread",
+    "es": "la difusión",
+    "ar": "الانتشار",
+    "fa": "گسترش / پخش"
+   },
+   "g": "die"
+  },
+  {
+   "id": "ausgleichen",
+   "w": "ausgleichen",
+   "t": "verbs",
+   "ex": "Er versucht, den Stress mit Sport auszugleichen.",
+   "tr": {
+    "en": "to balance, to compensate",
+    "es": "compensar",
+    "ar": "يعوّض / يوازن",
+    "fa": "جبران کردن"
+   }
+  },
+  {
+   "id": "selbstbewusst",
+   "w": "selbstbewusst",
+   "t": "adj",
+   "ex": "Sie tritt sehr selbstbewusst auf.",
+   "tr": {
+    "en": "self-confident",
+    "es": "seguro de sí mismo",
+    "ar": "واثق بنفسه",
+    "fa": "اعتمادبه‌نفس‌دار"
+   }
+  },
+  {
+   "id": "seitens",
+   "w": "seitens",
+   "t": "small",
+   "ex": "Seitens der Firma gibt es keine Einwände.",
+   "tr": {
+    "en": "on the part of",
+    "es": "por parte de",
+    "ar": "من جانب",
+    "fa": "از سوی"
+   }
+  },
+  {
+   "id": "das-arbeitszeugnis",
+   "w": "das Arbeitszeugnis",
+   "t": "work",
+   "ex": "Ein gutes Arbeitszeugnis hilft bei der nächsten Bewerbung.",
+   "tr": {
+    "en": "employment reference",
+    "es": "el certificado de trabajo",
+    "ar": "شهادة الخبرة",
+    "fa": "گواهی کار"
+   },
+   "g": "das",
+   "pl": "Arbeitszeugnisse"
+  },
+  {
+   "id": "der-extremismus",
+   "w": "der Extremismus",
+   "t": "society",
+   "ex": "Der Staat geht gegen Extremismus vor.",
+   "tr": {
+    "en": "extremism",
+    "es": "el extremismo",
+    "ar": "التطرف",
+    "fa": "افراط‌گرایی"
+   },
+   "g": "der"
+  },
+  {
+   "id": "die-begegnung",
+   "w": "die Begegnung",
+   "t": "people",
+   "ex": "Das war eine schöne Begegnung.",
+   "tr": {
+    "en": "encounter",
+    "es": "el encuentro",
+    "ar": "اللقاء",
+    "fa": "دیدار / برخورد"
+   },
+   "g": "die",
+   "pl": "Begegnungen"
+  },
+  {
+   "id": "ausloesen",
+   "w": "auslösen",
+   "t": "verbs",
+   "ex": "Die Nachricht hat eine Diskussion ausgelöst.",
+   "tr": {
+    "en": "to trigger",
+    "es": "desencadenar",
+    "ar": "يثير / يتسبب في",
+    "fa": "باعث شدن"
+   }
+  },
+  {
+   "id": "sorgfaeltig",
+   "w": "sorgfältig",
+   "t": "adj",
+   "ex": "Bitte füllen Sie das Formular sorgfältig aus.",
+   "tr": {
+    "en": "careful",
+    "es": "cuidadoso",
+    "ar": "بعناية",
+    "fa": "با دقت"
+   }
+  },
+  {
+   "id": "aufgrund",
+   "w": "aufgrund",
+   "t": "small",
+   "ex": "Aufgrund des Wetters fällt das Fest aus.",
+   "tr": {
+    "en": "due to",
+    "es": "debido a",
+    "ar": "بسبب",
+    "fa": "به دلیل"
+   }
+  },
+  {
+   "id": "die-gleitzeit",
+   "w": "die Gleitzeit",
+   "t": "work",
+   "ex": "Wir haben Gleitzeit und können zwischen 7 und 10 anfangen.",
+   "tr": {
+    "en": "flexitime",
+    "es": "el horario flexible",
+    "ar": "الدوام المرن",
+    "fa": "ساعت کاری شناور"
+   },
+   "g": "die"
+  },
+  {
+   "id": "die-kriminalitaet",
+   "w": "die Kriminalität",
+   "t": "society",
+   "ex": "Die Kriminalität in der Stadt ist gesunken.",
+   "tr": {
+    "en": "crime",
+    "es": "la delincuencia",
+    "ar": "الجريمة",
+    "fa": "جرم و جنایت"
+   },
+   "g": "die"
+  },
+  {
+   "id": "die-ehe",
+   "w": "die Ehe",
+   "t": "people",
+   "ex": "Ihre Ehe hält schon dreißig Jahre.",
+   "tr": {
+    "en": "marriage",
+    "es": "el matrimonio",
+    "ar": "الزواج",
+    "fa": "ازدواج"
+   },
+   "g": "die",
+   "pl": "Ehen"
+  },
+  {
+   "id": "ausnutzen",
+   "w": "ausnutzen",
+   "t": "verbs",
+   "ex": "Er hat ihre Hilfsbereitschaft ausgenutzt.",
+   "tr": {
+    "en": "to take advantage of",
+    "es": "aprovecharse de",
+    "ar": "يستغل",
+    "fa": "سوءاستفاده کردن"
+   }
+  },
+  {
+   "id": "ueberzeugend",
+   "w": "überzeugend",
+   "t": "adj",
+   "ex": "Ihre Argumente sind überzeugend.",
+   "tr": {
+    "en": "convincing",
+    "es": "convincente",
+    "ar": "مقنع",
+    "fa": "قانع‌کننده"
+   }
+  },
+  {
+   "id": "zumal",
+   "w": "zumal",
+   "t": "small",
+   "ex": "Ich bleibe zu Hause, zumal ich müde bin.",
+   "tr": {
+    "en": "especially since",
+    "es": "sobre todo porque",
+    "ar": "لا سيما أن",
+    "fa": "به‌ویژه که"
+   }
+  },
+  {
+   "id": "die-dienstreise",
+   "w": "die Dienstreise",
+   "t": "work",
+   "ex": "Nächste Woche bin ich auf Dienstreise in Wien.",
+   "tr": {
+    "en": "business trip",
+    "es": "el viaje de negocios",
+    "ar": "رحلة عمل",
+    "fa": "سفر کاری"
+   },
+   "g": "die",
+   "pl": "Dienstreisen"
+  },
+  {
+   "id": "die-gerechtigkeit",
+   "w": "die Gerechtigkeit",
+   "t": "society",
+   "ex": "Viele Menschen wünschen sich mehr soziale Gerechtigkeit.",
+   "tr": {
+    "en": "justice, fairness",
+    "es": "la justicia",
+    "ar": "العدالة",
+    "fa": "عدالت"
+   },
+   "g": "die"
+  },
+  {
+   "id": "die-schwiegermutter",
+   "w": "die Schwiegermutter",
+   "t": "people",
+   "ex": "Meine Schwiegermutter kocht fantastisch.",
+   "tr": {
+    "en": "mother-in-law",
+    "es": "la suegra",
+    "ar": "الحماة",
+    "fa": "مادرشوهر / مادرزن"
+   },
+   "g": "die",
+   "pl": "Schwiegermütter"
+  },
+  {
+   "id": "ausueben",
+   "w": "ausüben",
+   "t": "verbs",
+   "ex": "Welchen Beruf üben Sie aus?",
+   "tr": {
+    "en": "to practise, to exercise",
+    "es": "ejercer",
+    "ar": "يمارس",
+    "fa": "انجام دادن (شغل)"
+   }
+  },
+  {
+   "id": "umstritten",
+   "w": "umstritten",
+   "t": "adj",
+   "ex": "Das neue Gesetz ist umstritten.",
+   "tr": {
+    "en": "controversial",
+    "es": "controvertido",
+    "ar": "مثير للجدل",
+    "fa": "بحث‌برانگیز"
+   }
+  },
+  {
+   "id": "soweit",
+   "w": "soweit",
+   "t": "small",
+   "ex": "Soweit ich weiß, ist das Büro heute zu.",
+   "tr": {
+    "en": "as far as",
+    "es": "por lo que",
+    "ar": "على حد علمي / بقدر ما",
+    "fa": "تا جایی که"
+   }
+  },
+  {
+   "id": "die-praesentation",
+   "w": "die Präsentation",
+   "t": "work",
+   "ex": "Morgen halte ich eine Präsentation vor dem Team.",
+   "tr": {
+    "en": "presentation",
+    "es": "la presentación",
+    "ar": "العرض التقديمي",
+    "fa": "ارائه"
+   },
+   "g": "die",
+   "pl": "Präsentationen"
+  },
+  {
+   "id": "das-ehrenamt",
+   "w": "das Ehrenamt",
+   "t": "society",
+   "ex": "Sie engagiert sich im Ehrenamt bei der Tafel.",
+   "tr": {
+    "en": "voluntary work",
+    "es": "el voluntariado",
+    "ar": "العمل التطوعي",
+    "fa": "کار داوطلبانه"
+   },
+   "g": "das",
+   "pl": "Ehrenämter"
+  },
+  {
+   "id": "der-nachwuchs",
+   "w": "der Nachwuchs",
+   "t": "people",
+   "ex": "Bei unseren Nachbarn hat sich Nachwuchs angekündigt.",
+   "tr": {
+    "en": "offspring, young generation",
+    "es": "la descendencia",
+    "ar": "الذرية / الجيل الجديد",
+    "fa": "فرزندان / نسل جوان"
+   },
+   "g": "der"
+  },
+  {
+   "id": "beachten",
+   "w": "beachten",
+   "t": "verbs",
+   "ex": "Bitte beachten Sie die Hinweise.",
+   "tr": {
+    "en": "to observe, to pay attention to",
+    "es": "tener en cuenta",
+    "ar": "يراعي",
+    "fa": "رعایت کردن"
+   }
+  },
+  {
+   "id": "unvermeidlich",
+   "w": "unvermeidlich",
+   "t": "adj",
+   "ex": "Ein bisschen Stress ist unvermeidlich.",
+   "tr": {
+    "en": "unavoidable",
+    "es": "inevitable",
+    "ar": "لا مفر منه",
+    "fa": "اجتناب‌ناپذیر"
+   }
+  },
+  {
+   "id": "die-verhandlung",
+   "w": "die Verhandlung",
+   "t": "work",
+   "ex": "Die Verhandlungen über den Lohn laufen noch.",
+   "tr": {
+    "en": "negotiation",
+    "es": "la negociación",
+    "ar": "المفاوضة",
+    "fa": "مذاکره"
+   },
+   "g": "die",
+   "pl": "Verhandlungen"
+  },
+  {
+   "id": "der-sozialstaat",
+   "w": "der Sozialstaat",
+   "t": "society",
+   "ex": "Der Sozialstaat hilft Menschen in Not.",
+   "tr": {
+    "en": "welfare state",
+    "es": "el estado del bienestar",
+    "ar": "دولة الرعاية الاجتماعية",
+    "fa": "دولت رفاه"
+   },
+   "g": "der",
+   "pl": "Sozialstaaten"
+  },
+  {
+   "id": "die-pubertaet",
+   "w": "die Pubertät",
+   "t": "people",
+   "ex": "In der Pubertät streiten Kinder oft mit den Eltern.",
+   "tr": {
+    "en": "puberty",
+    "es": "la pubertad",
+    "ar": "البلوغ / المراهقة",
+    "fa": "بلوغ"
+   },
+   "g": "die"
+  },
+  {
+   "id": "bearbeiten",
+   "w": "bearbeiten",
+   "t": "verbs",
+   "ex": "Ihr Antrag wird gerade bearbeitet.",
+   "tr": {
+    "en": "to process, to edit",
+    "es": "tramitar, editar",
+    "ar": "يعالج / يحرر",
+    "fa": "رسیدگی کردن / ویرایش کردن"
+   }
+  },
+  {
+   "id": "vergleichbar",
+   "w": "vergleichbar",
+   "t": "adj",
+   "ex": "Die Preise sind vergleichbar.",
+   "tr": {
+    "en": "comparable",
+    "es": "comparable",
+    "ar": "قابل للمقارنة",
+    "fa": "قابل مقایسه"
+   }
+  },
+  {
+   "id": "die-mahnung",
+   "w": "die Mahnung",
+   "t": "work",
+   "ex": "Ich habe eine Mahnung bekommen, weil ich vergessen habe zu zahlen.",
+   "tr": {
+    "en": "payment reminder",
+    "es": "el aviso de pago",
+    "ar": "إشعار التذكير بالدفع",
+    "fa": "اخطار پرداخت"
+   },
+   "g": "die",
+   "pl": "Mahnungen"
+  },
+  {
+   "id": "die-wirtschaft",
+   "w": "die Wirtschaft",
+   "t": "society",
+   "ex": "Die Wirtschaft wächst nur langsam.",
+   "tr": {
+    "en": "economy",
+    "es": "la economía",
+    "ar": "الاقتصاد",
+    "fa": "اقتصاد"
+   },
+   "g": "die",
+   "pl": "Wirtschaften"
+  },
+  {
+   "id": "beeinflussen",
+   "w": "beeinflussen",
+   "t": "verbs",
+   "ex": "Werbung beeinflusst unsere Entscheidungen.",
+   "tr": {
+    "en": "to influence",
+    "es": "influir en",
+    "ar": "يؤثر في",
+    "fa": "تحت تأثیر قرار دادن"
+   }
+  },
+  {
+   "id": "verantwortungsvoll",
+   "w": "verantwortungsvoll",
+   "t": "adj",
+   "ex": "Pflege ist eine verantwortungsvolle Aufgabe.",
+   "tr": {
+    "en": "responsible",
+    "es": "de gran responsabilidad",
+    "ar": "مسؤول / يتطلب مسؤولية",
+    "fa": "پرمسئولیت"
+   }
+  },
+  {
+   "id": "der-datenschutzbeauftragte",
+   "w": "der Datenschutzbeauftragte",
+   "t": "work",
+   "ex": "Fragen Sie den Datenschutzbeauftragten der Firma.",
+   "tr": {
+    "en": "data protection officer",
+    "es": "el delegado de protección de datos",
+    "ar": "مسؤول حماية البيانات",
+    "fa": "مسئول حفاظت از داده‌ها"
+   },
+   "g": "der",
+   "pl": "Datenschutzbeauftragten"
+  },
+  {
+   "id": "die-inflation",
+   "w": "die Inflation",
+   "t": "society",
+   "ex": "Wegen der Inflation ist alles teurer.",
+   "tr": {
+    "en": "inflation",
+    "es": "la inflación",
+    "ar": "التضخم",
+    "fa": "تورم"
+   },
+   "g": "die",
+   "pl": "Inflationen"
+  },
+  {
+   "id": "befuerchten",
+   "w": "befürchten",
+   "t": "verbs",
+   "ex": "Ich befürchte, dass es zu spät ist.",
+   "tr": {
+    "en": "to fear",
+    "es": "temer",
+    "ar": "يخشى",
+    "fa": "بیم داشتن"
+   }
+  },
+  {
+   "id": "vielfaeltig",
+   "w": "vielfältig",
+   "t": "adj",
+   "ex": "Das Angebot ist sehr vielfältig.",
+   "tr": {
+    "en": "diverse, varied",
+    "es": "variado",
+    "ar": "متنوع",
+    "fa": "متنوع"
+   }
+  },
+  {
+   "id": "der-haushalt",
+   "w": "der Haushalt",
+   "t": "society",
+   "ex": "Der Staat muss im Haushalt sparen.",
+   "tr": {
+    "en": "budget, household",
+    "es": "el presupuesto, el hogar",
+    "ar": "الميزانية / الأسرة",
+    "fa": "بودجه / خانوار"
+   },
+   "g": "der",
+   "pl": "Haushalte"
+  },
+  {
+   "id": "begruenden",
+   "w": "begründen",
+   "t": "verbs",
+   "ex": "Bitte begründen Sie Ihre Meinung.",
+   "tr": {
+    "en": "to justify, to give reasons",
+    "es": "justificar",
+    "ar": "يعلل",
+    "fa": "دلیل آوردن"
+   }
+  },
+  {
+   "id": "vorsichtig",
+   "w": "vorsichtig",
+   "t": "adj",
+   "ex": "Fahr bitte vorsichtig!",
+   "tr": {
+    "en": "careful, cautious",
+    "es": "prudente",
+    "ar": "حذر",
+    "fa": "محتاط"
+   }
+  },
+  {
+   "id": "die-globalisierung",
+   "w": "die Globalisierung",
+   "t": "society",
+   "ex": "Die Globalisierung hat Vorteile und Nachteile.",
+   "tr": {
+    "en": "globalisation",
+    "es": "la globalización",
+    "ar": "العولمة",
+    "fa": "جهانی‌شدن"
+   },
+   "g": "die"
+  },
+  {
+   "id": "beitragen",
+   "w": "beitragen",
+   "t": "verbs",
+   "ex": "Jeder kann etwas zum Umweltschutz beitragen.",
+   "tr": {
+    "en": "to contribute",
+    "es": "contribuir",
+    "ar": "يساهم",
+    "fa": "سهم داشتن"
+   }
+  },
+  {
+   "id": "vorlaeufig",
+   "w": "vorläufig",
+   "t": "adj",
+   "ex": "Das ist nur eine vorläufige Lösung.",
+   "tr": {
+    "en": "provisional",
+    "es": "provisional",
+    "ar": "مؤقت",
+    "fa": "موقت"
+   }
+  },
+  {
+   "id": "der-wandel",
+   "w": "der Wandel",
+   "t": "society",
+   "ex": "Die Gesellschaft ist im Wandel.",
+   "tr": {
+    "en": "change, transformation",
+    "es": "el cambio",
+    "ar": "التحول",
+    "fa": "دگرگونی"
+   },
+   "g": "der"
+  },
+  {
+   "id": "belasten",
+   "w": "belasten",
+   "t": "verbs",
+   "ex": "Die Sorgen belasten mich sehr.",
+   "tr": {
+    "en": "to burden, to weigh on",
+    "es": "agobiar, cargar",
+    "ar": "يثقل",
+    "fa": "تحت فشار گذاشتن"
+   }
+  },
+  {
+   "id": "wesentlich",
+   "w": "wesentlich",
+   "t": "adj",
+   "ex": "Das ist ein wesentlicher Unterschied.",
+   "tr": {
+    "en": "essential, significant",
+    "es": "esencial",
+    "ar": "جوهري",
+    "fa": "اساسی"
+   }
+  },
+  {
+   "id": "die-herausforderung",
+   "w": "die Herausforderung",
+   "t": "society",
+   "ex": "Der Klimawandel ist eine große Herausforderung.",
+   "tr": {
+    "en": "challenge",
+    "es": "el reto",
+    "ar": "التحدي",
+    "fa": "چالش"
+   },
+   "g": "die",
+   "pl": "Herausforderungen"
+  },
+  {
+   "id": "beruecksichtigen",
+   "w": "berücksichtigen",
+   "t": "verbs",
+   "ex": "Wir berücksichtigen Ihre Wünsche.",
+   "tr": {
+    "en": "to take into account",
+    "es": "tener en cuenta",
+    "ar": "يأخذ بعين الاعتبار",
+    "fa": "در نظر گرفتن"
+   }
+  },
+  {
+   "id": "wirksam",
+   "w": "wirksam",
+   "t": "adj",
+   "ex": "Das Medikament ist sehr wirksam.",
+   "tr": {
+    "en": "effective",
+    "es": "eficaz",
+    "ar": "فعّال",
+    "fa": "مؤثر"
+   }
+  },
+  {
+   "id": "die-massnahme",
+   "w": "die Maßnahme",
+   "t": "society",
+   "ex": "Die Stadt plant neue Maßnahmen gegen Lärm.",
+   "tr": {
+    "en": "measure",
+    "es": "la medida",
+    "ar": "الإجراء",
+    "fa": "اقدام / تدبیر"
+   },
+   "g": "die",
+   "pl": "Maßnahmen"
+  },
+  {
+   "id": "beschliessen",
+   "w": "beschließen",
+   "t": "verbs",
+   "ex": "Der Stadtrat hat einen neuen Park beschlossen.",
+   "tr": {
+    "en": "to decide, to resolve",
+    "es": "acordar, decidir",
+    "ar": "يقرر",
+    "fa": "تصویب کردن / تصمیم گرفتن"
+   }
+  },
+  {
+   "id": "zahlreich",
+   "w": "zahlreich",
+   "t": "adj",
+   "ex": "Zahlreiche Gäste kamen zur Feier.",
+   "tr": {
+    "en": "numerous",
+    "es": "numeroso",
+    "ar": "عديد",
+    "fa": "بی‌شمار"
+   }
+  },
+  {
+   "id": "das-ergebnis",
+   "w": "das Ergebnis",
+   "t": "society",
+   "ex": "Das Ergebnis der Studie ist überraschend.",
+   "tr": {
+    "en": "result",
+    "es": "el resultado",
+    "ar": "النتيجة",
+    "fa": "نتیجه"
+   },
+   "g": "das",
+   "pl": "Ergebnisse"
+  },
+  {
+   "id": "bewaeltigen",
+   "w": "bewältigen",
+   "t": "verbs",
+   "ex": "Wir haben die Krise gemeinsam bewältigt.",
+   "tr": {
+    "en": "to cope with, to manage",
+    "es": "superar",
+    "ar": "يتغلب على",
+    "fa": "از پس چیزی برآمدن"
+   }
+  },
+  {
+   "id": "zeitgemaess",
+   "w": "zeitgemäß",
+   "t": "adj",
+   "ex": "Das Gesetz ist nicht mehr zeitgemäß.",
+   "tr": {
+    "en": "up to date, modern",
+    "es": "actual",
+    "ar": "مواكب للعصر",
+    "fa": "به‌روز"
+   }
+  },
+  {
+   "id": "die-studie",
+   "w": "die Studie",
+   "t": "society",
+   "ex": "Eine neue Studie zeigt, dass Schlaf wichtig ist.",
+   "tr": {
+    "en": "study",
+    "es": "el estudio",
+    "ar": "الدراسة",
+    "fa": "پژوهش"
+   },
+   "g": "die",
+   "pl": "Studien"
+  },
+  {
+   "id": "bewerten",
+   "w": "bewerten",
+   "t": "verbs",
+   "ex": "Die Prüfer bewerten den Text.",
+   "tr": {
+    "en": "to assess, to rate",
+    "es": "evaluar",
+    "ar": "يقيّم",
+    "fa": "ارزیابی کردن"
+   }
+  },
+  {
+   "id": "zufriedenstellend",
+   "w": "zufriedenstellend",
+   "t": "adj",
+   "ex": "Das Ergebnis ist zufriedenstellend.",
+   "tr": {
+    "en": "satisfactory",
+    "es": "satisfactorio",
+    "ar": "مُرضٍ",
+    "fa": "رضایت‌بخش"
+   }
+  },
+  {
+   "id": "die-forschung",
+   "w": "die Forschung",
+   "t": "society",
+   "ex": "Die Forschung braucht mehr Geld.",
+   "tr": {
+    "en": "research",
+    "es": "la investigación",
+    "ar": "البحث العلمي",
+    "fa": "پژوهش"
+   },
+   "g": "die",
+   "pl": "Forschungen"
+  },
+  {
+   "id": "bezweifeln",
+   "w": "bezweifeln",
+   "t": "verbs",
+   "ex": "Ich bezweifle, dass das stimmt.",
+   "tr": {
+    "en": "to doubt",
+    "es": "dudar",
+    "ar": "يشك في",
+    "fa": "شک داشتن"
+   }
+  },
+  {
+   "id": "zurueckhaltend",
+   "w": "zurückhaltend",
+   "t": "adj",
+   "ex": "Sie ist am Anfang eher zurückhaltend.",
+   "tr": {
+    "en": "reserved",
+    "es": "reservado",
+    "ar": "متحفّظ",
+    "fa": "کم‌حرف / محتاط"
+   }
+  },
+  {
+   "id": "die-voraussage",
+   "w": "die Voraussage",
+   "t": "society",
+   "ex": "Die Voraussage für das Wachstum ist schlecht.",
+   "tr": {
+    "en": "forecast, prediction",
+    "es": "el pronóstico",
+    "ar": "التوقع / التنبؤ",
+    "fa": "پیش‌بینی"
+   },
+   "g": "die",
+   "pl": "Voraussagen"
+  },
+  {
+   "id": "darstellen",
+   "w": "darstellen",
+   "t": "verbs",
+   "ex": "Die Grafik stellt die Entwicklung dar.",
+   "tr": {
+    "en": "to show, to represent",
+    "es": "representar",
+    "ar": "يمثل / يعرض",
+    "fa": "نشان دادن"
+   }
+  },
+  {
+   "id": "benachteiligt",
+   "w": "benachteiligt",
+   "t": "adj",
+   "ex": "Viele Kinder sind in der Schule benachteiligt.",
+   "tr": {
+    "en": "disadvantaged",
+    "es": "desfavorecido",
+    "ar": "محروم",
+    "fa": "محروم"
+   }
+  },
+  {
+   "id": "die-verwendung",
+   "w": "die Verwendung",
+   "t": "society",
+   "ex": "Die Verwendung von Plastiktüten ist zurückgegangen.",
+   "tr": {
+    "en": "use",
+    "es": "el uso",
+    "ar": "الاستخدام",
+    "fa": "استفاده"
+   },
+   "g": "die",
+   "pl": "Verwendungen"
+  },
+  {
+   "id": "durchfuehren",
+   "w": "durchführen",
+   "t": "verbs",
+   "ex": "Die Uni führt eine Umfrage durch.",
+   "tr": {
+    "en": "to carry out",
+    "es": "llevar a cabo",
+    "ar": "ينفذ",
+    "fa": "انجام دادن"
+   }
+  },
+  {
+   "id": "die-gefaehrdung",
+   "w": "die Gefährdung",
+   "t": "society",
+   "ex": "Die Baustelle ist eine Gefährdung für Kinder.",
+   "tr": {
+    "en": "danger, threat",
+    "es": "el peligro",
+    "ar": "الخطر / التهديد",
+    "fa": "تهدید / خطر"
+   },
+   "g": "die",
+   "pl": "Gefährdungen"
+  },
+  {
+   "id": "einfuehren",
+   "w": "einführen",
+   "t": "verbs",
+   "ex": "Die Schule hat ein neues System eingeführt.",
+   "tr": {
+    "en": "to introduce",
+    "es": "introducir",
+    "ar": "يُدخل / يطبّق",
+    "fa": "معرفی کردن / اجرا کردن"
+   }
+  },
+  {
+   "id": "einhalten",
+   "w": "einhalten",
+   "t": "verbs",
+   "ex": "Wir müssen den Termin unbedingt einhalten.",
+   "tr": {
+    "en": "to keep, to comply with",
+    "es": "cumplir",
+    "ar": "يلتزم بـ",
+    "fa": "رعایت کردن"
+   }
+  },
+  {
+   "id": "einschraenken",
+   "w": "einschränken",
+   "t": "verbs",
+   "ex": "Wegen der Krankheit muss ich Sport einschränken.",
+   "tr": {
+    "en": "to limit, to restrict",
+    "es": "limitar",
+    "ar": "يقيد",
+    "fa": "محدود کردن"
+   }
+  },
+  {
+   "id": "empfinden",
+   "w": "empfinden",
+   "t": "verbs",
+   "ex": "Wie empfinden Sie die Situation?",
+   "tr": {
+    "en": "to feel, to perceive",
+    "es": "sentir, percibir",
+    "ar": "يشعر",
+    "fa": "احساس کردن"
+   }
+  },
+  {
+   "id": "entlasten",
+   "w": "entlasten",
+   "t": "verbs",
+   "ex": "Eine Haushaltshilfe würde die Familie entlasten.",
+   "tr": {
+    "en": "to relieve",
+    "es": "aliviar",
+    "ar": "يخفف العبء",
+    "fa": "بار را سبک کردن"
+   }
+  },
+  {
+   "id": "erfassen",
+   "w": "erfassen",
+   "t": "verbs",
+   "ex": "Die Daten werden elektronisch erfasst.",
+   "tr": {
+    "en": "to record, to grasp",
+    "es": "registrar",
+    "ar": "يسجل / يدرك",
+    "fa": "ثبت کردن / درک کردن"
+   }
+  },
+  {
+   "id": "ergaenzen",
+   "w": "ergänzen",
+   "t": "verbs",
+   "ex": "Bitte ergänzen Sie die fehlenden Wörter.",
+   "tr": {
+    "en": "to add, to complete",
+    "es": "completar",
+    "ar": "يكمل",
+    "fa": "تکمیل کردن"
+   }
+  },
+  {
+   "id": "erlaeutern",
+   "w": "erläutern",
+   "t": "verbs",
+   "ex": "Der Arzt erläutert die Behandlung.",
+   "tr": {
+    "en": "to explain",
+    "es": "explicar",
+    "ar": "يشرح",
+    "fa": "توضیح دادن"
+   }
+  },
+  {
+   "id": "erleichtern",
+   "w": "erleichtern",
+   "t": "verbs",
+   "ex": "Die App erleichtert die Suche.",
+   "tr": {
+    "en": "to make easier",
+    "es": "facilitar",
+    "ar": "يسهّل",
+    "fa": "آسان کردن"
+   }
+  },
+  {
+   "id": "ermitteln",
+   "w": "ermitteln",
+   "t": "verbs",
+   "ex": "Die Polizei ermittelt in dem Fall.",
+   "tr": {
+    "en": "to investigate, to determine",
+    "es": "investigar",
+    "ar": "يحقق",
+    "fa": "تحقیق کردن"
+   }
+  },
+  {
+   "id": "erwerben",
+   "w": "erwerben",
+   "t": "verbs",
+   "ex": "Er hat die deutsche Staatsangehörigkeit erworben.",
+   "tr": {
+    "en": "to acquire",
+    "es": "adquirir",
+    "ar": "يكتسب",
+    "fa": "به دست آوردن"
+   }
+  },
+  {
+   "id": "fordern",
+   "w": "fordern",
+   "t": "verbs",
+   "ex": "Die Mitarbeiter fordern mehr Geld.",
+   "tr": {
+    "en": "to demand",
+    "es": "exigir",
+    "ar": "يطالب",
+    "fa": "مطالبه کردن"
+   }
+  },
+  {
+   "id": "gewaehrleisten",
+   "w": "gewährleisten",
+   "t": "verbs",
+   "ex": "Wir gewährleisten die Sicherheit der Daten.",
+   "tr": {
+    "en": "to guarantee",
+    "es": "garantizar",
+    "ar": "يضمن",
+    "fa": "تضمین کردن"
+   }
+  },
+  {
+   "id": "hervorheben",
+   "w": "hervorheben",
+   "t": "verbs",
+   "ex": "Ich möchte einen Punkt besonders hervorheben.",
+   "tr": {
+    "en": "to emphasise",
+    "es": "destacar",
+    "ar": "يبرز",
+    "fa": "برجسته کردن"
+   }
+  },
+  {
+   "id": "hinweisen-auf",
+   "w": "hinweisen auf",
+   "t": "verbs",
+   "ex": "Ich möchte Sie auf einen Fehler hinweisen.",
+   "tr": {
+    "en": "to point out",
+    "es": "señalar",
+    "ar": "ينبّه إلى",
+    "fa": "اشاره کردن به"
+   }
+  },
+  {
+   "id": "klarstellen",
+   "w": "klarstellen",
+   "t": "verbs",
+   "ex": "Ich möchte etwas klarstellen.",
+   "tr": {
+    "en": "to make clear",
+    "es": "aclarar",
+    "ar": "يوضّح",
+    "fa": "روشن کردن"
+   }
+  },
+  {
+   "id": "nachweisen",
+   "w": "nachweisen",
+   "t": "verbs",
+   "ex": "Sie müssen Ihre Deutschkenntnisse nachweisen.",
+   "tr": {
+    "en": "to prove",
+    "es": "demostrar",
+    "ar": "يثبت",
+    "fa": "اثبات کردن"
+   }
+  },
+  {
+   "id": "schaetzen",
+   "w": "schätzen",
+   "t": "verbs",
+   "ex": "Ich schätze deine Ehrlichkeit sehr.",
+   "tr": {
+    "en": "to value, to estimate",
+    "es": "apreciar, estimar",
+    "ar": "يقدّر",
+    "fa": "ارج نهادن / تخمین زدن"
+   }
+  },
+  {
+   "id": "stattfinden",
+   "w": "stattfinden",
+   "t": "verbs",
+   "ex": "Das Treffen findet online statt.",
+   "tr": {
+    "en": "to take place",
+    "es": "tener lugar",
+    "ar": "يُعقد / يحدث",
+    "fa": "برگزار شدن"
+   }
+  },
+  {
+   "id": "uebernehmen",
+   "w": "übernehmen",
+   "t": "verbs",
+   "ex": "Wer übernimmt die Kosten?",
+   "tr": {
+    "en": "to take over, to cover",
+    "es": "asumir",
+    "ar": "يتولى / يتحمل",
+    "fa": "به عهده گرفتن"
+   }
+  },
+  {
+   "id": "ueberpruefen",
+   "w": "überprüfen",
+   "t": "verbs",
+   "ex": "Bitte überprüfen Sie Ihre Angaben.",
+   "tr": {
+    "en": "to check",
+    "es": "comprobar",
+    "ar": "يتحقق من",
+    "fa": "بررسی کردن"
+   }
+  },
+  {
+   "id": "ueberwiegen",
+   "w": "überwiegen",
+   "t": "verbs",
+   "ex": "Die Vorteile überwiegen.",
+   "tr": {
+    "en": "to predominate, to outweigh",
+    "es": "predominar",
+    "ar": "يرجح / يغلب",
+    "fa": "غلبه داشتن"
+   }
+  },
+  {
+   "id": "umsetzen",
+   "w": "umsetzen",
+   "t": "verbs",
+   "ex": "Wir wollen die Idee schnell umsetzen.",
+   "tr": {
+    "en": "to put into practice",
+    "es": "llevar a la práctica",
+    "ar": "ينفذ",
+    "fa": "اجرا کردن"
+   }
+  },
+  {
+   "id": "unterscheiden",
+   "w": "unterscheiden",
+   "t": "verbs",
+   "ex": "Kannst du die beiden Wörter unterscheiden?",
+   "tr": {
+    "en": "to distinguish",
+    "es": "distinguir",
+    "ar": "يميّز",
+    "fa": "تشخیص دادن"
+   }
+  },
+  {
+   "id": "verfuegen-ueber",
+   "w": "verfügen über",
+   "t": "verbs",
+   "ex": "Die Wohnung verfügt über einen Balkon.",
+   "tr": {
+    "en": "to have at one's disposal",
+    "es": "disponer de",
+    "ar": "يملك / يتوفر على",
+    "fa": "دارا بودن"
+   }
+  },
+  {
+   "id": "vergroessern",
+   "w": "vergrößern",
+   "t": "verbs",
+   "ex": "Die Firma will das Team vergrößern.",
+   "tr": {
+    "en": "to enlarge, to expand",
+    "es": "ampliar",
+    "ar": "يوسّع",
+    "fa": "بزرگ کردن"
+   }
+  },
+  {
+   "id": "verlangen",
+   "w": "verlangen",
+   "t": "verbs",
+   "ex": "Der Vermieter verlangt drei Monatsmieten Kaution.",
+   "tr": {
+    "en": "to demand, to ask for",
+    "es": "exigir, pedir",
+    "ar": "يطلب",
+    "fa": "درخواست کردن / خواستن"
+   }
+  },
+  {
+   "id": "vermitteln",
+   "w": "vermitteln",
+   "t": "verbs",
+   "ex": "Die Agentur vermittelt Jobs.",
+   "tr": {
+    "en": "to arrange, to convey",
+    "es": "mediar, transmitir",
+    "ar": "يتوسط / ينقل",
+    "fa": "میانجی شدن / منتقل کردن"
+   }
+  },
+  {
+   "id": "verringern",
+   "w": "verringern",
+   "t": "verbs",
+   "ex": "Wir wollen den Verbrauch verringern.",
+   "tr": {
+    "en": "to reduce",
+    "es": "reducir",
+    "ar": "يقلل",
+    "fa": "کاهش دادن"
+   }
+  },
+  {
+   "id": "versorgen",
+   "w": "versorgen",
+   "t": "verbs",
+   "ex": "Die Krankenschwester versorgt die Patienten.",
+   "tr": {
+    "en": "to look after, to supply",
+    "es": "atender, abastecer",
+    "ar": "يعتني بـ / يزوّد",
+    "fa": "رسیدگی کردن / تأمین کردن"
+   }
+  },
+  {
+   "id": "verursachen",
+   "w": "verursachen",
+   "t": "verbs",
+   "ex": "Der Sturm hat große Schäden verursacht.",
+   "tr": {
+    "en": "to cause",
+    "es": "causar",
+    "ar": "يسبب",
+    "fa": "باعث شدن"
+   }
+  },
+  {
+   "id": "voraussetzen",
+   "w": "voraussetzen",
+   "t": "verbs",
+   "ex": "Die Stelle setzt Erfahrung voraus.",
+   "tr": {
+    "en": "to require, to presuppose",
+    "es": "presuponer, requerir",
+    "ar": "يشترط",
+    "fa": "پیش‌فرض گرفتن / لازم داشتن"
+   }
+  },
+  {
+   "id": "vorkommen",
+   "w": "vorkommen",
+   "t": "verbs",
+   "ex": "So etwas kommt leider oft vor.",
+   "tr": {
+    "en": "to happen, to occur",
+    "es": "ocurrir",
+    "ar": "يحدث",
+    "fa": "اتفاق افتادن"
+   }
+  },
+  {
+   "id": "vorwerfen",
+   "w": "vorwerfen",
+   "t": "verbs",
+   "ex": "Er wirft mir vor, dass ich nie zuhöre.",
+   "tr": {
+    "en": "to accuse, to reproach",
+    "es": "reprochar",
+    "ar": "يلوم / يتهم",
+    "fa": "سرزنش کردن"
+   }
+  },
+  {
+   "id": "wahrnehmen",
+   "w": "wahrnehmen",
+   "t": "verbs",
+   "ex": "Ich habe den Geruch gar nicht wahrgenommen.",
+   "tr": {
+    "en": "to perceive, to notice",
+    "es": "percibir",
+    "ar": "يدرك / يلاحظ",
+    "fa": "درک کردن / متوجه شدن"
+   }
+  },
+  {
+   "id": "widmen",
+   "w": "widmen",
+   "t": "verbs",
+   "ex": "Sie widmet ihre Freizeit der Musik.",
+   "tr": {
+    "en": "to dedicate",
+    "es": "dedicar",
+    "ar": "يكرّس",
+    "fa": "وقف کردن"
+   }
+  },
+  {
+   "id": "zugeben",
+   "w": "zugeben",
+   "t": "verbs",
+   "ex": "Er hat den Fehler zugegeben.",
+   "tr": {
+    "en": "to admit",
+    "es": "admitir",
+    "ar": "يعترف",
+    "fa": "اعتراف کردن"
+   }
+  },
+  {
+   "id": "zusammenfassen",
+   "w": "zusammenfassen",
+   "t": "verbs",
+   "ex": "Können Sie den Text kurz zusammenfassen?",
+   "tr": {
+    "en": "to summarise",
+    "es": "resumir",
+    "ar": "يلخص",
+    "fa": "خلاصه کردن"
+   }
+  },
+  {
+   "id": "zweifeln",
+   "w": "zweifeln",
+   "t": "verbs",
+   "ex": "Ich zweifle an seiner Ehrlichkeit.",
+   "tr": {
+    "en": "to doubt",
+    "es": "dudar",
+    "ar": "يشك",
+    "fa": "تردید داشتن"
+   }
+  }
+ ]
+}

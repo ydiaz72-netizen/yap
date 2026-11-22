@@ -228,7 +228,8 @@
 
   /* ---- Vocabulary flashcards ---- */
   .vccard{background:#fff;border-radius:24px;box-shadow:0 10px 30px rgba(27,42,65,.10);padding:26px 20px;text-align:center;min-height:260px;display:flex;flex-direction:column;justify-content:center;gap:8px}
-  .vcw{font-size:34px;font-weight:800;line-height:1.15}
+  .vcw{font-size:34px;font-weight:800;line-height:1.15;overflow-wrap:anywhere}
+  .vcw.vcl{font-size:28px}.vcw.vcxl{font-size:23px}
   .vcw .der{color:#2F6FD1}.vcw .die{color:#D9466A}.vcw .das{color:#2A8C82}
   .vcpl{font-size:15px;color:var(--muted);font-weight:600}
   .vcmean{font-size:22px;font-weight:800;color:var(--teal)}
@@ -8157,8 +8158,8 @@ async function nbReadAll(){
 /* ===================== VOCABULARY FLASHCARDS (spaced repetition) ===================== */
 /* Words: /vocab/de-a1.json (original list). Progress: sql/vocab.sql when signed in, this phone otherwise.
    🔊 appears only for words that have a recorded clip (Admin → Audio studio), never the phone voice. */
-const VC_V="2026-11-22c";
-const VC_LEVELS=["A1","A2","B1"];
+const VC_V="2026-11-22d";
+const VC_LEVELS=["A1","A2","B1","B2","C1"];
 const VC_DECK="de";
 const VC_LANGS=[["en","English"],["es","Español"],["ar","العربية"],["fa","فارسی / دری"]];
 const VC={ d:null, err:"", p:{}, days:{}, goal:10, lang:(typeof UI!=="undefined"&&UI==="es")?"es":"en", level:"A1", run:null, dirty:{}, dayDirty:false, chk:null };
@@ -8270,6 +8271,8 @@ function vcStart(mode, theme){
 function vcOpts(w){ const pool=VC.d.words.filter(x=>x.id!==w.id&&x.t===w.t), more=VC.d.words.filter(x=>x.id!==w.id);
   const o=exShuffle(pool.length>=3?pool:more).slice(0,3); return exShuffle([w,...o]); }
 function vcWordHtml(w){ const m=(w.w||"").match(/^(der|die|das) (.*)$/); return m?`<span class="${m[1]}">${m[1]}</span> ${esc(m[2])}`:esc(w.w); }
+/* long B2/C1 words and idioms: smaller text so they fit a phone */
+function vcSize(w){ const t=w.w||"", L=Math.max(...t.split(" ").map(x=>x.length)); return L>17||t.length>34?" vcxl":L>13||t.length>24?" vcl":""; }
 function vcSay(w){ const id=vcClip(w); if(id) exSay(id, w.w); }
 function vcSpk(w){ return vcClip(w)?`<button class="linkbtn" style="font-size:22px;text-decoration:none" onclick="vcSay(VC.byId['${w.id}'])" aria-label="Listen">🔊</button>`:""; }
 VIEWS.vocabq = function(){
@@ -8283,7 +8286,7 @@ VIEWS.vocabq = function(){
   const rate=`<div class="vcrate">${[["Again","Nochmal","#D9466A",0,"Otra vez"],["Hard","Schwer","#E59A2F",1,"Difícil"],["Good","Gut","#2A8C82",2,"Bien"],["Easy","Leicht","#2F6FD1",3,"Fácil"]].map(([a,b,col,g,e])=>`<button style="background:${col}" onclick="vcRate(${g})">${tr(a,b,e)}${UI==="de"?"":`<small>${b}</small>`}</button>`).join("")}</div>`;
   let h=back;
   if(c.type==="new"||c.type==="flip"){
-    h+=`<div class="vccard">${c.type==="new"?`<div class="ecmeta">${tr(`🆕 New word`,`🆕 Neues Wort`,`🆕 Palabra nueva`)}</div>`:""}<div class="vcw" lang="de">${vcWordHtml(w)} ${vcSpk(w)}</div>
+    h+=`<div class="vccard">${c.type==="new"?`<div class="ecmeta">${tr(`🆕 New word`,`🆕 Neues Wort`,`🆕 Palabra nueva`)}</div>`:""}<div class="vcw${vcSize(w)}" lang="de">${vcWordHtml(w)} ${vcSpk(w)}</div>
       ${r.show?reveal:`<div class="note">💭 Think of the meaning, then tap Show<br>Überlege, dann tippe auf Zeigen</div>`}</div>
       ${r.show?`<p class="note center" style="margin:12px 0 0">${tr(`How well did you know it?`,`Wie gut wusstest du es?`,`¿Qué tan bien la sabías?`)}</p>`+rate:`<button class="btn primary qbtn" style="margin-top:12px" onclick="VC.run.show=true;xr()">${tr(`Show`,`Zeigen`,`Mostrar`)}</button>`}`;
   } else if(c.type==="pick"||c.type==="listen"){
@@ -8294,7 +8297,7 @@ VIEWS.vocabq = function(){
       ${r.pick!==null?`<div class="vccard" style="min-height:0;margin-top:10px"><div class="vcw" style="font-size:26px" lang="de">${vcWordHtml(w)} ${vcSpk(w)}</div>${reveal}</div><button class="btn primary qbtn" style="margin-top:10px" onclick="vcNext()">${tr("Next →","Weiter →","Siguiente →")}</button>`:""}`;
   } else if(c.type==="gender"){
     const noun=w.w.replace(/^(der|die|das) /,"");
-    h+=`<div class="vccard" style="min-height:180px"><div class="ecmeta">${tr("der, die or das?","der, die oder das?","¿der, die o das?")}</div><div class="vcw" lang="de">${r.pick!==null?vcWordHtml(w):`<span style="color:#9AA1AC">___</span> ${esc(noun)}`}</div>
+    h+=`<div class="vccard" style="min-height:180px"><div class="ecmeta">${tr("der, die or das?","der, die oder das?","¿der, die o das?")}</div><div class="vcw${vcSize(w)}" lang="de">${r.pick!==null?vcWordHtml(w):`<span style="color:#9AA1AC">___</span> ${esc(noun)}`}</div>
       ${r.pick!==null?`<div class="vcmean" dir="${dir}">${esc(vcTr(w))}</div>${w.pl?`<div class="vcpl">Plural: ${esc(w.pl)}</div>`:""}`:""}</div>
       <div class="vcg">${[["der","#2F6FD1"],["die","#D9466A"],["das","#2A8C82"]].map(([g,col],k)=>`<button style="background:${col};${r.pick!==null&&g!==w.g?"opacity:.35":""}" ${r.pick!==null?"disabled":""} onclick="vcPick(${k})">${g}</button>`).join("")}</div>
       ${r.pick!==null?`<div class="${["der","die","das"][r.pick]===w.g?"ok":"err"}" style="margin-top:10px">${["der","die","das"][r.pick]===w.g?"✅ Richtig!":`❌ ${esc(w.w)}`}</div><button class="btn primary qbtn" style="margin-top:10px" onclick="vcNext()">${tr("Next →","Weiter →","Siguiente →")}</button>`:""}`;
@@ -8322,7 +8325,7 @@ VIEWS.vocabr = function(){
 };
 /* ---------- quick level check ---------- */
 function vcCheckStart(){ if(!VC.d) return; const list=[];
-  for(const lv of VC_LEVELS){ const pool=vcLv(lv).filter(w=>!(VC.p[w.id]&&VC.p[w.id].r)); list.push(...exShuffle(pool).slice(0,12)); }
+  for(const lv of VC_LEVELS){ const pool=vcLv(lv).filter(w=>!(VC.p[w.id]&&VC.p[w.id].r)); list.push(...exShuffle(pool).slice(0,8)); }
   if(list.length<10){ bToast(tr("You already know most words 🎉","Du kennst schon die meisten Wörter 🎉","Ya sabes la mayoría de las palabras 🎉")); return; }
   VC.chk={ list:exShuffle(list), i:0, yes:{}, n:{}, show:false }; go("vocabchk"); }
 VIEWS.vocabchk = function(){
@@ -8338,7 +8341,7 @@ VIEWS.vocabchk = function(){
   const w=k.list[k.i];
   return `<div class="topline"><button class="chip" onclick="go('vocab')">✕ ${tr("Stop","Stopp","Parar")}</button><span class="ecmeta">${k.i+1} / ${k.list.length}</span></div>
     <div class="exbar" style="margin:0 0 12px"><i style="width:${Math.round(k.i/k.list.length*100)}%;background:var(--coral)"></i></div>
-    <div class="vccard"><div class="ecmeta">${tr(`Do you know this word?`,`Kennst du das Wort?`,`¿Conoces esta palabra?`)}</div><div class="vcw" lang="de">${vcWordHtml(w)}</div>
+    <div class="vccard"><div class="ecmeta">${tr(`Do you know this word?`,`Kennst du das Wort?`,`¿Conoces esta palabra?`)}</div><div class="vcw${vcSize(w)}" lang="de">${vcWordHtml(w)}</div>
       ${k.show?`<div class="vcmean" dir="${vcRtl()?"rtl":"auto"}">${esc(vcTr(w))}</div>`:`<button class="linkbtn" onclick="VC.chk.show=true;xr()">${tr(`Check the meaning`,`Bedeutung zeigen`,`Ver el significado`)}</button>`}</div>
     <div class="row" style="gap:8px;margin-top:12px"><button class="btn secondary" style="flex:1" onclick="vcChk(false)">${tr(`✗ No`,`✗ Nein`,`✗ No`)}</button><button class="btn primary" style="flex:1" onclick="vcChk(true)">${tr(`✓ I know it`,`✓ Kenne ich`,`✓ La sé`)}</button></div>`;
 };
@@ -8368,7 +8371,6 @@ VIEWS.vocab = function(){
           <div class="ectop"><b>${on?"▶ ":""}${lv}</b><span class="ecmeta">${s2.learned} ${tr("learned","gelernt","aprendidas")} · ${s2.mastered} ${tr("mastered","sicher","dominadas")} · ${s2.total}</span></div>
           <div class="exbar" style="margin:6px 0 2px"><i style="width:${Math.round(s2.learned/s2.total*100)}%"></i></div>
           <div class="exbar"><i style="width:${Math.round(s2.mastered/s2.total*100)}%;background:var(--plum)"></i></div></button>`; }).join("")}
-      <div class="ectop" style="opacity:.55;padding:0 4px"><b>B2 · C1</b><span class="ecmeta">${tr(`coming soon`,`bald`,`muy pronto`)}</span></div>
       ${vcDaysHtml()}
       ${st.learned?`<button class="linkbtn" onclick="vcCheckStart()">📊 ${tr("Level check","Niveau-Check","Test de nivel")}</button>`:""}
       ${!A.user?`<p class="note" style="margin:8px 0 0">💾 ${tr("Saved on this phone only.","Nur auf diesem Handy gespeichert.","Guardado solo en este móvil.")} <button class="linkbtn" onclick="A.ret='vocab';go('account')">${tr("Sign in","Anmelden","Entra")}</button> ${tr("to keep your progress everywhere.","um deinen Fortschritt überall zu haben.","para tener tu progreso en todas partes.")}</p>`:""}</div>
