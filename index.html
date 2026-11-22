@@ -7756,7 +7756,7 @@ function exClock(ms){ const s=Math.max(0,Math.round(ms/1000)); return `${Math.fl
 VIEWS.exam = function(){
   const back=`<div class="topline"><button class="chip" onclick="go('home')">← Home</button><span>🇩🇪 Test practice</span></div>`;
   let h=back+`<h2 style="margin:6px 0 2px">Leben in Deutschland · Einbürgerungstest</h2>
-    <p class="sub" style="margin:0 0 10px">Practise with all official BAMF questions: 300 general + 10 for your Bundesland. · Alle offiziellen Fragen.</p>`;
+    <p class="sub" style="margin:0 0 6px">Practise with all official BAMF questions: 300 general + 10 for your Bundesland. · Alle offiziellen Fragen.</p><div style="display:inline-block;background:var(--teal-soft);color:var(--teal);font-weight:800;font-size:13px;border-radius:999px;padding:5px 12px;margin:0 0 10px">🎉 Free during our launch · Kostenlos zum Start</div>`;
   if(EX.err) return h+`<div class="err">${esc(EX.err)}</div>`;
   if(!EX.qs) return h+`<p class="note center">Loading… · Lädt…</p>`;
   const pool=exPool(), last=exLast(), known=pool.filter(q=>last[q.n]===true).length, wrong=pool.filter(q=>last[q.n]===false).length, unseen=pool.filter(q=>!(q.n in last)).length;
@@ -8073,7 +8073,7 @@ VIEWS.dtzstudio = function(){
 VIEWS.dtz = function(){
   let h=`<div class="topline"><button class="chip" onclick="dtStop();go('home')">← Home</button><span>🇩🇪 Test practice</span></div>
     <h2 style="margin:6px 0 2px">Deutsch-Prüfung A2–B1 (DTZ)</h2>
-    <p class="sub" style="margin:0 0 10px">Practise for the Deutsch-Test für Zuwanderer: Hören, Lesen, Schreiben, Sprechen. Also good practice for telc and Goethe B1.</p>`;
+    <p class="sub" style="margin:0 0 6px">Practise for the Deutsch-Test für Zuwanderer: Hören, Lesen, Schreiben, Sprechen. Also good practice for telc and Goethe B1.</p><div style="display:inline-block;background:var(--teal-soft);color:var(--teal);font-weight:800;font-size:13px;border-radius:999px;padding:5px 12px;margin:0 0 10px">🎉 Free during our launch · Kostenlos zum Start</div>`;
   if(DT.err) return h+`<div class="err">${esc(DT.err)}</div>`;
   if(!DT.d) return h+`<p class="note center">Loading… · Lädt…</p>`;
   h+=`<label class="card" style="display:flex;gap:12px;align-items:center;cursor:pointer"><input type="checkbox" style="width:22px;height:22px" ${DT.es?"checked":""} onchange="dtSetEs(this.checked)"><span><b>🇪🇸 Ayuda en español</b><br><span class="ecmeta">Spanish under the questions and answers. Texts and listening transcripts in Spanish appear after you answer (in practice).</span></span></label>`;
