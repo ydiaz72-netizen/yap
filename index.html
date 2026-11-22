@@ -6226,6 +6226,7 @@ async function bAct(fn,id){
     if(error) throw error;
     const st=data&&data.status;
     if(st==="cancelled" && data.late){ MR.data=null; MR.strikes=null; }
+    if(st==="joined" && ["pt_join_activity","pt_accept_invite","pt_accept_offer"].includes(fn)) setTimeout(()=>calOpen(id,true),600);
     const sideTxt = data && data.side ? (()=>{ const x=(B.list||[]).concat(R.list||[]).find(q=>q.activity_id===id); const k=x?(data.side==="a"?x.language_a:x.language_b):null; return k&&T[k]?" ("+tr(`${lname(k)} speakers`,`${lname(k)}-Sprechende`,`hablantes de ${lname(k).toLowerCase()}`)+")":""; })() : "";
     bToast( st==="joined" ? "✅ "+tr(`You're in${sideTxt}!`,`Du bist dabei${sideTxt}!`,`¡Estás dentro${sideTxt}!`)
           : st==="pending" ? "⏳ "+tr("Request sent. The host will reply","Anfrage gesendet. Der Host antwortet","Solicitud enviada. El anfitrión responderá")
@@ -6316,7 +6317,7 @@ function bCard(s){
     act=`<button class="btn primary" onclick="A.ret='board';go('account')">${tr("Sign in to join","Zum Beitreten anmelden","Entra para unirte")}</button>`;
   } else switch(s.my_status){
     case "joined":
-      act=`<p class="okmsg">✅ ${tr("You're in!","Du bist dabei!","¡Estás dentro!")}</p>${roomWindow?`<button class="btn primary" onclick="bRoom('${id}',false)">🎮 ${tr("Enter game room","Zum Spielraum","Entrar a la sala de juego")}</button>`:roomSoon?`<p class="note" style="margin:4px 0 0">🎮 ${tr("The game room opens 30 min before the start.","Spielraum öffnet 30 Min. vorher.","La sala de juego abre 30 min antes.")}</p>`:""}${started?"":`<button class="btn ghost" onclick="bAct('pt_leave_activity','${id}')">${tr("Leave","Absagen","Salir")}</button>`}`; break;
+      act=`<p class="okmsg">✅ ${tr("You're in!","Du bist dabei!","¡Estás dentro!")}</p>${started?"":`<button class="btn secondary" onclick="addToCal('${id}')">${ICO.cal} ${tr("Add to calendar","Zum Kalender","Añadir al calendario")}</button>`}${roomWindow?`<button class="btn primary" onclick="bRoom('${id}',false)">🎮 ${tr("Enter game room","Zum Spielraum","Entrar a la sala de juego")}</button>`:roomSoon?`<p class="note" style="margin:4px 0 0">🎮 ${tr("The game room opens 30 min before the start.","Spielraum öffnet 30 Min. vorher.","La sala de juego abre 30 min antes.")}</p>`:""}${started?"":`<button class="btn ghost" onclick="bAct('pt_leave_activity','${id}')">${tr("Leave","Absagen","Salir")}</button>`}`; break;
     case "invited":
       act=`<p class="okmsg">📩 ${tr(`${esc(s.host_name||"The host")} invited you!`,`${esc(s.host_name||"Der Host")} hat dich eingeladen!`,`¡${esc(s.host_name||"El anfitrión")} te invitó!`)}</p>
         <div class="brow2"><button class="btn primary" onclick="bAct('pt_accept_invite','${id}')" ${B.busy?"disabled":""}>${tr("Accept","Annehmen","Aceptar")}</button>
@@ -7415,8 +7416,40 @@ function icsFor(s){
     "BEGIN:VALARM","TRIGGER:-PT15M","ACTION:DISPLAY","DESCRIPTION:"+txt(s.title),"END:VALARM",
     "END:VEVENT","END:VCALENDAR"].join("\r\n");
 }
-function addToCal(id){
-  const s=(D.board||[]).concat(R.list||[]).find(x=>x.activity_id===id); if(!s) return;
+/* Add to calendar: Google, Outlook, Apple / other (.ics) */
+function calRow(id){ return (D.board||[]).concat(R.list||[], B.list||[]).find(x=>x.activity_id===id); }
+function calInfo(s){
+  const url=(location.protocol.startsWith("http")?location.origin:"https://pontetalk.setzio.com")+"/?s="+s.activity_id;
+  const vid=VL[s.activity_id] ? VL[s.activity_id].url : "";
+  const loc=s.format==="in_person" ? [s.place_name, (PL[s.activity_id]||{}).address || [s.area,s.city].filter(Boolean).join(", ")].filter(Boolean).join(", ") : vid;
+  const start=new Date(s.starts_at), end=new Date(start.getTime()+s.duration_min*60000);
+  const body=(vid?"Video: "+vid+"\n\n":"")+"PonteTalk: "+url;
+  return { title:"PonteTalk: "+s.title, start, end, loc, body };
+}
+function calGoogle(s){ const c=calInfo(s), f=d=>d.toISOString().replace(/[-:]/g,"").replace(/\.\d{3}/,"");
+  return "https://calendar.google.com/calendar/render?action=TEMPLATE&text="+encodeURIComponent(c.title)+"&dates="+f(c.start)+"/"+f(c.end)+"&details="+encodeURIComponent(c.body)+(c.loc?"&location="+encodeURIComponent(c.loc):""); }
+function calOutlook(s){ const c=calInfo(s);
+  return "https://outlook.live.com/calendar/0/deeplink/compose?path=/calendar/action/compose&rru=addevent&subject="+encodeURIComponent(c.title)+"&startdt="+encodeURIComponent(c.start.toISOString())+"&enddt="+encodeURIComponent(c.end.toISOString())+"&body="+encodeURIComponent(c.body)+(c.loc?"&location="+encodeURIComponent(c.loc):""); }
+function calOpen(id, joined){
+  const s=calRow(id); if(!s) return;
+  const old=document.getElementById("calSheet"); if(old) old.remove();
+  const box=document.createElement("div"); box.className="sheet-bg"; box.id="calSheet";
+  box.addEventListener("click",e=>{ if(e.target===box) box.remove(); });
+  box.innerHTML=`<div class="sheet" role="dialog" aria-label="Add to calendar">
+    <div class="nbhead"><h3 style="margin:0">${joined?"✅ "+tr("You're in!","Du bist dabei!","¡Estás dentro!"):"📅 "+tr("Add to calendar","Zum Kalender","Añadir al calendario")}</h3><button class="chip" aria-label="Close" onclick="document.getElementById('calSheet').remove()">✕</button></div>
+    <p class="note" style="margin:0 0 12px"><b>${esc(s.title)}</b><br>${fmtWhen(s.starts_at)} · ${s.duration_min} min</p>
+    ${joined?`<p style="margin:0 0 10px;font-weight:700">📅 ${tr("Save it in your calendar so you don't forget:","Trag es in deinen Kalender ein, damit du es nicht vergisst:","Guárdala en tu calendario para no olvidarla:")}</p>`:""}
+    <a class="btn secondary qbtn" style="text-decoration:none" href="${esc(calGoogle(s))}" target="_blank" rel="noopener noreferrer" onclick="setTimeout(()=>{const b=document.getElementById('calSheet');if(b)b.remove();},300)">🟦 Google Calendar</a>
+    <button class="btn secondary qbtn" onclick="calIcs('${id}');document.getElementById('calSheet').remove()">🍎 ${tr("Apple / iPhone calendar","Apple / iPhone-Kalender","Calendario de Apple / iPhone")}</button>
+    <a class="btn secondary qbtn" style="text-decoration:none" href="${esc(calOutlook(s))}" target="_blank" rel="noopener noreferrer" onclick="setTimeout(()=>{const b=document.getElementById('calSheet');if(b)b.remove();},300)">📧 Outlook</a>
+    <button class="btn ghost qbtn" onclick="calIcs('${id}');document.getElementById('calSheet').remove()">⬇ ${tr("Other calendar (.ics file)","Anderer Kalender (.ics-Datei)","Otro calendario (archivo .ics)")}</button>
+    ${joined?`<button class="btn ghost" onclick="document.getElementById('calSheet').remove()">${tr("Not now","Jetzt nicht","Ahora no")}</button>`:""}
+    <p class="note center" style="margin:6px 0 0">⏰ ${tr("We'll also remind you by email and in the app.","Wir erinnern dich auch per E-Mail und in der App.","También te lo recordaremos por correo y en la app.")}</p></div>`;
+  document.body.appendChild(box);
+}
+function addToCal(id){ calOpen(id,false); }
+function calIcs(id){
+  const s=calRow(id); if(!s) return;
   const blob=new Blob([icsFor(s)],{type:"text/calendar"}), a=document.createElement("a");
   a.href=URL.createObjectURL(blob); a.download="pontetalk-session.ics"; document.body.appendChild(a); a.click();
   setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },1000);
