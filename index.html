@@ -865,7 +865,7 @@
 <script>/* Extra interface languages live in /i18n/<code>.js (English text → translation). Load the chosen one before the app starts. */
 (function(){ try{ var X=["tr","uk","fa","ur"], v=localStorage.getItem("pt_ui");
   if(!v){ var n=String((navigator.languages&&navigator.languages[0])||navigator.language||"").slice(0,2).toLowerCase(); if(X.indexOf(n)>-1) v=n; }
-  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=9"><\/script>'); }catch(e){} })();</script>
+  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=10"><\/script>'); }catch(e){} })();</script>
 
 <script>
 /* ===================== CONTENT ===================== */
@@ -1238,7 +1238,7 @@ function bi(en,de,es){ if(es!==undefined) return tr(en,de,es); return `${en} <sp
 function uiSet(l){
   if(!UI_CODES.includes(l)) return;
   if(UI_EXTRA.includes(l) && !I18N_DATA[l]){
-    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=9";
+    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=10";
     sc.onload=()=>uiSet(l); sc.onerror=()=>bToast(offlineMsg()); document.head.appendChild(sc); return;
   }
   UI=l; I18N_T=null; I18N_M.clear();
@@ -6329,7 +6329,7 @@ function bPeopleHtml(s){
       ${p.status==="pending"?`<div class="row" style="margin-top:6px">
         <button class="chip on" onclick="bRespond('${s.activity_id}','${p.user_id}',true)">${tr(`✓ Approve`,`✓ Annehmen`,`✓ Aprobar`)}</button>
         <button class="chip" onclick="bRespond('${s.activity_id}','${p.user_id}',false)">${tr(`✕ Decline`,`✕ Ablehnen`,`✕ Rechazar`)}</button></div>`:""}
-      ${["joined","waitlisted","offered"].includes(p.status)?`<div class="row" style="margin-top:6px"><button class="chip" onclick="bRemove('${s.activity_id}','${p.user_id}','${esc(String(p.name||"").replace(/'/g,""))}')">🚪 ${tr("Remove","Entfernen","Quitar")}</button></div>`:""}
+      ${["joined","waitlisted","offered"].includes(p.status)?`<div class="row" style="margin-top:6px">${p.status==="joined"?`<button class="chip" onclick="dmOpen('${p.user_id}')">💬 ${tr("Message","Nachricht","Mensaje")}</button>`:""}<button class="chip" onclick="bRemove('${s.activity_id}','${p.user_id}','${esc(String(p.name||"").replace(/'/g,""))}')">🚪 ${tr("Remove","Entfernen","Quitar")}</button></div>`:""}
     </div>`).join("")}</div>`;
 }
 async function bRemove(act, uid, name){
@@ -6908,7 +6908,7 @@ function navSync(){
   cl.add("has-nav");
   n.innerHTML = NAV_ITEMS.map(([k,en,de,fn,es])=>`<button class="${tab===k?"on":""}" ${tab===k?'aria-current="page"':""} onclick="${fn}">${ICO[k]}${tr(en,de,es)}</button>`).join("");
   if(A.user){ nbStart(); nbFresh(); } else if(NB.timer){ clearInterval(NB.timer); NB.timer=null; NB.list=[]; NB.unread=0; }
-  const me = A.user ? `${bellBtn()}<button class="tme" aria-label="Profile" onclick="${NAV_ITEMS[4][3]}">${A.profile&&A.profile.avatar_url?`<img src="${esc(A.profile.avatar_url)}" alt="">`:esc((meName()||"?").charAt(0).toUpperCase())}</button>`
+  const me = A.user ? `${dmBtn()}${bellBtn()}<button class="tme" aria-label="Profile" onclick="${NAV_ITEMS[4][3]}">${A.profile&&A.profile.avatar_url?`<img src="${esc(A.profile.avatar_url)}" alt="">`:esc((meName()||"?").charAt(0).toUpperCase())}</button>`
                     : `<button class="tsign" onclick="${NAV_ITEMS[4][3]}">${tr("Sign in","Anmelden","Entrar")}</button>`;
   t.innerHTML = `<div class="tin"><button class="tlogo" onclick="goHome()"><span class="plogo">${ICO.logo}</span>PonteTalk</button>
     <nav class="tlinks" aria-label="Main">${NAV_ITEMS.slice(0,4).map(([k,en,de,fn,es])=>`<button class="${tab===k?"on":""}" ${tab===k?'aria-current="page"':""} onclick="${fn}">${ICO[k]}${tr(en,de,es)}</button>`).join("")}</nav>${me}</div>`;
@@ -7670,7 +7670,7 @@ function homeDash(){
   const speak=(R.mine||[]).filter(m=>m.role!=="learning").map(m=>T[m.code]?lname(m.code):m.code);
   return `<div class="dash">
     <div style="min-width:0;display:flex;flex-direction:column;gap:18px">
-      <div class="card" style="margin:0"><div class="dhead"><h1 class="dhi">${tr("Hi","Hallo","Hola")} ${esc(name)}</h1>${bellBtn()}</div>
+      <div class="card" style="margin:0"><div class="dhead"><h1 class="dhi">${tr("Hi","Hallo","Hola")} ${esc(name)}</h1><div style="display:flex;gap:8px">${dmBtn()}${bellBtn()}</div></div>
         <p class="sub" style="margin:2px 0 14px">${tr("Here's what's next for you.","Das steht als Nächstes an.","Esto es lo próximo para ti.")}</p>${nextCard()}</div>
       ${holdCard()}
       ${weekCard().replace('<div class="card">','<div class="card" style="margin:0">')}
@@ -7943,8 +7943,110 @@ async function nbLoad(){
 }
 function nbStart(){
   if(NB.timer || !A.user) return;
-  npLoad(); nbLoad();
-  NB.timer=setInterval(()=>{ if(A.user && NP.v.in_app && document.visibilityState==="visible") nbLoad(); }, 30000);
+  npLoad(); nbLoad(); dmUnreadLoad(); dmListen();
+  NB.timer=setInterval(()=>{ if(A.user && document.visibilityState==="visible"){ if(NP.v.in_app) nbLoad(); dmUnreadLoad(); } }, 30000);
+}
+
+/* ===================== INBOX: 1:1 messages with people you met in a session ===================== */
+const DM={ unread:0, threads:null, other:null, name:"", avatar:"", list:[], busy:false, err:"", contacts:null, picking:false, draft:"", my:null, timer:null };
+ICO.dm='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
+function dmBtn(){
+  if(!A.user) return "";
+  const n=DM.unread;
+  return `<button class="nbbell dmbtn" aria-label="${tr("Messages","Nachrichten","Mensajes")}${n?` (${n})`:""}" onclick="dmOpenInbox()">${ICO.dm}${n?`<span class="nbdot">${n>9?"9+":n}</span>`:""}</button>`;
+}
+function dmSync(){ document.querySelectorAll(".dmbtn").forEach(b=>{ b.outerHTML=dmBtn(); }); }
+async function dmUnreadLoad(){
+  if(!A.user||!A.sb) return;
+  try{ const { data, error } = await A.sb.rpc("pt_dm_unread"); if(error) return; if(data!==DM.unread){ DM.unread=data||0; dmSync(); } }catch(e){}
+}
+function dmListen(){
+  if(DM.my||!A.user||!A.sb) return;
+  try{ DM.my=A.sb.channel("dm-"+A.user.id).on("broadcast",{ event:"m" },({ payload })=>{
+      if(S.screen==="dm" && payload && payload.from===DM.other) dmFetch(); else { dmUnreadLoad(); if(S.screen==="inbox") dmThreads(); }
+    }).subscribe(); }catch(e){}
+}
+function dmPing(to){ try{ const c=A.sb.channel("dm-"+to); c.subscribe(st=>{ if(st==="SUBSCRIBED"){ c.send({ type:"broadcast", event:"m", payload:{ from:A.user.id } }).finally(()=>setTimeout(()=>A.sb.removeChannel(c),500)); } }); }catch(e){} }
+const DM_ERR={ dm_not_allowed:["You can message people you've been in a session with","Du kannst Leuten schreiben, mit denen du in einer Session warst","Puedes escribir a personas con las que estuviste en una sesión"],
+  dm_length:["Messages can be up to 1,000 characters","Nachrichten können bis zu 1.000 Zeichen lang sein","Los mensajes pueden tener hasta 1000 caracteres"] };
+function dmErr(e){ const m=String(e&&e.message||e); const k=Object.keys(DM_ERR).find(k=>m.includes(k)); return k?tr(...DM_ERR[k]):bErr(e); }
+function dmOpenInbox(){ if(!A.user) return; DM.picking=false; go("inbox"); dmThreads(); }
+async function dmThreads(){
+  try{ const { data, error } = await A.sb.rpc("pt_dm_threads"); if(error) throw error; DM.threads=data||[]; DM.err=""; }
+  catch(e){ DM.threads=DM.threads||[]; DM.err=dmErr(e); }
+  if(S.screen==="inbox") xr();
+}
+async function dmPick(){
+  DM.picking=!DM.picking; xr();
+  if(DM.picking && !DM.contacts){ try{ const { data } = await A.sb.rpc("pt_dm_contacts"); DM.contacts=data||[]; }catch(e){ DM.contacts=[]; } xr(); }
+}
+function dmAv(url,name){ return url?`<img class="avs" src="${esc(url)}" alt="" style="width:40px;height:40px">`:`<span class="avs" style="width:40px;height:40px;display:inline-flex;align-items:center;justify-content:center;background:var(--line);border-radius:50%;font-weight:800">${esc((name||"?").charAt(0).toUpperCase())}</span>`; }
+VIEWS.inbox = function(){
+  const th=DM.threads;
+  return `<div class="topline"><button class="chip" onclick="goHome()">${uiBack()} ${tr("Home","Start","Inicio")}</button><span>💬 ${tr("Messages","Nachrichten","Mensajes")}</span></div>
+    <h2 style="margin:4px 0 2px">💬 ${tr("Messages","Nachrichten","Mensajes")}</h2>
+    <p class="note" style="margin:0 0 10px">${tr("Write to people you've been in a session with.","Schreib Leuten, mit denen du in einer Session warst.","Escribe a personas con las que estuviste en una sesión.")}</p>
+    <button class="btn primary" onclick="dmPick()">✏️ ${tr("New message","Neue Nachricht","Nuevo mensaje")}</button>
+    ${DM.picking?`<div class="card">${DM.contacts==null?`<p class="note center">${tr("Loading…","Lädt…","Cargando…")}</p>`:!DM.contacts.length?`<p class="note">${tr("Nobody yet. After your first sessions, people you met show up here.","Noch niemand. Nach deinen ersten Sessions erscheinen hier die Leute, die du getroffen hast.","Aún nadie. Después de tus primeras sesiones, aquí aparecen las personas que conociste.")}</p>`
+      :DM.contacts.map(c=>`<button class="lrow" style="display:flex;gap:10px;align-items:center;width:100%;padding:8px 0;border:0;border-top:1px solid var(--line);background:none;text-align:start;cursor:pointer;font:inherit;color:inherit" onclick="dmOpen('${c.user_id}')">${dmAv(c.avatar_url,c.name)}<b>${esc(c.name)}</b></button>`).join("")}</div>`:""}
+    ${DM.err?`<div class="err">${esc(DM.err)}</div>`:""}
+    ${th==null?`<p class="note center" style="margin-top:20px">${tr("Loading…","Lädt…","Cargando…")}</p>`
+      :!th.length?`<div class="card center" style="margin-top:12px"><p style="font-size:34px;margin:0">💬</p><p class="note">${tr("No messages yet.","Noch keine Nachrichten.","Aún no hay mensajes.")}</p></div>`
+      :`<div class="card" style="padding:4px 14px">${th.map(t=>`<button style="display:flex;gap:10px;align-items:center;width:100%;padding:10px 0;border:0;border-bottom:1px solid var(--line);background:none;text-align:start;cursor:pointer;font:inherit;color:inherit" onclick="dmOpen('${t.other}')">
+          ${dmAv(t.avatar_url,t.name)}<span style="flex:1;min-width:0"><b>${esc(t.name||"Member")}</b> <span class="note">· ${nbAgo(t.last_at)}</span><br>
+          <span class="note" style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;${t.unread?"font-weight:800;color:var(--ink)":""}" dir="auto">${t.last_mine?tr("You:","Du:","Tú:")+" ":""}${t.last_body==null?"🗑":esc(t.last_body)}</span></span>
+          ${t.unread?`<span class="nbdot" style="position:static">${t.unread}</span>`:""}</button>`).join("")}</div>`}
+    <p class="note center" style="margin-top:10px">🔒 ${tr("Only you and the other person can read your messages. Never share passwords or bank details.","Nur du und die andere Person könnt eure Nachrichten lesen. Teile nie Passwörter oder Bankdaten.","Solo tú y la otra persona podéis leer vuestros mensajes. Nunca compartas contraseñas ni datos bancarios.")}</p>`;
+};
+async function dmOpen(uid){
+  DM.other=uid; DM.list=[]; DM.err=""; DM.draft="";
+  const t=(DM.threads||[]).find(x=>x.other===uid)||(DM.contacts||[]).find(x=>x.user_id===uid)||{};
+  DM.name=t.name||""; DM.avatar=t.avatar_url||""; DM.can=t.can_send!==false;
+  go("dm"); await dmFetch(true);
+  clearInterval(DM.timer); DM.timer=setInterval(()=>{ if(S.screen!=="dm"){ clearInterval(DM.timer); DM.timer=null; return; } if(!document.hidden) dmFetch(); }, 15000);
+}
+async function dmFetch(first){
+  if(!DM.other) return;
+  try{ const { data, error } = await A.sb.rpc("pt_dm_messages",{ p_other:DM.other }); if(error) throw error;
+    const list=(data||[]).slice().reverse(), grew=list.length!==DM.list.length || (list.length && DM.list.length && list[list.length-1].id!==DM.list[DM.list.length-1].id);
+    DM.list=list; DM.err="";
+    if(S.screen==="dm"){ if(first) xr(); else if(grew) dmPaint(); }
+    dmUnreadLoad();
+  }catch(e){ DM.err=dmErr(e); if(S.screen==="dm") xr(); }
+}
+function dmListHtml(){
+  if(!DM.list.length) return `<p class="note center" style="margin:auto">${tr("No messages yet. Say hi 👋","Noch keine Nachrichten. Sag Hallo 👋","Aún no hay mensajes. Saluda 👋")}</p>`;
+  let lastDay="";
+  return DM.list.map(m=>{
+    const d=new Date(m.created_at), day=d.toDateString();
+    const sep = day!==lastDay ? `<div class="chday">${esc(bDayLabel(m.created_at).split(" · ")[0])}</div>` : ""; lastDay=day;
+    const t=d.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
+    return `${sep}<div class="cm ${m.mine?"me":""}" dir="auto">${m.deleted?`<i class="note">🗑 ${tr("Message deleted","Nachricht gelöscht","Mensaje eliminado")}</i>`:chLinkify(m.body)}<span class="tm">${t}${m.mine&&m.read_at?" ✓✓":""}</span>${m.mine&&!m.deleted?`<button class="cx" aria-label="${tr("Delete","Löschen","Eliminar")}" onclick="dmDel(${m.id})">×</button>`:""}</div>`;
+  }).join("");
+}
+function dmPaint(){ const el=document.getElementById("dmlist"); if(!el) return; const atB=el.scrollHeight-el.scrollTop-el.clientHeight<80; el.innerHTML=dmListHtml(); if(atB) el.scrollTop=el.scrollHeight; }
+VIEWS.dm = function(){
+  return `<div class="topline"><button class="chip" onclick="dmOpenInbox()">${uiBack()} ${tr("Messages","Nachrichten","Mensajes")}</button>
+      <button class="chip" onclick="repOpen('user','${DM.other}',null,null,null,'${esc(String(DM.name||"").replace(/'/g,""))}')">🚩 ${tr("Report or block","Melden oder blockieren","Reportar o bloquear")}</button></div>
+    <div class="chhead">${dmAv(DM.avatar,DM.name)}<h2 style="margin:0 0 0 10px;font-size:20px;flex:1">${esc(DM.name||"Member")}</h2></div>
+    ${DM.err?`<div class="err">${esc(DM.err)}</div>`:""}
+    <div class="chlist" id="dmlist" aria-live="polite">${dmListHtml()}</div>
+    ${DM.can?`<div class="chin"><textarea id="dmtxt" rows="1" maxlength="1000" placeholder="${tr("Message…","Nachricht…","Mensaje…")}" dir="auto" oninput="DM.draft=this.value;this.style.height='auto';this.style.height=Math.min(this.scrollHeight,140)+'px'" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();dmSend()}">${esc(DM.draft)}</textarea>
+      ${emoBtn('dmtxt')}<button class="btn primary" ${DM.busy?"disabled":""} onclick="dmSend()" aria-label="${tr("Send","Senden","Enviar")}">${tr("Send","Senden","Enviar")}</button></div>`
+      :`<p class="note center" style="margin-top:10px">${tr("You can't reply in this conversation.","Du kannst in diesem Gespräch nicht antworten.","No puedes responder en esta conversación.")}</p>`}`;
+};
+AFTER.dm = function(){ const el=document.getElementById("dmlist"); if(el) el.scrollTop=el.scrollHeight; };
+async function dmSend(){
+  const ta=document.getElementById("dmtxt"); const body=((ta&&ta.value)||"").trim();
+  if(!body||DM.busy) return; DM.busy=true;
+  try{ const { error } = await A.sb.rpc("pt_dm_send",{ p_other:DM.other, p_body:body }); if(error) throw error;
+    DM.draft=""; if(ta) ta.value=""; dmPing(DM.other); await dmFetch(); }
+  catch(e){ bToast(dmErr(e)); }
+  DM.busy=false; const b=document.querySelector(".chin .btn"); if(b) b.disabled=false;
+}
+async function dmDel(id){
+  if(!window.confirm(tr("Delete this message?","Diese Nachricht löschen?","¿Eliminar este mensaje?"))) return;
+  try{ const { error } = await A.sb.rpc("pt_dm_delete",{ p_id:id }); if(error) throw error; dmFetch(); }catch(e){ bToast(dmErr(e)); }
 }
 function nbAgo(iso){
   const m=Math.max(0,Math.round((Date.now()-new Date(iso).getTime())/60000));
