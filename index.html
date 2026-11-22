@@ -3321,6 +3321,8 @@ const RANKS = ["A0","A1","A2","B1","B2+"];
 const B = { list:null, err:"", busy:false, lang:"", open:null, people:{} };
 const H = { started:false, checked:false };
 const BERR = {
+  account_on_hold:"⏸️ Your account is paused while we review a few reports. You can still browse. · Dein Konto ist pausiert, während wir Meldungen prüfen. Stöbern geht weiter.",
+  cannot_hold_admin:"Admins can't be paused · Admins können nicht pausiert werden",
   blocked_user:"You can't join this session · Du kannst dieser Session nicht beitreten",
   block_self:"You can't block yourself 🙂 · Du kannst dich nicht selbst blockieren",
   sign_in_required:"Please sign in first · Bitte zuerst anmelden",
@@ -3497,7 +3499,33 @@ async function repBlockOnly(){
 }
 
 /* Admin: Reports page */
-const RA = { admin:false, count:0, list:null, filter:"open", notes:{} };
+const RA = { admin:false, count:0, list:null, filter:"open", notes:{}, holds:{} };
+/* Account pause (hold): my own status, for the Home banner */
+const HOLD = { uid:null, on:false };
+async function holdCheck(){
+  if(!A.user || !A.sb || HOLD.uid===A.user.id) return;
+  HOLD.uid=A.user.id;
+  try{ const { data } = await A.sb.rpc("pt_my_hold"); HOLD.on=!!(data&&data.on_hold); if(HOLD.on && S.screen==="home") xr(); }catch(e){}
+}
+function holdCard(){
+  if(A.user && A.status==="in") holdCheck();
+  if(!HOLD.on || !A.user || HOLD.uid!==A.user.id) return "";
+  return `<div class="card" style="margin:0;border-left:5px solid var(--coral)">
+    <h3 style="margin:0 0 6px">⏸️ Your account is paused · Konto pausiert</h3>
+    <p class="note" style="margin:0">We got a few reports and are reviewing them. Until then you can browse, but you can't host, join, or chat. This usually takes 1–2 days. Questions? <a href="mailto:${esc(LEGAL.email)}">${esc(LEGAL.email)}</a><br>
+    <span class="de">Wir prüfen einige Meldungen. Bis dahin kannst du stöbern, aber nicht leiten, beitreten oder chatten.</span></p></div>`;
+}
+async function raHolds(){
+  try{ const { data, error } = await A.sb.rpc("pt_admin_holds"); if(error) throw error;
+    RA.holds=Object.fromEntries((data||[]).map(h=>[h.user_id,h])); }catch(e){ RA.holds={}; }
+  if(S.screen==="reports") xr();
+}
+async function raHold(uid, on){
+  if(!window.confirm(on?"Pause this account? They can browse but not host, join or chat. · Konto pausieren?":"Lift the pause for this account? · Pause aufheben?")) return;
+  try{ const { error } = await A.sb.rpc("pt_admin_hold_set",{ p_user:uid, p_on:on, p_note:null }); if(error) throw error;
+    bToast(on?"⏸️ Account paused · Pausiert":"▶️ Pause lifted · Pause aufgehoben"); raHolds(); }
+  catch(e){ bToast(bErr(e)); }
+}
 async function raCheck(){
   if(!A.user || !A.sb) return;
   try{
@@ -3566,6 +3594,7 @@ VIEWS.stats = function(){
   <p class="note">Tip: invite these people to a matching session from the app. Only email them if they agreed to emails.</p>`}`}`;
 };
 async function raLoad(){
+  raHolds();
   try{ const { data, error } = await A.sb.rpc("pt_admin_reports",{ p_status:RA.filter }); if(error) throw error; RA.list=data||[]; }
   catch(e){ RA.list=[]; bToast(/not_admin/.test(String(e&&e.message))?"Only admins · Nur für Admins":bErr(e)); }
   if(S.screen==="reports") xr();
@@ -3584,7 +3613,7 @@ VIEWS.reports = function(){
    : L.map(r=>`<div class="repcard ${r.status==="closed"?"closed":""}">
       <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><b>${TY[r.target_type]||r.target_type} · ${RS[r.reason]||r.reason}</b>
         <span class="note" style="margin:0">${new Date(r.created_at).toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})} · ${r.status==="open"?"🟠 open":r.status==="reviewing"?"👀 reviewing":"✓ closed"}</span></div>
-      ${r.target_user?`<p class="note" style="margin:6px 0 0">Reported: <b>${esc(r.target_name||"Member")}</b> ${r.target_email?`(${esc(r.target_email)})`:""}${r.target_reports>1?` · <b style="color:var(--coral)">reported ${r.target_reports}× in total</b>`:""}</p>`:""}
+      ${r.target_user?`<p class="note" style="margin:6px 0 0">Reported: <b>${esc(r.target_name||"Member")}</b> ${r.target_email?`(${esc(r.target_email)})`:""}${r.target_reports>1?` · <b style="color:var(--coral)">reported ${r.target_reports}× in total</b>`:""}${RA.holds[r.target_user]?` · <b style="color:var(--coral)">⏸️ Paused${RA.holds[r.target_user].reason==="reports"?" (automatic)":""}</b>`:""}</p>`:""}
       ${r.session_title?`<p class="note" style="margin:2px 0 0">Session: <button class="linkbtn" onclick="sOpen('${r.activity_id}')">${esc(r.session_title)}</button>${r.session_starts?` · ${fmtWhen(r.session_starts)}`:""}</p>`:""}
       ${r.message_body?`<blockquote>${esc(r.message_body)}${r.message_exists?"":` <span class="note">(already deleted)</span>`}</blockquote>`:""}
       ${r.details?`<p style="margin:6px 0 0">💬 “${esc(r.details)}”</p>`:""}
@@ -3595,10 +3624,11 @@ VIEWS.reports = function(){
         ${r.status!=="reviewing"&&r.status!=="closed"?`<button class="chip" onclick="raSet(${r.id},'reviewing')">👀 Reviewing</button>`:""}
         ${r.status!=="closed"?`<button class="chip on" onclick="raSet(${r.id},'closed')">✓ Close</button>`:`<button class="chip" onclick="raSet(${r.id},'open')">↩ Reopen</button>`}
         ${r.message_id&&r.message_exists?`<button class="chip" onclick="raDelMsg(${r.id},${r.message_id})">🗑 Delete message</button>`:""}
+        ${r.target_user?(RA.holds[r.target_user]?`<button class="chip on" onclick="raHold('${r.target_user}',false)">▶️ Lift pause</button>`:`<button class="chip" onclick="raHold('${r.target_user}',true)">⏸️ Pause account</button>`):""}
         ${r.target_user?`<button class="chip" onclick="raRemovePhoto('${r.target_user}')">🙈 Remove their photo</button>`:""}
         ${r.target_user?`<a class="chip" style="text-decoration:none" href="mailto:${esc(r.target_email||"")}">✉️ Email them</a>`:""}
       </div></div>`).join("")}
-  <p class="note" style="margin-top:10px">Serious case? Email the person, and if needed ask the host to cancel the session. Blocking accounts isn't available yet. · Ernster Fall? Person anschreiben; Konten sperren gibt es noch nicht.</p>`;
+  <p class="note" style="margin-top:10px">When 3 different people report someone within 30 days, their account pauses automatically until you lift it. Paused people can browse but can't host, join or chat. · Bei 3 Meldungen von verschiedenen Personen in 30 Tagen wird das Konto automatisch pausiert.</p>`;
 };
 async function raSet(id, status){
   try{ const { error } = await A.sb.rpc("pt_admin_report_set",{ p_id:id, p_status:status, p_note:RA.notes[id]||null }); if(error) throw error;
@@ -7383,6 +7413,7 @@ function homeDash(){
     <div style="min-width:0;display:flex;flex-direction:column;gap:18px">
       <div class="card" style="margin:0"><div class="dhead"><h1 class="dhi">Hi ${esc(name)}</h1>${bellBtn()}</div>
         <p class="sub" style="margin:2px 0 14px">Here's what's next for you. · Das steht als Nächstes an.</p>${nextCard()}</div>
+      ${holdCard()}
       ${weekCard().replace('<div class="card">','<div class="card" style="margin:0">')}
       ${acCard()}
       ${fuCard()}
@@ -7567,7 +7598,8 @@ function nbText(n){
   switch(n.kind){
     case "seat_offer":   return `🎉 A seat is free for you in ${t}.${d.expires_at?` Accept by ${nbClock(d.expires_at)}.`:""}`;
     case "join_request": return `🔔 ${who} wants to join ${t}. Tap to approve or decline.`;
-    case "report":       return `🚩 New report (${esc((RP_REASONS.find(r=>r[0]===d.reason)||[0,"other"])[1])}). Tap to review.`;
+    case "report":       if(d.hold) return `⏸️ An account was paused automatically after ${d.reports||3} reports. Tap to review.`;
+                         return `🚩 New report (${esc((RP_REASONS.find(r=>r[0]===d.reason)||[0,"other"])[1])}). Tap to review.`;
     case "chat":         return `💬 ${d.count>1?`${d.count} new messages`:`New message${n.from_name?` from ${who}`:""}`} in ${t}.`;
     case "invited":      return `📩 ${who} invited you to ${t}. Tap to accept or decline.`;
     case "reschedule":   return d.answer==="accepted" ? `✅ ${who} accepted the new time for ${t}: ${d.proposed_at?esc(fmtWhen(d.proposed_at)):""}.`
