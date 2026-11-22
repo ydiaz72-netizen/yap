@@ -3492,7 +3492,8 @@ function raCard(){
   return `<div class="card" style="border:2px solid ${RA.count?"var(--coral)":"var(--line)"}"><h3 style="margin:0 0 4px">🛠 Reports · Meldungen ${RA.count?`<span class="chbadge">${RA.count}</span>`:""}</h3>
     <p class="note" style="margin:0 0 8px">${RA.count?`${RA.count} open report${RA.count>1?"s":""} to review.`:"No open reports. 🎉"}</p>
     <button class="btn secondary" onclick="raOpen()">Open reports · Meldungen öffnen</button>
-    <button class="btn secondary" onclick="stOpen()">📊 Stats · Statistiken</button></div>`;
+    <button class="btn secondary" onclick="stOpen()">📊 Stats · Statistiken</button>
+    <button class="btn secondary" onclick="dsOpen()">🎙️ Audio studio · German exam</button></div>`;
 }
 function raOpen(){ RA.list=null; go("reports"); raLoad(); }
 /* Admin: Stats page */
@@ -7816,7 +7817,7 @@ function dtEsLine(t){ return t?`<span class="extr" lang="es">${esc(t)}</span>`:"
 function dtLevel(n){ return n>=33?"B1":n>=20?"A2":"–"; }
 async function dtOpen(){
   go("dtz");
-  try{ if(!DT.d){ const r=await fetch(`/dtz/dtz.json?v=${DT_V}`); DT.d=await r.json(); dtIndex(); } if(DT.es) await dtEsLoad(); await dtLoadHist(); }
+  try{ if(!DT.d){ const r=await fetch(`/dtz/dtz.json?v=${DT_V}`); DT.d=await r.json(); dtIndex(); } await Promise.all([DT.es?dtEsLoad():null, dtLoadHist(), DT.man===undefined?dtLoadManifest():null]); }
   catch(e){ DT.err="Couldn't load the exercises. Check your connection · Übungen konnten nicht geladen werden"; }
   try{ if(window.speechSynthesis) speechSynthesis.getVoices(); }catch(e){}
   if(/^dtz/.test(S.screen)) xr();
@@ -7859,12 +7860,26 @@ function dtLast(){ const m={}; for(const a of DT.ans){ if(!(a.n in m)) m[a.n]=a.
 /* ---------- listening: the phone's German voice reads the texts ---------- */
 function dtVoices(){ try{ return speechSynthesis.getVoices().filter(v=>/^de(-|_|$)/i.test(v.lang)); }catch(e){ return []; } }
 function dtCanSpeak(){ return !!(window.speechSynthesis&&window.SpeechSynthesisUtterance); }
-function dtStop(){ try{ speechSynthesis.cancel(); }catch(e){} DT.playing=null; dtPlayUi(); }
+/* recorded clips (Admin → Audio studio) live in the public bucket "dtz-audio"; manifest.json lists them */
+let DT_AUDIO=null;
+function dtClipUrl(id,v){ return `${SB_URL}/storage/v1/object/public/dtz-audio/${encodeURIComponent(id)}.mp3?v=${v||1}`; }
+async function dtLoadManifest(){ try{ const r=await fetch(`${SB_URL}/storage/v1/object/public/dtz-audio/manifest.json?t=${Date.now()}`,{ cache:"no-store" }); DT.man=r.ok?await r.json():null; }catch(e){ DT.man=null; } }
+function dtHasClip(key){ const id=(key||"").split("-").pop(); return !!(DT.man&&DT.man.clips&&DT.man.clips[id]); }
+function dtStop(){ try{ speechSynthesis.cancel(); }catch(e){} if(DT_AUDIO){ try{ DT_AUDIO.pause(); }catch(e){} DT_AUDIO=null; } DT.playing=null; dtPlayUi(); }
 function dtPlayUi(){ document.querySelectorAll("[data-dtplay]").forEach(b=>{ const on=b.dataset.dtplay===DT.playing; b.textContent=on?"⏹ Stop":"▶️ Hören · Listen"; }); }
 function dtPlay(key){
   const x=DT.items.find(y=>y.akey===key); if(!x) return;
   if(DT.playing===key){ dtStop(); return; }
   const r=DT.run; if(r&&r.mode==="mock"){ const n=r.plays[key]||0; if(n>=2){ bToast("You can listen twice in the mock test · Nur zweimal hören"); return; } r.plays[key]=n+1; }
+  if(dtHasClip(key)){
+    dtStop(); const id=key.split("-").pop(), a=new Audio(dtClipUrl(id, DT.man.clips[id]));
+    a.playbackRate=(r&&r.mode==="mock")||!DT.slow?1:0.8; DT_AUDIO=a; DT.playing=key; dtPlayUi();
+    const done=()=>{ if(DT.playing===key){ DT.playing=null; DT_AUDIO=null; dtPlayUi(); xr(); } };
+    a.onended=done; a.onerror=()=>{ done(); bToast("Couldn't load the audio. Check your connection."); };
+    a.play().catch(()=>done());
+    if(r&&r.mode==="mock") setTimeout(xr,50);
+    return;
+  }
   if(!dtCanSpeak()){ bToast("This browser can't read texts aloud. Try Chrome or Safari."); return; }
   try{ speechSynthesis.cancel(); }catch(e){}
   const vs=dtVoices(), fv=vs.find(v=>/female|anna|petra|helena|katja|hedda|marlene|vicki|frau/i.test(v.name))||vs[0], mv=vs.find(v=>v!==fv&&/male|markus|yannick|stefan|hans|conrad|daniel|google deutsch/i.test(v.name))||vs.find(v=>v!==fv)||fv;
@@ -7876,6 +7891,96 @@ function dtPlay(key){
     speechSynthesis.speak(u); });
   if(r&&r.mode==="mock") setTimeout(xr,50);
 }
+
+/* ---------- Admin: Audio studio (ElevenLabs) ---------- */
+/* The admin pastes their own ElevenLabs API key. It stays in this page's memory only: never saved, never sent anywhere except api.elevenlabs.io. */
+const DS={ key:"", voices:null, f:"", m:"", n:"", busy:false, log:[], done:0, total:0, err:"", redo:false, stop:false };
+const DS_MODEL="eleven_multilingual_v2";
+async function dsOpen(){
+  go("dtzstudio");
+  try{ if(!DT.d){ const r=await fetch(`/dtz/dtz.json?v=${DT_V}`); DT.d=await r.json(); dtIndex(); } await dtLoadManifest(); }catch(e){ DS.err="Couldn't load the exercises."; }
+  try{ const v=JSON.parse(localStorage.getItem("pt_ds_voices")||"{}"); DS.f=DS.f||v.f||""; DS.m=DS.m||v.m||""; DS.n=DS.n||v.n||""; }catch(e){}
+  if(S.screen==="dtzstudio") xr();
+}
+function dsClips(){ const seen={}, out=[]; for(const x of (DT.items||[])){ if(!x.akey||seen[x.akey]) continue; seen[x.akey]=1; out.push({ id:x.akey.split("-").pop(), part:x.part, lines:x.it.s }); } return out; }
+async function dsApi(path, opt){
+  let r; try{ r=await fetch("https://api.elevenlabs.io"+path, { ...opt, headers:{ "xi-api-key":DS.key, ...(opt&&opt.headers||{}) } }); }
+  catch(e){ throw new Error("ElevenLabs blocked the request from this browser (network/CORS). Use the backup plan: create the clips on elevenlabs.io and send them to Claude."); }
+  if(r.status===401) throw new Error("The API key was not accepted. Copy it again from ElevenLabs → Developers → API keys.");
+  if(!r.ok){ let t=""; try{ t=(await r.text()).slice(0,200); }catch(e){} throw new Error(`ElevenLabs error ${r.status}: ${t}`); }
+  return r;
+}
+async function dsLoadVoices(){
+  DS.key=(document.getElementById("dskey")||{}).value||DS.key; DS.err="";
+  if(!DS.key){ DS.err="Paste your API key first."; xr(); return; }
+  DS.busy=true; xr();
+  try{ const r=await dsApi("/v1/voices"); const j=await r.json(); DS.voices=(j.voices||[]).map(v=>({ id:v.voice_id, name:v.name, l:v.labels||{} }));
+    if(!DS.voices.length) DS.err="No voices in your account yet. Add German voices from the Voice Library first."; }
+  catch(e){ DS.err=e.message; }
+  DS.busy=false; xr();
+}
+function dsSaveVoices(){ try{ localStorage.setItem("pt_ds_voices", JSON.stringify({ f:DS.f, m:DS.m, n:DS.n })); }catch(e){} }
+async function dsTts(text, voice){
+  const r=await dsApi(`/v1/text-to-speech/${encodeURIComponent(voice)}?output_format=mp3_44100_128`, { method:"POST", headers:{ "Content-Type":"application/json", "Accept":"audio/mpeg" },
+    body:JSON.stringify({ text, model_id:DS_MODEL, voice_settings:{ stability:0.5, similarity_boost:0.75, style:0.15, use_speaker_boost:true } }) });
+  return new Uint8Array(await r.arrayBuffer());
+}
+function dsVoiceFor(v){ return v==="M"?DS.m:v==="N"?(DS.n||DS.f):DS.f; }
+async function dsTest(which){
+  const v=which==="M"?DS.m:which==="N"?(DS.n||DS.f):DS.f; if(!v){ bToast("Choose a voice first"); return; }
+  try{ const b=await dsTts(which==="N"?"Achtung an Gleis 4. Der Regionalexpress nach Erfurt fährt heute von Gleis 7 ab.":"Hallo! Ich bin heute Ihre Stimme für die Hörübungen. Klingt das gut?", v);
+    new Audio(URL.createObjectURL(new Blob([b],{ type:"audio/mpeg" }))).play(); }
+  catch(e){ DS.err=e.message; xr(); }
+}
+async function dsGenerate(onlyId){
+  if(!A.user||!A.sb){ DS.err="Sign in as admin first."; xr(); return; }
+  if(!DS.f||!DS.m){ DS.err="Choose a female and a male voice."; xr(); return; }
+  dsSaveVoices(); DS.err=""; DS.busy=true; DS.stop=false; DS.log=[];
+  const man={ v:1, model:DS_MODEL, voices:{ f:DS.f, m:DS.m, n:DS.n||DS.f }, clips:{ ...((DT.man&&DT.man.clips)||{}) } };
+  const all=dsClips(), todo=all.filter(c=>onlyId?c.id===onlyId:(DS.redo||!man.clips[c.id]));
+  DS.total=todo.length; DS.done=0; xr();
+  try{
+    for(const c of todo){
+      if(DS.stop) break;
+      const parts=[]; for(const l of c.lines) parts.push(await dsTts(l.t, dsVoiceFor(l.v)));
+      const len=parts.reduce((n,p)=>n+p.length,0), buf=new Uint8Array(len); let o=0; for(const p of parts){ buf.set(p,o); o+=p.length; }
+      const up=await A.sb.storage.from("dtz-audio").upload(`${c.id}.mp3`, new Blob([buf],{ type:"audio/mpeg" }), { upsert:true, contentType:"audio/mpeg", cacheControl:"31536000" });
+      if(up.error) throw new Error("Upload failed: "+up.error.message+" (did you run sql/dtz_audio.sql and sign in as admin?)");
+      man.clips[c.id]=Date.now(); DS.done++; DS.log.unshift(`✅ ${c.id} (${DT_TEIL[c.part]})`);
+      const mu=await A.sb.storage.from("dtz-audio").upload("manifest.json", new Blob([JSON.stringify(man)],{ type:"application/json" }), { upsert:true, contentType:"application/json", cacheControl:"0" });
+      if(mu.error) throw new Error("Saving the list failed: "+mu.error.message);
+      DT.man=man; xr();
+    }
+  }catch(e){ DS.err=e.message; }
+  DS.busy=false; xr();
+}
+VIEWS.dtzstudio = function(){
+  const clips=DT.d?dsClips():[], have=clips.filter(c=>DT.man&&DT.man.clips&&DT.man.clips[c.id]).length;
+  const sel=(k,label)=>`<label class="lbl" style="margin:8px 0 0">${label}<select onchange="DS.${k}=this.value;dsSaveVoices()" style="width:100%;margin-top:4px;border:2px solid var(--line);border-radius:12px;padding:10px;font:600 15px 'Plus Jakarta Sans',sans-serif">
+      <option value="">${k==="n"?"Same as female voice":"Choose…"}</option>${(DS.voices||[]).map(v=>`<option value="${esc(v.id)}" ${DS[k]===v.id?"selected":""}>${esc(v.name)}${v.l.gender?` · ${esc(v.l.gender)}`:""}${v.l.accent?` · ${esc(v.l.accent)}`:""}${v.l.language?` · ${esc(v.l.language)}`:""}</option>`).join("")}</select></label>
+      ${DS[k]?`<button class="linkbtn" onclick="dsTest('${k==="m"?"M":k==="n"?"N":"F"}')">▶ Test this voice</button>`:""}`;
+  return `<div class="topline"><button class="chip" onclick="go('account')">← Account</button><span>🎙️ Audio studio</span></div>
+    <h2 style="margin:6px 0 2px">Listening audio · German exam</h2>
+    <p class="sub" style="margin:0 0 10px">Creates natural voices for the ${clips.length} listening texts with ElevenLabs and saves them for everyone. ${have}/${clips.length} done.</p>
+    ${DS.err?`<div class="err" style="margin-bottom:8px">${esc(DS.err)}</div>`:""}
+    <div class="card"><h3 style="margin:0 0 4px">1 · Your ElevenLabs key</h3>
+      <p class="note" style="margin:0 0 6px">ElevenLabs → Developers → API keys. It stays on this phone only while this page is open and is never saved.</p>
+      <input id="dskey" type="password" autocomplete="off" spellcheck="false" placeholder="sk_…" value="${esc(DS.key)}" style="width:100%;box-sizing:border-box;border:2px solid var(--line);border-radius:12px;padding:12px;font:600 15px 'Plus Jakarta Sans',sans-serif">
+      <button class="btn secondary qbtn" style="margin-top:8px" ${DS.busy?"disabled":""} onclick="dsLoadVoices()">${DS.voices?"🔄 Reload my voices":"Load my voices"}</button></div>
+    ${DS.voices?`<div class="card"><h3 style="margin:0 0 4px">2 · Choose voices</h3>
+      <p class="note" style="margin:0">Tip: in ElevenLabs open the Voice Library, search “German”, and add 2–3 native German voices first. Then tap “Reload my voices”.</p>
+      ${sel("f","👩 Female voice · Frau")}${sel("m","👨 Male voice · Mann")}${sel("n","📢 Announcements · Durchsagen")}</div>
+    <div class="card"><h3 style="margin:0 0 4px">3 · Create the audio</h3>
+      <p class="note" style="margin:0 0 6px">About 8,000 characters for all clips. Takes a few minutes; keep this page open.</p>
+      <label class="row" style="gap:8px;font-size:14px"><input type="checkbox" ${DS.redo?"checked":""} onchange="DS.redo=this.checked"> Redo clips that already exist</label>
+      ${DS.busy?`<div class="exbar" style="margin:10px 0"><i style="width:${DS.total?Math.round(DS.done/DS.total*100):0}%"></i></div><p class="note">${DS.done} / ${DS.total}…</p><button class="btn secondary qbtn" onclick="DS.stop=true">Stop</button>`
+        :`<button class="btn primary qbtn" style="margin-top:8px" onclick="dsGenerate()">🎙️ Generate ${DS.redo?"all":"missing"} clips</button>`}
+      ${DS.log.length?`<div class="note" style="margin-top:8px;max-height:160px;overflow:auto">${DS.log.map(esc).join("<br>")}</div>`:""}</div>`:""}
+    ${clips.length?`<div class="card"><h3 style="margin:0 0 6px">Clips</h3>${clips.map(c=>{ const ok=DT.man&&DT.man.clips&&DT.man.clips[c.id];
+      return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--line)"><span style="flex:1;font-size:14px">${ok?"✅":"⬜️"} <b>${esc(c.id)}</b> <span class="ecmeta">${esc(DT_TEIL[c.part])} · ${esc(c.lines[0].t.slice(0,40))}…</span></span>
+        ${ok?`<button class="linkbtn" onclick="new Audio(dtClipUrl('${c.id}',${ok})).play()">▶</button>`:""}${DS.voices&&!DS.busy?`<button class="linkbtn" onclick="dsGenerate('${c.id}')">${ok?"redo":"make"}</button>`:""}</div>`; }).join("")}</div>`:""}
+    <p class="note">Model: ${DS_MODEL}. Use a paid ElevenLabs plan (Starter) so PonteTalk may use the audio commercially.</p>`;
+};
 /* ---------- hub ---------- */
 VIEWS.dtz = function(){
   let h=`<div class="topline"><button class="chip" onclick="dtStop();go('home')">← Home</button><span>🇩🇪 Test practice</span></div>
@@ -7892,7 +7997,7 @@ VIEWS.dtz = function(){
       <p class="note" style="margin:0 0 10px">Hören (20 questions) + Lesen (25 questions), 70 minutes. Out of 45 points: about <b>20 = A2</b>, about <b>33 = B1</b>. You can listen to each text twice.</p>
       ${DT.d.sets.map(st=>{ const mine=mocks.filter(a=>a.topic===`set${st.id}`); const b=mine.reduce((m,a)=>Math.max(m,a.correct),-1);
         return `<button class="btn primary qbtn" onclick="dtStart('mock','${st.id}')">${esc(st.title)}${b>=0?` <span style="opacity:.85;font-weight:600">· best ${b}/45 (${dtLevel(b)})</span>`:""}</button>`; }).join("")}
-      ${noVoice?`<p class="note">🔇 Your browser can't read the listening texts aloud. Try Chrome or Safari.</p>`:""}</div>
+      ${noVoice&&!(DT.man&&DT.man.clips)?`<p class="note">🔇 Your browser can't read the listening texts aloud. Try Chrome or Safari.</p>`:""}</div>
     <div class="card"><h3 style="margin:0 0 6px">📈 My progress · Mein Fortschritt</h3>
       <div class="extiles"><div><b>${mocks.length}</b><span class="ecmeta">mock tests</span></div><div><b>${mocks.length?best:"–"}<small style="font-size:12px">/45</small></b><span class="ecmeta">best · ${mocks.length?dtLevel(best):"–"}</span></div><div><b>${wr.length+sp.length}</b><span class="ecmeta">letters + speaking</span></div></div>
       ${mocks.length?dtHistHtml(mocks):""}
