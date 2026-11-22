@@ -7640,7 +7640,7 @@ async function nbReadAll(){
 /* Data: /lid/questions.json (official BAMF catalogue), /lid/tr/<lang>.json, /lid/img/. History: sql/exam_practice.sql */
 const LID_V="2025-05-07";
 const LID_STATES=[["BW","Baden-Württemberg"],["BY","Bayern"],["BE","Berlin"],["BB","Brandenburg"],["HB","Bremen"],["HH","Hamburg"],["HE","Hessen"],["MV","Mecklenburg-Vorpommern"],["NI","Niedersachsen"],["NW","Nordrhein-Westfalen"],["RP","Rheinland-Pfalz"],["SL","Saarland"],["SN","Sachsen"],["ST","Sachsen-Anhalt"],["SH","Schleswig-Holstein"],["TH","Thüringen"]];
-const LID_LANGS=[["","Off · Aus"],["en","English"],["es","Español"],["tr","Türkçe"],["ru","Русский"],["fr","Français"],["ar","العربية"],["uk","Українська"],["hi","हिन्दी"]];
+const LID_LANGS=[["","Off · Aus"],["en","English"],["es","Español"],["fa","فارسی / دری"],["tr","Türkçe"],["ru","Русский"],["fr","Français"],["ar","العربية"],["uk","Українська"],["hi","हिन्दी"]];
 const LID_TOPICS={"History & Geography":"🏛️ History & geography · Geschichte","Law & Governance":"⚖️ Law & government · Recht","Elections":"🗳️ Elections · Wahlen","Education & Religion":"🎓 Education & religion · Bildung","Economy & Employment":"💼 Work & economy · Arbeit","Democracy & Politics":"🏛️ Democracy · Demokratie","Rights & Freedoms":"🕊️ Rights & freedoms · Grundrechte","Federal System":"🗺️ Federal system · Bundesländer","Constitution":"📜 Constitution · Grundgesetz","Assembly & Protests":"📣 Assembly · Versammlung"};
 const EX={ qs:null, tr:{}, lang:"", state:"TH", err:"", run:null, res:null, ans:[], att:[], hist:false, loading:false };
 try{ const v=JSON.parse(localStorage.getItem("pt_lid")||"{}"); if(v.state) EX.state=v.state; if(typeof v.lang==="string") EX.lang=v.lang; }catch(e){}
@@ -7686,7 +7686,7 @@ VIEWS.exlisten = function(){
   if(!q) return `<div class="topline"><button class="chip" onclick="exlQuit()">← Back</button><span></span></div><div class="card center"><div style="font-size:48px">🎧</div><h2>Fertig! · Done!</h2><p class="note">You listened to ${EXL.list.length} questions.</p><button class="btn primary" onclick="exlQuit()">Back · Zurück</button></div>`;
   return `<div class="topline"><button class="chip" onclick="exlQuit()">✕ Stop</button><span class="ecmeta">🎧 ${EXL.i+1} / ${EXL.list.length}</span></div>
     <div class="exbar" style="margin:0 0 10px"><i style="width:${Math.round((EXL.i+1)/EXL.list.length*100)}%;background:var(--coral)"></i></div>
-    <div class="card"><div class="ecmeta">Frage ${esc(q.n)}</div><div class="exq" lang="de">${esc(q.q)}</div>${t?`<div class="extr" dir="${EX.lang==="ar"?"rtl":"auto"}">${esc(t.q)}</div>`:""}
+    <div class="card"><div class="ecmeta">Frage ${esc(q.n)}</div><div class="exq" lang="de">${esc(q.q)}</div>${t?`<div class="extr" dir="${EX.lang==="ar"||EX.lang==="fa"?"rtl":"auto"}">${esc(t.q)}</div>`:""}
       ${EXL.phase==="a"?`<div class="ok" style="margin-top:10px;font-size:18px">✓ <b lang="de">${esc(q.a[q.c])}</b>${t&&t.a[q.c]?`<span class="extr">${esc(t.a[q.c])}</span>`:""}</div>`:`<p class="note" style="margin-top:10px">🤔 Think of the answer… · Überlege…</p>`}</div>
     <div style="display:flex;gap:8px"><button class="btn secondary" style="flex:1" onclick="exlGo(-1)">⏮</button><button class="btn primary" style="flex:2" onclick="exlToggle()">${EXL.on?"⏸ Pause":"▶️ Play"}</button><button class="btn secondary" style="flex:1" onclick="exlGo(1)">⏭</button></div>
     <label class="row" style="gap:8px;margin-top:10px;font-size:14px"><input type="checkbox" ${EXL.slow?"checked":""} onchange="EXL.slow=this.checked"> 🐢 Slower · Langsamer</label>
@@ -7749,7 +7749,7 @@ function exStart(mode, topic){
 }
 function exQText(q){
   const t=EX.lang&&EX.tr[EX.lang]&&EX.tr[EX.lang][q.n];
-  return { q, t, rtl:EX.lang==="ar" };
+  return { q, t, rtl:EX.lang==="ar"||EX.lang==="fa" };
 }
 function exImg(q){ return q.i?`<img class="eximg" src="/lid/img/${esc(q.i)}?v=${LID_V}" alt="Pictures 1 to 4 for question ${esc(q.n)} · Bilder 1 bis 4" loading="lazy">`:""; }
 function exClock(ms){ const s=Math.max(0,Math.round(ms/1000)); return `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`; }
@@ -7788,7 +7788,7 @@ VIEWS.exam = function(){
         return `<button class="btn secondary qbtn" onclick="exStart('practice','${k.replace(/'/g,"\\'")}')">${esc(l)} <span class="ecmeta">${ok}/${qq.length}</span></button>`; }).join("")}
       <button class="btn secondary qbtn" onclick="exStart('practice','__all')">🗂️ All ${pool.length} in order · Alle der Reihe nach</button></div>
     <button class="btn secondary qbtn" onclick="dtOpen()">🎓 German exam A2–B1 (DTZ) →</button>
-    <p class="note">Questions: official BAMF catalogue (as of 07.05.2025). Translations and explanations: open-source project “Leben in Deutschland” (MIT); Spanish by PonteTalk. PonteTalk is not an official BAMF app. · Keine offizielle BAMF-App.</p>`;
+    <p class="note">Questions: official BAMF catalogue (as of 07.05.2025). Translations and explanations: open-source project “Leben in Deutschland” (MIT); Spanish and Farsi by PonteTalk. PonteTalk is not an official BAMF app. · Keine offizielle BAMF-App.</p>`;
   return h;
 };
 function exHistHtml(mocks){
