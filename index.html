@@ -8240,7 +8240,10 @@ function dsChars(list){ return list.reduce((n,c)=>n+c.lines.reduce((m,l)=>m+l.t.
 async function dsApi(path, opt){
   let r; try{ r=await fetch("https://api.elevenlabs.io"+path, { ...opt, headers:{ "xi-api-key":DS.key, ...(opt&&opt.headers||{}) } }); }
   catch(e){ throw new Error("ElevenLabs blocked the request from this browser (network/CORS). Use the backup plan: create the clips on elevenlabs.io and send them to Claude."); }
-  if(r.status===401) throw new Error("The API key was not accepted. Copy it again from ElevenLabs → Developers → API keys.");
+  if(r.status===401||r.status===402||r.status===429){ let t=""; try{ t=(await r.text()).toLowerCase(); }catch(e){}
+    if(/quota|credit|limit/.test(t)||r.status===402) throw new Error("ElevenLabs says the credits ran out: either the account or this API key's own credit limit. Raise the key's limit (ElevenLabs → API keys → Edit) or wait for the next month, then tap Generate again. Finished clips are saved.");
+    if(r.status===429) throw new Error("ElevenLabs is busy (too many requests). Wait a minute and tap Generate again; it continues where it stopped.");
+    throw new Error("The API key was not accepted. Copy it again from ElevenLabs → API keys. If it worked before, its credit limit may be used up: raise it under API keys → Edit."); }
   if(!r.ok){ let t=""; try{ t=(await r.text()).slice(0,200); }catch(e){} throw new Error(`ElevenLabs error ${r.status}: ${t}`); }
   return r;
 }
