@@ -865,7 +865,7 @@
 <script>/* Extra interface languages live in /i18n/<code>.js (English text → translation). Load the chosen one before the app starts. */
 (function(){ try{ var X=["tr","uk","fa","ur"], v=localStorage.getItem("pt_ui");
   if(!v){ var n=String((navigator.languages&&navigator.languages[0])||navigator.language||"").slice(0,2).toLowerCase(); if(X.indexOf(n)>-1) v=n; }
-  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=3"><\/script>'); }catch(e){} })();</script>
+  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=4"><\/script>'); }catch(e){} })();</script>
 
 <script>
 /* ===================== CONTENT ===================== */
@@ -1238,7 +1238,7 @@ function bi(en,de,es){ if(es!==undefined) return tr(en,de,es); return `${en} <sp
 function uiSet(l){
   if(!UI_CODES.includes(l)) return;
   if(UI_EXTRA.includes(l) && !I18N_DATA[l]){
-    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=3";
+    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=4";
     sc.onload=()=>uiSet(l); sc.onerror=()=>bToast(offlineMsg()); document.head.appendChild(sc); return;
   }
   UI=l; I18N_T=null; I18N_M.clear();
@@ -1616,10 +1616,10 @@ function tick(){
   if(S.left>0 && S.left<=10 && S.lastCount!==S.left){ S.lastCount=S.left; countdownSound(S.left); }
   $("barFill").style.width=`${Math.max(S.left,0)/S.total*100}%`;
 }
-function stopTimer(ended){ if(S.timerId){ clearInterval(S.timerId); S.timerId=null; } if(ended){ S.timeUp=true; beep(); const t=$("timer"); if(t) t.textContent="⏰ Time!"; const d=$("doneBtn"); if(d) d.innerHTML="✓ Time's up – feedback<small>Zeit um – Feedback</small>"; } }
+function stopTimer(ended){ if(S.timerId){ clearInterval(S.timerId); S.timerId=null; } if(ended){ S.timeUp=true; beep(); const t=$("timer"); if(t) t.textContent="⏰ "+tr("Time!","Zeit!","¡Tiempo!"); const d=$("doneBtn"); if(d) d.innerHTML="✓ "+tr("Time's up – feedback","Zeit um – Feedback","Se acabó el tiempo – feedback"); } }
 function finishTurn(){ stopTimer(false); S.turnReacts={clear:0,creative:0,funny:0,learned:0}; S.turnRating=0; S.turnAns=""; S.turnTip=""; S.needRating=false; S.keptTalking=!!S.timeUp; go("feedback"); }
 function toggleKept(){ if(!S.timeUp) return; S.keptTalking=!S.keptTalking; const y=window.scrollY; render(); window.scrollTo(0,y); }
-function turnBonus(){ const b=[]; if(!S.hintsUsed) b.push({k:"nohints",e:"🙈",en:"No hints",de:"Ohne Hilfe",pts:2}); if(S.timeUp && S.keptTalking) b.push({k:"kept",e:"🎤",en:"Kept talking",de:"Bis zum Ende gesprochen",pts:2}); return b; }
+function turnBonus(){ const b=[]; if(!S.hintsUsed) b.push({k:"nohints",e:"🙈",en:"No hints",de:"Ohne Hilfe",es:"Sin pistas",pts:2}); if(S.timeUp && S.keptTalking) b.push({k:"kept",e:"🎤",en:"Kept talking",de:"Bis zum Ende gesprochen",es:"Habló hasta el final",pts:2}); return b; }
 function setRating(v){ S.turnRating=v; S.needRating=false; const y=window.scrollY; render(); window.scrollTo(0,y); }
 function react(k){ S.turnReacts[k]++; const y=window.scrollY; render(); window.scrollTo(0,y); }
 function resetReacts(){ S.turnReacts={clear:0,creative:0,funny:0,learned:0}; render(); }
@@ -1691,7 +1691,7 @@ function openExport(i, ctx, raw){
   ctx=ctx||{players:S.players, log:S.log, rounds:S.rounds, clog:S.clog};
   const text = raw ? raw.text : (i<0 ? gameReview(ctx) : playerReview(i, ctx));
   const name = raw ? raw.name : (i<0 ? "game" : ctx.players[i].name);
-  const heading = raw ? raw.heading : (i<0?"Whole game":esc(name));
+  const heading = raw ? raw.heading : (i<0?tr("Whole game","Ganzes Spiel","Partida completa"):esc(name));
   const subject = raw ? raw.subject : (i<0?"Game summary":"Review "+name);
   const canShare = !!(navigator.share);
   const box=document.createElement("div");
@@ -1699,7 +1699,7 @@ function openExport(i, ctx, raw){
   box.innerHTML=`<div class="sheet">
     <div class="topline" style="margin-bottom:8px"><h3 style="margin:0">📤 ${heading}</h3><button class="chip" id="exClose">✕</button></div>
     <textarea id="exText" dir="auto" rows="9" readonly>${esc(text)}</textarea>
-    ${canShare?`<button class="btn primary" id="exShare">📲 Send… <small>WhatsApp, Email, Telegram…</small></button>`:""}
+    ${canShare?`<button class="btn primary" id="exShare">📲 ${tr("Send…","Senden…","Enviar…")} <small>WhatsApp, Email, Telegram…</small></button>`:""}
     <div class="exgrid">
       <a class="btn secondary exb" id="exWa" href="https://wa.me/?text=${encodeURIComponent(text)}" target="_blank" rel="noopener">💬 WhatsApp</a>
       <a class="btn secondary exb" id="exMail" href="mailto:?subject=${encodeURIComponent("PonteTalk – "+subject)}&body=${encodeURIComponent(text)}">✉️ Email</a>
@@ -1714,14 +1714,14 @@ function openExport(i, ctx, raw){
   box.addEventListener("click",e=>{ if(e.target===box) box.remove(); });
   if(canShare) $("exShare").onclick=async()=>{ try{ await navigator.share({title:"PonteTalk", text}); }catch(e){} };
   $("exCopy").onclick=async()=>{
-    try{ await navigator.clipboard.writeText(text); msg("Copied! · Kopiert!"); }
-    catch(e){ const t=$("exText"); t.removeAttribute("readonly"); t.select(); try{ document.execCommand("copy"); msg("Copied! · Kopiert!"); }catch(_){ msg("Select the text above and copy it."); } t.setAttribute("readonly",""); }
+    try{ await navigator.clipboard.writeText(text); msg(tr("Copied!","Kopiert!","¡Copiado!")); }
+    catch(e){ const t=$("exText"); t.removeAttribute("readonly"); t.select(); try{ document.execCommand("copy"); msg(tr("Copied!","Kopiert!","¡Copiado!")); }catch(_){ msg(tr("Select the text above and copy it.","Markiere den Text oben und kopiere ihn.","Selecciona el texto de arriba y cópialo.")); } t.setAttribute("readonly",""); }
   };
   $("exDl").onclick=()=>{
     try{ const blob=new Blob([text],{type:"text/plain;charset=utf-8"}); const a=document.createElement("a");
       a.href=URL.createObjectURL(blob); a.download=`PonteTalk-${name.replace(/[^\w-]+/g,"_")}-${today().replace(/\./g,"-")}.txt`;
-      document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500); msg("Saved · Gespeichert"); }
-    catch(e){ msg("Couldn't save – try Copy instead."); }
+      document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500); msg(tr("Saved","Gespeichert","Guardado")); }
+    catch(e){ msg(tr("Couldn't save – try Copy instead.","Speichern ging nicht – nutze Kopieren.","No se pudo guardar: prueba Copiar.")); }
   };
 }
 function avgLabel(p){ const a=p.ratings.reduce((x,y)=>x+y,0)/p.ratings.length; const r=RATINGS[Math.min(3,Math.max(0,Math.round(a)-1))]; return `${r.e} ${r.en}`; }
@@ -1816,7 +1816,7 @@ function onlineConnect(role, code, resumeG){
   saveSession();
   O.tr = makeTransport(code, O.me, {
     onReady(){ O.status="live"; if(role==="host") pushState(); else O.tr.send({kind:"hello", from:O.me.id}); renderOnline(); },
-    onError(e){ O.status="error"; O.err = e==="lib" ? "Couldn't load the online module. Check your internet and reload." : "Connection problem. Check your internet — retrying…";
+    onError(e){ O.status="error"; O.err = e==="lib" ? tr("Couldn't load the online module. Check your internet and reload.","Online-Modul konnte nicht laden. Prüfe dein Internet und lade neu.","No se pudo cargar el módulo online. Revisa tu internet y recarga.") : tr("Connection problem. Check your internet — retrying…","Verbindungsproblem. Prüfe dein Internet – neuer Versuch…","Problema de conexión. Revisa tu internet: reintentando…");
       renderOnline(); if(e!=="lib") setTimeout(()=>{ if(O.status==="error" && O.code) onlineConnect(O.role, O.code, O.role==="host"?O.G:null); }, 4000); },
     onPresence(list){ O.online=list; if(list.some(p=>p.id===(O.G&&O.G.hostId))) O.hostSeen=Date.now(); if(role==="host") hostPresence(list); renderOnline(); },
     onMsg(m){ handleMsg(m); }
@@ -2021,7 +2021,7 @@ function oCheckName(){ const n=($("oname")||{}).value; if(n!==undefined) S.draft
 function hostOnline(){ if(!oCheckName()) return; onlineConnect("host", newCode(), null); logUsage("room_created", {mode:"online", langs:[S.draft.lang], levels:[S.draft.level], players:1}); }
 function joinOnline(){
   if(!oCheckName()) return;
-  const c=(O.codeInput||"").toUpperCase(); if(c.length!==4){ O.err="Type the 4-letter room code · 4-stelligen Code eingeben"; render(); return; }
+  const c=(O.codeInput||"").toUpperCase(); if(c.length!==4){ O.err=tr("Type the 4-letter room code","4-stelligen Raumcode eingeben","Escribe el código de sala de 4 letras"); render(); return; }
   onlineConnect("guest", c, null);
 }
 function resumeOnline(){
@@ -2053,13 +2053,13 @@ function oOutsider(){
 }
 function oWaitView(){
   const G=O.G, pend=(G.pending||[]).some(q=>q.id===O.me.id), dec=(G.declined||[]).includes(O.me.id);
-  let icon="⏳", title="Asking to join…", de="Anfrage wird gesendet…", note="Hang on a moment.";
-  if(dec){ icon="🙅"; title="The host didn't let you in this time"; de="Der Host hat abgelehnt"; note="You can ask the host on the call, then try again later."; }
-  else if(G.locked && !pend){ icon="🔒"; title="This room is locked"; de="Dieser Raum ist gesperrt"; note="The game already started. Ask the host to unlock it, then reload this page."; }
-  else if(pend){ icon="🔔"; title="Request sent — waiting for the host"; de="Anfrage gesendet – warte auf den Host"; note="The host will accept you in a moment. You'll join from the next turn."; }
-  return `<div class="topline"><button class="chip" onclick="confirmLeave()">${uiBack()} Leave</button><span>🌐 ${esc(O.code)}</span></div>${oStatusBar()}
-    <div class="handoff"><div class="emoji">${icon}</div><h2>${title}</h2><p class="sub">${de}</p><p class="note">${note}</p>
-    ${G.phase!=="lobby"?`<p class="note">Game in progress · ${G.players.length} players · ${T[(G.players[G.turn]||{lang:"en"}).lang].round} ${G.round||1}/${G.rounds}</p>`:""}</div>`;
+  let icon="⏳", title=tr("Asking to join…","Anfrage wird gesendet…","Pidiendo entrar…"), de="", note=tr("Hang on a moment.","Einen Moment bitte.","Un momento.");
+  if(dec){ icon="🙅"; title=tr("The host didn't let you in this time","Der Host hat dich diesmal nicht reingelassen","El anfitrión no te dejó entrar esta vez"); de=""; note=tr("You can ask the host on the call, then try again later.","Frag den Host im Anruf und versuch es später nochmal.","Pregúntale al anfitrión en la llamada y vuelve a intentarlo luego."); }
+  else if(G.locked && !pend){ icon="🔒"; title=tr("This room is locked","Dieser Raum ist gesperrt","Esta sala está cerrada"); de=""; note=tr("The game already started. Ask the host to unlock it, then reload this page.","Das Spiel läuft schon. Bitte den Host, den Raum zu öffnen, dann lade die Seite neu.","La partida ya empezó. Pide al anfitrión que la abra y recarga esta página."); }
+  else if(pend){ icon="🔔"; title=tr("Request sent — waiting for the host","Anfrage gesendet – warte auf den Host","Solicitud enviada: esperando al anfitrión"); de=""; note=tr("The host will accept you in a moment. You'll join from the next turn.","Der Host nimmt dich gleich auf. Du spielst ab der nächsten Runde mit.","El anfitrión te aceptará en un momento. Entrarás en el próximo turno."); }
+  return `<div class="topline"><button class="chip" onclick="confirmLeave()">${uiBack()} ${tr("Leave","Verlassen","Salir")}</button><span>🌐 ${esc(O.code)}</span></div>${oStatusBar()}
+    <div class="handoff"><div class="emoji">${icon}</div><h2>${title}</h2>${de?`<p class="sub">${de}</p>`:""}<p class="note">${note}</p>
+    ${G.phase!=="lobby"?`<p class="note">${tr("Game in progress","Spiel läuft","Partida en curso")} · ${G.players.length} ${tr("players","Spieler","jugadores")} · ${T[(G.players[G.turn]||{lang:"en"}).lang].round} ${G.round||1}/${G.rounds}</p>`:""}</div>`;
 }
 function oRequests(){
   const G=O.G; if(O.role!=="host" || !G || !(G.pending||[]).length) return "";
@@ -2069,7 +2069,7 @@ function oRequests(){
       <span class="row" style="margin-inline-start:auto;gap:6px">
         <button class="chip" onclick="act({type:'decline',id:'${q.id}'})">✕</button>
         <button class="chip on" onclick="act({type:'accept',id:'${q.id}'})">✓ Accept</button></span></div>`).join("")}
-    ${G.players.length>=10?`<p class="note">The room is full (10 players).</p>`:""}</div>`;
+    ${G.players.length>=10?`<p class="note">${tr("The room is full (10 players).","Der Raum ist voll (10 Spieler).","La sala está llena (10 jugadores).")}</p>`:""}</div>`;
 }
 function oLockBtn(){
   const G=O.G; if(O.role!=="host" || !G) return "";
@@ -2084,7 +2084,7 @@ function oJitsi(){
 }
 function oCallChip(){
   const G=O.G; if(!G || !G.video || oOutsider()) return "";
-  return `<a class="chip vchip" href="${esc(G.video)}" target="_blank" rel="noopener noreferrer" aria-label="Join the video call">🎥 Call</a>`;
+  return `<a class="chip vchip" href="${esc(G.video)}" target="_blank" rel="noopener noreferrer" aria-label="${tr("Video call","Videoanruf","Videollamada")}">🎥 ${tr("Call","Anruf","Llamada")}</a>`;
 }
 function oVideoSave(){
   const v=vClean((($("ovideo")||{}).value)||"");
@@ -2104,7 +2104,7 @@ function oVideoCard(){
   return `<div class="card center"><h3 style="margin:0 0 6px">${tr(`🎥 Talk while you play`,`🎥 Sprecht beim Spielen`,`🎥 Hablad mientras jugáis`)}</h3>
       <a class="btn primary vbtn" href="${esc(v)}" target="_blank" rel="noopener noreferrer">🎥 ${tr(`Join ${esc(prov)}`,`${esc(prov)} beitreten`,`Unirse a ${esc(prov)}`)}</a>
       <p class="note" style="margin:6px 0 0">${tr(`Opens in a new tab. Keep this game open too: switch back to play.`,`Öffnet in neuem Tab. Lass das Spiel offen und wechsle zum Spielen zurück.`,`Se abre en otra pestaña. Deja también esta partida abierta y vuelve para jugar.`)}</p>
-      ${host&&vProvider(v)==="jitsi"?`<p class="note" style="margin:4px 0 0">Jitsi is free; guests join without an account. As the host you may need to sign in once (Google or GitHub) to start the call.</p>`:""}
+      ${host&&vProvider(v)==="jitsi"?`<p class="note" style="margin:4px 0 0">${tr("Jitsi is free; guests join without an account. As the host you may need to sign in once (Google or GitHub) to start the call.","Jitsi ist kostenlos; Gäste brauchen kein Konto. Als Host musst du dich evtl. einmal anmelden (Google oder GitHub), um den Anruf zu starten.","Jitsi es gratis; los invitados entran sin cuenta. Como anfitrión puede que tengas que iniciar sesión una vez (Google o GitHub) para empezar la llamada.")}</p>`:""}
       ${host?`<div class="row" style="justify-content:center;margin:8px 0 0">
         <button class="chip" onclick="O.vEdit=true;O.vErr='';render()">✏️ Change link</button>
         <button class="chip" onclick="navigator.clipboard&&navigator.clipboard.writeText(O.G.video).then(()=>bToast(tr('📋 Link copied','📋 Link kopiert','📋 Enlace copiado')),()=>{})">📋 ${tr("Copy","Kopieren","Copiar")}</button>
@@ -2117,7 +2117,7 @@ VIEWS.lobby = function(){
   if(!G || G.phase==="lobby"){
     const host=O.role==="host";
     return `
-    <div class="topline"><button class="chip" onclick="confirmLeave()">${uiBack()} Leave</button><span>🌐 Online</span></div>
+    <div class="topline"><button class="chip" onclick="confirmLeave()">${uiBack()} ${tr("Leave","Verlassen","Salir")}</button><span>🌐 Online</span></div>
     ${oStatusBar()}
     <div class="card center">
       <div class="note">${tr(`Room code`,`Raumcode`,`Código de sala`)}</div>
@@ -2140,7 +2140,7 @@ VIEWS.lobby = function(){
       <p class="note" style="margin:6px 0 0">${G.cmode==="camera"?tr("Everyone needs to be on a video call (Zoom, WhatsApp…).","Alle müssen im Videoanruf sein (Zoom, WhatsApp…).","Todos deben estar en videollamada (Zoom, WhatsApp…)."):tr(`No camera needed: the actor sends emojis, the others type their guesses.`,`Keine Kamera nötig.`,`No hace falta cámara: quien actúa envía emojis y los demás escriben sus respuestas.`)}</p>
       <label class="lbl">${tr("Difficulty","Schwierigkeit","Dificultad")}</label>${cDiffChips(G.cdiff===undefined?"auto":G.cdiff, G.players, "oSetCDiff")}`
       : `<label class="lbl">${tr("Topic","Thema","Tema")}</label>
-      <div class="row">${Object.entries(CATS).map(([k,c])=>`<button class="chip ${G.cat===k?"on":""}" onclick="act({type:'settings',cat:'${k}'})">${c.e} ${c.en} · ${c.de}</button>`).join("")}</div>`}
+      <div class="row">${Object.entries(CATS).map(([k,c])=>`<button class="chip ${G.cat===k?"on":""}" onclick="act({type:'settings',cat:'${k}'})">${c.e} ${tr(c.en,c.de,c.es)}</button>`).join("")}</div>`}
       <label class="lbl">${tr("Rounds","Runden","Rondas")}</label>
       <div class="stepper"><button class="step" onclick="act({type:'settings',rounds:${G.rounds-1}})" ${G.rounds<=1?"disabled":""}>−</button>
         <div class="stepval"><b>${G.rounds}</b><span>${G.rounds===1?tr("round","Runde","ronda"):tr("rounds","Runden","rondas")}</span></div>
@@ -2150,7 +2150,7 @@ VIEWS.lobby = function(){
     </div>
     <button class="btn primary" ${G.players.length<2?'style="opacity:.45"':""} onclick="${G.players.length<2?"":"act({type:'start'})"}">▶ ${tr("Start game","Spiel starten","Empezar partida")}${G.players.length<2?`<small>${tr("Waiting for at least 1 more player","Warte auf Mitspieler","Esperando al menos 1 jugador más")}</small>`:""}</button>`
     : G ? `<div class="card center"><div class="emoji">⏳</div><p>${tr(`Waiting for the host to start…`,`Warte, bis der Host startet…`,`Esperando a que el anfitrión empiece…`)}</p>
-      <p class="note">${G.game==="charades"?(G.cmode==="camera"?"🎭 Charades · 🎥 camera":"🎭 Charades · 😀 emoji clues"):`🗣️ Speak Up · ${CATS[G.cat].e} ${CATS[G.cat].en}`} · ${G.rounds} rounds · ${G.time}s</p></div>` : ""}`;
+      <p class="note">${G.game==="charades"?(G.cmode==="camera"?"🎭 "+tr("Charades","Pantomime","Mímica")+" · 🎥 "+tr("camera","Kamera","cámara"):"🎭 "+tr("Charades","Pantomime","Mímica")+" · 😀 "+tr("emoji clues","Emoji-Hinweise","pistas con emojis")):`🗣️ Speak Up · ${CATS[G.cat].e} ${tr(CATS[G.cat].en,CATS[G.cat].de,CATS[G.cat].es)}`} · ${G.rounds} ${tr("rounds","Runden","rondas")} · ${G.time}s</p></div>` : ""}`;
   }
   if(G.phase==="turn") return oTurnView();
   if(G.phase==="cturn") return oCTurnView();
@@ -2172,7 +2172,7 @@ function oTurnView(){
   const offline = !isOnline(a.id);
   return `${oHeader()}
     <div class="turnwho">${avatar(a,G.turn)}<div>${me?`<b>${tr("Your turn!","Du bist dran!","¡Te toca!")}</b>`:`<b>${esc(a.name)}</b> <span class="note">${tr("is speaking","spricht","está hablando")}</span>`}<br>${langBadge(L)} <span class="badge b-fmt">${LEVELS[a.level].code}</span></div></div>
-    ${offline && O.role==="host" ? `<div class="obanner bad">📴 ${esc(a.name)} seems offline. <button class="chip" onclick="act({type:'skip'})">Skip turn</button></div>`:""}
+    ${offline && O.role==="host" ? `<div class="obanner bad">📴 ${tr(`${esc(a.name)} seems offline.`,`${esc(a.name)} scheint offline.`,`${esc(a.name)} parece desconectado.`)} <button class="chip" onclick="act({type:'skip'})">${tr("Skip turn","Zug überspringen","Saltar turno")}</button></div>`:""}
     <div class="card" dir="${X.dir}" lang="${L}">
       <div class="row"><span class="badge b-fmt">${f.e} ${fLabel}</span><span class="badge b-cat">${CATS[c.c].e} ${X.cats[c.c]}</span></div>
       <div class="prompt">${esc(c.t)}</div>${romDiv(c.r)}
@@ -2191,7 +2191,7 @@ function oTurnView(){
 function oFeedbackView(){
   const G=O.G, a=G.players[G.turn], me=a.id===O.me.id;
   return `${oHeader()}
-    <div class="turnwho">${avatar(a,G.turn)}<div><b>${me?bi("How did you do?","Wie war's?"):`Feedback for ${esc(a.name)}`}</b><br>${langBadge(a.lang)}</div></div>
+    <div class="turnwho">${avatar(a,G.turn)}<div><b>${me?tr("How did you do?","Wie war's?","¿Cómo te fue?"):tr(`Feedback for ${esc(a.name)}`,`Feedback für ${esc(a.name)}`,`Feedback para ${esc(a.name)}`)}</b><br>${langBadge(a.lang)}</div></div>
     <div id="odyn">${oFeedbackDyn()}</div>
     ${me ? "" : `<div class="coach" style="margin-top:14px">
       <h3>💬 ${tr("Coach tip","Tipp","Consejo del coach")}</h3>
@@ -2261,16 +2261,16 @@ function oResultsView(){
     ${saveCardOnline()}
     <div class="card">
       <h3>📤 ${tr("Your review","Deine Auswertung","Tu repaso")}</h3>
-      <p class="note">Your questions, answers, useful words and tips — to practice later.</p>
+      <p class="note">${tr("Your questions, answers, useful words and tips — to practice later.","Deine Fragen, Antworten, nützlichen Wörter und Tipps – zum Üben später.","Tus preguntas, respuestas, palabras útiles y consejos, para practicar luego.")}</p>
       ${meIdx>=0?`<button class="btn primary" onclick="openExport(${meIdx}, oCtx())">${tr(`📤 My review`,`📤 Meine Auswertung`,`📤 Mi repaso`)}</button>`:""}
-      ${O.role==="host"?`<button class="btn secondary" onclick="openExport(-1, oCtx())">📋 Export whole game<small>Ganzes Spiel (für Host)</small></button>`:""}
+      ${O.role==="host"?`<button class="btn secondary" onclick="openExport(-1, oCtx())">📋 ${tr("Export whole game","Ganzes Spiel exportieren","Exportar toda la partida")}</button>`:""}
     </div>
     <div class="card center">
       <h3>${tr("Did you enjoy it?","Hat's Spaß gemacht?","¿Te gustó?")}</h3>
       <div class="faces">${["😞","😐","🙂","😄","🤩"].map((f,i)=>`<button class="face ${O.rating===i+1?"on":""}" onclick="oRate(${i+1})">${f}</button>`).join("")}</div>
     </div>
     ${O.role==="host" ? `<button class="btn primary" onclick="bump('replays');act({type:'start'})">🔁 ${tr("Play another round!","Noch eine Runde!","¡Otra ronda!")}<small>${tr("Same players","Gleiche Gruppe","Mismos jugadores")}</small></button>
-      <button class="btn secondary" onclick="act({type:'lobby'})">👥 Back to lobby<small>Change settings or players</small></button>`
+      <button class="btn secondary" onclick="act({type:'lobby'})">👥 ${tr("Back to lobby","Zurück zur Lobby","Volver a la sala")}<small>${tr("Change settings or players","Einstellungen oder Spieler ändern","Cambiar ajustes o jugadores")}</small></button>`
       : `<p class="note center">${tr(`The host can start another round`,`Der Host kann neu starten`,`El anfitrión puede empezar otra ronda`)}</p>`}
     <button class="btn ghost" onclick="confirmLeave()">${tr(`🏠 Leave & go home`,`🏠 Verlassen & zur Startseite`,`🏠 Salir e ir al inicio`)}</button>`;
 }
@@ -2279,7 +2279,7 @@ function oRate(n){ const first=O.rating===null; O.rating=n; const s=loadStats();
 
 /* ---------- small helpers ---------- */
 async function shareRoom(){
-  const text=`Join my PonteTalk game 🌉 Code: ${O.code}\n${roomLink()}`;
+  const text=tr(`Join my PonteTalk game 🌉 Code: ${O.code}`,`Spiel mit bei PonteTalk 🌉 Code: ${O.code}`,`Únete a mi partida de PonteTalk 🌉 Código: ${O.code}`)+`\n${roomLink()}`;
   try{ if(navigator.share){ await navigator.share({title:"PonteTalk", text}); return; } }catch(e){ return; }
   location.href = "https://wa.me/?text="+encodeURIComponent(text);
 }
@@ -2291,7 +2291,7 @@ async function copyRoom(){
 function confirmLeave(){
   const box=document.createElement("div");
   box.style.cssText="position:fixed;inset:0;background:rgba(43,33,64,.45);display:grid;place-items:center;padding:20px;z-index:9";
-  box.innerHTML=`<div class="card" style="max-width:360px;width:100%"><h3>Leave this game?</h3><p class="note">${O.role==="host"?"You're the host — the game stops for everyone.":"You can rejoin with the same code."}</p>
+  box.innerHTML=`<div class="card" style="max-width:360px;width:100%"><h3>${tr("Leave this game?","Spiel verlassen?","¿Salir de la partida?")}</h3><p class="note">${O.role==="host"?tr("You're the host — the game stops for everyone.","Du bist Host – das Spiel endet für alle.","Eres el anfitrión: la partida termina para todos."):tr("You can rejoin with the same code.","Mit demselben Code kannst du wieder rein.","Puedes volver a entrar con el mismo código.")}</p>
     <button class="btn primary" id="lYes">${tr("Leave","Verlassen","Salir")}</button><button class="btn ghost" id="lNo">${tr("Stay","Bleiben","Quedarme")}</button></div>`;
   document.body.appendChild(box);
   $("lNo").onclick=()=>box.remove(); $("lYes").onclick=()=>{ box.remove(); onlineLeave(); };
@@ -2473,7 +2473,7 @@ function cRefresh(){
   const ct=S.cturn, a=S.players[S.turn], box=$("cbox"); if(!box||ct.w===null) return;
   box.innerHTML = `<div class="cemoji">${CW[ct.w][0]}</div>
     <div class="cword" dir="${T[a.lang].dir}" lang="${a.lang}">${esc(cWord(ct.w,a.lang))}</div>${romDiv(cRoman(ct.w,a.lang))}
-    <div class="note" style="margin-top:8px">Accept these answers · Diese Antworten zählen:</div>
+    <div class="note" style="margin-top:8px">${tr("Accept these answers:","Diese Antworten zählen:","Valen estas respuestas:")}</div>
     <div>${cAnswerChips(ct.w, cGuesserLangs(S.players, S.turn))}</div>`;
   const n=$("ccount"); if(n) n.textContent=`✓ ${ct.guessed.length}`;
 }
@@ -2535,7 +2535,7 @@ VIEWS.csum = function(){
   <h2 class="center">⏰ ${bi("Time's up!","Zeit um!")}</h2>
   <div class="card center"><div class="big-name" style="font-size:40px;color:var(--coral)">${ct.guessed.length}</div>
     <p class="note" style="margin:0">${ct.guessed.length===1?"word guessed":"words guessed"} · ${esc(a.name)} +${ct.guessed.length} points</p></div>
-  ${ct.guessed.length?`<div class="card"><h3>✅ Guessed · Erraten</h3>${ct.guessed.map(g=>`<div class="cline"><span class="cemo">${CW[g.w][0]}</span><div>${cAnswerChips(g.w, langs)}<div class="note">by ${esc(S.players[g.by].name)} · +1</div></div></div>`).join("")}</div>`:""}
+  ${ct.guessed.length?`<div class="card"><h3>✅ ${tr("Guessed","Erraten","Adivinadas")}</h3>${ct.guessed.map(g=>`<div class="cline"><span class="cemo">${CW[g.w][0]}</span><div>${cAnswerChips(g.w, langs)}<div class="note">${tr(`by ${esc(S.players[g.by].name)}`,`von ${esc(S.players[g.by].name)}`,`de ${esc(S.players[g.by].name)}`)} · +1</div></div></div>`).join("")}</div>`:""}
   ${skipped.length?`<div class="card"><h3>⏭️ ${tr(`Skipped — learn these!`,`Übersprungen – lern diese!`,`Saltadas: ¡apréndelas!`)}</h3>${skipped.map(g=>`<div class="cline"><span class="cemo">${CW[g.w][0]}</span><div>${cAnswerChips(g.w, langs)}</div></div>`).join("")}</div>`:""}
   <button class="btn primary" onclick="cNext()">${isLastTurn()?"See results 🏆":"Next actor →"}<small>${isLastTurn()?"Ergebnisse":"Nächste Person"}</small></button>`;
 };
@@ -2615,20 +2615,20 @@ function oCTurnView(){
     } else {
       const guessers=G.players.map((p,i)=>({p,i})).filter(x=>x.i!==G.turn);
       body=`${timer}<div class="card center cardword"><div class="cemoji">${CW[tp.w][0]}</div><div class="cword" dir="${T[a.lang].dir}" lang="${a.lang}">${esc(cWord(tp.w,a.lang))}</div>${romDiv(cRoman(tp.w,a.lang))}
-        <div class="note" style="margin-top:8px">Accept these answers · Diese Antworten zählen:</div><div>${cAnswerChips(tp.w, cGuesserLangs(G.players, G.turn))}</div></div>
+        <div class="note" style="margin-top:8px">${tr("Accept these answers:","Diese Antworten zählen:","Valen estas respuestas:")}</div><div>${cAnswerChips(tp.w, cGuesserLangs(G.players, G.turn))}</div></div>
         <h3 style="margin:4px 0 8px">🙋 ${tr(`Tap who guessed it`,`Wer hat's erraten?`,`Toca quién lo adivinó`)}</h3>
         <div class="cguessers">${guessers.map(x=>`<button class="cg" onclick="act({type:'cguess',by:${x.i}})"><span class="cgck">✓</span><span><b>${esc(x.p.name)}</b> got it!<br><span class="cgde">hat's erraten</span></span></button>`).join("")}</div>
         <div class="exgrid" style="margin-top:6px"><button class="btn secondary exb" onclick="act({type:'cskip'})">⏭️ Skip</button><button class="btn ghost exb" onclick="act({type:'cend'})">🏁 End turn</button></div>`;
     }
   } else {
-    const last = tp.last ? `<div class="card center"><div class="note">${tp.last.skip?"⏭️ Skipped · Übersprungen":`✅ Guessed by ${esc(G.players[tp.last.by].name)}`}</div>
+    const last = tp.last ? `<div class="card center"><div class="note">${tp.last.skip?"⏭️ "+tr("Skipped","Übersprungen","Saltada"):"✅ "+tr(`Guessed by ${esc(G.players[tp.last.by].name)}`,`Erraten von ${esc(G.players[tp.last.by].name)}`,`Adivinada por ${esc(G.players[tp.last.by].name)}`)}</div>
       <div class="cemoji" style="font-size:40px">${CW[tp.last.w][0]}</div><div class="cword" style="font-size:24px" dir="${T[myLang].dir}" lang="${myLang}">${esc(cWord(tp.last.w,myLang))}</div>${romDiv(cRoman(tp.last.w,myLang))}</div>` : "";
     body=`${timer}<div class="card center"><div class="cemoji">🎭</div>
       <h3>${tr(`${esc(a.name)} is acting!`,`${esc(a.name)} spielt vor!`,`¡${esc(a.name)} está actuando!`)}</h3>
-      <p>Guess out loud in <b>${T[myLang].flag} ${T[myLang].name}</b>!</p>
-      <p class="note">${tp.timer?"Watch the camera and shout your guess · Rate laut!":"Get ready… · Gleich geht's los…"}</p>
+      <p>${tr(`Guess out loud in <b>${T[myLang].flag} ${T[myLang].name}</b>!`,`Rate laut auf <b>${T[myLang].flag} ${T[myLang].name}</b>!`,`¡Adivina en voz alta en <b>${T[myLang].flag} ${T[myLang].name}</b>!`)}</p>
+      <p class="note">${tp.timer?tr("Watch the camera and shout your guess!","Schau in die Kamera und rate laut!","¡Mira la cámara y grita tu respuesta!"):tr("Get ready…","Gleich geht's los…","Prepárate…")}</p>
       <div class="big-name" style="font-size:34px;color:var(--coral)">✓ ${tp.guessed.length}</div></div>${last}
-      ${O.role==="host" && offline ? `<div class="obanner bad">📴 ${esc(a.name)} seems offline. <button class="chip" onclick="act({type:'skip'})">Skip turn</button></div>`:""}`;
+      ${O.role==="host" && offline ? `<div class="obanner bad">📴 ${tr(`${esc(a.name)} seems offline.`,`${esc(a.name)} scheint offline.`,`${esc(a.name)} parece desconectado.`)} <button class="chip" onclick="act({type:'skip'})">${tr("Skip turn","Zug überspringen","Saltar turno")}</button></div>`:""}`;
   }
   return `${oHeader()}<div class="turnwho">${avatar(a,G.turn)}<div><b>🎭 ${me?bi("Your turn!","Du bist dran!"):esc(a.name)}</b><br>${langBadge(a.lang)}</div></div>${body}`;
 }
@@ -2638,10 +2638,10 @@ function oCSumView(){
   <h2 class="center">⏰ ${bi("Time's up!","Zeit um!")}</h2>
   <div class="card center"><div class="big-name" style="font-size:40px;color:var(--coral)">${tp.guessed.length}</div>
     <p class="note" style="margin:0">${tp.guessed.length===1?"word guessed":"words guessed"} · ${esc(a.name)} +${tp.guessed.length}</p></div>
-  ${tp.guessed.length?`<div class="card"><h3>✅ Guessed · Erraten</h3>${tp.guessed.map(g=>`<div class="cline"><span class="cemo">${CW[g.w][0]}</span><div>${cAnswerChips(g.w, langs)}<div class="note">by ${esc(G.players[g.by].name)} · +1</div></div></div>`).join("")}</div>`:""}
+  ${tp.guessed.length?`<div class="card"><h3>✅ ${tr("Guessed","Erraten","Adivinadas")}</h3>${tp.guessed.map(g=>`<div class="cline"><span class="cemo">${CW[g.w][0]}</span><div>${cAnswerChips(g.w, langs)}<div class="note">${tr(`by ${esc(G.players[g.by].name)}`,`von ${esc(G.players[g.by].name)}`,`de ${esc(G.players[g.by].name)}`)} · +1</div></div></div>`).join("")}</div>`:""}
   ${tp.skips.length?`<div class="card"><h3>⏭️ ${tr(`Skipped — learn these!`,`Übersprungen – lern diese!`,`Saltadas: ¡apréndelas!`)}</h3>${tp.skips.map(w=>`<div class="cline"><span class="cemo">${CW[w][0]}</span><div>${cAnswerChips(w, langs)}</div></div>`).join("")}</div>`:""}
   ${me||O.role==="host" ? `<button class="btn primary" onclick="act({type:'cnext'})">${oIsLast()?"See results 🏆":"Next actor →"}<small>${oIsLast()?"Ergebnisse":"Nächste Person"}</small></button>`
-    : `<p class="note center">⏳ Waiting for ${esc(a.name)} to continue… · Warte…</p>`}`;
+    : `<p class="note center">⏳ ${tr(`Waiting for ${esc(a.name)} to continue…`,`Warte auf ${esc(a.name)}…`,`Esperando a que ${esc(a.name)} continúe…`)}</p>`}`;
 }
 
 /* ---------- EMOJI CHARADES (online, no camera needed) ---------- */
@@ -2686,13 +2686,13 @@ function oEmojiActor(G,a,tp,timer){
   const guessers=G.players.map((p,i)=>({p,i})).filter(x=>x.i!==G.turn), tab=O.etab||0;
   return `${timer}
     <div class="card center cardword"><div class="cemoji" style="font-size:44px">${CW[tp.w][0]}</div><div class="cword" dir="${T[a.lang].dir}" lang="${a.lang}">${esc(cWord(tp.w,a.lang))}</div>${romDiv(cRoman(tp.w,a.lang))}
-      <div class="note">Give clues with emojis only — no words! · Nur Emojis!</div></div>
-    <div class="clue">${(tp.clue||[]).length?(tp.clue||[]).join(" "):`<span class="note">Tap emojis below to build your clue</span>`}</div>
+      <div class="note">${tr("Give clues with emojis only — no words!","Nur Emojis als Hinweise – keine Wörter!","Da pistas solo con emojis, ¡sin palabras!")}</div></div>
+    <div class="clue">${(tp.clue||[]).length?(tp.clue||[]).join(" "):`<span class="note">${tr("Tap emojis below to build your clue","Tippe unten auf Emojis für deinen Hinweis","Toca los emojis de abajo para armar tu pista")}</span>`}</div>
     <div class="row" style="gap:6px;margin:6px 0">${EKEYS.map((g,i)=>`<button class="chip ${tab===i?"on":""}" onclick="eTab(${i})">${g.t}</button>`).join("")}
       <button class="chip" onclick="eBack()">⌫</button><button class="chip" onclick="eClear()">🗑️</button></div>
     <div class="ekeys">${EKEYS[tab].list.map((e,j)=>`<button onclick="eTap(${tab},${j})">${e}</button>`).join("")}</div>
     ${oGuessFeed(tp,G)}
-    <p class="note" style="margin:10px 0 4px">Typed guesses are checked automatically. Guessed out loud? Tap the name: · Laut geraten? Name antippen:</p>
+    <p class="note" style="margin:10px 0 4px">${tr("Typed guesses are checked automatically. Guessed out loud? Tap the name:","Getippte Antworten werden automatisch geprüft. Laut geraten? Name antippen:","Las respuestas escritas se revisan solas. ¿Adivinó en voz alta? Toca el nombre:")}</p>
     <div class="cguessers">${guessers.map(x=>`<button class="cg" onclick="act({type:'cguess',by:${x.i}})"><span class="cgck">✓</span><span><b>${esc(x.p.name)}</b> got it!<br><span class="cgde">hat's erraten</span></span></button>`).join("")}</div>
     <div class="exgrid" style="margin-top:6px"><button class="btn secondary exb" onclick="act({type:'cskip'})">⏭️ Skip</button><button class="btn ghost exb" onclick="act({type:'cend'})">🏁 End turn</button></div>`;
 }
@@ -2701,15 +2701,15 @@ function oGuessFeed(tp,G){
   return `<div class="feed">${f.map(x=>`<div class="${x.ok?"ok":""}">${x.ok?"✅":"❌"} <b>${esc(x.by)}</b>: <span dir="auto">${esc(x.text)}</span></div>`).join("")}</div>`;
 }
 function oEmojiGuesser(G,a,tp,timer,myLang){
-  const last = tp.last ? `<div class="card center"><div class="note">${tp.last.skip?"⏭️ Skipped · Übersprungen":`✅ Guessed by ${esc(G.players[tp.last.by].name)}`}</div>
+  const last = tp.last ? `<div class="card center"><div class="note">${tp.last.skip?"⏭️ "+tr("Skipped","Übersprungen","Saltada"):"✅ "+tr(`Guessed by ${esc(G.players[tp.last.by].name)}`,`Erraten von ${esc(G.players[tp.last.by].name)}`,`Adivinada por ${esc(G.players[tp.last.by].name)}`)}</div>
       <div class="cemoji" style="font-size:36px">${CW[tp.last.w][0]}</div><div class="cword" style="font-size:22px" dir="${T[myLang].dir}" lang="${myLang}">${esc(cWord(tp.last.w,myLang))}</div>${romDiv(cRoman(tp.last.w,myLang))}</div>` : "";
   return `${timer}
-    <div class="card center"><div class="note">😀 ${esc(a.name)}'s clue · Hinweis</div>
-      <div class="clue big">${(tp.clue||[]).length?(tp.clue||[]).join(" "):`<span class="note">${tp.timer?"Waiting for emojis… · Warte auf Emojis…":"Get ready… · Gleich geht's los…"}</span>`}</div>
+    <div class="card center"><div class="note">😀 ${tr(`${esc(a.name)}'s clue`,`Hinweis von ${esc(a.name)}`,`Pista de ${esc(a.name)}`)}</div>
+      <div class="clue big">${(tp.clue||[]).length?(tp.clue||[]).join(" "):`<span class="note">${tp.timer?tr("Waiting for emojis…","Warte auf Emojis…","Esperando emojis…"):tr("Get ready…","Gleich geht's los…","Prepárate…")}</span>`}</div>
       <div class="big-name" style="font-size:28px;color:var(--coral)">✓ ${tp.guessed.length}</div></div>
     ${tp.timer?`<div class="guessrow"><input type="text" id="cguessin" data-keep="1" dir="auto" maxlength="60" placeholder="Your guess in ${T[myLang].name}…" autocomplete="off" onkeydown="if(event.key==='Enter')sendGuess()">
       <button class="btn primary" style="margin:0;width:auto;padding:12px 16px" onclick="sendGuess()">➤</button></div>
-      <p class="note" style="margin:4px 0 0">Type it in <b>${T[myLang].flag} ${T[myLang].name}</b> — small typos and missing accents are OK.</p>`:""}
+      <p class="note" style="margin:4px 0 0">${tr(`Type it in <b>${T[myLang].flag} ${T[myLang].name}</b> — small typos and missing accents are OK.`,`Tippe auf <b>${T[myLang].flag} ${T[myLang].name}</b> – kleine Tippfehler sind OK.`,`Escríbelo en <b>${T[myLang].flag} ${T[myLang].name}</b>: pequeños errores y tildes que faltan están bien.`)}</p>`:""}
     ${oGuessFeed(tp,G)}${last}`;
 }
 
@@ -2732,8 +2732,8 @@ function renderChat(){
     : `<p class="note center" style="margin:30px 0">${tr(`No messages yet. Say hi! 👋`,`Noch keine Nachrichten. Sag Hallo! 👋`,`Aún no hay mensajes. ¡Saluda! 👋`)}</p>`;
   box.innerHTML = O.chatOpen ? `
     <div class="chatpanel">
-      <div class="chathead"><b>💬 Room chat · ${esc(O.code)}</b><span style="display:flex;gap:6px">${msgs.length?`<button class="chip" id="chatExport" onclick="exportChat()" aria-label="Export chat">📤 Export</button>`:""}<button class="chip" onclick="toggleChat()" aria-label="Close chat">✕</button></span></div>
-      <p class="note" style="margin:0 12px 6px">Only players in this game can see it. Messages disappear when the game ends.</p>
+      <div class="chathead"><b>💬 ${tr("Room chat","Raum-Chat","Chat de la sala")} · ${esc(O.code)}</b><span style="display:flex;gap:6px">${msgs.length?`<button class="chip" id="chatExport" onclick="exportChat()" aria-label="Export chat">📤 Export</button>`:""}<button class="chip" onclick="toggleChat()" aria-label="Close chat">✕</button></span></div>
+      <p class="note" style="margin:0 12px 6px">${tr("Only players in this game can see it. Messages disappear when the game ends.","Nur Spieler dieses Spiels sehen das. Nachrichten verschwinden, wenn das Spiel endet.","Solo los jugadores de esta partida lo ven. Los mensajes desaparecen al terminar.")}</p>
       <div class="chatlist" id="chatlist">${list}</div>
       <div class="chatquick">${["👋","👍","😂","❤️","🎉","👏","🙏"].map(e=>`<button onclick="sendChat('${e}')">${e}</button>`).join("")}</div>
       <div class="chatinrow"><input type="text" id="chatin" dir="auto" maxlength="300" placeholder="Write a message… · Nachricht…" autocomplete="off"
@@ -3005,18 +3005,18 @@ function saveCardInperson(){
   if(!A.user) return `<div class="card acard">
       <h3>🔐 ${tr(`Keep your scores`,`Punkte behalten`,`Guarda tus puntos`)}</h3>
       <p class="note">${tr(`Free account: save this game, see your history and track your progress.`,`Kostenloses Konto: Spiel speichern, Verlauf sehen und Fortschritt verfolgen.`,`Cuenta gratis: guarda esta partida, mira tu historial y sigue tu progreso.`)}</p>
-      <button class="btn primary" onclick="keepScoresFrom('results')">👤 Sign in / Create account<small>Anmelden / Konto erstellen</small></button></div>`;
+      <button class="btn primary" onclick="keepScoresFrom('results')">👤 ${tr("Sign in / Create account","Anmelden / Konto erstellen","Entrar / Crear cuenta")}</button></div>`;
   const st=A.saving["ip-"+S.gid];
   if(st==="ok" || st==="queued") return `<div class="card acard center">
-      <h3>${st==="ok"?"✅ Saved to My games":"📶 Saved — will upload when you're online"}</h3>
-      <p class="note" style="margin:0">${st==="ok"?"Gespeichert":"Wird hochgeladen, sobald du online bist"} · ${esc(S.players[S.savedIdx]?S.players[S.savedIdx].name:"")}</p>
-      <button class="btn ghost" onclick="A.ret='results';go('account')">🏆 See my games · Meine Spiele</button></div>`;
+      <h3>${st==="ok"?"✅ "+tr("Saved to My games","In Meine Spiele gespeichert","Guardado en Mis partidas"):"📶 "+tr("Saved — will upload when you're online","Gespeichert – wird hochgeladen, sobald du online bist","Guardado: se subirá cuando tengas conexión")}</h3>
+      <p class="note" style="margin:0">${esc(S.players[S.savedIdx]?S.players[S.savedIdx].name:"")}</p>
+      <button class="btn ghost" onclick="A.ret='results';go('account')">🏆 ${tr("See my games","Meine Spiele ansehen","Ver mis partidas")}</button></div>`;
   const mine=meName().toLowerCase();
   return `<div class="card acard">
       <h3>💾 ${tr(`Save to My games`,`In Meine Spiele speichern`,`Guardar en Mis partidas`)}</h3>
-      <p class="note">Which player are you? · Wer bist du?</p>
+      <p class="note">${tr("Which player are you?","Welche/r Spieler/in bist du?","¿Qué jugador eres?")}</p>
       <div class="row">${S.players.map((p,i)=>`<button class="chip ${p.name.toLowerCase()===mine?"on":""}" ${st==="busy"?"disabled":""} onclick="saveInperson(${i})">${p.name.toLowerCase()===mine?"⭐ ":""}${esc(p.name)}</button>`).join("")}</div>
-      <p class="note" style="margin:8px 0 0">Only you see your saved games. Other players can save theirs on their own phone.</p></div>`;
+      <p class="note" style="margin:8px 0 0">${tr("Only you see your saved games. Other players can save theirs on their own phone.","Nur du siehst deine gespeicherten Spiele. Andere speichern ihre auf dem eigenen Handy.","Solo tú ves tus partidas guardadas. Los demás pueden guardar las suyas en su móvil.")}</p></div>`;
 }
 /* Card shown on the online results screen */
 function saveCardOnline(){
@@ -3024,12 +3024,12 @@ function saveCardOnline(){
   if(O.G.players.findIndex(p=>p.id===O.me.id)<0) return "";
   if(!A.user) return `<div class="card acard">
       <h3>🔐 ${tr(`Keep your scores`,`Punkte behalten`,`Guarda tus puntos`)}</h3>
-      <p class="note">Free account: save this game, see your history and track your progress.</p>
-      <button class="btn primary" onclick="keepScoresFrom('lobby')">👤 Sign in / Create account<small>Anmelden / Konto erstellen</small></button></div>`;
+      <p class="note">${tr(`Free account: save this game, see your history and track your progress.`,`Kostenloses Konto: Spiel speichern, Verlauf sehen und Fortschritt verfolgen.`,`Cuenta gratis: guarda esta partida, mira tu historial y sigue tu progreso.`)}</p>
+      <button class="btn primary" onclick="keepScoresFrom('lobby')">👤 ${tr("Sign in / Create account","Anmelden / Konto erstellen","Entrar / Crear cuenta")}</button></div>`;
   maybeSaveOnline();
   const st=onlineSaveState();
-  return `<div class="card acard center"><h3>${st==="ok"?"✅ Saved to My games":st==="queued"?"📶 Saved — will upload when you're online":"💾 Saving…"}</h3>
-    <button class="btn ghost" onclick="A.ret='lobby';go('account')">🏆 See my games · Meine Spiele</button></div>`;
+  return `<div class="card acard center"><h3>${st==="ok"?"✅ "+tr("Saved to My games","In Meine Spiele gespeichert","Guardado en Mis partidas"):st==="queued"?"📶 "+tr("Saved — will upload when you're online","Gespeichert – wird hochgeladen, sobald du online bist","Guardado: se subirá cuando tengas conexión"):"💾 "+tr("Saving…","Speichert…","Guardando…")}</h3>
+    <button class="btn ghost" onclick="A.ret='lobby';go('account')">🏆 ${tr("See my games","Meine Spiele ansehen","Ver mis partidas")}</button></div>`;
 }
 
 /* ---- account screen ---- */
@@ -3082,20 +3082,20 @@ function confirmDelete(){
   box.innerHTML=`<div class="sheet">
     <h3>${tr(`Delete your account?`,`Konto löschen?`,`¿Eliminar tu cuenta?`)}</h3>
     <p>${tr(`This permanently deletes your login, your profile and <b>all saved games</b>. It can't be undone.`,`Login, Profil und <b>alle gespeicherten Spiele</b> werden endgültig gelöscht. Das kann nicht rückgängig gemacht werden.`,`Esto borra para siempre tu acceso, tu perfil y <b>todas las partidas guardadas</b>. No se puede deshacer.`)}</p>
-    <button class="btn danger" id="delYes">🗑️ Delete forever · Endgültig löschen</button>
+    <button class="btn danger" id="delYes">🗑️ ${tr("Delete forever","Endgültig löschen","Eliminar para siempre")}</button>
     <button class="btn ghost" id="delNo">${tr(`Cancel`,`Abbrechen`,`Cancelar`)}</button>
     <p class="note center" id="delMsg"></p></div>`;
   document.body.appendChild(box);
   $("delNo").onclick=()=>box.remove();
   $("delYes").onclick=async()=>{
-    $("delYes").disabled=true; $("delMsg").textContent="Deleting… · Wird gelöscht…";
+    $("delYes").disabled=true; $("delMsg").textContent=tr("Deleting…","Wird gelöscht…","Eliminando…");
     try{
       try{ if(A.profile && A.profile.avatar_url) await avRemoveFile(A.profile.avatar_url); }catch(e){}
       const { error } = await A.sb.rpc("delete_my_account");
       if(error) throw error;
       try{ await A.sb.auth.signOut(); }catch(e){}
       lsSet("pt_queue",null); lsSet("pt_pending",null);
-      A.user=null; A.profile=null; A.games=null; A.status="out"; A.step="email"; A.msg="Your account was deleted · Dein Konto wurde gelöscht";
+      A.user=null; A.profile=null; A.games=null; A.status="out"; A.step="email"; A.msg=tr("Your account was deleted","Dein Konto wurde gelöscht","Tu cuenta fue eliminada");
       box.remove(); render();
     }catch(e){ $("delYes").disabled=false; $("delMsg").textContent=authErr(e); }
   };
