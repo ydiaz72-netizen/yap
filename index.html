@@ -856,6 +856,10 @@
 <p>Free video room, waitlist, reminders, conversation games and free learning materials. Adults only (18+). Please enable JavaScript to use the app.</p>
 </div></noscript>
 <div class="wrap" id="app"></div>
+<script>/* Extra interface languages live in /i18n/<code>.js (English text → translation). Load the chosen one before the app starts. */
+(function(){ try{ var X=["tr","uk","fa"], v=localStorage.getItem("pt_ui");
+  if(!v){ var n=String((navigator.languages&&navigator.languages[0])||navigator.language||"").slice(0,2).toLowerCase(); if(X.indexOf(n)>-1) v=n; }
+  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=1"><\/script>'); }catch(e){} })();</script>
 
 <script>
 /* ===================== CONTENT ===================== */
@@ -1199,17 +1203,39 @@ function langBadge(l){ const t=T[l]; return `<span class="badge" style="backgrou
 function avatar(p,i){ return `<div class="avatar" style="background:${COLORS[i%COLORS.length]}">${esc(p.name.charAt(0).toUpperCase())}</div>`; }
 /* Interface language (one at a time). Screens that are translated use tr()/bi(en,de,es);
    screens not translated yet still show English · Deutsch. */
-const UI_LANGS=[["en","English","🇬🇧"],["de","Deutsch","🇩🇪"],["es","Español","🇪🇸"]];
-let UI=(()=>{ try{ const v=localStorage.getItem("pt_ui"); if(["en","de","es"].includes(v)) return v; }catch(e){}
+const UI_LANGS=[["en","English","🇬🇧"],["de","Deutsch","🇩🇪"],["es","Español","🇪🇸"],["tr","Türkçe","🇹🇷"]];
+const UI_CODES=UI_LANGS.map(x=>x[0]), UI_EXTRA=["tr","uk","fa"], UI_RTL=["fa"];
+window.I18N_DATA=window.I18N_DATA||{};
+let UI=(()=>{ const ok=v=>UI_CODES.includes(v) && (!UI_EXTRA.includes(v) || I18N_DATA[v]);
+  try{ const v=localStorage.getItem("pt_ui"); if(ok(v)) return v; }catch(e){}
   const n=String((navigator.languages&&navigator.languages[0])||navigator.language||"en").slice(0,2).toLowerCase();
-  return ["de","es"].includes(n)?n:"en"; })();
-try{ document.documentElement.lang=UI; }catch(e){}
-function tr(en,de,es){ return UI==="de"?(de??en):UI==="es"?(es??en):en; }
+  return ok(n)?n:"en"; })();
+function uiDir(){ try{ document.documentElement.lang=UI; document.documentElement.dir=UI_RTL.includes(UI)?"rtl":"ltr"; }catch(e){} }
+uiDir();
+/* Extra languages: look up the English text. Sentences with names or numbers inside use {0}, {1} … */
+let I18N_T=null, I18N_M=new Map();
+function trX(en){
+  const D=I18N_DATA[UI]; if(!D || en==null) return en;
+  const hit=D[en]; if(hit!=null) return hit;
+  if(I18N_M.has(en)) return I18N_M.get(en);
+  if(!I18N_T){ I18N_T=[]; for(const k in D) if(k.includes("{0}")){ const parts=k.split(/\{(\d+)\}/), ord=[]; let rx="^";
+      parts.forEach((p,i)=>{ if(i%2){ rx+="([\\s\\S]*?)"; ord.push(+p); } else rx+=p.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"); });
+      I18N_T.push([new RegExp(rx+"$"),ord,D[k]]); } }
+  let out=en;
+  for(const [r,ord,t] of I18N_T){ const mm=r.exec(en); if(mm){ const v={}; ord.forEach((n,i)=>v[n]=mm[i+1]); out=t.replace(/\{(\d+)\}/g,(_,n)=>v[n]??""); break; } }
+  if(I18N_M.size>4000) I18N_M.clear(); I18N_M.set(en,out); return out;
+}
+function tr(en,de,es){ return UI==="de"?(de??en):UI==="es"?(es??en):UI==="en"?en:trX(en); }
 function bi(en,de,es){ if(es!==undefined) return tr(en,de,es); return `${en} <span class="de">· ${de}</span>`; }
 function uiSet(l){
-  if(!["en","de","es"].includes(l)) return; UI=l;
-  try{ localStorage.setItem("pt_ui",l); document.documentElement.lang=l; }catch(e){}
-  xr(); bToast(tr("🌐 Language: English","🌐 Sprache: Deutsch","🌐 Idioma: español"));
+  if(!UI_CODES.includes(l)) return;
+  if(UI_EXTRA.includes(l) && !I18N_DATA[l]){
+    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=1";
+    sc.onload=()=>uiSet(l); sc.onerror=()=>bToast(offlineMsg()); document.head.appendChild(sc); return;
+  }
+  UI=l; I18N_T=null; I18N_M.clear();
+  try{ localStorage.setItem("pt_ui",l); }catch(e){} uiDir();
+  xr(); bToast("🌐 "+(UI_LANGS.find(x=>x[0]===l)||[,""])[1]);
 }
 function uiPicker(){
   return `<div class="uipick" role="group" aria-label="${tr("App language","App-Sprache","Idioma de la app")}">
@@ -6109,7 +6135,7 @@ function mrHtml(){
 }
 /* Strikes: no-shows and late cancels (warn only while strike_blocks_on = 0) */
 function mrNum(n){ n=+n||0; const w=Math.floor(n), h=n-w>=0.5; return (w||!h?String(w):"")+(h?"½":""); }
-function uiLoc(){ return UI==="de"?"de-DE":UI==="es"?"es-ES":"en-GB"; }
+function uiLoc(){ return {de:"de-DE",es:"es-ES",tr:"tr-TR",uk:"uk-UA",fa:"fa-u-ca-gregory"}[UI]||"en-GB"; }
 function mrStrikes(){
   const k=MR.strikes; if(!k) return "";
   const ev=k.events||[], D2=d=>new Date(d).toLocaleDateString(uiLoc(),{day:"numeric",month:"short"});
