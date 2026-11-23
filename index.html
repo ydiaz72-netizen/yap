@@ -229,6 +229,18 @@
   /* ---- Vocabulary flashcards ---- */
   .vccard{background:#fff;border-radius:24px;box-shadow:0 10px 30px rgba(27,42,65,.10);padding:26px 20px;text-align:center;min-height:260px;display:flex;flex-direction:column;justify-content:center;gap:8px}
   .vcw{font-size:34px;font-weight:800;line-height:1.15;overflow-wrap:anywhere}
+  .bbstats{display:grid;grid-template-columns:1fr 1.6fr 1fr;gap:8px;text-align:center}
+  .bbstats div{background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px 4px}
+  .bbstats b{display:block;font-size:16px}.bbstats span{font-size:12px;color:var(--muted)}
+  .bbriver{min-height:76px;border-radius:18px;background:linear-gradient(180deg,#5B8FD8,#2F6FD1);padding:12px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;transition:background .3s}
+  .bbriver.done{background:linear-gradient(180deg,#A0703F,#7A5230)}
+  .bbt{border:0;border-radius:12px;background:var(--c);color:#fff;font:inherit;font-weight:800;font-size:16px;padding:9px 12px;min-height:44px;cursor:pointer;display:inline-flex;flex-direction:column;align-items:center;line-height:1.1}
+  .bbt small{font-size:10px;font-weight:700;opacity:.85;margin-top:2px}
+  .bbt:disabled{opacity:.25;cursor:default}
+  .bbbad .bbt{outline:3px solid #FDF2D8;animation:bbshake .3s}
+  @keyframes bbshake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+  .bbtray{display:flex;flex-direction:column;gap:8px}.bbg{display:flex;flex-wrap:wrap;gap:6px}
+  .bbok{background:#DDEFEC;margin-top:10px}.bbno{background:#FDF2D8;margin-top:10px;font-weight:600}
   .vcw.vcl{font-size:28px}.vcw.vcxl{font-size:23px}
   .vcw .der{color:#2F6FD1}.vcw .die{color:#D9466A}.vcw .das{color:#2A8C82}
   .vcpl{font-size:15px;color:var(--muted);font-weight:600}
@@ -866,7 +878,7 @@
 <script>/* Extra interface languages live in /i18n/<code>.js (English text → translation). Load the chosen one before the app starts. */
 (function(){ try{ var X=["tr","uk","fa","ur"], v=localStorage.getItem("pt_ui");
   if(!v){ var n=String((navigator.languages&&navigator.languages[0])||navigator.language||"").slice(0,2).toLowerCase(); if(X.indexOf(n)>-1) v=n; }
-  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=16"><\/script>'); }catch(e){} })();</script>
+  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=17"><\/script>'); }catch(e){} })();</script>
 
 <script>
 /* ===================== CONTENT ===================== */
@@ -1239,7 +1251,7 @@ function bi(en,de,es){ if(es!==undefined) return tr(en,de,es); return `${en} <sp
 function uiSet(l){
   if(!UI_CODES.includes(l)) return;
   if(UI_EXTRA.includes(l) && !I18N_DATA[l]){
-    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=16";
+    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=17";
     sc.onload=()=>uiSet(l); sc.onerror=()=>bToast(offlineMsg()); document.head.appendChild(sc); return;
   }
   UI=l; I18N_T=null; I18N_M.clear();
@@ -6899,7 +6911,7 @@ function homeRecs(){
 }
 
 /* ===================== BOTTOM BAR ===================== */
-const NAV_TAB = { home:"home", board:"sessions", host:"sessions", session:"sessions", games:"games", account:"profile", xprofile:"profile" };
+const NAV_TAB = { home:"home", bridge:"games", board:"sessions", host:"sessions", session:"sessions", games:"games", account:"profile", xprofile:"profile" };
 const WIDE = { home:"xl", board:"xl", host:"md", session:"md", account:"md", xprofile:"md", games:"md" };
 const ICO = {
   home:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10l9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>',
@@ -8566,6 +8578,159 @@ VIEWS.duel = function(){
       <p class="note">🌍 ${tr("Meanings in:","Bedeutungen auf:","Significados en:")} <select onchange="VC.lang=this.value;vcSaveLocal();xr()">${VC_LANGS.map(([k,l])=>`<option value="${k}" ${VC.lang===k?"selected":""}>${l}</option>`).join("")}</select></p>`
       :`<p class="note">${d.expired?duErr("duel_expired"):duErr("duel_taken")}</p><button class="btn secondary qbtn" onclick="vcOpen()">${tr("Start your own duel","Eigenes Duell starten","Empieza tu duelo")}</button>`}</div>`;
 };
+/* ---------- 🌉 Brückenbauer (Bridge Builder): build German sentences from word tiles. German only, solo, progress on this device. ----------
+   Tile roles: S subject · V verb (conjugated) · M modal (conjugated) · I infinitive · O object · T time · P place · A gerne
+   Persons: 1 ich · 2 du · 3 er/sie · 4 wir */
+const BB_THEMES={
+ cafe:{ e:"☕", en:"Café", de:"Café", es:"Café", tiles:[
+  ["ich","S",{p:1}],["du","S",{p:2}],["wir","S",{p:4}],["Lena","S",{p:3}],
+  ["trinke","V",{p:1,v:"trinken"}],["trinkst","V",{p:2,v:"trinken"}],["trinken","V",{p:4,v:"trinken"}],["trinkt","V",{p:3,v:"trinken"}],
+  ["esse","V",{p:1,v:"essen"}],["isst","V",{p:2,v:"essen"}],["essen","V",{p:4,v:"essen"}],
+  ["möchte","M",{p:1}],["möchtest","M",{p:2}],["möchten","M",{p:4}],
+  ["trinken","I",{v:"trinken"}],["essen","I",{v:"essen"}],["bestellen","I",{v:"bestellen"}],
+  ["einen Kaffee","O",{k:"drink"}],["einen Tee","O",{k:"drink"}],["ein Wasser","O",{k:"drink"}],["eine Brezel","O",{k:"food"}],["ein Stück Kuchen","O",{k:"food"}],
+  ["heute","T"],["morgen","T"],["am Wochenende","T"],["im Café","P"],["zu Hause","P"],["gerne","A"]],
+  fit:{trinken:["drink"],essen:["food"],bestellen:["drink","food"]} },
+ week:{ e:"🏖️", en:"Weekend", de:"Wochenende", es:"Fin de semana", tiles:[
+  ["ich","S",{p:1}],["du","S",{p:2}],["wir","S",{p:4}],["Tom","S",{p:3}],
+  ["lese","V",{p:1,v:"lesen"}],["liest","V",{p:2,v:"lesen"}],["lesen","V",{p:4,v:"lesen"}],
+  ["spiele","V",{p:1,v:"spielen"}],["spielst","V",{p:2,v:"spielen"}],["spielen","V",{p:4,v:"spielen"}],["spielt","V",{p:3,v:"spielen"}],
+  ["möchte","M",{p:1}],["möchtest","M",{p:2}],["möchten","M",{p:4}],["kann","M",{p:1}],["kannst","M",{p:2}],
+  ["lesen","I",{v:"lesen"}],["spielen","I",{v:"spielen"}],["sehen","I",{v:"sehen"}],
+  ["ein Buch","O",{k:"read"}],["die Zeitung","O",{k:"read"}],["Fußball","O",{k:"game"}],["Karten","O",{k:"game"}],["einen Film","O",{k:"watch"}],
+  ["am Samstag","T"],["am Sonntag","T"],["heute Abend","T"],["im Park","P"],["zu Hause","P"],["gerne","A"]],
+  fit:{lesen:["read"],spielen:["game"],sehen:["watch"]} },
+ learn:{ e:"📚", en:"Learning German", de:"Deutsch lernen", es:"Aprender alemán", tiles:[
+  ["ich","S",{p:1}],["du","S",{p:2}],["wir","S",{p:4}],["Sarah","S",{p:3}],
+  ["lerne","V",{p:1,v:"lernen"}],["lernst","V",{p:2,v:"lernen"}],["lernen","V",{p:4,v:"lernen"}],["lernt","V",{p:3,v:"lernen"}],
+  ["übe","V",{p:1,v:"üben"}],["übst","V",{p:2,v:"üben"}],["üben","V",{p:4,v:"üben"}],
+  ["möchte","M",{p:1}],["möchtest","M",{p:2}],["möchten","M",{p:4}],["muss","M",{p:1}],["musst","M",{p:2}],
+  ["lernen","I",{v:"lernen"}],["üben","I",{v:"üben"}],["sprechen","I",{v:"sprechen"}],
+  ["Deutsch","O",{k:"lang"}],["Vokabeln","O",{k:"words"}],["die Grammatik","O",{k:"words"}],
+  ["jeden Tag","T"],["heute","T"],["am Abend","T"],["im Kurs","P"],["zu Hause","P"],["gerne","A"]],
+  fit:{lernen:["lang","words"],üben:["lang","words"],sprechen:["lang"]} }
+};
+/* challenges: English prompt + accepted answers (tile texts in order). Level 1: S-V-O · 2: time first, verb stays 2nd · 3: modal + infinitive at the end */
+const BB_CH=[
+ { lv:1, th:"cafe", items:[["I drink a coffee.",["ich trinke einen Kaffee"]],["You eat a pretzel.",["du isst eine Brezel"]],["We drink a tea.",["wir trinken einen Tee"]],["Lena drinks a water.",["Lena trinkt ein Wasser"]],["I like eating a piece of cake.",["ich esse gerne ein Stück Kuchen"]]]},
+ { lv:2, th:"week", items:[["On Saturday I read a book.",["am Samstag lese ich ein Buch","ich lese am Samstag ein Buch"]],["Tonight we play cards.",["heute Abend spielen wir Karten","wir spielen heute Abend Karten"]],["On Sunday you play football in the park.",["am Sonntag spielst du im Park Fußball","am Sonntag spielst du Fußball im Park","du spielst am Sonntag im Park Fußball","du spielst am Sonntag Fußball im Park"]],["At home I read the newspaper.",["zu Hause lese ich die Zeitung","ich lese zu Hause die Zeitung"]],["On Saturday Tom plays football.",["am Samstag spielt Tom Fußball","Tom spielt am Samstag Fußball"]]]},
+ { lv:3, th:"learn", items:[["I want to learn German.",["ich möchte Deutsch lernen"]],["Today we want to practise vocabulary.",["heute möchten wir Vokabeln üben","wir möchten heute Vokabeln üben"]],["You have to learn the grammar.",["du musst die Grammatik lernen"]],["Every day I want to speak German.",["jeden Tag möchte ich Deutsch sprechen","ich möchte jeden Tag Deutsch sprechen"]],["In class I have to practise German.",["im Kurs muss ich Deutsch üben","ich muss im Kurs Deutsch üben"]]]}
+];
+const BB_LV=[0,40,110,220,360];  /* points needed for level 1..5 (levels 4+ are ranks for now) */
+const BB={ mode:"free", th:"cafe", row:[], res:null, ch:null, s:null };
+function bbLoad(){ if(BB.s) return; try{ BB.s=JSON.parse(localStorage.getItem("pt_bb")||"null"); }catch(e){} BB.s=BB.s||{ pts:0, best:0, n:0, streak:0, made:{}, ch:{} }; }
+function bbSave(){ try{ localStorage.setItem("pt_bb",JSON.stringify(BB.s)); }catch(e){} }
+function bbLevel(){ let l=1; for(let i=1;i<BB_LV.length;i++) if(BB.s.pts>=BB_LV[i]) l=i+1; return l; }
+function bbRank(l){ return ["🪵 "+tr("Plank","Planke","Tablón"),"🧱 "+tr("Builder","Bauarbeiter*in","Constructor/a"),"🌉 "+tr("Bridge builder","Brückenbauer*in","Constructor/a de puentes"),"🏗️ "+tr("Engineer","Ingenieur*in","Ingeniero/a"),"🏆 "+tr("Master builder","Baumeister*in","Maestro/a constructor/a")][Math.min(l,5)-1]; }
+function bbTiles(){ const T=BB_THEMES[BB.th], lv=Math.min(bbLevel(),3);
+  return T.tiles.map((t,i)=>({ id:i, t:t[0], r:t[1], ...(t[2]||{}) })).filter(x=>lv>=3||(x.r!=="M"&&x.r!=="I")).filter(x=>lv>=2||(x.r!=="T"&&x.r!=="P")); }
+function bbOpen(){ bbLoad(); BB.row=[]; BB.res=null; go("bridge"); }
+function bbAdd(id){ if(BB.row.includes(id)||BB.row.length>=9) return; BB.row.push(id); BB.res=null; xr(); }
+function bbDel(k){ BB.row.splice(k,1); BB.res=null; xr(); }
+function bbClear(){ BB.row=[]; BB.res=null; xr(); }
+const BB_COL={ S:"#2F4B7C", V:"#F25C3B", M:"#D9481F", I:"#C2401F", O:"#2A8C82", T:"#E8A21A", P:"#7B5BC4", A:"#5B6474" };
+function bbRole(r){ return {S:tr("who","wer","quién"),V:tr("verb","Verb","verbo"),M:tr("verb","Verb","verbo"),I:tr("verb (end)","Verb (Ende)","verbo (final)"),O:tr("what","was","qué"),T:tr("when","wann","cuándo"),P:tr("where","wo","dónde"),A:tr("extra","extra","extra")}[r]; }
+/* the grammar check: returns {ok, bad:[index], msg, pts, why:[...]} */
+function bbCheck(ws, th){
+  const R=ws.map(w=>w.r), err=(i,m)=>({ ok:false, bad:[].concat(i), msg:m });
+  if(ws.length<3) return err([], tr("Use at least 3 tiles.","Nimm mindestens 3 Kärtchen.","Usa al menos 3 fichas."));
+  const fin=ws.map((w,i)=>w.r==="V"||w.r==="M"?i:-1).filter(i=>i>=0), subj=ws.map((w,i)=>w.r==="S"?i:-1).filter(i=>i>=0);
+  if(!subj.length) return err([], tr("Who? Add a subject (ich, du, wir…).","Wer? Nimm ein Subjekt (ich, du, wir…).","¿Quién? Añade un sujeto (ich, du, wir…)."));
+  if(subj.length>1) return err(subj.slice(1), tr("Only one subject per sentence.","Nur ein Subjekt pro Satz.","Solo un sujeto por frase."));
+  if(!fin.length) return err([], tr("Every sentence needs a verb that matches the subject.","Jeder Satz braucht ein Verb, das zum Subjekt passt.","Cada frase necesita un verbo que concuerde con el sujeto."));
+  if(fin.length>1) return err(fin.slice(1), tr("Only one conjugated verb. For two verbs use möchte + infinitive.","Nur ein konjugiertes Verb. Für zwei Verben: möchte + Infinitiv.","Solo un verbo conjugado. Para dos verbos: möchte + infinitivo."));
+  const f=fin[0], s=subj[0], vw=ws[f], sw=ws[s];
+  if(f!==1) return err(f, tr("The verb goes in position 2.","Das Verb steht auf Position 2.","El verbo va en la posición 2."));
+  if(vw.p!==sw.p) return err(f, tr(`The verb must match “${sw.t}”.`,`Das Verb muss zu „${sw.t}“ passen.`,`El verbo debe concordar con «${sw.t}».`));
+  if(s!==0 && s!==2) return err(s, tr(`Something else is first, so the subject comes right after the verb: ${ws[0].t} ${vw.t} ${sw.t} …`,`Etwas anderes steht vorne, also kommt das Subjekt direkt nach dem Verb: ${ws[0].t} ${vw.t} ${sw.t} …`,`Algo va delante, así que el sujeto va justo después del verbo: ${ws[0].t} ${vw.t} ${sw.t} …`));
+  if(s!==0 && !["T","P","O","A"].includes(R[0])) return err(0, tr("Start with the subject or a time/place word.","Fang mit dem Subjekt oder einer Zeit-/Ortsangabe an.","Empieza con el sujeto o con una palabra de tiempo/lugar."));
+  const inf=ws.map((w,i)=>w.r==="I"?i:-1).filter(i=>i>=0);
+  if(vw.r==="M"){ if(!inf.length) return err(f, tr(`“${vw.t}” needs a verb in the infinitive at the end.`,`„${vw.t}“ braucht ein Verb im Infinitiv am Ende.`,`«${vw.t}» necesita un verbo en infinitivo al final.`));
+    if(inf.length>1) return err(inf.slice(1), tr("Only one infinitive at the end.","Nur ein Infinitiv am Ende.","Solo un infinitivo al final."));
+    if(inf[0]!==ws.length-1) return err(inf[0], tr("The infinitive goes to the very end.","Der Infinitiv kommt ganz ans Ende.","El infinitivo va al final de todo.")); }
+  else if(inf.length) return err(inf, tr("This verb form needs möchte, kann or muss.","Diese Verbform braucht möchte, kann oder muss.","Esta forma del verbo necesita möchte, kann o muss."));
+  const cnt=r=>R.filter(x=>x===r).length;
+  if(cnt("O")>1) return err(ws.map((w,i)=>w.r==="O"?i:-1).filter(i=>i>=0).slice(1), tr("One object is enough here.","Ein Objekt reicht hier.","Aquí basta un objeto."));
+  if(cnt("T")>1||cnt("P")>1) return err([], tr("Use one time word and one place word at most.","Höchstens eine Zeit- und eine Ortsangabe.","Como mucho una palabra de tiempo y una de lugar."));
+  const ti=R.indexOf("T"), oi=R.indexOf("O"), pi=R.indexOf("P");
+  if(ti>1 && ((oi>1&&oi<ti)||(pi>1&&pi<ti))) return err(ti, tr("Time words come early: Ich trinke heute einen Kaffee.","Zeitangaben kommen früh: Ich trinke heute einen Kaffee.","El tiempo va pronto: Ich trinke heute einen Kaffee."));
+  const ai=R.indexOf("A"); if(ai>1 && oi>1 && ai>oi) return err(ai, tr("gerne goes right after the verb (or the subject): Ich trinke gerne Tee.","gerne steht direkt nach dem Verb (oder Subjekt): Ich trinke gerne Tee.","gerne va justo después del verbo (o del sujeto): Ich trinke gerne Tee."));
+  /* points */
+  const why=[]; let pts=ws.length; why.push([tr(`${ws.length} words`,`${ws.length} Wörter`,`${ws.length} palabras`),ws.length]);
+  if(s===2 && ["T","P"].includes(R[0])){ pts+=4; why.push([tr("Time/place first, verb stays 2nd","Zeit/Ort vorne, Verb bleibt auf 2","Tiempo/lugar delante, verbo en 2.º"),4]); }
+  if(vw.r==="M"){ pts+=5; why.push([tr("Modal + infinitive at the end","Modalverb + Infinitiv am Ende","Modal + infinitivo al final"),5]); }
+  if(cnt("T")&&cnt("P")){ pts+=2; why.push([tr("When + where","Wann + wo","Cuándo + dónde"),2]); }
+  if(cnt("A")){ pts+=2; why.push(["gerne",2]); }
+  const verb=vw.r==="M"&&inf.length?ws[inf[0]].v:vw.v, ow=oi>=0?ws[oi]:null, fit=BB_THEMES[th].fit[verb];
+  const funny=!!(ow&&fit&&!fit.includes(ow.k));
+  return { ok:true, pts, why, funny };
+}
+/* "lernen" can be "wir lernen" (V) or the infinitive after möchte (I): pick the role that fits the sentence */
+function bbNorm(ws, th){ const T=BB_THEMES[th].tiles, hasM=ws.some(w=>w.r==="M");
+  return ws.map((w,k)=>{ if(w.r!=="V"&&w.r!=="I") return w;
+    const want=hasM&&k===ws.length-1?"I":(hasM?w.r:"V"); if(w.r===want) return w;
+    const i=T.findIndex(t=>t[0]===w.t&&t[1]===want); return i>=0?{ id:w.id, t:w.t, r:want, ...(T[i][2]||{}) }:w; }); }
+function bbSentence(ws){ const s=ws.map(w=>w.t).join(" "); return s.charAt(0).toUpperCase()+s.slice(1)+"."; }
+function bbGo(){
+  const tiles=bbTiles(), ws=BB.row.map(id=>tiles.find(t=>t.id===id)).filter(Boolean);
+  if(BB.mode==="ch") return bbChCheck(ws);
+  const r=bbCheck(bbNorm(ws,BB.th),BB.th); BB.res=r;
+  if(r.ok){ const key=BB.th+":"+ws.map(w=>w.t).join(" ").toLowerCase(), lv0=bbLevel();
+    if(BB.s.made[key]){ r.repeat=true; r.pts=0; }
+    else { BB.s.streak++; if(BB.s.streak>=3){ const b=Math.round(r.pts*0.5); r.pts+=b; r.why.push([`🔥 ${tr("Streak","Serie","Racha")} ×1.5`,b]); }
+      BB.s.made[key]=1; BB.s.pts+=r.pts; BB.s.n++; BB.s.best=Math.max(BB.s.best,r.pts); }
+    r.up=bbLevel()>lv0; bbSave(); }
+  else { BB.s.streak=0; bbSave(); }
+  xr();
+}
+function bbChStart(k){ bbLoad(); const c=BB_CH[k]; BB.mode="ch"; BB.th=c.th; BB.ch={ k, i:0, ok:0, tries:0 }; BB.row=[]; BB.res=null; go("bridge"); }
+function bbChTiles(){ const c=BB_CH[BB.ch.k], T=BB_THEMES[c.th].tiles.map((t,i)=>({ id:i, t:t[0], r:t[1], ...(t[2]||{}) }));
+  const need=c.items[BB.ch.i][1][0].split(" "), used=new Set(), pick=[];
+  /* tiles of the first answer, matched greedily (multi-word tiles first), plus a few distractors */
+  let rest=c.items[BB.ch.i][1][0];
+  const byLen=[...T].sort((a,b)=>b.t.length-a.t.length);
+  while(rest.trim()){ rest=rest.trim(); const m=byLen.find(t=>!used.has(t.id)&&(rest===t.t||rest.startsWith(t.t+" "))&&(c.lv>=3||t.r!=="I")); if(!m) break; used.add(m.id); pick.push(m); rest=rest.slice(m.t.length); }
+  const rnd=duRand("bb"+BB.ch.k+"-"+BB.ch.i), others=T.filter(t=>!used.has(t.id)&&(c.lv>=3||(t.r!=="M"&&t.r!=="I"))&&(c.lv>=2||(t.r!=="T"&&t.r!=="P")));
+  for(let n=0;n<4&&others.length;){ const o=others.splice(Math.floor(rnd()*others.length),1)[0]; if(pick.some(x=>x.t===o.t)) continue; pick.push(o); n++; }
+  return pick.sort((a,b)=>a.id-b.id); }
+function bbChCheck(ws){ const c=BB_CH[BB.ch.k], it=c.items[BB.ch.i], got=ws.map(w=>w.t).join(" ").toLowerCase();
+  const ok=it[1].some(a=>a.toLowerCase()===got); BB.ch.tries++;
+  if(ok){ const p=BB.ch.tries===1?10:5; BB.ch.ok+= BB.ch.tries===1?1:0; BB.s.pts+=p; bbSave(); BB.res={ ok:true, pts:p, why:[[BB.ch.tries===1?tr("First try!","Beim ersten Versuch!","¡A la primera!"):tr("Solved","Gelöst","Resuelto"),p]] }; }
+  else { const g=bbCheck(bbNorm(ws,c.th),c.th); BB.res=g.ok?{ ok:false, bad:[], msg:tr("Good German, but not what the English says. Look again!","Gutes Deutsch, aber nicht das, was auf Englisch steht. Schau noch mal!","Buen alemán, pero no es lo que dice el inglés. ¡Mira otra vez!") }:g; }
+  xr(); }
+function bbChNext(){ const c=BB_CH[BB.ch.k]; BB.ch.i++; BB.ch.tries=0; BB.row=[]; BB.res=null;
+  if(BB.ch.i>=c.items.length){ const st=BB.ch.ok>=5?3:BB.ch.ok>=3?2:1; BB.s.ch[BB.ch.k]=Math.max(BB.s.ch[BB.ch.k]||0,st); bbSave(); BB.ch.done=st; }
+  xr(); }
+function bbTile(w,used,k){ return `<button class="bbt" style="--c:${BB_COL[w.r]}" ${used?"disabled":""} onclick="${k==null?`bbAdd(${w.id})`:`bbDel(${k})`}" lang="de">${esc(w.t)}${k==null?`<small>${bbRole(w.r)}</small>`:""}</button>`; }
+VIEWS.bridge = function(){
+  bbLoad(); const lv=bbLevel(), next=BB_LV[lv]||null, ch=BB.mode==="ch"&&BB.ch, c=ch?BB_CH[BB.ch.k]:null;
+  const top=`<div class="topline"><button class="chip" onclick="${ch?"BB.mode='free';BB.ch=null;BB.row=[];BB.res=null;xr()":"go('games')"}">${uiBack()} ${ch?tr("Bridge Builder","Brückenbauer","Constructor de puentes"):tr("Games","Spiele","Juegos")}</button><span>🇩🇪 ${tr("German only","Nur Deutsch","Solo alemán")}</span></div>`;
+  const stats=`<div class="bbstats"><div><b>${BB.s.pts}</b><span>${tr("points","Punkte","puntos")}</span></div><div><b>${bbRank(lv)}</b><span>${tr("Level","Level","Nivel")} ${lv}${next?` · ${next-BB.s.pts} ${tr("to go","fehlen","faltan")}`:""}</span></div><div><b>${BB.s.streak?"🔥 "+BB.s.streak:"–"}</b><span>${tr("streak","Serie","racha")}</span></div></div>
+    ${next?`<div class="exbar" style="margin:6px 0 12px"><i style="width:${Math.round((BB.s.pts-(BB_LV[lv-1]||0))/(next-(BB_LV[lv-1]||0))*100)}%"></i></div>`:""}`;
+  if(ch&&BB.ch.done) return top+`<div class="card center"><div style="font-size:54px">${"⭐".repeat(BB.ch.done)}</div><h2>${tr("Challenge done!","Challenge geschafft!","¡Reto superado!")}</h2>
+    <p class="note">${tr(`${BB.ch.ok} of 5 on the first try.`,`${BB.ch.ok} von 5 beim ersten Versuch.`,`${BB.ch.ok} de 5 a la primera.`)}</p>
+    <button class="btn primary qbtn" onclick="BB.mode='free';BB.ch=null;BB.row=[];BB.res=null;xr()">${tr("Back to Bridge Builder","Zurück zum Brückenbauer","Volver al constructor")}</button></div>`;
+  const tiles=ch?bbChTiles():bbTiles(), row=BB.row.map(id=>tiles.find(t=>t.id===id)).filter(Boolean), r=BB.res;
+  const groups=["S","V","M","I","O","T","P","A"].filter(g=>tiles.some(t=>t.r===g));
+  const bad=new Set(r&&!r.ok?r.bad||[]:[]);
+  return top+`<h2 style="margin:4px 0">🌉 ${tr("Bridge Builder","Brückenbauer","Constructor de puentes")}</h2>${stats}
+    ${ch?`<div class="card" style="margin-bottom:10px"><div class="ecmeta">🎯 ${tr("Challenge","Challenge","Reto")} ${tr("Level","Level","Nivel")} ${c.lv} · ${BB.ch.i+1} / ${c.items.length}</div><div style="font-size:20px;font-weight:800;margin-top:4px">${esc(c.items[BB.ch.i][0])}</div></div>`
+      :`<div class="row" style="gap:6px;flex-wrap:wrap;margin-bottom:10px">${Object.entries(BB_THEMES).map(([k,t])=>`<button class="chip ${BB.th===k?"on":""}" onclick="BB.th='${k}';BB.row=[];BB.res=null;xr()">${t.e} ${tr(t.en,t.de,t.es)}</button>`).join("")}</div>`}
+    <div class="bbriver ${r&&r.ok?"done":""}" aria-label="${tr("Your sentence","Dein Satz","Tu frase")}">
+      ${row.length?row.map((w,k)=>`<span class="${bad.has(k)?"bbbad":""}">${bbTile(w,false,k)}</span>`).join(""):`<span class="note" style="margin:0;color:#fff">${tr("Tap the words below to build your sentence →","Tippe unten auf die Wörter und bau deinen Satz →","Toca las palabras de abajo para construir tu frase →")}</span>`}
+    </div>
+    ${r?(r.ok?`<div class="card bbok"><div style="font-size:22px;font-weight:800">${r.repeat?tr("Built before, so no new points. Try a new sentence!","Schon gebaut, keine neuen Punkte. Probier einen neuen Satz!","Ya la construiste, sin puntos nuevos. ¡Prueba otra!"):`🌉 +${r.pts} ${tr("points","Punkte","puntos")}`}</div>
+        ${r.repeat?"":`<div class="note" style="margin:4px 0 0">${r.why.map(([a,b])=>`${esc(a)} +${b}`).join(" · ")}</div>`}
+        ${r.funny?`<div class="note" style="margin:4px 0 0">😂 ${tr("Perfect grammar, funny meaning!","Grammatik perfekt, Bedeutung lustig!","¡Gramática perfecta, significado gracioso!")}</div>`:""}
+        ${r.up?`<div style="font-weight:800;margin-top:6px">🎉 ${tr("Level up!","Level up!","¡Subes de nivel!")} ${bbRank(bbLevel())} ${tr("New tiles unlocked.","Neue Kärtchen freigeschaltet.","Nuevas fichas desbloqueadas.")}</div>`:""}
+        <button class="btn primary qbtn" style="margin-top:10px" onclick="${ch?"bbChNext()":"bbClear()"}">${ch?tr("Next","Weiter","Siguiente"):tr("Build another","Noch einen bauen","Construir otra")} →</button></div>`
+      :`<div class="card bbno">💡 ${esc(r.msg)}</div>`):""}
+    ${r&&r.ok?"":`<div class="row" style="gap:8px;margin:10px 0"><button class="btn primary" style="flex:2" ${row.length?"":"disabled"} onclick="bbGo()">✅ ${tr("Check","Prüfen","Comprobar")}</button><button class="btn secondary" style="flex:1" ${row.length?"":"disabled"} onclick="BB.row.pop();BB.res=null;xr()">↩</button><button class="btn secondary" style="flex:1" ${row.length?"":"disabled"} onclick="bbClear()">🗑</button></div>`}
+    <div class="card bbtray">${groups.map(g=>`<div class="bbg">${tiles.filter(t=>t.r===g).map(t=>bbTile(t,BB.row.includes(t.id))).join("")}</div>`).join("")}</div>
+    ${ch?"":`<div class="card"><h3 style="margin:0 0 6px">🎯 ${tr("Challenges","Challenges","Retos")}</h3><p class="note" style="margin:0 0 8px">${tr("Build the German sentence for each English one. 5 sentences each.","Bau zu jedem englischen Satz den deutschen. Je 5 Sätze.","Construye la frase alemana para cada frase en inglés. 5 frases cada uno.")}</p>
+      ${BB_CH.map((cc,k)=>{ const open=k===0||(BB.s.ch[k-1]||0)>0; return `<button class="ectop" style="width:100%;background:none;border:0;border-top:1px solid var(--line);padding:10px 0;font:inherit;cursor:${open?"pointer":"default"};opacity:${open?1:.5}" ${open?`onclick="bbChStart(${k})"`:"disabled"}><span>${["1 · Ich lerne Deutsch.","2 · Heute lerne ich Deutsch.","3 · Ich möchte Deutsch lernen."][k]}</span><b>${BB.s.ch[k]?"⭐".repeat(BB.s.ch[k]):open?"▶️":"🔒"}</b></button>`; }).join("")}</div>
+    <p class="note center">${tr("Your points are saved on this device.","Deine Punkte werden auf diesem Gerät gespeichert.","Tus puntos se guardan en este dispositivo.")}</p>`}`;
+};
 /* ---------- quick level check ---------- */
 function vcCheckStart(){ if(!VC.d) return; const list=[];
   for(const lv of VC_LEVELS){ const pool=vcLv(lv).filter(w=>!(VC.p[w.id]&&VC.p[w.id].r)); list.push(...exShuffle(pool).slice(0,8)); }
@@ -8625,6 +8790,7 @@ VIEWS.vocab = function(){
     <div class="card"><h3 style="margin:0 0 4px">🎲 ${tr("Quick games","Schnelle Spiele","Juegos rápidos")}</h3>
       <button class="btn secondary qbtn" onclick="VC.gtRule=null;vcStart('gender')">🔵🔴🟢 der · die · das (${tr("20 nouns","20 Nomen","20 sustantivos")})</button>
       <button class="btn secondary qbtn" style="margin-top:8px" onclick="go('vocabg')">💡 ${tr("der · die · das tips","der · die · das Tipps","Consejos der · die · das")}</button>
+      <button class="btn secondary qbtn" style="margin-top:8px" onclick="bbOpen()">🌉 ${tr("Bridge Builder: build sentences","Brückenbauer: Sätze bauen","Constructor de puentes: frases")}</button>
       ${duCard()}</div>
     <div class="card"><h3 style="margin:0 0 6px">🗂️ ${tr("Topics","Themen","Temas")} (${VC.level})</h3><div class="vcth">${Object.entries(VC.d.themes).map(([k,t])=>{ const ws=vcLv(VC.level).filter(w=>w.t===k); if(!ws.length) return ""; const s2=vcStats(ws);
       const lab=VC.lang==="es"?t[2]:VC.lang==="ar"?t[3]:VC.lang==="fa"?t[4]:t[1];
@@ -9346,6 +9512,8 @@ VIEWS.games = function(){
     <div class="card"><h3>🌐 ${tr("Play online","Online spielen","Jugar online")}</h3><p class="note">${tr("Everyone on their own phone, with a room code.","Jede/r am eigenen Handy, mit Raumcode.","Cada uno en su móvil, con un código de sala.")}</p>
       <button class="btn secondary" onclick="O.err='';go('online')">${tr("Create or join a room","Raum erstellen oder beitreten","Crear o unirse a una sala")}</button></div>
   </div>
+  <div class="card"><h3>🌉 ${tr("Bridge Builder","Brückenbauer","Constructor de puentes")} <span class="note" style="font-weight:600">· 🇩🇪 ${tr("solo, German only","allein, nur Deutsch","solo, solo alemán")}</span></h3><p class="note">${tr("Build German sentences from word tiles. The better the word order and the longer the sentence, the more points.","Bau deutsche Sätze aus Wort-Kärtchen. Je besser die Satzstellung und je länger der Satz, desto mehr Punkte.","Construye frases en alemán con fichas. Cuanto mejor el orden y más larga la frase, más puntos.")}</p>
+    <button class="btn primary" onclick="bbOpen()">${tr("Play","Spielen","Jugar")}</button></div>
   <div class="card"><h3>📅 ${tr("Game nights","Spieleabende","Noches de juegos")}</h3><p class="note">${tr("Join a scheduled game session with people from around the world.","Mach bei einem geplanten Spieleabend mit Leuten aus aller Welt mit.","Únete a una sesión de juego programada con gente de todo el mundo.")}</p>
     <button class="btn secondary" onclick="bOpen()">${tr("See sessions","Sessions ansehen","Ver sesiones")}</button></div>
   ${legalLinks()}`;
