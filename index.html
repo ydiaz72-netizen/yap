@@ -250,6 +250,7 @@
   .bbqbar{position:relative;height:16px;border-radius:9px;background:#EEE;margin-top:5px;overflow:hidden}.bbqbar i{display:block;height:100%;background:#E8A21A}
   .bbqr.ok .bbqbar i{background:#2A8C82}.bbqbar span{position:absolute;inset:0;font-size:11px;font-weight:800;display:grid;place-items:center}
   .bbqdone{margin-top:6px;font-weight:700;font-size:14px}.bbqdone b{color:#F25C3B}
+  .bbcomma{color:#fff;font-weight:900;font-size:22px;margin:0 -2px}
   .bbsk{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}.bbsk span{font-size:12px;font-weight:700;background:#EEF2FA;color:#2F4B7C;border-radius:999px;padding:4px 9px}
   .bbround{display:flex;align-items:center;gap:8px;margin:2px 0 8px;font-size:13px;font-weight:700}.bbround div{flex:1;display:flex;gap:4px}
   .bbround i{flex:1;height:10px;border-radius:6px;background:#E4E1DA}.bbround i.on{background:#A0703F}
@@ -898,7 +899,7 @@
 <script>/* Extra interface languages live in /i18n/<code>.js (English text → translation). Load the chosen one before the app starts. */
 (function(){ try{ var X=["tr","uk","fa","ur"], v=localStorage.getItem("pt_ui");
   if(!v){ var n=String((navigator.languages&&navigator.languages[0])||navigator.language||"").slice(0,2).toLowerCase(); if(X.indexOf(n)>-1) v=n; }
-  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=19"><\/script>'); }catch(e){} })();</script>
+  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=20"><\/script>'); }catch(e){} })();</script>
 
 <script>
 /* ===================== CONTENT ===================== */
@@ -1271,7 +1272,7 @@ function bi(en,de,es){ if(es!==undefined) return tr(en,de,es); return `${en} <sp
 function uiSet(l){
   if(!UI_CODES.includes(l)) return;
   if(UI_EXTRA.includes(l) && !I18N_DATA[l]){
-    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=19";
+    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=20";
     sc.onload=()=>uiSet(l); sc.onerror=()=>bToast(offlineMsg()); document.head.appendChild(sc); return;
   }
   UI=l; I18N_T=null; I18N_M.clear();
@@ -8620,6 +8621,22 @@ const BB_THEMES={
   ["ein Buch","O",{k:"read"}],["die Zeitung","O",{k:"read"}],["Fußball","O",{k:"game"}],["Karten","O",{k:"game"}],["einen Film","O",{k:"watch"}],
   ["am Samstag","T"],["am Sonntag","T"],["heute Abend","T"],["im Park","P"],["zu Hause","P"],["gerne","A"]],
   fit:{lesen:["read"],spielen:["game"],sehen:["watch"]} },
+ past:{ e:"⏪", en:"Yesterday", de:"Gestern", es:"Ayer", lv:4, tiles:[
+  ["ich","S",{p:1}],["du","S",{p:2}],["wir","S",{p:4}],["Lena","S",{p:3}],
+  ["habe","H",{p:1,a:"haben"}],["hast","H",{p:2,a:"haben"}],["hat","H",{p:3,a:"haben"}],["haben","H",{p:4,a:"haben"}],
+  ["bin","H",{p:1,a:"sein"}],["bist","H",{p:2,a:"sein"}],["ist","H",{p:3,a:"sein"}],["sind","H",{p:4,a:"sein"}],
+  ["gegessen","Pa",{v:"essen",a:"haben"}],["getrunken","Pa",{v:"trinken",a:"haben"}],["gespielt","Pa",{v:"spielen",a:"haben"}],["gelernt","Pa",{v:"lernen",a:"haben"}],["gegangen","Pa",{v:"gehen",a:"sein"}],["gefahren","Pa",{v:"fahren",a:"sein"}],
+  ["eine Pizza","O",{k:"food"}],["einen Kaffee","O",{k:"drink"}],["Fußball","O",{k:"game"}],["Deutsch","O",{k:"lang"}],
+  ["gestern","T"],["letzte Woche","T"],["am Wochenende","T"],["ins Kino","P"],["nach Berlin","P"],["im Park","P"]],
+  fit:{essen:["food"],trinken:["drink"],spielen:["game"],lernen:["lang"],gehen:[],fahren:[]} },
+ why:{ e:"🤔", en:"Why? weil & dass", de:"Warum? weil & dass", es:"¿Por qué? weil y dass", lv:5, reuse:true, tiles:[
+  ["ich","S",{p:1}],["du","S",{p:2}],["wir","S",{p:4}],["Lena","S",{p:3}],
+  ["lerne","V",{p:1,v:"lernen"}],["lernst","V",{p:2,v:"lernen"}],["lernt","V",{p:3,v:"lernen"}],["lernen","V",{p:4,v:"lernen"}],
+  ["lebe","V",{p:1,v:"leben"}],["lebst","V",{p:2,v:"leben"}],["lebt","V",{p:3,v:"leben"}],["leben","V",{p:4,v:"leben"}],
+  ["arbeite","V",{p:1,v:"arbeiten"}],["arbeitest","V",{p:2,v:"arbeiten"}],["arbeitet","V",{p:3,v:"arbeiten"}],["arbeiten","V",{p:4,v:"arbeiten"}],
+  ["glaube","V",{p:1,v:"glauben"}],["glaubst","V",{p:2,v:"glauben"}],["glaubt","V",{p:3,v:"glauben"}],["glauben","V",{p:4,v:"glauben"}],
+  ["Deutsch","O",{k:"lang"}],["heute","T"],["jeden Tag","T"],["in Deutschland","P"],["in Erfurt","P"],["weil","K"],["dass","K"]],
+  fit:{lernen:["lang"],leben:[],arbeiten:[],glauben:[]} },
  learn:{ e:"📚", en:"Learning German", de:"Deutsch lernen", es:"Aprender alemán", tiles:[
   ["ich","S",{p:1}],["du","S",{p:2}],["wir","S",{p:4}],["Sarah","S",{p:3}],
   ["lerne","V",{p:1,v:"lernen"}],["lernst","V",{p:2,v:"lernen"}],["lernen","V",{p:4,v:"lernen"}],["lernt","V",{p:3,v:"lernen"}],
@@ -8634,7 +8651,9 @@ const BB_THEMES={
 const BB_CH=[
  { lv:1, th:"cafe", items:[["I drink a coffee.",["ich trinke einen Kaffee"]],["You eat a pretzel.",["du isst eine Brezel"]],["We drink a tea.",["wir trinken einen Tee"]],["Lena drinks a water.",["Lena trinkt ein Wasser"]],["I like eating a piece of cake.",["ich esse gerne ein Stück Kuchen"]]]},
  { lv:2, th:"week", items:[["On Saturday I read a book.",["am Samstag lese ich ein Buch","ich lese am Samstag ein Buch"]],["Tonight we play cards.",["heute Abend spielen wir Karten","wir spielen heute Abend Karten"]],["On Sunday you play football in the park.",["am Sonntag spielst du im Park Fußball","am Sonntag spielst du Fußball im Park","du spielst am Sonntag im Park Fußball","du spielst am Sonntag Fußball im Park"]],["At home I read the newspaper.",["zu Hause lese ich die Zeitung","ich lese zu Hause die Zeitung"]],["On Saturday Tom plays football.",["am Samstag spielt Tom Fußball","Tom spielt am Samstag Fußball"]]]},
- { lv:3, th:"learn", items:[["I want to learn German.",["ich möchte Deutsch lernen"]],["Today we want to practise vocabulary.",["heute möchten wir Vokabeln üben","wir möchten heute Vokabeln üben"]],["You have to learn the grammar.",["du musst die Grammatik lernen"]],["Every day I want to speak German.",["jeden Tag möchte ich Deutsch sprechen","ich möchte jeden Tag Deutsch sprechen"]],["In class I have to practise German.",["im Kurs muss ich Deutsch üben","ich muss im Kurs Deutsch üben"]]]}
+ { lv:3, th:"learn", items:[["I want to learn German.",["ich möchte Deutsch lernen"]],["Today we want to practise vocabulary.",["heute möchten wir Vokabeln üben","wir möchten heute Vokabeln üben"]],["You have to learn the grammar.",["du musst die Grammatik lernen"]],["Every day I want to speak German.",["jeden Tag möchte ich Deutsch sprechen","ich möchte jeden Tag Deutsch sprechen"]],["In class I have to practise German.",["im Kurs muss ich Deutsch üben","ich muss im Kurs Deutsch üben"]]]},
+ { lv:4, th:"past", items:[["Yesterday I ate a pizza.",["gestern habe ich eine Pizza gegessen","ich habe gestern eine Pizza gegessen"]],["You drank a coffee.",["du hast einen Kaffee getrunken"]],["We went to the cinema.",["wir sind ins Kino gegangen"]],["Last week Lena travelled to Berlin.",["letzte Woche ist Lena nach Berlin gefahren","Lena ist letzte Woche nach Berlin gefahren"]],["At the weekend I played football.",["am Wochenende habe ich Fußball gespielt","ich habe am Wochenende Fußball gespielt"]]]},
+ { lv:5, th:"why", items:[["I learn German because I live in Germany.",["ich lerne Deutsch weil ich in Deutschland lebe"]],["I think that Lena works in Erfurt.",["ich glaube dass Lena in Erfurt arbeitet"]],["We learn German because we work in Germany.",["wir lernen Deutsch weil wir in Deutschland arbeiten"]],["Lena thinks that I learn German every day.",["Lena glaubt dass ich jeden Tag Deutsch lerne"]],["Today I learn German because I live in Erfurt.",["heute lerne ich Deutsch weil ich in Erfurt lebe","ich lerne heute Deutsch weil ich in Erfurt lebe"]]]}
 ];
 const BB_LV=[0,40,110,220,360];  /* points needed for level 1..5 (levels 4+ are ranks for now) */
 const BB={ mode:"free", th:"cafe", row:[], res:null, ch:null, s:null };
@@ -8642,7 +8661,8 @@ function bbLoad(){ if(BB.s) return; try{ BB.s=JSON.parse(localStorage.getItem("p
 function bbSave(){ try{ localStorage.setItem("pt_bb",JSON.stringify(BB.s)); }catch(e){} }
 function bbLevel(){ let l=1; for(let i=1;i<BB_LV.length;i++) if(BB.s.pts>=BB_LV[i]) l=i+1; return l; }
 function bbRank(l){ return ["🪵 "+tr("Plank","Planke","Tablón"),"🧱 "+tr("Builder","Bauarbeiter*in","Constructor/a"),"🌉 "+tr("Bridge builder","Brückenbauer*in","Constructor/a de puentes"),"🏗️ "+tr("Engineer","Ingenieur*in","Ingeniero/a"),"🏆 "+tr("Master builder","Baumeister*in","Maestro/a constructor/a")][Math.min(l,5)-1]; }
-function bbTiles(){ const T=BB_THEMES[BB.th], lv=Math.min(bbLevel(),3);
+function bbThOpen(k){ const T=BB_THEMES[k]; return !T.lv||bbLevel()>=T.lv||(BB.s.ch[T.lv-2]||0)>0; }
+function bbTiles(){ const T=BB_THEMES[BB.th], lv=T.lv?3:Math.min(bbLevel(),3);
   return T.tiles.map((t,i)=>({ id:i, t:t[0], r:t[1], ...(t[2]||{}) })).filter(x=>lv>=3||(x.r!=="M"&&x.r!=="I")).filter(x=>lv>=2||(x.r!=="T"&&x.r!=="P")); }
 function bbOpen(){ bbLoad(); BB.row=[]; BB.res=null; BB.rd=bbRd(); go("bridge"); }
 /* days played, round summary (5 new sentences = one bridge), skills practised */
@@ -8657,7 +8677,9 @@ function bbWeek(){ const D=new Set(BB.s.days||[]), now=new Date(), mon=new Date(
     return `<div class="${on?"on":""} ${k===today?"today":""}"><span>${l}</span><b>${on?"✓":d>now?"":"·"}</b></div>`; }).join("")}</div>`; }
 const BB_SK={ 1:[["Verb in position 2","Verb auf Position 2","Verbo en posición 2"],["Verb endings","Verbendungen","Terminaciones del verbo"],["Subject","Subjekt","Sujeto"]],
   2:[["Time/place first","Zeit/Ort vorne","Tiempo/lugar delante"],["Subject after the verb","Subjekt nach dem Verb","Sujeto tras el verbo"]],
-  3:[["Modal verbs","Modalverben","Verbos modales"],["Infinitive at the end","Infinitiv am Ende","Infinitivo al final"]] };
+  3:[["Modal verbs","Modalverben","Verbos modales"],["Infinitive at the end","Infinitiv am Ende","Infinitivo al final"]],
+  4:[["Perfekt: participle at the end","Perfekt: Partizip am Ende","Perfekt: participio al final"],["haben or sein","haben oder sein","haben o sein"]],
+  5:[["Verb at the end after weil/dass","Verb am Ende nach weil/dass","Verbo al final tras weil/dass"],["weil or dass","weil oder dass","weil o dass"]] };
 function bbSkills(lv,only){ const L=only?[lv]:[1,2,3].filter(x=>x<=lv); return `<div class="bbsk">${L.flatMap(l=>BB_SK[l]).map(x=>`<span>${tr(x[0],x[1],x[2])}</span>`).join("")}</div>`; }
 /* ---- 🧬 grammar tracker: right/wrong per rule ---- */
 const BB_DNA={ v2:[["Verb in position 2","Verb auf Position 2","Verbo en posición 2"],["The conjugated verb is always the 2nd building block: Ich trinke… / Heute trinke ich…","Das konjugierte Verb ist immer der 2. Baustein: Ich trinke… / Heute trinke ich…","El verbo conjugado siempre es el 2.º bloque: Ich trinke… / Heute trinke ich…"],0],
@@ -8666,6 +8688,10 @@ const BB_DNA={ v2:[["Verb in position 2","Verb auf Position 2","Verbo en posici�
   inv:[["Subject after the verb","Subjekt nach dem Verb","Sujeto tras el verbo"],["Start with time or place? Then verb, then subject: Heute lerne ich…","Zeit oder Ort vorne? Dann Verb, dann Subjekt: Heute lerne ich…","¿Empiezas con tiempo o lugar? Verbo y luego sujeto: Heute lerne ich…"],1],
   tmp:[["Time words early","Zeitangaben früh","El tiempo pronto"],["When comes before what and where: Ich trinke heute im Café einen Tee.","Wann kommt vor was und wo: Ich trinke heute im Café einen Tee.","El cuándo va antes del qué y el dónde: Ich trinke heute im Café einen Tee."],1],
   modal:[["Modal + infinitive","Modalverb + Infinitiv","Modal + infinitivo"],["möchte/kann/muss in position 2, the 2nd verb jumps to the end: Ich möchte Deutsch lernen.","möchte/kann/muss auf Position 2, das 2. Verb springt ans Ende: Ich möchte Deutsch lernen.","möchte/kann/muss en posición 2, el 2.º verbo salta al final: Ich möchte Deutsch lernen."],2],
+  perf:[["Perfekt word order","Perfekt-Satzstellung","Orden del Perfekt"],["habe/bin in position 2, the participle goes to the end: Ich habe Pizza gegessen.","habe/bin auf Position 2, das Partizip ans Ende: Ich habe Pizza gegessen.","habe/bin en posición 2, el participio al final: Ich habe Pizza gegessen."],3],
+  aux:[["haben or sein","haben oder sein","haben o sein"],["Movement from A to B uses sein (ich bin gegangen, gefahren). Most others use haben.","Bewegung von A nach B mit sein (ich bin gegangen, gefahren). Die meisten anderen mit haben.","Movimiento de A a B con sein (ich bin gegangen, gefahren). Casi todos los demás con haben."],3],
+  sub:[["Verb at the end after weil/dass","Verb am Ende nach weil/dass","Verbo al final tras weil/dass"],["weil and dass send the verb to the very end: …, weil ich in Erfurt lebe.","weil und dass schicken das Verb ganz ans Ende: …, weil ich in Erfurt lebe.","weil y dass mandan el verbo al final: …, weil ich in Erfurt lebe."],4],
+  conj:[["weil or dass","weil oder dass","weil o dass"],["weil gives a reason. dass follows verbs like glauben: Ich glaube, dass …","weil nennt einen Grund. dass steht nach Verben wie glauben: Ich glaube, dass …","weil da una razón. dass va tras verbos como glauben: Ich glaube, dass …"],4],
   gerne:[["Where gerne goes","Wohin gerne kommt","Dónde va gerne"],["gerne goes right after the verb: Ich trinke gerne Tee.","gerne steht direkt nach dem Verb: Ich trinke gerne Tee.","gerne va justo después del verbo: Ich trinke gerne Tee."],0] };
 function bbDnaAdd(res){ const D=BB.s.dna=BB.s.dna||{};
   if(res.ok) (res.used||[]).forEach(k=>{ D[k]=D[k]||[0,0]; D[k][0]++; });
@@ -8719,16 +8745,42 @@ function bbDone(o){ /* lesson-complete screen */
       <div><span>🎯 ${tr("Accuracy","Genauigkeit","Precisión")}</span><b>${acc}%</b></div></div>
     ${o.extra||""}<div class="bbstreak"><div style="font-size:30px;font-weight:900">🔥 ${ds}</div><div class="note" style="margin:0 0 8px">${ds===1?tr("day in a row","Tag in Folge","día seguido"):tr("days in a row","Tage in Folge","días seguidos")}</div>${bbWeek()}</div>
     <button class="btn primary qbtn" style="margin-top:14px" onclick="${o.go}">${tr("Continue","Weiter","Continuar")} →</button></div>`; }
-function bbAdd(id){ if(BB.row.includes(id)||BB.row.length>=9) return; BB.row.push(id); BB.res=null; xr(); }
+function bbAdd(id){ if((BB.row.includes(id)&&!BB_THEMES[BB.th].reuse)||BB.row.length>=12) return; BB.row.push(id); BB.res=null; xr(); }
 function bbDel(k){ BB.row.splice(k,1); BB.res=null; xr(); }
 function bbClear(){ BB.row=[]; BB.res=null; xr(); }
-const BB_COL={ S:"#2F4B7C", V:"#F25C3B", M:"#D9481F", I:"#C2401F", O:"#2A8C82", T:"#E8A21A", P:"#7B5BC4", A:"#5B6474" };
-function bbRole(r){ return {S:tr("who","wer","quién"),V:tr("verb","Verb","verbo"),M:tr("verb","Verb","verbo"),I:tr("verb (end)","Verb (Ende)","verbo (final)"),O:tr("what","was","qué"),T:tr("when","wann","cuándo"),P:tr("where","wo","dónde"),A:tr("extra","extra","extra")}[r]; }
+const BB_COL={ S:"#2F4B7C", V:"#F25C3B", M:"#D9481F", I:"#C2401F", O:"#2A8C82", T:"#E8A21A", P:"#7B5BC4", A:"#5B6474", H:"#D9481F", Pa:"#B23A1C", K:"#1E8E5A" };
+function bbRole(r){ return { H:tr("helper verb","Hilfsverb","verbo auxiliar"), Pa:tr("participle (end)","Partizip (Ende)","participio (final)"), K:tr("joiner","Verbinder","conector"), S:tr("who","wer","quién"),V:tr("verb","Verb","verbo"),M:tr("verb","Verb","verbo"),I:tr("verb (end)","Verb (Ende)","verbo (final)"),O:tr("what","was","qué"),T:tr("when","wann","cuándo"),P:tr("where","wo","dónde"),A:tr("extra","extra","extra")}[r]; }
 /* the grammar check: returns {ok, bad:[index], msg, pts, why:[...]} */
 function bbCheck(ws, th){
+  const ki=ws.map((w,i)=>w.r==="K"?i:-1).filter(i=>i>=0);
+  if(!ki.length) return bbCheck1(ws,th);
+  const E=(k,i,m)=>({ ok:false, bad:[].concat(i), msg:m, k });
+  if(ki.length>1) return E("conj",ki.slice(1), tr("One weil or dass is enough.","Ein weil oder dass reicht.","Basta un weil o dass."));
+  const k=ki[0];
+  if(k<2) return E("conj",k, tr("Start with the main sentence, then weil/dass: Ich lerne Deutsch, weil …","Fang mit dem Hauptsatz an, dann weil/dass: Ich lerne Deutsch, weil …","Empieza con la frase principal y luego weil/dass: Ich lerne Deutsch, weil …"));
+  const main=ws.slice(0,k), sub=ws.slice(k+1), off=k+1;
+  const m=bbCheck1(main,th,2,true); if(!m.ok) return m;
+  const mv=main[1], kw=ws[k].t;
+  if(mv.v==="glauben"&&kw!=="dass") return E("conj",k, tr("After glauben comes dass: Ich glaube, dass …","Nach glauben kommt dass: Ich glaube, dass …","Tras glauben va dass: Ich glaube, dass …"));
+  if(mv.v!=="glauben"&&kw==="dass") return E("conj",k, tr("For a reason use weil: …, weil ich in Erfurt lebe.","Für einen Grund nimm weil: …, weil ich in Erfurt lebe.","Para una razón usa weil: …, weil ich in Erfurt lebe."));
+  const ss=sub.map((w,i)=>w.r==="S"?i:-1).filter(i=>i>=0), sf=sub.map((w,i)=>["V","M","H"].includes(w.r)?i:-1).filter(i=>i>=0);
+  if(!ss.length) return E("subj",[], tr("Who? The weil/dass part needs its own subject: weil ich …","Wer? Der weil/dass-Teil braucht ein eigenes Subjekt: weil ich …","¿Quién? La parte con weil/dass necesita su sujeto: weil ich …"));
+  if(ss.length>1) return E("subj",ss.slice(1).map(i=>i+off), tr("Only one subject per sentence.","Nur ein Subjekt pro Satz.","Solo un sujeto por frase."));
+  if(ss[0]!==0) return E("sub",ss[0]+off, tr("Right after weil/dass comes the subject: weil ich …","Direkt nach weil/dass kommt das Subjekt: weil ich …","Justo después de weil/dass va el sujeto: weil ich …"));
+  if(!sf.length) return E("agree",[], tr("The weil/dass part needs a verb too.","Der weil/dass-Teil braucht auch ein Verb.","La parte con weil/dass también necesita un verbo."));
+  if(sf.length>1) return E("sub",sf.slice(1).map(i=>i+off), tr("Only one conjugated verb after weil/dass.","Nur ein konjugiertes Verb nach weil/dass.","Solo un verbo conjugado tras weil/dass."));
+  if(sf[0]!==sub.length-1) return E("sub",sf[0]+off, tr("After weil/dass the verb jumps to the very end: …, weil ich in Erfurt lebe.","Nach weil/dass springt das Verb ganz ans Ende: …, weil ich in Erfurt lebe.","Tras weil/dass el verbo salta al final: …, weil ich in Erfurt lebe."));
+  const sv=sub[sf[0]];
+  if(sv.p!==sub[0].p) return E("agree",sf[0]+off, tr(`The verb must match “${sub[0].t}”.`,`Das Verb muss zu „${sub[0].t}“ passen.`,`El verbo debe concordar con «${sub[0].t}».`));
+  if(sub.filter(w=>w.r==="O").length>1) return E("other",[], tr("One object is enough here.","Ein Objekt reicht hier.","Aquí basta un objeto."));
+  const n=ws.length-1, why=[[tr(`${n} words`,`${n} Wörter`,`${n} palabras`),n]].concat(m.why.slice(1),[[tr("Verb at the end after weil/dass","Verb am Ende nach weil/dass","Verbo al final tras weil/dass"),8]]);
+  const so=sub.find(w=>w.r==="O"), fit=BB_THEMES[th].fit[sv.v];
+  return { ok:true, pts:m.pts-main.length+n+8, why, funny:m.funny||!!(so&&fit&&!fit.includes(so.k)), used:m.used.concat(["sub","conj"]), inv:m.inv, modal:false, len:n };
+}
+function bbCheck1(ws, th, min, inClause){
   const R=ws.map(w=>w.r), err=(i,m)=>({ ok:false, bad:[].concat(i), msg:m }), errK=(k,i,m)=>({ ...err(i,m), k });
-  if(ws.length<3) return errK("other",[], tr("Use at least 3 tiles.","Nimm mindestens 3 Kärtchen.","Usa al menos 3 fichas."));
-  const fin=ws.map((w,i)=>w.r==="V"||w.r==="M"?i:-1).filter(i=>i>=0), subj=ws.map((w,i)=>w.r==="S"?i:-1).filter(i=>i>=0);
+  if(ws.length<(min||3)) return errK("other",[], tr("Use at least 3 tiles.","Nimm mindestens 3 Kärtchen.","Usa al menos 3 fichas."));
+  const fin=ws.map((w,i)=>w.r==="V"||w.r==="M"||w.r==="H"?i:-1).filter(i=>i>=0), subj=ws.map((w,i)=>w.r==="S"?i:-1).filter(i=>i>=0);
   if(!subj.length) return errK("subj",[], tr("Who? Add a subject (ich, du, wir…).","Wer? Nimm ein Subjekt (ich, du, wir…).","¿Quién? Añade un sujeto (ich, du, wir…)."));
   if(subj.length>1) return errK("subj",subj.slice(1), tr("Only one subject per sentence.","Nur ein Subjekt pro Satz.","Solo un sujeto por frase."));
   if(!fin.length) return errK("agree",[], tr("Every sentence needs a verb that matches the subject.","Jeder Satz braucht ein Verb, das zum Subjekt passt.","Cada frase necesita un verbo que concuerde con el sujeto."));
@@ -8743,6 +8795,14 @@ function bbCheck(ws, th){
     if(inf.length>1) return errK("modal",inf.slice(1), tr("Only one infinitive at the end.","Nur ein Infinitiv am Ende.","Solo un infinitivo al final."));
     if(inf[0]!==ws.length-1) return errK("modal",inf[0], tr("The infinitive goes to the very end.","Der Infinitiv kommt ganz ans Ende.","El infinitivo va al final de todo.")); }
   else if(inf.length) return errK("modal",inf, tr("This verb form needs möchte, kann or muss.","Diese Verbform braucht möchte, kann oder muss.","Esta forma del verbo necesita möchte, kann o muss."));
+  const pa=ws.map((w,i)=>w.r==="Pa"?i:-1).filter(i=>i>=0);
+  if(vw.r==="H"){ if(!pa.length) return errK("perf",f, tr(`“${vw.t}” needs a participle at the end: gegessen, gegangen…`,`„${vw.t}“ braucht ein Partizip am Ende: gegessen, gegangen…`,`«${vw.t}» necesita un participio al final: gegessen, gegangen…`));
+    if(pa.length>1) return errK("perf",pa.slice(1), tr("Only one participle at the end.","Nur ein Partizip am Ende.","Solo un participio al final."));
+    if(pa[0]!==ws.length-1) return errK("perf",pa[0], tr("The participle goes to the very end: Ich habe eine Pizza gegessen.","Das Partizip kommt ganz ans Ende: Ich habe eine Pizza gegessen.","El participio va al final: Ich habe eine Pizza gegessen."));
+    if(ws[pa[0]].a!==vw.a) return errK("aux",f, ws[pa[0]].a==="sein"?tr(`${ws[pa[0]].t} uses sein: ich bin ${ws[pa[0]].t}.`,`${ws[pa[0]].t} geht mit sein: ich bin ${ws[pa[0]].t}.`,`${ws[pa[0]].t} va con sein: ich bin ${ws[pa[0]].t}.`)
+      :tr(`${ws[pa[0]].t} uses haben: ich habe ${ws[pa[0]].t}.`,`${ws[pa[0]].t} geht mit haben: ich habe ${ws[pa[0]].t}.`,`${ws[pa[0]].t} va con haben: ich habe ${ws[pa[0]].t}.`)); }
+  else if(pa.length) return errK("perf",pa, tr("A participle needs habe/hat or bin/ist in position 2.","Ein Partizip braucht habe/hat oder bin/ist auf Position 2.","Un participio necesita habe/hat o bin/ist en posición 2."));
+  if(vw.v==="glauben"&&!inClause) return errK("conj",f, tr("glauben needs a dass part: Ich glaube, dass …","glauben braucht einen dass-Teil: Ich glaube, dass …","glauben necesita una parte con dass: Ich glaube, dass …"));
   const cnt=r=>R.filter(x=>x===r).length;
   if(cnt("O")>1) return errK("other",ws.map((w,i)=>w.r==="O"?i:-1).filter(i=>i>=0).slice(1), tr("One object is enough here.","Ein Objekt reicht hier.","Aquí basta un objeto."));
   if(cnt("T")>1||cnt("P")>1) return errK("other",[], tr("Use one time word and one place word at most.","Höchstens eine Zeit- und eine Ortsangabe.","Como mucho una palabra de tiempo y una de lugar."));
@@ -8752,12 +8812,13 @@ function bbCheck(ws, th){
   /* points */
   const why=[]; let pts=ws.length; why.push([tr(`${ws.length} words`,`${ws.length} Wörter`,`${ws.length} palabras`),ws.length]);
   if(s===2 && ["T","P"].includes(R[0])){ pts+=4; why.push([tr("Time/place first, verb stays 2nd","Zeit/Ort vorne, Verb bleibt auf 2","Tiempo/lugar delante, verbo en 2.º"),4]); }
+  if(vw.r==="H"){ pts+=6; why.push([tr("Perfekt: participle at the end","Perfekt: Partizip am Ende","Perfekt: participio al final"),6]); }
   if(vw.r==="M"){ pts+=5; why.push([tr("Modal + infinitive at the end","Modalverb + Infinitiv am Ende","Modal + infinitivo al final"),5]); }
   if(cnt("T")&&cnt("P")){ pts+=2; why.push([tr("When + where","Wann + wo","Cuándo + dónde"),2]); }
   if(cnt("A")){ pts+=2; why.push(["gerne",2]); }
-  const verb=vw.r==="M"&&inf.length?ws[inf[0]].v:vw.v, ow=oi>=0?ws[oi]:null, fit=BB_THEMES[th].fit[verb];
+  const verb=vw.r==="H"?ws[pa[0]].v:vw.r==="M"&&inf.length?ws[inf[0]].v:vw.v, ow=oi>=0?ws[oi]:null, fit=BB_THEMES[th].fit[verb];
   const funny=!!(ow&&fit&&!fit.includes(ow.k));
-  const used=["v2","agree","subj"]; if(s===2) used.push("inv"); if(vw.r==="M") used.push("modal"); if(cnt("T")) used.push("tmp"); if(cnt("A")) used.push("gerne");
+  const used=["v2","agree","subj"]; if(s===2) used.push("inv"); if(vw.r==="M") used.push("modal"); if(vw.r==="H") used.push("perf","aux"); if(cnt("T")) used.push("tmp"); if(cnt("A")) used.push("gerne");
   return { ok:true, pts, why, funny, used, inv:s===2&&["T","P"].includes(R[0]), modal:vw.r==="M", len:ws.length };
 }
 /* "lernen" can be "wir lernen" (V) or the infinitive after möchte (I): pick the role that fits the sentence */
@@ -8786,7 +8847,7 @@ function bbChTiles(){ const c=BB_CH[BB.ch.k], T=BB_THEMES[c.th].tiles.map((t,i)=
   /* tiles of the first answer, matched greedily (multi-word tiles first), plus a few distractors */
   let rest=c.items[BB.ch.i][1][0];
   const byLen=[...T].sort((a,b)=>b.t.length-a.t.length);
-  while(rest.trim()){ rest=rest.trim(); const m=byLen.find(t=>!used.has(t.id)&&(rest===t.t||rest.startsWith(t.t+" "))&&(c.lv>=3||t.r!=="I")); if(!m) break; used.add(m.id); pick.push(m); rest=rest.slice(m.t.length); }
+  while(rest.trim()){ rest=rest.trim(); const m=byLen.find(t=>(BB_THEMES[c.th].reuse||!used.has(t.id))&&(rest===t.t||rest.startsWith(t.t+" "))&&(c.lv>=3||t.r!=="I")); if(!m) break; used.add(m.id); if(!pick.includes(m)) pick.push(m); rest=rest.slice(m.t.length); }
   const rnd=duRand("bb"+BB.ch.k+"-"+BB.ch.i), others=T.filter(t=>!used.has(t.id)&&(c.lv>=3||(t.r!=="M"&&t.r!=="I"))&&(c.lv>=2||(t.r!=="T"&&t.r!=="P")));
   for(let n=0;n<4&&others.length;){ const o=others.splice(Math.floor(rnd()*others.length),1)[0]; if(pick.some(x=>x.t===o.t)) continue; pick.push(o); n++; }
   return pick.sort((a,b)=>a.id-b.id); }
@@ -8812,16 +8873,17 @@ VIEWS.bridge = function(){
     sub:tr(`${BB_ROUND} new sentences built.`,`${BB_ROUND} neue Sätze gebaut.`,`${BB_ROUND} frases nuevas construidas.`),
     xp:BB.rd.xp, combo:BB.rd.combo, tries:BB.rd.tries, ok:BB.rd.ok, go:"BB.rd=bbRd();BB.row=[];BB.res=null;xr()" });
   const tiles=ch?bbChTiles():bbTiles(), row=BB.row.map(id=>tiles.find(t=>t.id===id)).filter(Boolean), r=BB.res;
-  const groups=["S","V","M","I","O","T","P","A"].filter(g=>tiles.some(t=>t.r===g));
+  const groups=["S","V","M","H","I","Pa","O","T","P","A","K"].filter(g=>tiles.some(t=>t.r===g));
   const bad=new Set(r&&!r.ok?r.bad||[]:[]);
   return top+`<h2 style="margin:4px 0">🌉 ${tr("Bridge Builder","Brückenbauer","Constructor de puentes")}</h2>${stats}
     ${ch?`<div class="card" style="margin-bottom:10px"><div class="ecmeta">🎯 ${tr("Challenge","Challenge","Reto")} ${tr("Level","Level","Nivel")} ${c.lv} · ${BB.ch.i+1} / ${c.items.length}</div><div style="font-size:20px;font-weight:800;margin-top:4px">${esc(c.items[BB.ch.i][0])}</div>${bbSkills(c.lv,true)}</div>`
       :`<div class="row" style="gap:6px;margin:0 0 8px"><button class="chip" onclick="document.getElementById('bbq').scrollIntoView({behavior:'smooth'})">📜 ${tr("Quests","Quests","Misiones")} ${(()=>{ const q=bbQs(); return q.ids.filter(id=>(q.p[id]||0)>=BB_Q[id].n).length; })()}/3</button>${BB.s.dna&&Object.keys(BB.s.dna).length?`<button class="chip" onclick="document.getElementById('bbdna').scrollIntoView({behavior:'smooth'})">🧬 ${tr("Your grammar","Deine Grammatik","Tu gramática")}</button>`:""}</div>
       <div class="bbround"><span>🌉 ${tr("This bridge","Diese Brücke","Este puente")}</span><div>${Array.from({length:BB_ROUND},(_,i)=>`<i class="${i<(BB.rd?BB.rd.n:0)?"on":""}"></i>`).join("")}</div><b>${BB.rd?BB.rd.n:0}/${BB_ROUND}</b></div>
-      <div class="ecmeta" style="margin:2px 0 0">🎯 ${tr("Practising","Du übst","Practicas")}</div>${bbSkills(Math.min(lv,3))}
-      <div class="row" style="gap:6px;flex-wrap:wrap;margin:10px 0">${Object.entries(BB_THEMES).map(([k,t])=>`<button class="chip ${BB.th===k?"on":""}" onclick="BB.th='${k}';BB.row=[];BB.res=null;xr()">${t.e} ${tr(t.en,t.de,t.es)}</button>`).join("")}</div>`}
+      <div class="ecmeta" style="margin:2px 0 0">🎯 ${tr("Practising","Du übst","Practicas")}</div>${BB_THEMES[BB.th].lv?bbSkills(BB_THEMES[BB.th].lv,true):bbSkills(Math.min(lv,3))}
+      <div class="row" style="gap:6px;flex-wrap:wrap;margin:10px 0">${Object.entries(BB_THEMES).sort((x,y)=>(x[1].lv||0)-(y[1].lv||0)).map(([k,t])=>bbThOpen(k)?`<button class="chip ${BB.th===k?"on":""}" onclick="BB.th='${k}';BB.row=[];BB.res=null;xr()">${t.e} ${tr(t.en,t.de,t.es)}${t.lv?` <small>B1</small>`:""}</button>`
+        :`<button class="chip" style="opacity:.5" onclick="bToast(tr('Reach level ${t.lv} or finish challenge ${t.lv-1} to unlock.','Erreiche Level ${t.lv} oder schaff Challenge ${t.lv-1}, um das freizuschalten.','Llega al nivel ${t.lv} o supera el reto ${t.lv-1} para desbloquearlo.'))">🔒 ${tr(t.en,t.de,t.es)} <small>B1</small></button>`).join("")}</div>`}
     <div class="bbriver ${r&&r.ok?"done":""}" aria-label="${tr("Your sentence","Dein Satz","Tu frase")}">
-      ${row.length?row.map((w,k)=>`<span class="${bad.has(k)?"bbbad":""}">${bbTile(w,false,k)}</span>`).join(""):`<span class="note" style="margin:0;color:#fff">${tr("Tap the words below to build your sentence →","Tippe unten auf die Wörter und bau deinen Satz →","Toca las palabras de abajo para construir tu frase →")}</span>`}
+      ${row.length?row.map((w,k)=>`${w.r==="K"?`<span class="bbcomma">,</span>`:""}<span class="${bad.has(k)?"bbbad":""}">${bbTile(w,false,k)}</span>`).join(""):`<span class="note" style="margin:0;color:#fff">${tr("Tap the words below to build your sentence →","Tippe unten auf die Wörter und bau deinen Satz →","Toca las palabras de abajo para construir tu frase →")}</span>`}
     </div>
     ${r?(r.ok?`<div class="card bbok"><div style="font-size:22px;font-weight:800">${r.repeat?tr("Built before, so no new points. Try a new sentence!","Schon gebaut, keine neuen Punkte. Probier einen neuen Satz!","Ya la construiste, sin puntos nuevos. ¡Prueba otra!"):`🌉 +${r.pts} ${tr("points","Punkte","puntos")}`}</div>
         ${r.repeat?"":`<div class="note" style="margin:4px 0 0">${r.why.map(([a,b])=>`${esc(a)} +${b}`).join(" · ")}</div>`}
@@ -8831,9 +8893,9 @@ VIEWS.bridge = function(){
         <button class="btn primary qbtn" style="margin-top:10px" onclick="${ch?"bbChNext()":r.round?"BB.rd.done=true;BB.row=[];BB.res=null;xr()":"bbClear()"}">${ch?tr("Next","Weiter","Siguiente"):r.round?"🎉 "+tr("Finish the bridge","Brücke fertigstellen","Terminar el puente"):tr("Build another","Noch einen bauen","Construir otra")} →</button></div>`
       :`<div class="card bbno">💡 ${esc(r.msg)}</div>`):""}
     ${r&&r.ok?"":`<div class="row" style="gap:8px;margin:10px 0"><button class="btn primary" style="flex:2" ${row.length?"":"disabled"} onclick="bbGo()">✅ ${tr("Check","Prüfen","Comprobar")}</button><button class="btn secondary" style="flex:1" ${row.length?"":"disabled"} onclick="BB.row.pop();BB.res=null;xr()">↩</button><button class="btn secondary" style="flex:1" ${row.length?"":"disabled"} onclick="bbClear()">🗑</button></div>`}
-    <div class="card bbtray">${groups.map(g=>`<div class="bbg">${tiles.filter(t=>t.r===g).map(t=>bbTile(t,BB.row.includes(t.id))).join("")}</div>`).join("")}</div>
+    <div class="card bbtray">${groups.map(g=>`<div class="bbg">${tiles.filter(t=>t.r===g).map(t=>bbTile(t,BB.row.includes(t.id)&&!BB_THEMES[BB.th].reuse)).join("")}</div>`).join("")}</div>
     ${ch?"":`<div class="card"><h3 style="margin:0 0 6px">🎯 ${tr("Challenges","Challenges","Retos")}</h3><p class="note" style="margin:0 0 8px">${tr("Build the German sentence for each English one. 5 sentences each.","Bau zu jedem englischen Satz den deutschen. Je 5 Sätze.","Construye la frase alemana para cada frase en inglés. 5 frases cada uno.")}</p>
-      ${BB_CH.map((cc,k)=>{ const open=k===0||(BB.s.ch[k-1]||0)>0; return `<button class="ectop" style="width:100%;background:none;border:0;border-top:1px solid var(--line);padding:10px 0;font:inherit;cursor:${open?"pointer":"default"};opacity:${open?1:.5}" ${open?`onclick="bbChStart(${k})"`:"disabled"}><span>${["1 · Ich lerne Deutsch.","2 · Heute lerne ich Deutsch.","3 · Ich möchte Deutsch lernen."][k]}</span><b>${BB.s.ch[k]?"⭐".repeat(BB.s.ch[k]):open?"▶️":"🔒"}</b></button>`; }).join("")}</div>
+      ${BB_CH.map((cc,k)=>{ const open=k===0||(BB.s.ch[k-1]||0)>0; return `<button class="ectop" style="width:100%;background:none;border:0;border-top:1px solid var(--line);padding:10px 0;font:inherit;cursor:${open?"pointer":"default"};opacity:${open?1:.5}" ${open?`onclick="bbChStart(${k})"`:"disabled"}><span>${["1 · Ich lerne Deutsch.","2 · Heute lerne ich Deutsch.","3 · Ich möchte Deutsch lernen.","4 · Gestern habe ich Deutsch gelernt. <small class=\"note\">B1</small>","5 · …, weil ich hier lebe. <small class=\"note\">B1</small>"][k]}</span><b>${BB.s.ch[k]?"⭐".repeat(BB.s.ch[k]):open?"▶️":"🔒"}</b></button>`; }).join("")}</div>
     ${ch?"":bbQCard()+bbDnaCard()}
     <p class="note center">${tr("Your points are saved on this device.","Deine Punkte werden auf diesem Gerät gespeichert.","Tus puntos se guardan en este dispositivo.")}</p>`}`;
 };
