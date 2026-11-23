@@ -866,7 +866,7 @@
 <script>/* Extra interface languages live in /i18n/<code>.js (English text → translation). Load the chosen one before the app starts. */
 (function(){ try{ var X=["tr","uk","fa","ur"], v=localStorage.getItem("pt_ui");
   if(!v){ var n=String((navigator.languages&&navigator.languages[0])||navigator.language||"").slice(0,2).toLowerCase(); if(X.indexOf(n)>-1) v=n; }
-  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=15"><\/script>'); }catch(e){} })();</script>
+  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=16"><\/script>'); }catch(e){} })();</script>
 
 <script>
 /* ===================== CONTENT ===================== */
@@ -1239,7 +1239,7 @@ function bi(en,de,es){ if(es!==undefined) return tr(en,de,es); return `${en} <sp
 function uiSet(l){
   if(!UI_CODES.includes(l)) return;
   if(UI_EXTRA.includes(l) && !I18N_DATA[l]){
-    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=15";
+    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=16";
     sc.onload=()=>uiSet(l); sc.onerror=()=>bToast(offlineMsg()); document.head.appendChild(sc); return;
   }
   UI=l; I18N_T=null; I18N_M.clear();
@@ -7120,7 +7120,7 @@ function shCard(it){
     </div>
     ${it.description?`<p class="shdesc">${esc(it.description)}</p>`:""}
     <p class="note" style="margin:0">${it.has_link?"🔗 "+tr("Link (opens in a new tab)","Link (öffnet in neuem Tab)","Enlace (se abre en otra pestaña)"):`📄 ${esc(it.file_name||"")}${it.file_size?` · ${shSize(it.file_size)}`:""}`}${it.mine&&A.user?" · ✓ "+tr("You have this","Hast du schon","Ya lo tienes"):""}</p>
-    ${act}${admin}
+    ${act}${!manage && it.visibility!=="unlisted" ? `<div class="shadm" style="margin-top:8px"><button class="chip" onclick="shShare('${it.id}')">🔗 ${tr("Share","Teilen","Compartir")}</button></div>` : ""}${admin}
   </div>`;
 }
 
@@ -7241,9 +7241,10 @@ function shStatus(it){
 }
 function shLink(id){ return (location.protocol.startsWith("http")?location.origin:"https://pontetalk.setzio.com")+"/?r="+id; }
 async function shShare(id){
-  const it=(SH.list||[]).concat(SH.one?[SH.one]:[]).find(x=>x.id===id), url=shLink(id), text=it?`${it.title} · PonteTalk`:"PonteTalk resource";
+  const it=(SH.list||[]).concat(SH.one?[SH.one]:[]).find(x=>x.id===id), url=shLink(id), text=it?`${it.title} · ${tr("free on PonteTalk","kostenlos auf PonteTalk","gratis en PonteTalk")}`:"PonteTalk";
   try{ if(navigator.share){ await navigator.share({ title:"PonteTalk", text, url }); return; } }catch(e){ if(e && e.name==="AbortError") return; }
-  try{ await navigator.clipboard.writeText(url); bToast(tr("🔗 Link copied. Send it to your students","🔗 Link kopiert. Schick ihn deinen Lernenden","🔗 Enlace copiado. Envíalo a tus alumnos")); }
+  const own=it&&(SH.admin||it.is_owner);
+  try{ await navigator.clipboard.writeText(url); bToast(own?tr("🔗 Link copied. Send it to your students","🔗 Link kopiert. Schick ihn deinen Lernenden","🔗 Enlace copiado. Envíalo a tus alumnos"):"🔗 "+tr("Link copied","Link kopiert","Enlace copiado")); }
   catch(e){ window.prompt(tr("Copy this link:","Link kopieren:","Copia este enlace:"), url); }
 }
 async function shReview(id, ok){
