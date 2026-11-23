@@ -7959,7 +7959,7 @@ function bellBtn(){
   const n=NB.unread;
   return `<button class="nbbell" aria-label="Notifications${n?` (${n} unread)`:""}" onclick="nbOpen()">${ICO.bell}${n?`<span class="nbdot">${n>9?"9+":n}</span>`:""}</button>`;
 }
-function bellSync(){ document.querySelectorAll(".nbbell").forEach(b=>{ b.outerHTML=bellBtn(); }); }
+function bellSync(){ document.querySelectorAll(".nbbell:not(.dmbtn)").forEach(b=>{ b.outerHTML=bellBtn(); }); }
 function nbFresh(){ if(A.user && NB.timer && NP.v.in_app && Date.now()-(NB.at||0) > 10000) nbLoad(); }
 document.addEventListener("visibilitychange", ()=>{ if(document.visibilityState==="visible") nbFresh(); });
 window.addEventListener("focus", nbFresh);
