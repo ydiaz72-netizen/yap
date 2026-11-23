@@ -866,7 +866,7 @@
 <script>/* Extra interface languages live in /i18n/<code>.js (English text → translation). Load the chosen one before the app starts. */
 (function(){ try{ var X=["tr","uk","fa","ur"], v=localStorage.getItem("pt_ui");
   if(!v){ var n=String((navigator.languages&&navigator.languages[0])||navigator.language||"").slice(0,2).toLowerCase(); if(X.indexOf(n)>-1) v=n; }
-  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=12"><\/script>'); }catch(e){} })();</script>
+  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=13"><\/script>'); }catch(e){} })();</script>
 
 <script>
 /* ===================== CONTENT ===================== */
@@ -1239,7 +1239,7 @@ function bi(en,de,es){ if(es!==undefined) return tr(en,de,es); return `${en} <sp
 function uiSet(l){
   if(!UI_CODES.includes(l)) return;
   if(UI_EXTRA.includes(l) && !I18N_DATA[l]){
-    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=12";
+    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=13";
     sc.onload=()=>uiSet(l); sc.onerror=()=>bToast(offlineMsg()); document.head.appendChild(sc); return;
   }
   UI=l; I18N_T=null; I18N_M.clear();
@@ -4668,6 +4668,7 @@ function wdAllView(){
   const mast=WD.all.filter(w=>(WP.prog[w.id]||{}).mastered).length;
   return `<div class="card">${tr(`<b>${WD.all.length}</b> word${WD.all.length===1?"":"s"} saved · <b>${ok}</b> checked by a partner · <b>${mast}</b> ⭐ mastered`,`<b>${WD.all.length}</b> Wörter gespeichert · <b>${ok}</b> vom Partner geprüft · <b>${mast}</b> ⭐ gelernt`,`<b>${WD.all.length}</b> palabra${WD.all.length===1?"":"s"} guardada${WD.all.length===1?"":"s"} · <b>${ok}</b> revisadas · <b>${mast}</b> ⭐ dominadas`)}</div>
     <button class="btn primary" onclick="wpOpen(null)">${tr(`🎯 Practise my words`,`🎯 Wörter üben`,`🎯 Practicar mis palabras`)}</button>
+    <button class="btn secondary" style="margin-top:8px" onclick="vcMineOpen()">🃏 ${tr("Review as flashcards","Als Karteikarten wiederholen","Repasar como tarjetas")}</button>
     ${WD.err?`<div class="err">${esc(WD.err)}</div>`:""}
     ${groups.map(g=>`<p class="dayh">${esc(g.title||"Session")} · ${g.at?esc(fmtWhen(g.at)):""}</p>${g.list.map(w=>wdItem(w,"all")).join("")}`).join("")}`;
 }
@@ -8177,10 +8178,27 @@ async function vcLoadData(){
   VC.d={ themes:Object.assign({}, ...files.map(f=>f.themes)), words }; VC.byId={}; words.forEach(w=>VC.byId[w.id]=w);
 }
 function vcLv(lv){ return VC.d?VC.d.words.filter(w=>w.lv===lv):[]; }
+/* "Words I learned" from my sessions become flashcards (lv "MINE", id "sw-<uuid>").
+   Progress uses the same deck and spaced repetition as the word lists. */
+async function vcMineLoad(){
+  if(!VC.d) return;
+  VC.d.words=VC.d.words.filter(w=>w.lv!=="MINE"); for(const id in VC.byId) if(id.startsWith("sw-")) delete VC.byId[id];
+  VC.mineN=0; if(!(A.user&&A.sb)) return;
+  try{ const { data, error }=await A.sb.rpc("pt_words_mine"); if(error) throw error;
+    for(const r of data||[]){ if(!r.word||!r.meaning) continue;
+      const m=r.lang==="de"&&/^(der|die|das) \S/.test(r.word)?r.word.slice(0,3):null;
+      const w={ id:"sw-"+r.id, w:r.word, t:"mine", lv:"MINE", ex:r.example||"", tr:{ en:r.meaning }, src:r.title||"", lang:r.lang||"de", ok:r.status };
+      if(m) w.g=m;
+      VC.d.words.push(w); VC.byId[w.id]=w; VC.mineN++; }
+  }catch(e){}
+}
+async function vcMineOpen(){ await vcOpen(); if(VC.d&&vcMine().length) vcStart("learn","mine"); }
+function vcMine(){ return VC.d?VC.d.words.filter(w=>w.lv==="MINE"):[]; }
+function vcSrc(w){ return w.lv==="MINE"?`<div class="ecmeta" style="margin-bottom:4px">📝 ${tr("From your session","Aus deiner Session","De tu sesión")}${w.src?": "+esc(w.src):""}${w.ok==="confirmed"?" · ✓":w.ok==="fixed"?" · ✏️":""}</div>`:""; }
 async function vcOpen(){
   go("vocab");
   try{ await vcLoadData();
-    await Promise.all([vcSync(), DT.man===undefined?dtLoadManifest():null]); }
+    await Promise.all([vcSync(), vcMineLoad(), DT.man===undefined?dtLoadManifest():null]); }
   catch(e){ VC.err=tr("Couldn't load the words. Check your connection","Wörter konnten nicht geladen werden. Prüfe deine Verbindung","No se pudieron cargar las palabras. Revisa tu conexión"); }
   if(/^vocab/.test(S.screen)) xr();
 }
@@ -8258,7 +8276,8 @@ function vcStart(mode, theme){
   else {
     const due=W.filter(w=>{ const x=VC.p[w.id]; return x&&x.r&&x.d<=now&&(!theme||w.t===theme); }).sort((a,b)=>VC.p[a.id].d-VC.p[b.id].d).slice(0,60);
     const today=VC.days[vcToday()]||{ w:0 }, room=theme?Math.max(VC.goal,10):Math.max(0,VC.goal-(today.w||0));
-    const fresh=W.filter(w=>(theme||w.lv===VC.level)&&w.lv===VC.level&&!(VC.p[w.id]&&VC.p[w.id].r)&&(!theme||w.t===theme)).slice(0,room);
+    const mineNew=W.filter(w=>w.lv==="MINE"&&!(VC.p[w.id]&&VC.p[w.id].r)).slice(0,theme==="mine"?20:theme?0:5);
+    const fresh=theme==="mine"?mineNew:[...mineNew, ...W.filter(w=>(theme||w.lv===VC.level)&&w.lv===VC.level&&!(VC.p[w.id]&&VC.p[w.id].r)&&(!theme||w.t===theme)).slice(0,Math.max(0,room-mineNew.length))];
     for(const w of due){ const types=["flip","pick"]; if(vcNoun(w)) types.push("gender"); if(vcClip(w)) types.push("listen"); list.push({ id:w.id, type:types[Math.floor(Math.random()*types.length)] }); }
     for(const w of fresh) list.push({ id:w.id, type:"new" });
     if(!list.length&&!theme) for(const w of W.filter(w=>w.lv===VC.level&&!(VC.p[w.id]&&VC.p[w.id].r)).slice(0,VC.goal)) list.push({ id:w.id, type:"new" }); // extra words on request
@@ -8286,7 +8305,7 @@ VIEWS.vocabq = function(){
   const rate=`<div class="vcrate">${[["Again","Nochmal","#D9466A",0,"Otra vez"],["Hard","Schwer","#E59A2F",1,"Difícil"],["Good","Gut","#2A8C82",2,"Bien"],["Easy","Leicht","#2F6FD1",3,"Fácil"]].map(([a,b,col,g,e])=>`<button style="background:${col}" onclick="vcRate(${g})">${tr(a,b,e)}${UI==="de"?"":`<small>${b}</small>`}</button>`).join("")}</div>`;
   let h=back;
   if(c.type==="new"||c.type==="flip"){
-    h+=`<div class="vccard">${c.type==="new"?`<div class="ecmeta">${tr(`🆕 New word`,`🆕 Neues Wort`,`🆕 Palabra nueva`)}</div>`:""}<div class="vcw${vcSize(w)}" lang="de">${vcWordHtml(w)} ${vcSpk(w)}</div>
+    h+=`<div class="vccard">${vcSrc(w)}${c.type==="new"?`<div class="ecmeta">${tr(`🆕 New word`,`🆕 Neues Wort`,`🆕 Palabra nueva`)}</div>`:""}<div class="vcw${vcSize(w)}" lang="de">${vcWordHtml(w)} ${vcSpk(w)}</div>
       ${r.show?reveal:`<div class="note">💭 Think of the meaning, then tap Show<br>Überlege, dann tippe auf Zeigen</div>`}</div>
       ${r.show?`<p class="note center" style="margin:12px 0 0">${tr(`How well did you know it?`,`Wie gut wusstest du es?`,`¿Qué tan bien la sabías?`)}</p>`+rate:`<button class="btn primary qbtn" style="margin-top:12px" onclick="VC.run.show=true;xr()">${tr(`Show`,`Zeigen`,`Mostrar`)}</button>`}`;
   } else if(c.type==="pick"||c.type==="listen"){
@@ -8355,7 +8374,7 @@ const GT_RULES=[
 const GT_COL={ der:"#2F6FD1", die:"#D9466A", das:"#2A8C82" };
 /* the head noun: first capitalised word after the article ("die künstliche Intelligenz" → Intelligenz) */
 function gtHead(w){ const t=(w.w||"").replace(/^(der|die|das) /,"").split(/\s+/); return ((t.find(x=>/^[A-ZÄÖÜ]/.test(x))||t[t.length-1]||"")).toLowerCase(); }
-function gtNouns(){ return VC.d?VC.d.words.filter(vcNoun):[]; }
+function gtNouns(){ return VC.d?VC.d.words.filter(w=>vcNoun(w)&&w.lv!=="MINE"):[]; }
 function gtRule(w){ const h=gtHead(w); return GT_RULES.find(r=>r.rx.test(h)); }
 function gtStats(r){ const m=gtNouns().filter(w=>r.rx.test(gtHead(w))&&gtRule(w)===r), ok=m.filter(w=>w.g===r.g);
   return { n:m.length, ok:ok.length, ex:ok.slice(0,3), bad:m.filter(w=>w.g!==r.g) }; }
@@ -8453,6 +8472,11 @@ VIEWS.vocab = function(){
       ${vcDaysHtml()}
       ${st.learned?`<button class="linkbtn" onclick="vcCheckStart()">📊 ${tr("Level check","Niveau-Check","Test de nivel")}</button>`:""}
       ${!A.user?`<p class="note" style="margin:8px 0 0">💾 ${tr("Saved on this phone only.","Nur auf diesem Handy gespeichert.","Guardado solo en este móvil.")} <button class="linkbtn" onclick="A.ret='vocab';go('account')">${tr("Sign in","Anmelden","Entra")}</button> ${tr("to keep your progress everywhere.","um deinen Fortschritt überall zu haben.","para tener tu progreso en todas partes.")}</p>`:""}</div>
+    ${A.user?(()=>{ const mw=vcMine(), s3=vcStats(mw), nw=mw.length-s3.learned;
+      return `<div class="card"><h3 style="margin:0 0 4px">📝 ${tr("My session words","Meine Session-Wörter","Mis palabras de sesiones")}</h3>
+      ${mw.length?`<p class="note" style="margin:0 0 8px">${tr(`${mw.length} words from your sessions · ${nw} new · ${s3.due} to review. New ones also come up in your daily cards.`,`${mw.length} Wörter aus deinen Sessions · ${nw} neu · ${s3.due} zu wiederholen. Neue kommen auch in deinen täglichen Karten.`,`${mw.length} palabras de tus sesiones · ${nw} nuevas · ${s3.due} por repasar. Las nuevas también salen en tus tarjetas diarias.`)}</p>
+        <button class="btn secondary qbtn" onclick="vcStart('learn','mine')">▶️ ${tr("Practise my session words","Meine Session-Wörter üben","Practicar mis palabras")}</button>`
+      :`<p class="note" style="margin:0">${tr("Words you save in a session (📚 Words I learned) show up here as flashcards.","Wörter, die du in einer Session speicherst (📚 Gelernte Wörter), erscheinen hier als Karteikarten.","Las palabras que guardas en una sesión (📚 Palabras que aprendí) aparecen aquí como tarjetas.")}</p>`}</div>`; })():""}
     <div class="card"><h3 style="margin:0 0 4px">🎲 ${tr("Quick games","Schnelle Spiele","Juegos rápidos")}</h3>
       <button class="btn secondary qbtn" onclick="VC.gtRule=null;vcStart('gender')">🔵🔴🟢 der · die · das (${tr("20 nouns","20 Nomen","20 sustantivos")})</button>
       <button class="btn secondary qbtn" style="margin-top:8px" onclick="go('vocabg')">💡 ${tr("der · die · das tips","der · die · das Tipps","Consejos der · die · das")}</button></div>
