@@ -5143,7 +5143,7 @@ function lwCard(l){
   if(l.lang_a!=="de"&&l.lang_b!=="de") return "";
   if(!LW.words){ lwLoad(); return ""; }
   const w=lwToday(); if(!w) return "";
-  const o=l.lang_a==="de"?l.lang_b:l.lang_a, mk=w.tr[o]?o:(w.tr[VC.lang]?VC.lang:"en"), n=LU.msgs.filter(lwUsed).length;
+  const o=l.lang_a==="de"?l.lang_b:l.lang_a, mk=w.tr[o]?o:(w.tr[vcLang()]?vcLang():"en"), n=LU.msgs.filter(lwUsed).length;
   return `<div class="luq" style="background:var(--coral-soft);margin-top:8px"><span class="note" style="margin:0">📖 ${tr("Word of the day","Wort des Tages","Palabra del día")}</span>
     <div style="font-size:22px;font-weight:800" lang="de" dir="ltr">${vcWordHtml(w)}</div>
     <div dir="auto">${luFlag(mk==="en"?"en":mk)} ${esc(w.tr[mk])}</div>
@@ -8246,12 +8246,14 @@ const VC_LEVELS=["A1","A2","B1","B2","C1"];
 const VC_DECK="de";
 const VC_LANGS=[["en","English"],["es","Español"],["ar","العربية"],["fa","فارسی / دری"]];
 const VC={ d:null, err:"", p:{}, days:{}, goal:10, lang:(typeof UI!=="undefined"&&UI==="es")?"es":"en", level:"A1", run:null, dirty:{}, dayDirty:false, chk:null };
-function vcLoadLocal(){ try{ const v=JSON.parse(localStorage.getItem("pt_vocab_"+VC_DECK)||"{}"); VC.p=v.p||{}; VC.days=v.days||{}; VC.goal=v.goal||10; VC.lang=v.lang||VC.lang; VC.level=v.level||"A1"; }catch(e){} }
-function vcSaveLocal(){ try{ localStorage.setItem("pt_vocab_"+VC_DECK, JSON.stringify({ p:VC.p, days:VC.days, goal:VC.goal, lang:VC.lang, level:VC.level })); }catch(e){} }
+function vcLoadLocal(){ try{ const v=JSON.parse(localStorage.getItem("pt_vocab_"+VC_DECK)||"{}"); VC.p=v.p||{}; VC.days=v.days||{}; VC.goal=v.goal||10; VC.pick=!!v.pick; if(VC.pick&&v.lang) VC.lang=v.lang; VC.level=v.level||"A1"; }catch(e){} }
+function vcSaveLocal(){ try{ localStorage.setItem("pt_vocab_"+VC_DECK, JSON.stringify({ p:VC.p, days:VC.days, goal:VC.goal, lang:VC.lang, pick:!!VC.pick, level:VC.level })); }catch(e){} }
 (function(){ try{ const l=(navigator.language||"en").slice(0,2); if(["es","ar","fa"].includes(l)) VC.lang=l; }catch(e){} vcLoadLocal(); })();
 function vcToday(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
-function vcRtl(){ return VC.lang==="ar"||VC.lang==="fa"; }
-function vcTr(w){ return (w.tr&&w.tr[VC.lang])||w.tr.en; }
+/* meanings follow the app language (es/ar/fa/en) unless the person picked one on the flashcards screen */
+function vcLang(){ if(VC.pick) return VC.lang; return ["es","ar","fa","en"].includes(UI)?UI:VC.lang; }
+function vcRtl(){ const l=vcLang(); return l==="ar"||l==="fa"; }
+function vcTr(w){ return (w.tr&&w.tr[vcLang()])||w.tr.en; }
 function vcClip(w){ const id="V-"+w.id; return DT.man&&DT.man.clips&&DT.man.clips[id]?id:null; }
 async function vcLoadData(){
   if(VC.d) return;
@@ -8611,7 +8613,7 @@ VIEWS.duel = function(){
     ${op&&!d.mine?"":""}
     ${DU.err?`<div class="err">${esc(DU.err)}</div>`:""}
     ${d.can_play||!A.user?`<button class="btn primary qbtn" onclick="duPlay()">▶️ ${tr("Start","Los geht's","Empezar")}</button>
-      <p class="note">🌍 ${tr("Meanings in:","Bedeutungen auf:","Significados en:")} <select onchange="VC.lang=this.value;vcSaveLocal();xr()">${VC_LANGS.map(([k,l])=>`<option value="${k}" ${VC.lang===k?"selected":""}>${l}</option>`).join("")}</select></p>`
+      <p class="note">🌍 ${tr("Meanings in:","Bedeutungen auf:","Significados en:")} <select onchange="VC.lang=this.value;VC.pick=true;vcSaveLocal();xr()">${VC_LANGS.map(([k,l])=>`<option value="${k}" ${vcLang()===k?"selected":""}>${l}</option>`).join("")}</select></p>`
       :`<p class="note">${d.expired?duErr("duel_expired"):duErr("duel_taken")}</p><button class="btn secondary qbtn" onclick="vcOpen()">${tr("Start your own duel","Eigenes Duell starten","Empieza tu duelo")}</button>`}</div>`;
 };
 /* ---------- 🌉 Brückenbauer (Bridge Builder): build German sentences from word tiles. German only, solo, progress on this device. ----------
@@ -9011,7 +9013,7 @@ VIEWS.vocab = function(){
   if(!VC.d) return h+`<p class="note center">${tr(`Loading…`,`Lädt…`,`Cargando…`)}</p>`;
   const st=vcStats(), sk=vcStreak(), today=VC.days[vcToday()]||{ n:0,c:0,w:0 }, newLeft=Math.max(0,VC.goal-(today.w||0));
   h+=`<div class="card"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end">
-      <label class="lbl" style="margin:0">🌍 ${tr("My language","Meine Sprache","Mi idioma")}<select onchange="VC.lang=this.value;vcSaveLocal();xr()" style="width:100%;margin-top:4px;border:2px solid var(--line);border-radius:12px;padding:10px;font:600 15px 'Plus Jakarta Sans',sans-serif">${VC_LANGS.map(([k,n])=>`<option value="${k}" ${VC.lang===k?"selected":""}>${n}</option>`).join("")}</select></label>
+      <label class="lbl" style="margin:0">🌍 ${tr("My language","Meine Sprache","Mi idioma")}<select onchange="VC.lang=this.value;VC.pick=true;vcSaveLocal();xr()" style="width:100%;margin-top:4px;border:2px solid var(--line);border-radius:12px;padding:10px;font:600 15px 'Plus Jakarta Sans',sans-serif">${VC_LANGS.map(([k,n])=>`<option value="${k}" ${vcLang()===k?"selected":""}>${n}</option>`).join("")}</select></label>
       <label class="lbl" style="margin:0">🎯 ${tr("New words a day","Neue Wörter pro Tag","Palabras nuevas al día")}<select onchange="VC.goal=+this.value;vcSaveLocal();xr()" style="width:100%;margin-top:4px;border:2px solid var(--line);border-radius:12px;padding:10px;font:600 15px 'Plus Jakarta Sans',sans-serif">${[5,10,20].map(n=>`<option value="${n}" ${VC.goal===n?"selected":""}>${n}</option>`).join("")}</select></label></div></div>
     <div class="card" style="border:2px solid var(--coral)"><div class="ectop"><h3 style="margin:0">📅 ${tr("Today","Heute","Hoy")}</h3><b>🔥 ${tr(`${sk} day${sk===1?"":"s"}`,`${sk} Tag${sk===1?"":"e"}`,`${sk} día${sk===1?"":"s"}`)}</b></div>
       <p class="note" style="margin:6px 0 10px">${tr(`${st.due} to review · ${newLeft} new words left today${today.n?` · done today: ${today.n}`:""}`,`${st.due} zu wiederholen · noch ${newLeft} neue Wörter heute${today.n?` · heute geschafft: ${today.n}`:""}`,`${st.due} por repasar · quedan ${newLeft} palabras nuevas hoy${today.n?` · hechas hoy: ${today.n}`:""}`)}</p>
@@ -9039,7 +9041,7 @@ VIEWS.vocab = function(){
       <button class="btn secondary qbtn" style="margin-top:8px" onclick="bbOpen()">🌉 ${tr("Bridge Builder: build sentences","Brückenbauer: Sätze bauen","Constructor de puentes: frases")}</button>
       ${duCard()}</div>
     <div class="card"><h3 style="margin:0 0 6px">🗂️ ${tr("Topics","Themen","Temas")} (${VC.level})</h3><div class="vcth">${Object.entries(VC.d.themes).map(([k,t])=>{ const ws=vcLv(VC.level).filter(w=>w.t===k); if(!ws.length) return ""; const s2=vcStats(ws);
-      const lab=VC.lang==="es"?t[2]:VC.lang==="ar"?t[3]:VC.lang==="fa"?t[4]:t[1];
+      const L=vcLang(), lab=L==="es"?t[2]:L==="ar"?t[3]:L==="fa"?t[4]:t[1];
       return `<button onclick="vcStart('learn','${k}')">${t[0]} ${esc(lab)}<small>${s2.learned}/${ws.length} ${tr("learned","gelernt","aprendidas")}</small></button>`; }).join("")}</div></div>
     <p class="note">${tr("Word list by PonteTalk. Colours:","Wortliste von PonteTalk. Farben:","Lista de palabras de PonteTalk. Colores:")} <b style="color:#2F6FD1">der</b> · <b style="color:#D9466A">die</b> · <b style="color:#2A8C82">das</b>.</p>`;
   return h;
