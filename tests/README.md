@@ -16,3 +16,5 @@ The SQL tests create test users and sessions inside the test, then undo everythi
 | `trust_fixes.sql` | QA-04/05 | Sessions across midnight fit free times; host late cancel = ½ strike (guests none); host removes a person, seat passes on, removed person can't rejoin | Supabase → SQL Editor, after `sql/trust_fixes.sql` |
 
 The midnight limit QA-01 found is fixed by `sql/trust_fixes.sql`.
+
+| `vocab_duel.sql` | VC-03 | Start a duel, play once, scores hidden until you play, impossible times refused, bell for the starter, a third person or someone blocked can't join, links end after 7 days | Supabase → SQL Editor, after `sql/vocab_duel.sql` |

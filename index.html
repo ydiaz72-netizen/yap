@@ -866,7 +866,7 @@
 <script>/* Extra interface languages live in /i18n/<code>.js (English text → translation). Load the chosen one before the app starts. */
 (function(){ try{ var X=["tr","uk","fa","ur"], v=localStorage.getItem("pt_ui");
   if(!v){ var n=String((navigator.languages&&navigator.languages[0])||navigator.language||"").slice(0,2).toLowerCase(); if(X.indexOf(n)>-1) v=n; }
-  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=14"><\/script>'); }catch(e){} })();</script>
+  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=15"><\/script>'); }catch(e){} })();</script>
 
 <script>
 /* ===================== CONTENT ===================== */
@@ -1239,7 +1239,7 @@ function bi(en,de,es){ if(es!==undefined) return tr(en,de,es); return `${en} <sp
 function uiSet(l){
   if(!UI_CODES.includes(l)) return;
   if(UI_EXTRA.includes(l) && !I18N_DATA[l]){
-    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=14";
+    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=15";
     sc.onload=()=>uiSet(l); sc.onerror=()=>bToast(offlineMsg()); document.head.appendChild(sc); return;
   }
   UI=l; I18N_T=null; I18N_M.clear();
@@ -2885,6 +2885,7 @@ function authReturn(){
   else if(r==="shop") shOpen();
   else if(r==="cafes") cfOpen();
   else if(r==="lounge"){ let id=LU.pend; try{ id=id||sessionStorage.getItem("pt_lounge"); }catch(e){} if(id) luEnter(id); else luOpen(); }
+  else if(r==="duel"){ let c=DU.code; try{ c=c||sessionStorage.getItem("pt_duel"); sessionStorage.removeItem("pt_duel"); }catch(e){} if(c) duOpen(c); else vcOpen(); }
   else if(r==="lounges") luOpen();
   else if(r==="partners") ptOpen();
   else if(r==="partner"){ let id=PT.oneId; try{ id=id||sessionStorage.getItem("pt_partner"); }catch(e){} if(id) ptOneOpen(id); else ptOpen(); }
@@ -6929,6 +6930,8 @@ function navSync(){
   try{ if(S.screen!=="session" && /[?&]s=/.test(location.search)) history.replaceState(null,"",location.pathname);
        if(S.screen==="lounge" && LU.id && new URLSearchParams(location.search).get("lounge")!==LU.id) history.replaceState(null,"",location.pathname+"?lounge="+encodeURIComponent(LU.id));
        else if(S.screen!=="lounge" && S.screen!=="account" && /[?&]lounge=/.test(location.search)) history.replaceState(null,"",location.pathname);
+       if(S.screen==="duel" && DU.code && new URLSearchParams(location.search).get("duel")!==DU.code) history.replaceState(null,"",location.pathname+"?duel="+DU.code);
+       else if(S.screen!=="duel" && S.screen!=="account" && /[?&]duel=/.test(location.search)) history.replaceState(null,"",location.pathname);
        if(S.screen==="cafes" && !/[?&]cafes/.test(location.search)) history.replaceState(null,"",location.pathname+"?cafes");
        else if(S.screen!=="cafes" && /[?&]cafes/.test(location.search)) history.replaceState(null,"",location.pathname); }catch(e){}
   let n=document.getElementById("bnav"), t=document.getElementById("tnav");
@@ -8108,6 +8111,7 @@ function nbText(n){
     case "changed":      return `📝 ${t}: ${nbChanges(d)}`;
     case "reminder_24h": return "⏰ "+tr(`Tomorrow: ${t}`,`Morgen: ${t}`,`Mañana: ${t}`)+(n.starts_at?" "+tr(`at ${nbClock(n.starts_at)}`,`um ${nbClock(n.starts_at)}`,`a las ${nbClock(n.starts_at)}`):"")+".";
     case "reminder_15m": return "⏰ "+tr(`${t} starts in 15 minutes.`,`${t} beginnt in 15 Minuten.`,`${t} empieza en 15 minutos.`);
+    case "duel_done":    return "⚔️ "+tr(`${who} played your duel. Tap to see who won!`,`${who} hat dein Duell gespielt. Tippe, um zu sehen, wer gewonnen hat!`,`${who} jugó tu duelo. ¡Toca para ver quién ganó!`);
     case "word_fixed":   return "✏️ "+tr(`${who} fixed your word <b>“${esc(d.old||"")}”</b>: now <b>“${esc(d.word||"")}”</b> (${t}). Tap to see it.`,`${who} hat dein Wort <b>„${esc(d.old||"")}“</b> korrigiert: jetzt <b>„${esc(d.word||"")}“</b> (${t}). Tippe zum Ansehen.`,`${who} corrigió tu palabra <b>“${esc(d.old||"")}”</b>: ahora <b>“${esc(d.word||"")}”</b> (${t}). Toca para verla.`);
     case "echo_new":     return "🎙️ "+tr(`New Echo Challenge by ${who}: ${ph}. Listen and record your echo!`,`Neue Echo Challenge von ${who}: ${ph}. Hör zu und nimm dich auf!`,`Nuevo reto Echo de ${who}: ${ph}. ¡Escucha y graba tu eco!`);
     case "echo_result":  return d.winners ? "🏆 "+tr(`The Echo Challenge ${ph} is over. People's choice: <b>${esc(d.winners)}</b>.`,`Die Echo Challenge ${ph} ist vorbei. Publikumsliebling: <b>${esc(d.winners)}</b>.`,`El reto Echo ${ph} terminó. Favorito del público: <b>${esc(d.winners)}</b>.`)+(d.host?" "+tr("Pick your ⭐ favourite!","Wähle deinen ⭐ Favoriten!","¡Elige tu ⭐ favorito!"):"")
@@ -8156,6 +8160,7 @@ async function nbTap(id){
   if(!n.read_at){ n.read_at=new Date().toISOString(); NB.unread=Math.max(0,NB.unread-1); bellSync(); try{ await A.sb.rpc("pt_mark_read",{ p_id:id }); }catch(e){} }
   const sh=document.getElementById("nbSheet"); if(sh) sh.remove();
   if(n.kind==="report"){ raOpen(); return; }
+  if(n.kind==="duel_done" && n.data && n.data.code){ duOpen(n.data.code); return; }
   if(/^echo_/.test(n.kind) && n.data && n.data.lounge){ await luEnter(n.data.lounge); ecOpen(); return; }
   if(n.activity_id){ if(n.kind==="chat") chOpen(n.activity_id); else if(n.kind==="word_fixed") wdOpen(n.activity_id); else sOpen(n.activity_id); }
 }
@@ -8449,6 +8454,117 @@ VIEWS.vocabg = function(){
     ${card("die")}${card("der")}${card("das")}
     <div class="card center"><button class="btn primary qbtn" onclick="VC.gtRule=null;vcStart('gender')">🔵🔴🟢 ${tr("Play der · die · das","der · die · das spielen","Jugar der · die · das")}</button></div>`;
 };
+/* ---------- ⚔️ Flashcard duel: two people, the same 10 words. Database: sql/vocab_duel.sql (pt_duel_* functions). ---------- */
+const DU={ code:null, d:null, stage:"intro", run:null, list:null, err:"", busy:false, contacts:null, sent:{} };
+function duErr(e){ const m=String((e&&e.message)||e||"");
+  if(/duel_missing/.test(m)) return tr("This duel doesn't exist. Check the link.","Dieses Duell gibt es nicht. Prüfe den Link.","Este duelo no existe. Revisa el enlace.");
+  if(/duel_expired/.test(m)) return tr("This duel is over (links last 7 days).","Dieses Duell ist vorbei (Links gelten 7 Tage).","Este duelo terminó (los enlaces duran 7 días).");
+  if(/duel_taken/.test(m)) return tr("Someone else already took this duel. Start your own!","Jemand anderes hat dieses Duell schon gespielt. Starte dein eigenes!","Otra persona ya jugó este duelo. ¡Empieza el tuyo!");
+  if(/duel_played/.test(m)) return tr("You already played this duel.","Du hast dieses Duell schon gespielt.","Ya jugaste este duelo.");
+  if(/duel_blocked/.test(m)) return tr("You can't play this duel.","Du kannst dieses Duell nicht spielen.","No puedes jugar este duelo.");
+  if(/duel_limit/.test(m)) return tr("That's a lot of duels today. Try again tomorrow.","Heute schon viele Duelle. Versuch es morgen wieder.","Muchos duelos hoy. Inténtalo mañana.");
+  if(/function .* does not exist|schema cache/i.test(m)) return tr("Duels aren't switched on yet (sql/vocab_duel.sql).","Duelle sind noch nicht aktiv (sql/vocab_duel.sql).","Los duelos aún no están activos (sql/vocab_duel.sql).");
+  return bErr?bErr(e):m; }
+function duLink(c){ return (location.protocol.startsWith("http")?location.origin:"https://pontetalk.setzio.com")+"/?duel="+c; }
+/* same options for both players: random numbers seeded by the duel code */
+function duRand(seed){ let h=1779033703^seed.length; for(let i=0;i<seed.length;i++){ h=Math.imul(h^seed.charCodeAt(i),3432918353); h=h<<13|h>>>19; }
+  return ()=>{ h=Math.imul(h^h>>>16,2246822507); h=Math.imul(h^h>>>13,3266489909); h^=h>>>16; return (h>>>0)/4294967296; }; }
+function duNeedSignIn(){ A.ret="duel"; try{ sessionStorage.setItem("pt_duel",DU.code||""); }catch(e){}
+  A.msg=tr("Sign in (free) to play the duel","Melde dich an (kostenlos), um das Duell zu spielen","Entra (gratis) para jugar el duelo"); go("account"); }
+async function duNew(){
+  if(!(A.user&&A.sb)){ DU.code=""; A.ret="vocab"; A.msg=tr("Sign in (free) to duel a friend","Melde dich an (kostenlos), um gegen Freunde zu spielen","Entra (gratis) para retar a un amigo"); go("account"); return; }
+  if(!VC.d||DU.busy) return; DU.busy=true;
+  try{ const pool=vcLv(VC.level).filter(w=>w.tr&&w.tr.en), ids=exShuffle(pool).slice(0,10).map(w=>w.id);
+    const { data, error }=await A.sb.rpc("pt_duel_create",{ p_level:VC.level, p_words:ids }); if(error) throw error;
+    DU.busy=false; DU.list=null; await duOpen(data, true);
+  }catch(e){ DU.busy=false; bToast(duErr(e)); }
+}
+async function duOpen(code, play){
+  DU.code=String(code||"").toUpperCase(); DU.d=null; DU.err=""; DU.stage="intro"; DU.run=null; DU.sent={}; go("duel");
+  try{ await vcLoadData(); const { data, error }=await A.sb.rpc("pt_duel_get",{ p_code:DU.code }); if(error) throw error; DU.d=data;
+    if(DU.d.me_played) DU.stage="result"; else if(play&&DU.d.can_play) return duPlay(); }
+  catch(e){ DU.err=duErr(e); }
+  if(S.screen==="duel") xr();
+}
+function duPlay(){
+  if(!(A.user&&A.sb)){ duNeedSignIn(); return; }
+  const d=DU.d; if(!d||!d.can_play||!VC.d) return;
+  const rnd=duRand(d.code), qs=[];
+  for(const id of d.words){ const w=VC.byId[id]; if(!w) continue;
+    const pool=VC.d.words.filter(x=>x.lv===w.lv&&x.id!==w.id&&vcTr(x)!==vcTr(w)); const opts=[w];
+    while(opts.length<4&&pool.length){ const k=Math.floor(rnd()*pool.length); opts.push(pool.splice(k,1)[0]); }
+    for(let i=opts.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [opts[i],opts[j]]=[opts[j],opts[i]]; }
+    qs.push({ w, opts }); }
+  DU.run={ qs, i:0, pick:null, ok:0, ms:0, t0:Date.now() }; DU.stage="play"; go("duel");
+  clearInterval(DU.tick); DU.tick=setInterval(()=>{ if(S.screen!=="duel"||DU.stage!=="play"){ clearInterval(DU.tick); return; } const el=document.getElementById("duClock"); if(el&&DU.run) el.textContent=duSec(DU.run.ms+(DU.run.pick===null?Date.now()-DU.run.t0:0)); },200);
+}
+function duSec(ms){ return (ms/1000).toFixed(1)+" s"; }
+function duPick(k){ const r=DU.run; if(!r||r.pick!==null) return; r.pick=k; r.ms+=Date.now()-r.t0;
+  const q=r.qs[r.i]; if(q.opts[k].id===q.w.id) r.ok++; xr();
+  setTimeout(()=>{ if(DU.run!==r) return; r.i++; r.pick=null; r.t0=Date.now(); if(r.i>=r.qs.length) duFinish(); else xr(); }, q.opts[k].id===q.w.id?650:1300); }
+async function duFinish(){ const r=DU.run; clearInterval(DU.tick); DU.stage="saving"; xr();
+  try{ const { data, error }=await A.sb.rpc("pt_duel_finish",{ p_code:DU.code, p_score:r.ok, p_ms:Math.max(r.ms, r.qs.length*300) }); if(error) throw error;
+    DU.d=data; DU.stage="result"; DU.list=null;
+    const t=vcToday(), dd=VC.days[t]||(VC.days[t]={ n:0,c:0,w:0 }); dd.n+=r.qs.length; dd.c+=r.ok; VC.dayDirty=true; vcFlush(); }
+  catch(e){ DU.err=duErr(e); DU.stage="intro"; }
+  xr(); }
+function duWinner(d){ const ps=(d.players||[]).filter(p=>p.score!=null); if(ps.length<2) return null;
+  const [a,b]=ps; if(a.score!==b.score) return a.score>b.score?a:b; if(a.ms!==b.ms) return a.ms<b.ms?a:b; return "tie"; }
+function duShareText(){ const me=(DU.d.players||[]).find(p=>p.me);
+  return tr(`⚔️ I scored ${me?me.score:"?"}/10 in a German word duel on PonteTalk. Can you beat me?`,`⚔️ Ich habe ${me?me.score:"?"}/10 im Wörter-Duell auf PonteTalk. Schaffst du mehr?`,`⚔️ Saqué ${me?me.score:"?"}/10 en un duelo de palabras en alemán en PonteTalk. ¿Me ganas?`)+" "+duLink(DU.code); }
+async function duShare(){ const txt=duShareText();
+  try{ if(navigator.share){ await navigator.share({ text:txt }); return; } }catch(e){ if(e&&e.name==="AbortError") return; }
+  try{ await navigator.clipboard.writeText(txt); bToast(tr("Link copied","Link kopiert","Enlace copiado")); }catch(e){ window.prompt("",txt); } }
+async function duContacts(){ DU.contacts=[]; xr();
+  try{ const { data, error }=await A.sb.rpc("pt_dm_contacts"); if(error) throw error; DU.contacts=data||[]; }catch(e){ DU.contacts=[]; }
+  if(S.screen==="duel") xr(); }
+async function duSendTo(uid){ if(DU.sent[uid]) return; DU.sent[uid]="…"; xr();
+  try{ const { error }=await A.sb.rpc("pt_dm_send",{ p_other:uid, p_body:duShareText() }); if(error) throw error; DU.sent[uid]="✓"; }
+  catch(e){ delete DU.sent[uid]; bToast(String((e&&e.message)||"").match(/link/i)?tr("Links can't be sent in your first week. Use Share instead.","Links gehen in der ersten Woche nicht. Nutze Teilen.","No puedes enviar enlaces la primera semana. Usa Compartir."):bErr(e)); }
+  xr(); }
+async function duMineLoad(){ if(!(A.user&&A.sb)||DU.list) return; DU.list=[];
+  try{ const { data, error }=await A.sb.rpc("pt_duel_mine"); if(error) throw error; DU.list=data||[]; }catch(e){ DU.list=[]; }
+  if(S.screen==="vocab") xr(); }
+function duLine(d){ const me=(d.players||[]).find(p=>p.me), op=(d.players||[]).find(p=>!p.me), w=duWinner(d);
+  const who=op?esc(op.name):d.mine?tr("waiting for a friend","wartet auf Freund*in","esperando a un amigo"):esc(d.creator_name);
+  const st=!me?(d.can_play?"▶️ "+tr("your turn","du bist dran","tu turno"):"—"):!op?(d.expired?"⌛":"⏳"):`${me.score}–${op.score} ${w==="tie"?"🤝":w&&w.me?"🏆":"😅"}`;
+  return `<button class="ectop" style="width:100%;background:none;border:0;border-top:1px solid var(--line);padding:8px 0;font:inherit;cursor:pointer;text-align:start" onclick="duOpen('${esc(d.code)}')"><span>⚔️ ${d.level} · ${who}</span><b>${st}</b></button>`; }
+function duCard(){
+  if(A.user&&!DU.list) duMineLoad();
+  const ls=(DU.list||[]).slice(0,5);
+  return `<button class="btn secondary qbtn" style="margin-top:8px" ${DU.busy?"disabled":""} onclick="duNew()">⚔️ ${tr(`Duel a friend (10 words, ${VC.level})`,`Duell mit Freund*in (10 Wörter, ${VC.level})`,`Duelo con un amigo (10 palabras, ${VC.level})`)}</button>
+    ${ls.length?`<div style="margin-top:6px">${ls.map(duLine).join("")}</div>`:""}`; }
+VIEWS.duel = function(){
+  const top=`<div class="topline"><button class="chip" onclick="clearInterval(DU.tick);DU.run=null;vcOpen()">${uiBack()} ${tr("Vocabulary","Wortschatz","Vocabulario")}</button><span>⚔️ ${tr("Duel","Duell","Duelo")}</span></div>`;
+  if(DU.err&&!DU.d) return top+`<div class="err">${esc(DU.err)}</div><button class="btn primary qbtn" onclick="vcOpen()">${tr("Start your own duel","Eigenes Duell starten","Empieza tu duelo")}</button>`;
+  const d=DU.d; if(!d||DU.stage==="saving") return top+`<p class="note center">${tr("Loading…","Lädt…","Cargando…")}</p>`;
+  if(DU.stage==="play"&&DU.run){ const r=DU.run, q=r.qs[r.i]; if(!q) return top;
+    return top+`<div class="ectop"><b>${r.i+1} / ${r.qs.length}</b><b id="duClock">${duSec(r.ms)}</b></div><div class="exbar" style="margin:6px 0 10px"><i style="width:${Math.round(r.i/r.qs.length*100)}%"></i></div>
+      <div class="vccard" style="min-height:150px"><div class="ecmeta">${tr("What does it mean?","Was bedeutet das?","¿Qué significa?")}</div><div class="vcw${vcSize(q.w)}" lang="de" dir="ltr">${vcWordHtml(q.w)}</div></div>
+      ${q.opts.map((o,k)=>{ const cl=r.pick===null?"":o.id===q.w.id?"ok":k===r.pick?"no":""; return `<button class="exopt ${cl}" ${r.pick!==null?"disabled":""} onclick="duPick(${k})"><span dir="${vcRtl()?"rtl":"auto"}">${esc(vcTr(o))}</span></button>`; }).join("")}`; }
+  const me=(d.players||[]).find(p=>p.me), op=(d.players||[]).find(p=>!p.me);
+  if(DU.stage==="result"&&me){ const w=duWinner(d);
+    const row=p=>`<div class="ectop" style="padding:8px 0;border-top:1px solid var(--line)"><span>${p.avatar_url?`<img class="avs" src="${esc(p.avatar_url)}" alt="">`:""}<b>${p.me?tr("You","Du","Tú"):esc(p.name)}</b></span><b>${p.score}/10 · ${duSec(p.ms)}${w&&w!=="tie"&&w.user_id===p.user_id?" 🏆":""}</b></div>`;
+    return top+`<div class="card center"><div style="font-size:54px">${!op?"⏳":w==="tie"?"🤝":w.me?"🏆":"💪"}</div>
+      <h2 style="margin:4px 0">${!op?tr("Your score is in!","Dein Ergebnis steht!","¡Tu resultado está listo!"):w==="tie"?tr("It's a tie!","Unentschieden!","¡Empate!"):w.me?tr("You won!","Du hast gewonnen!","¡Ganaste!"):tr(`${op.name} won this time`,`${op.name} hat diesmal gewonnen`,`${op.name} ganó esta vez`)}</h2>
+      <div style="text-align:start;margin-top:8px">${row(me)}${op?row(op):""}</div>
+      ${!op?`<p class="note">${d.mine?tr("Send the duel to a friend. They play the same 10 words, and you'll get a 🔔 when they're done.","Schick das Duell an eine*n Freund*in. Sie spielen dieselben 10 Wörter, und du bekommst eine 🔔, wenn sie fertig sind.","Envía el duelo a un amigo. Juega las mismas 10 palabras y recibirás una 🔔 cuando termine."):tr(`Waiting for ${d.creator_name}.`,`Warte auf ${d.creator_name}.`,`Esperando a ${d.creator_name}.`)}</p>`:""}
+      ${!op&&d.mine&&!d.expired?`<button class="btn primary qbtn" onclick="duShare()">📤 ${tr("Share the duel","Duell teilen","Compartir el duelo")}</button>
+        <button class="btn secondary qbtn" style="margin-top:8px" onclick="window.open('https://wa.me/?text='+encodeURIComponent(duShareText()),'_blank')">WhatsApp</button>
+        ${DU.contacts===null?`<button class="btn secondary qbtn" style="margin-top:8px" onclick="duContacts()">💬 ${tr("Send in PonteTalk","In PonteTalk senden","Enviar en PonteTalk")}</button>`
+          :DU.contacts.length?`<div style="text-align:start;margin-top:8px">${DU.contacts.slice(0,20).map(c=>`<div class="ectop" style="padding:6px 0;border-top:1px solid var(--line)"><span>${esc(c.name)}</span><button class="chip ${DU.sent[c.user_id]?"on":""}" onclick="duSendTo('${c.user_id}')">${DU.sent[c.user_id]||tr("Send","Senden","Enviar")}</button></div>`).join("")}</div>`
+          :`<p class="note">${tr("You can message people after sharing a session with them. Use Share instead.","Nachrichten gehen an Leute, mit denen du in einer Session warst. Nutze Teilen.","Puedes escribir a personas con las que compartiste una sesión. Usa Compartir.")}</p>`}`:""}
+      <div class="row" style="gap:8px;justify-content:center;margin-top:12px"><button class="btn secondary" onclick="duNew()">⚔️ ${tr("New duel","Neues Duell","Nuevo duelo")}</button><button class="btn secondary" onclick="vcOpen()">${tr("Done","Fertig","Hecho")}</button></div></div>`; }
+  const n=(d.words||[]).length;
+  return top+`<div class="card center"><div style="font-size:54px">⚔️</div>
+    <h2 style="margin:4px 0">${d.mine?tr("Your duel","Dein Duell","Tu duelo"):tr(`${d.creator_name} challenges you!`,`${d.creator_name} fordert dich heraus!`,`¡${d.creator_name} te reta!`)}</h2>
+    <p class="note">${tr(`${n} German words · level ${d.level}. Pick the right meaning, fast. Most correct wins; if it's a tie, the faster one wins.`,`${n} deutsche Wörter · Niveau ${d.level}. Wähle schnell die richtige Bedeutung. Wer mehr richtig hat, gewinnt; bei Gleichstand der Schnellere.`,`${n} palabras en alemán · nivel ${d.level}. Elige rápido el significado correcto. Gana quien acierte más; si hay empate, el más rápido.`)}</p>
+    ${op&&!d.mine?"":""}
+    ${DU.err?`<div class="err">${esc(DU.err)}</div>`:""}
+    ${d.can_play||!A.user?`<button class="btn primary qbtn" onclick="duPlay()">▶️ ${tr("Start","Los geht's","Empezar")}</button>
+      <p class="note">🌍 ${tr("Meanings in:","Bedeutungen auf:","Significados en:")} <select onchange="VC.lang=this.value;vcSaveLocal();xr()">${VC_LANGS.map(([k,l])=>`<option value="${k}" ${VC.lang===k?"selected":""}>${l}</option>`).join("")}</select></p>`
+      :`<p class="note">${d.expired?duErr("duel_expired"):duErr("duel_taken")}</p><button class="btn secondary qbtn" onclick="vcOpen()">${tr("Start your own duel","Eigenes Duell starten","Empieza tu duelo")}</button>`}</div>`;
+};
 /* ---------- quick level check ---------- */
 function vcCheckStart(){ if(!VC.d) return; const list=[];
   for(const lv of VC_LEVELS){ const pool=vcLv(lv).filter(w=>!(VC.p[w.id]&&VC.p[w.id].r)); list.push(...exShuffle(pool).slice(0,8)); }
@@ -8507,7 +8623,8 @@ VIEWS.vocab = function(){
       :`<p class="note" style="margin:0">${tr("Words you save in a session (📚 Words I learned) show up here as flashcards.","Wörter, die du in einer Session speicherst (📚 Gelernte Wörter), erscheinen hier als Karteikarten.","Las palabras que guardas en una sesión (📚 Palabras que aprendí) aparecen aquí como tarjetas.")}</p>`}</div>`; })():""}
     <div class="card"><h3 style="margin:0 0 4px">🎲 ${tr("Quick games","Schnelle Spiele","Juegos rápidos")}</h3>
       <button class="btn secondary qbtn" onclick="VC.gtRule=null;vcStart('gender')">🔵🔴🟢 der · die · das (${tr("20 nouns","20 Nomen","20 sustantivos")})</button>
-      <button class="btn secondary qbtn" style="margin-top:8px" onclick="go('vocabg')">💡 ${tr("der · die · das tips","der · die · das Tipps","Consejos der · die · das")}</button></div>
+      <button class="btn secondary qbtn" style="margin-top:8px" onclick="go('vocabg')">💡 ${tr("der · die · das tips","der · die · das Tipps","Consejos der · die · das")}</button>
+      ${duCard()}</div>
     <div class="card"><h3 style="margin:0 0 6px">🗂️ ${tr("Topics","Themen","Temas")} (${VC.level})</h3><div class="vcth">${Object.entries(VC.d.themes).map(([k,t])=>{ const ws=vcLv(VC.level).filter(w=>w.t===k); if(!ws.length) return ""; const s2=vcStats(ws);
       const lab=VC.lang==="es"?t[2]:VC.lang==="ar"?t[3]:VC.lang==="fa"?t[4]:t[1];
       return `<button onclick="vcStart('learn','${k}')">${t[0]} ${esc(lab)}<small>${s2.learned}/${ws.length} ${tr("learned","gelernt","aprendidas")}</small></button>`; }).join("")}</div></div>
@@ -9326,6 +9443,9 @@ try{ const lid=new URLSearchParams(location.search).get("lounge"); if(lid && /^[
     if(A.status==="in"&&A.user){ clearInterval(w); luEnter(lid); }
     else if((A.status==="out"&&n>2)||n>20){ clearInterval(w); A.ret="lounge"; const pr=lid.split("-");
       A.msg=`Sign in (free) to join the ${cfLang(pr[0])[1]} ⇄ ${cfLang(pr[1])[1]} lounge · Melde dich an, um der Lounge beizutreten`; go("account"); } },500); } }catch(e){}
+try{ const dc=new URLSearchParams(location.search).get("duel"); if(dc && /^[A-Za-z0-9]{6}$/.test(dc)){
+  DU.code=dc.toUpperCase(); S.screen="duel"; try{ sessionStorage.setItem("pt_duel",DU.code); }catch(e){}
+  let n=0; const w=setInterval(()=>{ n++; if(A.sb&&(A.status==="in"||A.status==="out"||n>20)){ clearInterval(w); duOpen(DU.code); } },300); } }catch(e){}
 try{ if(new URLSearchParams(location.search).has("lid")) setTimeout(()=>exOpen(),0); }catch(e){}
 try{ if(new URLSearchParams(location.search).has("dtz")) setTimeout(()=>dtOpen(),0); }catch(e){}
 try{ if(new URLSearchParams(location.search).has("vocab")) setTimeout(()=>vcOpen(),0); }catch(e){}
