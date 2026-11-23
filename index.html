@@ -913,7 +913,7 @@
 <script>/* Extra interface languages live in /i18n/<code>.js (English text → translation). Load the chosen one before the app starts. */
 (function(){ try{ var X=["tr","uk","fa","ur"], v=localStorage.getItem("pt_ui");
   if(!v){ var n=String((navigator.languages&&navigator.languages[0])||navigator.language||"").slice(0,2).toLowerCase(); if(X.indexOf(n)>-1) v=n; }
-  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=23"><\/script>'); }catch(e){} })();</script>
+  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=24"><\/script>'); }catch(e){} })();</script>
 
 <script>
 /* ===================== CONTENT ===================== */
@@ -1286,7 +1286,7 @@ function bi(en,de,es){ if(es!==undefined) return tr(en,de,es); return `${en} <sp
 function uiSet(l){
   if(!UI_CODES.includes(l)) return;
   if(UI_EXTRA.includes(l) && !I18N_DATA[l]){
-    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=23";
+    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=24";
     sc.onload=()=>uiSet(l); sc.onerror=()=>bToast(offlineMsg()); document.head.appendChild(sc); return;
   }
   UI=l; I18N_T=null; I18N_M.clear();
@@ -8241,18 +8241,18 @@ async function nbReadAll(){
 /* ===================== VOCABULARY FLASHCARDS (spaced repetition) ===================== */
 /* Words: /vocab/de-a1.json (original list). Progress: sql/vocab.sql when signed in, this phone otherwise.
    🔊 appears only for words that have a recorded clip (Admin → Audio studio), never the phone voice. */
-const VC_V="2026-11-22d";
+const VC_V="2026-11-23a";
 const VC_LEVELS=["A1","A2","B1","B2","C1"];
 const VC_DECK="de";
-const VC_LANGS=[["en","English"],["es","Español"],["ar","العربية"],["fa","فارسی / دری"]];
+const VC_LANGS=[["en","English"],["es","Español"],["tr","Türkçe"],["uk","Українська"],["ar","العربية"],["fa","فارسی / دری"],["ur","اردو"]];
 const VC={ d:null, err:"", p:{}, days:{}, goal:10, lang:(typeof UI!=="undefined"&&UI==="es")?"es":"en", level:"A1", run:null, dirty:{}, dayDirty:false, chk:null };
 function vcLoadLocal(){ try{ const v=JSON.parse(localStorage.getItem("pt_vocab_"+VC_DECK)||"{}"); VC.p=v.p||{}; VC.days=v.days||{}; VC.goal=v.goal||10; VC.pick=!!v.pick; if(VC.pick&&v.lang) VC.lang=v.lang; VC.level=v.level||"A1"; }catch(e){} }
 function vcSaveLocal(){ try{ localStorage.setItem("pt_vocab_"+VC_DECK, JSON.stringify({ p:VC.p, days:VC.days, goal:VC.goal, lang:VC.lang, pick:!!VC.pick, level:VC.level })); }catch(e){} }
-(function(){ try{ const l=(navigator.language||"en").slice(0,2); if(["es","ar","fa"].includes(l)) VC.lang=l; }catch(e){} vcLoadLocal(); })();
+(function(){ try{ const l=(navigator.language||"en").slice(0,2); if(["es","ar","fa","tr","uk","ur"].includes(l)) VC.lang=l; }catch(e){} vcLoadLocal(); })();
 function vcToday(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
 /* meanings follow the app language (es/ar/fa/en) unless the person picked one on the flashcards screen */
-function vcLang(){ if(VC.pick) return VC.lang; return ["es","ar","fa","en"].includes(UI)?UI:VC.lang; }
-function vcRtl(){ const l=vcLang(); return l==="ar"||l==="fa"; }
+function vcLang(){ if(VC.pick) return VC.lang; return ["es","ar","fa","en","tr","uk","ur"].includes(UI)?UI:VC.lang; }
+function vcRtl(){ const l=vcLang(); return l==="ar"||l==="fa"||l==="ur"; }
 function vcTr(w){ return (w.tr&&w.tr[vcLang()])||w.tr.en; }
 function vcClip(w){ const id="V-"+w.id; return DT.man&&DT.man.clips&&DT.man.clips[id]?id:null; }
 async function vcLoadData(){
@@ -9041,7 +9041,7 @@ VIEWS.vocab = function(){
       <button class="btn secondary qbtn" style="margin-top:8px" onclick="bbOpen()">🌉 ${tr("Bridge Builder: build sentences","Brückenbauer: Sätze bauen","Constructor de puentes: frases")}</button>
       ${duCard()}</div>
     <div class="card"><h3 style="margin:0 0 6px">🗂️ ${tr("Topics","Themen","Temas")} (${VC.level})</h3><div class="vcth">${Object.entries(VC.d.themes).map(([k,t])=>{ const ws=vcLv(VC.level).filter(w=>w.t===k); if(!ws.length) return ""; const s2=vcStats(ws);
-      const L=vcLang(), lab=L==="es"?t[2]:L==="ar"?t[3]:L==="fa"?t[4]:t[1];
+      const L=vcLang(), lab=L==="es"?t[2]:L==="ar"?t[3]:L==="fa"?t[4]:["tr","uk","ur"].includes(L)&&L===UI?trX(t[1]):t[1];
       return `<button onclick="vcStart('learn','${k}')">${t[0]} ${esc(lab)}<small>${s2.learned}/${ws.length} ${tr("learned","gelernt","aprendidas")}</small></button>`; }).join("")}</div></div>
     <p class="note">${tr("Word list by PonteTalk. Colours:","Wortliste von PonteTalk. Farben:","Lista de palabras de PonteTalk. Colores:")} <b style="color:#2F6FD1">der</b> · <b style="color:#D9466A">die</b> · <b style="color:#2A8C82">das</b>.</p>`;
   return h;
