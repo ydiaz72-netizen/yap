@@ -18,3 +18,4 @@ The SQL tests create test users and sessions inside the test, then undo everythi
 The midnight limit QA-01 found is fixed by `sql/trust_fixes.sql`.
 
 | `vocab_duel.sql` | VC-03 | Start a duel, play once, scores hidden until you play, impossible times refused, bell for the starter, a third person or someone blocked can't join, links end after 7 days | Supabase → SQL Editor, after `sql/vocab_duel.sql` |
+| `bridge_league.sql` | Bridge Builder | Weekly league: only people who joined count, max 60 XP per send and 5,000 per week, board order and own place, blocked people hidden, leaving hides you, new week starts at 0 | Supabase → SQL Editor, after `sql/bridge_league.sql` |
