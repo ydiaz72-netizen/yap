@@ -261,6 +261,10 @@
   .lgrow{display:flex;align-items:center;gap:10px;padding:8px 6px;border-top:1px solid var(--line);font-size:14px}.lgrow .lgnm{flex:1;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .lgrow>b:first-child{width:22px;text-align:center;color:var(--muted)}.lgrow>b:last-child{color:#F25C3B;font-size:13px}
   .lgrow.me{background:#FDF2D8;border-radius:12px;border-top:0}
+  .bbmode{display:grid;grid-template-columns:1fr 1fr;background:#EEF0F4;border-radius:14px;padding:4px;margin-bottom:10px}
+  .bbmode button{border:0;background:none;font:inherit;font-weight:800;padding:9px;border-radius:11px;color:var(--muted);cursor:pointer}.bbmode button.on{background:#fff;color:var(--ink,#1d2433);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+  .bbtype input{width:100%;box-sizing:border-box;font:inherit;font-size:18px;font-weight:700;padding:14px;border:2px solid #5B8FD8;border-radius:16px;background:#fff;margin-bottom:10px}
+  .bbt.sm{font-size:14px;min-height:36px;padding:6px 10px}
   .bbsk{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}.bbsk span{font-size:12px;font-weight:700;background:#EEF2FA;color:#2F4B7C;border-radius:999px;padding:4px 9px}
   .bbround{display:flex;align-items:center;gap:8px;margin:2px 0 8px;font-size:13px;font-weight:700}.bbround div{flex:1;display:flex;gap:4px}
   .bbround i{flex:1;height:10px;border-radius:6px;background:#E4E1DA}.bbround i.on{background:#A0703F}
@@ -909,7 +913,7 @@
 <script>/* Extra interface languages live in /i18n/<code>.js (English text → translation). Load the chosen one before the app starts. */
 (function(){ try{ var X=["tr","uk","fa","ur"], v=localStorage.getItem("pt_ui");
   if(!v){ var n=String((navigator.languages&&navigator.languages[0])||navigator.language||"").slice(0,2).toLowerCase(); if(X.indexOf(n)>-1) v=n; }
-  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=21"><\/script>'); }catch(e){} })();</script>
+  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=22"><\/script>'); }catch(e){} })();</script>
 
 <script>
 /* ===================== CONTENT ===================== */
@@ -1282,7 +1286,7 @@ function bi(en,de,es){ if(es!==undefined) return tr(en,de,es); return `${en} <sp
 function uiSet(l){
   if(!UI_CODES.includes(l)) return;
   if(UI_EXTRA.includes(l) && !I18N_DATA[l]){
-    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=21";
+    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=22";
     sc.onload=()=>uiSet(l); sc.onerror=()=>bToast(offlineMsg()); document.head.appendChild(sc); return;
   }
   UI=l; I18N_T=null; I18N_M.clear();
@@ -8757,6 +8761,7 @@ const BB_Q={ build:{ n:5, t:["Build 5 new sentences","Bau 5 neue Sätze","Constr
   long:{ n:1, t:["Build a sentence with 6+ words","Bau einen Satz mit 6+ Wörtern","Frase de 6+ palabras"] },
   bridge:{ n:1, t:["Finish a bridge","Bau eine Brücke fertig","Termina un puente"] },
   ch:{ n:1, t:["Finish a challenge","Schaff eine Challenge","Termina un reto"] },
+  type:{ n:3, t:["Type 3 sentences yourself","Tippe 3 Sätze selbst","Escribe 3 frases tú"] },
   inv:{ n:2, lv:2, t:["Start 2 sentences with time or place","Fang 2 Sätze mit Zeit oder Ort an","Empieza 2 frases con tiempo o lugar"] },
   modal:{ n:2, lv:3, t:["Build 2 sentences with möchte, kann or muss","Bau 2 Sätze mit möchte, kann oder muss","2 frases con möchte, kann o muss"] } };
 function bbQs(){ const d=bbDs(new Date()); let q=BB.s.q;
@@ -8766,11 +8771,13 @@ function bbQs(){ const d=bbDs(new Date()); let q=BB.s.q;
   return q; }
 function bbQ(ev,res){ const q=bbQs(), got=[];
   q.ids.forEach(id=>{ const Q=BB_Q[id], was=q.p[id]||0; if(was>=Q.n) return; let v=was;
+    if(res&&res.len===0&&id!=="type") return;
     if(id==="build"&&ev==="ok") v++;
     if(id==="combo"&&ev==="ok") v=Math.max(v,Math.min(BB.s.streak,3));
     if(id==="long"&&ev==="ok"&&res.len>=6) v=1;
     if(id==="inv"&&ev==="ok"&&res.inv) v++;
     if(id==="modal"&&ev==="ok"&&res.modal) v++;
+    if(id==="type"&&ev==="ok"&&res.typed) v++;
     if(id===ev) v=1;
     q.p[id]=Math.min(v,Q.n); if(was<Q.n&&q.p[id]>=Q.n){ bbXp(10); got.push(["📜 "+tr(...Q.t),10]); } });
   if(!q.chest&&q.ids.every(id=>(q.p[id]||0)>=BB_Q[id].n)){ q.chest=1; bbXp(20); got.push(["🎁 "+tr("All daily quests","Alle Tagesquests","Todas las misiones"),20]); }
@@ -8792,7 +8799,29 @@ function bbDone(o){ /* lesson-complete screen */
     <button class="btn primary qbtn" style="margin-top:14px" onclick="${o.go}">${tr("Continue","Weiter","Continuar")} →</button></div>`; }
 function bbAdd(id){ if((BB.row.includes(id)&&!BB_THEMES[BB.th].reuse)||BB.row.length>=12) return; BB.row.push(id); BB.res=null; xr(); }
 function bbDel(k){ BB.row.splice(k,1); BB.res=null; xr(); }
-function bbClear(){ BB.row=[]; BB.res=null; xr(); }
+function bbClear(){ BB.row=[]; BB.res=null; BB.typed=""; BB.tws=null; xr(); }
+/* ---- ⌨️ typing mode: read a typed sentence with the same word tiles ---- */
+function bbNz(w){ return w.toLowerCase().replace(/ä/g,"ae").replace(/ö/g,"oe").replace(/ü/g,"ue").replace(/ß/g,"ss"); }
+function bbParse(text, tiles){
+  const W=String(text||"").replace(/[.,!?;:"„“”«»()…]/g," ").trim().split(/\s+/).filter(Boolean), out=[], unknown=[], spell=[];
+  const C=[...tiles].sort((a,b)=>b.t.split(" ").length-a.t.split(" ").length||(a.r==="I")-(b.r==="I"));
+  for(let i=0;i<W.length;){ let hit=null;
+    for(const t of C){ const tw=t.t.split(" "); if(W.slice(i,i+tw.length).map(bbNz).join(" ")===tw.map(bbNz).join(" ")){ hit=t; break; } }
+    if(!hit){ unknown.push(W[i]); i++; continue; }
+    const n=hit.t.split(" ").length, typed=W.slice(i,i+n).join(" ");
+    const okCase=typed===hit.t||(i===0&&typed===hit.t.charAt(0).toUpperCase()+hit.t.slice(1));
+    if(!okCase&&!spell.includes(hit.t)) spell.push(hit.t);
+    out.push(hit); i+=n; }
+  return { ws:out, unknown, spell }; }
+function bbTypedTiles(){ return BB.mode==="ch"?BB_THEMES[BB_CH[BB.ch.k].th].tiles.map((t,i)=>({ id:i, t:t[0], r:t[1], ...(t[2]||{}) })):bbTiles(); }
+function bbTypeGo(){ const P=bbParse(BB.typed,bbTypedTiles());
+  if(!P.ws.length&&!P.unknown.length){ BB.res={ ok:false, bad:[], msg:tr("Type a German sentence first.","Schreib zuerst einen deutschen Satz.","Escribe primero una frase en alemán.") }; xr(); return null; }
+  if(P.unknown.length){ BB.tws=P.ws; BB.res={ ok:false, bad:[], msg:tr(`I don't know “${P.unknown.join(" ")}” here yet. Use the words in the list.`,`„${P.unknown.join(" ")}“ kenne ich hier noch nicht. Nimm die Wörter aus der Liste.`,`Aquí todavía no conozco «${P.unknown.join(" ")}». Usa las palabras de la lista.`) }; xr(); return null; }
+  BB.tws=P.ws; BB.spell=P.spell; return P.ws; }
+function bbTypeBonus(r){ const clean=!(BB.spell||[]).length, b=clean?3:1;
+  r.typed=true; r.pts+=b; r.why.push(["✍️ "+tr("Typed it yourself","Selbst getippt","Escrita por ti"),b]);
+  if(!clean) r.spell=BB.spell.slice(); return b; }
+function bbIns(t){ const el=document.getElementById("bbin"); BB.typed=((el?el.value:BB.typed)||"").replace(/\s+$/,"")+(BB.typed?" ":"")+t+" "; if(el){ el.value=BB.typed; el.focus(); } }
 const BB_COL={ S:"#2F4B7C", V:"#F25C3B", M:"#D9481F", I:"#C2401F", O:"#2A8C82", T:"#E8A21A", P:"#7B5BC4", A:"#5B6474", H:"#D9481F", Pa:"#B23A1C", K:"#1E8E5A" };
 function bbRole(r){ return { H:tr("helper verb","Hilfsverb","verbo auxiliar"), Pa:tr("participle (end)","Partizip (Ende)","participio (final)"), K:tr("joiner","Verbinder","conector"), S:tr("who","wer","quién"),V:tr("verb","Verb","verbo"),M:tr("verb","Verb","verbo"),I:tr("verb (end)","Verb (Ende)","verbo (final)"),O:tr("what","was","qué"),T:tr("when","wann","cuándo"),P:tr("where","wo","dónde"),A:tr("extra","extra","extra")}[r]; }
 /* the grammar check: returns {ok, bad:[index], msg, pts, why:[...]} */
@@ -8873,12 +8902,13 @@ function bbNorm(ws, th){ const T=BB_THEMES[th].tiles, hasM=ws.some(w=>w.r==="M")
     const i=T.findIndex(t=>t[0]===w.t&&t[1]===want); return i>=0?{ id:w.id, t:w.t, r:want, ...(T[i][2]||{}) }:w; }); }
 function bbSentence(ws){ const s=ws.map(w=>w.t).join(" "); return s.charAt(0).toUpperCase()+s.slice(1)+"."; }
 function bbGo(){
-  const tiles=bbTiles(), ws=BB.row.map(id=>tiles.find(t=>t.id===id)).filter(Boolean);
+  const typing=BB.s.input==="type", tiles=bbTiles(), ws=typing?bbTypeGo():BB.row.map(id=>tiles.find(t=>t.id===id)).filter(Boolean);
+  if(!ws) return;
   if(BB.mode==="ch") return bbChCheck(ws);
   const r=bbCheck(bbNorm(ws,BB.th),BB.th); BB.res=r; BB.rd=BB.rd||bbRd(); BB.rd.tries++;
   if(r.ok){ const key=BB.th+":"+ws.map(w=>w.t).join(" ").toLowerCase(), lv0=bbLevel();
     if(BB.s.made[key]){ r.repeat=true; r.pts=0; }
-    else { BB.s.streak++; if(BB.s.streak>=3){ const b=Math.round(r.pts*0.5); r.pts+=b; BB.rd.combo+=b; r.why.push([`🔥 ${tr("Streak","Serie","Racha")} ×1.5`,b]); }
+    else { if(typing) bbTypeBonus(r); BB.s.streak++; if(BB.s.streak>=3){ const b=Math.round(r.pts*0.5); r.pts+=b; BB.rd.combo+=b; r.why.push([`🔥 ${tr("Streak","Serie","Racha")} ×1.5`,b]); }
       BB.rd.ok++; BB.rd.n++; BB.rd.xp+=r.pts; bbDay(); if(BB.rd.n>=BB_ROUND) r.round=true;
       r.quests=bbQ("ok",r).concat(r.round?bbQ("bridge"):[]); bbDnaAdd(r);
       BB.s.made[key]=1; bbXp(r.pts); BB.s.n++; BB.s.best=Math.max(BB.s.best,r.pts); }
@@ -8899,25 +8929,25 @@ function bbChTiles(){ const c=BB_CH[BB.ch.k], T=BB_THEMES[c.th].tiles.map((t,i)=
 function bbChCheck(ws){ const c=BB_CH[BB.ch.k], it=c.items[BB.ch.i], got=ws.map(w=>w.t).join(" ").toLowerCase();
   const ok=it[1].some(a=>a.toLowerCase()===got); BB.ch.tries++;
   BB.ch.all=(BB.ch.all||0)+1;
-  if(ok){ const p=BB.ch.tries===1?10:5; BB.ch.ok+= BB.ch.tries===1?1:0; BB.ch.xp=(BB.ch.xp||0)+p; bbXp(p); bbDay(); bbDnaAdd({ ok:true, used:bbCheck(bbNorm(ws,c.th),c.th).used }); bbSave(); BB.res={ ok:true, pts:p, why:[[BB.ch.tries===1?tr("First try!","Beim ersten Versuch!","¡A la primera!"):tr("Solved","Gelöst","Resuelto"),p]] }; }
+  if(ok){ const tb=BB.s.input==="type"?(BB.spell&&BB.spell.length?1:3):0, p=(BB.ch.tries===1?10:5)+tb; BB.ch.ok+= BB.ch.tries===1?1:0; BB.ch.xp=(BB.ch.xp||0)+p; bbXp(p); bbDay(); bbDnaAdd({ ok:true, used:bbCheck(bbNorm(ws,c.th),c.th).used }); bbSave(); BB.res={ ok:true, pts:p, typed:!!tb, spell:tb===1?BB.spell.slice():null, why:[[BB.ch.tries===1?tr("First try!","Beim ersten Versuch!","¡A la primera!"):tr("Solved","Gelöst","Resuelto"),p-tb]].concat(tb?[["✍️ "+tr("Typed it yourself","Selbst getippt","Escrita por ti"),tb]]:[]) }; if(tb) bbQ("ok",{ typed:true, len:0 }); }
   else { const g=bbCheck(bbNorm(ws,c.th),c.th); if(!g.ok){ bbDnaAdd(g); bbSave(); } BB.res=g.ok?{ ok:false, bad:[], msg:tr("Good German, but not what the English says. Look again!","Gutes Deutsch, aber nicht das, was auf Englisch steht. Schau noch mal!","Buen alemán, pero no es lo que dice el inglés. ¡Mira otra vez!") }:g; }
   xr(); }
-function bbChNext(){ const c=BB_CH[BB.ch.k]; BB.ch.i++; BB.ch.tries=0; BB.row=[]; BB.res=null;
+function bbChNext(){ const c=BB_CH[BB.ch.k]; BB.ch.i++; BB.ch.tries=0; BB.row=[]; BB.res=null; BB.typed=""; BB.tws=null;
   if(BB.ch.i>=c.items.length){ const st=BB.ch.ok>=5?3:BB.ch.ok>=3?2:1; BB.s.ch[BB.ch.k]=Math.max(BB.s.ch[BB.ch.k]||0,st); BB.ch.qs=bbQ("ch"); bbSave(); BB.ch.done=st; }
   xr(); }
 function bbTile(w,used,k){ return `<button class="bbt" style="--c:${BB_COL[w.r]}" ${used?"disabled":""} onclick="${k==null?`bbAdd(${w.id})`:`bbDel(${k})`}" lang="de">${esc(w.t)}${k==null?`<small>${bbRole(w.r)}</small>`:""}</button>`; }
 VIEWS.bridge = function(){
   bbLoad(); const lv=bbLevel(), next=BB_LV[lv]||null, ch=BB.mode==="ch"&&BB.ch, c=ch?BB_CH[BB.ch.k]:null;
-  const top=`<div class="topline"><button class="chip" onclick="${ch?"BB.mode='free';BB.ch=null;BB.row=[];BB.res=null;xr()":"go('games')"}">${uiBack()} ${ch?tr("Bridge Builder","Brückenbauer","Constructor de puentes"):tr("Games","Spiele","Juegos")}</button><span>🇩🇪 ${tr("German only","Nur Deutsch","Solo alemán")}</span></div>`;
+  const top=`<div class="topline"><button class="chip" onclick="${ch?"BB.mode='free';BB.ch=null;BB.row=[];BB.res=null;BB.typed='';BB.tws=null;xr()":"go('games')"}">${uiBack()} ${ch?tr("Bridge Builder","Brückenbauer","Constructor de puentes"):tr("Games","Spiele","Juegos")}</button><span>🇩🇪 ${tr("German only","Nur Deutsch","Solo alemán")}</span></div>`;
   const stats=`<div class="bbstats"><div><b>${BB.s.pts}</b><span>${tr("points","Punkte","puntos")}</span></div><div><b>${bbRank(lv)}</b><span>${tr("Level","Level","Nivel")} ${lv}${next?` · ${next-BB.s.pts} ${tr("to go","fehlen","faltan")}`:""}</span></div><div><b>${BB.s.streak?"🔥 "+BB.s.streak:"–"}</b><span>${tr("streak","Serie","racha")}</span></div></div>
     ${next?`<div class="exbar" style="margin:6px 0 12px"><i style="width:${Math.round((BB.s.pts-(BB_LV[lv-1]||0))/(next-(BB_LV[lv-1]||0))*100)}%"></i></div>`:""}`;
   if(ch&&BB.ch.done) return top+bbDone({ stars:BB.ch.done, title:tr("Challenge done!","Challenge geschafft!","¡Reto superado!"),
     sub:tr(`${BB.ch.ok} of 5 on the first try.`,`${BB.ch.ok} von 5 beim ersten Versuch.`,`${BB.ch.ok} de 5 a la primera.`),
-    xp:BB.ch.xp||0, combo:0, tries:BB.ch.all||0, ok:5, extra:(BB.ch.qs||[]).map(([a,b])=>`<div class="bbqdone">✅ ${esc(a)} <b>+${b}</b></div>`).join(""), go:"BB.mode='free';BB.ch=null;BB.row=[];BB.res=null;xr()" });
+    xp:BB.ch.xp||0, combo:0, tries:BB.ch.all||0, ok:5, extra:(BB.ch.qs||[]).map(([a,b])=>`<div class="bbqdone">✅ ${esc(a)} <b>+${b}</b></div>`).join(""), go:"BB.mode='free';BB.ch=null;BB.row=[];BB.res=null;BB.typed='';BB.tws=null;xr()" });
   if(!ch&&BB.rd&&BB.rd.done) return top+bbDone({ title:tr("Bridge complete!","Brücke fertig!","¡Puente terminado!"),
     sub:tr(`${BB_ROUND} new sentences built.`,`${BB_ROUND} neue Sätze gebaut.`,`${BB_ROUND} frases nuevas construidas.`),
-    xp:BB.rd.xp, combo:BB.rd.combo, tries:BB.rd.tries, ok:BB.rd.ok, go:"BB.rd=bbRd();BB.row=[];BB.res=null;xr()" });
-  const tiles=ch?bbChTiles():bbTiles(), row=BB.row.map(id=>tiles.find(t=>t.id===id)).filter(Boolean), r=BB.res;
+    xp:BB.rd.xp, combo:BB.rd.combo, tries:BB.rd.tries, ok:BB.rd.ok, go:"BB.rd=bbRd();BB.row=[];BB.res=null;BB.typed='';BB.tws=null;xr()" });
+  const typing=BB.s.input==="type", tiles=ch?bbChTiles():bbTiles(), row=typing?(BB.tws||[]):BB.row.map(id=>tiles.find(t=>t.id===id)).filter(Boolean), r=BB.res;
   const groups=["S","V","M","H","I","Pa","O","T","P","A","K"].filter(g=>tiles.some(t=>t.r===g));
   const bad=new Set(r&&!r.ok?r.bad||[]:[]);
   return top+`<h2 style="margin:4px 0">🌉 ${tr("Bridge Builder","Brückenbauer","Constructor de puentes")}</h2>${stats}
@@ -8925,20 +8955,23 @@ VIEWS.bridge = function(){
       :`<div class="row" style="gap:6px;margin:0 0 8px"><button class="chip" onclick="document.getElementById('bbq').scrollIntoView({behavior:'smooth'})">📜 ${tr("Quests","Quests","Misiones")} ${(()=>{ const q=bbQs(); return q.ids.filter(id=>(q.p[id]||0)>=BB_Q[id].n).length; })()}/3</button><button class="chip" onclick="document.getElementById('bblg').scrollIntoView({behavior:'smooth'})">🏆 ${tr("League","Liga","Liga")}${LG.data&&LG.data.mine?` #${LG.data.mine.rank}`:""}</button>${BB.s.dna&&Object.keys(BB.s.dna).length?`<button class="chip" onclick="document.getElementById('bbdna').scrollIntoView({behavior:'smooth'})">🧬 ${tr("Your grammar","Deine Grammatik","Tu gramática")}</button>`:""}</div>
       <div class="bbround"><span>🌉 ${tr("This bridge","Diese Brücke","Este puente")}</span><div>${Array.from({length:BB_ROUND},(_,i)=>`<i class="${i<(BB.rd?BB.rd.n:0)?"on":""}"></i>`).join("")}</div><b>${BB.rd?BB.rd.n:0}/${BB_ROUND}</b></div>
       <div class="ecmeta" style="margin:2px 0 0">🎯 ${tr("Practising","Du übst","Practicas")}</div>${BB_THEMES[BB.th].lv?bbSkills(BB_THEMES[BB.th].lv,true):bbSkills(Math.min(lv,3))}
-      <div class="row" style="gap:6px;flex-wrap:wrap;margin:10px 0">${Object.entries(BB_THEMES).sort((x,y)=>(x[1].lv||0)-(y[1].lv||0)).map(([k,t])=>bbThOpen(k)?`<button class="chip ${BB.th===k?"on":""}" onclick="BB.th='${k}';BB.row=[];BB.res=null;xr()">${t.e} ${tr(t.en,t.de,t.es)}${t.lv?` <small>B1</small>`:""}</button>`
+      <div class="row" style="gap:6px;flex-wrap:wrap;margin:10px 0">${Object.entries(BB_THEMES).sort((x,y)=>(x[1].lv||0)-(y[1].lv||0)).map(([k,t])=>bbThOpen(k)?`<button class="chip ${BB.th===k?"on":""}" onclick="BB.th='${k}';BB.row=[];BB.res=null;BB.typed='';BB.tws=null;xr()">${t.e} ${tr(t.en,t.de,t.es)}${t.lv?` <small>B1</small>`:""}</button>`
         :`<button class="chip" style="opacity:.5" onclick="bToast(tr('Reach level ${t.lv} or finish challenge ${t.lv-1} to unlock.','Erreiche Level ${t.lv} oder schaff Challenge ${t.lv-1}, um das freizuschalten.','Llega al nivel ${t.lv} o supera el reto ${t.lv-1} para desbloquearlo.'))">🔒 ${tr(t.en,t.de,t.es)} <small>B1</small></button>`).join("")}</div>`}
-    <div class="bbriver ${r&&r.ok?"done":""}" aria-label="${tr("Your sentence","Dein Satz","Tu frase")}">
-      ${row.length?row.map((w,k)=>`${w.r==="K"?`<span class="bbcomma">,</span>`:""}<span class="${bad.has(k)?"bbbad":""}">${bbTile(w,false,k)}</span>`).join(""):`<span class="note" style="margin:0;color:#fff">${tr("Tap the words below to build your sentence →","Tippe unten auf die Wörter und bau deinen Satz →","Toca las palabras de abajo para construir tu frase →")}</span>`}
-    </div>
+    <div class="bbmode" role="tablist"><button class="${typing?"":"on"}" onclick="BB.s.input='tiles';bbSave();BB.row=[];BB.res=null;BB.typed='';BB.tws=null;xr()">🧩 ${tr("Tiles","Kärtchen","Fichas")}</button><button class="${typing?"on":""}" onclick="BB.s.input='type';bbSave();BB.row=[];BB.res=null;BB.typed='';BB.tws=null;xr()">⌨️ ${tr("Type it","Selbst tippen","Escribir")}</button></div>
+    ${typing&&!(r&&r.ok)?`<div class="bbtype"><input id="bbin" lang="de" autocomplete="off" autocorrect="off" autocapitalize="sentences" spellcheck="false" enterkeyhint="done" placeholder="${tr("Type your German sentence…","Schreib deinen deutschen Satz…","Escribe tu frase en alemán…")}" value="${esc(BB.typed||"")}" oninput="BB.typed=this.value" onkeydown="if(event.key==='Enter'){event.preventDefault();bbGo()}"></div>`:""}
+    ${typing&&!row.length?"":`<div class="bbriver ${r&&r.ok?"done":""}" aria-label="${tr("Your sentence","Dein Satz","Tu frase")}">
+      ${row.length?row.map((w,k)=>`${w.r==="K"?`<span class="bbcomma">,</span>`:""}<span class="${bad.has(k)?"bbbad":""}">${typing?`<span class="bbt" style="--c:${BB_COL[w.r]}" lang="de">${esc(w.t)}</span>`:bbTile(w,false,k)}</span>`).join(""):`<span class="note" style="margin:0;color:#fff">${tr("Tap the words below to build your sentence →","Tippe unten auf die Wörter und bau deinen Satz →","Toca las palabras de abajo para construir tu frase →")}</span>`}
+    </div>`}
     ${r?(r.ok?`<div class="card bbok"><div style="font-size:22px;font-weight:800">${r.repeat?tr("Built before, so no new points. Try a new sentence!","Schon gebaut, keine neuen Punkte. Probier einen neuen Satz!","Ya la construiste, sin puntos nuevos. ¡Prueba otra!"):`🌉 +${r.pts} ${tr("points","Punkte","puntos")}`}</div>
         ${r.repeat?"":`<div class="note" style="margin:4px 0 0">${r.why.map(([a,b])=>`${esc(a)} +${b}`).join(" · ")}</div>`}
         ${(r.quests||[]).map(([a,b])=>`<div class="bbqdone">✅ ${esc(a)} <b>+${b}</b></div>`).join("")}
+        ${r.spell?`<div class="note" style="margin:4px 0 0">✏️ ${tr("Watch the spelling","Achte auf die Schreibung","Ojo con la ortografía")}: <b lang="de">${r.spell.map(esc).join(" · ")}</b></div>`:""}
         ${r.funny?`<div class="note" style="margin:4px 0 0">😂 ${tr("Perfect grammar, funny meaning!","Grammatik perfekt, Bedeutung lustig!","¡Gramática perfecta, significado gracioso!")}</div>`:""}
         ${r.up?`<div style="font-weight:800;margin-top:6px">🎉 ${tr("Level up!","Level up!","¡Subes de nivel!")} ${bbRank(bbLevel())} ${tr("New tiles unlocked.","Neue Kärtchen freigeschaltet.","Nuevas fichas desbloqueadas.")}</div>`:""}
-        <button class="btn primary qbtn" style="margin-top:10px" onclick="${ch?"bbChNext()":r.round?"BB.rd.done=true;BB.row=[];BB.res=null;xr()":"bbClear()"}">${ch?tr("Next","Weiter","Siguiente"):r.round?"🎉 "+tr("Finish the bridge","Brücke fertigstellen","Terminar el puente"):tr("Build another","Noch einen bauen","Construir otra")} →</button></div>`
+        <button class="btn primary qbtn" style="margin-top:10px" onclick="${ch?"bbChNext()":r.round?"BB.rd.done=true;BB.row=[];BB.res=null;BB.typed='';BB.tws=null;xr()":"bbClear()"}">${ch?tr("Next","Weiter","Siguiente"):r.round?"🎉 "+tr("Finish the bridge","Brücke fertigstellen","Terminar el puente"):tr("Build another","Noch einen bauen","Construir otra")} →</button></div>`
       :`<div class="card bbno">💡 ${esc(r.msg)}</div>`):""}
-    ${r&&r.ok?"":`<div class="row" style="gap:8px;margin:10px 0"><button class="btn primary" style="flex:2" ${row.length?"":"disabled"} onclick="bbGo()">✅ ${tr("Check","Prüfen","Comprobar")}</button><button class="btn secondary" style="flex:1" ${row.length?"":"disabled"} onclick="BB.row.pop();BB.res=null;xr()">↩</button><button class="btn secondary" style="flex:1" ${row.length?"":"disabled"} onclick="bbClear()">🗑</button></div>`}
-    <div class="card bbtray">${groups.map(g=>`<div class="bbg">${tiles.filter(t=>t.r===g).map(t=>bbTile(t,BB.row.includes(t.id)&&!BB_THEMES[BB.th].reuse)).join("")}</div>`).join("")}</div>
+    ${r&&r.ok?"":`<div class="row" style="gap:8px;margin:10px 0"><button class="btn primary" style="flex:2" ${row.length||typing?"":"disabled"} onclick="bbGo()">✅ ${tr("Check","Prüfen","Comprobar")}</button>${typing?"":`<button class="btn secondary" style="flex:1" ${row.length?"":"disabled"} onclick="BB.row.pop();BB.res=null;xr()">↩</button>`}<button class="btn secondary" style="flex:1" ${row.length||typing?"":"disabled"} onclick="bbClear()">🗑</button></div>`}
+    <div class="card bbtray">${typing?`<div class="ecmeta">📖 ${tr("Words you can use (tap to add)","Wörter, die du nutzen kannst (tippen zum Einfügen)","Palabras que puedes usar (toca para añadir)")}</div>`:""}${groups.map(g=>`<div class="bbg">${tiles.filter(t=>t.r===g).map(t=>typing?`<button class="bbt sm" style="--c:${BB_COL[t.r]}" lang="de" onclick="bbIns('${esc(t.t).replace(/'/g,"&#39;")}')">${esc(t.t)}</button>`:bbTile(t,BB.row.includes(t.id)&&!BB_THEMES[BB.th].reuse)).join("")}</div>`).join("")}</div>
     ${ch?"":`<div class="card"><h3 style="margin:0 0 6px">🎯 ${tr("Challenges","Challenges","Retos")}</h3><p class="note" style="margin:0 0 8px">${tr("Build the German sentence for each English one. 5 sentences each.","Bau zu jedem englischen Satz den deutschen. Je 5 Sätze.","Construye la frase alemana para cada frase en inglés. 5 frases cada uno.")}</p>
       ${BB_CH.map((cc,k)=>{ const open=k===0||(BB.s.ch[k-1]||0)>0; return `<button class="ectop" style="width:100%;background:none;border:0;border-top:1px solid var(--line);padding:10px 0;font:inherit;cursor:${open?"pointer":"default"};opacity:${open?1:.5}" ${open?`onclick="bbChStart(${k})"`:"disabled"}><span>${["1 · Ich lerne Deutsch.","2 · Heute lerne ich Deutsch.","3 · Ich möchte Deutsch lernen.","4 · Gestern habe ich Deutsch gelernt. <small class=\"note\">B1</small>","5 · …, weil ich hier lebe. <small class=\"note\">B1</small>"][k]}</span><b>${BB.s.ch[k]?"⭐".repeat(BB.s.ch[k]):open?"▶️":"🔒"}</b></button>`; }).join("")}</div>
     ${ch?"":bbQCard()+lgCard()+bbDnaCard()}
