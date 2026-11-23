@@ -866,7 +866,7 @@
 <script>/* Extra interface languages live in /i18n/<code>.js (English text → translation). Load the chosen one before the app starts. */
 (function(){ try{ var X=["tr","uk","fa","ur"], v=localStorage.getItem("pt_ui");
   if(!v){ var n=String((navigator.languages&&navigator.languages[0])||navigator.language||"").slice(0,2).toLowerCase(); if(X.indexOf(n)>-1) v=n; }
-  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=13"><\/script>'); }catch(e){} })();</script>
+  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=14"><\/script>'); }catch(e){} })();</script>
 
 <script>
 /* ===================== CONTENT ===================== */
@@ -1239,7 +1239,7 @@ function bi(en,de,es){ if(es!==undefined) return tr(en,de,es); return `${en} <sp
 function uiSet(l){
   if(!UI_CODES.includes(l)) return;
   if(UI_EXTRA.includes(l) && !I18N_DATA[l]){
-    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=13";
+    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=14";
     sc.onload=()=>uiSet(l); sc.onerror=()=>bToast(offlineMsg()); document.head.appendChild(sc); return;
   }
   UI=l; I18N_T=null; I18N_M.clear();
@@ -5044,7 +5044,7 @@ function luListHtml(){
         <span class="tm">${t}</span>${tools}</div>`;
     }
     return `${sep}<div class="cm ${mine?"me":""}">${mine?"":`<div class="who">${m.avatar_url?`<img class="avs" src="${esc(m.avatar_url)}" alt="">`:""}${esc(m.name||"Member")}</div>`}
-      <span dir="auto">${chLinkify(m.body)}</span><span class="tm">${t}</span>${tools}</div>`;
+      <span dir="auto">${chLinkify(m.body)}</span>${lwUsed(m)?` <span title="${tr("Word of the day","Wort des Tages","Palabra del día")}">⭐</span>`:""}<span class="tm">${t}</span>${tools}</div>`;
   }).join("");
 }
 function luPaint(){
@@ -5077,6 +5077,33 @@ function emoAdd(ta,e){
   t.dispatchEvent(new Event("input"));
 }
 document.addEventListener("click",ev=>{ const box=document.getElementById("emobox"); if(box && !(ev.target.closest && (ev.target.closest("#emobox")||ev.target.closest(".emob")))) box.remove(); });
+/* ---- Word of the day (German lounges): one word from the A2/B1 flashcard lists, the same for everyone each day ---- */
+const LW={ words:null, loading:false };
+async function lwLoad(){
+  if(LW.words||LW.loading) return; LW.loading=true;
+  try{ const fs=await Promise.all(["a2","b1"].map(l=>fetch(`/vocab/de-${l}.json?v=${VC_V}`).then(r=>r.ok?r.json():{ words:[] })));
+    LW.words=[].concat(...fs.map(f=>f.words||[])).filter(w=>w.ex&&w.tr&&w.tr.en&&!/\s.*\s/.test(w.w.replace(/^(der|die|das) /,""))); }
+  catch(e){ LW.words=[]; }
+  LW.loading=false; if(S.screen==="lounge") xr();
+}
+function lwToday(){ if(!LW.words||!LW.words.length) return null; const day=Math.floor(Date.now()/86400000); return LW.words[(day*7919)%LW.words.length]; }
+/* the part people will type: the noun without article, or a verb/adjective stem ("arbeiten" → "arbeit") */
+function lwStem(w){ const x=w.w.replace(/^(der|die|das) /,"").replace(/^sich /,"").split(/\s/)[0].toLowerCase(); return w.g?x:(x.length>6?x.replace(/(en|n)$/,""):x); }
+function lwUsed(m){ const w=lwToday(); return !!(w&&m&&m.kind!=="session"&&m.body&&new Date(m.created_at).toDateString()===new Date().toDateString()&&m.body.toLowerCase().includes(lwStem(w))); }
+function lwCard(l){
+  if(l.lang_a!=="de"&&l.lang_b!=="de") return "";
+  if(!LW.words){ lwLoad(); return ""; }
+  const w=lwToday(); if(!w) return "";
+  const o=l.lang_a==="de"?l.lang_b:l.lang_a, mk=w.tr[o]?o:(w.tr[VC.lang]?VC.lang:"en"), n=LU.msgs.filter(lwUsed).length;
+  return `<div class="luq" style="background:var(--coral-soft);margin-top:8px"><span class="note" style="margin:0">📖 ${tr("Word of the day","Wort des Tages","Palabra del día")}</span>
+    <div style="font-size:22px;font-weight:800" lang="de" dir="ltr">${vcWordHtml(w)}</div>
+    <div dir="auto">${luFlag(mk==="en"?"en":mk)} ${esc(w.tr[mk])}</div>
+    <div class="luroman" lang="de" dir="ltr">„${esc(w.ex)}“</div>
+    <div class="row" style="gap:8px;align-items:center;flex-wrap:wrap">${LU.canPost!==false?`<button class="chip on" onclick="lwUse()">✍️ ${tr("Use it in a message","In einer Nachricht benutzen","Úsala en un mensaje")}</button>`:""}
+      <span class="note" style="margin:0">${n?`⭐ ${tr(`Used ${n} time${n===1?"":"s"} today`,`Heute ${n}× benutzt`,`Usada ${n} ${n===1?"vez":"veces"} hoy`)}`:tr("⭐ Be the first to use it today","⭐ Sei heute die erste Person, die es benutzt","⭐ Sé la primera persona en usarla hoy")}</span></div></div>`;
+}
+function lwUse(){ const w=lwToday(), ta=document.getElementById("lutxt"); if(!w||!ta) return;
+  const x=w.w; ta.value=(ta.value?ta.value.trimEnd()+" ":"")+x+" "; LU.draft=ta.value; ta.focus(); ta.setSelectionRange(ta.value.length,ta.value.length); }
 function luQuestion(l){
   const day=Math.floor(Date.now()/86400000), q=LU_QS[day % LU_QS.length];
   const a=q[l.lang_a], b=q[l.lang_b];
@@ -5376,6 +5403,7 @@ VIEWS.lounge = function(){
     <p class="note" style="margin:0">${tr(`Open to all members`,`Für alle Mitglieder`,`Abierta a todos los miembros`)} <span data-lupres="${esc(l.id)}">${lpHere(l.id)}</span></p></div>
     <button class="chip" style="flex:none" onclick="luShare()" aria-label="Share link to this lounge">🔗 ${tr("Share","Teilen","Compartir")}</button></div>
   ${luQuestion(l)}
+  ${lwCard(l)}
   ${ecCard(l)}
   <button class="btn secondary" style="margin:8px 0" aria-expanded="${LU.findOpen}" onclick="LU.findOpen=!LU.findOpen;xr()">📅 ${tr("Find a time to talk","Zeit zum Reden finden","Encontrar una hora para hablar")}${best.length?` · ${tr(`${best[0].n} free`,`${best[0].n} frei`,`${best[0].n} libres`)} ${esc(luWhen(best[0].when))}: ${esc((best[0].people||[]).slice(0,3).map(x=>A.user&&x.user_id===A.user.id?tr("you","du","tú"):x.name).join(", "))}${best[0].n>3?"…":""}`:""} ${LU.findOpen?"▲":"▼"}</button>
   ${LU.findOpen?luFindHtml(l, best):""}
