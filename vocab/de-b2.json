@@ -91,7 +91,10 @@
     "en": "application deadline",
     "es": "el plazo de solicitud",
     "ar": "الموعد النهائي للتقديم",
-    "fa": "مهلت درخواست"
+    "fa": "مهلت درخواست",
+    "tr": "başvuru son tarihi",
+    "uk": "термін подання заявок",
+    "ur": "درخواست کی آخری تاریخ"
    },
    "g": "die",
    "pl": "Bewerbungsfristen"
@@ -105,7 +108,10 @@
     "en": "opposition",
     "es": "la oposición",
     "ar": "المعارضة",
-    "fa": "مخالفان / اپوزیسیون"
+    "fa": "مخالفان / اپوزیسیون",
+    "tr": "muhalefet",
+    "uk": "опозиція",
+    "ur": "حزبِ اختلاف"
    },
    "g": "die",
    "pl": "Oppositionen"
@@ -119,7 +125,10 @@
     "en": "argument, dispute",
     "es": "la discusión, el conflicto",
     "ar": "الخلاف / المشادة",
-    "fa": "درگیری / مشاجره"
+    "fa": "درگیری / مشاجره",
+    "tr": "anlaşmazlık",
+    "uk": "суперечка",
+    "ur": "تنازع"
    },
    "g": "die",
    "pl": "Auseinandersetzungen"
@@ -133,7 +142,10 @@
     "en": "headline",
     "es": "el titular",
     "ar": "العنوان الرئيسي",
-    "fa": "تیتر"
+    "fa": "تیتر",
+    "tr": "manşet",
+    "uk": "заголовок",
+    "ur": "سرخی"
    },
    "g": "die",
    "pl": "Schlagzeilen"
@@ -147,7 +159,10 @@
     "en": "environmental protection",
     "es": "la protección del medio ambiente",
     "ar": "حماية البيئة",
-    "fa": "حفاظت از محیط زیست"
+    "fa": "حفاظت از محیط زیست",
+    "tr": "çevre koruma",
+    "uk": "охорона довкілля",
+    "ur": "ماحولیاتی تحفظ"
    },
    "g": "der"
   },
@@ -160,7 +175,10 @@
     "en": "prevention",
     "es": "la prevención",
     "ar": "الوقاية",
-    "fa": "پیشگیری"
+    "fa": "پیشگیری",
+    "tr": "önleme",
+    "uk": "запобігання",
+    "ur": "روک تھام"
    },
    "g": "die"
   },
@@ -173,7 +191,10 @@
     "en": "owner",
     "es": "el propietario",
     "ar": "المالك",
-    "fa": "مالک"
+    "fa": "مالک",
+    "tr": "mal sahibi",
+    "uk": "власник",
+    "ur": "مالک"
    },
    "g": "der",
    "pl": "Eigentümer"
@@ -187,7 +208,10 @@
     "en": "infrastructure",
     "es": "la infraestructura",
     "ar": "البنية التحتية",
-    "fa": "زیرساخت"
+    "fa": "زیرساخت",
+    "tr": "altyapı",
+    "uk": "інфраструктура",
+    "ur": "بنیادی ڈھانچہ"
    },
    "g": "die",
    "pl": "Infrastrukturen"
@@ -201,7 +225,10 @@
     "en": "to deal with, to engage with",
     "es": "ocuparse de",
     "ar": "يتعامل مع / يناقش",
-    "fa": "پرداختن به"
+    "fa": "پرداختن به",
+    "tr": "ele almak, uğraşmak",
+    "uk": "займатися, розбиратися з",
+    "ur": "سے نمٹنا"
    }
   },
   {
@@ -213,7 +240,10 @@
     "en": "appropriate, reasonable",
     "es": "adecuado",
     "ar": "مناسب / معقول",
-    "fa": "مناسب / معقول"
+    "fa": "مناسب / معقول",
+    "tr": "uygun, makul",
+    "uk": "відповідний",
+    "ur": "مناسب"
    }
   },
   {
@@ -225,7 +255,10 @@
     "en": "apparently",
     "es": "al parecer",
     "ar": "على ما يبدو",
-    "fa": "ظاهراً"
+    "fa": "ظاهراً",
+    "tr": "görünüşe göre",
+    "uk": "мабуть",
+    "ur": "بظاہر"
    }
   },
   {
@@ -237,7 +270,10 @@
     "en": "notice period",
     "es": "el plazo de preaviso",
     "ar": "مهلة الإشعار",
-    "fa": "مهلت اخطار فسخ قرارداد"
+    "fa": "مهلت اخطار فسخ قرارداد",
+    "tr": "ihbar süresi",
+    "uk": "строк попередження про звільнення",
+    "ur": "نوٹس کی مدت"
    },
    "g": "die",
    "pl": "Kündigungsfristen"
@@ -251,7 +287,10 @@
     "en": "member of parliament",
     "es": "el diputado",
     "ar": "النائب",
-    "fa": "نماینده‌ی مجلس"
+    "fa": "نماینده‌ی مجلس",
+    "tr": "milletvekili",
+    "uk": "депутат",
+    "ur": "رکنِ پارلیمنٹ"
    },
    "g": "der",
    "pl": "Abgeordneten"
@@ -265,7 +304,10 @@
     "en": "compromise",
     "es": "el compromiso, el acuerdo",
     "ar": "الحل الوسط",
-    "fa": "سازش / مصالحه"
+    "fa": "سازش / مصالحه",
+    "tr": "uzlaşma",
+    "uk": "компроміс",
+    "ur": "سمجھوتہ"
    },
    "g": "der",
    "pl": "Kompromisse"
@@ -279,7 +321,10 @@
     "en": "article",
     "es": "el artículo",
     "ar": "المقالة",
-    "fa": "مقاله"
+    "fa": "مقاله",
+    "tr": "makale",
+    "uk": "стаття",
+    "ur": "مضمون"
    },
    "g": "der",
    "pl": "Artikel"
@@ -293,7 +338,10 @@
     "en": "global warming",
     "es": "el calentamiento global",
     "ar": "الاحتباس الحراري",
-    "fa": "گرمایش زمین"
+    "fa": "گرمایش زمین",
+    "tr": "küresel ısınma",
+    "uk": "глобальне потепління",
+    "ur": "عالمی حدت"
    },
    "g": "die"
   },
@@ -306,7 +354,10 @@
     "en": "healing, cure",
     "es": "la curación",
     "ar": "الشفاء",
-    "fa": "بهبود / درمان"
+    "fa": "بهبود / درمان",
+    "tr": "iyileşme, şifa",
+    "uk": "зцілення",
+    "ur": "شفا"
    },
    "g": "die",
    "pl": "Heilungen"
@@ -320,7 +371,10 @@
     "en": "owner-occupied flat",
     "es": "el piso en propiedad",
     "ar": "شقة مملوكة",
-    "fa": "آپارتمان شخصی"
+    "fa": "آپارتمان شخصی",
+    "tr": "mülk daire",
+    "uk": "власна квартира",
+    "ur": "ملکیتی فلیٹ"
    },
    "g": "die",
    "pl": "Eigentumswohnungen"
@@ -334,7 +388,10 @@
     "en": "local public transport",
     "es": "el transporte público local",
     "ar": "النقل المحلي",
-    "fa": "حمل‌ونقل عمومی شهری"
+    "fa": "حمل‌ونقل عمومی شهری",
+    "tr": "toplu taşıma (yerel)",
+    "uk": "міський транспорт",
+    "ur": "مقامی پبلک ٹرانسپورٹ"
    },
    "g": "der"
   },
@@ -347,7 +404,10 @@
     "en": "to prevail, to assert oneself",
     "es": "imponerse",
     "ar": "يفرض نفسه / ينتصر",
-    "fa": "خود را جا انداختن / غالب شدن"
+    "fa": "خود را جا انداختن / غالب شدن",
+    "tr": "kabul ettirmek, sözünü geçirmek",
+    "uk": "домагатися свого",
+    "ur": "اپنی بات منوانا"
    }
   },
   {
@@ -359,7 +419,10 @@
     "en": "demanding",
     "es": "exigente",
     "ar": "متطلّب / صعب",
-    "fa": "پرچالش"
+    "fa": "پرچالش",
+    "tr": "zahmetli, talepkâr",
+    "uk": "вимогливий",
+    "ur": "مشکل، زیادہ تقاضے والا"
    }
   },
   {
@@ -371,7 +434,10 @@
     "en": "of all things, of all days",
     "es": "precisamente",
     "ar": "بالذات",
-    "fa": "درست همین (امروز)"
+    "fa": "درست همین (امروز)",
+    "tr": "tam da",
+    "uk": "як навмисне",
+    "ur": "عین اسی وقت"
    }
   },
   {
@@ -383,7 +449,10 @@
     "en": "order, assignment",
     "es": "el encargo, el pedido",
     "ar": "الطلبية / التكليف",
-    "fa": "سفارش / مأموریت"
+    "fa": "سفارش / مأموریت",
+    "tr": "sipariş, görev",
+    "uk": "замовлення, доручення",
+    "ur": "آرڈر، ذمہ داری"
    },
    "g": "der",
    "pl": "Aufträge"
@@ -397,7 +466,10 @@
     "en": "constitution",
     "es": "la constitución",
     "ar": "الدستور",
-    "fa": "قانون اساسی"
+    "fa": "قانون اساسی",
+    "tr": "anayasa",
+    "uk": "конституція",
+    "ur": "آئین"
    },
    "g": "die",
    "pl": "Verfassungen"
@@ -411,7 +483,10 @@
     "en": "consideration",
     "es": "la consideración",
     "ar": "المراعاة",
-    "fa": "ملاحظه"
+    "fa": "ملاحظه",
+    "tr": "saygı, düşünceli olma",
+    "uk": "врахування інших",
+    "ur": "لحاظ"
    },
    "g": "die"
   },
@@ -424,7 +499,10 @@
     "en": "journalist",
     "es": "el periodista",
     "ar": "الصحفي",
-    "fa": "روزنامه‌نگار"
+    "fa": "روزنامه‌نگار",
+    "tr": "gazeteci",
+    "uk": "журналіст",
+    "ur": "صحافی"
    },
    "g": "der",
    "pl": "Journalisten"
@@ -438,7 +516,10 @@
     "en": "greenhouse effect",
     "es": "el efecto invernadero",
     "ar": "الاحتباس الحراري / ظاهرة الدفيئة",
-    "fa": "اثر گلخانه‌ای"
+    "fa": "اثر گلخانه‌ای",
+    "tr": "sera etkisi",
+    "uk": "парниковий ефект",
+    "ur": "گرین ہاؤس اثر"
    },
    "g": "der"
   },
@@ -451,7 +532,10 @@
     "en": "recovery",
     "es": "la recuperación",
     "ar": "التعافي",
-    "fa": "بهبودی"
+    "fa": "بهبودی",
+    "tr": "iyileşme",
+    "uk": "одужання",
+    "ur": "صحت یابی"
    },
    "g": "die"
   },
@@ -464,7 +548,10 @@
     "en": "rent increase",
     "es": "la subida del alquiler",
     "ar": "زيادة الإيجار",
-    "fa": "افزایش اجاره"
+    "fa": "افزایش اجاره",
+    "tr": "kira artışı",
+    "uk": "підвищення орендної плати",
+    "ur": "کرائے میں اضافہ"
    },
    "g": "die",
    "pl": "Mieterhöhungen"
@@ -478,7 +565,10 @@
     "en": "construction site",
     "es": "la obra",
     "ar": "موقع البناء",
-    "fa": "محل ساخت‌وساز"
+    "fa": "محل ساخت‌وساز",
+    "tr": "şantiye",
+    "uk": "будівельний майданчик",
+    "ur": "تعمیراتی جگہ"
    },
    "g": "die",
    "pl": "Baustellen"
@@ -492,7 +582,10 @@
     "en": "to have an effect on",
     "es": "repercutir en",
     "ar": "يؤثر على",
-    "fa": "تأثیر گذاشتن بر"
+    "fa": "تأثیر گذاشتن بر",
+    "tr": "etkilemek",
+    "uk": "впливати на",
+    "ur": "اثر ڈالنا"
    }
   },
   {
@@ -504,7 +597,10 @@
     "en": "detailed",
     "es": "detallado",
     "ar": "مفصّل",
-    "fa": "مفصل"
+    "fa": "مفصل",
+    "tr": "ayrıntılı",
+    "uk": "докладний",
+    "ur": "تفصیلی"
    }
   },
   {
@@ -516,7 +612,10 @@
     "en": "as is well known",
     "es": "como es sabido",
     "ar": "كما هو معروف",
-    "fa": "چنان‌که معلوم است"
+    "fa": "چنان‌که معلوم است",
+    "tr": "bilindiği gibi",
+    "uk": "як відомо",
+    "ur": "جیسا کہ معلوم ہے"
    }
   },
   {
@@ -528,7 +627,10 @@
     "en": "manager, leader",
     "es": "el directivo",
     "ar": "المدير / القائد",
-    "fa": "مدیر"
+    "fa": "مدیر",
+    "tr": "yönetici",
+    "uk": "керівник",
+    "ur": "منیجر"
    },
    "g": "die",
    "pl": "Führungskräfte"
@@ -542,7 +644,10 @@
     "en": "freedom of speech",
     "es": "la libertad de expresión",
     "ar": "حرية التعبير",
-    "fa": "آزادی بیان"
+    "fa": "آزادی بیان",
+    "tr": "ifade özgürlüğü",
+    "uk": "свобода слова",
+    "ur": "آزادیِ اظہار"
    },
    "g": "die"
   },
@@ -555,7 +660,10 @@
     "en": "sympathy, compassion",
     "es": "la compasión",
     "ar": "التعاطف",
-    "fa": "همدردی"
+    "fa": "همدردی",
+    "tr": "şefkat",
+    "uk": "співчуття",
+    "ur": "ہمدردی"
    },
    "g": "das"
   },
@@ -568,7 +676,10 @@
     "en": "source",
     "es": "la fuente",
     "ar": "المصدر",
-    "fa": "منبع"
+    "fa": "منبع",
+    "tr": "kaynak",
+    "uk": "джерело",
+    "ur": "ماخذ"
    },
    "g": "die",
    "pl": "Quellen"
@@ -582,7 +693,10 @@
     "en": "emissions, output",
     "es": "la emisión",
     "ar": "الانبعاث",
-    "fa": "انتشار (گاز)"
+    "fa": "انتشار (گاز)",
+    "tr": "emisyon",
+    "uk": "викиди",
+    "ur": "اخراج"
    },
    "g": "der"
   },
@@ -595,7 +709,10 @@
     "en": "inflammation",
     "es": "la inflamación",
     "ar": "الالتهاب",
-    "fa": "التهاب"
+    "fa": "التهاب",
+    "tr": "iltihap",
+    "uk": "запалення",
+    "ur": "سوزش"
    },
    "g": "die",
    "pl": "Entzündungen"
@@ -609,7 +726,10 @@
     "en": "rent without utilities",
     "es": "el alquiler sin gastos",
     "ar": "الإيجار الصافي (بدون التكاليف)",
-    "fa": "اجاره بدون هزینه‌های جانبی"
+    "fa": "اجاره بدون هزینه‌های جانبی",
+    "tr": "yan giderler hariç kira",
+    "uk": "оренда без комунальних",
+    "ur": "بغیر بلوں کا کرایہ"
    },
    "g": "die",
    "pl": "Kaltmieten"
@@ -623,7 +743,10 @@
     "en": "diversion",
     "es": "el desvío",
     "ar": "التحويلة",
-    "fa": "مسیر انحرافی"
+    "fa": "مسیر انحرافی",
+    "tr": "sapma (yol)",
+    "uk": "об'їзд",
+    "ur": "متبادل راستہ"
    },
    "g": "die",
    "pl": "Umleitungen"
@@ -637,7 +760,10 @@
     "en": "to deal with, to look at",
     "es": "ocuparse de",
     "ar": "يتناول",
-    "fa": "پرداختن به"
+    "fa": "پرداختن به",
+    "tr": "ilgilenmek, ele almak",
+    "uk": "займатися",
+    "ur": "پر غور کرنا"
    }
   },
   {
@@ -649,7 +775,10 @@
     "en": "balanced, calm",
     "es": "equilibrado",
     "ar": "متوازن",
-    "fa": "متعادل"
+    "fa": "متعادل",
+    "tr": "dengeli",
+    "uk": "врівноважений",
+    "ur": "متوازن"
    }
   },
   {
@@ -661,7 +790,10 @@
     "en": "nevertheless",
     "es": "sin embargo",
     "ar": "ومع ذلك",
-    "fa": "با این حال"
+    "fa": "با این حال",
+    "tr": "yine de",
+    "uk": "проте",
+    "ur": "پھر بھی"
    }
   },
   {
@@ -673,7 +805,10 @@
     "en": "minutes, record",
     "es": "el acta",
     "ar": "المحضر",
-    "fa": "صورت‌جلسه"
+    "fa": "صورت‌جلسه",
+    "tr": "tutanak",
+    "uk": "протокол",
+    "ur": "روداد"
    },
    "g": "das",
    "pl": "Protokolle"
@@ -687,7 +822,10 @@
     "en": "minority",
     "es": "la minoría",
     "ar": "الأقلية",
-    "fa": "اقلیت"
+    "fa": "اقلیت",
+    "tr": "azınlık",
+    "uk": "меншість",
+    "ur": "اقلیت"
    },
    "g": "die",
    "pl": "Minderheiten"
@@ -701,7 +839,10 @@
     "en": "affection",
     "es": "el cariño",
     "ar": "المودة",
-    "fa": "محبت"
+    "fa": "محبت",
+    "tr": "sevgi, ilgi",
+    "uk": "прихильність",
+    "ur": "لگاؤ"
    },
    "g": "die"
   },
@@ -714,7 +855,10 @@
     "en": "fake news",
     "es": "la noticia falsa",
     "ar": "الخبر الكاذب",
-    "fa": "خبر جعلی"
+    "fa": "خبر جعلی",
+    "tr": "yalan haber",
+    "uk": "фейк",
+    "ur": "جھوٹی خبر"
    },
    "g": "die",
    "pl": "Falschmeldungen"
@@ -728,7 +872,10 @@
     "en": "renewable energy",
     "es": "la energía renovable",
     "ar": "الطاقة المتجددة",
-    "fa": "انرژی تجدیدپذیر"
+    "fa": "انرژی تجدیدپذیر",
+    "tr": "yenilenebilir enerji",
+    "uk": "відновлювана енергія",
+    "ur": "قابلِ تجدید توانائی"
    },
    "g": "die",
    "pl": "erneuerbaren Energien"
@@ -742,7 +889,10 @@
     "en": "infection",
     "es": "la infección",
     "ar": "العدوى",
-    "fa": "عفونت"
+    "fa": "عفونت",
+    "tr": "enfeksiyon",
+    "uk": "інфекція",
+    "ur": "انفیکشن"
    },
    "g": "die",
    "pl": "Infektionen"
@@ -756,7 +906,10 @@
     "en": "rent including utilities",
     "es": "el alquiler con gastos",
     "ar": "الإيجار الشامل",
-    "fa": "اجاره با هزینه‌های جانبی"
+    "fa": "اجاره با هزینه‌های جانبی",
+    "tr": "yan giderler dahil kira",
+    "uk": "оренда з комунальними",
+    "ur": "بلوں سمیت کرایہ"
    },
    "g": "die",
    "pl": "Warmmieten"
@@ -770,7 +923,10 @@
     "en": "commuter",
     "es": "el viajero diario",
     "ar": "المتنقل اليومي",
-    "fa": "کسی که هر روز برای کار رفت‌وآمد می‌کند"
+    "fa": "کسی که هر روز برای کار رفت‌وآمد می‌کند",
+    "tr": "işe gidip gelen",
+    "uk": "маятниковий мігрант",
+    "ur": "روزانہ سفر کرنے والا"
    },
    "g": "der",
    "pl": "Pendler"
@@ -784,7 +940,10 @@
     "en": "to prove itself",
     "es": "dar buen resultado",
     "ar": "يثبت جدارته",
-    "fa": "کارآمد بودن خود را نشان دادن"
+    "fa": "کارآمد بودن خود را نشان دادن",
+    "tr": "kendini kanıtlamak",
+    "uk": "виправдовувати себе",
+    "ur": "کارآمد ثابت ہونا"
    }
   },
   {
@@ -796,7 +955,10 @@
     "en": "enthusiastic",
     "es": "entusiasmado",
     "ar": "متحمس",
-    "fa": "مشتاق / ذوق‌زده"
+    "fa": "مشتاق / ذوق‌زده",
+    "tr": "hevesli",
+    "uk": "захоплений",
+    "ur": "پرجوش"
    }
   },
   {
@@ -808,7 +970,10 @@
     "en": "currently",
     "es": "actualmente",
     "ar": "حالياً",
-    "fa": "در حال حاضر"
+    "fa": "در حال حاضر",
+    "tr": "şu anda",
+    "uk": "наразі",
+    "ur": "فی الحال"
    }
   },
   {
@@ -820,7 +985,10 @@
     "en": "profit",
     "es": "la ganancia",
     "ar": "الربح",
-    "fa": "سود"
+    "fa": "سود",
+    "tr": "kâr",
+    "uk": "прибуток",
+    "ur": "منافع"
    },
    "g": "der",
    "pl": "Gewinne"
@@ -834,7 +1002,10 @@
     "en": "majority",
     "es": "la mayoría",
     "ar": "الأغلبية",
-    "fa": "اکثریت"
+    "fa": "اکثریت",
+    "tr": "çoğunluk",
+    "uk": "більшість",
+    "ur": "اکثریت"
    },
    "g": "die",
    "pl": "Mehrheiten"
@@ -848,7 +1019,10 @@
     "en": "loneliness",
     "es": "la soledad",
     "ar": "الوحدة",
-    "fa": "تنهایی"
+    "fa": "تنهایی",
+    "tr": "yalnızlık",
+    "uk": "самотність",
+    "ur": "تنہائی"
    },
    "g": "die"
   },
@@ -861,7 +1035,10 @@
     "en": "freedom of the press",
     "es": "la libertad de prensa",
     "ar": "حرية الصحافة",
-    "fa": "آزادی مطبوعات"
+    "fa": "آزادی مطبوعات",
+    "tr": "basın özgürlüğü",
+    "uk": "свобода преси",
+    "ur": "آزادیِ صحافت"
    },
    "g": "die"
   },
@@ -874,7 +1051,10 @@
     "en": "wind power",
     "es": "la energía eólica",
     "ar": "طاقة الرياح",
-    "fa": "انرژی بادی"
+    "fa": "انرژی بادی",
+    "tr": "rüzgâr enerjisi",
+    "uk": "вітроенергетика",
+    "ur": "ہوا سے بجلی"
    },
    "g": "die"
   },
@@ -887,7 +1067,10 @@
     "en": "pathogen",
     "es": "el patógeno",
     "ar": "العامل الممرض",
-    "fa": "عامل بیماری‌زا"
+    "fa": "عامل بیماری‌زا",
+    "tr": "hastalık etkeni",
+    "uk": "збудник",
+    "ur": "جراثیم"
    },
    "g": "der",
    "pl": "Erreger"
@@ -901,7 +1084,10 @@
     "en": "housing shortage",
     "es": "la escasez de vivienda",
     "ar": "نقص المساكن",
-    "fa": "کمبود مسکن"
+    "fa": "کمبود مسکن",
+    "tr": "konut sıkıntısı",
+    "uk": "дефіцит житла",
+    "ur": "رہائش کی کمی"
    },
    "g": "der"
   },
@@ -914,7 +1100,10 @@
     "en": "pedestrian zone",
     "es": "la zona peatonal",
     "ar": "منطقة المشاة",
-    "fa": "پیاده‌راه"
+    "fa": "پیاده‌راه",
+    "tr": "yaya bölgesi",
+    "uk": "пішохідна зона",
+    "ur": "پیدل علاقہ"
    },
    "g": "die",
    "pl": "Fußgängerzonen"
@@ -928,7 +1117,10 @@
     "en": "to agree",
     "es": "ponerse de acuerdo",
     "ar": "يتفق",
-    "fa": "به توافق رسیدن"
+    "fa": "به توافق رسیدن",
+    "tr": "anlaşmak",
+    "uk": "домовлятися",
+    "ur": "متفق ہونا"
    }
   },
   {
@@ -940,7 +1132,10 @@
     "en": "popular",
     "es": "popular",
     "ar": "محبوب",
-    "fa": "محبوب"
+    "fa": "محبوب",
+    "tr": "sevilen",
+    "uk": "популярний",
+    "ur": "مقبول"
    }
   },
   {
@@ -952,7 +1147,10 @@
     "en": "in this regard",
     "es": "al respecto",
     "ar": "بهذا الخصوص",
-    "fa": "در این باره"
+    "fa": "در این باره",
+    "tr": "bu konuda",
+    "uk": "щодо цього",
+    "ur": "اس سلسلے میں"
    }
   },
   {
@@ -964,7 +1162,10 @@
     "en": "loss",
     "es": "la pérdida",
     "ar": "الخسارة",
-    "fa": "زیان"
+    "fa": "زیان",
+    "tr": "kayıp",
+    "uk": "втрата",
+    "ur": "نقصان"
    },
    "g": "der",
    "pl": "Verluste"
@@ -978,7 +1179,10 @@
     "en": "prosperity",
     "es": "la prosperidad",
     "ar": "الرخاء",
-    "fa": "رفاه"
+    "fa": "رفاه",
+    "tr": "refah",
+    "uk": "добробут",
+    "ur": "خوشحالی"
    },
    "g": "der"
   },
@@ -991,7 +1195,10 @@
     "en": "insecurity, uncertainty",
     "es": "la inseguridad",
     "ar": "عدم الثقة / الشك",
-    "fa": "ناامنی / تردید"
+    "fa": "ناامنی / تردید",
+    "tr": "güvensizlik, belirsizlik",
+    "uk": "невпевненість",
+    "ur": "عدم تحفظ"
    },
    "g": "die",
    "pl": "Unsicherheiten"
@@ -1005,7 +1212,10 @@
     "en": "broadcasting fee",
     "es": "la tasa de radiodifusión",
     "ar": "رسوم البث",
-    "fa": "حق پخش رادیو و تلویزیون"
+    "fa": "حق پخش رادیو و تلویزیون",
+    "tr": "yayın ücreti",
+    "uk": "радіотелевізійний збір",
+    "ur": "براڈکاسٹنگ فیس"
    },
    "g": "der",
    "pl": "Rundfunkbeiträge"
@@ -1019,7 +1229,10 @@
     "en": "raw material",
     "es": "la materia prima",
     "ar": "المادة الخام",
-    "fa": "ماده‌ی خام"
+    "fa": "ماده‌ی خام",
+    "tr": "hammadde",
+    "uk": "сировина",
+    "ur": "خام مال"
    },
    "g": "der",
    "pl": "Rohstoffe"
@@ -1033,7 +1246,10 @@
     "en": "immune system",
     "es": "el sistema inmunológico",
     "ar": "جهاز المناعة",
-    "fa": "سیستم ایمنی"
+    "fa": "سیستم ایمنی",
+    "tr": "bağışıklık sistemi",
+    "uk": "імунна система",
+    "ur": "مدافعتی نظام"
    },
    "g": "das",
    "pl": "Immunsysteme"
@@ -1047,7 +1263,10 @@
     "en": "property management",
     "es": "la administración de la finca",
     "ar": "إدارة العقار",
-    "fa": "مدیریت ساختمان"
+    "fa": "مدیریت ساختمان",
+    "tr": "site yönetimi",
+    "uk": "управління будинком",
+    "ur": "پراپرٹی مینجمنٹ"
    },
    "g": "die",
    "pl": "Hausverwaltungen"
@@ -1061,7 +1280,10 @@
     "en": "city centre",
     "es": "el centro de la ciudad",
     "ar": "وسط المدينة",
-    "fa": "مرکز شهر"
+    "fa": "مرکز شهر",
+    "tr": "şehir merkezi",
+    "uk": "центр міста",
+    "ur": "شہر کا مرکز"
    },
    "g": "die",
    "pl": "Innenstädte"
@@ -1075,7 +1297,10 @@
     "en": "to be committed, to get involved",
     "es": "comprometerse",
     "ar": "ينخرط / يلتزم",
-    "fa": "فعالیت داوطلبانه کردن"
+    "fa": "فعالیت داوطلبانه کردن",
+    "tr": "angaje olmak, katkıda bulunmak",
+    "uk": "брати участь, займатися",
+    "ur": "سرگرم ہونا"
    }
   },
   {
@@ -1087,7 +1312,10 @@
     "en": "justified, entitled",
     "es": "justificado",
     "ar": "مبرَّر / مخوَّل",
-    "fa": "موجه / محق"
+    "fa": "موجه / محق",
+    "tr": "haklı, yetkili",
+    "uk": "обґрунтований, уповноважений",
+    "ur": "جائز، حقدار"
    }
   },
   {
@@ -1099,7 +1327,10 @@
     "en": "just as, likewise",
     "es": "igualmente",
     "ar": "بالمثل",
-    "fa": "به همان اندازه"
+    "fa": "به همان اندازه",
+    "tr": "aynı şekilde",
+    "uk": "так само",
+    "ur": "اسی طرح"
    }
   },
   {
@@ -1111,7 +1342,10 @@
     "en": "company",
     "es": "la empresa",
     "ar": "الشركة",
-    "fa": "شرکت"
+    "fa": "شرکت",
+    "tr": "şirket",
+    "uk": "підприємство",
+    "ur": "کمپنی"
    },
    "g": "das",
    "pl": "Unternehmen"
@@ -1125,7 +1359,10 @@
     "en": "social insurance",
     "es": "la seguridad social",
     "ar": "التأمين الاجتماعي",
-    "fa": "تأمین اجتماعی"
+    "fa": "تأمین اجتماعی",
+    "tr": "sosyal sigorta",
+    "uk": "соціальне страхування",
+    "ur": "سوشل انشورنس"
    },
    "g": "die",
    "pl": "Sozialversicherungen"
@@ -1139,7 +1376,10 @@
     "en": "expectation",
     "es": "la expectativa",
     "ar": "التوقع",
-    "fa": "انتظار"
+    "fa": "انتظار",
+    "tr": "beklenti",
+    "uk": "очікування",
+    "ur": "توقع"
    },
    "g": "die",
    "pl": "Erwartungen"
@@ -1153,7 +1393,10 @@
     "en": "channel, station",
     "es": "la cadena",
     "ar": "القناة / المحطة",
-    "fa": "شبکه / ایستگاه"
+    "fa": "شبکه / ایستگاه",
+    "tr": "kanal",
+    "uk": "канал, станція",
+    "ur": "چینل، اسٹیشن"
    },
    "g": "der",
    "pl": "Sender"
@@ -1167,7 +1410,10 @@
     "en": "biodiversity",
     "es": "la biodiversidad",
     "ar": "التنوع البيولوجي",
-    "fa": "تنوع زیستی"
+    "fa": "تنوع زیستی",
+    "tr": "biyoçeşitlilik",
+    "uk": "біорізноманіття",
+    "ur": "حیاتیاتی تنوع"
    },
    "g": "die"
   },
@@ -1180,7 +1426,10 @@
     "en": "test results",
     "es": "los resultados de las pruebas",
     "ar": "نتائج الفحوصات",
-    "fa": "نتایج آزمایش"
+    "fa": "نتایج آزمایش",
+    "tr": "tetkik sonuçları",
+    "uk": "результати обстеження",
+    "ur": "ٹیسٹ کے نتائج"
    },
    "g": "die",
    "pl": "(Plural)"
@@ -1194,7 +1443,10 @@
     "en": "maintenance",
     "es": "el mantenimiento",
     "ar": "الصيانة",
-    "fa": "نگهداری و تعمیر"
+    "fa": "نگهداری و تعمیر",
+    "tr": "bakım",
+    "uk": "технічне обслуговування",
+    "ur": "دیکھ بھال"
    },
    "g": "die"
   },
@@ -1207,7 +1459,10 @@
     "en": "outskirts",
     "es": "las afueras",
     "ar": "أطراف المدينة",
-    "fa": "حاشیه‌ی شهر"
+    "fa": "حاشیه‌ی شهر",
+    "tr": "şehir kenarı",
+    "uk": "околиця",
+    "ur": "شہر کا کنارہ"
    },
    "g": "der",
    "pl": "Stadtränder"
@@ -1221,7 +1476,10 @@
     "en": "to result, to arise",
     "es": "resultar",
     "ar": "ينتج عن",
-    "fa": "حاصل شدن"
+    "fa": "حاصل شدن",
+    "tr": "ortaya çıkmak",
+    "uk": "виходити, випливати",
+    "ur": "نتیجہ نکلنا"
    }
   },
   {
@@ -1233,7 +1491,10 @@
     "en": "modest",
     "es": "modesto",
     "ar": "متواضع",
-    "fa": "فروتن"
+    "fa": "فروتن",
+    "tr": "alçakgönüllü",
+    "uk": "скромний",
+    "ur": "عاجز"
    }
   },
   {
@@ -1245,7 +1506,10 @@
     "en": "rather",
     "es": "más bien",
     "ar": "بالأحرى",
-    "fa": "ترجیحاً / بیشتر"
+    "fa": "ترجیحاً / بیشتر",
+    "tr": "daha çok",
+    "uk": "скоріше",
+    "ur": "بلکہ"
    }
   },
   {
@@ -1257,7 +1521,10 @@
     "en": "industry, sector",
     "es": "el sector",
     "ar": "القطاع",
-    "fa": "صنعت / رشته"
+    "fa": "صنعت / رشته",
+    "tr": "sektör",
+    "uk": "галузь",
+    "ur": "شعبہ"
    },
    "g": "die",
    "pl": "Branchen"
@@ -1271,7 +1538,10 @@
     "en": "asylum application",
     "es": "la solicitud de asilo",
     "ar": "طلب اللجوء",
-    "fa": "درخواست پناهندگی"
+    "fa": "درخواست پناهندگی",
+    "tr": "sığınma başvurusu",
+    "uk": "заява про притулок",
+    "ur": "پناہ کی درخواست"
    },
    "g": "der",
    "pl": "Asylanträge"
@@ -1285,7 +1555,10 @@
     "en": "obligation, commitment",
     "es": "el compromiso, la obligación",
     "ar": "الالتزام",
-    "fa": "تعهد"
+    "fa": "تعهد",
+    "tr": "yükümlülük",
+    "uk": "зобов'язання",
+    "ur": "ذمہ داری"
    },
    "g": "die",
    "pl": "Verpflichtungen"
@@ -1299,7 +1572,10 @@
     "en": "report, documentary",
     "es": "el reportaje",
     "ar": "التقرير / الريبورتاج",
-    "fa": "گزارش مستند"
+    "fa": "گزارش مستند",
+    "tr": "röportaj",
+    "uk": "репортаж",
+    "ur": "رپورتاژ"
    },
    "g": "die",
    "pl": "Reportagen"
@@ -1313,7 +1589,10 @@
     "en": "drought",
     "es": "la sequía",
     "ar": "الجفاف",
-    "fa": "خشکسالی"
+    "fa": "خشکسالی",
+    "tr": "kuraklık",
+    "uk": "посуха",
+    "ur": "خشک سالی"
    },
    "g": "die",
    "pl": "Dürren"
@@ -1327,7 +1606,10 @@
     "en": "referral to a specialist",
     "es": "la derivación al especialista",
     "ar": "التحويل إلى الطبيب المختص",
-    "fa": "ارجاع به متخصص"
+    "fa": "ارجاع به متخصص",
+    "tr": "uzmana sevk",
+    "uk": "направлення до спеціаліста",
+    "ur": "ماہر ڈاکٹر کو ریفرل"
    },
    "g": "die"
   },
@@ -1340,7 +1622,10 @@
     "en": "disturbance of the peace",
     "es": "la perturbación del descanso",
     "ar": "الإزعاج",
-    "fa": "برهم زدن آرامش"
+    "fa": "برهم زدن آرامش",
+    "tr": "huzur bozma",
+    "uk": "порушення тиші",
+    "ur": "شور شرابا"
    },
    "g": "die",
    "pl": "Ruhestörungen"
@@ -1354,7 +1639,10 @@
     "en": "to turn out",
     "es": "resultar, revelarse",
     "ar": "يتضح",
-    "fa": "معلوم شدن"
+    "fa": "معلوم شدن",
+    "tr": "ortaya çıkmak (anlaşılmak)",
+    "uk": "виявлятися",
+    "ur": "سامنے آنا"
    }
   },
   {
@@ -1366,7 +1654,10 @@
     "en": "stable, constant",
     "es": "estable",
     "ar": "ثابت",
-    "fa": "پایدار"
+    "fa": "پایدار",
+    "tr": "kalıcı, istikrarlı",
+    "uk": "стабільний",
+    "ur": "پائیدار"
    }
   },
   {
@@ -1378,7 +1669,10 @@
     "en": "on the one hand … on the other hand",
     "es": "por un lado … por otro",
     "ar": "من ناحية … ومن ناحية أخرى",
-    "fa": "از یک سو … از سوی دیگر"
+    "fa": "از یک سو … از سوی دیگر",
+    "tr": "bir yandan … diğer yandan",
+    "uk": "з одного боку … з іншого боку",
+    "ur": "ایک طرف … دوسری طرف"
    }
   },
   {
@@ -1390,7 +1684,10 @@
     "en": "(female) colleague",
     "es": "la compañera de trabajo",
     "ar": "الزميلة",
-    "fa": "همکار (زن)"
+    "fa": "همکار (زن)",
+    "tr": "iş arkadaşı (kadın)",
+    "uk": "колега (жінка)",
+    "ur": "ساتھی (خاتون)"
    },
    "g": "die",
    "pl": "Kolleginnen"
@@ -1404,7 +1701,10 @@
     "en": "bureaucracy",
     "es": "la burocracia",
     "ar": "البيروقراطية",
-    "fa": "دیوان‌سالاری"
+    "fa": "دیوان‌سالاری",
+    "tr": "bürokrasi",
+    "uk": "бюрократія",
+    "ur": "دفتری نظام"
    },
    "g": "die"
   },
@@ -1417,7 +1717,10 @@
     "en": "conflict",
     "es": "el conflicto",
     "ar": "النزاع",
-    "fa": "تعارض / درگیری"
+    "fa": "تعارض / درگیری",
+    "tr": "çatışma",
+    "uk": "конфлікт",
+    "ur": "تنازع"
    },
    "g": "der",
    "pl": "Konflikte"
@@ -1431,7 +1734,10 @@
     "en": "interview",
     "es": "la entrevista",
     "ar": "المقابلة",
-    "fa": "مصاحبه"
+    "fa": "مصاحبه",
+    "tr": "röportaj",
+    "uk": "інтерв'ю",
+    "ur": "انٹرویو"
    },
    "g": "das",
    "pl": "Interviews"
@@ -1445,7 +1751,10 @@
     "en": "flood",
     "es": "la inundación",
     "ar": "الفيضان",
-    "fa": "سیل"
+    "fa": "سیل",
+    "tr": "sel",
+    "uk": "повінь",
+    "ur": "سیلاب"
    },
    "g": "die",
    "pl": "Überschwemmungen"
@@ -1459,7 +1768,10 @@
     "en": "check-up",
     "es": "el chequeo preventivo",
     "ar": "الفحص الوقائي",
-    "fa": "معاینه‌ی پیشگیرانه"
+    "fa": "معاینه‌ی پیشگیرانه",
+    "tr": "check-up",
+    "uk": "профілактичний огляд",
+    "ur": "طبی معائنہ"
    },
    "g": "die",
    "pl": "Vorsorgeuntersuchungen"
@@ -1473,7 +1785,10 @@
     "en": "handover of the flat",
     "es": "la entrega del piso",
     "ar": "تسليم الشقة",
-    "fa": "تحویل آپارتمان"
+    "fa": "تحویل آپارتمان",
+    "tr": "daire teslimi",
+    "uk": "передача квартири",
+    "ur": "فلیٹ کی حوالگی"
    },
    "g": "die",
    "pl": "Wohnungsübergaben"
@@ -1487,7 +1802,10 @@
     "en": "to rely on",
     "es": "contar con",
     "ar": "يعتمد على",
-    "fa": "اعتماد کردن به"
+    "fa": "اعتماد کردن به",
+    "tr": "güvenmek",
+    "uk": "покладатися на",
+    "ur": "پر بھروسہ کرنا"
    }
   },
   {
@@ -1499,7 +1817,10 @@
     "en": "lasting, permanent",
     "es": "duradero",
     "ar": "دائم",
-    "fa": "ماندگار"
+    "fa": "ماندگار",
+    "tr": "kalıcı",
+    "uk": "тривалий",
+    "ur": "مستقل"
    }
   },
   {
@@ -1511,7 +1832,10 @@
     "en": "consequently",
     "es": "por consiguiente",
     "ar": "وبالتالي",
-    "fa": "در نتیجه"
+    "fa": "در نتیجه",
+    "tr": "dolayısıyla",
+    "uk": "отже",
+    "ur": "نتیجتاً"
    }
   },
   {
@@ -1523,7 +1847,10 @@
     "en": "performance, achievement",
     "es": "el rendimiento",
     "ar": "الأداء",
-    "fa": "عملکرد"
+    "fa": "عملکرد",
+    "tr": "performans, başarı",
+    "uk": "продуктивність, досягнення",
+    "ur": "کارکردگی"
    },
    "g": "die",
    "pl": "Leistungen"
@@ -1537,7 +1864,10 @@
     "en": "voter turnout",
     "es": "la participación electoral",
     "ar": "نسبة المشاركة في الانتخابات",
-    "fa": "میزان مشارکت در انتخابات"
+    "fa": "میزان مشارکت در انتخابات",
+    "tr": "seçime katılım",
+    "uk": "явка виборців",
+    "ur": "ووٹنگ کی شرح"
    },
    "g": "die",
    "pl": "Wahlbeteiligungen"
@@ -1551,7 +1881,10 @@
     "en": "criticism",
     "es": "la crítica",
     "ar": "النقد",
-    "fa": "انتقاد"
+    "fa": "انتقاد",
+    "tr": "eleştiri",
+    "uk": "критика",
+    "ur": "تنقید"
    },
    "g": "die",
    "pl": "Kritiken"
@@ -1565,7 +1898,10 @@
     "en": "letter to the editor",
     "es": "la carta al director",
     "ar": "رسالة القراء",
-    "fa": "نامه به سردبیر"
+    "fa": "نامه به سردبیر",
+    "tr": "okur mektubu",
+    "uk": "лист до редакції",
+    "ur": "مدیر کے نام خط"
    },
    "g": "der",
    "pl": "Leserbriefe"
@@ -1579,7 +1915,10 @@
     "en": "severe weather, storm",
     "es": "el temporal",
     "ar": "العاصفة / الطقس العاصف",
-    "fa": "توفان / هوای نامساعد"
+    "fa": "توفان / هوای نامساعد",
+    "tr": "kötü hava, fırtına",
+    "uk": "негода",
+    "ur": "طوفانی موسم"
    },
    "g": "das",
    "pl": "Unwetter"
@@ -1593,7 +1932,10 @@
     "en": "rehab",
     "es": "la rehabilitación",
     "ar": "إعادة التأهيل",
-    "fa": "توان‌بخشی"
+    "fa": "توان‌بخشی",
+    "tr": "rehabilitasyon",
+    "uk": "реабілітація",
+    "ur": "بحالی"
    },
    "g": "die",
    "pl": "Rehas"
@@ -1607,7 +1949,10 @@
     "en": "renovation",
     "es": "la reforma",
     "ar": "الترميم",
-    "fa": "بازسازی"
+    "fa": "بازسازی",
+    "tr": "tadilat",
+    "uk": "ремонт",
+    "ur": "تزئینِ نو"
    },
    "g": "die",
    "pl": "Renovierungen"
@@ -1621,7 +1966,10 @@
     "en": "to find one's way",
     "es": "orientarse",
     "ar": "يتأقلم / يجد طريقه",
-    "fa": "از پس کار برآمدن / راه را پیدا کردن"
+    "fa": "از پس کار برآمدن / راه را پیدا کردن",
+    "tr": "yolunu bulmak",
+    "uk": "орієнтуватися",
+    "ur": "راستہ تلاش کرنا"
    }
   },
   {
@@ -1633,7 +1981,10 @@
     "en": "clear, unambiguous",
     "es": "inequívoco",
     "ar": "واضح / قاطع",
-    "fa": "روشن / بی‌ابهام"
+    "fa": "روشن / بی‌ابهام",
+    "tr": "açık, kesin",
+    "uk": "однозначний",
+    "ur": "واضح"
    }
   },
   {
@@ -1645,7 +1996,10 @@
     "en": "on the other hand, whereas",
     "es": "en cambio",
     "ar": "في المقابل",
-    "fa": "در عوض"
+    "fa": "در عوض",
+    "tr": "buna karşılık",
+    "uk": "натомість",
+    "ur": "جبکہ"
    }
   },
   {
@@ -1657,7 +2011,10 @@
     "en": "job description",
     "es": "la descripción del puesto",
     "ar": "الوصف الوظيفي",
-    "fa": "شرح وظایف شغل"
+    "fa": "شرح وظایف شغل",
+    "tr": "iş tanımı",
+    "uk": "опис посади",
+    "ur": "ملازمت کی تفصیل"
    },
    "g": "die",
    "pl": "Stellenbeschreibungen"
@@ -1671,7 +2028,10 @@
     "en": "survey, poll",
     "es": "la encuesta",
     "ar": "الاستطلاع",
-    "fa": "نظرسنجی"
+    "fa": "نظرسنجی",
+    "tr": "anket",
+    "uk": "опитування",
+    "ur": "سروے"
    },
    "g": "die",
    "pl": "Umfragen"
@@ -1685,7 +2045,10 @@
     "en": "calmness, composure",
     "es": "la serenidad",
     "ar": "الهدوء / رباطة الجأش",
-    "fa": "آرامش"
+    "fa": "آرامش",
+    "tr": "soğukkanlılık",
+    "uk": "спокій",
+    "ur": "سکون"
    },
    "g": "die"
   },
@@ -1698,7 +2061,10 @@
     "en": "report",
     "es": "el informe",
     "ar": "التقرير",
-    "fa": "گزارش"
+    "fa": "گزارش",
+    "tr": "rapor",
+    "uk": "звіт",
+    "ur": "رپورٹ"
    },
    "g": "der",
    "pl": "Berichte"
@@ -1712,7 +2078,10 @@
     "en": "natural disaster",
     "es": "el desastre natural",
     "ar": "الكارثة الطبيعية",
-    "fa": "بلای طبیعی"
+    "fa": "بلای طبیعی",
+    "tr": "doğal afet",
+    "uk": "стихійне лихо",
+    "ur": "قدرتی آفت"
    },
    "g": "die",
    "pl": "Naturkatastrophen"
@@ -1726,7 +2095,10 @@
     "en": "physiotherapy",
     "es": "la fisioterapia",
     "ar": "العلاج الطبيعي",
-    "fa": "فیزیوتراپی"
+    "fa": "فیزیوتراپی",
+    "tr": "fizyoterapi",
+    "uk": "фізіотерапія",
+    "ur": "فزیوتھراپی"
    },
    "g": "die"
   },
@@ -1739,7 +2111,10 @@
     "en": "insulation",
     "es": "el aislamiento",
     "ar": "العزل",
-    "fa": "عایق‌کاری"
+    "fa": "عایق‌کاری",
+    "tr": "yalıtım",
+    "uk": "утеплення",
+    "ur": "انسولیشن"
    },
    "g": "die",
    "pl": "Dämmungen"
@@ -1753,7 +2128,10 @@
     "en": "to withdraw",
     "es": "retirarse",
     "ar": "ينسحب",
-    "fa": "کناره‌گیری کردن"
+    "fa": "کناره‌گیری کردن",
+    "tr": "geri çekilmek",
+    "uk": "усамітнюватися",
+    "ur": "کنارہ کش ہونا"
    }
   },
   {
@@ -1765,7 +2143,10 @@
     "en": "influential",
     "es": "influyente",
     "ar": "مؤثّر / ذو نفوذ",
-    "fa": "بانفوذ"
+    "fa": "بانفوذ",
+    "tr": "etkili",
+    "uk": "впливовий",
+    "ur": "بااثر"
    }
   },
   {
@@ -1777,7 +2158,10 @@
     "en": "at least, after all",
     "es": "al menos",
     "ar": "على الأقل",
-    "fa": "دست‌کم"
+    "fa": "دست‌کم",
+    "tr": "en azından, ne de olsa",
+    "uk": "принаймні",
+    "ur": "بہرحال"
    }
   },
   {
@@ -1789,7 +2173,10 @@
     "en": "cover letter",
     "es": "la carta de presentación",
     "ar": "رسالة التقديم",
-    "fa": "نامه‌ی درخواست کار"
+    "fa": "نامه‌ی درخواست کار",
+    "tr": "ön yazı",
+    "uk": "супровідний лист",
+    "ur": "کور لیٹر"
    },
    "g": "das",
    "pl": "Anschreiben"
@@ -1803,7 +2190,10 @@
     "en": "debate",
     "es": "el debate",
     "ar": "النقاش",
-    "fa": "بحث / مناظره"
+    "fa": "بحث / مناظره",
+    "tr": "tartışma",
+    "uk": "дебати",
+    "ur": "مباحثہ"
    },
    "g": "die",
    "pl": "Debatten"
@@ -1817,7 +2207,10 @@
     "en": "honesty",
     "es": "la honestidad",
     "ar": "الصدق",
-    "fa": "صداقت"
+    "fa": "صداقت",
+    "tr": "dürüstlük",
+    "uk": "чесність",
+    "ur": "ایمانداری"
    },
    "g": "die"
   },
@@ -1830,7 +2223,10 @@
     "en": "target group",
     "es": "el público objetivo",
     "ar": "الفئة المستهدفة",
-    "fa": "گروه هدف"
+    "fa": "گروه هدف",
+    "tr": "hedef kitle",
+    "uk": "цільова група",
+    "ur": "ہدف گروپ"
    },
    "g": "die",
    "pl": "Zielgruppen"
@@ -1844,7 +2240,10 @@
     "en": "agriculture",
     "es": "la agricultura",
     "ar": "الزراعة",
-    "fa": "کشاورزی"
+    "fa": "کشاورزی",
+    "tr": "tarım",
+    "uk": "сільське господарство",
+    "ur": "زراعت"
    },
    "g": "die"
   },
@@ -1857,7 +2256,10 @@
     "en": "inability to work",
     "es": "la incapacidad laboral",
     "ar": "العجز عن العمل",
-    "fa": "ناتوانی از کار"
+    "fa": "ناتوانی از کار",
+    "tr": "çalışamazlık",
+    "uk": "непрацездатність",
+    "ur": "کام کے قابل نہ ہونا"
    },
    "g": "die"
   },
@@ -1870,7 +2272,10 @@
     "en": "to adapt",
     "es": "adaptarse",
     "ar": "يتكيف",
-    "fa": "سازگار شدن"
+    "fa": "سازگار شدن",
+    "tr": "uyum sağlamak",
+    "uk": "пристосовуватися",
+    "ur": "ڈھل جانا"
    }
   },
   {
@@ -1882,7 +2287,10 @@
     "en": "sensitive",
     "es": "sensible",
     "ar": "حسّاس",
-    "fa": "حساس"
+    "fa": "حساس",
+    "tr": "hassas",
+    "uk": "чутливий",
+    "ur": "حساس"
    }
   },
   {
@@ -1894,7 +2302,10 @@
     "en": "as a result of",
     "es": "a consecuencia de",
     "ar": "نتيجةً لـ",
-    "fa": "در پی"
+    "fa": "در پی",
+    "tr": "-in sonucu olarak",
+    "uk": "внаслідок",
+    "ur": "کے نتیجے میں"
    }
   },
   {
@@ -1906,7 +2317,10 @@
     "en": "salary expectation",
     "es": "la pretensión salarial",
     "ar": "الراتب المتوقع",
-    "fa": "حقوق مورد انتظار"
+    "fa": "حقوق مورد انتظار",
+    "tr": "maaş beklentisi",
+    "uk": "бажана зарплата",
+    "ur": "متوقع تنخواہ"
    },
    "g": "die",
    "pl": "Gehaltsvorstellungen"
@@ -1920,7 +2334,10 @@
     "en": "regulation, rule",
     "es": "la norma",
     "ar": "اللائحة / القاعدة",
-    "fa": "مقررات"
+    "fa": "مقررات",
+    "tr": "yönetmelik",
+    "uk": "припис",
+    "ur": "ضابطہ"
    },
    "g": "die",
    "pl": "Vorschriften"
@@ -1934,7 +2351,10 @@
     "en": "reliability",
     "es": "la fiabilidad",
     "ar": "الموثوقية",
-    "fa": "قابل‌اعتماد بودن"
+    "fa": "قابل‌اعتماد بودن",
+    "tr": "güvenilirlik",
+    "uk": "надійність",
+    "ur": "قابلِ اعتماد ہونا"
    },
    "g": "die"
   },
@@ -1947,7 +2367,10 @@
     "en": "user",
     "es": "el usuario",
     "ar": "المستخدم",
-    "fa": "کاربر"
+    "fa": "کاربر",
+    "tr": "kullanıcı",
+    "uk": "користувач",
+    "ur": "صارف"
    },
    "g": "der",
    "pl": "Nutzer"
@@ -1961,7 +2384,10 @@
     "en": "cultivation",
     "es": "el cultivo",
     "ar": "الزراعة / الغرس",
-    "fa": "کشت"
+    "fa": "کشت",
+    "tr": "ekim, yetiştirme",
+    "uk": "вирощування",
+    "ur": "کاشت"
    },
    "g": "der"
   },
@@ -1974,7 +2400,10 @@
     "en": "disability",
     "es": "la discapacidad",
     "ar": "الإعاقة",
-    "fa": "معلولیت"
+    "fa": "معلولیت",
+    "tr": "engellilik",
+    "uk": "інвалідність",
+    "ur": "معذوری"
    },
    "g": "die",
    "pl": "Behinderungen"
@@ -1988,7 +2417,10 @@
     "en": "to comment, to express oneself",
     "es": "pronunciarse",
     "ar": "يدلي برأيه",
-    "fa": "اظهار نظر کردن"
+    "fa": "اظهار نظر کردن",
+    "tr": "görüş bildirmek",
+    "uk": "висловлюватися",
+    "ur": "رائے دینا"
    }
   },
   {
@@ -2000,7 +2432,10 @@
     "en": "decisive",
     "es": "decisivo",
     "ar": "حاسم",
-    "fa": "تعیین‌کننده"
+    "fa": "تعیین‌کننده",
+    "tr": "belirleyici",
+    "uk": "вирішальний",
+    "ur": "فیصلہ کن"
    }
   },
   {
@@ -2012,7 +2447,10 @@
     "en": "in particular",
     "es": "especialmente",
     "ar": "خصوصاً",
-    "fa": "به‌ویژه"
+    "fa": "به‌ویژه",
+    "tr": "özellikle",
+    "uk": "особливо",
+    "ur": "خاص طور پر"
    }
   },
   {
@@ -2024,7 +2462,10 @@
     "en": "induction, onboarding",
     "es": "el periodo de formación inicial",
     "ar": "فترة التأهيل",
-    "fa": "دوره‌ی آشنایی با کار"
+    "fa": "دوره‌ی آشنایی با کار",
+    "tr": "işe alıştırma",
+    "uk": "введення в посаду",
+    "ur": "ابتدائی تربیت"
    },
    "g": "die"
   },
@@ -2037,7 +2478,10 @@
     "en": "exception",
     "es": "la excepción",
     "ar": "الاستثناء",
-    "fa": "استثنا"
+    "fa": "استثنا",
+    "tr": "istisna",
+    "uk": "виняток",
+    "ur": "استثنا"
    },
    "g": "die",
    "pl": "Ausnahmen"
@@ -2051,7 +2495,10 @@
     "en": "mentality",
     "es": "la mentalidad",
     "ar": "العقلية",
-    "fa": "طرز فکر"
+    "fa": "طرز فکر",
+    "tr": "zihniyet",
+    "uk": "менталітет",
+    "ur": "ذہنیت"
    },
    "g": "die",
    "pl": "Mentalitäten"
@@ -2065,7 +2512,10 @@
     "en": "platform",
     "es": "la plataforma",
     "ar": "المنصة",
-    "fa": "پلتفرم"
+    "fa": "پلتفرم",
+    "tr": "platform",
+    "uk": "платформа",
+    "ur": "پلیٹ فارم"
    },
    "g": "die",
    "pl": "Plattformen"
@@ -2079,7 +2529,10 @@
     "en": "harvest",
     "es": "la cosecha",
     "ar": "الحصاد",
-    "fa": "برداشت محصول"
+    "fa": "برداشت محصول",
+    "tr": "hasat",
+    "uk": "урожай",
+    "ur": "فصل"
    },
    "g": "die",
    "pl": "Ernten"
@@ -2093,7 +2546,10 @@
     "en": "accessible, step-free",
     "es": "accesible",
     "ar": "خالٍ من العوائق",
-    "fa": "بدون مانع / دسترس‌پذیر"
+    "fa": "بدون مانع / دسترس‌پذیر",
+    "tr": "engelsiz",
+    "uk": "безбар'єрний",
+    "ur": "رکاوٹ سے پاک"
    }
   },
   {
@@ -2105,7 +2561,10 @@
     "en": "to strive for",
     "es": "esforzarse por",
     "ar": "يسعى إلى",
-    "fa": "تلاش کردن برای"
+    "fa": "تلاش کردن برای",
+    "tr": "çabalamak",
+    "uk": "докладати зусиль",
+    "ur": "کوشش کرنا"
    }
   },
   {
@@ -2117,7 +2576,10 @@
     "en": "considerable",
     "es": "considerable",
     "ar": "كبير / ملحوظ",
-    "fa": "قابل‌توجه"
+    "fa": "قابل‌توجه",
+    "tr": "önemli ölçüde",
+    "uk": "значний",
+    "ur": "قابلِ ذکر"
    }
   },
   {
@@ -2129,7 +2591,10 @@
     "en": "by no means",
     "es": "de ninguna manera",
     "ar": "على الإطلاق (نفي)",
-    "fa": "به هیچ وجه"
+    "fa": "به هیچ وجه",
+    "tr": "asla, hiç de",
+    "uk": "аж ніяк",
+    "ur": "ہرگز نہیں"
    }
   },
   {
@@ -2141,7 +2606,10 @@
     "en": "working conditions",
     "es": "las condiciones laborales",
     "ar": "ظروف العمل",
-    "fa": "شرایط کار"
+    "fa": "شرایط کار",
+    "tr": "çalışma koşulları",
+    "uk": "умови праці",
+    "ur": "کام کے حالات"
    },
    "g": "die",
    "pl": "(Plural)"
@@ -2155,7 +2623,10 @@
     "en": "change",
     "es": "el cambio",
     "ar": "التغيير",
-    "fa": "تغییر"
+    "fa": "تغییر",
+    "tr": "değişim",
+    "uk": "зміна",
+    "ur": "تبدیلی"
    },
    "g": "die",
    "pl": "Veränderungen"
@@ -2169,7 +2640,10 @@
     "en": "cliché, stereotype",
     "es": "el cliché",
     "ar": "الصورة النمطية",
-    "fa": "کلیشه"
+    "fa": "کلیشه",
+    "tr": "klişe",
+    "uk": "кліше",
+    "ur": "دقیانوسی تصور"
    },
    "g": "das",
    "pl": "Klischees"
@@ -2183,7 +2657,10 @@
     "en": "algorithm",
     "es": "el algoritmo",
     "ar": "الخوارزمية",
-    "fa": "الگوریتم"
+    "fa": "الگوریتم",
+    "tr": "algoritma",
+    "uk": "алгоритм",
+    "ur": "الگورتھم"
    },
    "g": "der",
    "pl": "Algorithmen"
@@ -2197,7 +2674,10 @@
     "en": "body of water",
     "es": "las aguas",
     "ar": "المسطحات المائية",
-    "fa": "آب‌ها / پهنه‌ی آبی"
+    "fa": "آب‌ها / پهنه‌ی آبی",
+    "tr": "su kütlesi",
+    "uk": "водойма",
+    "ur": "آبی ذخیرہ"
    },
    "g": "das",
    "pl": "Gewässer"
@@ -2211,7 +2691,10 @@
     "en": "addiction",
     "es": "la adicción",
     "ar": "الإدمان",
-    "fa": "اعتیاد"
+    "fa": "اعتیاد",
+    "tr": "bağımlılık",
+    "uk": "залежність",
+    "ur": "لت"
    },
    "g": "die",
    "pl": "Süchte"
@@ -2225,7 +2708,10 @@
     "en": "to get worse",
     "es": "empeorar",
     "ar": "يسوء",
-    "fa": "بدتر شدن"
+    "fa": "بدتر شدن",
+    "tr": "kötüleşmek",
+    "uk": "погіршуватися",
+    "ur": "بگڑنا"
    }
   },
   {
@@ -2237,7 +2723,10 @@
     "en": "progressive",
     "es": "progresista, avanzado",
     "ar": "تقدمي",
-    "fa": "پیشرو"
+    "fa": "پیشرو",
+    "tr": "ilerici",
+    "uk": "прогресивний",
+    "ur": "ترقی پسند"
    }
   },
   {
@@ -2249,7 +2738,10 @@
     "en": "meanwhile, by now",
     "es": "entretanto, ya",
     "ar": "في هذه الأثناء / الآن",
-    "fa": "تا حالا / در این میان"
+    "fa": "تا حالا / در این میان",
+    "tr": "bu arada, artık",
+    "uk": "тим часом",
+    "ur": "اب تک"
    }
   },
   {
@@ -2261,7 +2753,10 @@
     "en": "skills shortage",
     "es": "la escasez de profesionales",
     "ar": "نقص العمالة الماهرة",
-    "fa": "کمبود نیروی متخصص"
+    "fa": "کمبود نیروی متخصص",
+    "tr": "nitelikli işgücü eksikliği",
+    "uk": "дефіцит фахівців",
+    "ur": "ہنر مند کارکنوں کی کمی"
    },
    "g": "der"
   },
@@ -2274,7 +2769,10 @@
     "en": "ballot box",
     "es": "la urna",
     "ar": "صندوق الاقتراع",
-    "fa": "صندوق رأی"
+    "fa": "صندوق رأی",
+    "tr": "oy sandığı",
+    "uk": "урна для голосування",
+    "ur": "بیلٹ باکس"
    },
    "g": "die",
    "pl": "Wahlurnen"
@@ -2288,7 +2786,10 @@
     "en": "origin, background",
     "es": "el origen",
     "ar": "الأصل",
-    "fa": "اصل و نسب"
+    "fa": "اصل و نسب",
+    "tr": "köken",
+    "uk": "походження",
+    "ur": "پس منظر"
    },
    "g": "die"
   },
@@ -2301,7 +2802,10 @@
     "en": "artificial intelligence",
     "es": "la inteligencia artificial",
     "ar": "الذكاء الاصطناعي",
-    "fa": "هوش مصنوعی"
+    "fa": "هوش مصنوعی",
+    "tr": "yapay zekâ",
+    "uk": "штучний інтелект",
+    "ur": "مصنوعی ذہانت"
    },
    "g": "die"
   },
@@ -2314,7 +2818,10 @@
     "en": "habitat",
     "es": "el hábitat",
     "ar": "الموطن",
-    "fa": "زیستگاه"
+    "fa": "زیستگاه",
+    "tr": "yaşam alanı",
+    "uk": "ареал",
+    "ur": "مسکن"
    },
    "g": "der",
    "pl": "Lebensräume"
@@ -2328,7 +2835,10 @@
     "en": "burden, strain",
     "es": "la carga",
     "ar": "العبء",
-    "fa": "فشار / بار"
+    "fa": "فشار / بار",
+    "tr": "yük",
+    "uk": "навантаження",
+    "ur": "بوجھ"
    },
    "g": "die",
    "pl": "Belastungen"
@@ -2342,7 +2852,10 @@
     "en": "to improve",
     "es": "mejorar",
     "ar": "يتحسن",
-    "fa": "بهتر شدن"
+    "fa": "بهتر شدن",
+    "tr": "gelişmek, iyileşmek",
+    "uk": "покращуватися",
+    "ur": "بہتر ہونا"
    }
   },
   {
@@ -2354,7 +2867,10 @@
     "en": "conscientious",
     "es": "concienzudo",
     "ar": "دقيق / ضميري",
-    "fa": "باوجدان / دقیق"
+    "fa": "باوجدان / دقیق",
+    "tr": "vicdanlı, titiz",
+    "uk": "сумлінний",
+    "ur": "فرض شناس"
    }
   },
   {
@@ -2366,7 +2882,10 @@
     "en": "namely, you see",
     "es": "es que",
     "ar": "إذ / لأن",
-    "fa": "آخه / چون"
+    "fa": "آخه / چون",
+    "tr": "yani, çünkü",
+    "uk": "а саме",
+    "ur": "یعنی"
    }
   },
   {
@@ -2378,7 +2897,10 @@
     "en": "skilled worker",
     "es": "el profesional cualificado",
     "ar": "العامل الماهر",
-    "fa": "نیروی متخصص"
+    "fa": "نیروی متخصص",
+    "tr": "nitelikli çalışan",
+    "uk": "фахівець",
+    "ur": "ہنر مند کارکن"
    },
    "g": "die",
    "pl": "Fachkräfte"
@@ -2392,7 +2914,10 @@
     "en": "federal election",
     "es": "las elecciones federales",
     "ar": "الانتخابات البرلمانية الاتحادية",
-    "fa": "انتخابات پارلمان فدرال"
+    "fa": "انتخابات پارلمان فدرال",
+    "tr": "federal meclis seçimi",
+    "uk": "вибори до Бундестагу",
+    "ur": "وفاقی انتخابات"
    },
    "g": "die",
    "pl": "Bundestagswahlen"
@@ -2406,7 +2931,10 @@
     "en": "mother tongue",
     "es": "la lengua materna",
     "ar": "اللغة الأم",
-    "fa": "زبان مادری"
+    "fa": "زبان مادری",
+    "tr": "ana dil",
+    "uk": "рідна мова",
+    "ur": "مادری زبان"
    },
    "g": "die",
    "pl": "Muttersprachen"
@@ -2420,7 +2948,10 @@
     "en": "digitalisation",
     "es": "la digitalización",
     "ar": "الرقمنة",
-    "fa": "دیجیتالی‌سازی"
+    "fa": "دیجیتالی‌سازی",
+    "tr": "dijitalleşme",
+    "uk": "цифровізація",
+    "ur": "ڈیجیٹلائزیشن"
    },
    "g": "die"
   },
@@ -2433,7 +2964,10 @@
     "en": "waste",
     "es": "el despilfarro",
     "ar": "الهدر",
-    "fa": "هدر / اسراف"
+    "fa": "هدر / اسراف",
+    "tr": "israf",
+    "uk": "марнотратство",
+    "ur": "ضیاع"
    },
    "g": "die"
   },
@@ -2446,7 +2980,10 @@
     "en": "well-being",
     "es": "el bienestar",
     "ar": "الرفاهية / الشعور بالراحة",
-    "fa": "سلامت روانی و جسمی"
+    "fa": "سلامت روانی و جسمی",
+    "tr": "esenlik",
+    "uk": "добробут, самопочуття",
+    "ur": "بہتر حالت"
    },
    "g": "das"
   },
@@ -2459,7 +2996,10 @@
     "en": "to communicate, to make oneself understood",
     "es": "entenderse",
     "ar": "يتفاهم",
-    "fa": "با هم ارتباط برقرار کردن"
+    "fa": "با هم ارتباط برقرار کردن",
+    "tr": "anlaşmak (iletişim)",
+    "uk": "порозумітися",
+    "ur": "بات سمجھانا"
    }
   },
   {
@@ -2471,7 +3011,10 @@
     "en": "thorough",
     "es": "minucioso",
     "ar": "دقيق / شامل",
-    "fa": "دقیق / کامل"
+    "fa": "دقیق / کامل",
+    "tr": "titiz",
+    "uk": "ретельний",
+    "ur": "مکمل، باریک بین"
    }
   },
   {
@@ -2483,7 +3026,10 @@
     "en": "evidently",
     "es": "por lo visto",
     "ar": "على ما يبدو",
-    "fa": "ظاهراً / پیداست"
+    "fa": "ظاهراً / پیداست",
+    "tr": "görünüşe göre",
+    "uk": "очевидно",
+    "ur": "بظاہر"
    }
   },
   {
@@ -2495,7 +3041,10 @@
     "en": "apprenticeship place",
     "es": "la plaza de formación profesional",
     "ar": "مقعد التدريب المهني",
-    "fa": "جای کارآموزی"
+    "fa": "جای کارآموزی",
+    "tr": "çıraklık yeri",
+    "uk": "місце для навчання професії",
+    "ur": "تربیتی اسامی"
    },
    "g": "die",
    "pl": "Ausbildungsstellen"
@@ -2509,7 +3058,10 @@
     "en": "federal chancellor",
     "es": "el canciller federal",
     "ar": "المستشار الاتحادي",
-    "fa": "صدراعظم"
+    "fa": "صدراعظم",
+    "tr": "federal şansölye",
+    "uk": "федеральний канцлер",
+    "ur": "وفاقی چانسلر"
    },
    "g": "der",
    "pl": "Bundeskanzler"
@@ -2523,7 +3075,10 @@
     "en": "bilingualism",
     "es": "el bilingüismo",
     "ar": "ثنائية اللغة",
-    "fa": "دوزبانگی"
+    "fa": "دوزبانگی",
+    "tr": "iki dillilik",
+    "uk": "двомовність",
+    "ur": "دو لسانیت"
    },
    "g": "die"
   },
@@ -2536,7 +3091,10 @@
     "en": "screen time",
     "es": "el tiempo de pantalla",
     "ar": "وقت الشاشة",
-    "fa": "زمان استفاده از صفحه‌نمایش"
+    "fa": "زمان استفاده از صفحه‌نمایش",
+    "tr": "ekran süresi",
+    "uk": "екранний час",
+    "ur": "اسکرین ٹائم"
    },
    "g": "die",
    "pl": "Bildschirmzeiten"
@@ -2550,7 +3108,10 @@
     "en": "packaging waste",
     "es": "los residuos de envases",
     "ar": "نفايات التغليف",
-    "fa": "زباله‌ی بسته‌بندی"
+    "fa": "زباله‌ی بسته‌بندی",
+    "tr": "ambalaj atığı",
+    "uk": "пакувальні відходи",
+    "ur": "پیکنگ کا کوڑا"
    },
    "g": "der"
   },
@@ -2563,7 +3124,10 @@
     "en": "sleep disorder",
     "es": "el trastorno del sueño",
     "ar": "اضطراب النوم",
-    "fa": "اختلال خواب"
+    "fa": "اختلال خواب",
+    "tr": "uyku bozukluğu",
+    "uk": "розлад сну",
+    "ur": "نیند کی خرابی"
    },
    "g": "die",
    "pl": "Schlafstörungen"
@@ -2577,7 +3141,10 @@
     "en": "to distract",
     "es": "distraer",
     "ar": "يشتت الانتباه",
-    "fa": "حواس را پرت کردن"
+    "fa": "حواس را پرت کردن",
+    "tr": "dikkatini dağıtmak",
+    "uk": "відволікати",
+    "ur": "توجہ ہٹانا"
    }
   },
   {
@@ -2589,7 +3156,10 @@
     "en": "having equal rights",
     "es": "con igualdad de derechos",
     "ar": "متساوٍ في الحقوق",
-    "fa": "دارای حقوق برابر"
+    "fa": "دارای حقوق برابر",
+    "tr": "eşit haklara sahip",
+    "uk": "рівноправний",
+    "ur": "برابر حقوق والا"
    }
   },
   {
@@ -2601,7 +3171,10 @@
     "en": "after all, finally",
     "es": "al fin y al cabo",
     "ar": "في النهاية / فبعد كل شيء",
-    "fa": "بالاخره / آخر"
+    "fa": "بالاخره / آخر",
+    "tr": "sonuçta, nihayet",
+    "uk": "зрештою",
+    "ur": "آخرکار"
    }
   },
   {
@@ -2613,7 +3186,10 @@
     "en": "trainee, apprentice",
     "es": "el aprendiz",
     "ar": "المتدرب",
-    "fa": "کارآموز"
+    "fa": "کارآموز",
+    "tr": "çırak, stajyer",
+    "uk": "учень (на виробництві)",
+    "ur": "زیرِ تربیت"
    },
    "g": "der",
    "pl": "Auszubildenden"
@@ -2627,7 +3203,10 @@
     "en": "parliament",
     "es": "el parlamento",
     "ar": "البرلمان",
-    "fa": "پارلمان"
+    "fa": "پارلمان",
+    "tr": "parlamento",
+    "uk": "парламент",
+    "ur": "پارلیمنٹ"
    },
    "g": "das",
    "pl": "Parlamente"
@@ -2641,7 +3220,10 @@
     "en": "homesickness",
     "es": "la nostalgia",
     "ar": "الحنين إلى الوطن",
-    "fa": "دلتنگی برای وطن"
+    "fa": "دلتنگی برای وطن",
+    "tr": "sıla özlemi",
+    "uk": "туга за домом",
+    "ur": "وطن کی یاد"
    },
    "g": "das"
   },
@@ -2654,7 +3236,10 @@
     "en": "privacy",
     "es": "la privacidad",
     "ar": "الخصوصية",
-    "fa": "حریم خصوصی"
+    "fa": "حریم خصوصی",
+    "tr": "mahremiyet",
+    "uk": "приватність",
+    "ur": "نجی زندگی"
    },
    "g": "die"
   },
@@ -2667,7 +3252,10 @@
     "en": "coal phase-out",
     "es": "el abandono del carbón",
     "ar": "التخلي عن الفحم",
-    "fa": "کنار گذاشتن زغال‌سنگ"
+    "fa": "کنار گذاشتن زغال‌سنگ",
+    "tr": "kömürden çıkış",
+    "uk": "відмова від вугілля",
+    "ur": "کوئلے کا خاتمہ"
    },
    "g": "der"
   },
@@ -2680,7 +3268,10 @@
     "en": "psychotherapy",
     "es": "la psicoterapia",
     "ar": "العلاج النفسي",
-    "fa": "روان‌درمانی"
+    "fa": "روان‌درمانی",
+    "tr": "psikoterapi",
+    "uk": "психотерапія",
+    "ur": "سائیکو تھراپی"
    },
    "g": "die"
   },
@@ -2693,7 +3284,10 @@
     "en": "to abolish",
     "es": "abolir",
     "ar": "يلغي",
-    "fa": "لغو کردن"
+    "fa": "لغو کردن",
+    "tr": "kaldırmak (yasa vb.)",
+    "uk": "скасовувати",
+    "ur": "ختم کرنا"
    }
   },
   {
@@ -2705,7 +3299,10 @@
     "en": "persistent, stubborn",
     "es": "persistente",
     "ar": "عنيد / مستمر",
-    "fa": "سمج / مداوم"
+    "fa": "سمج / مداوم",
+    "tr": "inatçı, ısrarcı",
+    "uk": "наполегливий",
+    "ur": "ضدی"
    }
   },
   {
@@ -2717,7 +3314,10 @@
     "en": "neither … nor",
     "es": "ni … ni",
     "ar": "لا … ولا",
-    "fa": "نه … و نه"
+    "fa": "نه … و نه",
+    "tr": "ne … ne de",
+    "uk": "ні … ні",
+    "ur": "نہ … نہ"
    }
   },
   {
@@ -2729,7 +3329,10 @@
     "en": "cooperation",
     "es": "la colaboración",
     "ar": "التعاون",
-    "fa": "همکاری"
+    "fa": "همکاری",
+    "tr": "işbirliği",
+    "uk": "співпраця",
+    "ur": "تعاون"
    },
    "g": "die"
   },
@@ -2742,7 +3345,10 @@
     "en": "coalition",
     "es": "la coalición",
     "ar": "الائتلاف",
-    "fa": "ائتلاف"
+    "fa": "ائتلاف",
+    "tr": "koalisyon",
+    "uk": "коаліція",
+    "ur": "اتحاد"
    },
    "g": "die",
    "pl": "Koalitionen"
@@ -2756,7 +3362,10 @@
     "en": "longing",
     "es": "el anhelo",
     "ar": "الشوق",
-    "fa": "اشتیاق / دلتنگی"
+    "fa": "اشتیاق / دلتنگی",
+    "tr": "özlem",
+    "uk": "туга",
+    "ur": "آرزو"
    },
    "g": "die",
    "pl": "Sehnsüchte"
@@ -2770,7 +3379,10 @@
     "en": "security gap",
     "es": "la vulnerabilidad",
     "ar": "الثغرة الأمنية",
-    "fa": "حفره‌ی امنیتی"
+    "fa": "حفره‌ی امنیتی",
+    "tr": "güvenlik açığı",
+    "uk": "вразливість",
+    "ur": "سکیورٹی خامی"
    },
    "g": "die",
    "pl": "Sicherheitslücken"
@@ -2784,7 +3396,10 @@
     "en": "climate protection",
     "es": "la protección del clima",
     "ar": "حماية المناخ",
-    "fa": "حفاظت از اقلیم"
+    "fa": "حفاظت از اقلیم",
+    "tr": "iklim koruma",
+    "uk": "захист клімату",
+    "ur": "ماحولیاتی تحفظ"
    },
    "g": "der"
   },
@@ -2797,7 +3412,10 @@
     "en": "organ donation",
     "es": "la donación de órganos",
     "ar": "التبرع بالأعضاء",
-    "fa": "اهدای عضو"
+    "fa": "اهدای عضو",
+    "tr": "organ bağışı",
+    "uk": "донорство органів",
+    "ur": "اعضا کا عطیہ"
    },
    "g": "die",
    "pl": "Organspenden"
@@ -2811,7 +3429,10 @@
     "en": "to complete, to conclude",
     "es": "terminar, concluir",
     "ar": "يكمل / ينهي",
-    "fa": "به پایان رساندن"
+    "fa": "به پایان رساندن",
+    "tr": "tamamlamak, sonuçlandırmak",
+    "uk": "завершувати",
+    "ur": "مکمل کرنا"
    }
   },
   {
@@ -2823,7 +3444,10 @@
     "en": "helpless",
     "es": "indefenso",
     "ar": "عاجز",
-    "fa": "درمانده"
+    "fa": "درمانده",
+    "tr": "çaresiz",
+    "uk": "безпорадний",
+    "ur": "بے بس"
    }
   },
   {
@@ -2835,7 +3459,10 @@
     "en": "moreover",
     "es": "además",
     "ar": "علاوة على ذلك",
-    "fa": "افزون بر این"
+    "fa": "افزون بر این",
+    "tr": "ayrıca",
+    "uk": "крім того",
+    "ur": "مزید یہ کہ"
    }
   },
   {
@@ -2847,7 +3474,10 @@
     "en": "feedback, reply",
     "es": "la respuesta",
     "ar": "الرد / الملاحظات",
-    "fa": "بازخورد / پاسخ"
+    "fa": "بازخورد / پاسخ",
+    "tr": "geri bildirim",
+    "uk": "зворотний зв'язок",
+    "ur": "جواب، فیڈ بیک"
    },
    "g": "die",
    "pl": "Rückmeldungen"
@@ -2861,7 +3491,10 @@
     "en": "state under the rule of law",
     "es": "el estado de derecho",
     "ar": "دولة القانون",
-    "fa": "دولت قانون‌مدار"
+    "fa": "دولت قانون‌مدار",
+    "tr": "hukuk devleti",
+    "uk": "правова держава",
+    "ur": "قانون کی حکمرانی والی ریاست"
    },
    "g": "der",
    "pl": "Rechtsstaaten"
@@ -2875,7 +3508,10 @@
     "en": "gratitude",
     "es": "la gratitud",
     "ar": "الامتنان",
-    "fa": "سپاسگزاری"
+    "fa": "سپاسگزاری",
+    "tr": "minnettarlık",
+    "uk": "вдячність",
+    "ur": "شکر گزاری"
    },
    "g": "die"
   },
@@ -2888,7 +3524,10 @@
     "en": "comment",
     "es": "el comentario",
     "ar": "التعليق",
-    "fa": "نظر / کامنت"
+    "fa": "نظر / کامنت",
+    "tr": "yorum",
+    "uk": "коментар",
+    "ur": "تبصرہ"
    },
    "g": "der",
    "pl": "Kommentare"
@@ -2902,7 +3541,10 @@
     "en": "electric mobility",
     "es": "la movilidad eléctrica",
     "ar": "التنقل الكهربائي",
-    "fa": "خودروهای برقی"
+    "fa": "خودروهای برقی",
+    "tr": "elektrikli ulaşım",
+    "uk": "електромобільність",
+    "ur": "برقی نقل و حمل"
    },
    "g": "die"
   },
@@ -2915,7 +3557,10 @@
     "en": "emergency number",
     "es": "el número de emergencia",
     "ar": "رقم الطوارئ",
-    "fa": "شماره‌ی اورژانس"
+    "fa": "شماره‌ی اورژانس",
+    "tr": "acil durum numarası",
+    "uk": "номер екстреної служби",
+    "ur": "ایمرجنسی نمبر"
    },
    "g": "die",
    "pl": "Notfallnummern"
@@ -2929,7 +3574,10 @@
     "en": "to weigh up",
     "es": "sopesar",
     "ar": "يوازن",
-    "fa": "سبک‌سنگین کردن"
+    "fa": "سبک‌سنگین کردن",
+    "tr": "tartmak, değerlendirmek",
+    "uk": "зважувати",
+    "ur": "سوچ بچار کرنا"
    }
   },
   {
@@ -2941,7 +3589,10 @@
     "en": "critical",
     "es": "crítico",
     "ar": "نقدي / حرج",
-    "fa": "انتقادی"
+    "fa": "انتقادی",
+    "tr": "eleştirel",
+    "uk": "критичний",
+    "ur": "تنقیدی"
    }
   },
   {
@@ -2953,7 +3604,10 @@
     "en": "first, initially",
     "es": "primero",
     "ar": "أولاً",
-    "fa": "ابتدا"
+    "fa": "ابتدا",
+    "tr": "önce, ilk olarak",
+    "uk": "спершу",
+    "ur": "سب سے پہلے"
    }
   },
   {
@@ -2965,7 +3619,10 @@
     "en": "responsibility, remit",
     "es": "la competencia",
     "ar": "الاختصاص",
-    "fa": "حوزه‌ی مسئولیت"
+    "fa": "حوزه‌ی مسئولیت",
+    "tr": "yetki alanı",
+    "uk": "компетенція",
+    "ur": "دائرۂ اختیار"
    },
    "g": "die",
    "pl": "Zuständigkeiten"
@@ -2979,7 +3636,10 @@
     "en": "separation of powers",
     "es": "la separación de poderes",
     "ar": "الفصل بين السلطات",
-    "fa": "تفکیک قوا"
+    "fa": "تفکیک قوا",
+    "tr": "kuvvetler ayrılığı",
+    "uk": "поділ влади",
+    "ur": "اختیارات کی تقسیم"
    },
    "g": "die"
   },
@@ -2992,7 +3652,10 @@
     "en": "shame",
     "es": "la vergüenza",
     "ar": "الخجل / العار",
-    "fa": "شرم"
+    "fa": "شرم",
+    "tr": "utanç",
+    "uk": "сором",
+    "ur": "شرم"
    },
    "g": "die"
   },
@@ -3005,7 +3668,10 @@
     "en": "forming opinions",
     "es": "la formación de opinión",
     "ar": "تكوين الرأي",
-    "fa": "شکل‌گیری افکار"
+    "fa": "شکل‌گیری افکار",
+    "tr": "kanaat oluşumu",
+    "uk": "формування думки",
+    "ur": "رائے سازی"
    },
    "g": "die"
   },
@@ -3018,7 +3684,10 @@
     "en": "water consumption",
     "es": "el consumo de agua",
     "ar": "استهلاك المياه",
-    "fa": "مصرف آب"
+    "fa": "مصرف آب",
+    "tr": "su tüketimi",
+    "uk": "споживання води",
+    "ur": "پانی کا استعمال"
    },
    "g": "der"
   },
@@ -3031,7 +3700,10 @@
     "en": "living will",
     "es": "el testamento vital",
     "ar": "وصية المريض",
-    "fa": "وصیت‌نامه‌ی درمانی"
+    "fa": "وصیت‌نامه‌ی درمانی",
+    "tr": "hasta vasiyeti",
+    "uk": "розпорядження пацієнта",
+    "ur": "طبی وصیت"
    },
    "g": "die",
    "pl": "Patientenverfügungen"
@@ -3045,7 +3717,10 @@
     "en": "to announce",
     "es": "anunciar",
     "ar": "يعلن",
-    "fa": "اعلام کردن"
+    "fa": "اعلام کردن",
+    "tr": "duyurmak",
+    "uk": "оголошувати",
+    "ur": "اعلان کرنا"
    }
   },
   {
@@ -3057,7 +3732,10 @@
     "en": "at short notice, short-term",
     "es": "a corto plazo",
     "ar": "على المدى القصير / في وقت قصير",
-    "fa": "کوتاه‌مدت / در آخرین لحظه"
+    "fa": "کوتاه‌مدت / در آخرین لحظه",
+    "tr": "kısa süreli, son dakika",
+    "uk": "короткостроковий",
+    "ur": "مختصر مدت کا، اچانک"
    }
   },
   {
@@ -3069,7 +3747,10 @@
     "en": "admittedly … but",
     "es": "es cierto que … pero",
     "ar": "صحيح أن … لكن",
-    "fa": "درست است که … اما"
+    "fa": "درست است که … اما",
+    "tr": "gerçi … ama",
+    "uk": "щоправда … але",
+    "ur": "بے شک … لیکن"
    }
   },
   {
@@ -3081,7 +3762,10 @@
     "en": "workload",
     "es": "la carga de trabajo",
     "ar": "عبء العمل",
-    "fa": "حجم کار"
+    "fa": "حجم کار",
+    "tr": "iş yükü",
+    "uk": "робоче навантаження",
+    "ur": "کام کا بوجھ"
    },
    "g": "die"
   },
@@ -3094,7 +3778,10 @@
     "en": "fundamental right",
     "es": "el derecho fundamental",
     "ar": "الحق الأساسي",
-    "fa": "حق بنیادین"
+    "fa": "حق بنیادین",
+    "tr": "temel hak",
+    "uk": "основне право",
+    "ur": "بنیادی حق"
    },
    "g": "das",
    "pl": "Grundrechte"
@@ -3108,7 +3795,10 @@
     "en": "habit (often bad)",
     "es": "la costumbre, la manía",
     "ar": "العادة",
-    "fa": "عادت (اغلب بد)"
+    "fa": "عادت (اغلب بد)",
+    "tr": "alışkanlık (çoğu kötü)",
+    "uk": "звичка",
+    "ur": "عادت (اکثر بری)"
    },
    "g": "die",
    "pl": "Angewohnheiten"
@@ -3122,7 +3812,10 @@
     "en": "advertising campaign",
     "es": "la campaña publicitaria",
     "ar": "الحملة الإعلانية",
-    "fa": "کمپین تبلیغاتی"
+    "fa": "کمپین تبلیغاتی",
+    "tr": "reklam kampanyası",
+    "uk": "рекламна кампанія",
+    "ur": "اشتہاری مہم"
    },
    "g": "die",
    "pl": "Werbekampagnen"
@@ -3136,7 +3829,10 @@
     "en": "heat pump",
     "es": "la bomba de calor",
     "ar": "المضخة الحرارية",
-    "fa": "پمپ حرارتی"
+    "fa": "پمپ حرارتی",
+    "tr": "ısı pompası",
+    "uk": "тепловий насос",
+    "ur": "ہیٹ پمپ"
    },
    "g": "die",
    "pl": "Wärmepumpen"
@@ -3150,7 +3846,10 @@
     "en": "to stimulate, to encourage",
     "es": "estimular",
     "ar": "يحفّز",
-    "fa": "برانگیختن"
+    "fa": "برانگیختن",
+    "tr": "teşvik etmek",
+    "uk": "стимулювати",
+    "ur": "ترغیب دینا"
    }
   },
   {
@@ -3162,7 +3861,10 @@
     "en": "long-term",
     "es": "a largo plazo",
     "ar": "على المدى الطويل",
-    "fa": "بلندمدت"
+    "fa": "بلندمدت",
+    "tr": "uzun vadeli",
+    "uk": "довгостроковий",
+    "ur": "طویل مدتی"
    }
   },
   {
@@ -3174,7 +3876,10 @@
     "en": "on the basis of",
     "es": "a partir de",
     "ar": "بناءً على",
-    "fa": "بر اساس"
+    "fa": "بر اساس",
+    "tr": "-e dayanarak",
+    "uk": "на підставі",
+    "ur": "کی بنیاد پر"
    }
   },
   {
@@ -3186,7 +3891,10 @@
     "en": "time pressure",
     "es": "la presión de plazos",
     "ar": "ضغط المواعيد",
-    "fa": "فشار زمانی"
+    "fa": "فشار زمانی",
+    "tr": "zaman baskısı",
+    "uk": "тиск термінів",
+    "ur": "وقت کا دباؤ"
    },
    "g": "der"
   },
@@ -3199,7 +3907,10 @@
     "en": "human dignity",
     "es": "la dignidad humana",
     "ar": "الكرامة الإنسانية",
-    "fa": "کرامت انسانی"
+    "fa": "کرامت انسانی",
+    "tr": "insan onuru",
+    "uk": "людська гідність",
+    "ur": "انسانی وقار"
    },
    "g": "die"
   },
@@ -3212,7 +3923,10 @@
     "en": "dealing with, contact",
     "es": "el trato",
     "ar": "التعامل",
-    "fa": "برخورد / رفتار با"
+    "fa": "برخورد / رفتار با",
+    "tr": "ilişki, davranış biçimi",
+    "uk": "поводження, спілкування",
+    "ur": "برتاؤ، میل جول"
    },
    "g": "der"
   },
@@ -3225,7 +3939,10 @@
     "en": "dependence, addiction",
     "es": "la dependencia",
     "ar": "الإدمان / التبعية",
-    "fa": "وابستگی"
+    "fa": "وابستگی",
+    "tr": "bağımlılık",
+    "uk": "залежність",
+    "ur": "انحصار، لت"
    },
    "g": "die",
    "pl": "Abhängigkeiten"
@@ -3239,7 +3956,10 @@
     "en": "ecosystem",
     "es": "el ecosistema",
     "ar": "النظام البيئي",
-    "fa": "اکوسیستم"
+    "fa": "اکوسیستم",
+    "tr": "ekosistem",
+    "uk": "екосистема",
+    "ur": "ماحولیاتی نظام"
    },
    "g": "das",
    "pl": "Ökosysteme"
@@ -3253,7 +3973,10 @@
     "en": "to clear up, to inform",
     "es": "aclarar, informar",
     "ar": "يوضح / يكشف",
-    "fa": "روشن کردن / آگاه کردن"
+    "fa": "روشن کردن / آگاه کردن",
+    "tr": "aydınlatmak, bilgilendirmek",
+    "uk": "з'ясовувати, роз'яснювати",
+    "ur": "وضاحت کرنا، آگاہ کرنا"
    }
   },
   {
@@ -3265,7 +3988,10 @@
     "en": "powerful, efficient",
     "es": "potente",
     "ar": "قوي الأداء",
-    "fa": "پرقدرت / کارآمد"
+    "fa": "پرقدرت / کارآمد",
+    "tr": "verimli, güçlü",
+    "uk": "продуктивний",
+    "ur": "مؤثر، طاقتور"
    }
   },
   {
@@ -3277,7 +4003,10 @@
     "en": "regarding",
     "es": "con respecto a",
     "ar": "بخصوص",
-    "fa": "درباره‌ی"
+    "fa": "درباره‌ی",
+    "tr": "-e ilişkin",
+    "uk": "щодо",
+    "ur": "کے بارے میں"
    }
   },
   {
@@ -3289,7 +4018,10 @@
     "en": "severance pay",
     "es": "la indemnización",
     "ar": "مكافأة نهاية الخدمة",
-    "fa": "غرامت پایان کار"
+    "fa": "غرامت پایان کار",
+    "tr": "kıdem tazminatı",
+    "uk": "вихідна допомога",
+    "ur": "برطرفی کا معاوضہ"
    },
    "g": "die",
    "pl": "Abfindungen"
@@ -3303,7 +4035,10 @@
     "en": "equal opportunities",
     "es": "la igualdad de oportunidades",
     "ar": "تكافؤ الفرص",
-    "fa": "برابری فرصت‌ها"
+    "fa": "برابری فرصت‌ها",
+    "tr": "fırsat eşitliği",
+    "uk": "рівність можливостей",
+    "ur": "یکساں مواقع"
    },
    "g": "die"
   },
@@ -3316,7 +4051,10 @@
     "en": "body language",
     "es": "el lenguaje corporal",
     "ar": "لغة الجسد",
-    "fa": "زبان بدن"
+    "fa": "زبان بدن",
+    "tr": "beden dili",
+    "uk": "мова тіла",
+    "ur": "جسمانی زبان"
    },
    "g": "die"
   },
@@ -3329,7 +4067,10 @@
     "en": "attention",
     "es": "la atención",
     "ar": "الانتباه",
-    "fa": "توجه"
+    "fa": "توجه",
+    "tr": "dikkat",
+    "uk": "увага",
+    "ur": "توجہ"
    },
    "g": "die"
   },
@@ -3342,7 +4083,10 @@
     "en": "reuse",
     "es": "la reutilización",
     "ar": "إعادة الاستخدام",
-    "fa": "استفاده‌ی دوباره"
+    "fa": "استفاده‌ی دوباره",
+    "tr": "yeniden kullanım",
+    "uk": "повторне використання",
+    "ur": "دوبارہ استعمال"
    },
    "g": "die"
   },
@@ -3355,7 +4099,10 @@
     "en": "to dissolve",
     "es": "disolver",
     "ar": "يحل",
-    "fa": "منحل کردن"
+    "fa": "منحل کردن",
+    "tr": "çözmek, feshetmek",
+    "uk": "розчиняти, розпускати",
+    "ur": "تحلیل کرنا"
    }
   },
   {
@@ -3367,7 +4114,10 @@
     "en": "multilingual",
     "es": "plurilingüe",
     "ar": "متعدد اللغات",
-    "fa": "چندزبانه"
+    "fa": "چندزبانه",
+    "tr": "çok dilli",
+    "uk": "багатомовний",
+    "ur": "کثیر لسانی"
    }
   },
   {
@@ -3379,7 +4129,10 @@
     "en": "according to",
     "es": "según",
     "ar": "وفقاً لـ",
-    "fa": "طبق"
+    "fa": "طبق",
+    "tr": "-e göre",
+    "uk": "згідно з",
+    "ur": "کے مطابق"
    }
   },
   {
@@ -3391,7 +4144,10 @@
     "en": "collective agreement",
     "es": "el convenio colectivo",
     "ar": "الاتفاقية الجماعية",
-    "fa": "قرارداد دسته‌جمعی"
+    "fa": "قرارداد دسته‌جمعی",
+    "tr": "toplu iş sözleşmesi",
+    "uk": "колективний договір",
+    "ur": "اجتماعی معاہدہ"
    },
    "g": "der",
    "pl": "Tarifverträge"
@@ -3405,7 +4161,10 @@
     "en": "immigration",
     "es": "la inmigración",
     "ar": "الهجرة الوافدة",
-    "fa": "مهاجرت به داخل"
+    "fa": "مهاجرت به داخل",
+    "tr": "göç (içeri)",
+    "uk": "імміграція",
+    "ur": "نقل مکانی (آمد)"
    },
    "g": "die"
   },
@@ -3418,7 +4177,10 @@
     "en": "politeness",
     "es": "la cortesía",
     "ar": "الأدب / اللباقة",
-    "fa": "ادب"
+    "fa": "ادب",
+    "tr": "nezaket",
+    "uk": "ввічливість",
+    "ur": "شائستگی"
    },
    "g": "die"
   },
@@ -3431,7 +4193,10 @@
     "en": "influence",
     "es": "la influencia",
     "ar": "التأثير",
-    "fa": "نفوذ / تأثیر"
+    "fa": "نفوذ / تأثیر",
+    "tr": "etki",
+    "uk": "вплив",
+    "ur": "اثر"
    },
    "g": "der",
    "pl": "Einflüsse"
@@ -3445,7 +4210,10 @@
     "en": "footprint",
     "es": "la huella",
     "ar": "البصمة",
-    "fa": "ردپا"
+    "fa": "ردپا",
+    "tr": "ayak izi",
+    "uk": "слід",
+    "ur": "نقشِ پا"
    },
    "g": "der",
    "pl": "Fußabdrücke"
@@ -3459,7 +4227,10 @@
     "en": "to maintain",
     "es": "mantener",
     "ar": "يحافظ على",
-    "fa": "حفظ کردن"
+    "fa": "حفظ کردن",
+    "tr": "sürdürmek",
+    "uk": "підтримувати",
+    "ur": "برقرار رکھنا"
    }
   },
   {
@@ -3471,7 +4242,10 @@
     "en": "understandable",
     "es": "comprensible",
     "ar": "مفهوم",
-    "fa": "قابل درک"
+    "fa": "قابل درک",
+    "tr": "anlaşılır",
+    "uk": "зрозумілий",
+    "ur": "قابلِ فہم"
    }
   },
   {
@@ -3483,7 +4257,10 @@
     "en": "with regard to",
     "es": "en cuanto a",
     "ar": "فيما يتعلق بـ",
-    "fa": "از لحاظ"
+    "fa": "از لحاظ",
+    "tr": "-e ilişkin olarak",
+    "uk": "стосовно",
+    "ur": "کے حوالے سے"
    }
   },
   {
@@ -3495,7 +4272,10 @@
     "en": "parental leave",
     "es": "el permiso parental",
     "ar": "إجازة الوالدين",
-    "fa": "مرخصی والدین"
+    "fa": "مرخصی والدین",
+    "tr": "ebeveyn izni",
+    "uk": "відпустка по догляду за дитиною",
+    "ur": "والدین کی چھٹی"
    },
    "g": "die"
   },
@@ -3508,7 +4288,10 @@
     "en": "diversity",
     "es": "la diversidad",
     "ar": "التنوع",
-    "fa": "تنوع"
+    "fa": "تنوع",
+    "tr": "çeşitlilik",
+    "uk": "різноманіття",
+    "ur": "تنوع"
    },
    "g": "die"
   },
@@ -3521,7 +4304,10 @@
     "en": "indifference",
     "es": "la indiferencia",
     "ar": "اللامبالاة",
-    "fa": "بی‌تفاوتی"
+    "fa": "بی‌تفاوتی",
+    "tr": "kayıtsızlık",
+    "uk": "байдужість",
+    "ur": "لاپرواہی"
    },
    "g": "die"
   },
@@ -3534,7 +4320,10 @@
     "en": "access",
     "es": "el acceso",
     "ar": "الوصول",
-    "fa": "دسترسی"
+    "fa": "دسترسی",
+    "tr": "erişim",
+    "uk": "доступ",
+    "ur": "رسائی"
    },
    "g": "der",
    "pl": "Zugänge"
@@ -3548,7 +4337,10 @@
     "en": "to express",
     "es": "expresar",
     "ar": "يعبّر",
-    "fa": "بیان کردن"
+    "fa": "بیان کردن",
+    "tr": "ifade etmek",
+    "uk": "висловлювати",
+    "ur": "اظہار کرنا"
    }
   },
   {
@@ -3560,7 +4352,10 @@
     "en": "obvious",
     "es": "evidente",
     "ar": "واضح",
-    "fa": "آشکار"
+    "fa": "آشکار",
+    "tr": "bariz",
+    "uk": "очевидний",
+    "ur": "واضح"
    }
   },
   {
@@ -3572,7 +4367,10 @@
     "en": "with the help of",
     "es": "con ayuda de",
     "ar": "بمساعدة",
-    "fa": "به کمک"
+    "fa": "به کمک",
+    "tr": "yardımıyla",
+    "uk": "за допомогою",
+    "ur": "کی مدد سے"
    }
   },
   {
@@ -3584,7 +4382,10 @@
     "en": "maternity protection",
     "es": "la baja por maternidad",
     "ar": "حماية الأمومة",
-    "fa": "مرخصی زایمان"
+    "fa": "مرخصی زایمان",
+    "tr": "annelik koruması",
+    "uk": "охорона материнства",
+    "ur": "زچگی کا تحفظ"
    },
    "g": "der"
   },
@@ -3597,7 +4398,10 @@
     "en": "racism",
     "es": "el racismo",
     "ar": "العنصرية",
-    "fa": "نژادپرستی"
+    "fa": "نژادپرستی",
+    "tr": "ırkçılık",
+    "uk": "расизм",
+    "ur": "نسل پرستی"
    },
    "g": "der"
   },
@@ -3610,7 +4414,10 @@
     "en": "solidarity, cohesion",
     "es": "la unión",
     "ar": "التماسك / الترابط",
-    "fa": "همبستگی"
+    "fa": "همبستگی",
+    "tr": "dayanışma",
+    "uk": "згуртованість",
+    "ur": "یکجہتی"
    },
    "g": "der"
   },
@@ -3623,7 +4430,10 @@
     "en": "spread",
     "es": "la difusión",
     "ar": "الانتشار",
-    "fa": "گسترش / پخش"
+    "fa": "گسترش / پخش",
+    "tr": "yayılma",
+    "uk": "поширення",
+    "ur": "پھیلاؤ"
    },
    "g": "die"
   },
@@ -3636,7 +4446,10 @@
     "en": "to balance, to compensate",
     "es": "compensar",
     "ar": "يعوّض / يوازن",
-    "fa": "جبران کردن"
+    "fa": "جبران کردن",
+    "tr": "dengelemek, telafi etmek",
+    "uk": "урівноважувати",
+    "ur": "توازن پیدا کرنا"
    }
   },
   {
@@ -3648,7 +4461,10 @@
     "en": "self-confident",
     "es": "seguro de sí mismo",
     "ar": "واثق بنفسه",
-    "fa": "اعتمادبه‌نفس‌دار"
+    "fa": "اعتمادبه‌نفس‌دار",
+    "tr": "özgüvenli",
+    "uk": "впевнений у собі",
+    "ur": "خود اعتماد"
    }
   },
   {
@@ -3660,7 +4476,10 @@
     "en": "on the part of",
     "es": "por parte de",
     "ar": "من جانب",
-    "fa": "از سوی"
+    "fa": "از سوی",
+    "tr": "tarafından",
+    "uk": "з боку",
+    "ur": "کی جانب سے"
    }
   },
   {
@@ -3672,7 +4491,10 @@
     "en": "employment reference",
     "es": "el certificado de trabajo",
     "ar": "شهادة الخبرة",
-    "fa": "گواهی کار"
+    "fa": "گواهی کار",
+    "tr": "iş referans belgesi",
+    "uk": "трудова характеристика",
+    "ur": "تجربے کا سرٹیفکیٹ"
    },
    "g": "das",
    "pl": "Arbeitszeugnisse"
@@ -3686,7 +4508,10 @@
     "en": "extremism",
     "es": "el extremismo",
     "ar": "التطرف",
-    "fa": "افراط‌گرایی"
+    "fa": "افراط‌گرایی",
+    "tr": "aşırıcılık",
+    "uk": "екстремізм",
+    "ur": "انتہا پسندی"
    },
    "g": "der"
   },
@@ -3699,7 +4524,10 @@
     "en": "encounter",
     "es": "el encuentro",
     "ar": "اللقاء",
-    "fa": "دیدار / برخورد"
+    "fa": "دیدار / برخورد",
+    "tr": "karşılaşma",
+    "uk": "зустріч",
+    "ur": "ملاقات"
    },
    "g": "die",
    "pl": "Begegnungen"
@@ -3713,7 +4541,10 @@
     "en": "to trigger",
     "es": "desencadenar",
     "ar": "يثير / يتسبب في",
-    "fa": "باعث شدن"
+    "fa": "باعث شدن",
+    "tr": "tetiklemek",
+    "uk": "спричиняти",
+    "ur": "شروع کرنا، متحرک کرنا"
    }
   },
   {
@@ -3725,7 +4556,10 @@
     "en": "careful",
     "es": "cuidadoso",
     "ar": "بعناية",
-    "fa": "با دقت"
+    "fa": "با دقت",
+    "tr": "özenli",
+    "uk": "ретельний",
+    "ur": "محتاط"
    }
   },
   {
@@ -3737,7 +4571,10 @@
     "en": "due to",
     "es": "debido a",
     "ar": "بسبب",
-    "fa": "به دلیل"
+    "fa": "به دلیل",
+    "tr": "nedeniyle",
+    "uk": "через",
+    "ur": "کی وجہ سے"
    }
   },
   {
@@ -3749,7 +4586,10 @@
     "en": "flexitime",
     "es": "el horario flexible",
     "ar": "الدوام المرن",
-    "fa": "ساعت کاری شناور"
+    "fa": "ساعت کاری شناور",
+    "tr": "esnek mesai",
+    "uk": "гнучкий графік",
+    "ur": "لچکدار اوقات"
    },
    "g": "die"
   },
@@ -3762,7 +4602,10 @@
     "en": "crime",
     "es": "la delincuencia",
     "ar": "الجريمة",
-    "fa": "جرم و جنایت"
+    "fa": "جرم و جنایت",
+    "tr": "suç oranı",
+    "uk": "злочинність",
+    "ur": "جرائم"
    },
    "g": "die"
   },
@@ -3775,7 +4618,10 @@
     "en": "marriage",
     "es": "el matrimonio",
     "ar": "الزواج",
-    "fa": "ازدواج"
+    "fa": "ازدواج",
+    "tr": "evlilik",
+    "uk": "шлюб",
+    "ur": "شادی"
    },
    "g": "die",
    "pl": "Ehen"
@@ -3789,7 +4635,10 @@
     "en": "to take advantage of",
     "es": "aprovecharse de",
     "ar": "يستغل",
-    "fa": "سوءاستفاده کردن"
+    "fa": "سوءاستفاده کردن",
+    "tr": "istismar etmek",
+    "uk": "використовувати",
+    "ur": "فائدہ اٹھانا"
    }
   },
   {
@@ -3801,7 +4650,10 @@
     "en": "convincing",
     "es": "convincente",
     "ar": "مقنع",
-    "fa": "قانع‌کننده"
+    "fa": "قانع‌کننده",
+    "tr": "ikna edici",
+    "uk": "переконливий",
+    "ur": "قائل کرنے والا"
    }
   },
   {
@@ -3813,7 +4665,10 @@
     "en": "especially since",
     "es": "sobre todo porque",
     "ar": "لا سيما أن",
-    "fa": "به‌ویژه که"
+    "fa": "به‌ویژه که",
+    "tr": "özellikle de",
+    "uk": "тим більше що",
+    "ur": "خاص طور پر جبکہ"
    }
   },
   {
@@ -3825,7 +4680,10 @@
     "en": "business trip",
     "es": "el viaje de negocios",
     "ar": "رحلة عمل",
-    "fa": "سفر کاری"
+    "fa": "سفر کاری",
+    "tr": "iş seyahati",
+    "uk": "відрядження",
+    "ur": "کاروباری سفر"
    },
    "g": "die",
    "pl": "Dienstreisen"
@@ -3839,7 +4697,10 @@
     "en": "justice, fairness",
     "es": "la justicia",
     "ar": "العدالة",
-    "fa": "عدالت"
+    "fa": "عدالت",
+    "tr": "adalet",
+    "uk": "справедливість",
+    "ur": "انصاف"
    },
    "g": "die"
   },
@@ -3852,7 +4713,10 @@
     "en": "mother-in-law",
     "es": "la suegra",
     "ar": "الحماة",
-    "fa": "مادرشوهر / مادرزن"
+    "fa": "مادرشوهر / مادرزن",
+    "tr": "kayınvalide",
+    "uk": "свекруха, теща",
+    "ur": "ساس"
    },
    "g": "die",
    "pl": "Schwiegermütter"
@@ -3866,7 +4730,10 @@
     "en": "to practise, to exercise",
     "es": "ejercer",
     "ar": "يمارس",
-    "fa": "انجام دادن (شغل)"
+    "fa": "انجام دادن (شغل)",
+    "tr": "icra etmek",
+    "uk": "виконувати, займатися",
+    "ur": "انجام دینا"
    }
   },
   {
@@ -3878,7 +4745,10 @@
     "en": "controversial",
     "es": "controvertido",
     "ar": "مثير للجدل",
-    "fa": "بحث‌برانگیز"
+    "fa": "بحث‌برانگیز",
+    "tr": "tartışmalı",
+    "uk": "суперечливий",
+    "ur": "متنازع"
    }
   },
   {
@@ -3890,7 +4760,10 @@
     "en": "as far as",
     "es": "por lo que",
     "ar": "على حد علمي / بقدر ما",
-    "fa": "تا جایی که"
+    "fa": "تا جایی که",
+    "tr": "-diği kadarıyla",
+    "uk": "наскільки",
+    "ur": "جہاں تک"
    }
   },
   {
@@ -3902,7 +4775,10 @@
     "en": "presentation",
     "es": "la presentación",
     "ar": "العرض التقديمي",
-    "fa": "ارائه"
+    "fa": "ارائه",
+    "tr": "sunum",
+    "uk": "презентація",
+    "ur": "پریزنٹیشن"
    },
    "g": "die",
    "pl": "Präsentationen"
@@ -3916,7 +4792,10 @@
     "en": "voluntary work",
     "es": "el voluntariado",
     "ar": "العمل التطوعي",
-    "fa": "کار داوطلبانه"
+    "fa": "کار داوطلبانه",
+    "tr": "gönüllü çalışma",
+    "uk": "волонтерство",
+    "ur": "رضاکارانہ کام"
    },
    "g": "das",
    "pl": "Ehrenämter"
@@ -3930,7 +4809,10 @@
     "en": "offspring, young generation",
     "es": "la descendencia",
     "ar": "الذرية / الجيل الجديد",
-    "fa": "فرزندان / نسل جوان"
+    "fa": "فرزندان / نسل جوان",
+    "tr": "yeni nesil",
+    "uk": "нащадки, молоде покоління",
+    "ur": "نئی نسل"
    },
    "g": "der"
   },
@@ -3943,7 +4825,10 @@
     "en": "to observe, to pay attention to",
     "es": "tener en cuenta",
     "ar": "يراعي",
-    "fa": "رعایت کردن"
+    "fa": "رعایت کردن",
+    "tr": "dikkat etmek",
+    "uk": "дотримуватися",
+    "ur": "دھیان رکھنا"
    }
   },
   {
@@ -3955,7 +4840,10 @@
     "en": "unavoidable",
     "es": "inevitable",
     "ar": "لا مفر منه",
-    "fa": "اجتناب‌ناپذیر"
+    "fa": "اجتناب‌ناپذیر",
+    "tr": "kaçınılmaz",
+    "uk": "неминучий",
+    "ur": "ناگزیر"
    }
   },
   {
@@ -3967,7 +4855,10 @@
     "en": "negotiation",
     "es": "la negociación",
     "ar": "المفاوضة",
-    "fa": "مذاکره"
+    "fa": "مذاکره",
+    "tr": "müzakere",
+    "uk": "переговори",
+    "ur": "مذاکرات"
    },
    "g": "die",
    "pl": "Verhandlungen"
@@ -3981,7 +4872,10 @@
     "en": "welfare state",
     "es": "el estado del bienestar",
     "ar": "دولة الرعاية الاجتماعية",
-    "fa": "دولت رفاه"
+    "fa": "دولت رفاه",
+    "tr": "sosyal devlet",
+    "uk": "соціальна держава",
+    "ur": "فلاحی ریاست"
    },
    "g": "der",
    "pl": "Sozialstaaten"
@@ -3995,7 +4889,10 @@
     "en": "puberty",
     "es": "la pubertad",
     "ar": "البلوغ / المراهقة",
-    "fa": "بلوغ"
+    "fa": "بلوغ",
+    "tr": "ergenlik",
+    "uk": "статеве дозрівання",
+    "ur": "بلوغت"
    },
    "g": "die"
   },
@@ -4008,7 +4905,10 @@
     "en": "to process, to edit",
     "es": "tramitar, editar",
     "ar": "يعالج / يحرر",
-    "fa": "رسیدگی کردن / ویرایش کردن"
+    "fa": "رسیدگی کردن / ویرایش کردن",
+    "tr": "işlemek, düzenlemek",
+    "uk": "опрацьовувати",
+    "ur": "کارروائی کرنا، ترمیم کرنا"
    }
   },
   {
@@ -4020,7 +4920,10 @@
     "en": "comparable",
     "es": "comparable",
     "ar": "قابل للمقارنة",
-    "fa": "قابل مقایسه"
+    "fa": "قابل مقایسه",
+    "tr": "karşılaştırılabilir",
+    "uk": "порівнянний",
+    "ur": "قابلِ موازنہ"
    }
   },
   {
@@ -4032,7 +4935,10 @@
     "en": "payment reminder",
     "es": "el aviso de pago",
     "ar": "إشعار التذكير بالدفع",
-    "fa": "اخطار پرداخت"
+    "fa": "اخطار پرداخت",
+    "tr": "ödeme ihtarı",
+    "uk": "нагадування про оплату",
+    "ur": "یاد دہانی نوٹس"
    },
    "g": "die",
    "pl": "Mahnungen"
@@ -4046,7 +4952,10 @@
     "en": "economy",
     "es": "la economía",
     "ar": "الاقتصاد",
-    "fa": "اقتصاد"
+    "fa": "اقتصاد",
+    "tr": "ekonomi",
+    "uk": "економіка",
+    "ur": "معیشت"
    },
    "g": "die",
    "pl": "Wirtschaften"
@@ -4060,7 +4969,10 @@
     "en": "to influence",
     "es": "influir en",
     "ar": "يؤثر في",
-    "fa": "تحت تأثیر قرار دادن"
+    "fa": "تحت تأثیر قرار دادن",
+    "tr": "etkilemek",
+    "uk": "впливати",
+    "ur": "اثر انداز ہونا"
    }
   },
   {
@@ -4072,7 +4984,10 @@
     "en": "responsible",
     "es": "de gran responsabilidad",
     "ar": "مسؤول / يتطلب مسؤولية",
-    "fa": "پرمسئولیت"
+    "fa": "پرمسئولیت",
+    "tr": "sorumluluk sahibi",
+    "uk": "відповідальний",
+    "ur": "ذمہ دار"
    }
   },
   {
@@ -4084,7 +4999,10 @@
     "en": "data protection officer",
     "es": "el delegado de protección de datos",
     "ar": "مسؤول حماية البيانات",
-    "fa": "مسئول حفاظت از داده‌ها"
+    "fa": "مسئول حفاظت از داده‌ها",
+    "tr": "veri koruma görevlisi",
+    "uk": "уповноважений із захисту даних",
+    "ur": "ڈیٹا پروٹیکشن افسر"
    },
    "g": "der",
    "pl": "Datenschutzbeauftragten"
@@ -4098,7 +5016,10 @@
     "en": "inflation",
     "es": "la inflación",
     "ar": "التضخم",
-    "fa": "تورم"
+    "fa": "تورم",
+    "tr": "enflasyon",
+    "uk": "інфляція",
+    "ur": "مہنگائی"
    },
    "g": "die",
    "pl": "Inflationen"
@@ -4112,7 +5033,10 @@
     "en": "to fear",
     "es": "temer",
     "ar": "يخشى",
-    "fa": "بیم داشتن"
+    "fa": "بیم داشتن",
+    "tr": "korkmak, endişe etmek",
+    "uk": "побоюватися",
+    "ur": "خدشہ ہونا"
    }
   },
   {
@@ -4124,7 +5048,10 @@
     "en": "diverse, varied",
     "es": "variado",
     "ar": "متنوع",
-    "fa": "متنوع"
+    "fa": "متنوع",
+    "tr": "çeşitli",
+    "uk": "різноманітний",
+    "ur": "متنوع"
    }
   },
   {
@@ -4136,7 +5063,10 @@
     "en": "budget, household",
     "es": "el presupuesto, el hogar",
     "ar": "الميزانية / الأسرة",
-    "fa": "بودجه / خانوار"
+    "fa": "بودجه / خانوار",
+    "tr": "bütçe, hane",
+    "uk": "бюджет, господарство",
+    "ur": "بجٹ، گھرانہ"
    },
    "g": "der",
    "pl": "Haushalte"
@@ -4150,7 +5080,10 @@
     "en": "to justify, to give reasons",
     "es": "justificar",
     "ar": "يعلل",
-    "fa": "دلیل آوردن"
+    "fa": "دلیل آوردن",
+    "tr": "gerekçelendirmek",
+    "uk": "обґрунтовувати",
+    "ur": "وجہ بیان کرنا"
    }
   },
   {
@@ -4162,7 +5095,10 @@
     "en": "careful, cautious",
     "es": "prudente",
     "ar": "حذر",
-    "fa": "محتاط"
+    "fa": "محتاط",
+    "tr": "dikkatli",
+    "uk": "обережний",
+    "ur": "محتاط"
    }
   },
   {
@@ -4174,7 +5110,10 @@
     "en": "globalisation",
     "es": "la globalización",
     "ar": "العولمة",
-    "fa": "جهانی‌شدن"
+    "fa": "جهانی‌شدن",
+    "tr": "küreselleşme",
+    "uk": "глобалізація",
+    "ur": "عالمگیریت"
    },
    "g": "die"
   },
@@ -4187,7 +5126,10 @@
     "en": "to contribute",
     "es": "contribuir",
     "ar": "يساهم",
-    "fa": "سهم داشتن"
+    "fa": "سهم داشتن",
+    "tr": "katkıda bulunmak",
+    "uk": "робити внесок",
+    "ur": "حصہ ڈالنا"
    }
   },
   {
@@ -4199,7 +5141,10 @@
     "en": "provisional",
     "es": "provisional",
     "ar": "مؤقت",
-    "fa": "موقت"
+    "fa": "موقت",
+    "tr": "geçici",
+    "uk": "тимчасовий",
+    "ur": "عارضی"
    }
   },
   {
@@ -4211,7 +5156,10 @@
     "en": "change, transformation",
     "es": "el cambio",
     "ar": "التحول",
-    "fa": "دگرگونی"
+    "fa": "دگرگونی",
+    "tr": "dönüşüm",
+    "uk": "зміна, трансформація",
+    "ur": "تبدیلی"
    },
    "g": "der"
   },
@@ -4224,7 +5172,10 @@
     "en": "to burden, to weigh on",
     "es": "agobiar, cargar",
     "ar": "يثقل",
-    "fa": "تحت فشار گذاشتن"
+    "fa": "تحت فشار گذاشتن",
+    "tr": "yük olmak",
+    "uk": "обтяжувати",
+    "ur": "بوجھ ڈالنا"
    }
   },
   {
@@ -4236,7 +5187,10 @@
     "en": "essential, significant",
     "es": "esencial",
     "ar": "جوهري",
-    "fa": "اساسی"
+    "fa": "اساسی",
+    "tr": "esaslı, önemli",
+    "uk": "суттєвий",
+    "ur": "بنیادی، اہم"
    }
   },
   {
@@ -4248,7 +5202,10 @@
     "en": "challenge",
     "es": "el reto",
     "ar": "التحدي",
-    "fa": "چالش"
+    "fa": "چالش",
+    "tr": "zorluk",
+    "uk": "виклик",
+    "ur": "چیلنج"
    },
    "g": "die",
    "pl": "Herausforderungen"
@@ -4262,7 +5219,10 @@
     "en": "to take into account",
     "es": "tener en cuenta",
     "ar": "يأخذ بعين الاعتبار",
-    "fa": "در نظر گرفتن"
+    "fa": "در نظر گرفتن",
+    "tr": "dikkate almak",
+    "uk": "враховувати",
+    "ur": "مدِ نظر رکھنا"
    }
   },
   {
@@ -4274,7 +5234,10 @@
     "en": "effective",
     "es": "eficaz",
     "ar": "فعّال",
-    "fa": "مؤثر"
+    "fa": "مؤثر",
+    "tr": "etkili",
+    "uk": "ефективний",
+    "ur": "مؤثر"
    }
   },
   {
@@ -4286,7 +5249,10 @@
     "en": "measure",
     "es": "la medida",
     "ar": "الإجراء",
-    "fa": "اقدام / تدبیر"
+    "fa": "اقدام / تدبیر",
+    "tr": "önlem",
+    "uk": "захід",
+    "ur": "اقدام"
    },
    "g": "die",
    "pl": "Maßnahmen"
@@ -4300,7 +5266,10 @@
     "en": "to decide, to resolve",
     "es": "acordar, decidir",
     "ar": "يقرر",
-    "fa": "تصویب کردن / تصمیم گرفتن"
+    "fa": "تصویب کردن / تصمیم گرفتن",
+    "tr": "karar almak",
+    "uk": "ухвалювати",
+    "ur": "فیصلہ کرنا"
    }
   },
   {
@@ -4312,7 +5281,10 @@
     "en": "numerous",
     "es": "numeroso",
     "ar": "عديد",
-    "fa": "بی‌شمار"
+    "fa": "بی‌شمار",
+    "tr": "çok sayıda",
+    "uk": "численний",
+    "ur": "بے شمار"
    }
   },
   {
@@ -4324,7 +5296,10 @@
     "en": "result",
     "es": "el resultado",
     "ar": "النتيجة",
-    "fa": "نتیجه"
+    "fa": "نتیجه",
+    "tr": "sonuç",
+    "uk": "результат",
+    "ur": "نتیجہ"
    },
    "g": "das",
    "pl": "Ergebnisse"
@@ -4338,7 +5313,10 @@
     "en": "to cope with, to manage",
     "es": "superar",
     "ar": "يتغلب على",
-    "fa": "از پس چیزی برآمدن"
+    "fa": "از پس چیزی برآمدن",
+    "tr": "üstesinden gelmek",
+    "uk": "справлятися",
+    "ur": "نمٹنا"
    }
   },
   {
@@ -4350,7 +5328,10 @@
     "en": "up to date, modern",
     "es": "actual",
     "ar": "مواكب للعصر",
-    "fa": "به‌روز"
+    "fa": "به‌روز",
+    "tr": "çağa uygun",
+    "uk": "сучасний",
+    "ur": "جدید"
    }
   },
   {
@@ -4362,7 +5343,10 @@
     "en": "study",
     "es": "el estudio",
     "ar": "الدراسة",
-    "fa": "پژوهش"
+    "fa": "پژوهش",
+    "tr": "çalışma (araştırma)",
+    "uk": "дослідження",
+    "ur": "تحقیقی مطالعہ"
    },
    "g": "die",
    "pl": "Studien"
@@ -4376,7 +5360,10 @@
     "en": "to assess, to rate",
     "es": "evaluar",
     "ar": "يقيّم",
-    "fa": "ارزیابی کردن"
+    "fa": "ارزیابی کردن",
+    "tr": "değerlendirmek",
+    "uk": "оцінювати",
+    "ur": "جانچنا"
    }
   },
   {
@@ -4388,7 +5375,10 @@
     "en": "satisfactory",
     "es": "satisfactorio",
     "ar": "مُرضٍ",
-    "fa": "رضایت‌بخش"
+    "fa": "رضایت‌بخش",
+    "tr": "tatmin edici",
+    "uk": "задовільний",
+    "ur": "تسلی بخش"
    }
   },
   {
@@ -4400,7 +5390,10 @@
     "en": "research",
     "es": "la investigación",
     "ar": "البحث العلمي",
-    "fa": "پژوهش"
+    "fa": "پژوهش",
+    "tr": "araştırma",
+    "uk": "дослідження",
+    "ur": "تحقیق"
    },
    "g": "die",
    "pl": "Forschungen"
@@ -4414,7 +5407,10 @@
     "en": "to doubt",
     "es": "dudar",
     "ar": "يشك في",
-    "fa": "شک داشتن"
+    "fa": "شک داشتن",
+    "tr": "şüphe etmek",
+    "uk": "сумніватися",
+    "ur": "شک کرنا"
    }
   },
   {
@@ -4426,7 +5422,10 @@
     "en": "reserved",
     "es": "reservado",
     "ar": "متحفّظ",
-    "fa": "کم‌حرف / محتاط"
+    "fa": "کم‌حرف / محتاط",
+    "tr": "çekingen",
+    "uk": "стриманий",
+    "ur": "محتاط، کم گو"
    }
   },
   {
@@ -4438,7 +5437,10 @@
     "en": "forecast, prediction",
     "es": "el pronóstico",
     "ar": "التوقع / التنبؤ",
-    "fa": "پیش‌بینی"
+    "fa": "پیش‌بینی",
+    "tr": "tahmin",
+    "uk": "прогноз",
+    "ur": "پیش گوئی"
    },
    "g": "die",
    "pl": "Voraussagen"
@@ -4452,7 +5454,10 @@
     "en": "to show, to represent",
     "es": "representar",
     "ar": "يمثل / يعرض",
-    "fa": "نشان دادن"
+    "fa": "نشان دادن",
+    "tr": "göstermek, temsil etmek",
+    "uk": "зображувати",
+    "ur": "پیش کرنا"
    }
   },
   {
@@ -4464,7 +5469,10 @@
     "en": "disadvantaged",
     "es": "desfavorecido",
     "ar": "محروم",
-    "fa": "محروم"
+    "fa": "محروم",
+    "tr": "dezavantajlı",
+    "uk": "знедолений",
+    "ur": "محروم"
    }
   },
   {
@@ -4476,7 +5484,10 @@
     "en": "use",
     "es": "el uso",
     "ar": "الاستخدام",
-    "fa": "استفاده"
+    "fa": "استفاده",
+    "tr": "kullanım",
+    "uk": "використання",
+    "ur": "استعمال"
    },
    "g": "die",
    "pl": "Verwendungen"
@@ -4490,7 +5501,10 @@
     "en": "to carry out",
     "es": "llevar a cabo",
     "ar": "ينفذ",
-    "fa": "انجام دادن"
+    "fa": "انجام دادن",
+    "tr": "uygulamak, gerçekleştirmek",
+    "uk": "проводити",
+    "ur": "انجام دینا"
    }
   },
   {
@@ -4502,7 +5516,10 @@
     "en": "danger, threat",
     "es": "el peligro",
     "ar": "الخطر / التهديد",
-    "fa": "تهدید / خطر"
+    "fa": "تهدید / خطر",
+    "tr": "tehlike, tehdit",
+    "uk": "загроза",
+    "ur": "خطرہ"
    },
    "g": "die",
    "pl": "Gefährdungen"
@@ -4516,7 +5533,10 @@
     "en": "to introduce",
     "es": "introducir",
     "ar": "يُدخل / يطبّق",
-    "fa": "معرفی کردن / اجرا کردن"
+    "fa": "معرفی کردن / اجرا کردن",
+    "tr": "getirmek, uygulamaya koymak",
+    "uk": "запроваджувати",
+    "ur": "متعارف کرانا"
    }
   },
   {
@@ -4528,7 +5548,10 @@
     "en": "to keep, to comply with",
     "es": "cumplir",
     "ar": "يلتزم بـ",
-    "fa": "رعایت کردن"
+    "fa": "رعایت کردن",
+    "tr": "uymak",
+    "uk": "дотримуватися",
+    "ur": "پابندی کرنا"
    }
   },
   {
@@ -4540,7 +5563,10 @@
     "en": "to limit, to restrict",
     "es": "limitar",
     "ar": "يقيد",
-    "fa": "محدود کردن"
+    "fa": "محدود کردن",
+    "tr": "kısıtlamak",
+    "uk": "обмежувати",
+    "ur": "محدود کرنا"
    }
   },
   {
@@ -4552,7 +5578,10 @@
     "en": "to feel, to perceive",
     "es": "sentir, percibir",
     "ar": "يشعر",
-    "fa": "احساس کردن"
+    "fa": "احساس کردن",
+    "tr": "hissetmek, algılamak",
+    "uk": "відчувати",
+    "ur": "محسوس کرنا"
    }
   },
   {
@@ -4564,7 +5593,10 @@
     "en": "to relieve",
     "es": "aliviar",
     "ar": "يخفف العبء",
-    "fa": "بار را سبک کردن"
+    "fa": "بار را سبک کردن",
+    "tr": "yükünü hafifletmek",
+    "uk": "розвантажувати",
+    "ur": "بوجھ کم کرنا"
    }
   },
   {
@@ -4576,7 +5608,10 @@
     "en": "to record, to grasp",
     "es": "registrar",
     "ar": "يسجل / يدرك",
-    "fa": "ثبت کردن / درک کردن"
+    "fa": "ثبت کردن / درک کردن",
+    "tr": "kaydetmek, kavramak",
+    "uk": "фіксувати, охоплювати",
+    "ur": "درج کرنا، سمجھنا"
    }
   },
   {
@@ -4588,7 +5623,10 @@
     "en": "to add, to complete",
     "es": "completar",
     "ar": "يكمل",
-    "fa": "تکمیل کردن"
+    "fa": "تکمیل کردن",
+    "tr": "tamamlamak, eklemek",
+    "uk": "доповнювати",
+    "ur": "اضافہ کرنا"
    }
   },
   {
@@ -4600,7 +5638,10 @@
     "en": "to explain",
     "es": "explicar",
     "ar": "يشرح",
-    "fa": "توضیح دادن"
+    "fa": "توضیح دادن",
+    "tr": "açıklamak",
+    "uk": "роз'яснювати",
+    "ur": "وضاحت کرنا"
    }
   },
   {
@@ -4612,7 +5653,10 @@
     "en": "to make easier",
     "es": "facilitar",
     "ar": "يسهّل",
-    "fa": "آسان کردن"
+    "fa": "آسان کردن",
+    "tr": "kolaylaştırmak",
+    "uk": "полегшувати",
+    "ur": "آسان بنانا"
    }
   },
   {
@@ -4624,7 +5668,10 @@
     "en": "to investigate, to determine",
     "es": "investigar",
     "ar": "يحقق",
-    "fa": "تحقیق کردن"
+    "fa": "تحقیق کردن",
+    "tr": "soruşturmak, belirlemek",
+    "uk": "розслідувати, визначати",
+    "ur": "تحقیق کرنا، معلوم کرنا"
    }
   },
   {
@@ -4636,7 +5683,10 @@
     "en": "to acquire",
     "es": "adquirir",
     "ar": "يكتسب",
-    "fa": "به دست آوردن"
+    "fa": "به دست آوردن",
+    "tr": "edinmek",
+    "uk": "набувати",
+    "ur": "حاصل کرنا"
    }
   },
   {
@@ -4648,7 +5698,10 @@
     "en": "to demand",
     "es": "exigir",
     "ar": "يطالب",
-    "fa": "مطالبه کردن"
+    "fa": "مطالبه کردن",
+    "tr": "talep etmek",
+    "uk": "вимагати",
+    "ur": "مطالبہ کرنا"
    }
   },
   {
@@ -4660,7 +5713,10 @@
     "en": "to guarantee",
     "es": "garantizar",
     "ar": "يضمن",
-    "fa": "تضمین کردن"
+    "fa": "تضمین کردن",
+    "tr": "garanti etmek",
+    "uk": "гарантувати",
+    "ur": "یقینی بنانا"
    }
   },
   {
@@ -4672,7 +5728,10 @@
     "en": "to emphasise",
     "es": "destacar",
     "ar": "يبرز",
-    "fa": "برجسته کردن"
+    "fa": "برجسته کردن",
+    "tr": "vurgulamak",
+    "uk": "підкреслювати",
+    "ur": "نمایاں کرنا"
    }
   },
   {
@@ -4684,7 +5743,10 @@
     "en": "to point out",
     "es": "señalar",
     "ar": "ينبّه إلى",
-    "fa": "اشاره کردن به"
+    "fa": "اشاره کردن به",
+    "tr": "işaret etmek",
+    "uk": "вказувати на",
+    "ur": "نشاندہی کرنا"
    }
   },
   {
@@ -4696,7 +5758,10 @@
     "en": "to make clear",
     "es": "aclarar",
     "ar": "يوضّح",
-    "fa": "روشن کردن"
+    "fa": "روشن کردن",
+    "tr": "açıklığa kavuşturmak",
+    "uk": "уточнювати",
+    "ur": "واضح کرنا"
    }
   },
   {
@@ -4708,7 +5773,10 @@
     "en": "to prove",
     "es": "demostrar",
     "ar": "يثبت",
-    "fa": "اثبات کردن"
+    "fa": "اثبات کردن",
+    "tr": "kanıtlamak",
+    "uk": "доводити",
+    "ur": "ثابت کرنا"
    }
   },
   {
@@ -4720,7 +5788,10 @@
     "en": "to value, to estimate",
     "es": "apreciar, estimar",
     "ar": "يقدّر",
-    "fa": "ارج نهادن / تخمین زدن"
+    "fa": "ارج نهادن / تخمین زدن",
+    "tr": "takdir etmek, tahmin etmek",
+    "uk": "цінувати, оцінювати",
+    "ur": "قدر کرنا، اندازہ لگانا"
    }
   },
   {
@@ -4732,7 +5803,10 @@
     "en": "to take place",
     "es": "tener lugar",
     "ar": "يُعقد / يحدث",
-    "fa": "برگزار شدن"
+    "fa": "برگزار شدن",
+    "tr": "gerçekleşmek",
+    "uk": "відбуватися",
+    "ur": "منعقد ہونا"
    }
   },
   {
@@ -4744,7 +5818,10 @@
     "en": "to take over, to cover",
     "es": "asumir",
     "ar": "يتولى / يتحمل",
-    "fa": "به عهده گرفتن"
+    "fa": "به عهده گرفتن",
+    "tr": "üstlenmek, karşılamak",
+    "uk": "переймати, покривати",
+    "ur": "سنبھالنا، ادا کرنا"
    }
   },
   {
@@ -4756,7 +5833,10 @@
     "en": "to check",
     "es": "comprobar",
     "ar": "يتحقق من",
-    "fa": "بررسی کردن"
+    "fa": "بررسی کردن",
+    "tr": "kontrol etmek",
+    "uk": "перевіряти",
+    "ur": "جانچ کرنا"
    }
   },
   {
@@ -4768,7 +5848,10 @@
     "en": "to predominate, to outweigh",
     "es": "predominar",
     "ar": "يرجح / يغلب",
-    "fa": "غلبه داشتن"
+    "fa": "غلبه داشتن",
+    "tr": "ağır basmak",
+    "uk": "переважати",
+    "ur": "غالب ہونا"
    }
   },
   {
@@ -4780,7 +5863,10 @@
     "en": "to put into practice",
     "es": "llevar a la práctica",
     "ar": "ينفذ",
-    "fa": "اجرا کردن"
+    "fa": "اجرا کردن",
+    "tr": "hayata geçirmek",
+    "uk": "втілювати",
+    "ur": "عملی جامہ پہنانا"
    }
   },
   {
@@ -4792,7 +5878,10 @@
     "en": "to distinguish",
     "es": "distinguir",
     "ar": "يميّز",
-    "fa": "تشخیص دادن"
+    "fa": "تشخیص دادن",
+    "tr": "ayırt etmek",
+    "uk": "розрізняти",
+    "ur": "فرق کرنا"
    }
   },
   {
@@ -4804,7 +5893,10 @@
     "en": "to have at one's disposal",
     "es": "disponer de",
     "ar": "يملك / يتوفر على",
-    "fa": "دارا بودن"
+    "fa": "دارا بودن",
+    "tr": "sahip olmak",
+    "uk": "мати в розпорядженні",
+    "ur": "کے پاس ہونا"
    }
   },
   {
@@ -4816,7 +5908,10 @@
     "en": "to enlarge, to expand",
     "es": "ampliar",
     "ar": "يوسّع",
-    "fa": "بزرگ کردن"
+    "fa": "بزرگ کردن",
+    "tr": "büyütmek",
+    "uk": "збільшувати",
+    "ur": "بڑا کرنا"
    }
   },
   {
@@ -4828,7 +5923,10 @@
     "en": "to demand, to ask for",
     "es": "exigir, pedir",
     "ar": "يطلب",
-    "fa": "درخواست کردن / خواستن"
+    "fa": "درخواست کردن / خواستن",
+    "tr": "istemek, talep etmek",
+    "uk": "вимагати",
+    "ur": "تقاضا کرنا"
    }
   },
   {
@@ -4840,7 +5938,10 @@
     "en": "to arrange, to convey",
     "es": "mediar, transmitir",
     "ar": "يتوسط / ينقل",
-    "fa": "میانجی شدن / منتقل کردن"
+    "fa": "میانجی شدن / منتقل کردن",
+    "tr": "aracılık etmek, aktarmak",
+    "uk": "посередничати, передавати",
+    "ur": "ثالثی کرنا، منتقل کرنا"
    }
   },
   {
@@ -4852,7 +5953,10 @@
     "en": "to reduce",
     "es": "reducir",
     "ar": "يقلل",
-    "fa": "کاهش دادن"
+    "fa": "کاهش دادن",
+    "tr": "azaltmak",
+    "uk": "зменшувати",
+    "ur": "کم کرنا"
    }
   },
   {
@@ -4864,7 +5968,10 @@
     "en": "to look after, to supply",
     "es": "atender, abastecer",
     "ar": "يعتني بـ / يزوّد",
-    "fa": "رسیدگی کردن / تأمین کردن"
+    "fa": "رسیدگی کردن / تأمین کردن",
+    "tr": "bakmak, tedarik etmek",
+    "uk": "забезпечувати",
+    "ur": "دیکھ بھال کرنا، فراہم کرنا"
    }
   },
   {
@@ -4876,7 +5983,10 @@
     "en": "to cause",
     "es": "causar",
     "ar": "يسبب",
-    "fa": "باعث شدن"
+    "fa": "باعث شدن",
+    "tr": "neden olmak",
+    "uk": "спричиняти",
+    "ur": "سبب بننا"
    }
   },
   {
@@ -4888,7 +5998,10 @@
     "en": "to require, to presuppose",
     "es": "presuponer, requerir",
     "ar": "يشترط",
-    "fa": "پیش‌فرض گرفتن / لازم داشتن"
+    "fa": "پیش‌فرض گرفتن / لازم داشتن",
+    "tr": "ön koşul olarak gerektirmek",
+    "uk": "передбачати",
+    "ur": "شرط رکھنا"
    }
   },
   {
@@ -4900,7 +6013,10 @@
     "en": "to happen, to occur",
     "es": "ocurrir",
     "ar": "يحدث",
-    "fa": "اتفاق افتادن"
+    "fa": "اتفاق افتادن",
+    "tr": "olmak, rastlanmak",
+    "uk": "траплятися",
+    "ur": "پیش آنا"
    }
   },
   {
@@ -4912,7 +6028,10 @@
     "en": "to accuse, to reproach",
     "es": "reprochar",
     "ar": "يلوم / يتهم",
-    "fa": "سرزنش کردن"
+    "fa": "سرزنش کردن",
+    "tr": "suçlamak",
+    "uk": "дорікати",
+    "ur": "الزام لگانا"
    }
   },
   {
@@ -4924,7 +6043,10 @@
     "en": "to perceive, to notice",
     "es": "percibir",
     "ar": "يدرك / يلاحظ",
-    "fa": "درک کردن / متوجه شدن"
+    "fa": "درک کردن / متوجه شدن",
+    "tr": "algılamak",
+    "uk": "сприймати",
+    "ur": "محسوس کرنا"
    }
   },
   {
@@ -4936,7 +6058,10 @@
     "en": "to dedicate",
     "es": "dedicar",
     "ar": "يكرّس",
-    "fa": "وقف کردن"
+    "fa": "وقف کردن",
+    "tr": "adamak",
+    "uk": "присвячувати",
+    "ur": "وقف کرنا"
    }
   },
   {
@@ -4948,7 +6073,10 @@
     "en": "to admit",
     "es": "admitir",
     "ar": "يعترف",
-    "fa": "اعتراف کردن"
+    "fa": "اعتراف کردن",
+    "tr": "itiraf etmek",
+    "uk": "визнавати",
+    "ur": "اعتراف کرنا"
    }
   },
   {
@@ -4960,7 +6088,10 @@
     "en": "to summarise",
     "es": "resumir",
     "ar": "يلخص",
-    "fa": "خلاصه کردن"
+    "fa": "خلاصه کردن",
+    "tr": "özetlemek",
+    "uk": "підсумовувати",
+    "ur": "خلاصہ کرنا"
    }
   },
   {
@@ -4972,7 +6103,10 @@
     "en": "to doubt",
     "es": "dudar",
     "ar": "يشك",
-    "fa": "تردید داشتن"
+    "fa": "تردید داشتن",
+    "tr": "şüphe duymak",
+    "uk": "сумніватися",
+    "ur": "شک کرنا"
    }
   }
  ]
