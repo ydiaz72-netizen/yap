@@ -251,6 +251,16 @@
   .bbqr.ok .bbqbar i{background:#2A8C82}.bbqbar span{position:absolute;inset:0;font-size:11px;font-weight:800;display:grid;place-items:center}
   .bbqdone{margin-top:6px;font-weight:700;font-size:14px}.bbqdone b{color:#F25C3B}
   .bbcomma{color:#fff;font-weight:900;font-size:22px;margin:0 -2px}
+  .lgpods{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;align-items:end;margin:10px 0 6px;text-align:center}
+  .lgpod{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0}
+  .lgname{font-size:13px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.lgpod small{font-size:12px;font-weight:700;color:#F25C3B}
+  .lgstep{width:100%;border-radius:12px 12px 0 0;background:linear-gradient(180deg,#5B8FD8,#2F6FD1);color:#fff;font-weight:900;font-size:26px;display:grid;place-items:center}
+  .lgpod.p1 .lgstep{height:78px}.lgpod.p2 .lgstep{height:56px}.lgpod.p3 .lgstep{height:42px;background:linear-gradient(180deg,#A0703F,#7A5230)}
+  .lgav{width:34px;height:34px;border-radius:50%;object-fit:cover;display:inline-grid;place-items:center;color:#fff;font-weight:800;flex:none}
+  .lgav.big{width:48px;height:48px;font-size:20px;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+  .lgrow{display:flex;align-items:center;gap:10px;padding:8px 6px;border-top:1px solid var(--line);font-size:14px}.lgrow .lgnm{flex:1;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .lgrow>b:first-child{width:22px;text-align:center;color:var(--muted)}.lgrow>b:last-child{color:#F25C3B;font-size:13px}
+  .lgrow.me{background:#FDF2D8;border-radius:12px;border-top:0}
   .bbsk{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}.bbsk span{font-size:12px;font-weight:700;background:#EEF2FA;color:#2F4B7C;border-radius:999px;padding:4px 9px}
   .bbround{display:flex;align-items:center;gap:8px;margin:2px 0 8px;font-size:13px;font-weight:700}.bbround div{flex:1;display:flex;gap:4px}
   .bbround i{flex:1;height:10px;border-radius:6px;background:#E4E1DA}.bbround i.on{background:#A0703F}
@@ -899,7 +909,7 @@
 <script>/* Extra interface languages live in /i18n/<code>.js (English text → translation). Load the chosen one before the app starts. */
 (function(){ try{ var X=["tr","uk","fa","ur"], v=localStorage.getItem("pt_ui");
   if(!v){ var n=String((navigator.languages&&navigator.languages[0])||navigator.language||"").slice(0,2).toLowerCase(); if(X.indexOf(n)>-1) v=n; }
-  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=20"><\/script>'); }catch(e){} })();</script>
+  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=21"><\/script>'); }catch(e){} })();</script>
 
 <script>
 /* ===================== CONTENT ===================== */
@@ -1272,7 +1282,7 @@ function bi(en,de,es){ if(es!==undefined) return tr(en,de,es); return `${en} <sp
 function uiSet(l){
   if(!UI_CODES.includes(l)) return;
   if(UI_EXTRA.includes(l) && !I18N_DATA[l]){
-    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=20";
+    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=21";
     sc.onload=()=>uiSet(l); sc.onerror=()=>bToast(offlineMsg()); document.head.appendChild(sc); return;
   }
   UI=l; I18N_T=null; I18N_M.clear();
@@ -2918,6 +2928,7 @@ function authReturn(){
   else if(r==="shop") shOpen();
   else if(r==="cafes") cfOpen();
   else if(r==="lounge"){ let id=LU.pend; try{ id=id||sessionStorage.getItem("pt_lounge"); }catch(e){} if(id) luEnter(id); else luOpen(); }
+  else if(r==="bridge") bbOpen();
   else if(r==="duel"){ let c=DU.code; try{ c=c||sessionStorage.getItem("pt_duel"); sessionStorage.removeItem("pt_duel"); }catch(e){} if(c) duOpen(c); else vcOpen(); }
   else if(r==="lounges") luOpen();
   else if(r==="partners") ptOpen();
@@ -8664,7 +8675,41 @@ function bbRank(l){ return ["🪵 "+tr("Plank","Planke","Tablón"),"🧱 "+tr("B
 function bbThOpen(k){ const T=BB_THEMES[k]; return !T.lv||bbLevel()>=T.lv||(BB.s.ch[T.lv-2]||0)>0; }
 function bbTiles(){ const T=BB_THEMES[BB.th], lv=T.lv?3:Math.min(bbLevel(),3);
   return T.tiles.map((t,i)=>({ id:i, t:t[0], r:t[1], ...(t[2]||{}) })).filter(x=>lv>=3||(x.r!=="M"&&x.r!=="I")).filter(x=>lv>=2||(x.r!=="T"&&x.r!=="P")); }
-function bbOpen(){ bbLoad(); BB.row=[]; BB.res=null; BB.rd=bbRd(); go("bridge"); }
+function bbOpen(){ bbLoad(); BB.row=[]; BB.res=null; BB.rd=bbRd(); go("bridge"); lgLoad(); }
+/* ---- 🏆 weekly league: opt-in, XP synced to Supabase (sql/bridge_league.sql) ---- */
+const LG={ data:null, pend:0, t:null, err:false, busy:false };
+function bbXp(n){ BB.s.pts+=n; if(BB.s.lg&&A.user&&A.sb&&n>0){ LG.pend+=n; clearTimeout(LG.t); LG.t=setTimeout(lgFlush,1500); } }
+async function lgFlush(){ while(LG.pend>0){ const n=Math.min(LG.pend,60); LG.pend-=n;
+    try{ const { error }=await A.sb.rpc("pt_bb_add",{ p_xp:n }); if(error) throw error; }catch(e){ LG.pend=0; break; } }
+  lgLoad(); }
+async function lgLoad(){ if(!A.user||!A.sb) return;
+  try{ const { data, error }=await A.sb.rpc("pt_bb_board"); if(error) throw error; LG.data=data; LG.err=false; bbLoad(); BB.s.lg=!!(data&&data.joined); bbSave(); }
+  catch(e){ LG.err=true; }
+  if(S.screen==="bridge") xr(); }
+async function lgJoin(on){ if(LG.busy) return; LG.busy=true;
+  try{ const { error }=await A.sb.rpc("pt_bb_join",{ p_on:on }); if(error) throw error; BB.s.lg=on; bbSave();
+    bToast(on?tr("You're in! Points you earn from now on count this week.","Du bist dabei! Ab jetzt zählen deine Punkte diese Woche.","¡Estás dentro! Los puntos que ganes desde ahora cuentan esta semana."):tr("You left the league. You're hidden from the board.","Du hast die Liga verlassen und bist nicht mehr sichtbar.","Saliste de la liga. Ya no apareces en la tabla.")); }
+  catch(e){ bToast(bErr(e)); }
+  LG.busy=false; await lgLoad(); }
+function lgAv(p,big){ const c=COLORS[(p.name||"?").charCodeAt(0)%COLORS.length];
+  return p.avatar_url?`<img class="lgav ${big?"big":""}" src="${esc(p.avatar_url)}" alt="">`:`<span class="lgav ${big?"big":""}" style="background:${c}">${esc((p.name||"?").charAt(0).toUpperCase())}</span>`; }
+function lgCard(){
+  const head=`<h3 style="margin:0 0 4px">🏆 ${tr("Weekly league","Wochenliga","Liga semanal")}</h3>`;
+  if(!A.user) return `<div class="card" id="bblg">${head}<p class="note" style="margin:0 0 10px">${tr("Compete with other learners every week. Sign in to join.","Miss dich jede Woche mit anderen Lernenden. Melde dich an, um mitzumachen.","Compite cada semana con otros estudiantes. Inicia sesión para unirte.")}</p>
+    <button class="btn primary" onclick="A.ret='bridge';A.err='';A.msg='';go('account')">${tr("Sign in","Anmelden","Entrar")}</button></div>`;
+  const d=LG.data;
+  if(!d) return `<div class="card" id="bblg">${head}<p class="note" style="margin:0">${LG.err?tr("The league isn't available right now.","Die Liga ist gerade nicht verfügbar.","La liga no está disponible ahora."):tr("Loading…","Lädt…","Cargando…")}</p></div>`;
+  if(!d.joined) return `<div class="card" id="bblg">${head}<p class="note" style="margin:0 0 6px">${tr("Join to see this week's board. Everyone starts at 0 every Monday.","Mach mit und sieh die Rangliste der Woche. Jeden Montag starten alle bei 0.","Únete para ver la tabla de la semana. Cada lunes todos empiezan en 0.")} ${d.players?`👥 ${d.players}`:""}</p>
+    <p class="note" style="margin:0 0 10px">🔒 ${tr("Your name, photo and weekly points will be visible to other players. You can leave anytime.","Dein Name, Foto und deine Wochenpunkte sind für andere sichtbar. Du kannst jederzeit austreten.","Tu nombre, foto y puntos semanales serán visibles para otros. Puedes salir cuando quieras.")}</p>
+    <button class="btn primary" ${LG.busy?"disabled":""} onclick="lgJoin(true)">🏆 ${tr("Join the league","Der Liga beitreten","Unirme a la liga")}</button></div>`;
+  const days=Math.max(1,Math.ceil((new Date(d.ends_at)-Date.now())/86400000)), T=d.top||[];
+  const pod=[T[1],T[0],T[2]].map((p,i)=>p?`<div class="lgpod p${[2,1,3][i]}">${[2,1,3][i]===1?`<div style="font-size:20px">👑</div>`:""}${lgAv(p,true)}<b class="lgname">${esc(p.me?tr("You","Du","Tú"):p.name)}</b><small>⚡ ${p.xp}</small><div class="lgstep">${p.rank}</div></div>`:`<div class="lgpod"></div>`).join("");
+  const rows=T.slice(3,10).map(p=>`<div class="lgrow ${p.me?"me":""}"><b>${p.rank}</b>${lgAv(p)}<span class="lgnm">${esc(p.me?tr("You","Du","Tú"):p.name)}</span><b>⚡ ${p.xp}</b></div>`).join("");
+  const mine=d.mine&&!T.slice(0,10).some(p=>p.me)?`<div class="lgrow me" style="margin-top:6px"><b>${d.mine.rank}</b>${lgAv(d.mine)}<span class="lgnm">${tr("You","Du","Tú")}</span><b>⚡ ${d.mine.xp}</b></div>`:"";
+  return `<div class="card" id="bblg"><div class="ectop">${head}<span class="note" style="margin:0">⏱ ${days===1?tr("ends today","endet heute","termina hoy"):tr(`${days} days left`,`noch ${days} Tage`,`quedan ${days} días`)}</span></div>
+    ${T.length?`<div class="lgpods">${pod}</div>${rows}${mine}`:`<p class="note">${tr("No points yet this week. Build a sentence and take first place!","Diese Woche noch keine Punkte. Bau einen Satz und hol dir Platz 1!","Aún no hay puntos esta semana. ¡Construye una frase y toma el primer puesto!")}</p>`}
+    ${d.mine?"":`<p class="note" style="margin:8px 0 0">${tr("Earn points to appear on the board.","Sammle Punkte, um auf der Liste zu erscheinen.","Gana puntos para aparecer en la tabla.")}</p>`}
+    <button class="linkbtn" style="margin-top:10px;font-size:13px" onclick="lgJoin(false)">${tr("Leave the league","Liga verlassen","Salir de la liga")}</button></div>`; }
 /* days played, round summary (5 new sentences = one bridge), skills practised */
 const BB_ROUND=5;
 function bbRd(){ return { n:0, xp:0, combo:0, tries:0, ok:0, done:false }; }
@@ -8727,8 +8772,8 @@ function bbQ(ev,res){ const q=bbQs(), got=[];
     if(id==="inv"&&ev==="ok"&&res.inv) v++;
     if(id==="modal"&&ev==="ok"&&res.modal) v++;
     if(id===ev) v=1;
-    q.p[id]=Math.min(v,Q.n); if(was<Q.n&&q.p[id]>=Q.n){ BB.s.pts+=10; got.push(["📜 "+tr(...Q.t),10]); } });
-  if(!q.chest&&q.ids.every(id=>(q.p[id]||0)>=BB_Q[id].n)){ q.chest=1; BB.s.pts+=20; got.push(["🎁 "+tr("All daily quests","Alle Tagesquests","Todas las misiones"),20]); }
+    q.p[id]=Math.min(v,Q.n); if(was<Q.n&&q.p[id]>=Q.n){ bbXp(10); got.push(["📜 "+tr(...Q.t),10]); } });
+  if(!q.chest&&q.ids.every(id=>(q.p[id]||0)>=BB_Q[id].n)){ q.chest=1; bbXp(20); got.push(["🎁 "+tr("All daily quests","Alle Tagesquests","Todas las misiones"),20]); }
   return got; }
 function bbQCard(){ const q=bbQs(), done=q.ids.filter(id=>(q.p[id]||0)>=BB_Q[id].n).length;
   return `<div class="card" id="bbq"><div class="ectop"><h3 style="margin:0">📜 ${tr("Daily quests","Tagesquests","Misiones del día")}</h3><span class="note" style="margin:0">${done}/3</span></div>
@@ -8836,7 +8881,7 @@ function bbGo(){
     else { BB.s.streak++; if(BB.s.streak>=3){ const b=Math.round(r.pts*0.5); r.pts+=b; BB.rd.combo+=b; r.why.push([`🔥 ${tr("Streak","Serie","Racha")} ×1.5`,b]); }
       BB.rd.ok++; BB.rd.n++; BB.rd.xp+=r.pts; bbDay(); if(BB.rd.n>=BB_ROUND) r.round=true;
       r.quests=bbQ("ok",r).concat(r.round?bbQ("bridge"):[]); bbDnaAdd(r);
-      BB.s.made[key]=1; BB.s.pts+=r.pts; BB.s.n++; BB.s.best=Math.max(BB.s.best,r.pts); }
+      BB.s.made[key]=1; bbXp(r.pts); BB.s.n++; BB.s.best=Math.max(BB.s.best,r.pts); }
     r.up=bbLevel()>lv0; bbSave(); }
   else { BB.s.streak=0; bbDnaAdd(r); bbSave(); }
   xr();
@@ -8854,7 +8899,7 @@ function bbChTiles(){ const c=BB_CH[BB.ch.k], T=BB_THEMES[c.th].tiles.map((t,i)=
 function bbChCheck(ws){ const c=BB_CH[BB.ch.k], it=c.items[BB.ch.i], got=ws.map(w=>w.t).join(" ").toLowerCase();
   const ok=it[1].some(a=>a.toLowerCase()===got); BB.ch.tries++;
   BB.ch.all=(BB.ch.all||0)+1;
-  if(ok){ const p=BB.ch.tries===1?10:5; BB.ch.ok+= BB.ch.tries===1?1:0; BB.ch.xp=(BB.ch.xp||0)+p; BB.s.pts+=p; bbDay(); bbDnaAdd({ ok:true, used:bbCheck(bbNorm(ws,c.th),c.th).used }); bbSave(); BB.res={ ok:true, pts:p, why:[[BB.ch.tries===1?tr("First try!","Beim ersten Versuch!","¡A la primera!"):tr("Solved","Gelöst","Resuelto"),p]] }; }
+  if(ok){ const p=BB.ch.tries===1?10:5; BB.ch.ok+= BB.ch.tries===1?1:0; BB.ch.xp=(BB.ch.xp||0)+p; bbXp(p); bbDay(); bbDnaAdd({ ok:true, used:bbCheck(bbNorm(ws,c.th),c.th).used }); bbSave(); BB.res={ ok:true, pts:p, why:[[BB.ch.tries===1?tr("First try!","Beim ersten Versuch!","¡A la primera!"):tr("Solved","Gelöst","Resuelto"),p]] }; }
   else { const g=bbCheck(bbNorm(ws,c.th),c.th); if(!g.ok){ bbDnaAdd(g); bbSave(); } BB.res=g.ok?{ ok:false, bad:[], msg:tr("Good German, but not what the English says. Look again!","Gutes Deutsch, aber nicht das, was auf Englisch steht. Schau noch mal!","Buen alemán, pero no es lo que dice el inglés. ¡Mira otra vez!") }:g; }
   xr(); }
 function bbChNext(){ const c=BB_CH[BB.ch.k]; BB.ch.i++; BB.ch.tries=0; BB.row=[]; BB.res=null;
@@ -8877,7 +8922,7 @@ VIEWS.bridge = function(){
   const bad=new Set(r&&!r.ok?r.bad||[]:[]);
   return top+`<h2 style="margin:4px 0">🌉 ${tr("Bridge Builder","Brückenbauer","Constructor de puentes")}</h2>${stats}
     ${ch?`<div class="card" style="margin-bottom:10px"><div class="ecmeta">🎯 ${tr("Challenge","Challenge","Reto")} ${tr("Level","Level","Nivel")} ${c.lv} · ${BB.ch.i+1} / ${c.items.length}</div><div style="font-size:20px;font-weight:800;margin-top:4px">${esc(c.items[BB.ch.i][0])}</div>${bbSkills(c.lv,true)}</div>`
-      :`<div class="row" style="gap:6px;margin:0 0 8px"><button class="chip" onclick="document.getElementById('bbq').scrollIntoView({behavior:'smooth'})">📜 ${tr("Quests","Quests","Misiones")} ${(()=>{ const q=bbQs(); return q.ids.filter(id=>(q.p[id]||0)>=BB_Q[id].n).length; })()}/3</button>${BB.s.dna&&Object.keys(BB.s.dna).length?`<button class="chip" onclick="document.getElementById('bbdna').scrollIntoView({behavior:'smooth'})">🧬 ${tr("Your grammar","Deine Grammatik","Tu gramática")}</button>`:""}</div>
+      :`<div class="row" style="gap:6px;margin:0 0 8px"><button class="chip" onclick="document.getElementById('bbq').scrollIntoView({behavior:'smooth'})">📜 ${tr("Quests","Quests","Misiones")} ${(()=>{ const q=bbQs(); return q.ids.filter(id=>(q.p[id]||0)>=BB_Q[id].n).length; })()}/3</button><button class="chip" onclick="document.getElementById('bblg').scrollIntoView({behavior:'smooth'})">🏆 ${tr("League","Liga","Liga")}${LG.data&&LG.data.mine?` #${LG.data.mine.rank}`:""}</button>${BB.s.dna&&Object.keys(BB.s.dna).length?`<button class="chip" onclick="document.getElementById('bbdna').scrollIntoView({behavior:'smooth'})">🧬 ${tr("Your grammar","Deine Grammatik","Tu gramática")}</button>`:""}</div>
       <div class="bbround"><span>🌉 ${tr("This bridge","Diese Brücke","Este puente")}</span><div>${Array.from({length:BB_ROUND},(_,i)=>`<i class="${i<(BB.rd?BB.rd.n:0)?"on":""}"></i>`).join("")}</div><b>${BB.rd?BB.rd.n:0}/${BB_ROUND}</b></div>
       <div class="ecmeta" style="margin:2px 0 0">🎯 ${tr("Practising","Du übst","Practicas")}</div>${BB_THEMES[BB.th].lv?bbSkills(BB_THEMES[BB.th].lv,true):bbSkills(Math.min(lv,3))}
       <div class="row" style="gap:6px;flex-wrap:wrap;margin:10px 0">${Object.entries(BB_THEMES).sort((x,y)=>(x[1].lv||0)-(y[1].lv||0)).map(([k,t])=>bbThOpen(k)?`<button class="chip ${BB.th===k?"on":""}" onclick="BB.th='${k}';BB.row=[];BB.res=null;xr()">${t.e} ${tr(t.en,t.de,t.es)}${t.lv?` <small>B1</small>`:""}</button>`
@@ -8896,7 +8941,7 @@ VIEWS.bridge = function(){
     <div class="card bbtray">${groups.map(g=>`<div class="bbg">${tiles.filter(t=>t.r===g).map(t=>bbTile(t,BB.row.includes(t.id)&&!BB_THEMES[BB.th].reuse)).join("")}</div>`).join("")}</div>
     ${ch?"":`<div class="card"><h3 style="margin:0 0 6px">🎯 ${tr("Challenges","Challenges","Retos")}</h3><p class="note" style="margin:0 0 8px">${tr("Build the German sentence for each English one. 5 sentences each.","Bau zu jedem englischen Satz den deutschen. Je 5 Sätze.","Construye la frase alemana para cada frase en inglés. 5 frases cada uno.")}</p>
       ${BB_CH.map((cc,k)=>{ const open=k===0||(BB.s.ch[k-1]||0)>0; return `<button class="ectop" style="width:100%;background:none;border:0;border-top:1px solid var(--line);padding:10px 0;font:inherit;cursor:${open?"pointer":"default"};opacity:${open?1:.5}" ${open?`onclick="bbChStart(${k})"`:"disabled"}><span>${["1 · Ich lerne Deutsch.","2 · Heute lerne ich Deutsch.","3 · Ich möchte Deutsch lernen.","4 · Gestern habe ich Deutsch gelernt. <small class=\"note\">B1</small>","5 · …, weil ich hier lebe. <small class=\"note\">B1</small>"][k]}</span><b>${BB.s.ch[k]?"⭐".repeat(BB.s.ch[k]):open?"▶️":"🔒"}</b></button>`; }).join("")}</div>
-    ${ch?"":bbQCard()+bbDnaCard()}
+    ${ch?"":bbQCard()+lgCard()+bbDnaCard()}
     <p class="note center">${tr("Your points are saved on this device.","Deine Punkte werden auf diesem Gerät gespeichert.","Tus puntos se guardan en este dispositivo.")}</p>`}`;
 };
 /* ---------- quick level check ---------- */
