@@ -938,7 +938,7 @@
 <script>/* Extra interface languages live in /i18n/<code>.js (English text → translation). Load the chosen one before the app starts. */
 (function(){ try{ var X=["tr","uk","fa","ur"], v=localStorage.getItem("pt_ui");
   if(!v){ var n=String((navigator.languages&&navigator.languages[0])||navigator.language||"").slice(0,2).toLowerCase(); if(X.indexOf(n)>-1) v=n; }
-  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=32"><\/script>'); }catch(e){} })();</script>
+  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=33"><\/script>'); }catch(e){} })();</script>
 
 <script>
 /* ===================== CONTENT ===================== */
@@ -1368,7 +1368,7 @@ function bi(en,de,es){ if(es!==undefined) return tr(en,de,es); return `${en} <sp
 function uiSet(l){
   if(!UI_CODES.includes(l)) return;
   if(UI_EXTRA.includes(l) && !I18N_DATA[l]){
-    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=32";
+    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=33";
     sc.onload=()=>uiSet(l); sc.onerror=()=>bToast(offlineMsg()); document.head.appendChild(sc); return;
   }
   UI=l; I18N_T=null; I18N_M.clear();
@@ -8297,6 +8297,8 @@ function nbText(n){
     case "changed":      return `📝 ${t}: ${nbChanges(d)}`;
     case "reminder_24h": return "⏰ "+tr(`Tomorrow: ${t}`,`Morgen: ${t}`,`Mañana: ${t}`)+(n.starts_at?" "+tr(`at ${nbClock(n.starts_at)}`,`um ${nbClock(n.starts_at)}`,`a las ${nbClock(n.starts_at)}`):"")+".";
     case "reminder_15m": return "⏰ "+tr(`${t} starts in 15 minutes.`,`${t} beginnt in 15 Minuten.`,`${t} empieza en 15 minutos.`);
+    case "new_member":   { const nm=n.from_name&&n.from_name!=="Member"?esc(n.from_name):esc(d.email||tr("someone","jemand","alguien"));
+                           return "👋 "+tr(`New member: ${nm}`,`Neues Mitglied: ${nm}`,`Nuevo miembro: ${nm}`)+(d.total?` · ${tr(`${d.total} accounts in total`,`${d.total} Konten insgesamt`,`${d.total} cuentas en total`)}`:""); }
     case "duel_done":    return "⚔️ "+tr(`${who} played your duel. Tap to see who won!`,`${who} hat dein Duell gespielt. Tippe, um zu sehen, wer gewonnen hat!`,`${who} jugó tu duelo. ¡Toca para ver quién ganó!`);
     case "word_fixed":   return "✏️ "+tr(`${who} fixed your word <b>“${esc(d.old||"")}”</b>: now <b>“${esc(d.word||"")}”</b> (${t}). Tap to see it.`,`${who} hat dein Wort <b>„${esc(d.old||"")}“</b> korrigiert: jetzt <b>„${esc(d.word||"")}“</b> (${t}). Tippe zum Ansehen.`,`${who} corrigió tu palabra <b>“${esc(d.old||"")}”</b>: ahora <b>“${esc(d.word||"")}”</b> (${t}). Toca para verla.`);
     case "echo_new":     return "🎙️ "+tr(`New Echo Challenge by ${who}: ${ph}. Listen and record your echo!`,`Neue Echo Challenge von ${who}: ${ph}. Hör zu und nimm dich auf!`,`Nuevo reto Echo de ${who}: ${ph}. ¡Escucha y graba tu eco!`);
@@ -8347,6 +8349,7 @@ async function nbTap(id){
   const sh=document.getElementById("nbSheet"); if(sh) sh.remove();
   if(n.kind==="report"){ raOpen(); return; }
   if(n.kind==="duel_done" && n.data && n.data.code){ duOpen(n.data.code); return; }
+  if(n.kind==="new_member"){ stOpen(); return; }
   if(/^echo_/.test(n.kind) && n.data && n.data.lounge){ await luEnter(n.data.lounge); ecOpen(); return; }
   if(n.activity_id){ if(n.kind==="chat") chOpen(n.activity_id); else if(n.kind==="word_fixed") wdOpen(n.activity_id); else sOpen(n.activity_id); }
 }
