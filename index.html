@@ -290,6 +290,7 @@
   .palok{display:flex;align-items:center;gap:12px;background:#DDEFEC;font-size:17px}
   .palpw{font-size:12px;font-weight:800;color:#C2401F;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px}
   .palrow{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}.palmini{border:0;background:none;padding:2px;cursor:pointer;border-radius:50%}
+  .mwrow{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--line)}.mwrow:first-of-type{border-top:0}
   .rdrow{display:flex;align-items:center;gap:10px}.rdcard{display:flex;align-items:center;gap:12px;width:100%;font:inherit;cursor:pointer;margin-bottom:10px;border:1px solid var(--line)}
   .rdsent{font-size:24px;font-weight:800;line-height:1.3;text-align:center;margin:6px 0}.rdmean{background:var(--soft,#F6F2EC);border-radius:14px;padding:10px 12px;text-align:center;font-size:17px;color:#2A8C82;font-weight:700;margin-top:8px}
   .rdsofar{color:var(--muted,#6B7A8F);font-size:15px;line-height:1.5;margin:4px 2px 10px}.rddots{display:flex;gap:5px;margin:6px 0 10px}.rddots i{flex:1;height:6px;border-radius:9px;background:var(--line,#E8E2D8)}.rddots i.on{background:#2A8C82}.rddots i.cur{background:var(--coral,#F25C3B)}
@@ -949,7 +950,7 @@
 <script>/* Extra interface languages live in /i18n/<code>.js (English text → translation). Load the chosen one before the app starts. */
 (function(){ try{ var X=["tr","uk","fa","ur"], v=localStorage.getItem("pt_ui");
   if(!v){ var n=String((navigator.languages&&navigator.languages[0])||navigator.language||"").slice(0,2).toLowerCase(); if(X.indexOf(n)>-1) v=n; }
-  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=43"><\/script>'); }catch(e){} })();</script>
+  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=44"><\/script>'); }catch(e){} })();</script>
 
 <script>
 /* ===================== CONTENT ===================== */
@@ -1379,7 +1380,7 @@ function bi(en,de,es){ if(es!==undefined) return tr(en,de,es); return `${en} <sp
 function uiSet(l){
   if(!UI_CODES.includes(l)) return;
   if(UI_EXTRA.includes(l) && !I18N_DATA[l]){
-    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=43";
+    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=44";
     sc.onload=()=>uiSet(l); sc.onerror=()=>bToast(offlineMsg()); document.head.appendChild(sc); return;
   }
   UI=l; I18N_T=null; I18N_M.clear();
@@ -8428,13 +8429,35 @@ async function vcMineLoad(){
       VC.d.words.push(w); VC.byId[w.id]=w; VC.mineN++; }
   }catch(e){}
 }
+/* ✍️ My words: words you add yourself or save from a story. Signed in → Supabase (sql/my_words.sql); otherwise kept on this phone. */
+const MW={ list:null };
+function mwLocal(){ try{ return JSON.parse(localStorage.getItem("pt_mywords")||"[]"); }catch(e){ return []; } }
+function mwLocalSave(l){ try{ localStorage.setItem("pt_mywords",JSON.stringify(l)); }catch(e){} }
+async function mwLoad(){ if(A.user&&A.sb){ try{ const { data, error }=await A.sb.rpc("pt_mywords_list"); if(error) throw error; MW.list=data||[]; return MW.list; }catch(e){} } MW.list=mwLocal(); return MW.list; }
+function mwHas(word){ return (MW.list||[]).some(x=>x.word.toLowerCase()===String(word).toLowerCase()); }
+async function mwAdd(word, meaning, example, src){ word=String(word||"").trim(); meaning=String(meaning||"").trim(); if(!word||!meaning) return false;
+  if(MW.list===null) await mwLoad(); if(mwHas(word)) return true;
+  if(A.user&&A.sb){ try{ const { data, error }=await A.sb.rpc("pt_mywords_add",{ p_word:word, p_meaning:meaning, p_example:example||null, p_src:src||null }); if(error) throw error;
+      MW.list.unshift({ id:data, word, meaning, example:example||null, src:src||null }); vcMineMerge(); return true; }catch(e){ bToast(tr("Couldn't save the word. Check your connection.","Wort konnte nicht gespeichert werden. Prüfe deine Verbindung.","No se pudo guardar la palabra. Revisa tu conexión.")); return false; } }
+  const l=mwLocal(); l.unshift({ id:"l"+Date.now().toString(36)+Math.random().toString(36).slice(2,5), word, meaning, example:example||null, src:src||null }); mwLocalSave(l); MW.list=l; vcMineMerge(); return true; }
+async function mwDel(id){ if(A.user&&A.sb&&!String(id).startsWith("l")){ try{ const { error }=await A.sb.rpc("pt_mywords_delete",{ p_id:id }); if(error) throw error; }catch(e){ bToast(tr("Couldn't delete. Try again.","Löschen ging nicht. Versuch es noch mal.","No se pudo borrar. Inténtalo de nuevo.")); return; } }
+  else mwLocalSave(mwLocal().filter(x=>x.id!==id));
+  MW.list=(MW.list||[]).filter(x=>x.id!==id); vcMineMerge(); xr(); }
+/* put my own words into the flashcard deck next to the session words */
+function vcMineMerge(){ if(!VC.d||!MW.list) return;
+  VC.d.words=VC.d.words.filter(w=>!String(w.id).startsWith("mw-")); for(const id in VC.byId) if(id.startsWith("mw-")) delete VC.byId[id];
+  for(const r of MW.list){ const tr0={}; VC_LANGS.forEach(([c])=>tr0[c]=r.meaning);
+    const w={ id:"mw-"+r.id, w:r.word, t:"mine", lv:"MINE", ex:r.example||"", tr:tr0, src:r.src||"", lang:"de", own:1 };
+    const m=/^(der|die|das) \S/.test(r.word)?r.word.slice(0,3):null; if(m) w.g=m;
+    VC.d.words.push(w); VC.byId[w.id]=w; } }
 async function vcMineOpen(){ await vcOpen(); if(VC.d&&vcMine().length) vcStart("learn","mine"); }
 function vcMine(){ return VC.d?VC.d.words.filter(w=>w.lv==="MINE"):[]; }
-function vcSrc(w){ return w.lv==="MINE"?`<div class="ecmeta" style="margin-bottom:4px">📝 ${tr("From your session","Aus deiner Session","De tu sesión")}${w.src?": "+esc(w.src):""}${w.ok==="confirmed"?" · ✓":w.ok==="fixed"?" · ✏️":""}</div>`:""; }
+function vcSrc(w){ if(w.own) return `<div class="ecmeta" style="margin-bottom:4px">${w.src?`📖 ${esc(w.src)}`:`✍️ ${tr("Added by you","Von dir hinzugefügt","Añadida por ti")}`}</div>`;
+  return w.lv==="MINE"?`<div class="ecmeta" style="margin-bottom:4px">📝 ${tr("From your session","Aus deiner Session","De tu sesión")}${w.src?": "+esc(w.src):""}${w.ok==="confirmed"?" · ✓":w.ok==="fixed"?" · ✏️":""}</div>`:""; }
 async function vcOpen(){
   go("vocab");
   try{ await vcLoadData();
-    await Promise.all([vcSync(), vcMineLoad(), DT.man===undefined?dtLoadManifest():null]); }
+    await Promise.all([vcSync(), vcMineLoad(), mwLoad(), DT.man===undefined?dtLoadManifest():null]); vcMineMerge(); }
   catch(e){ VC.err=tr("Couldn't load the words. Check your connection","Wörter konnten nicht geladen werden. Prüfe deine Verbindung","No se pudieron cargar las palabras. Revisa tu conexión"); }
   if(/^vocab/.test(S.screen)) xr();
 }
@@ -9651,11 +9674,11 @@ VIEWS.vocab = function(){
       ${vcDaysHtml()}
       ${st.learned?`<button class="linkbtn" onclick="vcCheckStart()">📊 ${tr("Level check","Niveau-Check","Test de nivel")}</button>`:""}
       ${!A.user?`<p class="note" style="margin:8px 0 0">💾 ${tr("Saved on this phone only.","Nur auf diesem Handy gespeichert.","Guardado solo en este móvil.")} <button class="linkbtn" onclick="A.ret='vocab';go('account')">${tr("Sign in","Anmelden","Entra")}</button> ${tr("to keep your progress everywhere.","um deinen Fortschritt überall zu haben.","para tener tu progreso en todas partes.")}</p>`:""}</div>
-    ${A.user?(()=>{ const mw=vcMine(), s3=vcStats(mw), nw=mw.length-s3.learned;
-      return `<div class="card"><h3 style="margin:0 0 4px">📝 ${tr("My session words","Meine Session-Wörter","Mis palabras de sesiones")}</h3>
-      ${mw.length?`<p class="note" style="margin:0 0 8px">${tr(`${mw.length} words from your sessions · ${nw} new · ${s3.due} to review. New ones also come up in your daily cards.`,`${mw.length} Wörter aus deinen Sessions · ${nw} neu · ${s3.due} zu wiederholen. Neue kommen auch in deinen täglichen Karten.`,`${mw.length} palabras de tus sesiones · ${nw} nuevas · ${s3.due} por repasar. Las nuevas también salen en tus tarjetas diarias.`)}</p>
-        <button class="btn secondary qbtn" onclick="vcStart('learn','mine')">▶️ ${tr("Practise my session words","Meine Session-Wörter üben","Practicar mis palabras")}</button>`
-      :`<p class="note" style="margin:0">${tr("Words you save in a session (📚 Words I learned) show up here as flashcards.","Wörter, die du in einer Session speicherst (📚 Gelernte Wörter), erscheinen hier als Karteikarten.","Las palabras que guardas en una sesión (📚 Palabras que aprendí) aparecen aquí como tarjetas.")}</p>`}</div>`; })():""}
+    ${(()=>{ const mw=vcMine(), s3=vcStats(mw), nw=mw.length-s3.learned, own=mw.filter(w=>w.own).length, ses=mw.length-own;
+      return `<div class="card"><h3 style="margin:0 0 4px">📝 ${tr("My words","Meine Wörter","Mis palabras")}</h3>
+      <p class="note" style="margin:0 0 8px">${mw.length?tr(`${mw.length} words · ${nw} new · ${s3.due} to review.`,`${mw.length} Wörter · ${nw} neu · ${s3.due} zu wiederholen.`,`${mw.length} palabras · ${nw} nuevas · ${s3.due} por repasar.`)+" ":""}${tr("Add words from anywhere, save them from a story, or from a session (📚 Words I learned).","Füge Wörter von überall hinzu, speichere sie aus einer Geschichte oder einer Session (📚 Gelernte Wörter).","Añade palabras de cualquier sitio, guárdalas de una historia o de una sesión (📚 Palabras que aprendí).")}</p>
+      ${mw.length?`<button class="btn secondary qbtn" onclick="vcStart('learn','mine')">▶️ ${tr("Practise my words","Meine Wörter üben","Practicar mis palabras")}</button>`:""}
+      <button class="btn secondary qbtn" style="margin-top:8px" onclick="MW.form=null;go('mwadd')">➕ ${tr("Add a word","Wort hinzufügen","Añadir una palabra")}${own?` · ✍️ ${own}`:""}</button></div>`; })()}
     <div class="card"><h3 style="margin:0 0 4px">🎲 ${tr("Quick games","Schnelle Spiele","Juegos rápidos")}</h3>
       <button class="btn secondary qbtn" onclick="VC.gtRule=null;vcStart('gender')">🔵🔴🟢 der · die · das (${tr("20 nouns","20 Nomen","20 sustantivos")})</button>
       <button class="btn secondary qbtn" style="margin-top:8px" onclick="go('vocabg')">💡 ${tr("der · die · das tips","der · die · das Tipps","Consejos der · die · das")}</button>
@@ -10375,7 +10398,7 @@ async function dtSSave(){
 
 /* ---- 📖 Lesen: short stories by level, one sentence at a time ---- */
 const RD={ d:null, s:null, cur:null, i:0, show:false, q:null, done:null, loading:false };
-const RD_V="2026-11-24b", RD_LV=["A1","A2","B1","B2","C1"];
+const RD_V="2026-11-24c", RD_LV=["A1","A2","B1","B2","C1"];
 function rdLoad(){ if(RD.s) return; try{ RD.s=JSON.parse(localStorage.getItem("pt_read")||"{}"); }catch(e){} RD.s=RD.s||{}; RD.s.done=RD.s.done||{}; RD.s.days=RD.s.days||[]; }
 function rdSave(){ try{ localStorage.setItem("pt_read",JSON.stringify(RD.s)); }catch(e){} }
 function rdData(){ if(RD.d||RD.loading) return; RD.loading=true; fetch("stories/de.json?v="+RD_V).then(r=>r.json()).then(d=>{ RD.d=d; }).catch(()=>{ RD.d={ stories:[] }; }).finally(()=>{ RD.loading=false; xr(); }); }
@@ -10406,7 +10429,7 @@ VIEWS.story = function(){
     return top+`<div class="card center"><div style="font-size:44px">${sc===n?"🌟":sc>0?"⭐":"📖"}</div><h2 style="margin:4px 0">${sc===n?tr("Perfect!","Perfekt!","¡Perfecto!"):tr("Story done!","Geschichte geschafft!","¡Historia terminada!")}</h2>
       <p class="note">${tr(`${sc} of ${n} right.`,`${sc} von ${n} richtig.`,`${sc} de ${n} correctas.`)} ${rdStreak()?`🔥 ${rdStreak()}`:""}</p>
       ${nx?`<button class="btn primary" onclick="rdStart('${nx.id}')">${tr("Next story","Nächste Geschichte","Siguiente historia")} →</button>`:""}
-      <button class="btn secondary" style="margin-top:8px" onclick="RD.cur=null;go('read')">${tr("All stories","Alle Geschichten","Todas las historias")}</button></div>`; }
+      <button class="btn secondary" style="margin-top:8px" onclick="RD.cur=null;go('read')">${tr("All stories","Alle Geschichten","Todas las historias")}</button></div>${rdWords(st)}`; }
   if(RD.q){ const q=st.q[RD.q.i], a=RD.q.ans;
     return top+`<div class="rdrow" style="margin:0 0 10px">${palArt(st.pal,40)}<b lang="de">${esc(st.title.de)}</b></div>
       <div class="card"><div class="ecmeta">❓ ${tr("Right or wrong?","Richtig oder falsch?","¿Verdadero o falso?")} · ${RD.q.i+1} / ${st.q.length}</div>
@@ -10433,6 +10456,36 @@ function rdQNext(){ const st=RD.cur; RD.show=false;
   if(RD.q.i+1<st.q.length){ RD.q.i++; RD.q.ans=null; xr(); return; }
   rdLoad(); RD.s.done[st.id]=Math.max(RD.s.done[st.id]||0,RD.q.ok); const t=bbDs(new Date()); if(!RD.s.days.includes(t)) RD.s.days=RD.s.days.concat([t]).slice(-60); rdSave();
   RD.done={ ok:RD.q.ok }; RD.q=null; xr(); }
+
+/* ➕ add your own word + the list of words you added */
+VIEWS.mwadd = function(){ if(MW.list===null){ mwLoad().then(()=>{ vcMineMerge(); xr(); }); }
+  const f=MW.form||{ word:"", meaning:"", example:"" }, L=MW.list||[], ln=(VC_LANGS.find(x=>x[0]===vcLang())||["","English"])[1];
+  return `<div class="topline"><button class="chip" onclick="go('vocab')">${uiBack()} ${tr("Flashcards","Karteikarten","Tarjetas")}</button><span></span></div>
+  <h2 style="margin:4px 0">➕ ${tr("Add a word","Wort hinzufügen","Añadir una palabra")}</h2>
+  <p class="sub" style="margin:0 0 10px">${tr("Heard it at the Bäcker, read it on Instagram? Save it and it comes up in your flashcards.","Beim Bäcker gehört, auf Instagram gelesen? Speicher es und es kommt in deinen Karteikarten.","¿Lo oíste en la panadería o lo leíste en Instagram? Guárdala y saldrá en tus tarjetas.")}</p>
+  <div class="card">
+    <label class="lbl">🇩🇪 ${tr("German word","Deutsches Wort","Palabra en alemán")}</label><input type="text" id="mww" lang="de" autocapitalize="off" maxlength="80" placeholder="${tr("e.g. die Kaution, sich beeilen","z. B. die Kaution, sich beeilen","p. ej. die Kaution, sich beeilen")}" value="${esc(f.word)}">
+    <p class="note" style="margin:4px 0 10px">💡 ${tr("For nouns, add der, die or das.","Bei Nomen: der, die oder das dazu.","Para sustantivos, añade der, die o das.")}</p>
+    <label class="lbl">${tr("Meaning","Bedeutung","Significado")} (${esc(ln)})</label><input type="text" id="mwm" maxlength="120" dir="auto" value="${esc(f.meaning)}">
+    <label class="lbl" style="margin-top:10px">${tr("Example sentence (optional)","Beispielsatz (optional)","Frase de ejemplo (opcional)")}</label><input type="text" id="mwe" lang="de" maxlength="240" value="${esc(f.example)}">
+    <button class="btn primary" style="margin-top:12px" onclick="mwSave()">💾 ${tr("Save word","Wort speichern","Guardar palabra")}</button>
+    ${!A.user?`<p class="note" style="margin:8px 0 0">💾 ${tr("Saved on this phone only.","Nur auf diesem Handy gespeichert.","Guardado solo en este móvil.")}</p>`:""}</div>
+  ${L.length?`<div class="card"><h3 style="margin:0 0 6px">✍️ ${tr("Words you added","Deine Wörter","Tus palabras")} (${L.length})</h3>
+    ${L.map(x=>`<div class="mwrow"><div style="flex:1;min-width:0"><b lang="de">${esc(x.word)}</b> <span class="note" dir="auto">· ${esc(x.meaning)}</span>${x.src?`<div class="note" style="margin:0">📖 ${esc(x.src)}</div>`:""}</div><button class="chip" aria-label="${tr("Delete","Löschen","Borrar")}" onclick="if(confirm('${tr("Delete this word?","Dieses Wort löschen?","¿Borrar esta palabra?")}'))mwDel('${esc(String(x.id))}')">🗑</button></div>`).join("")}</div>`:""}`; };
+async function mwSave(){ const g=id=>(document.getElementById(id)||{}).value||"", word=g("mww").trim(), meaning=g("mwm").trim(), example=g("mwe").trim();
+  MW.form={ word, meaning, example };
+  if(!word||!meaning){ bToast(tr("Add the word and its meaning.","Gib das Wort und die Bedeutung ein.","Escribe la palabra y su significado.")); return; }
+  if(mwHas(word)){ bToast(tr("You already have this word.","Dieses Wort hast du schon.","Ya tienes esta palabra.")); return; }
+  if(await mwAdd(word,meaning,example,null)){ MW.form=null; bToast("✅ "+tr("Saved! It will come up in your flashcards.","Gespeichert! Es kommt in deinen Karteikarten.","¡Guardada! Saldrá en tus tarjetas.")); xr(); } }
+/* 📚 words from a story → my words */
+function rdWords(st){ if(!st.kw||!st.kw.length) return ""; if(MW.list===null){ mwLoad().then(()=>xr()); }
+  const all=st.kw.every(k=>mwHas(k.w));
+  return `<div class="card" style="text-align:start"><h3 style="margin:0 0 6px">📚 ${tr("Words from this story","Wörter aus der Geschichte","Palabras de esta historia")}</h3>
+    ${st.kw.map((k,i)=>`<div class="mwrow"><div style="flex:1;min-width:0"><b lang="de">${esc(k.w)}</b> <span class="note" dir="auto">· ${esc(rdTr(k.tr))}</span></div>${mwHas(k.w)?`<span class="note">✓</span>`:`<button class="chip" onclick="rdSaveWord(${i})">➕</button>`}</div>`).join("")}
+    ${all?`<p class="note" style="margin:8px 0 0">✅ ${tr("All saved to your flashcards.","Alle in deinen Karteikarten.","Todas guardadas en tus tarjetas.")}</p>`:`<button class="btn secondary" style="margin-top:8px" onclick="rdSaveWord(-1)">➕ ${tr("Save all to my flashcards","Alle in meine Karteikarten","Guardar todas en mis tarjetas")}</button>`}</div>`; }
+async function rdSaveWord(i){ const st=RD.cur; if(!st) return; const L=i<0?st.kw:[st.kw[i]];
+  for(const k of L){ if(!mwHas(k.w)) await mwAdd(k.w,rdTr(k.tr),k.ex,st.title.de); }
+  bToast("✅ "+tr("Saved to your flashcards.","In deinen Karteikarten gespeichert.","Guardado en tus tarjetas.")); xr(); }
 VIEWS.games = function(){
   return `<h2>${tr("Games","Spiele","Juegos")}</h2>
   <p class="sub">${tr("Speaking games for 2–10 players.","Sprechspiele für 2–10 Personen.","Juegos de conversación para 2–10 jugadores.")}</p>
