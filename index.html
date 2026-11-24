@@ -296,7 +296,7 @@
   .bbwp b{font-size:18px;color:var(--c)}.bbwp i{display:block;width:100%;height:3px;border-radius:2px;background:var(--c);margin:4px 0 2px;position:relative}
   .bbwp i::after{content:"";position:absolute;left:50%;top:3px;width:2px;height:10px;margin-left:-1px;background:var(--c)}
   .bbwp span{font-size:12px;font-weight:800;margin-top:10px;color:var(--c)}.bbwp small{font-size:11px;color:var(--muted)}
-  .bbalt{margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:14px}.bbalt b{display:block;font-size:13px;margin-bottom:2px}.bbalt div{padding:2px 0}.bbwen{margin-top:10px;font-size:15px;font-weight:600;border-top:1px solid var(--line);padding-top:8px}
+  .bbalt{margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:14px}.bbalt b{display:block;font-size:13px;margin-bottom:2px}.bbalt details{padding:3px 0}.bbalt summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px}.bbalt summary::-webkit-details-marker{display:none}.bbalt summary::before{content:"▸";font-size:12px;opacity:.6;transition:transform .15s}.bbalt details[open] summary::before{transform:rotate(90deg)}.bbalt .bbwrow{margin:6px 0 4px}.bbwen{margin-top:10px;font-size:15px;font-weight:600;border-top:1px solid var(--line);padding-top:8px}
   .bbsk{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}.bbsk span{font-size:12px;font-weight:700;background:#EEF2FA;color:#2F4B7C;border-radius:999px;padding:4px 9px}
   .bbround{display:flex;align-items:center;gap:8px;margin:2px 0 8px;font-size:13px;font-weight:700}.bbround div{flex:1;display:flex;gap:4px}
   .bbround i{flex:1;height:10px;border-radius:6px;background:#E4E1DA}.bbround i.on{background:#A0703F}
@@ -9155,10 +9155,11 @@ function bbAlts(ws, th){ if(!th||!BB_THEMES[th]) return [];
   for(const f of fronts){ if(out.length>=3) break;
     const mid=rest.filter(w=>w!==f).map((w,i)=>[w,i]).sort((a,b)=>rank(a[0])-rank(b[0])||a[1]-b[1]).map(x=>x[0]);
     const cand=[f,verb,...mid,...ends,...tail]; let r; try{ r=bbCheck(cand,th); }catch(e){ continue; }
-    const t=bbSentence(cand).replace(/ (weil|dass) /,", $1 "); if(r&&r.ok&&t.toLowerCase()!==mine&&!seen[t]){ seen[t]=1; out.push(t); } }
+    const t=bbSentence(cand).replace(/ (weil|dass) /,", $1 "); if(r&&r.ok&&t.toLowerCase()!==mine&&!seen[t]){ seen[t]=1; out.push({ t, ws:cand }); } }
   return out; }
 function bbAltsHtml(ws){ const th=BB.mode==="ch"&&BB.ch?BB_CH[BB.ch.k].th:BB.th, alts=bbAlts(ws,th); if(!alts.length) return "";
-  return `<div class="bbalt"><b>🔀 ${tr("You could also say","Du könntest auch sagen","También podrías decir")}</b>${alts.map(t=>`<div lang="de">${esc(t)}</div>`).join("")}</div>`; }
+  return `<div class="bbalt"><b>🔀 ${tr("You could also say","Du könntest auch sagen","También podrías decir")}</b>${alts.map(a=>{ const k=a.ws.findIndex(w=>w.r==="K");
+    return `<details><summary lang="de">${esc(a.t)}</summary><div class="bbwrow" dir="ltr">${a.ws.map((w,i)=>bbPart(w,k>=0&&i>k)).join("")}</div></details>`; }).join("")}</div>`; }
 function bbSentence(ws){ const s=ws.map(w=>w.t).join(" "); return s.charAt(0).toUpperCase()+s.slice(1)+"."; }
 function bbGo(){
   const typing=BB.s.input==="type", tiles=bbTiles(), ws=typing?bbTypeGo():BB.row.map(id=>tiles.find(t=>t.id===id)).filter(Boolean);
