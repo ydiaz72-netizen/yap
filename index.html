@@ -938,7 +938,7 @@
 <script>/* Extra interface languages live in /i18n/<code>.js (English text → translation). Load the chosen one before the app starts. */
 (function(){ try{ var X=["tr","uk","fa","ur"], v=localStorage.getItem("pt_ui");
   if(!v){ var n=String((navigator.languages&&navigator.languages[0])||navigator.language||"").slice(0,2).toLowerCase(); if(X.indexOf(n)>-1) v=n; }
-  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=31"><\/script>'); }catch(e){} })();</script>
+  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=32"><\/script>'); }catch(e){} })();</script>
 
 <script>
 /* ===================== CONTENT ===================== */
@@ -1293,9 +1293,9 @@ function palJoin(){
   const k=S.palKey, name=(($("palname")||{}).value||"").trim(), L=palLobby();
   if(!name){ S.err=tr("Please type a name","Bitte Namen eingeben","Escribe un nombre"); render(); return; }
   if(L) S.players=L.players||[];
+  S.players=S.players.filter(p=>p.pal!==k);   /* same card tapped again: replace that player */
   if(S.players.length>=10){ S.err=tr("Max 10 players","Maximal 10 Spieler","Máximo 10 jugadores"); render(); return; }
   if(S.players.some(p=>p.name.toLowerCase()===name.toLowerCase())){ S.err=tr("That name is taken","Name schon vergeben","Ese nombre ya está"); render(); return; }
-  S.players=S.players.filter(p=>p.pal!==k);
   S.players.push({ name, pal:k, lang:S.draft.lang, level:S.draft.level, pts:0, reacts:{clear:0,creative:0,funny:0,learned:0}, tips:[] });
   S.err=""; try{ audio=audio||new (window.AudioContext||window.webkitAudioContext)(); beep&&beep(880,.12); }catch(e){}
   const toBoard=!!(L&&L.board); S.palBoard=toBoard; S.palJustJoined=k; go(toBoard?"palboard":"setup"); palSave(true); }
@@ -1368,7 +1368,7 @@ function bi(en,de,es){ if(es!==undefined) return tr(en,de,es); return `${en} <sp
 function uiSet(l){
   if(!UI_CODES.includes(l)) return;
   if(UI_EXTRA.includes(l) && !I18N_DATA[l]){
-    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=31";
+    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=32";
     sc.onload=()=>uiSet(l); sc.onerror=()=>bToast(offlineMsg()); document.head.appendChild(sc); return;
   }
   UI=l; I18N_T=null; I18N_M.clear();
@@ -1529,10 +1529,10 @@ palboard(){
   <button class="btn primary" ${n<2?'style="opacity:.45"':""} onclick="toSettings()">${n<2?tr("Waiting for 2 players…","Warte auf 2 Personen…","Esperando a 2 jugadores…"):tr(`Start with ${n} players →`,`Mit ${n} Personen starten →`,`Empezar con ${n} jugadores →`)}</button></div>`;
 },
 paljoin(){
-  const k=S.palKey, P=PALS[k], d=S.draft, n=(S.players||[]).filter(p=>p.pal!==k).length;
+  const k=S.palKey, P=PALS[k], d=S.draft, L=palLobby(), n=((L&&L.players)||S.players||[]).filter(p=>p.pal!==k).length;
   return `${S.palBoard?`<div class="topline"><button class="chip" onclick="go('palboard')">${uiBack()} ${tr("Back","Zurück","Atrás")}</button><span></span></div>`:""}<div class="center" style="margin-top:10px">${palAv(k,140)}
     <h2 style="margin:12px 0 2px">${tr(`${P.n} is joining!`,`${P.n} spielt mit!`,`¡${P.n} se une!`)}</h2>
-    <p class="sub" style="margin:0 0 16px">${(n===1?tr("Game night · 1 player is in","Spieleabend · 1 Person ist dabei","Noche de juegos · 1 jugador dentro"):tr(`Game night · ${n} players are in`,`Spieleabend · ${n} Personen sind dabei`,`Noche de juegos · ${n} jugadores dentro`))}</p></div>
+    <p class="sub" style="margin:0 0 16px">${(n===0?tr("Game night · you're the first!","Spieleabend · du bist die erste Person!","Noche de juegos · ¡eres el primero!"):n===1?tr("Game night · 1 player is in","Spieleabend · 1 Person ist dabei","Noche de juegos · 1 jugador dentro"):tr(`Game night · ${n} players are in`,`Spieleabend · ${n} Personen sind dabei`,`Noche de juegos · ${n} jugadores dentro`))}</p></div>
   <div class="card">
     <label class="lbl" for="palname">${tr("What's your name?","Wie heißt du?","¿Cómo te llamas?")}</label>
     <input type="text" id="palname" maxlength="16" autocomplete="off" value="${esc(d.name||"")}" placeholder="${tr("e.g. Ana","z. B. Ana","p. ej. Ana")}" onkeydown="if(event.key==='Enter')palJoin()">
