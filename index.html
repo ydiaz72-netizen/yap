@@ -9541,7 +9541,8 @@ VIEWS.bridge = function(){
     sub:tr(`${BB_ROUND} new sentences built.`,`${BB_ROUND} neue Sätze gebaut.`,`${BB_ROUND} frases nuevas construidas.`),
     xp:BB.rd.xp, combo:BB.rd.combo, tries:BB.rd.tries, ok:BB.rd.ok, best:BB.rd.best, go:"BB.rd=bbRd();BB.row=[];BB.res=null;BB.typed='';BB.tws=null;xr()" });
   const typing=BB.s.input==="type", tiles=ch?bbChTiles():bbTiles(), row=typing?(BB.tws||[]):BB.row.map(id=>tiles.find(t=>t.id===id)).filter(Boolean), r=BB.res;
-  const groups=["S","V","M","H","I","Pa","D","O","T","P","A","K"].filter(g=>tiles.some(t=>t.r===g));
+  /* every role that has tiles gets a row: subjects, verbs, … and the newer ones (an/auf, der/die/das, um/zu, von …) */
+  const ORDER=["Je","U","S","Ar","V","M","H","I","Mi","Pa","Pj","N","D","O","Q","B","T","P","A","Cp","X","Z","R","K","De"], groups=ORDER.concat([...new Set(tiles.map(t=>t.r))].filter(r=>!ORDER.includes(r))).filter(g=>tiles.some(t=>t.r===g));
   const bad=new Set(r&&!r.ok?r.bad||[]:[]);
   return top+`<h2 style="margin:4px 0">🌉 ${tr("Bridge Builder","Brückenbauer","Constructor de puentes")}</h2>${stats}
     ${ch?`<div class="card" style="margin-bottom:10px"><div class="ecmeta">🎯 ${tr("Challenge","Challenge","Reto")} ${tr("Level","Level","Nivel")} ${c.lv} · ${BB.ch.i+1} / ${c.items.length}</div><div style="font-size:20px;font-weight:800;margin-top:4px">${esc(tr(c.items[BB.ch.i][0],c.items[BB.ch.i][0],c.items[BB.ch.i][1]))}</div>${bbSkills(c.lv,true)}</div>`
