@@ -279,6 +279,7 @@
   .pbtile{position:relative;border-radius:20px;background:#fff;border:2px dashed #DDD5C8;padding:12px 8px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px;min-height:150px;justify-content:center}
   .pbtile b{font-size:16px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pbtile small{font-size:12px;color:var(--muted)}
   .pbtile.in{border:2px solid transparent;box-shadow:0 2px 8px rgba(27,42,65,.08)}.pbtile.pop{animation:bbpop .5s ease-out;border-color:var(--coral)}
+  button.pbtile{font:inherit;color:inherit;cursor:pointer}.pbfree:hover,.pbfree:focus-visible{border-color:var(--coral)}
   .pbghost{opacity:.28;filter:grayscale(1)}.pbinit{width:70px;height:70px;border-radius:50%;background:#2F4B7C;color:#fff;font-size:30px;font-weight:800;display:grid;place-items:center;margin:8px 0}
   .pbx{position:absolute;top:6px;right:6px;width:30px;height:30px;border-radius:50%;border:0;background:rgba(255,255,255,.8);font-size:18px;line-height:1;cursor:pointer;color:var(--ink)}
   .pbbtns{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-top:14px}.pbbtns .btn{margin:0}
@@ -937,7 +938,7 @@
 <script>/* Extra interface languages live in /i18n/<code>.js (English text → translation). Load the chosen one before the app starts. */
 (function(){ try{ var X=["tr","uk","fa","ur"], v=localStorage.getItem("pt_ui");
   if(!v){ var n=String((navigator.languages&&navigator.languages[0])||navigator.language||"").slice(0,2).toLowerCase(); if(X.indexOf(n)>-1) v=n; }
-  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=30"><\/script>'); }catch(e){} })();</script>
+  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=31"><\/script>'); }catch(e){} })();</script>
 
 <script>
 /* ===================== CONTENT ===================== */
@@ -1286,6 +1287,7 @@ function palPowerBox(){ const p=S.players[S.turn]; if(!p||!p.pal||!PALS[p.pal]||
 function palSave(open){ try{ localStorage.setItem("pt_pal_lobby",JSON.stringify({ open, ts:Date.now(), players:S.players, board:S.screen==="palboard"||(S.palBoard&&S.screen!=="setup") })); }catch(e){} }
 function palBoardOpen(){ S.palBoard=true; S.palJustJoined=null; S.err=""; go("palboard"); }
 function palLobby(){ try{ const L=JSON.parse(localStorage.getItem("pt_pal_lobby")||"null"); if(L&&L.open&&Date.now()-L.ts<PAL_LOBBY_MS) return L; }catch(e){} return null; }
+function palPick(k){ S.palKey=k; S.draft.name=""; S.err=""; palSave(true); go("paljoin"); }
 function palDrop(k){ S.players=S.players.filter(p=>p.pal!==k); if(S.palJustJoined===k) S.palJustJoined=null; render(); }
 function palJoin(){
   const k=S.palKey, name=(($("palname")||{}).value||"").trim(), L=palLobby();
@@ -1366,7 +1368,7 @@ function bi(en,de,es){ if(es!==undefined) return tr(en,de,es); return `${en} <sp
 function uiSet(l){
   if(!UI_CODES.includes(l)) return;
   if(UI_EXTRA.includes(l) && !I18N_DATA[l]){
-    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=30";
+    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=31";
     sc.onload=()=>uiSet(l); sc.onerror=()=>bToast(offlineMsg()); document.head.appendChild(sc); return;
   }
   UI=l; I18N_T=null; I18N_M.clear();
@@ -1516,11 +1518,11 @@ palboard(){
   return `<div class="topline"><button class="chip" onclick="S.palBoard=false;go('setup')">${uiBack()} ${tr("Players list","Spielerliste","Lista de jugadores")}</button><span>${n}/10 ${tr("players","Spieler","jugadores")}</span></div>
   <div class="pbhead"><span class="pbnfc" aria-hidden="true"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M6 8.5a5 5 0 0 1 0 7"/><path d="M9.5 6a9 9 0 0 1 0 12"/><path d="M13 3.5a13 13 0 0 1 0 17"/></svg></span>
     <div><div class="pbkick">🎲 ${tr("Game night","Spieleabend","Noche de juegos")}</div><h2>${tr("Tap your card here to join","Halte deine Karte hierher, um mitzuspielen","Acerca tu carta aquí para unirte")}</h2>
-    <p>${tr("No NFC? Scan the QR code on the back of your card with this device's camera.","Kein NFC? Scanne den QR-Code auf der Kartenrückseite mit der Kamera dieses Geräts.","¿Sin NFC? Escanea el código QR del reverso con la cámara de este dispositivo.")}</p></div></div>
+    <p>${tr("No card or no NFC? Just tap your character below.","Keine Karte oder kein NFC? Tippe einfach unten auf deine Figur.","¿Sin carta o sin NFC? Toca tu personaje abajo.")}</p></div></div>
   ${nj&&byPal[nj]?`<div class="pbwelcome">${palAv(nj,64)}<div><b>${tr(`Welcome, ${esc(byPal[nj].name)}!`,`Willkommen, ${esc(byPal[nj].name)}!`,`¡Bienvenida/o, ${esc(byPal[nj].name)}!`)}</b><span>${tr(`You're playing as ${PALS[nj].n}.`,`Du spielst als ${PALS[nj].n}.`,`Juegas como ${PALS[nj].n}.`)} ⚡ ${palPower(nj)}</span></div></div>`:""}
   <div class="pbgrid">${PAL_KEYS.map(k=>{ const p=byPal[k];
     return p?`<div class="pbtile in ${k===nj?"pop":""}" style="background:${PALS[k].c}">${palArt(k,86)}<b>${esc(p.name)}</b><small>${PALS[k].n} · ${T[p.lang].flag} ${LEVELS[p.level].code}</small><button class="pbx" onclick="palDrop('${k}')" aria-label="${tr(`Remove ${esc(p.name)}`,`${esc(p.name)} entfernen`,`Quitar a ${esc(p.name)}`)}">×</button></div>`
-      :`<div class="pbtile"><span class="pbghost">${palArt(k,70)}</span><b>${PALS[k].n}</b><small>${tr("free","frei","libre")}</small></div>`; }).join("")}
+      :`<button class="pbtile pbfree" onclick="palPick('${k}')"><span class="pbghost">${palArt(k,70)}</span><b>${PALS[k].n}</b><small>${tr("tap to join","tippen zum Mitspielen","toca para unirte")}</small></button>`; }).join("")}
     ${extra.map(p=>`<div class="pbtile in" style="background:#EEF2FA"><span class="pbinit">${esc(p.name.charAt(0).toUpperCase())}</span><b>${esc(p.name)}</b><small>${tr("no card","ohne Karte","sin carta")} · ${T[p.lang].flag} ${LEVELS[p.level].code}</small></div>`).join("")}</div>
   <div class="err">${esc(S.err||"")}</div>
   <div class="pbbtns"><button class="btn secondary" onclick="S.palBoard=false;go('setup')">+ ${tr("Add someone without a card","Person ohne Karte hinzufügen","Añadir a alguien sin carta")}</button>
@@ -1528,7 +1530,7 @@ palboard(){
 },
 paljoin(){
   const k=S.palKey, P=PALS[k], d=S.draft, n=(S.players||[]).filter(p=>p.pal!==k).length;
-  return `<div class="center" style="margin-top:10px">${palAv(k,140)}
+  return `${S.palBoard?`<div class="topline"><button class="chip" onclick="go('palboard')">${uiBack()} ${tr("Back","Zurück","Atrás")}</button><span></span></div>`:""}<div class="center" style="margin-top:10px">${palAv(k,140)}
     <h2 style="margin:12px 0 2px">${tr(`${P.n} is joining!`,`${P.n} spielt mit!`,`¡${P.n} se une!`)}</h2>
     <p class="sub" style="margin:0 0 16px">${(n===1?tr("Game night · 1 player is in","Spieleabend · 1 Person ist dabei","Noche de juegos · 1 jugador dentro"):tr(`Game night · ${n} players are in`,`Spieleabend · ${n} Personen sind dabei`,`Noche de juegos · ${n} jugadores dentro`))}</p></div>
   <div class="card">
