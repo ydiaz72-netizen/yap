@@ -296,7 +296,7 @@
   .bbwp b{font-size:18px;color:var(--c)}.bbwp i{display:block;width:100%;height:3px;border-radius:2px;background:var(--c);margin:4px 0 2px;position:relative}
   .bbwp i::after{content:"";position:absolute;left:50%;top:3px;width:2px;height:10px;margin-left:-1px;background:var(--c)}
   .bbwp span{font-size:12px;font-weight:800;margin-top:10px;color:var(--c)}.bbwp small{font-size:11px;color:var(--muted)}
-  .bbalt{margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:14px}.bbalt b{display:block;font-size:13px;margin-bottom:2px}.bbalt details{padding:3px 0}.bbalt summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px}.bbalt summary::-webkit-details-marker{display:none}.bbalt summary::before{content:"▸";font-size:12px;opacity:.6;transition:transform .15s}.bbalt details[open] summary::before{transform:rotate(90deg)}.bbalt .bbwrow{margin:6px 0 4px}.bbwen{margin-top:10px;font-size:15px;font-weight:600;border-top:1px solid var(--line);padding-top:8px}
+  .bbskip{font-size:12px;font-weight:800;white-space:nowrap;padding:4px 8px;border-radius:999px;background:var(--soft,#EEF2F8);color:var(--ink,#1B2A41)}.bbalt{margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:14px}.bbalt b{display:block;font-size:13px;margin-bottom:2px}.bbalt details{padding:3px 0}.bbalt summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px}.bbalt summary::-webkit-details-marker{display:none}.bbalt summary::before{content:"▸";font-size:12px;opacity:.6;transition:transform .15s}.bbalt details[open] summary::before{transform:rotate(90deg)}.bbalt .bbwrow{margin:6px 0 4px}.bbwen{margin-top:10px;font-size:15px;font-weight:600;border-top:1px solid var(--line);padding-top:8px}
   .bbsk{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}.bbsk span{font-size:12px;font-weight:700;background:#EEF2FA;color:#2F4B7C;border-radius:999px;padding:4px 9px}
   .bbround{display:flex;align-items:center;gap:8px;margin:2px 0 8px;font-size:13px;font-weight:700}.bbround div{flex:1;display:flex;gap:4px}
   .bbround i{flex:1;height:10px;border-radius:6px;background:#E4E1DA}.bbround i.on{background:#A0703F}
@@ -945,7 +945,7 @@
 <script>/* Extra interface languages live in /i18n/<code>.js (English text → translation). Load the chosen one before the app starts. */
 (function(){ try{ var X=["tr","uk","fa","ur"], v=localStorage.getItem("pt_ui");
   if(!v){ var n=String((navigator.languages&&navigator.languages[0])||navigator.language||"").slice(0,2).toLowerCase(); if(X.indexOf(n)>-1) v=n; }
-  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=40"><\/script>'); }catch(e){} })();</script>
+  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=41"><\/script>'); }catch(e){} })();</script>
 
 <script>
 /* ===================== CONTENT ===================== */
@@ -1375,7 +1375,7 @@ function bi(en,de,es){ if(es!==undefined) return tr(en,de,es); return `${en} <sp
 function uiSet(l){
   if(!UI_CODES.includes(l)) return;
   if(UI_EXTRA.includes(l) && !I18N_DATA[l]){
-    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=40";
+    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=41";
     sc.onload=()=>uiSet(l); sc.onerror=()=>bToast(offlineMsg()); document.head.appendChild(sc); return;
   }
   UI=l; I18N_T=null; I18N_M.clear();
@@ -9503,11 +9503,17 @@ function bbGo(){
   else { BB.s.streak=0; bbDnaAdd(r); bbSave(); }
   xr();
 }
+/* the sentence being built now: a skip test uses 3 picked sentences, a normal challenge all 5 in order */
+function bbChIt(){ const c=BB_CH[BB.ch.k]; return c.items[BB.ch.ord?BB.ch.ord[BB.ch.i]:BB.ch.i]; }
+function bbChN(){ return BB.ch.ord?BB.ch.ord.length:BB_CH[BB.ch.k].items.length; }
+/* ⏭️ test out: 3 sentences from the challenge before; 2 right on the first try unlocks everything up to challenge k */
+function bbSkipStart(k){ bbLoad(); const src=k-1, n=BB_CH[src].items.length, ord=[...Array(n).keys()].sort(()=>Math.random()-.5).slice(0,3);
+  BB.mode="ch"; BB.th=BB_CH[src].th; BB.ch={ k:src, i:0, ok:0, tries:0, ord, skip:k }; BB.row=[]; BB.res=null; BB.typed=""; BB.tws=null; go("bridge"); }
 function bbChStart(k){ bbLoad(); const c=BB_CH[k]; BB.mode="ch"; BB.th=c.th; BB.ch={ k, i:0, ok:0, tries:0 }; BB.row=[]; BB.res=null; go("bridge"); }
 function bbChTiles(){ const c=BB_CH[BB.ch.k], T=BB_THEMES[c.th].tiles.map((t,i)=>({ id:i, t:t[0], r:t[1], ...(t[2]||{}) }));
-  const need=c.items[BB.ch.i][2][0].split(" "), used=new Set(), pick=[];
+  const need=bbChIt()[2][0].split(" "), used=new Set(), pick=[];
   /* tiles of the first answer, matched greedily (multi-word tiles first), plus a few distractors */
-  let rest=c.items[BB.ch.i][2][0];
+  let rest=bbChIt()[2][0];
   const byLen=[...T].sort((a,b)=>b.t.length-a.t.length);
   while(rest.trim()){ rest=rest.trim(); const m=byLen.find(t=>(BB_THEMES[c.th].reuse||!used.has(t.id))&&(rest===t.t||rest.startsWith(t.t+" "))&&(c.lv>=3||t.r!=="I")); if(!m) break; used.add(m.id); if(!pick.includes(m)) pick.push(m); rest=rest.slice(m.t.length); }
   const rnd=duRand("bb"+BB.ch.k+"-"+BB.ch.i), others=T.filter(t=>!used.has(t.id)&&(c.lv>=3||(t.r!=="M"&&t.r!=="I"))&&(c.lv>=2||(t.r!=="T"&&t.r!=="P")));
@@ -9518,7 +9524,7 @@ function bbChMiss(ws,it){ const A=it[2].map(x=>" "+x.toLowerCase()+" "), bad=ws.
   return { ok:false, bad, msg:bad.length
     ?tr("Good German, but it doesn't match the sentence above. Swap the marked word!","Gutes Deutsch, aber es passt nicht zum Satz oben. Tausch das markierte Wort!","Buen alemán, pero no coincide con la frase de arriba. ¡Cambia la palabra marcada!")
     :tr("Good German, but it doesn't match the sentence above. Look again!","Gutes Deutsch, aber es passt nicht zum Satz oben. Schau noch mal!","Buen alemán, pero no coincide con la frase de arriba. ¡Mira otra vez!") }; }
-function bbChCheck(ws){ const c=BB_CH[BB.ch.k], it=c.items[BB.ch.i], got=ws.map(w=>w.t).join(" ").toLowerCase(); BB.lastWs=bbNorm(ws,c.th);
+function bbChCheck(ws){ const c=BB_CH[BB.ch.k], it=bbChIt(), got=ws.map(w=>w.t).join(" ").toLowerCase(); BB.lastWs=bbNorm(ws,c.th);
   /* exact answer, or the same words in another order the grammar check accepts (e.g. the weil part first) */
   const bag=x=>x.toLowerCase().split(" ").sort().join(" "), ok=it[2].some(a=>a.toLowerCase()===got)||(it[2].some(a=>bag(a)===bag(got))&&bbCheck(bbNorm(ws,c.th),c.th).ok); BB.ch.tries++;
   BB.ch.all=(BB.ch.all||0)+1;
@@ -9526,6 +9532,7 @@ function bbChCheck(ws){ const c=BB_CH[BB.ch.k], it=c.items[BB.ch.i], got=ws.map(
   else { const g=bbCheck(bbNorm(ws,c.th),c.th); if(!g.ok){ bbDnaAdd(g); bbSave(); } BB.res=g.ok?bbChMiss(ws,it):g; }
   xr(); }
 function bbChNext(){ const c=BB_CH[BB.ch.k]; BB.ch.i++; BB.ch.tries=0; BB.row=[]; BB.res=null; BB.typed=""; BB.tws=null;
+  if(BB.ch.skip&&BB.ch.i>=bbChN()){ const pass=BB.ch.ok>=2; if(pass){ for(let j=0;j<BB.ch.skip;j++) BB.s.ch[j]=Math.max(BB.s.ch[j]||0,1); BB.ch.qs=bbQ("ch"); } bbSave(); BB.ch.done=pass?"pass":"fail"; xr(); return; }
   if(BB.ch.i>=c.items.length){ const st=BB.ch.ok>=5?3:BB.ch.ok>=3?2:1; BB.s.ch[BB.ch.k]=Math.max(BB.s.ch[BB.ch.k]||0,st); BB.ch.qs=bbQ("ch"); bbSave(); BB.ch.done=st; }
   xr(); }
 function bbTile(w,used,k){ return `<button class="bbt" style="--c:${BB_COL[w.r]}" ${used?"disabled":""} onclick="${k==null?`bbAdd(${w.id})`:`bbDel(${k})`}" lang="de">${esc(w.t)}${k==null?`<small>${bbRole(w.r)}</small>`:""}</button>`; }
@@ -9534,6 +9541,12 @@ VIEWS.bridge = function(){
   const top=`<div class="topline"><button class="chip" onclick="${ch?"BB.mode='free';BB.ch=null;BB.row=[];BB.res=null;BB.typed='';BB.tws=null;xr()":"go('games')"}">${uiBack()} ${ch?tr("Bridge Builder","Brückenbauer","Constructor de puentes"):tr("Games","Spiele","Juegos")}</button><span>🇩🇪 ${tr("German only","Nur Deutsch","Solo alemán")}</span></div>`;
   const stats=`<div class="bbstats"><div><b>${BB.s.pts}</b><span>${tr("points","Punkte","puntos")}</span></div><div><b>${bbRank(lv)}</b><span>${tr("Level","Level","Nivel")} ${lv}${next?` · ${next-BB.s.pts} ${tr("to go","fehlen","faltan")}`:""}</span></div><div><b>${BB.s.streak?"🔥 "+BB.s.streak:"–"}</b><span>${tr("streak","Serie","racha")}</span></div></div>
     ${next?`<div class="exbar" style="margin:6px 0 12px"><i style="width:${Math.round((BB.s.pts-(BB_LV[lv-1]||0))/(next-(BB_LV[lv-1]||0))*100)}%"></i></div>`:""}`;
+  if(ch&&BB.ch.skip&&BB.ch.done){ const K=BB.ch.skip, pass=BB.ch.done==="pass";
+    return top+bbDone({ title:pass?tr("Unlocked! 🎉","Freigeschaltet! 🎉","¡Desbloqueado! 🎉"):tr("Almost!","Fast!","¡Casi!"),
+      sub:pass?tr(`${BB.ch.ok} of 3 on the first try. Challenges 1–${K+1} are open.`,`${BB.ch.ok} von 3 beim ersten Versuch. Challenges 1–${K+1} sind offen.`,`${BB.ch.ok} de 3 a la primera. Los retos 1–${K+1} están abiertos.`)
+        :tr(`${BB.ch.ok} of 3 on the first try. You need 2. Play challenge ${K} first, or test again.`,`${BB.ch.ok} von 3 beim ersten Versuch. Du brauchst 2. Spiel erst Challenge ${K} oder versuch es noch mal.`,`${BB.ch.ok} de 3 a la primera. Necesitas 2. Juega primero el reto ${K} o vuelve a intentarlo.`),
+      xp:BB.ch.xp||0, combo:0, tries:BB.ch.all||0, ok:3, best:BB.ch.best, extra:(BB.ch.qs||[]).map(([a,b])=>`<div class="bbqdone">✅ ${esc(a)} <b>+${b}</b></div>`).join(""),
+      go:pass?`bbChStart(${K})`:"BB.mode='free';BB.ch=null;BB.row=[];BB.res=null;BB.typed='';BB.tws=null;xr()" }); }
   if(ch&&BB.ch.done) return top+bbDone({ stars:BB.ch.done, title:tr("Challenge done!","Challenge geschafft!","¡Reto superado!"),
     sub:tr(`${BB.ch.ok} of 5 on the first try.`,`${BB.ch.ok} von 5 beim ersten Versuch.`,`${BB.ch.ok} de 5 a la primera.`),
     xp:BB.ch.xp||0, combo:0, tries:BB.ch.all||0, ok:5, best:BB.ch.best, extra:(BB.ch.qs||[]).map(([a,b])=>`<div class="bbqdone">✅ ${esc(a)} <b>+${b}</b></div>`).join(""), go:"BB.mode='free';BB.ch=null;BB.row=[];BB.res=null;BB.typed='';BB.tws=null;xr()" });
@@ -9545,7 +9558,7 @@ VIEWS.bridge = function(){
   const ORDER=["Je","U","S","Ar","V","M","H","I","Mi","Pa","Pj","N","D","O","Q","B","T","P","A","Cp","X","Z","R","K","De"], groups=ORDER.concat([...new Set(tiles.map(t=>t.r))].filter(r=>!ORDER.includes(r))).filter(g=>tiles.some(t=>t.r===g));
   const bad=new Set(r&&!r.ok?r.bad||[]:[]);
   return top+`<h2 style="margin:4px 0">🌉 ${tr("Bridge Builder","Brückenbauer","Constructor de puentes")}</h2>${stats}
-    ${ch?`<div class="card" style="margin-bottom:10px"><div class="ecmeta">🎯 ${tr("Challenge","Challenge","Reto")} ${tr("Level","Level","Nivel")} ${c.lv} · ${BB.ch.i+1} / ${c.items.length}</div><div style="font-size:20px;font-weight:800;margin-top:4px">${esc(tr(c.items[BB.ch.i][0],c.items[BB.ch.i][0],c.items[BB.ch.i][1]))}</div>${bbSkills(c.lv,true)}</div>`
+    ${ch?`<div class="card" style="margin-bottom:10px"><div class="ecmeta">${BB.ch.skip?`⏭️ ${tr(`Test out to challenge ${BB.ch.skip+1}`,`Einstufung bis Challenge ${BB.ch.skip+1}`,`Prueba para saltar al reto ${BB.ch.skip+1}`)} · ${BB.ch.i+1} / ${bbChN()} · <span class="note">${tr("2 right on the first try unlocks it","2 beim ersten Versuch richtig schaltet frei","2 a la primera lo desbloquean")}</span>`:`🎯 ${tr("Challenge","Challenge","Reto")} ${tr("Level","Level","Nivel")} ${c.lv} · ${BB.ch.i+1} / ${bbChN()}`}</div><div style="font-size:20px;font-weight:800;margin-top:4px">${esc(tr(bbChIt()[0],bbChIt()[0],bbChIt()[1]))}</div>${bbSkills(c.lv,true)}</div>`
       :`<div class="row" style="gap:6px;margin:0 0 8px"><button class="chip" onclick="document.getElementById('bbq').scrollIntoView({behavior:'smooth'})">📜 ${tr("Quests","Quests","Misiones")} ${(()=>{ const q=bbQs(); return q.ids.filter(id=>(q.p[id]||0)>=BB_Q[id].n).length; })()}/3</button><button class="chip" onclick="document.getElementById('bblg').scrollIntoView({behavior:'smooth'})">🏆 ${tr("League","Liga","Liga")}${LG.data&&LG.data.mine?` #${LG.data.mine.rank}`:""}</button>${BB.s.dna&&Object.keys(BB.s.dna).length?`<button class="chip" onclick="document.getElementById('bbdna').scrollIntoView({behavior:'smooth'})">🧬 ${tr("Your grammar","Deine Grammatik","Tu gramática")}</button>`:""}</div>
       <div class="bbround"><span>🌉 ${tr("This bridge","Diese Brücke","Este puente")}</span><div>${Array.from({length:BB_ROUND},(_,i)=>`<i class="${i<(BB.rd?BB.rd.n:0)?"on":""}"></i>`).join("")}</div><b>${BB.rd?BB.rd.n:0}/${BB_ROUND}</b></div>
       <div class="ecmeta" style="margin:2px 0 0">🎯 ${tr("Practising","Du übst","Practicas")}</div>${BB_THEMES[BB.th].lv?bbSkills(BB_THEMES[BB.th].lv,true):bbSkills(Math.min(lv,3))}
@@ -9568,7 +9581,7 @@ VIEWS.bridge = function(){
     ${r&&r.ok?"":`<div class="row" style="gap:8px;margin:10px 0"><button class="btn primary" style="flex:2" ${row.length||typing?"":"disabled"} onclick="bbGo()">✅ ${tr("Check","Prüfen","Comprobar")}</button>${typing?"":`<button class="btn secondary" style="flex:1" ${row.length?"":"disabled"} onclick="BB.row.pop();BB.res=null;xr()">↩</button>`}<button class="btn secondary" style="flex:1" ${row.length||typing?"":"disabled"} onclick="bbClear()">🗑</button></div>`}
     <div class="card bbtray" dir="ltr">${typing?`<div class="ecmeta">📖 ${tr("Words you can use (tap to add)","Wörter, die du nutzen kannst (tippen zum Einfügen)","Palabras que puedes usar (toca para añadir)")}</div>`:""}${groups.map(g=>`<div class="bbg">${tiles.filter(t=>t.r===g).map(t=>typing?`<button class="bbt sm" style="--c:${BB_COL[t.r]}" lang="de" onclick="bbIns('${esc(t.t).replace(/'/g,"&#39;")}')">${esc(t.t)}</button>`:bbTile(t,BB.row.includes(t.id)&&!BB_THEMES[BB.th].reuse)).join("")}</div>`).join("")}</div>
     ${ch?"":`<div class="card"><h3 style="margin:0 0 6px">🎯 ${tr("Challenges","Challenges","Retos")}</h3><p class="note" style="margin:0 0 8px">${tr("Build the German sentence for each English one. 5 sentences each.","Bau zu jedem englischen Satz den deutschen. Je 5 Sätze.","Construye la frase alemana para cada frase en inglés. 5 frases cada uno.")}</p>
-      ${BB_CH.map((cc,k)=>{ const open=k===0||(BB.s.ch[k-1]||0)>0; return `<button class="ectop" style="width:100%;background:none;border:0;border-top:1px solid var(--line);padding:10px 0;font:inherit;cursor:${open?"pointer":"default"};opacity:${open?1:.5}" ${open?`onclick="bbChStart(${k})"`:"disabled"}><span>${["1 · Ich lerne Deutsch.","2 · Heute lerne ich Deutsch.","3 · Ich möchte Deutsch lernen.","4 · Gestern habe ich Deutsch gelernt. <small class=\"note\">B1</small>","5 · …, weil ich hier lebe. <small class=\"note\">B1</small>","6 · Ich biete dem Gast ein Zimmer. <small class=\"note\">A2–B1</small>","7 · Ich rufe dich morgen an. <small class=\"note\">A2</small>","8 · Wenn ich Zeit habe, lese ich. <small class=\"note\">B1</small>","9 · Der Mann, der hier wohnt. <small class=\"note\">B1</small>","10 · …, um hier zu arbeiten. <small class=\"note\">B1</small>","11 · Wenn ich Zeit hätte, würde ich reisen. <small class=\"note\">B2</small>","12 · Das Haus wurde 1900 gebaut. <small class=\"note\">B2</small>","13 · Ich habe arbeiten müssen. <small class=\"note\">C1</small>","14 · Je mehr …, desto besser … <small class=\"note\">B2–C1</small>","15 · Er sagt, er habe keine Zeit. <small class=\"note\">C1</small>","16 · Das gestern gekaufte Auto … <small class=\"note\">C1–C2</small>"][k]}</span><b>${BB.s.ch[k]?"⭐".repeat(BB.s.ch[k]):open?"▶️":"🔒"}</b></button>`; }).join("")}</div>
+      ${BB_CH.map((cc,k)=>{ const open=k===0||(BB.s.ch[k-1]||0)>0; return `<button class="ectop" style="width:100%;background:none;border:0;border-top:1px solid var(--line);padding:10px 0;font:inherit;cursor:pointer;opacity:${open?1:.6};display:flex;align-items:center;gap:8px;flex-wrap:nowrap;text-align:left" onclick="${open?`bbChStart(${k})`:`bbSkipStart(${k})`}"><span style="flex:1;min-width:0">${["1 · Ich lerne Deutsch.","2 · Heute lerne ich Deutsch.","3 · Ich möchte Deutsch lernen.","4 · Gestern habe ich Deutsch gelernt. <small class=\"note\">B1</small>","5 · …, weil ich hier lebe. <small class=\"note\">B1</small>","6 · Ich biete dem Gast ein Zimmer. <small class=\"note\">A2–B1</small>","7 · Ich rufe dich morgen an. <small class=\"note\">A2</small>","8 · Wenn ich Zeit habe, lese ich. <small class=\"note\">B1</small>","9 · Der Mann, der hier wohnt. <small class=\"note\">B1</small>","10 · …, um hier zu arbeiten. <small class=\"note\">B1</small>","11 · Wenn ich Zeit hätte, würde ich reisen. <small class=\"note\">B2</small>","12 · Das Haus wurde 1900 gebaut. <small class=\"note\">B2</small>","13 · Ich habe arbeiten müssen. <small class=\"note\">C1</small>","14 · Je mehr …, desto besser … <small class=\"note\">B2–C1</small>","15 · Er sagt, er habe keine Zeit. <small class=\"note\">C1</small>","16 · Das gestern gekaufte Auto … <small class=\"note\">C1–C2</small>"][k]}</span><b>${BB.s.ch[k]?"⭐".repeat(BB.s.ch[k]):open?"▶️":`<span class="bbskip">⏭️ ${tr("Test out","Überspringen","Saltar")}</span>`}</b></button>`; }).join("")}</div>
     ${ch?"":bbQCard()+lgCard()+bbDnaCard()}
     <p class="note center">${tr("Your points are saved on this device.","Deine Punkte werden auf diesem Gerät gespeichert.","Tus puntos se guardan en este dispositivo.")}</p>`}`;
 };
