@@ -1,0 +1,17 @@
+FIX={
+"Pía bezahlt und geht nach Hause.":"Pía:S|bezahlt:V|und:J|geht:V|nach Hause:P",
+"Seine Mutter heißt Anna.":"Seine Mutter:S|heißt:V|Anna:Pd",
+"Am Sonntag essen alle zusammen.":"Am Sonntag:T|essen:V|alle:S|zusammen:Mo",
+"Sie trinkt einen Tee und liest die Zeitung.":"Sie:S|trinkt:V|einen Tee:O|und:J|liest:V|die Zeitung:O",
+"Die Sonne scheint und es ist warm.":"Die Sonne:S|scheint:V|und:J|es:S|ist:V|warm:Pd",
+"Kiko ist müde, aber froh.":"Kiko:S|ist:V|müde:Pd|aber:J|froh:Pd",
+"Tomo möchte die Wohnung unbedingt haben.":"Tomo:S|möchte:M|die Wohnung:O|unbedingt:Mo|haben:I",
+"Ola muss drei Tage im Bett bleiben.":"Ola:S|muss:M|drei Tage:T|im Bett:P|bleiben:I",
+"Sie trinkt viel Tee und schläft viel.":"Sie:S|trinkt:V|viel Tee:O|und:J|schläft:V|viel:Mo",
+"Am Samstag hatte Zuzu Geburtstag.":"Am Samstag:T|hatte:V|Zuzu:S|Geburtstag:O",
+"Alle haben getanzt und gesungen.":"Alle:S|haben:H|getanzt:Pa|und:J|gesungen:Pa",
+"Zuzu hat viele Geschenke bekommen.":"Zuzu:S|hat:H|viele Geschenke:O|bekommen:Pa",
+"Die Party war erst um Mitternacht zu Ende.":"Die Party:S|war:V|erst um Mitternacht:T|zu Ende:Pd",
+"Jetzt kann sie schon gut einkaufen und telefonieren.":"Jetzt:T|kann:M|sie:S|schon:T|gut:Mo|einkaufen:I|und:J|telefonieren:I",
+"Mit PonteTalk übt sie jeden Abend.":"Mit PonteTalk:Mo|übt:V|sie:S|jeden Abend:T",
+}
