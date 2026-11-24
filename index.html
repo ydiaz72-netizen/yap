@@ -265,6 +265,9 @@
   .bbmode button{border:0;background:none;font:inherit;font-weight:800;padding:9px;border-radius:11px;color:var(--muted);cursor:pointer}.bbmode button.on{background:#fff;color:var(--ink,#1d2433);box-shadow:0 1px 4px rgba(0,0,0,.1)}
   .bbtype input{width:100%;box-sizing:border-box;font:inherit;font-size:18px;font-weight:700;padding:14px;border:2px solid #5B8FD8;border-radius:16px;background:#fff;margin-bottom:10px}
   .bbt.sm{font-size:14px;min-height:36px;padding:6px 10px}
+  .palpwr,.palon{display:flex;align-items:center;gap:12px;border-radius:18px;padding:12px 14px;margin:10px 0}
+  .palpwr{background:#FDF2D8}.palon{background:#FCE6DF}
+  .palpwr b,.palon b{display:block;font-size:15px;line-height:1.3}.palpwr span,.palon span{display:block;font-size:13px;color:var(--muted);margin-top:2px}
   .palav{display:inline-flex;align-items:center;justify-content:center;border-radius:50%;flex:none}
   .paltap{display:flex;gap:12px;align-items:center;background:var(--ink);color:#fff;border-radius:18px;padding:14px;margin:6px 0 12px}
   .paltap b{display:block;font-size:15px;line-height:1.3}.paltap small{display:block;color:#D8DEE8;font-size:12px;margin-top:3px}
@@ -920,7 +923,7 @@
 <script>/* Extra interface languages live in /i18n/<code>.js (English text → translation). Load the chosen one before the app starts. */
 (function(){ try{ var X=["tr","uk","fa","ur"], v=localStorage.getItem("pt_ui");
   if(!v){ var n=String((navigator.languages&&navigator.languages[0])||navigator.language||"").slice(0,2).toLowerCase(); if(X.indexOf(n)>-1) v=n; }
-  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=28"><\/script>'); }catch(e){} })();</script>
+  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=29"><\/script>'); }catch(e){} })();</script>
 
 <script>
 /* ===================== CONTENT ===================== */
@@ -1234,6 +1237,37 @@ function palKind(k){ const P=PALS[k]; return tr(P.k[0],P.k[1],P.k[2]); }
 function palTrait(k){ const P=PALS[k]; return tr(P.t[0],P.t[1],P.t[2]); }
 function palPower(k){ const P=PALS[k]; return tr(P.p[0],P.p[1],P.p[2]); }
 const PAL_LOBBY_MS=3*3600e3;
+/* ⚡ powers in Speak Up (one phone): once per game per Pal player */
+function palCan(p){ return !!(p&&p.pal&&PALS[p.pal]&&!p.pwUsed&&S.game!=="charades"); }
+function palLeader(p){ let L=null; S.players.forEach(x=>{ if(x!==p&&x.pts>0&&(!L||x.pts>L.pts)) L=x; }); return L; }
+function palWhyNot(p){ const k=p.pal, c=S.current||{};
+  if(k==="bruno"&&c.f==="quick") return tr("Works on Role Play or What would you do? questions.","Klappt bei Rollenspiel oder Was würdest du tun?","Funciona en Juego de rol o ¿Qué harías?");
+  if(k==="zuzu"&&!palLeader(p)) return tr("Nobody else has points yet.","Noch hat niemand sonst Punkte.","Nadie más tiene puntos todavía.");
+  if(k==="kiko") return tr("Kiko's power is used on the 'Pass the phone' screen.","Kikos Kraft nutzt du beim „Handy weitergeben“.","El poder de Kiko se usa en «Pasa el móvil».");
+  return ""; }
+const PAL_ON={ pia:["New question, no cost!","Neue Frage, ganz ohne Nachteil!","¡Nueva pregunta, sin coste!"],
+  bruno:["Double points this turn!","Doppelte Punkte in diesem Zug!","¡Puntos dobles en este turno!"],
+  fina:["The lowest coach score is crossed out this turn.","Die niedrigste Bewertung ist in diesem Zug gestrichen.","La puntuación más baja queda tachada en este turno."],
+  tomo:["+15 seconds on the timer!","+15 Sekunden auf der Uhr!","¡+15 segundos en el reloj!"],
+  ola:["The group can help: hints are open and you keep the no-hints bonus.","Die Gruppe darf helfen: Tipps sind offen und der Bonus bleibt.","El grupo puede ayudar: pistas abiertas y conservas el bonus."],
+  otto:["You may answer in either language this turn.","Du darfst in beiden Sprachen antworten.","Puedes responder en cualquiera de los dos idiomas."],
+  zuzu:["Point stolen!","Punkt geklaut!","¡Punto robado!"],
+  rosa:["Act it out instead of saying it!","Spiel es vor, statt es zu sagen!","¡Actúalo en vez de decirlo!"] };
+function palUse(){ const p=S.players[S.turn]; if(!palCan(p)||palWhyNot(p)) return; const k=p.pal; p.pwUsed=true; S.pwOn=k;
+  if(k==="pia"){ S.current=nextPrompt(p); S.hintsUsed=false; }
+  if(k==="ola"){ S.hintsUsed=true; }
+  if(k==="zuzu"){ const L=palLeader(p); L.pts-=1; p.pts+=1; p.bonus=(p.bonus||0)+1; S.pwNote=L.name; }
+  try{ beep(); }catch(e){} render(); }
+function palJump(i){ const p=S.players[i]; if(!palCan(p)||p.pal!=="kiko"||i<=S.turn) return; const a=S.turn;
+  [S.players[a],S.players[i]]=[S.players[i],S.players[a]]; S.log.forEach(t=>{ if(t.pi===a) t.pi=i; else if(t.pi===i) t.pi=a; });
+  S.players[a].pwUsed=true; try{ beep(); }catch(e){} render(); }
+function palPowerBox(){ const p=S.players[S.turn]; if(!p||!p.pal||!PALS[p.pal]||S.game==="charades") return "";
+  const k=p.pal, P=PALS[k];
+  if(S.pwOn===k) return `<div class="palon">${palAv(k,40)}<div><b>⚡ ${tr(`${P.n}'s power is on!`,`${P.n}s Kraft ist aktiv!`,`¡El poder de ${P.n} está activo!`)}</b><span>${k==="zuzu"?tr(`Stole a point from ${esc(S.pwNote||"")}.`,`Hat ${esc(S.pwNote||"")} einen Punkt geklaut.`,`Le robó un punto a ${esc(S.pwNote||"")}.`):tr(...PAL_ON[k])}</span></div></div>`;
+  if(p.pwUsed) return `<p class="note center" style="margin:8px 0 0">⚡ ${tr(`${P.n}'s power was already used this game.`,`${P.n}s Kraft wurde schon benutzt.`,`El poder de ${P.n} ya se usó en esta partida.`)}</p>`;
+  const why=palWhyNot(p);
+  return `<div class="palpwr">${palAv(k,40)}<div style="flex:1;min-width:0"><b>⚡ ${palPower(k)}</b><span>${why||tr("Once per game.","Einmal pro Spiel.","Una vez por partida.")}</span></div>${why?"":`<button class="btn primary" style="width:auto;margin:0;padding:10px 14px" onclick="palUse()">${tr("Use","Nutzen","Usar")}</button>`}</div>`; }
+
 function palSave(open){ try{ localStorage.setItem("pt_pal_lobby",JSON.stringify({ open, ts:Date.now(), players:S.players })); }catch(e){} }
 function palLobby(){ try{ const L=JSON.parse(localStorage.getItem("pt_pal_lobby")||"null"); if(L&&L.open&&Date.now()-L.ts<PAL_LOBBY_MS) return L; }catch(e){} return null; }
 function palJoin(){
@@ -1315,7 +1349,7 @@ function bi(en,de,es){ if(es!==undefined) return tr(en,de,es); return `${en} <sp
 function uiSet(l){
   if(!UI_CODES.includes(l)) return;
   if(UI_EXTRA.includes(l) && !I18N_DATA[l]){
-    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=28";
+    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=29";
     sc.onload=()=>uiSet(l); sc.onerror=()=>bToast(offlineMsg()); document.head.appendChild(sc); return;
   }
   UI=l; I18N_T=null; I18N_M.clear();
@@ -1452,7 +1486,7 @@ palmeet(){
   <div class="center" style="margin-top:6px">${palAv(k,180)}
     <h2 style="margin:12px 0 2px">${tr(`Hi, I'm ${P.n}!`,`Hallo, ich bin ${P.n}!`,`¡Hola, soy ${P.n}!`)}</h2>
     <p class="sub" style="margin:0 0 16px">${palKind(k)} · ${palTrait(k)}</p></div>
-  <div class="card"><div class="palpw">⚡ ${tr("My power","Meine Kraft","Mi poder")}</div><b style="font-size:17px">${palPower(k)}</b> <span class="note">(${tr("coming soon","bald","pronto")})</span></div>
+  <div class="card"><div class="palpw">⚡ ${tr("My power","Meine Kraft","Mi poder")}</div><b style="font-size:17px">${palPower(k)}</b><div class="note" style="margin:4px 0 0">${tr("Use it once per game in Speak Up.","Einmal pro Spiel in Speak Up nutzbar.","Úsalo una vez por partida en Speak Up.")}</div></div>
   <p class="note">${tr("Play a language game with friends. When a game night starts, tap me on the host's phone and I join as you.","Spiel ein Sprachspiel mit Freunden. Wenn ein Spieleabend startet, halte mich ans Handy der Gastgeberin und ich spiele als du mit.","Juega a un juego de idiomas con amigos. Cuando empiece una noche de juegos, acércame al móvil del anfitrión y me uno como tú.")}</p>
   <button class="btn primary" onclick="newGame()">🎲 ${tr("Start a game night","Spieleabend starten","Empezar una noche de juegos")}</button>
   <button class="btn secondary" onclick="go('online')">🌐 ${tr("Join an online game","Einem Online-Spiel beitreten","Unirse a un juego en línea")}<small>${tr("with the host's room code","mit dem Raumcode der Gastgeberin","con el código de sala del anfitrión")}</small></button>
@@ -1472,7 +1506,7 @@ paljoin(){
     <label class="lbl">${tr("My level","Mein Niveau","Mi nivel")}</label>
     <div class="row">${LVL_ORDER.map(i=>[LEVELS[i],i]).map(([l,i])=>`<button class="chip ${d.level===i?"on":""}" onclick="S.draft.name=($('palname')||{}).value||'';setDraft('level',${i})">${l.code} · ${T[d.lang].levels[i]}</button>`).join("")}</div>
     <div class="err">${esc(S.err||"")}</div></div>
-  <div class="card" style="background:var(--sun-soft)"><div class="palpw">⚡ ${tr("Your power","Deine Kraft","Tu poder")}</div>${palPower(k)} <span class="note">(${tr("coming soon","bald","pronto")})</span></div>
+  <div class="card" style="background:var(--sun-soft)"><div class="palpw">⚡ ${tr("Your power","Deine Kraft","Tu poder")}</div>${palPower(k)}<div class="note" style="margin:4px 0 0">${tr("Use it once per game in Speak Up.","Einmal pro Spiel in Speak Up nutzbar.","Úsalo una vez por partida en Speak Up.")}</div></div>
   <button class="btn primary" onclick="palJoin()">${tr(`Join as ${P.n}`,`Als ${P.n} mitspielen`,`Unirme como ${P.n}`)}</button>
   <p class="note center">${tr("Each card is one player. Then hand the phone back to the host.","Jede Karte ist eine Person. Danach das Handy zurückgeben.","Cada carta es un jugador. Luego devuelve el móvil al anfitrión.")}</p>`;
 },
@@ -1535,11 +1569,12 @@ handoff(){
   return `
   <div class="topline"><span>${tr("Round","Runde","Ronda")} ${S.round}/${S.rounds}</span><button class="chip" onclick="confirmQuit()">${tr("End game","Spiel beenden","Terminar juego")}</button></div>
   <div class="handoff">
-    <div class="emoji">📱👉</div>
+    <div class="emoji">${p.pal&&PALS[p.pal]?palAv(p.pal,96):"📱👉"}</div>
     <p class="sub" style="margin:10px 0 0">${tr("Pass the phone to","Gib das Handy weiter an","Pasa el móvil a")}</p>
     <div class="big-name" style="color:${COLORS[i%COLORS.length]}">${esc(p.name)}</div>
     <div>${langBadge(p.lang)} <span class="badge b-fmt">${LEVELS[p.level].code}</span></div>
     <button class="btn primary" style="margin-top:28px" onclick="showChallenge()">${T[p.lang].ready}</button>
+    ${S.players.map((x,j)=>j>S.turn&&x.pal==="kiko"&&palCan(x)?`<button class="btn secondary" style="margin-top:10px" onclick="palJump(${j})">${palAv("kiko",28)} ${tr(`${esc(x.name)} jumps in! (Kiko's power)`,`${esc(x.name)} springt vor! (Kikos Kraft)`,`¡${esc(x.name)} se adelanta! (poder de Kiko)`)}</button>`:"").join("")}
   </div>`;
 },
 challenge(){
@@ -1558,6 +1593,7 @@ challenge(){
     ${S.hintsUsed?"":`<p class="note" style="margin:6px 0 0">🙈 ${T[L].nohint}</p>`}
     <div class="hints ${S.hintsUsed?"show":""}" id="hints">${c.w.map((w,k)=>`<span class="hint">${esc(w)}${romP((c.wr||[])[k])}</span>`).join("")}</div>
   </div>
+  ${palPowerBox()}
   <div id="timerBox" class="hidden">
     <div class="timerrow"><div class="timer" id="timer">0:00</div>${soundBtn()}</div>
     <div class="bar" id="bar"><i id="barFill"></i></div>
@@ -1576,7 +1612,7 @@ feedback(){
   <div class="coach coach-score ${S.needRating?"need":""}">
     <h3>🧑‍🏫 ${tr("Coach score","Bewertung","Puntuación del coach")}</h3>
     <p style="margin:0 0 10px;font-size:15px">${tr(`The best <b>${langName}</b> speaker at the table judges ${esc(p.name)}'s answer: grammar, words and how natural it sounded.`,`Die Person, die am besten <b>${T[L].nameDe}</b> spricht, bewertet die Antwort von ${esc(p.name)}: Grammatik, Wörter und wie natürlich es klang.`,`Quien mejor hable <b>${lname(L).toLowerCase()}</b> en la mesa valora la respuesta de ${esc(p.name)}: gramática, palabras y naturalidad.`)}</p>
-    <div class="ratings">${RATINGS.map(r=>`
+    <div class="ratings">${RATINGS.filter(r=>!(S.pwOn==="fina"&&r.v===1)).map(r=>`
       <button class="rate ${S.turnRating===r.v?"on":""}" onclick="setRating(${r.v})">
         <span class="e">${r.e}</span><b>${tr(r.en,r.de,r.es)}</b><span class="rp">+${r.pts}</span>
       </button>`).join("")}</div>
@@ -1584,7 +1620,8 @@ feedback(){
   </div>
   <div class="bonusbox">
     <h3 style="margin:0 0 8px">🎁 Bonus</h3>
-    <div class="bonus ${S.hintsUsed?"off":"got"}"><span>🙈 <b>${tr("No hints","Ohne Hilfe","Sin pistas")}</b></span><span class="bp">${S.hintsUsed?"–":"+2"}</span></div>
+    <div class="bonus ${S.hintsUsed&&S.pwOn!=="ola"?"off":"got"}"><span>🙈 <b>${tr("No hints","Ohne Hilfe","Sin pistas")}</b></span><span class="bp">${S.hintsUsed&&S.pwOn!=="ola"?"–":"+2"}</span></div>
+    ${S.pwOn&&PALS[S.pwOn]&&S.pwOn!=="zuzu"?`<div class="bonus got"><span>⚡ <b>${esc(PALS[S.pwOn].n)}: ${tr(...PAL_ON[S.pwOn])}</b></span><span class="bp">${S.pwOn==="bruno"?"×2":"✓"}</span></div>`:""}
     <button class="bonus ${S.timeUp?(S.keptTalking?"got":"off"):"off"}" onclick="toggleKept()" ${S.timeUp?"":"disabled"}>
       <span>🎤 <b>${tr("Kept talking to the end","Bis zum Ende gesprochen","Habló hasta el final")}</b>${S.timeUp?`<br><span class="note">${S.keptTalking?tr("Tap to remove if they went quiet","Tippen zum Entfernen, falls Pause","Toca para quitar si se quedó callado"):tr("Tap if they really kept talking","Tippen, wenn wirklich durchgesprochen","Toca si de verdad siguió hablando")}</span>`:`<br><span class="note">${tr("Finished before the timer","Vor Ablauf fertig","Terminó antes del tiempo")}</span>`}</span>
       <span class="bp">${S.timeUp&&S.keptTalking?"+2":"–"}</span>
@@ -1697,7 +1734,7 @@ function removePlayer(i){ S.players.splice(i,1); S.palJustJoined=null; render();
 function toSettings(){ S.palJustJoined=null; if(S.players.length>=2) palSave(false); if(S.players.length<2){ S.err=tr(`Add at least 2 players`,`Mindestens 2 Spieler`,`Añade al menos 2 jugadores`); render(); return; } S.err=""; go("settings"); }
 function setOpt(k,v){ S[k]=v; render(); }
 function setRounds(d){ S.rounds=Math.min(10,Math.max(1,S.rounds+d)); render(); }
-function resetScores(){ S.players.forEach(p=>{p.pts=0;p.coach=0;p.bonus=0;p.cact=0;p.cguess=0;p.ratings=[];p.reacts={clear:0,creative:0,funny:0,learned:0};p.tips=[];}); }
+function resetScores(){ S.players.forEach(p=>{p.pwUsed=false;p.pts=0;p.coach=0;p.bonus=0;p.cact=0;p.cguess=0;p.ratings=[];p.reacts={clear:0,creative:0,funny:0,learned:0};p.tips=[];}); }
 function startGame(){
   try{ audio = audio || new (window.AudioContext||window.webkitAudioContext)(); }catch(e){}
   keepAwake();
@@ -1705,7 +1742,7 @@ function startGame(){
   if(S.game==="charades"){ cStartGame(); return; }
   bump("started"); go("handoff");
 }
-function showChallenge(){ keepAwake(); S.current=nextPrompt(S.players[S.turn]); S.rerolled=false; S.hintsUsed=false; S.timeUp=false; go("challenge"); }
+function showChallenge(){ keepAwake(); S.current=nextPrompt(S.players[S.turn]); S.rerolled=false; S.hintsUsed=false; S.timeUp=false; S.pwOn=null; S.pwNote=""; go("challenge"); }
 function reroll(){ S.current=nextPrompt(S.players[S.turn]); S.rerolled=true; S.hintsUsed=false; render(); }
 function openHints(){
   S.hintsUsed=true;
@@ -1714,7 +1751,7 @@ function openHints(){
 }
 function startTimer(){
   try{ if(audio && audio.state==="suspended") audio.resume(); }catch(e){}
-  S.total = S.current.f==="quick" ? Math.round(S.time/2) : S.time; S.left=S.total; S.lastCount=null;
+  S.total = (S.current.f==="quick" ? Math.round(S.time/2) : S.time)+(S.pwOn==="tomo"?15:0); S.left=S.total; S.lastCount=null;
   $("timerBox").classList.remove("hidden"); $("startBtn").classList.add("hidden"); $("doneBtn").classList.remove("hidden");
   const rb=$("rerollBtn"); if(rb) rb.classList.add("hidden");
   tick(); S.timerId=setInterval(()=>{ S.left--; tick(); if(S.left<=0){ stopTimer(true); } },1000);
@@ -1730,7 +1767,7 @@ function tick(){
 function stopTimer(ended){ if(S.timerId){ clearInterval(S.timerId); S.timerId=null; } if(ended){ S.timeUp=true; beep(); const t=$("timer"); if(t) t.textContent="⏰ "+tr("Time!","Zeit!","¡Tiempo!"); const d=$("doneBtn"); if(d) d.innerHTML="✓ "+tr("Time's up – feedback","Zeit um – Feedback","Se acabó el tiempo – feedback"); } }
 function finishTurn(){ stopTimer(false); S.turnReacts={clear:0,creative:0,funny:0,learned:0}; S.turnRating=0; S.turnAns=""; S.turnTip=""; S.needRating=false; S.keptTalking=!!S.timeUp; go("feedback"); }
 function toggleKept(){ if(!S.timeUp) return; S.keptTalking=!S.keptTalking; const y=window.scrollY; render(); window.scrollTo(0,y); }
-function turnBonus(){ const b=[]; if(!S.hintsUsed) b.push({k:"nohints",e:"🙈",en:"No hints",de:"Ohne Hilfe",es:"Sin pistas",pts:2}); if(S.timeUp && S.keptTalking) b.push({k:"kept",e:"🎤",en:"Kept talking",de:"Bis zum Ende gesprochen",es:"Habló hasta el final",pts:2}); return b; }
+function turnBonus(){ const b=[]; if(!S.hintsUsed||S.pwOn==="ola") b.push({k:"nohints",e:"🙈",en:"No hints",de:"Ohne Hilfe",es:"Sin pistas",pts:2}); if(S.timeUp && S.keptTalking) b.push({k:"kept",e:"🎤",en:"Kept talking",de:"Bis zum Ende gesprochen",es:"Habló hasta el final",pts:2}); return b; }
 function setRating(v){ S.turnRating=v; S.needRating=false; const y=window.scrollY; render(); window.scrollTo(0,y); }
 function react(k){ S.turnReacts[k]++; const y=window.scrollY; render(); window.scrollTo(0,y); }
 function resetReacts(){ S.turnReacts={clear:0,creative:0,funny:0,learned:0}; render(); }
@@ -1745,6 +1782,7 @@ function nextTurn(){
   p.coach+=R.pts; p.ratings.push(R.v);
   p.bonus=(p.bonus||0)+bonus.reduce((a,b)=>a+b.pts,0);
   let gained=R.pts+bonus.reduce((a,b)=>a+b.pts,0); for(const k in S.turnReacts){ p.reacts[k]+=S.turnReacts[k]; gained+=S.turnReacts[k]; }
+  if(S.pwOn==="bruno"){ p.bonus=(p.bonus||0)+gained; gained*=2; }
   p.pts+=gained;
   if(isLastTurn()){ bump("completed"); go("results"); return; }
   S.turn++; if(S.turn>=S.players.length){ S.turn=0; S.round++; }
