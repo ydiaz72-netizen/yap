@@ -290,6 +290,10 @@
   .palok{display:flex;align-items:center;gap:12px;background:#DDEFEC;font-size:17px}
   .palpw{font-size:12px;font-weight:800;color:#C2401F;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px}
   .palrow{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}.palmini{border:0;background:none;padding:2px;cursor:pointer;border-radius:50%}
+  .rdrow{display:flex;align-items:center;gap:10px}.rdcard{display:flex;align-items:center;gap:12px;width:100%;font:inherit;cursor:pointer;margin-bottom:10px;border:1px solid var(--line)}
+  .rdsent{font-size:24px;font-weight:800;line-height:1.3;text-align:center;margin:6px 0}.rdmean{background:var(--soft,#F6F2EC);border-radius:14px;padding:10px 12px;text-align:center;font-size:17px;color:#2A8C82;font-weight:700;margin-top:8px}
+  .rdsofar{color:var(--muted,#6B7A8F);font-size:15px;line-height:1.5;margin:4px 2px 10px}.rddots{display:flex;gap:5px;margin:6px 0 10px}.rddots i{flex:1;height:6px;border-radius:9px;background:var(--line,#E8E2D8)}.rddots i.on{background:#2A8C82}.rddots i.cur{background:var(--coral,#F25C3B)}
+  .rdq{display:flex;gap:8px;margin-top:14px}.rdq .btn{flex:1}.rdfb{margin:14px 0 10px;padding:10px 12px;border-radius:12px;font-weight:700}.rdfb.ok{background:#E3F4EC;color:#1E7B52}.rdfb.no{background:#FDEBE7;color:#B3361C}
   .vcpx{text-align:start;margin:10px 0 0;border:1px solid var(--line);font-size:14px}.vcpx .bbwrow{margin-top:8px}.bbwhy{margin-top:10px;background:#fff;border-radius:16px;padding:10px 12px}.bbwhy summary{font-weight:800;cursor:pointer}
   .bbwrow{display:flex;flex-wrap:wrap;gap:12px 10px;margin-top:10px}
   .bbwp{display:flex;flex-direction:column;align-items:center;text-align:center;min-width:64px}
@@ -945,7 +949,7 @@
 <script>/* Extra interface languages live in /i18n/<code>.js (English text → translation). Load the chosen one before the app starts. */
 (function(){ try{ var X=["tr","uk","fa","ur"], v=localStorage.getItem("pt_ui");
   if(!v){ var n=String((navigator.languages&&navigator.languages[0])||navigator.language||"").slice(0,2).toLowerCase(); if(X.indexOf(n)>-1) v=n; }
-  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=42"><\/script>'); }catch(e){} })();</script>
+  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=43"><\/script>'); }catch(e){} })();</script>
 
 <script>
 /* ===================== CONTENT ===================== */
@@ -1375,7 +1379,7 @@ function bi(en,de,es){ if(es!==undefined) return tr(en,de,es); return `${en} <sp
 function uiSet(l){
   if(!UI_CODES.includes(l)) return;
   if(UI_EXTRA.includes(l) && !I18N_DATA[l]){
-    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=42";
+    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=43";
     sc.onload=()=>uiSet(l); sc.onerror=()=>bToast(offlineMsg()); document.head.appendChild(sc); return;
   }
   UI=l; I18N_T=null; I18N_M.clear();
@@ -7900,6 +7904,7 @@ function homeDash(){
         <p class="sub" style="margin:2px 0 14px">${tr("Here's what's next for you.","Das steht als Nächstes an.","Esto es lo próximo para ti.")}</p>${nextCard()}</div>
       ${holdCard()}
       ${weekCard().replace('<div class="card">','<div class="card" style="margin:0">')}
+      ${rdDayCard()}
       ${acCard()}
       ${fuCard()}
       ${avNudge()}
@@ -9432,8 +9437,9 @@ function bbEn(ws){ if(ws.some(w=>w.r==="Ar")) ws=bbNpJoin(ws);
   if(k>0){ const a=bbEnClause(ws.slice(0,k)), b=bbEnClause(ws.slice(k+1)); return a&&b?cap(a)+" "+(J[ws[k].t]||"that")+" "+b+".":""; }
   const a=bbEnClause(ws); return a?cap(a)+".":""; }
 /* flashcards: the example sentence split into its parts, same colours and labels as Bridge Builder */
-function vcParts(w){ if(!w||!w.px||!w.px.length) return "";
-  const row=w.px.map(x=>{ const o={ t:x[0], r:x[1] }; if(x[1]==="X") o.v=x[3]; if(x[1]==="H"&&x[3]==="werden") o.a="werden"; if(x[3]==="q") o.q=1; return bbPart(o,!!x[2]); }).join("");
+function vcParts(w){ return w?pxHtml(w.px):""; }
+function pxHtml(px){ if(!px||!px.length) return "";
+  const row=px.map(x=>{ const o={ t:x[0], r:x[1] }; if(x[1]==="X") o.v=x[3]; if(x[1]==="H"&&x[3]==="werden") o.a="werden"; if(x[3]==="q") o.q=1; return bbPart(o,!!x[2]); }).join("");
   let open=true; try{ open=localStorage.getItem("pt_vcpx")!=="0"; }catch(e){}
   return `<details class="bbwhy vcpx" ${open?"open":""} ontoggle="try{localStorage.setItem('pt_vcpx',this.open?'1':'0')}catch(e){}"><summary>🔍 ${tr("Parts of the sentence","Satzteile","Partes de la frase")}</summary><div class="bbwrow" dir="ltr">${row}</div></details>`; }
 function bbInSub(ws){ if(ws[0]&&ws[0].r==="Je"){ const d=ws.findIndex(w=>w.r==="De"); return ws.map((w,i)=>i>1&&(d<0||i<d)); }
@@ -9442,7 +9448,7 @@ function bbInSub(ws){ if(ws[0]&&ws[0].r==="Je"){ const d=ws.findIndex(w=>w.r==="
   return ws.map((w,i)=>i>k); }
 function bbPart(w,inSub){ const L={ S:[tr("Subject","Subjekt","Sujeto"),tr("who?","wer?","¿quién?")],
     V:inSub?[tr("Verb (end)","Verb (Ende)","Verbo (final)"),w.k1?"Konjunktiv I":w.kon?"Konjunktiv II":tr("side clause","Nebensatz","subordinada")]:[tr("Verb (position 2)","Verb (Position 2)","Verbo (posición 2)"),w.k1?"Konjunktiv I":w.kon?"Konjunktiv II":tr("conjugated","konjugiert","conjugado")],
-    M:[tr("Modal verb (position 2)","Modalverb (Position 2)","Verbo modal (posición 2)"),w.kon?"Konjunktiv II":tr("conjugated","konjugiert","conjugado")],
+    M:[inSub?tr("Modal verb (end)","Modalverb (Ende)","Verbo modal (final)"):tr("Modal verb (position 2)","Modalverb (Position 2)","Verbo modal (posición 2)"),w.kon?"Konjunktiv II":inSub?tr("side clause","Nebensatz","subordinada"):tr("conjugated","konjugiert","conjugado")],
     Vq:[tr("Verb (position 1)","Verb (Position 1)","Verbo (posición 1)"),tr("question or command","Frage oder Aufforderung","pregunta u orden")],
     Rf:[tr("Reflexive","Reflexiv","Reflexivo"),"sich · mich · dir"], Pd:[tr("Predicate","Prädikativ","Predicado"),tr("is what? how?","ist was? wie?","¿qué es? ¿cómo?")],
     Mo:[tr("Extra info","Angabe","Complemento"),tr("how? why?","wie? warum?","¿cómo? ¿por qué?")], Ng:["nicht / kein",tr("negation","Verneinung","negación")],
@@ -10366,6 +10372,67 @@ async function dtSSave(){
 }
 
 /* ===================== GAMES ===================== */
+
+/* ---- 📖 Lesen: short stories by level, one sentence at a time ---- */
+const RD={ d:null, s:null, cur:null, i:0, show:false, q:null, done:null, loading:false };
+const RD_V="2026-11-24a", RD_LV=["A1","A2","B1","B2","C1"];
+function rdLoad(){ if(RD.s) return; try{ RD.s=JSON.parse(localStorage.getItem("pt_read")||"{}"); }catch(e){} RD.s=RD.s||{}; RD.s.done=RD.s.done||{}; RD.s.days=RD.s.days||[]; }
+function rdSave(){ try{ localStorage.setItem("pt_read",JSON.stringify(RD.s)); }catch(e){} }
+function rdData(){ if(RD.d||RD.loading) return; RD.loading=true; fetch("stories/de.json?v="+RD_V).then(r=>r.json()).then(d=>{ RD.d=d; }).catch(()=>{ RD.d={ stories:[] }; }).finally(()=>{ RD.loading=false; xr(); }); }
+function rdTr(o){ const l=vcLang(); return (o&&(o[l]||o.en))||""; }
+function rdOpen(id){ rdLoad(); if(id&&RD.d){ rdStart(id); return; } RD.cur=null; go("read"); }
+function rdStart(id){ const st=RD.d&&RD.d.stories.find(x=>x.id===id); if(!st) return; RD.cur=st; RD.i=0; RD.show=false; RD.q=null; RD.done=null; exHush(); go("story"); }
+function rdStreak(){ const D=new Set(RD.s.days), d=new Date(); if(!D.has(bbDs(d))) d.setDate(d.getDate()-1); let n=0; while(D.has(bbDs(d))){ n++; d.setDate(d.getDate()-1); } return n; }
+function rdOfDay(){ if(!RD.d||!RD.d.stories.length) return null; rdLoad(); const all=RD.d.stories, lv=RD.s.lv||"A1", day=Math.floor(Date.now()/864e5);
+  const pool=all.filter(x=>x.lv===lv&&!RD.s.done[x.id]); const list=pool.length?pool:all.filter(x=>!RD.s.done[x.id]); const L=list.length?list:all; return L[day%L.length]; }
+function rdDayCard(){ rdLoad(); if(!RD.d){ rdData(); return ""; } const st=rdOfDay(); if(!st) return "";
+  return `<div class="card" style="margin:0"><div class="ecmeta">📖 ${tr("Story of the day","Geschichte des Tages","Historia del día")} · ${st.lv}</div>
+    <div class="rdrow" style="margin:8px 0 10px">${palArt(st.pal,48)}<div><b lang="de">${esc(st.title.de)}</b><div class="note" style="margin:0">${esc(rdTr(st.title))}</div></div></div>
+    <button class="btn primary" onclick="rdOpen('${st.id}')">${tr("Read","Lesen","Leer")} →</button></div>`; }
+VIEWS.read = function(){
+  rdLoad(); if(!RD.d){ rdData(); return `<p class="note center">…</p>`; }
+  const lv=RD.s.lv||"A1", list=RD.d.stories.filter(x=>x.lv===lv), st=rdStreak();
+  return `<div class="topline"><button class="chip" onclick="go('games')">${uiBack()} ${tr("Games","Spiele","Juegos")}</button><span>🇩🇪 ${tr("German only","Nur Deutsch","Solo alemán")}</span></div>
+  <h2 style="margin:4px 0">📖 ${tr("Easy reads","Lesen","Lecturas fáciles")}</h2>
+  <p class="sub" style="margin:0 0 10px">${tr("Short stories, one sentence at a time. Try to understand first, then tap to check.","Kurze Geschichten, Satz für Satz. Erst selbst verstehen, dann nachsehen.","Historias cortas, frase a frase. Intenta entender primero y luego comprueba.")}${st?` · 🔥 ${st}`:""}</p>
+  <div class="row" style="gap:6px;flex-wrap:wrap;margin:0 0 12px">${RD_LV.map(l=>`<button class="chip ${l===lv?"on":""}" onclick="RD.s.lv='${l}';rdSave();xr()">${l}</button>`).join("")}</div>
+  ${list.length?list.map(x=>{ const sc=RD.s.done[x.id]; return `<button class="card rdcard" onclick="rdStart('${x.id}')">${palArt(x.pal,52)}<div style="flex:1;min-width:0;text-align:start"><b lang="de">${esc(x.title.de)}</b><div class="note" style="margin:0">${esc(rdTr(x.title))} · ${x.s.length} ${tr("sentences","Sätze","frases")}</div></div><span>${sc!=null?`✅ ${sc}/${x.q.length}`:"▶️"}</span></button>`; }).join("")
+    :`<div class="card center"><p class="note" style="margin:0">✨ ${tr("New stories for this level are coming soon.","Neue Geschichten für dieses Level kommen bald.","Pronto habrá historias para este nivel.")}</p></div>`}`;
+};
+VIEWS.story = function(){
+  const st=RD.cur; if(!st) return VIEWS.read(); const dir=vcRtl()?"rtl":"auto";
+  const top=`<div class="topline"><button class="chip" onclick="exHush();RD.cur=null;go('read')">${uiBack()} ${tr("Stories","Geschichten","Historias")}</button><span>${st.lv}</span></div>`;
+  if(RD.done){ const n=st.q.length, sc=RD.done.ok, idx=RD.d.stories.indexOf(st), nx=RD.d.stories.slice(idx+1).find(x=>x.lv===st.lv)||RD.d.stories[idx+1];
+    return top+`<div class="card center"><div style="font-size:44px">${sc===n?"🌟":sc>0?"⭐":"📖"}</div><h2 style="margin:4px 0">${sc===n?tr("Perfect!","Perfekt!","¡Perfecto!"):tr("Story done!","Geschichte geschafft!","¡Historia terminada!")}</h2>
+      <p class="note">${tr(`${sc} of ${n} right.`,`${sc} von ${n} richtig.`,`${sc} de ${n} correctas.`)} ${rdStreak()?`🔥 ${rdStreak()}`:""}</p>
+      ${nx?`<button class="btn primary" onclick="rdStart('${nx.id}')">${tr("Next story","Nächste Geschichte","Siguiente historia")} →</button>`:""}
+      <button class="btn secondary" style="margin-top:8px" onclick="RD.cur=null;go('read')">${tr("All stories","Alle Geschichten","Todas las historias")}</button></div>`; }
+  if(RD.q){ const q=st.q[RD.q.i], a=RD.q.ans;
+    return top+`<div class="rdrow" style="margin:0 0 10px">${palArt(st.pal,40)}<b lang="de">${esc(st.title.de)}</b></div>
+      <div class="card"><div class="ecmeta">❓ ${tr("Right or wrong?","Richtig oder falsch?","¿Verdadero o falso?")} · ${RD.q.i+1} / ${st.q.length}</div>
+        <div class="rdsent" lang="de">${esc(q.de)}</div>
+        ${RD.show?`<div class="rdmean" dir="${dir}">${esc(rdTr(q.tr))}</div>`:`<button class="linkbtn" onclick="RD.show=true;xr()">👁 ${tr("Show meaning","Bedeutung zeigen","Ver significado")}</button>`}
+        ${a==null?`<div class="rdq"><button class="btn primary" onclick="rdAns(true)">✅ Richtig</button><button class="btn secondary" onclick="rdAns(false)">❌ Falsch</button></div>`
+          :`<div class="rdfb ${a===q.ok?"ok":"no"}">${a===q.ok?tr("Correct!","Richtig!","¡Correcto!"):tr("Not quite.","Nicht ganz.","No exactamente.")} ${tr("The answer is","Die Antwort ist","La respuesta es")} <b>${q.ok?"Richtig":"Falsch"}</b>.</div>
+            <button class="btn primary" onclick="rdQNext()">${RD.q.i+1<st.q.length?tr("Next","Weiter","Siguiente")+" →":tr("Finish","Fertig","Terminar")}</button>`}</div>`; }
+  const e=st.s[RD.i], last=RD.i===st.s.length-1;
+  return top+`<div class="rdrow" style="margin:0 0 6px">${palArt(st.pal,44)}<div><b lang="de">${esc(st.title.de)}</b><div class="note" style="margin:0">${esc(rdTr(st.title))}</div></div></div>
+    <div class="rddots">${st.s.map((x,k)=>`<i class="${k<RD.i?"on":k===RD.i?"cur":""}"></i>`).join("")}</div>
+    ${RD.i?`<p class="rdsofar" lang="de">${st.s.slice(0,RD.i).map(x=>esc(x.de)).join(" ")}</p>`:""}
+    <div class="card"><div class="rdsent" lang="de">${esc(e.de)}</div>
+      <div class="row" style="gap:8px;justify-content:center;flex-wrap:wrap;margin:10px 0 4px">
+        <button class="chip" onclick="exSay('RD-${st.id}-${RD.i}',RD.cur.s[${RD.i}].de)">🔊 ${tr("Listen","Anhören","Escuchar")}</button>
+        <button class="chip ${RD.show?"on":""}" onclick="RD.show=!RD.show;xr()">👁 ${tr("Meaning","Bedeutung","Significado")}</button></div>
+      ${RD.show?`<div class="rdmean" dir="${dir}">${esc(rdTr(e.tr))}</div>`:`<p class="note center" style="margin:6px 0 0">💭 ${tr("Try to understand it first.","Versuch es erst selbst zu verstehen.","Intenta entenderla primero.")}</p>`}
+      ${pxHtml(e.px)}</div>
+    <div class="row" style="gap:8px;margin-top:10px"><button class="btn secondary" style="flex:1" ${RD.i?"":"disabled"} onclick="exHush();RD.i--;RD.show=false;xr()">← ${tr("Back","Zurück","Atrás")}</button>
+      <button class="btn primary" style="flex:2" onclick="exHush();${last?"RD.q={ i:0, ok:0, ans:null };":"RD.i++;"}RD.show=false;xr()">${last?tr("Quiz","Quiz","Quiz")+" ❓":tr("Next","Weiter","Siguiente")+" →"}</button></div>`;
+};
+function rdAns(v){ const q=RD.cur.q[RD.q.i]; if(RD.q.ans!=null) return; RD.q.ans=v; if(v===q.ok) RD.q.ok++; xr(); }
+function rdQNext(){ const st=RD.cur; RD.show=false;
+  if(RD.q.i+1<st.q.length){ RD.q.i++; RD.q.ans=null; xr(); return; }
+  rdLoad(); RD.s.done[st.id]=Math.max(RD.s.done[st.id]||0,RD.q.ok); const t=bbDs(new Date()); if(!RD.s.days.includes(t)) RD.s.days=RD.s.days.concat([t]).slice(-60); rdSave();
+  RD.done={ ok:RD.q.ok }; RD.q=null; xr(); }
 VIEWS.games = function(){
   return `<h2>${tr("Games","Spiele","Juegos")}</h2>
   <p class="sub">${tr("Speaking games for 2–10 players.","Sprechspiele für 2–10 Personen.","Juegos de conversación para 2–10 jugadores.")}</p>
@@ -10377,6 +10444,8 @@ VIEWS.games = function(){
   </div>
   <div class="card"><h3>🌉 ${tr("Bridge Builder","Brückenbauer","Constructor de puentes")} <span class="note" style="font-weight:600">· 🇩🇪 ${tr("solo, German only","allein, nur Deutsch","solo, solo alemán")}</span></h3><p class="note">${tr("Build German sentences from word tiles. The better the word order and the longer the sentence, the more points.","Bau deutsche Sätze aus Wort-Kärtchen. Je besser die Satzstellung und je länger der Satz, desto mehr Punkte.","Construye frases en alemán con fichas. Cuanto mejor el orden y más larga la frase, más puntos.")}</p>
     <button class="btn primary" onclick="bbOpen()">${tr("Play","Spielen","Jugar")}</button></div>
+  <div class="card"><h3>📖 ${tr("Easy reads","Lesen","Lecturas fáciles")} <span class="note" style="font-weight:600">· 🇩🇪 A1–C1</span></h3><p class="note">${tr("Short stories with Pía, Bruno and friends. One sentence at a time, with the meaning and sentence parts.","Kurze Geschichten mit Pía, Bruno und Freunden. Satz für Satz, mit Bedeutung und Satzteilen.","Historias cortas con Pía, Bruno y sus amigos. Frase a frase, con significado y partes de la frase.")}</p>
+    <button class="btn primary" onclick="rdOpen()">${tr("Read","Lesen","Leer")}</button></div>
   <div class="card"><h3>📅 ${tr("Game nights","Spieleabende","Noches de juegos")}</h3><p class="note">${tr("Join a scheduled game session with people from around the world.","Mach bei einem geplanten Spieleabend mit Leuten aus aller Welt mit.","Únete a una sesión de juego programada con gente de todo el mundo.")}</p>
     <button class="btn secondary" onclick="bOpen()">${tr("See sessions","Sessions ansehen","Ver sesiones")}</button></div>
   ${legalLinks()}`;
