@@ -9439,7 +9439,7 @@ function bbEn(ws){ if(ws.some(w=>w.r==="Ar")) ws=bbNpJoin(ws);
 /* flashcards: the example sentence split into its parts, same colours and labels as Bridge Builder */
 function vcParts(w){ return w?pxHtml(w.px):""; }
 function pxHtml(px){ if(!px||!px.length) return "";
-  const row=px.map(x=>{ const o={ t:x[0], r:x[1] }; if(x[1]==="X") o.v=x[3]; if(x[1]==="H"&&x[3]==="werden") o.a="werden"; if(x[3]==="q") o.q=1; return bbPart(o,!!x[2]); }).join("");
+  const row=px.map(x=>{ const o={ t:x[0], r:x[1] }; if(x[1]==="X") o.v=x[3]; if(x[3]==="werden") o.a="werden"; if(x[3]==="q") o.q=1; return bbPart(o,!!x[2]); }).join("");
   let open=true; try{ open=localStorage.getItem("pt_vcpx")!=="0"; }catch(e){}
   return `<details class="bbwhy vcpx" ${open?"open":""} ontoggle="try{localStorage.setItem('pt_vcpx',this.open?'1':'0')}catch(e){}"><summary>🔍 ${tr("Parts of the sentence","Satzteile","Partes de la frase")}</summary><div class="bbwrow" dir="ltr">${row}</div></details>`; }
 function bbInSub(ws){ if(ws[0]&&ws[0].r==="Je"){ const d=ws.findIndex(w=>w.r==="De"); return ws.map((w,i)=>i>1&&(d<0||i<d)); }
@@ -10375,7 +10375,7 @@ async function dtSSave(){
 
 /* ---- 📖 Lesen: short stories by level, one sentence at a time ---- */
 const RD={ d:null, s:null, cur:null, i:0, show:false, q:null, done:null, loading:false };
-const RD_V="2026-11-24a", RD_LV=["A1","A2","B1","B2","C1"];
+const RD_V="2026-11-24b", RD_LV=["A1","A2","B1","B2","C1"];
 function rdLoad(){ if(RD.s) return; try{ RD.s=JSON.parse(localStorage.getItem("pt_read")||"{}"); }catch(e){} RD.s=RD.s||{}; RD.s.done=RD.s.done||{}; RD.s.days=RD.s.days||[]; }
 function rdSave(){ try{ localStorage.setItem("pt_read",JSON.stringify(RD.s)); }catch(e){} }
 function rdData(){ if(RD.d||RD.loading) return; RD.loading=true; fetch("stories/de.json?v="+RD_V).then(r=>r.json()).then(d=>{ RD.d=d; }).catch(()=>{ RD.d={ stories:[] }; }).finally(()=>{ RD.loading=false; xr(); }); }

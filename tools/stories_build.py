@@ -14,7 +14,11 @@ for st in S:
   for row in st["s"]:
     assert len(row)==8,row
     exec(open('tools/stories_fix.py').read(),globals())
-    if row[0] in FIX: p=[[a.rstrip('*'),b.rstrip('*'),1 if b.endswith('*') else 0] for a,b in (x.rsplit(':',1) for x in FIX[row[0]].split('|'))]
+    if row[0] in FIX:
+      p=[]
+      for a,b in (x.rsplit(':',1) for x in FIX[row[0]].split('|')):
+        sub=1 if b.endswith('*') else 0; b=b.rstrip('*'); r,_,v=b.partition('=')
+        p.append([a,r,sub]+([v] if v else []))
     else: p=parts(row[0])
     miss+= p is None
     if p and p[0][1] in("V","M","H") and not p[0][2]: p[0]=p[0][:3]+["q"]
@@ -25,7 +29,7 @@ for st in S:
     assert len(q)==9,q
     o["q"].append({"de":q[0],"ok":bool(q[1]),"tr":dict(zip(L[1:],q[2:]))})
   out.append(o)
-json.dump({"v":"2026-11-24a","stories":out},open('stories/de.json','w'),ensure_ascii=False,separators=(',',':'))
+json.dump({"v":"2026-11-24b","stories":out},open('stories/de.json','w'),ensure_ascii=False,separators=(',',':'))
 print(len(out),"stories",sum(len(o["s"]) for o in out),"sentences, no parts:",miss)
 for o in out:
   for e in o["s"]: print(' | '.join(f'{x[0]}:{x[1]}'+('*' if x[2] else '') for x in e.get("px",[])) or "—", )
