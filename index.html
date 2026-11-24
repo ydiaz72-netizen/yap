@@ -8884,13 +8884,13 @@ function bbWeek(){ const D=new Set(BB.s.days||[]), now=new Date(), mon=new Date(
   const L=[tr("Mo","Mo","Lu"),tr("Tu","Di","Ma"),tr("We","Mi","Mi"),tr("Th","Do","Ju"),tr("Fr","Fr","Vi"),tr("Sa","Sa","Sá"),tr("Su","So","Do")], today=bbDs(now);
   return `<div class="bbweek">${L.map((l,i)=>{ const d=new Date(mon); d.setDate(mon.getDate()+i); const k=bbDs(d), on=D.has(k);
     return `<div class="${on?"on":""} ${k===today?"today":""}"><span>${l}</span><b>${on?"✓":d>now?"":"·"}</b></div>`; }).join("")}</div>`; }
-const BB_SK={ 1:[["Verb in position 2","Verb auf Position 2","Verbo en posición 2"],["Verb endings","Verbendungen","Terminaciones del verbo"],["Subject","Subjekt","Sujeto"]],
-  2:[["Time/place first","Zeit/Ort vorne","Tiempo/lugar delante"],["Subject after the verb","Subjekt nach dem Verb","Sujeto tras el verbo"]],
-  3:[["Modal verbs","Modalverben","Verbos modales"],["Infinitive at the end","Infinitiv am Ende","Infinitivo al final"]],
-  4:[["Perfekt: participle at the end","Perfekt: Partizip am Ende","Perfekt: participio al final"],["haben or sein","haben oder sein","haben o sein"]],
-  6:[["Dativ: to whom?","Dativ: wem?","Dativo: ¿a quién?"],["Dativ before Akkusativ","Dativ vor Akkusativ","Dativo antes que acusativo"]],
-  5:[["Verb at the end after weil/dass","Verb am Ende nach weil/dass","Verbo al final tras weil/dass"],["weil or dass","weil oder dass","weil o dass"]] };
-function bbSkills(lv,only){ const L=only?[lv]:[1,2,3].filter(x=>x<=lv); return `<div class="bbsk">${L.flatMap(l=>BB_SK[l]).map(x=>`<span>${tr(x[0],x[1],x[2])}</span>`).join("")}</div>`; }
+const BB_SK={ 1:[["Verb in position 2","Verb auf Position 2","Verbo en posición 2","Ich lerne Deutsch"],["Verb endings","Verbendungen","Terminaciones del verbo","ich lerne · du lernst"],["Subject","Subjekt","Sujeto","ich, du, Lena"]],
+  2:[["Time/place first","Zeit/Ort vorne","Tiempo/lugar delante","Heute …"],["Subject after the verb","Subjekt nach dem Verb","Sujeto tras el verbo","Heute lerne ich"]],
+  3:[["Modal verbs","Modalverben","Verbos modales","möchte, muss, kann"],["Infinitive at the end","Infinitiv am Ende","Infinitivo al final","… Deutsch lernen"]],
+  4:[["Perfekt: participle at the end","Perfekt: Partizip am Ende","Perfekt: participio al final","… Deutsch gelernt"],["haben or sein","haben oder sein","haben o sein","habe gelernt · bin gefahren"]],
+  6:[["Dativ: to whom?","Dativ: wem?","Dativo: ¿a quién?","dem Gast, ihm"],["Dativ before Akkusativ","Dativ vor Akkusativ","Dativo antes que acusativo","dem Gast ein Zimmer"]],
+  5:[["Verb at the end after weil/dass","Verb am Ende nach weil/dass","Verbo al final tras weil/dass","…, weil ich hier lebe"],["weil or dass","weil oder dass","weil o dass","weil = because · dass = that"]] };
+function bbSkills(lv,only){ const L=only?[lv]:[1,2,3].filter(x=>x<=lv); return `<div class="bbsk">${L.flatMap(l=>BB_SK[l]).map(x=>`<span>${tr(x[0],x[1],x[2])}${x[3]?` <i lang="de" style="font-weight:500;opacity:.75">(${x[3]})</i>`:""}</span>`).join("")}</div>`; }
 /* ---- 📤 share my bridge: a branded picture for WhatsApp / Instagram ---- */
 const BB_URL="https://pontetalk.setzio.com/?bb";
 async function bbShareImg(){ const S2=BB.share||{}, W=1080, H=1350, c=document.createElement("canvas"); c.width=W; c.height=H; const g=c.getContext("2d");
