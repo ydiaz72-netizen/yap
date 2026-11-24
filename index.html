@@ -945,7 +945,7 @@
 <script>/* Extra interface languages live in /i18n/<code>.js (English text → translation). Load the chosen one before the app starts. */
 (function(){ try{ var X=["tr","uk","fa","ur"], v=localStorage.getItem("pt_ui");
   if(!v){ var n=String((navigator.languages&&navigator.languages[0])||navigator.language||"").slice(0,2).toLowerCase(); if(X.indexOf(n)>-1) v=n; }
-  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=36"><\/script>'); }catch(e){} })();</script>
+  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=37"><\/script>'); }catch(e){} })();</script>
 
 <script>
 /* ===================== CONTENT ===================== */
@@ -1375,7 +1375,7 @@ function bi(en,de,es){ if(es!==undefined) return tr(en,de,es); return `${en} <sp
 function uiSet(l){
   if(!UI_CODES.includes(l)) return;
   if(UI_EXTRA.includes(l) && !I18N_DATA[l]){
-    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=36";
+    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=37";
     sc.onload=()=>uiSet(l); sc.onerror=()=>bToast(offlineMsg()); document.head.appendChild(sc); return;
   }
   UI=l; I18N_T=null; I18N_M.clear();
@@ -9185,11 +9185,16 @@ function bbChTiles(){ const c=BB_CH[BB.ch.k], T=BB_THEMES[c.th].tiles.map((t,i)=
   const rnd=duRand("bb"+BB.ch.k+"-"+BB.ch.i), others=T.filter(t=>!used.has(t.id)&&(c.lv>=3||(t.r!=="M"&&t.r!=="I"))&&(c.lv>=2||(t.r!=="T"&&t.r!=="P")));
   for(let n=0;n<4&&others.length;){ const o=others.splice(Math.floor(rnd()*others.length),1)[0]; if(pick.some(x=>x.t===o.t)) continue; pick.push(o); n++; }
   return pick.sort((a,b)=>a.id-b.id); }
+/* good German but a different sentence: mark the words that aren't in the target sentence */
+function bbChMiss(ws,it){ const A=it[2].map(x=>" "+x.toLowerCase()+" "), bad=ws.map((w,i)=>A.every(x=>!x.includes(" "+w.t.toLowerCase()+" "))?i:-1).filter(i=>i>=0);
+  return { ok:false, bad, msg:bad.length
+    ?tr("Good German, but it doesn't match the sentence above. Swap the marked word!","Gutes Deutsch, aber es passt nicht zum Satz oben. Tausch das markierte Wort!","Buen alemán, pero no coincide con la frase de arriba. ¡Cambia la palabra marcada!")
+    :tr("Good German, but it doesn't match the sentence above. Look again!","Gutes Deutsch, aber es passt nicht zum Satz oben. Schau noch mal!","Buen alemán, pero no coincide con la frase de arriba. ¡Mira otra vez!") }; }
 function bbChCheck(ws){ const c=BB_CH[BB.ch.k], it=c.items[BB.ch.i], got=ws.map(w=>w.t).join(" ").toLowerCase(); BB.lastWs=bbNorm(ws,c.th);
   const ok=it[2].some(a=>a.toLowerCase()===got); BB.ch.tries++;
   BB.ch.all=(BB.ch.all||0)+1;
   if(ok){ const tb=BB.s.input==="type"?(BB.spell&&BB.spell.length?1:3):0, p=(BB.ch.tries===1?10:5)+tb; BB.ch.ok+= BB.ch.tries===1?1:0; BB.ch.xp=(BB.ch.xp||0)+p; bbXp(p); if(!BB.ch.best||ws.length>BB.ch.best.length) BB.ch.best=ws.map(w=>({ t:w.t, r:w.r })); bbDay(); bbDnaAdd({ ok:true, used:bbCheck(bbNorm(ws,c.th),c.th).used }); bbSave(); BB.res={ ok:true, pts:p, typed:!!tb, spell:tb===1?BB.spell.slice():null, why:[[BB.ch.tries===1?tr("First try!","Beim ersten Versuch!","¡A la primera!"):tr("Solved","Gelöst","Resuelto"),p-tb]].concat(tb?[["✍️ "+tr("Typed it yourself","Selbst getippt","Escrita por ti"),tb]]:[]) }; if(tb) bbQ("ok",{ typed:true, len:0 }); }
-  else { const g=bbCheck(bbNorm(ws,c.th),c.th); if(!g.ok){ bbDnaAdd(g); bbSave(); } BB.res=g.ok?{ ok:false, bad:[], msg:tr("Good German, but not what the English says. Look again!","Gutes Deutsch, aber nicht das, was auf Englisch steht. Schau noch mal!","Buen alemán, pero no es lo que dice el inglés. ¡Mira otra vez!") }:g; }
+  else { const g=bbCheck(bbNorm(ws,c.th),c.th); if(!g.ok){ bbDnaAdd(g); bbSave(); } BB.res=g.ok?bbChMiss(ws,it):g; }
   xr(); }
 function bbChNext(){ const c=BB_CH[BB.ch.k]; BB.ch.i++; BB.ch.tries=0; BB.row=[]; BB.res=null; BB.typed=""; BB.tws=null;
   if(BB.ch.i>=c.items.length){ const st=BB.ch.ok>=5?3:BB.ch.ok>=3?2:1; BB.s.ch[BB.ch.k]=Math.max(BB.s.ch[BB.ch.k]||0,st); BB.ch.qs=bbQ("ch"); bbSave(); BB.ch.done=st; }
