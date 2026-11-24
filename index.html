@@ -290,6 +290,13 @@
   .palok{display:flex;align-items:center;gap:12px;background:#DDEFEC;font-size:17px}
   .palpw{font-size:12px;font-weight:800;color:#C2401F;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px}
   .palrow{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}.palmini{border:0;background:none;padding:2px;cursor:pointer;border-radius:50%}
+  .bbwhy{margin-top:10px;background:#fff;border-radius:16px;padding:10px 12px}.bbwhy summary{font-weight:800;cursor:pointer}
+  .bbwrow{display:flex;flex-wrap:wrap;gap:12px 10px;margin-top:10px}
+  .bbwp{display:flex;flex-direction:column;align-items:center;text-align:center;min-width:64px}
+  .bbwp b{font-size:18px;color:var(--c)}.bbwp i{display:block;width:100%;height:3px;border-radius:2px;background:var(--c);margin:4px 0 2px;position:relative}
+  .bbwp i::after{content:"";position:absolute;left:50%;top:3px;width:2px;height:10px;margin-left:-1px;background:var(--c)}
+  .bbwp span{font-size:12px;font-weight:800;margin-top:10px;color:var(--c)}.bbwp small{font-size:11px;color:var(--muted)}
+  .bbwen{margin-top:10px;font-size:15px;font-weight:600;border-top:1px solid var(--line);padding-top:8px}
   .bbsk{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}.bbsk span{font-size:12px;font-weight:700;background:#EEF2FA;color:#2F4B7C;border-radius:999px;padding:4px 9px}
   .bbround{display:flex;align-items:center;gap:8px;margin:2px 0 8px;font-size:13px;font-weight:700}.bbround div{flex:1;display:flex;gap:4px}
   .bbround i{flex:1;height:10px;border-radius:6px;background:#E4E1DA}.bbround i.on{background:#A0703F}
@@ -938,7 +945,7 @@
 <script>/* Extra interface languages live in /i18n/<code>.js (English text → translation). Load the chosen one before the app starts. */
 (function(){ try{ var X=["tr","uk","fa","ur"], v=localStorage.getItem("pt_ui");
   if(!v){ var n=String((navigator.languages&&navigator.languages[0])||navigator.language||"").slice(0,2).toLowerCase(); if(X.indexOf(n)>-1) v=n; }
-  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=33"><\/script>'); }catch(e){} })();</script>
+  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=34"><\/script>'); }catch(e){} })();</script>
 
 <script>
 /* ===================== CONTENT ===================== */
@@ -1368,7 +1375,7 @@ function bi(en,de,es){ if(es!==undefined) return tr(en,de,es); return `${en} <sp
 function uiSet(l){
   if(!UI_CODES.includes(l)) return;
   if(UI_EXTRA.includes(l) && !I18N_DATA[l]){
-    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=33";
+    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=34";
     sc.onload=()=>uiSet(l); sc.onerror=()=>bToast(offlineMsg()); document.head.appendChild(sc); return;
   }
   UI=l; I18N_T=null; I18N_M.clear();
@@ -8786,6 +8793,15 @@ const BB_THEMES={
   ["eine Pizza","O",{k:"food"}],["einen Kaffee","O",{k:"drink"}],["Fußball","O",{k:"game"}],["Deutsch","O",{k:"lang"}],
   ["gestern","T"],["letzte Woche","T"],["am Wochenende","T"],["ins Kino","P"],["nach Berlin","P"],["im Park","P"]],
   fit:{essen:["food"],trinken:["drink"],spielen:["game"],lernen:["lang"],gehen:[],fahren:[]} },
+ wem:{ e:"🎁", en:"Who gets what? Dativ", de:"Wem? Was? Dativ", es:"¿A quién? ¿Qué? Dativo", lv:4, dat:true, tiles:[
+  ["ich","S",{p:1}],["du","S",{p:2}],["wir","S",{p:4}],["Lena","S",{p:3}],
+  ["biete","V",{p:1,v:"bieten"}],["bietest","V",{p:2,v:"bieten"}],["bietet","V",{p:3,v:"bieten"}],["bieten","V",{p:4,v:"bieten"}],
+  ["gebe","V",{p:1,v:"geben"}],["gibst","V",{p:2,v:"geben"}],["gibt","V",{p:3,v:"geben"}],["geben","V",{p:4,v:"geben"}],
+  ["zeige","V",{p:1,v:"zeigen"}],["zeigst","V",{p:2,v:"zeigen"}],["zeigt","V",{p:3,v:"zeigen"}],["zeigen","V",{p:4,v:"zeigen"}],
+  ["dem Gast","D"],["der Freundin","D"],["den Kindern","D"],["ihm","D",{pron:1}],["ihr","D",{pron:1}],
+  ["ein Zimmer","O",{k:"thing"}],["einen Kaffee","O",{k:"thing"}],["das Foto","O",{k:"thing"}],["ein Buch","O",{k:"thing"}],["es","O",{k:"thing",pron:1}],
+  ["heute","T"],["morgen","T"]],
+  fit:{} },
  why:{ e:"🤔", en:"Why? weil & dass", de:"Warum? weil & dass", es:"¿Por qué? weil y dass", lv:5, reuse:true, tiles:[
   ["ich","S",{p:1}],["du","S",{p:2}],["wir","S",{p:4}],["Lena","S",{p:3}],
   ["lerne","V",{p:1,v:"lernen"}],["lernst","V",{p:2,v:"lernen"}],["lernt","V",{p:3,v:"lernen"}],["lernen","V",{p:4,v:"lernen"}],
@@ -8811,6 +8827,8 @@ const BB_CH=[
  { lv:3, th:"learn", items:[["I want to learn German.","Quiero aprender alemán.",["ich möchte Deutsch lernen"]],["Today we want to practise vocabulary.","Hoy queremos practicar vocabulario.",["heute möchten wir Vokabeln üben","wir möchten heute Vokabeln üben"]],["You have to learn the grammar.","Tienes que aprender la gramática.",["du musst die Grammatik lernen"]],["Every day I want to speak German.","Cada día quiero hablar alemán.",["jeden Tag möchte ich Deutsch sprechen","ich möchte jeden Tag Deutsch sprechen"]],["In class I have to practise German.","En clase tengo que practicar alemán.",["im Kurs muss ich Deutsch üben","ich muss im Kurs Deutsch üben"]]]},
  { lv:4, th:"past", items:[["Yesterday I ate a pizza.","Ayer comí una pizza.",["gestern habe ich eine Pizza gegessen","ich habe gestern eine Pizza gegessen"]],["You drank a coffee.","Bebiste un café.",["du hast einen Kaffee getrunken"]],["We went to the cinema.","Fuimos al cine.",["wir sind ins Kino gegangen"]],["Last week Lena travelled to Berlin.","La semana pasada Lena viajó a Berlín.",["letzte Woche ist Lena nach Berlin gefahren","Lena ist letzte Woche nach Berlin gefahren"]],["At the weekend I played football.","El fin de semana jugué al fútbol.",["am Wochenende habe ich Fußball gespielt","ich habe am Wochenende Fußball gespielt"]]]},
  { lv:5, th:"why", items:[["I learn German because I live in Germany.","Aprendo alemán porque vivo en Alemania.",["ich lerne Deutsch weil ich in Deutschland lebe"]],["I think that Lena works in Erfurt.","Creo que Lena trabaja en Erfurt.",["ich glaube dass Lena in Erfurt arbeitet"]],["We learn German because we work in Germany.","Aprendemos alemán porque trabajamos en Alemania.",["wir lernen Deutsch weil wir in Deutschland arbeiten"]],["Lena thinks that I learn German every day.","Lena cree que aprendo alemán cada día.",["Lena glaubt dass ich jeden Tag Deutsch lerne"]],["Today I learn German because I live in Erfurt.","Hoy aprendo alemán porque vivo en Erfurt.",["heute lerne ich Deutsch weil ich in Erfurt lebe","ich lerne heute Deutsch weil ich in Erfurt lebe"]]]}
+,
+ { lv:6, th:"wem", items:[["I'm offering the guest a room.","Le ofrezco una habitación al huésped.",["ich biete dem Gast ein Zimmer"]],["You show your friend the photo.","Le enseñas la foto a tu amiga.",["du zeigst der Freundin das Foto"]],["Lena gives the children a book.","Lena les da un libro a los niños.",["Lena gibt den Kindern ein Buch"]],["Today I'm showing him the photo.","Hoy le enseño la foto.",["heute zeige ich ihm das Foto","ich zeige ihm heute das Foto"]],["We give it to the guest.","Se lo damos al huésped.",["wir geben es dem Gast"]]]}
 ];
 const BB_LV=[0,40,110,220,360];  /* points needed for level 1..5 (levels 4+ are ranks for now) */
 const BB={ mode:"free", th:"cafe", row:[], res:null, ch:null, s:null };
@@ -8870,6 +8888,7 @@ const BB_SK={ 1:[["Verb in position 2","Verb auf Position 2","Verbo en posición
   2:[["Time/place first","Zeit/Ort vorne","Tiempo/lugar delante"],["Subject after the verb","Subjekt nach dem Verb","Sujeto tras el verbo"]],
   3:[["Modal verbs","Modalverben","Verbos modales"],["Infinitive at the end","Infinitiv am Ende","Infinitivo al final"]],
   4:[["Perfekt: participle at the end","Perfekt: Partizip am Ende","Perfekt: participio al final"],["haben or sein","haben oder sein","haben o sein"]],
+  6:[["Dativ: to whom?","Dativ: wem?","Dativo: ¿a quién?"],["Dativ before Akkusativ","Dativ vor Akkusativ","Dativo antes que acusativo"]],
   5:[["Verb at the end after weil/dass","Verb am Ende nach weil/dass","Verbo al final tras weil/dass"],["weil or dass","weil oder dass","weil o dass"]] };
 function bbSkills(lv,only){ const L=only?[lv]:[1,2,3].filter(x=>x<=lv); return `<div class="bbsk">${L.flatMap(l=>BB_SK[l]).map(x=>`<span>${tr(x[0],x[1],x[2])}</span>`).join("")}</div>`; }
 /* ---- 📤 share my bridge: a branded picture for WhatsApp / Instagram ---- */
@@ -8919,6 +8938,7 @@ const BB_DNA={ v2:[["Verb in position 2","Verb auf Position 2","Verbo en posici�
   aux:[["haben or sein","haben oder sein","haben o sein"],["Movement from A to B uses sein (ich bin gegangen, gefahren). Most others use haben.","Bewegung von A nach B mit sein (ich bin gegangen, gefahren). Die meisten anderen mit haben.","Movimiento de A a B con sein (ich bin gegangen, gefahren). Casi todos los demás con haben."],3],
   sub:[["Verb at the end after weil/dass","Verb am Ende nach weil/dass","Verbo al final tras weil/dass"],["weil and dass send the verb to the very end: …, weil ich in Erfurt lebe.","weil und dass schicken das Verb ganz ans Ende: …, weil ich in Erfurt lebe.","weil y dass mandan el verbo al final: …, weil ich in Erfurt lebe."],4],
   conj:[["weil or dass","weil oder dass","weil o dass"],["weil gives a reason. dass follows verbs like glauben: Ich glaube, dass …","weil nennt einen Grund. dass steht nach Verben wie glauben: Ich glaube, dass …","weil da una razón. dass va tras verbos como glauben: Ich glaube, dass …"],4],
+  dat:[["Dativ before Akkusativ","Dativ vor Akkusativ","Dativo antes que acusativo"],["To whom first, then what: Ich biete dem Gast ein Zimmer. But a pronoun like es comes first: Ich gebe es dem Gast.","Erst wem, dann was: Ich biete dem Gast ein Zimmer. Aber ein Pronomen wie es kommt zuerst: Ich gebe es dem Gast.","Primero a quién, luego qué: Ich biete dem Gast ein Zimmer. Pero un pronombre como es va primero: Ich gebe es dem Gast."],5],
   gerne:[["Where gerne goes","Wohin gerne kommt","Dónde va gerne"],["gerne goes right after the verb: Ich trinke gerne Tee.","gerne steht direkt nach dem Verb: Ich trinke gerne Tee.","gerne va justo después del verbo: Ich trinke gerne Tee."],0] };
 function bbDnaAdd(res){ const D=BB.s.dna=BB.s.dna||{};
   if(res.ok) (res.used||[]).forEach(k=>{ D[k]=D[k]||[0,0]; D[k][0]++; });
@@ -9002,8 +9022,8 @@ function bbTypeBonus(r){ const clean=!(BB.spell||[]).length, b=clean?3:1;
   r.typed=true; r.pts+=b; r.why.push(["✍️ "+tr("Typed it yourself","Selbst getippt","Escrita por ti"),b]);
   if(!clean) r.spell=BB.spell.slice(); return b; }
 function bbIns(t){ const el=document.getElementById("bbin"); BB.typed=((el?el.value:BB.typed)||"").replace(/\s+$/,"")+(BB.typed?" ":"")+t+" "; if(el){ el.value=BB.typed; el.focus(); } }
-const BB_COL={ S:"#2F4B7C", V:"#F25C3B", M:"#D9481F", I:"#C2401F", O:"#2A8C82", T:"#E8A21A", P:"#7B5BC4", A:"#5B6474", H:"#D9481F", Pa:"#B23A1C", K:"#1E8E5A" };
-function bbRole(r){ return { H:tr("helper verb","Hilfsverb","verbo auxiliar"), Pa:tr("participle (end)","Partizip (Ende)","participio (final)"), K:tr("joiner","Verbinder","conector"), S:tr("who","wer","quién"),V:tr("verb","Verb","verbo"),M:tr("verb","Verb","verbo"),I:tr("verb (end)","Verb (Ende)","verbo (final)"),O:tr("what","was","qué"),T:tr("when","wann","cuándo"),P:tr("where","wo","dónde"),A:tr("extra","extra","extra")}[r]; }
+const BB_COL={ S:"#2F4B7C", V:"#F25C3B", M:"#D9481F", I:"#C2401F", O:"#2A8C82", T:"#E8A21A", P:"#7B5BC4", A:"#5B6474", H:"#D9481F", Pa:"#B23A1C", K:"#1E8E5A", D:"#B0286A" };
+function bbRole(r){ return { H:tr("helper verb","Hilfsverb","verbo auxiliar"), Pa:tr("participle (end)","Partizip (Ende)","participio (final)"), K:tr("joiner","Verbinder","conector"), D:tr("to whom","wem","a quién"), S:tr("who","wer","quién"),V:tr("verb","Verb","verbo"),M:tr("verb","Verb","verbo"),I:tr("verb (end)","Verb (Ende)","verbo (final)"),O:tr("what","was","qué"),T:tr("when","wann","cuándo"),P:tr("where","wo","dónde"),A:tr("extra","extra","extra")}[r]; }
 /* the grammar check: returns {ok, bad:[index], msg, pts, why:[...]} */
 function bbCheck(ws, th){
   const ki=ws.map((w,i)=>w.r==="K"?i:-1).filter(i=>i>=0);
@@ -9043,7 +9063,7 @@ function bbCheck1(ws, th, min, inClause){
   if(f!==1) return errK("v2",f, tr("The verb goes in position 2.","Das Verb steht auf Position 2.","El verbo va en la posición 2."));
   if(vw.p!==sw.p) return errK("agree",f, tr(`The verb must match “${sw.t}”.`,`Das Verb muss zu „${sw.t}“ passen.`,`El verbo debe concordar con «${sw.t}».`));
   if(s!==0 && s!==2) return errK("inv",s, tr(`Something else is first, so the subject comes right after the verb: ${ws[0].t} ${vw.t} ${sw.t} …`,`Etwas anderes steht vorne, also kommt das Subjekt direkt nach dem Verb: ${ws[0].t} ${vw.t} ${sw.t} …`,`Algo va delante, así que el sujeto va justo después del verbo: ${ws[0].t} ${vw.t} ${sw.t} …`));
-  if(s!==0 && !["T","P","O","A"].includes(R[0])) return errK("v2",0, tr("Start with the subject or a time/place word.","Fang mit dem Subjekt oder einer Zeit-/Ortsangabe an.","Empieza con el sujeto o con una palabra de tiempo/lugar."));
+  if(s!==0 && !["T","P","O","A","D"].includes(R[0])) return errK("v2",0, tr("Start with the subject or a time/place word.","Fang mit dem Subjekt oder einer Zeit-/Ortsangabe an.","Empieza con el sujeto o con una palabra de tiempo/lugar."));
   const inf=ws.map((w,i)=>w.r==="I"?i:-1).filter(i=>i>=0);
   if(vw.r==="M"){ if(!inf.length) return errK("modal",f, tr(`“${vw.t}” needs a verb in the infinitive at the end.`,`„${vw.t}“ braucht ein Verb im Infinitiv am Ende.`,`«${vw.t}» necesita un verbo en infinitivo al final.`));
     if(inf.length>1) return errK("modal",inf.slice(1), tr("Only one infinitive at the end.","Nur ein Infinitiv am Ende.","Solo un infinitivo al final."));
@@ -9058,9 +9078,16 @@ function bbCheck1(ws, th, min, inClause){
   else if(pa.length) return errK("perf",pa, tr("A participle needs habe/hat or bin/ist in position 2.","Ein Partizip braucht habe/hat oder bin/ist auf Position 2.","Un participio necesita habe/hat o bin/ist en posición 2."));
   if(vw.v==="glauben"&&!inClause) return errK("conj",f, tr("glauben needs a dass part: Ich glaube, dass …","glauben braucht einen dass-Teil: Ich glaube, dass …","glauben necesita una parte con dass: Ich glaube, dass …"));
   const cnt=r=>R.filter(x=>x===r).length;
+  if(cnt("D")>1) return errK("dat",ws.map((w,i)=>w.r==="D"?i:-1).filter(i=>i>=0).slice(1), tr("One 'to whom' (Dativ) is enough.","Ein Wem (Dativ) reicht.","Basta un 'a quién' (dativo)."));
   if(cnt("O")>1) return errK("other",ws.map((w,i)=>w.r==="O"?i:-1).filter(i=>i>=0).slice(1), tr("One object is enough here.","Ein Objekt reicht hier.","Aquí basta un objeto."));
   if(cnt("T")>1||cnt("P")>1) return errK("other",[], tr("Use one time word and one place word at most.","Höchstens eine Zeit- und eine Ortsangabe.","Como mucho una palabra de tiempo y una de lugar."));
-  const ti=R.indexOf("T"), oi=R.indexOf("O"), pi=R.indexOf("P");
+  const ti=R.indexOf("T"), oi=R.indexOf("O"), pi=R.indexOf("P"), di=R.indexOf("D");
+  if(BB_THEMES[th].dat&&!inClause){
+    if(di<0) return errK("dat",[], tr(`To whom? “${vw.t}” needs a Dativ: dem Gast, der Freundin, ihm…`,`Wem? „${vw.t}“ braucht einen Dativ: dem Gast, der Freundin, ihm…`,`¿A quién? «${vw.t}» necesita un dativo: dem Gast, der Freundin, ihm…`));
+    if(oi<0) return errK("dat",[], tr(`What? “${vw.t}” also needs an Akkusativ: ein Zimmer, das Foto, es…`,`Was? „${vw.t}“ braucht auch einen Akkusativ: ein Zimmer, das Foto, es…`,`¿Qué? «${vw.t}» también necesita un acusativo: ein Zimmer, das Foto, es…`)); }
+  if(di>1&&oi>1){ const op=ws[oi].pron;
+    if(op&&oi>di) return errK("dat",oi, tr("A pronoun like es comes before the Dativ: Ich gebe es dem Gast.","Ein Pronomen wie es kommt vor den Dativ: Ich gebe es dem Gast.","Un pronombre como es va antes del dativo: Ich gebe es dem Gast."));
+    if(!op&&oi<di) return errK("dat",di, tr("Dativ (to whom?) before Akkusativ (what?): Ich biete dem Gast ein Zimmer.","Dativ (wem?) vor Akkusativ (was?): Ich biete dem Gast ein Zimmer.","Dativo (¿a quién?) antes que acusativo (¿qué?): Ich biete dem Gast ein Zimmer.")); }
   if(ti>1 && ((oi>1&&oi<ti)||(pi>1&&pi<ti))) return errK("tmp",ti, tr("Time words come early: Ich trinke heute einen Kaffee.","Zeitangaben kommen früh: Ich trinke heute einen Kaffee.","El tiempo va pronto: Ich trinke heute einen Kaffee."));
   const ai=R.indexOf("A"); if(ai>1 && oi>1 && ai>oi) return errK("gerne",ai, tr("gerne goes right after the verb (or the subject): Ich trinke gerne Tee.","gerne steht direkt nach dem Verb (oder Subjekt): Ich trinke gerne Tee.","gerne va justo después del verbo (o del sujeto): Ich trinke gerne Tee."));
   /* points */
@@ -9070,9 +9097,10 @@ function bbCheck1(ws, th, min, inClause){
   if(vw.r==="M"){ pts+=5; why.push([tr("Modal + infinitive at the end","Modalverb + Infinitiv am Ende","Modal + infinitivo al final"),5]); }
   if(cnt("T")&&cnt("P")){ pts+=2; why.push([tr("When + where","Wann + wo","Cuándo + dónde"),2]); }
   if(cnt("A")){ pts+=2; why.push(["gerne",2]); }
+  if(di>=0&&oi>=0){ pts+=4; why.push([tr("Dativ + Akkusativ in the right order","Dativ + Akkusativ richtig","Dativo + acusativo en orden"),4]); }
   const verb=vw.r==="H"?ws[pa[0]].v:vw.r==="M"&&inf.length?ws[inf[0]].v:vw.v, ow=oi>=0?ws[oi]:null, fit=BB_THEMES[th].fit[verb];
   const funny=!!(ow&&fit&&!fit.includes(ow.k));
-  const used=["v2","agree","subj"]; if(s===2) used.push("inv"); if(vw.r==="M") used.push("modal"); if(vw.r==="H") used.push("perf","aux"); if(cnt("T")) used.push("tmp"); if(cnt("A")) used.push("gerne");
+  const used=["v2","agree","subj"]; if(s===2) used.push("inv"); if(vw.r==="M") used.push("modal"); if(vw.r==="H") used.push("perf","aux"); if(cnt("T")) used.push("tmp"); if(cnt("A")) used.push("gerne"); if(di>=0&&oi>=0) used.push("dat");
   return { ok:true, pts, why, funny, used, inv:s===2&&["T","P"].includes(R[0]), modal:vw.r==="M", len:ws.length };
 }
 /* "lernen" can be "wir lernen" (V) or the infinitive after möchte (I): pick the role that fits the sentence */
@@ -9080,12 +9108,43 @@ function bbNorm(ws, th){ const T=BB_THEMES[th].tiles, hasM=ws.some(w=>w.r==="M")
   return ws.map((w,k)=>{ if(w.r!=="V"&&w.r!=="I") return w;
     const want=hasM&&k===ws.length-1?"I":(hasM?w.r:"V"); if(w.r===want) return w;
     const i=T.findIndex(t=>t[0]===w.t&&t[1]===want); return i>=0?{ id:w.id, t:w.t, r:want, ...(T[i][2]||{}) }:w; }); }
+/* ---- 🔍 "See why": each part labelled + the meaning in English ---- */
+const BB_EN={ ich:"I", du:"you", wir:"we", Lena:"Lena", Tom:"Tom", Sarah:"Sarah",
+  "einen Kaffee":"a coffee","einen Tee":"a tea","ein Wasser":"a water","eine Brezel":"a pretzel","ein Stück Kuchen":"a piece of cake","ein Buch":"a book","die Zeitung":"the newspaper","Fußball":"football","Karten":"cards","einen Film":"a film","Deutsch":"German","Vokabeln":"vocabulary","die Grammatik":"the grammar","eine Pizza":"a pizza","ein Zimmer":"a room","das Foto":"the photo","es":"it",
+  "dem Gast":"the guest","der Freundin":"her friend","den Kindern":"the children","ihm":"him","ihr":"her",
+  heute:"today",morgen:"tomorrow","am Wochenende":"at the weekend","am Samstag":"on Saturday","am Sonntag":"on Sunday","heute Abend":"tonight","jeden Tag":"every day","am Abend":"in the evening",gestern:"yesterday","letzte Woche":"last week",
+  "im Café":"in the café","zu Hause":"at home","in Erfurt":"in Erfurt","im Park":"in the park","im Kurs":"in class","ins Kino":"to the cinema","nach Berlin":"to Berlin","in Deutschland":"in Germany",hier:"here" };
+const BB_BASE={ trinken:"drink",essen:"eat",bestellen:"order",lesen:"read",spielen:"play",sehen:"watch",lernen:"learn",üben:"practise",sprechen:"speak",leben:"live",arbeiten:"work",glauben:"think",bieten:"offer",geben:"give",zeigen:"show" };
+const BB_PAST={ essen:"ate",trinken:"drank",spielen:"played",lernen:"learned",gehen:"went",fahren:"travelled" };
+function bbEnClause(ws){ const g=r=>ws.find(w=>w.r===r), S=g("S"), A=g("A"), T=g("T"), P=g("P"), D=g("D"), O=g("O"), fin=ws.find(w=>["V","M","H"].includes(w.r));
+  if(!S||!fin) return ""; const p=S.p, subj=BB_EN[S.t]||S.t; let vp="";
+  if(fin.r==="H"){ const pa=g("Pa"); vp=pa?BB_PAST[pa.v]||"":""; }
+  else if(fin.r==="M"){ const I=g("I"), b=I?BB_BASE[I.v]||"":""; vp=(/^m[öo]chte/.test(fin.t)?"would like to":/^kann/.test(fin.t)?"can":p===3?"has to":"have to")+" "+b; }
+  else { const b=BB_BASE[fin.v]||""; vp=A?(p===3?"likes to ":"like to ")+b:(p===3?b+"s":b); }
+  let obj=""; if(D&&O) obj=O.pron?`${BB_EN[O.t]} to ${BB_EN[D.t]}`:`${BB_EN[D.t]} ${BB_EN[O.t]}`; else if(O) obj=BB_EN[O.t]||""; else if(D) obj=BB_EN[D.t]||"";
+  const front=ws[0]&&(ws[0].r==="T"||ws[0].r==="P")?ws[0]:null;
+  const tail=[P&&P!==front?BB_EN[P.t]:"",T&&T!==front?BB_EN[T.t]:""].filter(Boolean).join(" ");
+  return [front?BB_EN[front.t]:"", subj, vp, obj, tail].filter(Boolean).join(" ").replace(/\s+/g," ").trim(); }
+function bbEn(ws){ const k=ws.findIndex(w=>w.r==="K"), cap=x=>x.charAt(0).toUpperCase()+x.slice(1);
+  if(k>0){ const a=bbEnClause(ws.slice(0,k)), b=bbEnClause(ws.slice(k+1)); return a&&b?cap(a)+(ws[k].t==="weil"?" because ":" that ")+b+".":""; }
+  const a=bbEnClause(ws); return a?cap(a)+".":""; }
+function bbPart(w,inSub){ const L={ S:[tr("Subject","Subjekt","Sujeto"),tr("who?","wer?","¿quién?")],
+    V:inSub?[tr("Verb (end)","Verb (Ende)","Verbo (final)"),tr("after weil/dass","nach weil/dass","tras weil/dass")]:[tr("Verb (position 2)","Verb (Position 2)","Verbo (posición 2)"),tr("conjugated","konjugiert","conjugado")],
+    M:[tr("Modal verb (position 2)","Modalverb (Position 2)","Verbo modal (posición 2)"),tr("conjugated","konjugiert","conjugado")], I:[tr("Infinitive (end)","Infinitiv (Ende)","Infinitivo (final)"),""],
+    H:[tr("Helper verb (position 2)","Hilfsverb (Position 2)","Verbo auxiliar (posición 2)"),"haben / sein"], Pa:[tr("Participle (end)","Partizip (Ende)","Participio (final)"),"Perfekt"],
+    D:["Dativ",tr("to whom?","wem?","¿a quién?")], O:["Akkusativ",tr("what?","was?","¿qué?")], T:[tr("Time","Zeit","Tiempo"),tr("when?","wann?","¿cuándo?")], P:[tr("Place","Ort","Lugar"),tr("where?","wo? wohin?","¿dónde?")],
+    A:["gerne",tr("likes to","mag","le gusta")], K:[tr("Joiner","Konjunktion","Conjunción"),"weil / dass"] }[w.r]||["",""];
+  return `<div class="bbwp" style="--c:${BB_COL[w.r]}"><b lang="de">${esc(w.t)}</b><i></i><span>${L[0]}</span><small>${L[1]}</small></div>`; }
+function bbWhy(ws){ if(!ws||!ws.length) return ""; const k=ws.findIndex(w=>w.r==="K"), en=bbEn(ws);
+  return `<details class="bbwhy" open><summary>🔍 ${tr("See why it works","Warum es passt","Por qué funciona")}</summary>
+    <div class="bbwrow" dir="ltr">${ws.map((w,i)=>bbPart(w,k>=0&&i>k)).join("")}</div>
+    ${en?`<div class="bbwen">🇬🇧 ${esc(en)}</div>`:""}</details>`; }
 function bbSentence(ws){ const s=ws.map(w=>w.t).join(" "); return s.charAt(0).toUpperCase()+s.slice(1)+"."; }
 function bbGo(){
   const typing=BB.s.input==="type", tiles=bbTiles(), ws=typing?bbTypeGo():BB.row.map(id=>tiles.find(t=>t.id===id)).filter(Boolean);
   if(!ws) return;
   if(BB.mode==="ch") return bbChCheck(ws);
-  const r=bbCheck(bbNorm(ws,BB.th),BB.th); BB.res=r; BB.rd=BB.rd||bbRd(); BB.rd.tries++;
+  const nws=bbNorm(ws,BB.th), r=bbCheck(nws,BB.th); BB.res=r; BB.lastWs=nws; BB.rd=BB.rd||bbRd(); BB.rd.tries++;
   if(r.ok){ const key=BB.th+":"+ws.map(w=>w.t).join(" ").toLowerCase(), lv0=bbLevel();
     if(BB.s.made[key]){ r.repeat=true; r.pts=0; }
     else { if(typing) bbTypeBonus(r); BB.s.streak++; if(BB.s.streak>=3){ const b=Math.round(r.pts*0.5); r.pts+=b; BB.rd.combo+=b; r.why.push([`🔥 ${tr("Streak","Serie","Racha")} ×1.5`,b]); }
@@ -9106,7 +9165,7 @@ function bbChTiles(){ const c=BB_CH[BB.ch.k], T=BB_THEMES[c.th].tiles.map((t,i)=
   const rnd=duRand("bb"+BB.ch.k+"-"+BB.ch.i), others=T.filter(t=>!used.has(t.id)&&(c.lv>=3||(t.r!=="M"&&t.r!=="I"))&&(c.lv>=2||(t.r!=="T"&&t.r!=="P")));
   for(let n=0;n<4&&others.length;){ const o=others.splice(Math.floor(rnd()*others.length),1)[0]; if(pick.some(x=>x.t===o.t)) continue; pick.push(o); n++; }
   return pick.sort((a,b)=>a.id-b.id); }
-function bbChCheck(ws){ const c=BB_CH[BB.ch.k], it=c.items[BB.ch.i], got=ws.map(w=>w.t).join(" ").toLowerCase();
+function bbChCheck(ws){ const c=BB_CH[BB.ch.k], it=c.items[BB.ch.i], got=ws.map(w=>w.t).join(" ").toLowerCase(); BB.lastWs=bbNorm(ws,c.th);
   const ok=it[2].some(a=>a.toLowerCase()===got); BB.ch.tries++;
   BB.ch.all=(BB.ch.all||0)+1;
   if(ok){ const tb=BB.s.input==="type"?(BB.spell&&BB.spell.length?1:3):0, p=(BB.ch.tries===1?10:5)+tb; BB.ch.ok+= BB.ch.tries===1?1:0; BB.ch.xp=(BB.ch.xp||0)+p; bbXp(p); if(!BB.ch.best||ws.length>BB.ch.best.length) BB.ch.best=ws.map(w=>({ t:w.t, r:w.r })); bbDay(); bbDnaAdd({ ok:true, used:bbCheck(bbNorm(ws,c.th),c.th).used }); bbSave(); BB.res={ ok:true, pts:p, typed:!!tb, spell:tb===1?BB.spell.slice():null, why:[[BB.ch.tries===1?tr("First try!","Beim ersten Versuch!","¡A la primera!"):tr("Solved","Gelöst","Resuelto"),p-tb]].concat(tb?[["✍️ "+tr("Typed it yourself","Selbst getippt","Escrita por ti"),tb]]:[]) }; if(tb) bbQ("ok",{ typed:true, len:0 }); }
@@ -9128,7 +9187,7 @@ VIEWS.bridge = function(){
     sub:tr(`${BB_ROUND} new sentences built.`,`${BB_ROUND} neue Sätze gebaut.`,`${BB_ROUND} frases nuevas construidas.`),
     xp:BB.rd.xp, combo:BB.rd.combo, tries:BB.rd.tries, ok:BB.rd.ok, best:BB.rd.best, go:"BB.rd=bbRd();BB.row=[];BB.res=null;BB.typed='';BB.tws=null;xr()" });
   const typing=BB.s.input==="type", tiles=ch?bbChTiles():bbTiles(), row=typing?(BB.tws||[]):BB.row.map(id=>tiles.find(t=>t.id===id)).filter(Boolean), r=BB.res;
-  const groups=["S","V","M","H","I","Pa","O","T","P","A","K"].filter(g=>tiles.some(t=>t.r===g));
+  const groups=["S","V","M","H","I","Pa","D","O","T","P","A","K"].filter(g=>tiles.some(t=>t.r===g));
   const bad=new Set(r&&!r.ok?r.bad||[]:[]);
   return top+`<h2 style="margin:4px 0">🌉 ${tr("Bridge Builder","Brückenbauer","Constructor de puentes")}</h2>${stats}
     ${ch?`<div class="card" style="margin-bottom:10px"><div class="ecmeta">🎯 ${tr("Challenge","Challenge","Reto")} ${tr("Level","Level","Nivel")} ${c.lv} · ${BB.ch.i+1} / ${c.items.length}</div><div style="font-size:20px;font-weight:800;margin-top:4px">${esc(tr(c.items[BB.ch.i][0],c.items[BB.ch.i][0],c.items[BB.ch.i][1]))}</div>${bbSkills(c.lv,true)}</div>`
@@ -9146,6 +9205,7 @@ VIEWS.bridge = function(){
         ${r.repeat?"":`<div class="note" style="margin:4px 0 0">${r.why.map(([a,b])=>`${esc(a)} +${b}`).join(" · ")}</div>`}
         ${(r.quests||[]).map(([a,b])=>`<div class="bbqdone">✅ ${esc(a)} <b>+${b}</b></div>`).join("")}
         ${r.spell?`<div class="note" style="margin:4px 0 0">✏️ ${tr("Watch the spelling","Achte auf die Schreibung","Ojo con la ortografía")}: <b lang="de">${r.spell.map(esc).join(" · ")}</b></div>`:""}
+        ${bbWhy(BB.lastWs)}
         ${r.funny?`<div class="note" style="margin:4px 0 0">😂 ${tr("Perfect grammar, funny meaning!","Grammatik perfekt, Bedeutung lustig!","¡Gramática perfecta, significado gracioso!")}</div>`:""}
         ${r.up?`<div style="font-weight:800;margin-top:6px">🎉 ${tr("Level up!","Level up!","¡Subes de nivel!")} ${bbRank(bbLevel())} ${tr("New tiles unlocked.","Neue Kärtchen freigeschaltet.","Nuevas fichas desbloqueadas.")}</div>`:""}
         <button class="btn primary qbtn" style="margin-top:10px" onclick="${ch?"bbChNext()":r.round?"BB.rd.done=true;BB.row=[];BB.res=null;BB.typed='';BB.tws=null;xr()":"bbClear()"}">${ch?tr("Next","Weiter","Siguiente"):r.round?"🎉 "+tr("Finish the bridge","Brücke fertigstellen","Terminar el puente"):tr("Build another","Noch einen bauen","Construir otra")} →</button></div>`
@@ -9153,7 +9213,7 @@ VIEWS.bridge = function(){
     ${r&&r.ok?"":`<div class="row" style="gap:8px;margin:10px 0"><button class="btn primary" style="flex:2" ${row.length||typing?"":"disabled"} onclick="bbGo()">✅ ${tr("Check","Prüfen","Comprobar")}</button>${typing?"":`<button class="btn secondary" style="flex:1" ${row.length?"":"disabled"} onclick="BB.row.pop();BB.res=null;xr()">↩</button>`}<button class="btn secondary" style="flex:1" ${row.length||typing?"":"disabled"} onclick="bbClear()">🗑</button></div>`}
     <div class="card bbtray" dir="ltr">${typing?`<div class="ecmeta">📖 ${tr("Words you can use (tap to add)","Wörter, die du nutzen kannst (tippen zum Einfügen)","Palabras que puedes usar (toca para añadir)")}</div>`:""}${groups.map(g=>`<div class="bbg">${tiles.filter(t=>t.r===g).map(t=>typing?`<button class="bbt sm" style="--c:${BB_COL[t.r]}" lang="de" onclick="bbIns('${esc(t.t).replace(/'/g,"&#39;")}')">${esc(t.t)}</button>`:bbTile(t,BB.row.includes(t.id)&&!BB_THEMES[BB.th].reuse)).join("")}</div>`).join("")}</div>
     ${ch?"":`<div class="card"><h3 style="margin:0 0 6px">🎯 ${tr("Challenges","Challenges","Retos")}</h3><p class="note" style="margin:0 0 8px">${tr("Build the German sentence for each English one. 5 sentences each.","Bau zu jedem englischen Satz den deutschen. Je 5 Sätze.","Construye la frase alemana para cada frase en inglés. 5 frases cada uno.")}</p>
-      ${BB_CH.map((cc,k)=>{ const open=k===0||(BB.s.ch[k-1]||0)>0; return `<button class="ectop" style="width:100%;background:none;border:0;border-top:1px solid var(--line);padding:10px 0;font:inherit;cursor:${open?"pointer":"default"};opacity:${open?1:.5}" ${open?`onclick="bbChStart(${k})"`:"disabled"}><span>${["1 · Ich lerne Deutsch.","2 · Heute lerne ich Deutsch.","3 · Ich möchte Deutsch lernen.","4 · Gestern habe ich Deutsch gelernt. <small class=\"note\">B1</small>","5 · …, weil ich hier lebe. <small class=\"note\">B1</small>"][k]}</span><b>${BB.s.ch[k]?"⭐".repeat(BB.s.ch[k]):open?"▶️":"🔒"}</b></button>`; }).join("")}</div>
+      ${BB_CH.map((cc,k)=>{ const open=k===0||(BB.s.ch[k-1]||0)>0; return `<button class="ectop" style="width:100%;background:none;border:0;border-top:1px solid var(--line);padding:10px 0;font:inherit;cursor:${open?"pointer":"default"};opacity:${open?1:.5}" ${open?`onclick="bbChStart(${k})"`:"disabled"}><span>${["1 · Ich lerne Deutsch.","2 · Heute lerne ich Deutsch.","3 · Ich möchte Deutsch lernen.","4 · Gestern habe ich Deutsch gelernt. <small class=\"note\">B1</small>","5 · …, weil ich hier lebe. <small class=\"note\">B1</small>","6 · Ich biete dem Gast ein Zimmer. <small class=\"note\">A2–B1</small>"][k]}</span><b>${BB.s.ch[k]?"⭐".repeat(BB.s.ch[k]):open?"▶️":"🔒"}</b></button>`; }).join("")}</div>
     ${ch?"":bbQCard()+lgCard()+bbDnaCard()}
     <p class="note center">${tr("Your points are saved on this device.","Deine Punkte werden auf diesem Gerät gespeichert.","Tus puntos se guardan en este dispositivo.")}</p>`}`;
 };
