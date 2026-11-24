@@ -296,7 +296,7 @@
   .bbwp b{font-size:18px;color:var(--c)}.bbwp i{display:block;width:100%;height:3px;border-radius:2px;background:var(--c);margin:4px 0 2px;position:relative}
   .bbwp i::after{content:"";position:absolute;left:50%;top:3px;width:2px;height:10px;margin-left:-1px;background:var(--c)}
   .bbwp span{font-size:12px;font-weight:800;margin-top:10px;color:var(--c)}.bbwp small{font-size:11px;color:var(--muted)}
-  .bbwen{margin-top:10px;font-size:15px;font-weight:600;border-top:1px solid var(--line);padding-top:8px}
+  .bbalt{margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:14px}.bbalt b{display:block;font-size:13px;margin-bottom:2px}.bbalt div{padding:2px 0}.bbwen{margin-top:10px;font-size:15px;font-weight:600;border-top:1px solid var(--line);padding-top:8px}
   .bbsk{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}.bbsk span{font-size:12px;font-weight:700;background:#EEF2FA;color:#2F4B7C;border-radius:999px;padding:4px 9px}
   .bbround{display:flex;align-items:center;gap:8px;margin:2px 0 8px;font-size:13px;font-weight:700}.bbround div{flex:1;display:flex;gap:4px}
   .bbround i{flex:1;height:10px;border-radius:6px;background:#E4E1DA}.bbround i.on{background:#A0703F}
@@ -945,7 +945,7 @@
 <script>/* Extra interface languages live in /i18n/<code>.js (English text → translation). Load the chosen one before the app starts. */
 (function(){ try{ var X=["tr","uk","fa","ur"], v=localStorage.getItem("pt_ui");
   if(!v){ var n=String((navigator.languages&&navigator.languages[0])||navigator.language||"").slice(0,2).toLowerCase(); if(X.indexOf(n)>-1) v=n; }
-  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=34"><\/script>'); }catch(e){} })();</script>
+  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=35"><\/script>'); }catch(e){} })();</script>
 
 <script>
 /* ===================== CONTENT ===================== */
@@ -1375,7 +1375,7 @@ function bi(en,de,es){ if(es!==undefined) return tr(en,de,es); return `${en} <sp
 function uiSet(l){
   if(!UI_CODES.includes(l)) return;
   if(UI_EXTRA.includes(l) && !I18N_DATA[l]){
-    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=34";
+    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=35";
     sc.onload=()=>uiSet(l); sc.onerror=()=>bToast(offlineMsg()); document.head.appendChild(sc); return;
   }
   UI=l; I18N_T=null; I18N_M.clear();
@@ -9138,7 +9138,23 @@ function bbPart(w,inSub){ const L={ S:[tr("Subject","Subjekt","Sujeto"),tr("who?
 function bbWhy(ws){ if(!ws||!ws.length) return ""; const k=ws.findIndex(w=>w.r==="K"), en=bbEn(ws);
   return `<details class="bbwhy" open><summary>🔍 ${tr("See why it works","Warum es passt","Por qué funciona")}</summary>
     <div class="bbwrow" dir="ltr">${ws.map((w,i)=>bbPart(w,k>=0&&i>k)).join("")}</div>
-    ${en?`<div class="bbwen">🇬🇧 ${esc(en)}</div>`:""}</details>`; }
+    ${en?`<div class="bbwen">🇬🇧 ${esc(en)}</div>`:""}${bbAltsHtml(ws)}</details>`; }
+/* ---- 🔀 other correct orders: put a different part first, verb second, the rest in natural German order (subject, pronouns, Dativ, time, place, Akkusativ), verb(s) at the end. Only orders the checker accepts are shown. */
+function bbAlts(ws, th){ if(!th||!BB_THEMES[th]) return [];
+  const k=ws.findIndex(w=>w.r==="K"), head=k>=0?ws.slice(0,k):ws.slice(), tail=k>=0?ws.slice(k):[];
+  if(head.length<3) return [];
+  const vi=head.findIndex((w,i)=>i>0&&["V","M","H"].includes(w.r)); if(vi<0) return [];
+  const verb=head[vi], ends=head.filter((w,i)=>i!==vi&&["I","Pa","V","M","H"].includes(w.r)), rest=head.filter((w,i)=>i!==vi&&!ends.includes(w));
+  const rank=w=>w.r==="S"?0:w.pron&&w.r==="O"?1:w.pron&&w.r==="D"?2:({D:3,T:4,A:5,P:6,O:7})[w.r]??8;
+  const mine=bbSentence(ws).replace(/ (weil|dass) /,", $1 ").toLowerCase(), out=[], seen={};
+  const fronts=rest.filter(w=>!w.pron).sort((a,b)=>({S:0,T:1,P:2,D:3,O:4})[a.r]-({S:0,T:1,P:2,D:3,O:4})[b.r]);
+  for(const f of fronts){ if(out.length>=3) break;
+    const mid=rest.filter(w=>w!==f).map((w,i)=>[w,i]).sort((a,b)=>rank(a[0])-rank(b[0])||a[1]-b[1]).map(x=>x[0]);
+    const cand=[f,verb,...mid,...ends,...tail]; let r; try{ r=bbCheck(cand,th); }catch(e){ continue; }
+    const t=bbSentence(cand).replace(/ (weil|dass) /,", $1 "); if(r&&r.ok&&t.toLowerCase()!==mine&&!seen[t]){ seen[t]=1; out.push(t); } }
+  return out; }
+function bbAltsHtml(ws){ const th=BB.mode==="ch"&&BB.ch?BB_CH[BB.ch.k].th:BB.th, alts=bbAlts(ws,th); if(!alts.length) return "";
+  return `<div class="bbalt"><b>🔀 ${tr("You could also say","Du könntest auch sagen","También podrías decir")}</b>${alts.map(t=>`<div lang="de">${esc(t)}</div>`).join("")}</div>`; }
 function bbSentence(ws){ const s=ws.map(w=>w.t).join(" "); return s.charAt(0).toUpperCase()+s.slice(1)+"."; }
 function bbGo(){
   const typing=BB.s.input==="type", tiles=bbTiles(), ws=typing?bbTypeGo():BB.row.map(id=>tiles.find(t=>t.id===id)).filter(Boolean);
