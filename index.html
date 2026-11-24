@@ -1252,9 +1252,10 @@ const PAL_ON={ pia:["New question, no cost!","Neue Frage, ganz ohne Nachteil!","
   ola:["The group can help: hints are open and you keep the no-hints bonus.","Die Gruppe darf helfen: Tipps sind offen und der Bonus bleibt.","El grupo puede ayudar: pistas abiertas y conservas el bonus."],
   otto:["You may answer in either language this turn.","Du darfst in beiden Sprachen antworten.","Puedes responder en cualquiera de los dos idiomas."],
   zuzu:["Point stolen!","Punkt geklaut!","¡Punto robado!"],
-  rosa:["Act it out instead of saying it!","Spiel es vor, statt es zu sagen!","¡Actúalo en vez de decirlo!"] };
+  rosa:["Act it out instead of saying it!","Spiel es vor, statt es zu sagen!","¡Actúalo en vez de decirlo!"],
+  lula:["Question swapped, no cost!","Frage getauscht, ohne Nachteil!","¡Pregunta cambiada, sin coste!"] };
 function palUse(){ const p=S.players[S.turn]; if(!palCan(p)||palWhyNot(p)) return; const k=p.pal; p.pwUsed=true; S.pwOn=k;
-  if(k==="pia"){ S.current=nextPrompt(p); S.hintsUsed=false; }
+  if(k==="pia"||k==="lula"){ S.current=nextPrompt(p); S.hintsUsed=false; }
   if(k==="ola"){ S.hintsUsed=true; }
   if(k==="zuzu"){ const L=palLeader(p); L.pts-=1; p.pts+=1; p.bonus=(p.bonus||0)+1; S.pwNote=L.name; }
   try{ beep(); }catch(e){} render(); }
