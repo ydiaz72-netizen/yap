@@ -290,7 +290,7 @@
   .palok{display:flex;align-items:center;gap:12px;background:#DDEFEC;font-size:17px}
   .palpw{font-size:12px;font-weight:800;color:#C2401F;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px}
   .palrow{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}.palmini{border:0;background:none;padding:2px;cursor:pointer;border-radius:50%}
-  .bbwhy{margin-top:10px;background:#fff;border-radius:16px;padding:10px 12px}.bbwhy summary{font-weight:800;cursor:pointer}
+  .vcpx{text-align:start;margin:10px 0 0;border:1px solid var(--line);font-size:14px}.vcpx .bbwrow{margin-top:8px}.bbwhy{margin-top:10px;background:#fff;border-radius:16px;padding:10px 12px}.bbwhy summary{font-weight:800;cursor:pointer}
   .bbwrow{display:flex;flex-wrap:wrap;gap:12px 10px;margin-top:10px}
   .bbwp{display:flex;flex-direction:column;align-items:center;text-align:center;min-width:64px}
   .bbwp b{font-size:18px;color:var(--c)}.bbwp i{display:block;width:100%;height:3px;border-radius:2px;background:var(--c);margin:4px 0 2px;position:relative}
@@ -945,7 +945,7 @@
 <script>/* Extra interface languages live in /i18n/<code>.js (English text → translation). Load the chosen one before the app starts. */
 (function(){ try{ var X=["tr","uk","fa","ur"], v=localStorage.getItem("pt_ui");
   if(!v){ var n=String((navigator.languages&&navigator.languages[0])||navigator.language||"").slice(0,2).toLowerCase(); if(X.indexOf(n)>-1) v=n; }
-  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=41"><\/script>'); }catch(e){} })();</script>
+  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=42"><\/script>'); }catch(e){} })();</script>
 
 <script>
 /* ===================== CONTENT ===================== */
@@ -1375,7 +1375,7 @@ function bi(en,de,es){ if(es!==undefined) return tr(en,de,es); return `${en} <sp
 function uiSet(l){
   if(!UI_CODES.includes(l)) return;
   if(UI_EXTRA.includes(l) && !I18N_DATA[l]){
-    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=41";
+    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=42";
     sc.onload=()=>uiSet(l); sc.onerror=()=>bToast(offlineMsg()); document.head.appendChild(sc); return;
   }
   UI=l; I18N_T=null; I18N_M.clear();
@@ -8388,7 +8388,7 @@ async function nbReadAll(){
 /* ===================== VOCABULARY FLASHCARDS (spaced repetition) ===================== */
 /* Words: /vocab/de-a1.json (original list). Progress: sql/vocab.sql when signed in, this phone otherwise.
    🔊 appears only for words that have a recorded clip (Admin → Audio studio), never the phone voice. */
-const VC_V="2026-11-24a";
+const VC_V="2026-11-24b";
 const VC_LEVELS=["A1","A2","B1","B2","C1"];
 const VC_DECK="de";
 const VC_LANGS=[["en","English"],["es","Español"],["tr","Türkçe"],["uk","Українська"],["ar","العربية"],["fa","فارسی / دری"],["ur","اردو"]];
@@ -8532,7 +8532,7 @@ VIEWS.vocabq = function(){
   const back=`<div class="topline"><button class="chip" onclick="vcQuit()">✕ ${tr("Stop","Stopp","Parar")}</button><span class="ecmeta"><button class="linkbtn" style="margin-inline-end:8px" onclick="vcHow()">ℹ️ ${tr("How it works","So funktioniert's","Cómo funciona")}</button>${r.i+1} / ${r.list.length}</span></div>
     <div class="exbar" style="margin:0 0 12px"><i style="width:${Math.round((r.i)/r.list.length*100)}%;background:var(--coral)"></i></div>`;
   const xid="VX-"+w.id, xv=DT.man&&DT.man.clips&&DT.man.clips[xid];
-  const reveal=`<div class="vcmean" dir="${dir}">${esc(vcTr(w))}</div>${w.pl?`<div class="vcpl">Plural: ${esc(w.pl)}</div>`:""}<div class="vcex" lang="de">${esc(w.ex)}${xv?` <button class="linkbtn" style="text-decoration:none" onclick="exSay('${xid}',VC.byId['${w.id}'].ex)" aria-label="Listen">🔊</button>`:""}</div>`;
+  const reveal=`<div class="vcmean" dir="${dir}">${esc(vcTr(w))}</div>${w.pl?`<div class="vcpl">Plural: ${esc(w.pl)}</div>`:""}<div class="vcex" lang="de">${esc(w.ex)}${xv?` <button class="linkbtn" style="text-decoration:none" onclick="exSay('${xid}',VC.byId['${w.id}'].ex)" aria-label="Listen">🔊</button>`:""}</div>${vcParts(w)}`;
   const rate=`<div class="vcrate">${[["Again","Nochmal","#D9466A",0,"Otra vez"],["Hard","Schwer","#E59A2F",1,"Difícil"],["Good","Gut","#2A8C82",2,"Bien"],["Easy","Leicht","#2F6FD1",3,"Fácil"]].map(([a,b,col,g,e])=>`<button style="background:${col}" onclick="vcRate(${g})">${tr(a,b,e)}${UI==="de"?"":`<small>${b}</small>`}</button>`).join("")}</div>`;
   let h=back;
   if(c.type==="new"||c.type==="flip"){
@@ -9140,7 +9140,7 @@ function bbTypeBonus(r){ const clean=!(BB.spell||[]).length, b=clean?3:1;
   r.typed=true; r.pts+=b; r.why.push(["✍️ "+tr("Typed it yourself","Selbst getippt","Escrita por ti"),b]);
   if(!clean) r.spell=BB.spell.slice(); return b; }
 function bbIns(t){ const el=document.getElementById("bbin"); BB.typed=((el?el.value:BB.typed)||"").replace(/\s+$/,"")+(BB.typed?" ":"")+t+" "; if(el){ el.value=BB.typed; el.focus(); } }
-const BB_COL={ S:"#2F4B7C", V:"#F25C3B", M:"#D9481F", I:"#C2401F", O:"#2A8C82", T:"#E8A21A", P:"#7B5BC4", A:"#5B6474", H:"#D9481F", Pa:"#B23A1C", K:"#1E8E5A", D:"#B0286A", X:"#8A3FA0", R:"#13806B", U:"#1E8E5A", Z:"#5B6474", B:"#3C7DBF", Mi:"#A8321A", Je:"#1E8E5A", De:"#1E8E5A", Cp:"#C2781A", Q:"#2A8C82", Ar:"#2F4B7C", Pj:"#B23A1C", N:"#2F4B7C" };
+const BB_COL={ S:"#2F4B7C", V:"#F25C3B", M:"#D9481F", I:"#C2401F", O:"#2A8C82", T:"#E8A21A", P:"#7B5BC4", A:"#5B6474", H:"#D9481F", Pa:"#B23A1C", K:"#1E8E5A", D:"#B0286A", X:"#8A3FA0", R:"#13806B", U:"#1E8E5A", Z:"#5B6474", B:"#3C7DBF", Mi:"#A8321A", Je:"#1E8E5A", De:"#1E8E5A", Cp:"#C2781A", Q:"#2A8C82", Ar:"#2F4B7C", Pj:"#B23A1C", N:"#2F4B7C", Rf:"#6B7A8F", Pd:"#2A8C82", Mo:"#8A6D3B", Ng:"#C0392B", Po:"#3C7DBF", Oc:"#5B6474", J:"#1E8E5A" };
 function bbRole(r){ return { Mi:tr("modal (end)","Modal (Ende)","modal (final)"), Je:"je", De:"desto", Cp:tr("comparative","Komparativ","comparativo"), Q:tr("how?","wie?","¿cómo?"), Ar:tr("article","Artikel","artículo"), Pj:tr("participle + ending","Partizip + Endung","participio + terminación"), N:tr("noun","Nomen","sustantivo"), U:tr("in order to","um … zu","para"), Z:"zu", B:tr("by whom","von wem","por quién"), X:tr("prefix (end)","Präfix (Ende)","prefijo (final)"), R:tr("which / who","der/die/das","que"), H:tr("helper verb","Hilfsverb","verbo auxiliar"), Pa:tr("participle (end)","Partizip (Ende)","participio (final)"), K:tr("joiner","Verbinder","conector"), D:tr("to whom","wem","a quién"), S:tr("who","wer","quién"),V:tr("verb","Verb","verbo"),M:tr("verb","Verb","verbo"),I:tr("verb (end)","Verb (Ende)","verbo (final)"),O:tr("what","was","qué"),T:tr("when","wann","cuándo"),P:tr("where","wo","dónde"),A:tr("extra","extra","extra")}[r]; }
 /* the grammar check: returns {ok, bad:[index], msg, pts, why:[...]} */
 function bbSubErr(sub,off,E){
@@ -9431,6 +9431,11 @@ function bbEn(ws){ if(ws.some(w=>w.r==="Ar")) ws=bbNpJoin(ws);
   if(k===0){ const e=bbClauseEnd(ws); if(e<0) return ""; const a=bbEnClause(ws.slice(1,e+1)), b=bbEnClause(ws.slice(e+1)); return a&&b?cap((J[ws[0].t]||"")+" "+a)+", "+b+".":""; }
   if(k>0){ const a=bbEnClause(ws.slice(0,k)), b=bbEnClause(ws.slice(k+1)); return a&&b?cap(a)+" "+(J[ws[k].t]||"that")+" "+b+".":""; }
   const a=bbEnClause(ws); return a?cap(a)+".":""; }
+/* flashcards: the example sentence split into its parts, same colours and labels as Bridge Builder */
+function vcParts(w){ if(!w||!w.px||!w.px.length) return "";
+  const row=w.px.map(x=>{ const o={ t:x[0], r:x[1] }; if(x[1]==="X") o.v=x[3]; if(x[1]==="H"&&x[3]==="werden") o.a="werden"; if(x[3]==="q") o.q=1; return bbPart(o,!!x[2]); }).join("");
+  let open=true; try{ open=localStorage.getItem("pt_vcpx")!=="0"; }catch(e){}
+  return `<details class="bbwhy vcpx" ${open?"open":""} ontoggle="try{localStorage.setItem('pt_vcpx',this.open?'1':'0')}catch(e){}"><summary>🔍 ${tr("Parts of the sentence","Satzteile","Partes de la frase")}</summary><div class="bbwrow" dir="ltr">${row}</div></details>`; }
 function bbInSub(ws){ if(ws[0]&&ws[0].r==="Je"){ const d=ws.findIndex(w=>w.r==="De"); return ws.map((w,i)=>i>1&&(d<0||i<d)); }
   const k=ws.findIndex(w=>["K","R","U"].includes(w.r)); if(k<0) return ws.map(()=>false);
   if(k===0){ const e=bbClauseEnd(ws); return ws.map((w,i)=>i>0&&(e<0||i<=e)); }
@@ -9438,6 +9443,10 @@ function bbInSub(ws){ if(ws[0]&&ws[0].r==="Je"){ const d=ws.findIndex(w=>w.r==="
 function bbPart(w,inSub){ const L={ S:[tr("Subject","Subjekt","Sujeto"),tr("who?","wer?","¿quién?")],
     V:inSub?[tr("Verb (end)","Verb (Ende)","Verbo (final)"),w.k1?"Konjunktiv I":w.kon?"Konjunktiv II":tr("side clause","Nebensatz","subordinada")]:[tr("Verb (position 2)","Verb (Position 2)","Verbo (posición 2)"),w.k1?"Konjunktiv I":w.kon?"Konjunktiv II":tr("conjugated","konjugiert","conjugado")],
     M:[tr("Modal verb (position 2)","Modalverb (Position 2)","Verbo modal (posición 2)"),w.kon?"Konjunktiv II":tr("conjugated","konjugiert","conjugado")],
+    Vq:[tr("Verb (position 1)","Verb (Position 1)","Verbo (posición 1)"),tr("question or command","Frage oder Aufforderung","pregunta u orden")],
+    Rf:[tr("Reflexive","Reflexiv","Reflexivo"),"sich · mich · dir"], Pd:[tr("Predicate","Prädikativ","Predicado"),tr("is what? how?","ist was? wie?","¿qué es? ¿cómo?")],
+    Mo:[tr("Extra info","Angabe","Complemento"),tr("how? why?","wie? warum?","¿cómo? ¿por qué?")], Ng:["nicht / kein",tr("negation","Verneinung","negación")],
+    Po:[tr("Prep. object","Präpositionalobjekt","Objeto preposicional"),"über … · auf …"], Oc:[tr("Object clause","Objektsatz","Oración objeto"),""], J:[tr("Joiner","Konjunktion","Conjunción"),"und · aber · denn"],
     Mi:[tr("Modal (very end)","Modalverb (ganz am Ende)","Modal (al final)"),tr("double infinitive","Doppelinfinitiv","doble infinitivo")], Je:["je … desto",tr("the more …","je mehr …","cuanto más …")], De:["desto",tr("the more …","umso …","más …")],
     Cp:[tr("Comparative","Komparativ","Comparativo"),"-er"], Q:[tr("Adjective","Adjektiv","Adjetivo"),tr("how?","wie?","¿cómo?")], Ar:[tr("Article","Artikel","Artículo"),w.c==="akk"?"Akkusativ":w.c==="nom"?"Nominativ":"der · die · das"],
     Pj:[tr("Participle as adjective","Partizip als Adjektiv","Participio como adjetivo"),tr(`ending -${w.e}`,`Endung -${w.e}`,`terminación -${w.e}`)], N:[tr("Noun","Nomen","Sustantivo"),{ m:"der", f:"die", n:"das" }[w.g]||""], I:[tr("Infinitive (end)","Infinitiv (Ende)","Infinitivo (final)"),""],
@@ -9445,7 +9454,7 @@ function bbPart(w,inSub){ const L={ S:[tr("Subject","Subjekt","Sujeto"),tr("who?
     U:["um … zu",tr("in order to","Zweck","para")], Z:["zu",tr("before the infinitive","vor dem Infinitiv","antes del infinitivo")], B:[tr("By whom?","Von wem?","¿Por quién?"),"von …"],
     D:["Dativ",tr("to whom?","wem?","¿a quién?")], O:["Akkusativ",tr("what?","was?","¿qué?")], T:[tr("Time","Zeit","Tiempo"),tr("when?","wann?","¿cuándo?")], P:[tr("Place","Ort","Lugar"),tr("where?","wo? wohin?","¿dónde?")],
     A:["gerne",tr("likes to","mag","le gusta")], K:[tr("Joiner","Konjunktion","Conjunción"),tr("verb to the end","Verb ans Ende","verbo al final")],
-    X:[tr("Prefix (end)","Präfix (Ende)","Prefijo (final)"),w.v||""], R:[tr("Relative pronoun","Relativpronomen","Pronombre relativo"),w.c==="nom"?tr("who? (does it)","wer?","¿quién? (lo hace)"):w.c==="akk"?tr("whom?","wen?","¿a quién?"):"der · die · das"] }[w.r]||["",""];
+    X:[tr("Prefix (end)","Präfix (Ende)","Prefijo (final)"),w.v||""], R:[tr("Relative pronoun","Relativpronomen","Pronombre relativo"),w.c==="nom"?tr("who? (does it)","wer?","¿quién? (lo hace)"):w.c==="akk"?tr("whom?","wen?","¿a quién?"):"der · die · das"] }[w.q&&["V","M","H"].includes(w.r)?"Vq":w.r]||["",""];
   return `<div class="bbwp" style="--c:${BB_COL[w.r]}"><b lang="de">${esc(w.t)}</b><i></i><span>${L[0]}</span><small>${L[1]}</small></div>`; }
 /* meaning in the app language: a challenge sentence has a written translation; anything else is built in English */
 function bbMeaning(ws){ const bag=x=>x.toLowerCase().split(" ").sort().join(" "), got=bag(ws.map(w=>w.t).join(" "));
