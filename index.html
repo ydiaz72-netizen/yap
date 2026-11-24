@@ -913,7 +913,7 @@
 <script>/* Extra interface languages live in /i18n/<code>.js (English text → translation). Load the chosen one before the app starts. */
 (function(){ try{ var X=["tr","uk","fa","ur"], v=localStorage.getItem("pt_ui");
   if(!v){ var n=String((navigator.languages&&navigator.languages[0])||navigator.language||"").slice(0,2).toLowerCase(); if(X.indexOf(n)>-1) v=n; }
-  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=25"><\/script>'); }catch(e){} })();</script>
+  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=26"><\/script>'); }catch(e){} })();</script>
 
 <script>
 /* ===================== CONTENT ===================== */
@@ -1286,7 +1286,7 @@ function bi(en,de,es){ if(es!==undefined) return tr(en,de,es); return `${en} <sp
 function uiSet(l){
   if(!UI_CODES.includes(l)) return;
   if(UI_EXTRA.includes(l) && !I18N_DATA[l]){
-    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=25";
+    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=26";
     sc.onload=()=>uiSet(l); sc.onerror=()=>bToast(offlineMsg()); document.head.appendChild(sc); return;
   }
   UI=l; I18N_T=null; I18N_M.clear();
@@ -8732,6 +8732,42 @@ const BB_SK={ 1:[["Verb in position 2","Verb auf Position 2","Verbo en posición
   4:[["Perfekt: participle at the end","Perfekt: Partizip am Ende","Perfekt: participio al final"],["haben or sein","haben oder sein","haben o sein"]],
   5:[["Verb at the end after weil/dass","Verb am Ende nach weil/dass","Verbo al final tras weil/dass"],["weil or dass","weil oder dass","weil o dass"]] };
 function bbSkills(lv,only){ const L=only?[lv]:[1,2,3].filter(x=>x<=lv); return `<div class="bbsk">${L.flatMap(l=>BB_SK[l]).map(x=>`<span>${tr(x[0],x[1],x[2])}</span>`).join("")}</div>`; }
+/* ---- 📤 share my bridge: a branded picture for WhatsApp / Instagram ---- */
+const BB_URL="https://pontetalk.setzio.com/?bb";
+async function bbShareImg(){ const S2=BB.share||{}, W=1080, H=1350, c=document.createElement("canvas"); c.width=W; c.height=H; const g=c.getContext("2d");
+  try{ await Promise.all([document.fonts.load("800 60px 'Plus Jakarta Sans'"),document.fonts.load("600 60px Fredoka")]); }catch(e){}
+  const F=(w,px,f)=>`${w} ${px}px ${f||"'Plus Jakarta Sans'"}, system-ui, sans-serif`;
+  const rr=(x,y,w,h,r)=>{ g.beginPath(); g.moveTo(x+r,y); g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r); g.arcTo(x,y+h,x,y,r); g.arcTo(x,y,x+w,y,r); g.closePath(); };
+  g.fillStyle="#FAF7F2"; g.fillRect(0,0,W,H);
+  g.fillStyle="#F25C3B"; g.fillRect(0,0,W,14);
+  try{ const im=new Image(); im.src="/icon-192.png"; await im.decode(); g.save(); rr(70,70,96,96,24); g.clip(); g.drawImage(im,70,70,96,96); g.restore(); }catch(e){}
+  g.fillStyle="#1B2A41"; g.font=F(600,58,"Fredoka"); g.textBaseline="middle"; g.fillText("PonteTalk",190,120);
+  g.textAlign="center"; g.font=F(400,120); g.fillText(S2.stars?"⭐".repeat(S2.stars):"🌉",W/2,285);
+  g.font=F(800,72); g.fillText(S2.title||tr("Bridge complete!","Brücke fertig!","¡Puente terminado!"),W/2,415);
+  g.fillStyle="#5B6474"; g.font=F(600,38); g.fillText("🇩🇪 "+tr("I'm building German sentences","Ich baue deutsche Sätze","Construyo frases en alemán"),W/2,485);
+  /* river with the best sentence as tiles */
+  const rx=60, ry=545, rw=W-120; let lines=[[]], lw=0; g.font=F(800,40);
+  const best=(S2.best||[{t:"Ich",r:"S"},{t:"lerne",r:"V"},{t:"Deutsch",r:"O"}]).slice(0,12);
+  best.forEach((w,i)=>{ const t=(i===0?w.t.charAt(0).toUpperCase()+w.t.slice(1):w.t)+(i===best.length-1?".":""), tw=g.measureText(t).width+44; if(lw+tw>rw-60&&lines[lines.length-1].length){ lines.push([]); lw=0; } lines[lines.length-1].push([t,w.r,tw]); lw+=tw+14; }); lines=lines.slice(0,3);
+  const rh=60+lines.length*92; const grd=g.createLinearGradient(0,ry,0,ry+rh); grd.addColorStop(0,"#5B8FD8"); grd.addColorStop(1,"#2F6FD1"); g.fillStyle=grd; rr(rx,ry,rw,rh,36); g.fill();
+  lines.forEach((ln,li)=>{ const tot=ln.reduce((a,x)=>a+x[2],0)+14*(ln.length-1); let x=W/2-tot/2; const y=ry+30+li*92;
+    ln.forEach(([t,r,tw])=>{ g.fillStyle=BB_COL[r]||"#2F4B7C"; rr(x,y,tw,76,18); g.fill(); g.fillStyle="#fff"; g.fillText(t,x+tw/2,y+40); x+=tw+14; }); });
+  /* stats */
+  const sy=ry+rh+40, cw=(W-120-40)/3, st=[["⚡",S2.xp||0,tr("points","Punkte","puntos")],["🔥",S2.streak||0,tr("days in a row","Tage in Folge","días seguidos")],["🏅",(S2.rank||"").replace(/^\S+\s/,""),tr("level","Level","nivel")]];
+  st.forEach(([e,v,l],i)=>{ const x=60+i*(cw+20); g.fillStyle="#fff"; rr(x,sy,cw,180,28); g.fill(); g.strokeStyle="#ECE6DC"; g.lineWidth=3; g.stroke();
+    g.fillStyle="#1B2A41"; g.font=F(400,48); g.fillText(e,x+cw/2,sy+45); g.font=F(800,String(v).length>9?34:50); g.fillText(String(v),x+cw/2,sy+102); g.fillStyle="#5B6474"; g.font=F(600,28); g.fillText(l,x+cw/2,sy+150); });
+  /* footer */
+  g.fillStyle="#F25C3B"; rr(60,H-180,W-120,130,36); g.fill(); g.fillStyle="#fff"; g.font=F(800,44); g.fillText(tr("Can you beat me? Play free:","Schaffst du mehr? Gratis spielen:","¿Me superas? Juega gratis:"),W/2,H-138); g.font=F(700,38); g.fillText("pontetalk.setzio.com",W/2,H-88);
+  return await new Promise(res=>c.toBlob(res,"image/png")); }
+async function bbShare(){ const text=tr("I just built German sentences on PonteTalk 🌉 Can you beat my score?","Ich habe gerade auf PonteTalk deutsche Sätze gebaut 🌉 Schaffst du mehr Punkte?","Acabo de construir frases en alemán en PonteTalk 🌉 ¿Puedes superar mi puntuación?");
+  bToast(tr("Making your picture…","Bild wird erstellt…","Creando tu imagen…"));
+  let blob=null; try{ blob=await bbShareImg(); }catch(e){}
+  const file=blob?new File([blob],"pontetalk-bridge.png",{ type:"image/png" }):null;
+  try{ if(file&&navigator.canShare&&navigator.canShare({ files:[file] })){ await navigator.share({ files:[file], text:text+" "+BB_URL }); return; }
+    if(navigator.share){ await navigator.share({ title:"PonteTalk", text, url:BB_URL }); return; } }catch(e){ if(e&&e.name==="AbortError") return; }
+  if(blob){ const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="pontetalk-bridge.png"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),4000); }
+  try{ await navigator.clipboard.writeText(text+" "+BB_URL); }catch(e){}
+  bToast(tr("Picture saved and link copied. Paste it anywhere!","Bild gespeichert und Link kopiert. Überall einfügen!","Imagen guardada y enlace copiado. ¡Pégalo donde quieras!")); }
 /* ---- 🧬 grammar tracker: right/wrong per rule ---- */
 const BB_DNA={ v2:[["Verb in position 2","Verb auf Position 2","Verbo en posición 2"],["The conjugated verb is always the 2nd building block: Ich trinke… / Heute trinke ich…","Das konjugierte Verb ist immer der 2. Baustein: Ich trinke… / Heute trinke ich…","El verbo conjugado siempre es el 2.º bloque: Ich trinke… / Heute trinke ich…"],0],
   agree:[["Verb endings","Verbendungen","Terminaciones del verbo"],["ich trinke · du trinkst · er/sie trinkt · wir trinken","ich trinke · du trinkst · er/sie trinkt · wir trinken","ich trinke · du trinkst · er/sie trinkt · wir trinken"],0],
@@ -8791,6 +8827,7 @@ function bbQCard(){ const q=bbQs(), done=q.ids.filter(id=>(q.p[id]||0)>=BB_Q[id]
     <div class="bbqr ${q.chest?"ok":""}"><div style="flex:1;font-weight:700">${tr("All 3 quests: bonus","Alle 3 Quests: Bonus","Las 3 misiones: bonus")}</div><b style="font-size:22px">${q.chest?"🎉":"🎁"}</b><b>+20</b></div>
     <p class="note" style="margin:8px 0 0">⏱ ${tr("New quests every day.","Jeden Tag neue Quests.","Misiones nuevas cada día.")}</p></div>`; }
 function bbDone(o){ /* lesson-complete screen */
+  BB.share={ title:o.title, xp:o.xp, stars:o.stars||0, best:o.best||null, streak:bbDayStreak(), rank:bbRank(bbLevel()) };
   const acc=o.tries?Math.round(o.ok/o.tries*100):100, ds=bbDayStreak();
   return `<div class="card center bbdone"><div class="bbdonebig">${o.stars?"⭐".repeat(o.stars):"🌉"}</div>
     <h2 style="margin:4px 0">${o.title}</h2><p class="note" style="margin:0 0 12px">${o.sub}</p>
@@ -8798,7 +8835,8 @@ function bbDone(o){ /* lesson-complete screen */
       ${o.combo?`<div><span>🔥 ${tr("Combo bonus","Kombi-Bonus","Bonus combo")}</span><b>+${o.combo}</b></div>`:""}
       <div><span>🎯 ${tr("Accuracy","Genauigkeit","Precisión")}</span><b>${acc}%</b></div></div>
     ${o.extra||""}<div class="bbstreak"><div style="font-size:30px;font-weight:900">🔥 ${ds}</div><div class="note" style="margin:0 0 8px">${ds===1?tr("day in a row","Tag in Folge","día seguido"):tr("days in a row","Tage in Folge","días seguidos")}</div>${bbWeek()}</div>
-    <button class="btn primary qbtn" style="margin-top:14px" onclick="${o.go}">${tr("Continue","Weiter","Continuar")} →</button></div>`; }
+    <button class="btn primary qbtn" style="margin-top:14px" onclick="${o.go}">${tr("Continue","Weiter","Continuar")} →</button>
+    <button class="btn secondary qbtn" style="margin-top:8px" onclick="bbShare()">📤 ${tr("Share my bridge","Meine Brücke teilen","Compartir mi puente")}</button></div>`; }
 function bbAdd(id){ if((BB.row.includes(id)&&!BB_THEMES[BB.th].reuse)||BB.row.length>=12) return; BB.row.push(id); BB.res=null; xr(); }
 function bbDel(k){ BB.row.splice(k,1); BB.res=null; xr(); }
 function bbClear(){ BB.row=[]; BB.res=null; BB.typed=""; BB.tws=null; xr(); }
@@ -8911,7 +8949,7 @@ function bbGo(){
   if(r.ok){ const key=BB.th+":"+ws.map(w=>w.t).join(" ").toLowerCase(), lv0=bbLevel();
     if(BB.s.made[key]){ r.repeat=true; r.pts=0; }
     else { if(typing) bbTypeBonus(r); BB.s.streak++; if(BB.s.streak>=3){ const b=Math.round(r.pts*0.5); r.pts+=b; BB.rd.combo+=b; r.why.push([`🔥 ${tr("Streak","Serie","Racha")} ×1.5`,b]); }
-      BB.rd.ok++; BB.rd.n++; BB.rd.xp+=r.pts; bbDay(); if(BB.rd.n>=BB_ROUND) r.round=true;
+      BB.rd.ok++; BB.rd.n++; BB.rd.xp+=r.pts; bbDay(); if(!BB.rd.best||ws.length>BB.rd.best.length) BB.rd.best=ws.map(w=>({ t:w.t, r:w.r })); if(BB.rd.n>=BB_ROUND) r.round=true;
       r.quests=bbQ("ok",r).concat(r.round?bbQ("bridge"):[]); bbDnaAdd(r);
       BB.s.made[key]=1; bbXp(r.pts); BB.s.n++; BB.s.best=Math.max(BB.s.best,r.pts); }
     r.up=bbLevel()>lv0; bbSave(); }
@@ -8931,7 +8969,7 @@ function bbChTiles(){ const c=BB_CH[BB.ch.k], T=BB_THEMES[c.th].tiles.map((t,i)=
 function bbChCheck(ws){ const c=BB_CH[BB.ch.k], it=c.items[BB.ch.i], got=ws.map(w=>w.t).join(" ").toLowerCase();
   const ok=it[2].some(a=>a.toLowerCase()===got); BB.ch.tries++;
   BB.ch.all=(BB.ch.all||0)+1;
-  if(ok){ const tb=BB.s.input==="type"?(BB.spell&&BB.spell.length?1:3):0, p=(BB.ch.tries===1?10:5)+tb; BB.ch.ok+= BB.ch.tries===1?1:0; BB.ch.xp=(BB.ch.xp||0)+p; bbXp(p); bbDay(); bbDnaAdd({ ok:true, used:bbCheck(bbNorm(ws,c.th),c.th).used }); bbSave(); BB.res={ ok:true, pts:p, typed:!!tb, spell:tb===1?BB.spell.slice():null, why:[[BB.ch.tries===1?tr("First try!","Beim ersten Versuch!","¡A la primera!"):tr("Solved","Gelöst","Resuelto"),p-tb]].concat(tb?[["✍️ "+tr("Typed it yourself","Selbst getippt","Escrita por ti"),tb]]:[]) }; if(tb) bbQ("ok",{ typed:true, len:0 }); }
+  if(ok){ const tb=BB.s.input==="type"?(BB.spell&&BB.spell.length?1:3):0, p=(BB.ch.tries===1?10:5)+tb; BB.ch.ok+= BB.ch.tries===1?1:0; BB.ch.xp=(BB.ch.xp||0)+p; bbXp(p); if(!BB.ch.best||ws.length>BB.ch.best.length) BB.ch.best=ws.map(w=>({ t:w.t, r:w.r })); bbDay(); bbDnaAdd({ ok:true, used:bbCheck(bbNorm(ws,c.th),c.th).used }); bbSave(); BB.res={ ok:true, pts:p, typed:!!tb, spell:tb===1?BB.spell.slice():null, why:[[BB.ch.tries===1?tr("First try!","Beim ersten Versuch!","¡A la primera!"):tr("Solved","Gelöst","Resuelto"),p-tb]].concat(tb?[["✍️ "+tr("Typed it yourself","Selbst getippt","Escrita por ti"),tb]]:[]) }; if(tb) bbQ("ok",{ typed:true, len:0 }); }
   else { const g=bbCheck(bbNorm(ws,c.th),c.th); if(!g.ok){ bbDnaAdd(g); bbSave(); } BB.res=g.ok?{ ok:false, bad:[], msg:tr("Good German, but not what the English says. Look again!","Gutes Deutsch, aber nicht das, was auf Englisch steht. Schau noch mal!","Buen alemán, pero no es lo que dice el inglés. ¡Mira otra vez!") }:g; }
   xr(); }
 function bbChNext(){ const c=BB_CH[BB.ch.k]; BB.ch.i++; BB.ch.tries=0; BB.row=[]; BB.res=null; BB.typed=""; BB.tws=null;
@@ -8945,10 +8983,10 @@ VIEWS.bridge = function(){
     ${next?`<div class="exbar" style="margin:6px 0 12px"><i style="width:${Math.round((BB.s.pts-(BB_LV[lv-1]||0))/(next-(BB_LV[lv-1]||0))*100)}%"></i></div>`:""}`;
   if(ch&&BB.ch.done) return top+bbDone({ stars:BB.ch.done, title:tr("Challenge done!","Challenge geschafft!","¡Reto superado!"),
     sub:tr(`${BB.ch.ok} of 5 on the first try.`,`${BB.ch.ok} von 5 beim ersten Versuch.`,`${BB.ch.ok} de 5 a la primera.`),
-    xp:BB.ch.xp||0, combo:0, tries:BB.ch.all||0, ok:5, extra:(BB.ch.qs||[]).map(([a,b])=>`<div class="bbqdone">✅ ${esc(a)} <b>+${b}</b></div>`).join(""), go:"BB.mode='free';BB.ch=null;BB.row=[];BB.res=null;BB.typed='';BB.tws=null;xr()" });
+    xp:BB.ch.xp||0, combo:0, tries:BB.ch.all||0, ok:5, best:BB.ch.best, extra:(BB.ch.qs||[]).map(([a,b])=>`<div class="bbqdone">✅ ${esc(a)} <b>+${b}</b></div>`).join(""), go:"BB.mode='free';BB.ch=null;BB.row=[];BB.res=null;BB.typed='';BB.tws=null;xr()" });
   if(!ch&&BB.rd&&BB.rd.done) return top+bbDone({ title:tr("Bridge complete!","Brücke fertig!","¡Puente terminado!"),
     sub:tr(`${BB_ROUND} new sentences built.`,`${BB_ROUND} neue Sätze gebaut.`,`${BB_ROUND} frases nuevas construidas.`),
-    xp:BB.rd.xp, combo:BB.rd.combo, tries:BB.rd.tries, ok:BB.rd.ok, go:"BB.rd=bbRd();BB.row=[];BB.res=null;BB.typed='';BB.tws=null;xr()" });
+    xp:BB.rd.xp, combo:BB.rd.combo, tries:BB.rd.tries, ok:BB.rd.ok, best:BB.rd.best, go:"BB.rd=bbRd();BB.row=[];BB.res=null;BB.typed='';BB.tws=null;xr()" });
   const typing=BB.s.input==="type", tiles=ch?bbChTiles():bbTiles(), row=typing?(BB.tws||[]):BB.row.map(id=>tiles.find(t=>t.id===id)).filter(Boolean), r=BB.res;
   const groups=["S","V","M","H","I","Pa","O","T","P","A","K"].filter(g=>tiles.some(t=>t.r===g));
   const bad=new Set(r&&!r.ok?r.bad||[]:[]);
@@ -9845,6 +9883,7 @@ try{ const u=new URL(location.href); if(u.searchParams.get("auth")==="google" ||
 // supabase.js loads with 'defer', so it is ready only once the page has finished loading
 if(window.supabase) authInit(); else document.addEventListener("DOMContentLoaded", authInit);
 try{ const sid=new URLSearchParams(location.search).get("s"); if(sid && /^[0-9a-f-]{36}$/i.test(sid)){ S.sid=sid; S.screen="session"; document.addEventListener("DOMContentLoaded", ()=>bLoad()); } }catch(e){}
+try{ if(new URLSearchParams(location.search).has("bb")){ document.addEventListener("DOMContentLoaded",()=>{ bbOpen(); history.replaceState(null,"",location.pathname); }); } }catch(e){}
 try{ if(new URLSearchParams(location.search).has("stats")){ S.screen="stats"; let n=0; const w=setInterval(()=>{ n++; if(A.status==="in"&&A.user){ clearInterval(w); stLoad(); } else if((A.status==="out"&&n>2)||n>20){ clearInterval(w); A.ret="stats"; A.msg="Sign in to see stats · Bitte anmelden"; go("account"); } },500); } }catch(e){}
 try{ if(new URLSearchParams(location.search).has("reports")){ S.screen="reports"; let n=0; const w=setInterval(()=>{ n++; if(A.status==="in"&&A.user){ clearInterval(w); raLoad(); } else if((A.status==="out"&&n>2)||n>20){ clearInterval(w); A.ret="reports"; A.msg="Sign in to see reports · Bitte anmelden"; go("account"); } },500); } }catch(e){}
 try{ const rid=new URLSearchParams(location.search).get("r"); if(rid && /^[0-9a-f-]{36}$/i.test(rid)){ S.screen="shopitem"; SH.one=null; A.ret="shopitem"; SH.oneId=rid; document.addEventListener("DOMContentLoaded", ()=>shOneLoad(rid)); } }catch(e){}
