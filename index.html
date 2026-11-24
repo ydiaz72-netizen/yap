@@ -945,7 +945,7 @@
 <script>/* Extra interface languages live in /i18n/<code>.js (English text → translation). Load the chosen one before the app starts. */
 (function(){ try{ var X=["tr","uk","fa","ur"], v=localStorage.getItem("pt_ui");
   if(!v){ var n=String((navigator.languages&&navigator.languages[0])||navigator.language||"").slice(0,2).toLowerCase(); if(X.indexOf(n)>-1) v=n; }
-  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=39"><\/script>'); }catch(e){} })();</script>
+  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=40"><\/script>'); }catch(e){} })();</script>
 
 <script>
 /* ===================== CONTENT ===================== */
@@ -1375,7 +1375,7 @@ function bi(en,de,es){ if(es!==undefined) return tr(en,de,es); return `${en} <sp
 function uiSet(l){
   if(!UI_CODES.includes(l)) return;
   if(UI_EXTRA.includes(l) && !I18N_DATA[l]){
-    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=39";
+    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=40";
     sc.onload=()=>uiSet(l); sc.onerror=()=>bToast(offlineMsg()); document.head.appendChild(sc); return;
   }
   UI=l; I18N_T=null; I18N_M.clear();
@@ -8865,6 +8865,38 @@ const BB_THEMES={
   ["von meinem Vater","B"],["von der Firma","B"],
   ["1900","T"],["gestern","T"],["jeden Morgen","T"],["in Erfurt","P"]],
   fit:{} },
+ dinf:{ e:"🧱", en:"habe … arbeiten müssen", de:"habe … arbeiten müssen", es:"habe … arbeiten müssen", lv:13, cf:"C1", reuse:true, tiles:[
+  ["ich","S",{p:1}],["du","S",{p:2}],["wir","S",{p:4}],["Lena","S",{p:3}],
+  ["habe","H",{p:1,a:"haben"}],["hast","H",{p:2,a:"haben"}],["hat","H",{p:3,a:"haben"}],["haben","H",{p:4,a:"haben"}],["bin","H",{p:1,a:"sein"}],
+  ["bleibe","V",{p:1,v:"bleiben"}],
+  ["arbeiten","I",{v:"arbeiten"}],["lernen","I",{v:"lernen"}],["warten","I",{v:"warten"}],
+  ["müssen","Mi",{v:"müssen"}],["können","Mi",{v:"können"}],["wollen","Mi",{v:"wollen"}],["gemusst","Pa",{v:"müssen",a:"haben"}],
+  ["Deutsch","O",{k:"lang"}],["gestern","T"],["lange","T"],["zu Hause","P"],["weil","K"]],
+  fit:{} },
+ je:{ e:"📈", en:"je … desto: the more…", de:"je … desto", es:"je … desto: cuanto más…", lv:14, cf:"B2–C1", reuse:true, tiles:[
+  ["ich","S",{p:1}],["du","S",{p:2}],["wir","S",{p:4}],
+  ["lerne","V",{p:1,v:"lernen"}],["lernst","V",{p:2,v:"lernen"}],["lernen","V",{p:4,v:"lernen"}],
+  ["verstehe","V",{p:1,v:"verstehen"}],["verstehst","V",{p:2,v:"verstehen"}],["verstehen","V",{p:4,v:"verstehen"}],
+  ["spreche","V",{p:1,v:"sprechen"}],["sprichst","V",{p:2,v:"sprechen"}],["sprechen","V",{p:4,v:"sprechen"}],
+  ["übe","V",{p:1,v:"üben"}],["übst","V",{p:2,v:"üben"}],["üben","V",{p:4,v:"üben"}],["liest","V",{p:2,v:"lesen"}],
+  ["mehr","Cp"],["besser","Cp"],["schneller","Cp"],["öfter","Cp"],["länger","Cp"],
+  ["Deutsch","O",{k:"lang"}],["je","Je"],["desto","De"]],
+  fit:{} },
+ k1:{ e:"🗣️", en:"Reported speech: Konjunktiv I", de:"Indirekte Rede: Konjunktiv I", es:"Estilo indirecto: Konjunktiv I", lv:15, cf:"C1", reuse:true, k1:true, tiles:[
+  ["Lena","S",{p:3}],["er","S",{p:3}],["sie","S",{p:3}],["der Chef","S",{p:3}],
+  ["sagt","V",{p:3,v:"sagen",say:1}],["sagte","V",{p:3,v:"sagen",say:1,past:1}],["meint","V",{p:3,v:"meinen",say:1}],
+  ["habe","V",{p:3,v:"haben",k1:1}],["sei","V",{p:3,v:"sein",k1:1}],["komme","V",{p:3,v:"kommen",k1:1}],["arbeite","V",{p:3,v:"arbeiten",k1:1}],
+  ["hat","V",{p:3,v:"haben"}],["ist","V",{p:3,v:"sein"}],["kommt","V",{p:3,v:"kommen"}],["arbeitet","V",{p:3,v:"arbeiten"}],
+  ["keine Zeit","O",{k:"time"}],["krank","Q"],["morgen","T"],["in Berlin","P"],["zu Hause","P"],["dass","K"]],
+  fit:{} },
+ padj:{ e:"🧩", en:"das gestern gekaufte Auto", de:"das gestern gekaufte Auto", es:"das gestern gekaufte Auto", lv:16, cf:"C1–C2", tiles:[
+  ["ich","S",{p:1}],["wir","S",{p:4}],
+  ["ist","V",{p:3,v:"sein"}],["verkaufe","V",{p:1,v:"verkaufen"}],["lesen","V",{p:4,v:"lesen"}],
+  ["das","Ar",{g:"n",c:"both"}],["die","Ar",{g:"f",c:"both"}],["der","Ar",{g:"m",c:"nom"}],["den","Ar",{g:"m",c:"akk"}],
+  ["gekaufte","Pj",{e:"e",v:"kaufen"}],["gekauften","Pj",{e:"en",v:"kaufen"}],["renovierte","Pj",{e:"e",v:"renovieren"}],["geschriebenen","Pj",{e:"en",v:"schreiben"}],["geschriebene","Pj",{e:"e",v:"schreiben"}],["gebaute","Pj",{e:"e",v:"bauen"}],
+  ["Auto","N",{g:"n"}],["Wohnung","N",{g:"f"}],["Brief","N",{g:"m"}],["Brücke","N",{g:"f"}],
+  ["gestern","T"],["1900","T"],["von der Firma","B"],["von Lena","B"],["rot","Q"],["teuer","Q"],["alt","Q"]],
+  fit:{} },
  learn:{ e:"📚", en:"Learning German", de:"Deutsch lernen", es:"Aprender alemán", tiles:[
   ["ich","S",{p:1}],["du","S",{p:2}],["wir","S",{p:4}],["Sarah","S",{p:3}],
   ["lerne","V",{p:1,v:"lernen"}],["lernst","V",{p:2,v:"lernen"}],["lernen","V",{p:4,v:"lernen"}],["lernt","V",{p:3,v:"lernen"}],
@@ -8889,7 +8921,11 @@ const BB_CH=[
  { lv:9, th:"rel", items:[["I know the man who lives here.","Conozco al hombre que vive aquí.",["ich kenne den Mann der hier wohnt"]],["We're looking for the flat that has a balcony.","Buscamos el piso que tiene balcón.",["wir suchen die Wohnung die einen Balkon hat"]],["Lena knows the woman who lives in Erfurt.","Lena conoce a la mujer que vive en Erfurt.",["Lena kennt die Frau die in Erfurt wohnt"]],["I like the book that you know.","Me gusta el libro que conoces.",["ich mag das Buch das du kennst"]],["You know the man I like.","Conoces al hombre que me gusta.",["du kennst den Mann den ich mag"]]]},
  { lv:10, th:"umzu", items:[["I learn German in order to work here.","Aprendo alemán para trabajar aquí.",["ich lerne Deutsch um hier zu arbeiten"]],["We save money to buy a car.","Ahorramos dinero para comprar un coche.",["wir sparen Geld um ein Auto zu kaufen"]],["Lena goes to the baker's to buy bread.","Lena va a la panadería a comprar pan.",["Lena geht zum Bäcker um Brot zu kaufen"]],["You learn every day in order to study in Germany.","Aprendes cada día para estudiar en Alemania.",["du lernst jeden Tag um in Deutschland zu studieren"]],["I save money to study in Germany.","Ahorro dinero para estudiar en Alemania.",["ich spare Geld um in Deutschland zu studieren"]]]},
  { lv:11, th:"kon", items:[["If I had time, I would travel.","Si tuviera tiempo, viajaría.",["wenn ich Zeit hätte würde ich reisen"]],["If we had money, we would buy a house.","Si tuviéramos dinero, compraríamos una casa.",["wenn wir Geld hätten würden wir ein Haus kaufen"]],["If I were in Berlin, I would learn German every day.","Si estuviera en Berlín, aprendería alemán cada día.",["wenn ich in Berlin wäre würde ich jeden Tag Deutsch lernen"]],["If you had time, you would travel to Spain.","Si tuvieras tiempo, viajarías a España.",["wenn du Zeit hättest würdest du nach Spanien reisen"]],["I would buy a house if I had money.","Compraría una casa si tuviera dinero.",["ich würde ein Haus kaufen wenn ich Geld hätte"]]]},
- { lv:12, th:"pass", items:[["The house was built in 1900.","La casa fue construida en 1900.",["das Haus wurde 1900 gebaut","1900 wurde das Haus gebaut"]],["The bridge is being built.","El puente se está construyendo.",["die Brücke wird gebaut"]],["The car was repaired yesterday.","El coche fue reparado ayer.",["das Auto wurde gestern repariert","gestern wurde das Auto repariert"]],["The windows are opened every morning.","Las ventanas se abren cada mañana.",["die Fenster werden jeden Morgen geöffnet","jeden Morgen werden die Fenster geöffnet"]],["The car was sold by my father.","El coche fue vendido por mi padre.",["das Auto wurde von meinem Vater verkauft"]]]}
+ { lv:12, th:"pass", items:[["The house was built in 1900.","La casa fue construida en 1900.",["das Haus wurde 1900 gebaut","1900 wurde das Haus gebaut"]],["The bridge is being built.","El puente se está construyendo.",["die Brücke wird gebaut"]],["The car was repaired yesterday.","El coche fue reparado ayer.",["das Auto wurde gestern repariert","gestern wurde das Auto repariert"]],["The windows are opened every morning.","Las ventanas se abren cada mañana.",["die Fenster werden jeden Morgen geöffnet","jeden Morgen werden die Fenster geöffnet"]],["The car was sold by my father.","El coche fue vendido por mi padre.",["das Auto wurde von meinem Vater verkauft"]]]},
+ { lv:13, th:"dinf", items:[["I had to work yesterday.","Ayer tuve que trabajar.",["ich habe gestern arbeiten müssen","gestern habe ich arbeiten müssen"]],["We were able to learn German at home.","Pudimos aprender alemán en casa.",["wir haben zu Hause Deutsch lernen können"]],["Lena had to wait a long time.","Lena tuvo que esperar mucho tiempo.",["Lena hat lange warten müssen"]],["Yesterday you wanted to learn German.","Ayer querías aprender alemán.",["gestern hast du Deutsch lernen wollen","du hast gestern Deutsch lernen wollen"]],["I'm staying at home because I had to work yesterday.","Me quedo en casa porque ayer tuve que trabajar.",["ich bleibe zu Hause weil ich gestern habe arbeiten müssen"]]]},
+ { lv:14, th:"je", items:[["The more I learn, the better I understand.","Cuanto más aprendo, mejor entiendo.",["je mehr ich lerne desto besser verstehe ich"]],["The more often we practise, the faster we speak.","Cuanto más practicamos, más rápido hablamos.",["je öfter wir üben desto schneller sprechen wir"]],["The more you read, the better you understand.","Cuanto más lees, mejor entiendes.",["je mehr du liest desto besser verstehst du"]],["The longer I learn German, the better I speak.","Cuanto más tiempo aprendo alemán, mejor hablo.",["je länger ich Deutsch lerne desto besser spreche ich"]],["The more often you speak, the faster you learn.","Cuanto más hablas, más rápido aprendes.",["je öfter du sprichst desto schneller lernst du"]]]},
+ { lv:15, th:"k1", items:[["Lena says she has no time.","Lena dice que no tiene tiempo.",["Lena sagt sie habe keine Zeit","Lena sagt dass sie keine Zeit habe"]],["The boss says he is sick.","El jefe dice que está enfermo.",["der Chef sagt er sei krank","der Chef sagt dass er krank sei"]],["Lena said she would come tomorrow.","Lena dijo que vendría mañana.",["Lena sagte sie komme morgen","Lena sagte dass sie morgen komme"]],["He thinks she works in Berlin.","Él opina que ella trabaja en Berlín.",["er meint sie arbeite in Berlin","er meint dass sie in Berlin arbeite"]],["She says the boss is at home.","Ella dice que el jefe está en casa.",["sie sagt der Chef sei zu Hause","sie sagt dass der Chef zu Hause sei"]]]},
+ { lv:16, th:"padj", items:[["The car bought yesterday is red.","El coche comprado ayer es rojo.",["das gestern gekaufte Auto ist rot"]],["I'm selling the car I bought yesterday.","Vendo el coche comprado ayer.",["ich verkaufe das gestern gekaufte Auto"]],["The flat renovated by the company is expensive.","El piso renovado por la empresa es caro.",["die von der Firma renovierte Wohnung ist teuer"]],["We read the letter written by Lena.","Leemos la carta escrita por Lena.",["wir lesen den von Lena geschriebenen Brief"]],["The bridge built in 1900 is old.","El puente construido en 1900 es viejo.",["die 1900 gebaute Brücke ist alt"]]]}
 ];
 const BB_LV=[0,40,110,220,360];  /* points needed for level 1..5 (levels 4+ are ranks for now) */
 const BB={ mode:"free", th:"cafe", row:[], res:null, ch:null, s:null };
@@ -8955,6 +8991,10 @@ const BB_SK={ 1:[["Verb in position 2","Verb auf Position 2","Verbo en posición
   10:[["um … zu: in order to","um … zu: um zu","um … zu: para","…, um hier zu arbeiten"],["No subject after um","Kein Subjekt nach um","Sin sujeto tras um","um … zu + Infinitiv"]],
   11:[["Konjunktiv II","Konjunktiv II","Konjuntivo II","hätte, wäre, würde"],["Both parts unreal","Beide Teile irreal","Las dos partes irreales","Wenn ich Zeit hätte, würde ich reisen"]],
   12:[["Passive with werden","Passiv mit werden","Pasiva con werden","wird / wurde + Partizip"],["Participle at the end","Partizip am Ende","Participio al final","Das Haus wurde 1900 gebaut"]],
+  13:[["Modal in the Perfekt","Modalverb im Perfekt","Modal en Perfekt","habe … arbeiten müssen"],["habe jumps forward after weil","habe springt nach weil nach vorn","habe se adelanta tras weil","weil ich habe arbeiten müssen"]],
+  14:[["je … desto","je … desto","je … desto","je mehr …, desto besser …"],["desto + comparative + verb","desto + Komparativ + Verb","desto + comparativo + verbo","desto besser verstehe ich"]],
+  15:[["Konjunktiv I","Konjunktiv I","Konjuntivo I","er habe, sie sei"],["With or without dass","Mit oder ohne dass","Con o sin dass","sie sagt, sie habe … / dass sie … habe"]],
+  16:[["Participle as adjective","Partizip als Adjektiv","Participio como adjetivo","das gestern gekaufte Auto"],["Ending -e or -en","Endung -e oder -en","Terminación -e o -en","das …-e Auto · den …-en Brief"]],
   9:[["Relative clauses","Relativsätze","Oraciones de relativo","der Mann, der hier wohnt"],["der or den?","der oder den?","¿der o den?","der hier wohnt · den ich mag"]],
   5:[["Verb at the end after weil/dass","Verb am Ende nach weil/dass","Verbo al final tras weil/dass","…, weil ich hier lebe"],["weil or dass","weil oder dass","weil o dass","weil = because · dass = that"]] };
 function bbSkills(lv,only){ const L=only?[lv]:[1,2,3].filter(x=>x<=lv); return `<div class="bbsk">${L.flatMap(l=>BB_SK[l]).map(x=>`<span>${tr(x[0],x[1],x[2])}${x[3]?` <i lang="de" style="font-weight:500;opacity:.75">(${x[3]})</i>`:""}</span>`).join("")}</div>`; }
@@ -9013,6 +9053,10 @@ const BB_DNA={ v2:[["Verb in position 2","Verb auf Position 2","Verbo en posici�
   umzu:[["um … zu","um … zu","um … zu"],["No subject after um, and zu + infinitive at the very end: Ich lerne Deutsch, um hier zu arbeiten.","Kein Subjekt nach um, und zu + Infinitiv ganz am Ende: Ich lerne Deutsch, um hier zu arbeiten.","Sin sujeto tras um, y zu + infinitivo al final: Ich lerne Deutsch, um hier zu arbeiten."],9],
   kon:[["Konjunktiv II","Konjunktiv II","Konjuntivo II"],["For an unreal if, both parts need Konjunktiv II: hätte/wäre in the wenn part, würde + infinitive in the main part: Wenn ich Zeit hätte, würde ich reisen.","Für ein irreales Wenn brauchen beide Teile Konjunktiv II: hätte/wäre im wenn-Teil, würde + Infinitiv im Hauptsatz: Wenn ich Zeit hätte, würde ich reisen.","Para un si irreal, las dos partes llevan Konjunktiv II: hätte/wäre en la parte con wenn, würde + infinitivo en la principal: Wenn ich Zeit hätte, würde ich reisen."],10],
   pass:[["Passive","Passiv","Pasiva"],["werden in position 2, the participle at the very end: Das Haus wurde 1900 gebaut.","werden auf Position 2, das Partizip ganz am Ende: Das Haus wurde 1900 gebaut.","werden en posición 2 y el participio al final: Das Haus wurde 1900 gebaut."],11],
+  dinf:[["Double infinitive","Doppelinfinitiv","Doble infinitivo"],["Modal verbs in the Perfekt use haben + two infinitives, the modal last: Ich habe arbeiten müssen. After weil, habe jumps in front of them: …, weil ich habe arbeiten müssen.","Modalverben im Perfekt: haben + zwei Infinitive, das Modalverb zuletzt: Ich habe arbeiten müssen. Nach weil springt habe davor: …, weil ich habe arbeiten müssen.","Los modales en Perfekt: haben + dos infinitivos, el modal al final: Ich habe arbeiten müssen. Tras weil, habe se pone delante: …, weil ich habe arbeiten müssen."],12],
+  je:[["je … desto","je … desto","je … desto"],["je + comparative sends the verb to the end; desto + comparative is followed by verb, then subject: Je mehr ich lerne, desto besser verstehe ich.","je + Komparativ schickt das Verb ans Ende; nach desto + Komparativ kommen Verb, dann Subjekt: Je mehr ich lerne, desto besser verstehe ich.","je + comparativo manda el verbo al final; tras desto + comparativo van verbo y sujeto: Je mehr ich lerne, desto besser verstehe ich."],13],
+  k1:[["Konjunktiv I","Konjunktiv I","Konjuntivo I"],["Reported speech uses Konjunktiv I: er habe, sie sei, er komme. Without dass the verb stays in position 2, with dass it goes to the end.","Indirekte Rede mit Konjunktiv I: er habe, sie sei, er komme. Ohne dass bleibt das Verb auf Position 2, mit dass geht es ans Ende.","El estilo indirecto usa Konjunktiv I: er habe, sie sei, er komme. Sin dass el verbo va en posición 2, con dass al final."],14],
+  padj:[["Participle as adjective","Partizip als Adjektiv","Participio como adjetivo"],["Article, extra info, participle with ending, noun: das gestern gekaufte Auto · den von Lena geschriebenen Brief.","Artikel, Zusatzinfo, Partizip mit Endung, Nomen: das gestern gekaufte Auto · den von Lena geschriebenen Brief.","Artículo, información extra, participio con terminación, sustantivo: das gestern gekaufte Auto · den von Lena geschriebenen Brief."],15],
   gerne:[["Where gerne goes","Wohin gerne kommt","Dónde va gerne"],["gerne goes right after the verb: Ich trinke gerne Tee.","gerne steht direkt nach dem Verb: Ich trinke gerne Tee.","gerne va justo después del verbo: Ich trinke gerne Tee."],0] };
 function bbDnaAdd(res){ const D=BB.s.dna=BB.s.dna||{};
   if(res.ok) (res.used||[]).forEach(k=>{ D[k]=D[k]||[0,0]; D[k][0]++; });
@@ -9096,8 +9140,8 @@ function bbTypeBonus(r){ const clean=!(BB.spell||[]).length, b=clean?3:1;
   r.typed=true; r.pts+=b; r.why.push(["✍️ "+tr("Typed it yourself","Selbst getippt","Escrita por ti"),b]);
   if(!clean) r.spell=BB.spell.slice(); return b; }
 function bbIns(t){ const el=document.getElementById("bbin"); BB.typed=((el?el.value:BB.typed)||"").replace(/\s+$/,"")+(BB.typed?" ":"")+t+" "; if(el){ el.value=BB.typed; el.focus(); } }
-const BB_COL={ S:"#2F4B7C", V:"#F25C3B", M:"#D9481F", I:"#C2401F", O:"#2A8C82", T:"#E8A21A", P:"#7B5BC4", A:"#5B6474", H:"#D9481F", Pa:"#B23A1C", K:"#1E8E5A", D:"#B0286A", X:"#8A3FA0", R:"#13806B", U:"#1E8E5A", Z:"#5B6474", B:"#3C7DBF" };
-function bbRole(r){ return { U:tr("in order to","um … zu","para"), Z:"zu", B:tr("by whom","von wem","por quién"), X:tr("prefix (end)","Präfix (Ende)","prefijo (final)"), R:tr("which / who","der/die/das","que"), H:tr("helper verb","Hilfsverb","verbo auxiliar"), Pa:tr("participle (end)","Partizip (Ende)","participio (final)"), K:tr("joiner","Verbinder","conector"), D:tr("to whom","wem","a quién"), S:tr("who","wer","quién"),V:tr("verb","Verb","verbo"),M:tr("verb","Verb","verbo"),I:tr("verb (end)","Verb (Ende)","verbo (final)"),O:tr("what","was","qué"),T:tr("when","wann","cuándo"),P:tr("where","wo","dónde"),A:tr("extra","extra","extra")}[r]; }
+const BB_COL={ S:"#2F4B7C", V:"#F25C3B", M:"#D9481F", I:"#C2401F", O:"#2A8C82", T:"#E8A21A", P:"#7B5BC4", A:"#5B6474", H:"#D9481F", Pa:"#B23A1C", K:"#1E8E5A", D:"#B0286A", X:"#8A3FA0", R:"#13806B", U:"#1E8E5A", Z:"#5B6474", B:"#3C7DBF", Mi:"#A8321A", Je:"#1E8E5A", De:"#1E8E5A", Cp:"#C2781A", Q:"#2A8C82", Ar:"#2F4B7C", Pj:"#B23A1C", N:"#2F4B7C" };
+function bbRole(r){ return { Mi:tr("modal (end)","Modal (Ende)","modal (final)"), Je:"je", De:"desto", Cp:tr("comparative","Komparativ","comparativo"), Q:tr("how?","wie?","¿cómo?"), Ar:tr("article","Artikel","artículo"), Pj:tr("participle + ending","Partizip + Endung","participio + terminación"), N:tr("noun","Nomen","sustantivo"), U:tr("in order to","um … zu","para"), Z:"zu", B:tr("by whom","von wem","por quién"), X:tr("prefix (end)","Präfix (Ende)","prefijo (final)"), R:tr("which / who","der/die/das","que"), H:tr("helper verb","Hilfsverb","verbo auxiliar"), Pa:tr("participle (end)","Partizip (Ende)","participio (final)"), K:tr("joiner","Verbinder","conector"), D:tr("to whom","wem","a quién"), S:tr("who","wer","quién"),V:tr("verb","Verb","verbo"),M:tr("verb","Verb","verbo"),I:tr("verb (end)","Verb (Ende)","verbo (final)"),O:tr("what","was","qué"),T:tr("when","wann","cuándo"),P:tr("where","wo","dónde"),A:tr("extra","extra","extra")}[r]; }
 /* the grammar check: returns {ok, bad:[index], msg, pts, why:[...]} */
 function bbSubErr(sub,off,E){
   const ss=sub.map((w,i)=>w.r==="S"?i:-1).filter(i=>i>=0), sf=sub.map((w,i)=>["V","M","H"].includes(w.r)?i:-1).filter(i=>i>=0);
@@ -9106,7 +9150,10 @@ function bbSubErr(sub,off,E){
   if(ss[0]!==0) return E("sub",ss[0]+off, tr("Right after weil/dass comes the subject: weil ich …","Direkt nach weil/dass kommt das Subjekt: weil ich …","Justo después de weil/dass va el sujeto: weil ich …"));
   if(!sf.length) return E("agree",[], tr("The weil/dass part needs a verb too.","Der weil/dass-Teil braucht auch ein Verb.","La parte con weil/dass también necesita un verbo."));
   if(sf.length>1) return E("sub",sf.slice(1).map(i=>i+off), tr("Only one conjugated verb after weil/dass.","Nur ein konjugiertes Verb nach weil/dass.","Solo un verbo conjugado tras weil/dass."));
-  if(sf[0]!==sub.length-1) return E("sub",sf[0]+off, tr("After weil/dass the verb jumps to the very end: …, weil ich in Erfurt lebe.","Nach weil/dass springt das Verb ganz ans Ende: …, weil ich in Erfurt lebe.","Tras weil/dass el verbo salta al final: …, weil ich in Erfurt lebe."));
+  const L=sub.length, dI=L>=3&&sub[L-1].r==="Mi"&&sub[L-2].r==="I";
+  if(!dI&&L>=3&&sub[L-1].r==="H"&&sub[L-2].r==="Mi") return E("dinf",L-1+off, tr("C1 rule: with two infinitives, habe jumps in front of them: …, weil ich gestern habe arbeiten müssen.","C1-Regel: Bei zwei Infinitiven springt habe davor: …, weil ich gestern habe arbeiten müssen.","Regla C1: con dos infinitivos, habe se pone delante: …, weil ich gestern habe arbeiten müssen."));
+  if(dI&&sf.length===1&&sf[0]!==L-3) return E("dinf",sf[0]+off, tr("C1 rule: with two infinitives, habe jumps in front of them: …, weil ich gestern habe arbeiten müssen.","C1-Regel: Bei zwei Infinitiven springt habe davor: …, weil ich gestern habe arbeiten müssen.","Regla C1: con dos infinitivos, habe se pone delante: …, weil ich gestern habe arbeiten müssen."));
+  if(!dI&&sf[0]!==sub.length-1) return E("sub",sf[0]+off, tr("After weil/dass the verb jumps to the very end: …, weil ich in Erfurt lebe.","Nach weil/dass springt das Verb ganz ans Ende: …, weil ich in Erfurt lebe.","Tras weil/dass el verbo salta al final: …, weil ich in Erfurt lebe."));
   const sv=sub[sf[0]];
   if(sv.p!==sub[0].p) return E("agree",sf[0]+off, tr(`The verb must match “${sub[0].t}”.`,`Das Verb muss zu „${sub[0].t}“ passen.`,`El verbo debe concordar con «${sub[0].t}».`));
   if(sub.filter(w=>w.r==="O").length>1) return E("other",[], tr("One object is enough here.","Ein Objekt reicht hier.","Aquí basta un objeto."));
@@ -9114,6 +9161,9 @@ function bbSubErr(sub,off,E){
 function bbCheck(ws, th){
   const ri=ws.map((w,i)=>w.r==="R"?i:-1).filter(i=>i>=0); if(ri.length) return bbCheckRel(ws,th,ri);
   const ui=ws.map((w,i)=>w.r==="U"?i:-1).filter(i=>i>=0); if(ui.length) return bbCheckUm(ws,th,ui);
+  if(ws.some(w=>w.r==="Ar"||w.r==="Pj"||w.r==="N")) return bbCheckNP(ws,th);
+  if(ws.some(w=>w.r==="Je"||w.r==="De")) return bbCheckJe(ws,th);
+  if(!ws.some(w=>w.r==="K")){ const fin=ws.map((w,i)=>["V","M","H"].includes(w.r)?i:-1).filter(i=>i>=0); if(fin.length===2&&ws[fin[0]].say) return bbCheckSay(ws,th,fin); }
   const ki=ws.map((w,i)=>w.r==="K"?i:-1).filter(i=>i>=0);
   if(!ki.length) return bbCheck1(ws,th);
   const E=(k,i,m)=>({ ok:false, bad:[].concat(i), msg:m, k });
@@ -9125,9 +9175,10 @@ function bbCheck(ws, th){
   const m=bbCheck1(main,th,2,true); if(!m.ok) return m;
   const mv=main[1], kw=ws[k].t;
   if(mv.v==="glauben"&&kw!=="dass") return E("conj",k, tr("After glauben comes dass: Ich glaube, dass …","Nach glauben kommt dass: Ich glaube, dass …","Tras glauben va dass: Ich glaube, dass …"));
-  if(mv.v!=="glauben"&&kw==="dass") return E("conj",k, tr("For a reason use weil: …, weil ich in Erfurt lebe.","Für einen Grund nimm weil: …, weil ich in Erfurt lebe.","Para una razón usa weil: …, weil ich in Erfurt lebe."));
+  if(mv.v!=="glauben"&&!mv.say&&kw==="dass") return E("conj",k, tr("For a reason use weil: …, weil ich in Erfurt lebe.","Für einen Grund nimm weil: …, weil ich in Erfurt lebe.","Para una razón usa weil: …, weil ich in Erfurt lebe."));
   const se=bbSubErr(sub,off,E); if(se) return se; const sv=sub[sub.length-1];
   const ke=bbKonErr(kw,sv,ws.length-1,mv,1,E); if(ke) return ke;
+  if(BB_THEMES[th].k1&&mv.say){ const vi=sub.findIndex(w=>["V","M","H"].includes(w.r)); if(vi>=0&&!sub[vi].k1) return E("k1",vi+off, bbK1Msg(sub[vi])); }
   const n=ws.length-1, why=[[tr(`${n} words`,`${n} Wörter`,`${n} palabras`),n]].concat(m.why.slice(1),[[tr("Verb at the end after weil/dass","Verb am Ende nach weil/dass","Verbo al final tras weil/dass"),8]]);
   const so=sub.find(w=>w.r==="O"), fit=BB_THEMES[th].fit[sv.v];
   return { ok:true, pts:m.pts-main.length+n+8, why, funny:m.funny||!!(so&&fit&&!fit.includes(so.k)), used:m.used.concat(["sub","conj"]), inv:m.inv, modal:false, len:n };
@@ -9143,7 +9194,8 @@ function bbCheckFirst(ws, th){
   if(ws[0].t==="dass") return E("first",0, tr("Start with weil or wenn: Wenn ich Zeit habe, …","Fang mit weil oder wenn an: Wenn ich Zeit habe, …","Empieza con weil o wenn: Wenn ich Zeit habe, …"));
   const FIN=w=>w&&["V","M","H"].includes(w.r), fs=ws.map((w,i)=>i>0&&FIN(w)?i:-1).filter(i=>i>=0);
   if(!fs.length) return E("sub",[], tr("The weil/dass part needs a verb too.","Der weil/dass-Teil braucht auch ein Verb.","La parte con weil/dass también necesita un verbo."));
-  let e=fs.find(i=>FIN(ws[i+1]));
+  let e=fs.find(i=>FIN(ws[i+1])||(ws[i+1]&&ws[i+1].r==="I"&&ws[i+2]&&ws[i+2].r==="Mi"&&FIN(ws[i+3])));
+  if(e!==undefined&&!FIN(ws[e+1])) e+=2;
   if(e===undefined){ e=fs[0]; if(fs.length>1&&e===2&&ws[1].r==="S"&&ws[e+1]&&ws[e+1].r!=="S") return E("sub",e, tr("After weil/dass the verb jumps to the very end: …, weil ich in Erfurt lebe.","Nach weil/dass springt das Verb ganz ans Ende: …, weil ich in Erfurt lebe.","Tras weil/dass el verbo salta al final: …, weil ich in Erfurt lebe.")); }
   const sub=ws.slice(1,e+1), main=ws.slice(e+1), se=bbSubErr(sub,1,E); if(se) return se;
   if(!main.length) return E("first",[], tr("Now add the main sentence: Wenn ich Zeit habe, lese ich ein Buch.","Jetzt fehlt der Hauptsatz: Wenn ich Zeit habe, lese ich ein Buch.","Ahora añade la frase principal: Wenn ich Zeit habe, lese ich ein Buch."));
@@ -9181,8 +9233,57 @@ function bbCheckUm(ws, th, ui){
   const main=ws.slice(0,u), sub=ws.slice(u+1), m=bbCheck1(main,th,3,true); if(!m.ok) return m;
   const se=bbUmErr(sub,u+1,E); if(se) return se;
   const n=ws.length; return { ok:true, pts:n+(m.pts-main.length)+8, why:[[tr(`${n} words`,`${n} Wörter`,`${n} palabras`),n]].concat(m.why.slice(1),bonus), funny:m.funny, used:m.used.concat(["umzu"]), inv:m.inv, modal:false, len:n }; }
+/* reported speech without dass: "Lena sagt, sie habe keine Zeit." */
+function bbK1Msg(w){ const k={ haben:"habe", sein:"sei", kommen:"komme", arbeiten:"arbeite" }[w.v]||"…";
+  return tr(`Reported speech uses Konjunktiv I: ${w.t} → ${k}`,`Indirekte Rede braucht Konjunktiv I: ${w.t} → ${k}`,`El estilo indirecto usa Konjunktiv I: ${w.t} → ${k}`); }
+function bbCheckSay(ws, th, fin){
+  const E=(k,i,m)=>({ ok:false, bad:[].concat(i), msg:m, k }), sv=fin[0];
+  const end=ws[sv-1]&&ws[sv-1].r==="S"&&sv===1?2:(ws[sv+1]&&ws[sv+1].r==="S"?sv+2:sv+1);
+  const main=ws.slice(0,end), rest=ws.slice(end);
+  const m=bbCheck1(main,th,2,true); if(!m.ok) return m;
+  if(rest.length<2) return E("k1",[], tr("What was said? Add it: Lena sagt, sie habe keine Zeit.","Was wurde gesagt? Ergänze es: Lena sagt, sie habe keine Zeit.","¿Qué se dijo? Añádelo: Lena sagt, sie habe keine Zeit."));
+  const r=bbCheck1(rest,th,2,true); if(!r.ok) return { ...r, bad:(r.bad||[]).map(i=>i+end) };
+  const rv=rest.findIndex(w=>["V","M","H"].includes(w.r));
+  if(BB_THEMES[th].k1&&!rest[rv].k1) return E("k1",rv+end, bbK1Msg(rest[rv]));
+  const n=ws.length; return { ok:true, pts:n+10, why:[[tr(`${n} words`,`${n} Wörter`,`${n} palabras`),n],[tr("Reported speech with Konjunktiv I","Indirekte Rede mit Konjunktiv I","Estilo indirecto con Konjunktiv I"),10]], funny:false, used:["v2","agree","subj","k1"], inv:false, modal:false, len:n }; }
+/* je … desto: "Je mehr ich lerne, desto besser verstehe ich." */
+function bbCheckJe(ws, th){
+  const E=(k,i,m)=>({ ok:false, bad:[].concat(i), msg:m, k }), d=ws.findIndex(w=>w.r==="De");
+  if(ws[0].r!=="Je") return E("je",0, tr("Start with je: Je mehr ich lerne, …","Fang mit je an: Je mehr ich lerne, …","Empieza con je: Je mehr ich lerne, …"));
+  if(!ws[1]||ws[1].r!=="Cp") return E("je",1, tr("Right after je comes a comparative: je mehr, je öfter…","Direkt nach je kommt ein Komparativ: je mehr, je öfter…","Justo después de je va un comparativo: je mehr, je öfter…"));
+  if(d<0) return E("je",[], tr("Now the second half: …, desto besser verstehe ich.","Jetzt die zweite Hälfte: …, desto besser verstehe ich.","Ahora la segunda mitad: …, desto besser verstehe ich."));
+  const sub=ws.slice(2,d); if(sub[0]&&sub[0].r!=="S") return E("je",2, tr("After je + comparative comes the subject, and the verb goes to the end: Je mehr ich lerne, …","Nach je + Komparativ kommt das Subjekt, das Verb geht ans Ende: Je mehr ich lerne, …","Tras je + comparativo va el sujeto y el verbo al final: Je mehr ich lerne, …"));
+  const se=bbSubErr(sub,2,E); if(se) return se;
+  if(!ws[d+1]||ws[d+1].r!=="Cp") return E("je",d+1, tr("Right after desto comes a comparative: desto besser…","Direkt nach desto kommt ein Komparativ: desto besser…","Justo después de desto va un comparativo: desto besser…"));
+  const main=ws.slice(d+2);
+  if(!main[0]||!["V","M","H"].includes(main[0].r)) return E("je",main[0]?d+2:[], tr("After desto + comparative comes the verb: …, desto besser verstehe ich.","Nach desto + Komparativ kommt das Verb: …, desto besser verstehe ich.","Tras desto + comparativo va el verbo: …, desto besser verstehe ich."));
+  if(!main[1]||main[1].r!=="S") return E("je",main[1]?d+3:[], tr("Then the subject: …, desto besser verstehe ich.","Dann das Subjekt: …, desto besser verstehe ich.","Luego el sujeto: …, desto besser verstehe ich."));
+  const vm=[{ t:"…", r:"C" }].concat(main), m=bbCheck1(vm,th,3,true); if(!m.ok) return { ...m, bad:(m.bad||[]).filter(i=>i>0).map(i=>i+d+1) };
+  const n=ws.length; return { ok:true, pts:n+14, why:[[tr(`${n} words`,`${n} Wörter`,`${n} palabras`),n],["je … desto",14]], funny:false, used:["sub","je","agree","subj"], inv:false, modal:false, len:n }; }
+/* participle as adjective: "das gestern gekaufte Auto" is checked, then counts as one subject/object */
+function bbCheckNP(ws, th){
+  const E=(k,i,m)=>({ ok:false, bad:[].concat(i), msg:m, k }), out=[], map=[]; let i=0, np=0;
+  while(i<ws.length){ const w=ws[i];
+    if(w.r==="Pj"||w.r==="N") return E("padj",i, tr("Start the group with an article: das gestern gekaufte Auto.","Beginne die Gruppe mit einem Artikel: das gestern gekaufte Auto.","Empieza el grupo con un artículo: das gestern gekaufte Auto."));
+    if(w.r!=="Ar"){ out.push(w); map.push([i]); i++; continue; }
+    let j=i+1; const mods=[]; while(j<ws.length&&["T","B","P"].includes(ws[j].r)){ mods.push(j); j++; }
+    const pj=ws[j], nn=ws[j+1];
+    if(!pj||pj.r!=="Pj") return E("padj",pj&&pj.r==="N"?j:[i], tr("Between article and noun goes the participle: das gestern gekaufte Auto.","Zwischen Artikel und Nomen kommt das Partizip: das gestern gekaufte Auto.","Entre artículo y sustantivo va el participio: das gestern gekaufte Auto."));
+    if(!nn||nn.r!=="N") return E("padj",j, tr("The participle stands right before the noun: das gestern gekaufte Auto.","Das Partizip steht direkt vor dem Nomen: das gestern gekaufte Auto.","El participio va justo antes del sustantivo: das gestern gekaufte Auto."));
+    if(w.g!==nn.g) return E("padj",i, tr(`Match the article to the noun: ${{ m:"der/den", f:"die", n:"das" }[nn.g]} ${nn.t}`,`Der Artikel muss zum Nomen passen: ${{ m:"der/den", f:"die", n:"das" }[nn.g]} ${nn.t}`,`El artículo debe concordar con el sustantivo: ${{ m:"der/den", f:"die", n:"das" }[nn.g]} ${nn.t}`));
+    const want=w.c==="akk"&&w.g==="m"?"en":"e"; if(pj.e!==want) return E("padj",j, tr(`After “${w.t}” the ending is -${want}: ${w.t} … ${pj.t.replace(/en?$/,"")}${want} ${nn.t}`,`Nach „${w.t}“ ist die Endung -${want}: ${w.t} … ${pj.t.replace(/en?$/,"")}${want} ${nn.t}`,`Tras «${w.t}» la terminación es -${want}: ${w.t} … ${pj.t.replace(/en?$/,"")}${want} ${nn.t}`));
+    out.push({ t:ws.slice(i,j+2).map(x=>x.t).join(" "), r:w.c==="akk"?"O":"?", p:3, np:1, ws:ws.slice(i,j+2) }); map.push(Array.from({ length:j+2-i },(_,q)=>i+q)); np++; i=j+2; }
+  /* a group that can be subject or object: subject if nothing else is */
+  out.forEach(w=>{ if(w.r==="?") w.r=out.some(x=>x.r==="S")?"O":"S"; });
+  const r=bbCheck(out,th);
+  if(!r.ok) return { ...r, bad:[].concat(...(r.bad||[]).map(b=>map[b]||[])) };
+  return { ...r, pts:r.pts+12*np+ws.length-out.length, why:[[tr(`${ws.length} words`,`${ws.length} Wörter`,`${ws.length} palabras`),ws.length]].concat(r.why.slice(1),[[tr("Participle as adjective","Partizip als Adjektiv","Participio como adjetivo"),12*np]]), len:ws.length, used:(r.used||[]).concat(["padj"]) }; }
 /* where a side clause that opens the sentence ends: the verb of a weil/wenn part, or the zu-infinitive of an um part */
-function bbClauseEnd(ws){ return ws[0]&&ws[0].r==="U"?ws.findIndex((w,i)=>i>1&&w.r==="I"&&ws[i-1].r==="Z"):ws.findIndex((w,i)=>i>0&&["V","M","H"].includes(w.r)); }
+function bbClauseEnd(ws){ if(ws[0]&&ws[0].r==="U") return ws.findIndex((w,i)=>i>1&&w.r==="I"&&ws[i-1].r==="Z");
+  const e=ws.findIndex((w,i)=>i>0&&["V","M","H"].includes(w.r)); return e>=0&&ws[e+1]&&ws[e+1].r==="I"&&ws[e+2]&&ws[e+2].r==="Mi"?e+2:e; }
+/* "Lena sagt, sie habe …": where the saying part ends */
+function bbSayEnd(ws){ if(ws.some(w=>w.r==="K")) return -1; const fin=ws.map((w,i)=>["V","M","H"].includes(w.r)?i:-1).filter(i=>i>=0); if(fin.length!==2||!ws[fin[0]].say) return -1;
+  const sv=fin[0]; return ws[sv-1]&&ws[sv-1].r==="S"&&sv===1?2:(ws[sv+1]&&ws[sv+1].r==="S"?sv+2:sv+1); }
 /* relative clause: "Ich kenne den Mann, der hier wohnt." */
 function bbCheckRel(ws, th, ri){
   const E=(k,i,m)=>({ ok:false, bad:[].concat(i), msg:m, k });
@@ -9224,12 +9325,21 @@ function bbCheck1(ws, th, min, inClause){
   if(vw.r==="M"){ if(!inf.length) return errK("modal",f, tr(`“${vw.t}” needs a verb in the infinitive at the end.`,`„${vw.t}“ braucht ein Verb im Infinitiv am Ende.`,`«${vw.t}» necesita un verbo en infinitivo al final.`));
     if(inf.length>1) return errK("modal",inf.slice(1), tr("Only one infinitive at the end.","Nur ein Infinitiv am Ende.","Solo un infinitivo al final."));
     if(inf[0]!==ws.length-1) return errK("modal",inf[0], tr("The infinitive goes to the very end.","Der Infinitiv kommt ganz ans Ende.","El infinitivo va al final de todo.")); }
-  else if(inf.length) return errK("modal",inf, tr("This verb form needs möchte, kann or muss.","Diese Verbform braucht möchte, kann oder muss.","Esta forma del verbo necesita möchte, kann o muss."));
+  const mi=ws.map((w,i)=>w.r==="Mi"?i:-1).filter(i=>i>=0), dinf=vw.r==="H"&&mi.length>0;
+  if(mi.length&&vw.r!=="H") return errK("dinf",mi, tr("müssen/können/wollen at the very end need habe: Ich habe arbeiten müssen.","müssen/können/wollen ganz am Ende brauchen habe: Ich habe arbeiten müssen.","müssen/können/wollen al final necesitan habe: Ich habe arbeiten müssen."));
+  if(dinf){ if(mi.length>1) return errK("dinf",mi.slice(1), tr("Only one modal at the end.","Nur ein Modalverb am Ende.","Solo un modal al final."));
+    if(inf.length!==1) return errK("dinf",inf.length?inf.slice(1):f, tr("Two infinitives at the end: the main verb, then the modal: … arbeiten müssen.","Zwei Infinitive am Ende: erst das Hauptverb, dann das Modalverb: … arbeiten müssen.","Dos infinitivos al final: el verbo principal y luego el modal: … arbeiten müssen."));
+    if(mi[0]!==ws.length-1) return errK("dinf",mi[0], tr("The modal comes last: … arbeiten müssen.","Das Modalverb steht ganz am Ende: … arbeiten müssen.","El modal va al final de todo: … arbeiten müssen."));
+    if(inf[0]!==ws.length-2) return errK("dinf",inf[0], tr("The main verb goes right before the modal: … arbeiten müssen.","Das Hauptverb steht direkt vor dem Modalverb: … arbeiten müssen.","El verbo principal va justo antes del modal: … arbeiten müssen."));
+    if(vw.a!=="haben") return errK("dinf",f, tr("With a modal in the Perfekt the helper is always haben: Ich habe arbeiten müssen.","Mit Modalverb im Perfekt ist das Hilfsverb immer haben: Ich habe arbeiten müssen.","Con modal en Perfekt el auxiliar siempre es haben: Ich habe arbeiten müssen."));
+    if(ws.some(w=>w.r==="Pa")) return errK("dinf",ws.map((w,i)=>w.r==="Pa"?i:-1).filter(i=>i>=0), tr("With a second verb, use müssen instead of gemusst: Ich habe arbeiten müssen.","Mit einem zweiten Verb: müssen statt gemusst: Ich habe arbeiten müssen.","Con un segundo verbo, usa müssen en vez de gemusst: Ich habe arbeiten müssen.")); }
+  else if(inf.length&&vw.r==="H"&&ws.some(w=>w.r==="Pa"&&["müssen","können","wollen"].includes(w.v))) return errK("dinf",ws.map((w,i)=>w.r==="Pa"?i:-1).filter(i=>i>=0), tr("With a second verb, use müssen instead of gemusst: Ich habe arbeiten müssen.","Mit einem zweiten Verb: müssen statt gemusst: Ich habe arbeiten müssen.","Con un segundo verbo, usa müssen en vez de gemusst: Ich habe arbeiten müssen."));
+  else if(inf.length&&vw.r!=="M") return errK("modal",inf, tr("This verb form needs möchte, kann or muss.","Diese Verbform braucht möchte, kann oder muss.","Esta forma del verbo necesita möchte, kann o muss."));
   const pa=ws.map((w,i)=>w.r==="Pa"?i:-1).filter(i=>i>=0);
   const pas=vw.r==="H"&&vw.a==="werden";
   if(pas&&!pa.length) return errK("pass",f, tr(`“${vw.t}” needs a participle at the end: gebaut, repariert…`,`„${vw.t}“ braucht ein Partizip am Ende: gebaut, repariert…`,`«${vw.t}» necesita un participio al final: gebaut, repariert…`));
   if(pas&&pa.length===1&&pa[0]!==ws.length-1) return errK("pass",pa[0], tr("The participle goes to the very end: Das Haus wurde 1900 gebaut.","Das Partizip kommt ganz ans Ende: Das Haus wurde 1900 gebaut.","El participio va al final: Das Haus wurde 1900 gebaut."));
-  if(vw.r==="H"){ if(!pa.length) return errK("perf",f, tr(`“${vw.t}” needs a participle at the end: gegessen, gegangen…`,`„${vw.t}“ braucht ein Partizip am Ende: gegessen, gegangen…`,`«${vw.t}» necesita un participio al final: gegessen, gegangen…`));
+  if(vw.r==="H"&&!dinf){ if(!pa.length) return errK("perf",f, tr(`“${vw.t}” needs a participle at the end: gegessen, gegangen…`,`„${vw.t}“ braucht ein Partizip am Ende: gegessen, gegangen…`,`«${vw.t}» necesita un participio al final: gegessen, gegangen…`));
     if(pa.length>1) return errK("perf",pa.slice(1), tr("Only one participle at the end.","Nur ein Partizip am Ende.","Solo un participio al final."));
     if(pa[0]!==ws.length-1) return errK("perf",pa[0], tr("The participle goes to the very end: Ich habe eine Pizza gegessen.","Das Partizip kommt ganz ans Ende: Ich habe eine Pizza gegessen.","El participio va al final: Ich habe eine Pizza gegessen."));
     if(ws[pa[0]].a!==vw.a) return errK("aux",f, ws[pa[0]].a==="sein"?tr(`${ws[pa[0]].t} uses sein: ich bin ${ws[pa[0]].t}.`,`${ws[pa[0]].t} geht mit sein: ich bin ${ws[pa[0]].t}.`,`${ws[pa[0]].t} va con sein: ich bin ${ws[pa[0]].t}.`)
@@ -9259,17 +9369,18 @@ function bbCheck1(ws, th, min, inClause){
   /* points */
   const why=[]; let pts=ws.length; why.push([tr(`${ws.length} words`,`${ws.length} Wörter`,`${ws.length} palabras`),ws.length]);
   if(s===2 && ["T","P"].includes(R[0])){ pts+=4; why.push([tr("Time/place first, verb stays 2nd","Zeit/Ort vorne, Verb bleibt auf 2","Tiempo/lugar delante, verbo en 2.º"),4]); }
+  if(dinf){ pts+=12; why.push([tr("Double infinitive: … arbeiten müssen","Doppelinfinitiv: … arbeiten müssen","Doble infinitivo: … arbeiten müssen"),12]); }
   if(pas){ pts+=8; why.push([tr("Passive: werden + participle at the end","Passiv: werden + Partizip am Ende","Pasiva: werden + participio al final"),8]); }
-  else if(vw.r==="H"){ pts+=6; why.push([tr("Perfekt: participle at the end","Perfekt: Partizip am Ende","Perfekt: participio al final"),6]); }
+  else if(vw.r==="H"&&!dinf){ pts+=6; why.push([tr("Perfekt: participle at the end","Perfekt: Partizip am Ende","Perfekt: participio al final"),6]); }
   if(vw.kon){ pts+=6; why.push([tr("Konjunktiv II","Konjunktiv II","Konjuntivo II"),6]); }
   if(vw.r==="M"){ pts+=5; why.push([tr("Modal + infinitive at the end","Modalverb + Infinitiv am Ende","Modal + infinitivo al final"),5]); }
   if(cnt("T")&&cnt("P")){ pts+=2; why.push([tr("When + where","Wann + wo","Cuándo + dónde"),2]); }
   if(cnt("A")){ pts+=2; why.push(["gerne",2]); }
   if(vw.sep){ pts+=5; why.push([tr("Split verb: little word at the end","Trennbares Verb: kleines Wort am Ende","Verbo separable: palabrita al final"),5]); }
   if(di>=0&&oi>=0){ pts+=4; why.push([tr("Dativ + Akkusativ in the right order","Dativ + Akkusativ richtig","Dativo + acusativo en orden"),4]); }
-  const verb=vw.r==="H"?ws[pa[0]].v:vw.r==="M"&&inf.length?ws[inf[0]].v:vw.v, ow=oi>=0?ws[oi]:null, fit=BB_THEMES[th].fit[verb];
+  const verb=vw.r==="H"&&pa.length?ws[pa[0]].v:(vw.r==="M"||dinf)&&inf.length?ws[inf[0]].v:vw.v, ow=oi>=0?ws[oi]:null, fit=BB_THEMES[th].fit[verb];
   const funny=!!(ow&&fit&&!fit.includes(ow.k));
-  const used=["v2","agree","subj"]; if(s===2) used.push("inv"); if(vw.r==="M") used.push("modal"); if(pas) used.push("pass"); else if(vw.r==="H") used.push("perf","aux"); if(vw.kon) used.push("kon"); if(cnt("T")) used.push("tmp"); if(cnt("A")) used.push("gerne"); if(di>=0&&oi>=0) used.push("dat"); if(vw.sep) used.push("sep");
+  const used=["v2","agree","subj"]; if(s===2) used.push("inv"); if(vw.r==="M") used.push("modal"); if(pas) used.push("pass"); else if(dinf) used.push("dinf"); else if(vw.r==="H") used.push("perf","aux"); if(vw.kon) used.push("kon"); if(cnt("T")) used.push("tmp"); if(cnt("A")) used.push("gerne"); if(di>=0&&oi>=0) used.push("dat"); if(vw.sep) used.push("sep");
   return { ok:true, pts, why, funny, used, inv:s===2&&["T","P"].includes(R[0]), modal:vw.r==="M", len:ws.length };
 }
 /* "lernen" can be "wir lernen" (V) or the infinitive after möchte (I): pick the role that fits the sentence */
@@ -9280,26 +9391,38 @@ function bbNorm(ws, th){ const T=BB_THEMES[th].tiles, hasM=ws.some(w=>w.r==="M")
 /* ---- 🔍 "See why": each part labelled + the meaning in English ---- */
 const BB_EN={ ich:"I", du:"you", wir:"we", Lena:"Lena", Tom:"Tom", Sarah:"Sarah",
   "einen Kaffee":"a coffee","einen Tee":"a tea","ein Wasser":"a water","eine Brezel":"a pretzel","ein Stück Kuchen":"a piece of cake","ein Buch":"a book","die Zeitung":"the newspaper","Fußball":"football","Karten":"cards","einen Film":"a film","Deutsch":"German","Vokabeln":"vocabulary","die Grammatik":"the grammar","eine Pizza":"a pizza","ein Zimmer":"a room","das Foto":"the photo","es":"it",
-  "dem Gast":"the guest",Geld:"money","ein Auto":"a car",Brot:"bread","zum Bäcker":"to the baker's","ein Haus":"a house","in Berlin":"in Berlin","nach Spanien":"to Spain","das Haus":"the house","die Brücke":"the bridge","das Auto":"the car","die Fenster":"the windows","von meinem Vater":"by my father","von der Firma":"by the company","1900":"in 1900","jeden Morgen":"every morning",dich:"you",mich:"me","deine Mutter":"your mother",früh:"early","im Supermarkt":"at the supermarket",sie:"she",Zeit:"time","keine Zeit":"no time","nach Hause":"home","in den Park":"to the park","den Mann":"the man","die Frau":"the woman","das Buch":"the book","die Wohnung":"the flat","einen Balkon":"a balcony","der Freundin":"her friend","den Kindern":"the children","ihm":"him","ihr":"her",
+  "dem Gast":"the guest",Auto:"car",Wohnung:"flat",Brief:"letter",Brücke:"bridge","von Lena":"by Lena",rot:"red",teuer:"expensive",alt:"old",krank:"sick",er:"he","der Chef":"the boss",mehr:"more",besser:"better",schneller:"faster",öfter:"more often",länger:"longer",lange:"for a long time",Geld:"money","ein Auto":"a car",Brot:"bread","zum Bäcker":"to the baker's","ein Haus":"a house","in Berlin":"in Berlin","nach Spanien":"to Spain","das Haus":"the house","die Brücke":"the bridge","das Auto":"the car","die Fenster":"the windows","von meinem Vater":"by my father","von der Firma":"by the company","1900":"in 1900","jeden Morgen":"every morning",dich:"you",mich:"me","deine Mutter":"your mother",früh:"early","im Supermarkt":"at the supermarket",sie:"she",Zeit:"time","keine Zeit":"no time","nach Hause":"home","in den Park":"to the park","den Mann":"the man","die Frau":"the woman","das Buch":"the book","die Wohnung":"the flat","einen Balkon":"a balcony","der Freundin":"her friend","den Kindern":"the children","ihm":"him","ihr":"her",
   heute:"today",morgen:"tomorrow","am Wochenende":"at the weekend","am Samstag":"on Saturday","am Sonntag":"on Sunday","heute Abend":"tonight","jeden Tag":"every day","am Abend":"in the evening",gestern:"yesterday","letzte Woche":"last week",
   "im Café":"in the café","zu Hause":"at home","in Erfurt":"in Erfurt","im Park":"in the park","im Kurs":"in class","ins Kino":"to the cinema","nach Berlin":"to Berlin","in Deutschland":"in Germany",hier:"here" };
-const BB_BASE={ trinken:"drink",essen:"eat",bestellen:"order",lesen:"read",spielen:"play",sehen:"watch",lernen:"learn",üben:"practise",sprechen:"speak",leben:"live",arbeiten:"work",glauben:"think",bieten:"offer",geben:"give",zeigen:"show",anrufen:"call",aufstehen:"get up",einkaufen:"do the shopping",haben:"have",gehen:"go",kennen:"know",suchen:"look for",mögen:"like",wohnen:"live",sparen:"save",kaufen:"buy",studieren:"study",reisen:"travel" };
-const BB_PP={ bauen:"built",reparieren:"repaired",öffnen:"opened",verkaufen:"sold" };
+const BB_BASE={ trinken:"drink",essen:"eat",bestellen:"order",lesen:"read",spielen:"play",sehen:"watch",lernen:"learn",üben:"practise",sprechen:"speak",leben:"live",arbeiten:"work",glauben:"think",bieten:"offer",geben:"give",zeigen:"show",anrufen:"call",aufstehen:"get up",einkaufen:"do the shopping",haben:"have",gehen:"go",kennen:"know",suchen:"look for",mögen:"like",wohnen:"live",sparen:"save",kaufen:"buy",studieren:"study",reisen:"travel",sagen:"say",meinen:"think",kommen:"come",verstehen:"understand",bleiben:"stay",warten:"wait",verkaufen:"sell" };
+const BB_PP={ bauen:"built",reparieren:"repaired",öffnen:"opened",verkaufen:"sold",kaufen:"bought",renovieren:"renovated",schreiben:"written" };
+/* "das gestern gekaufte Auto" → one part "the car bought yesterday" */
+function bbNpJoin(ws){ const out=[]; for(let i=0;i<ws.length;i++){ const w=ws[i]; if(w.r!=="Ar"){ out.push(w); continue; }
+    let j=i+1; const mods=[]; while(j<ws.length&&["T","B","P"].includes(ws[j].r)) mods.push(ws[j++]); const pj=ws[j], nn=ws[j+1]; if(!pj||!nn||nn.r!=="N"){ out.push(w); continue; }
+    out.push({ t:ws.slice(i,j+2).map(x=>x.t).join(" "), r:w.c==="akk"?"O":"?", p:3, en:["the",BB_EN[nn.t]||nn.t,BB_PP[pj.v]||"",...mods.map(m=>BB_EN[m.t]||m.t)].filter(Boolean).join(" ") }); i=j+1; }
+  out.forEach(w=>{ if(w.r==="?") w.r=out.some(x=>x.r==="S")?"O":"S"; }); return out; }
 function bbEn3(b){ const w=b.split(" "), f=w[0]; w[0]=f==="have"?"has":f==="do"?"does":f==="go"?"goes":/(sh|ch|ss|x)$/.test(f)?f+"es":f+"s"; return w.join(" "); }
 const BB_PAST={ essen:"ate",trinken:"drank",spielen:"played",lernen:"learned",gehen:"went",fahren:"travelled" };
 function bbEnClause(ws){ const g=r=>ws.find(w=>w.r===r), S=g("S"), A=g("A"), T=g("T"), P=g("P"), D=g("D"), O=g("O"), B=g("B"), fin=ws.find(w=>["V","M","H"].includes(w.r));
-  if(!S||!fin) return ""; const p=S.p, subj=BB_EN[S.t]||S.t; let vp="";
+  if(!S||!fin) return ""; const p=S.p, subj=S.en||BB_EN[S.t]||S.t, Q=g("Q"), Mi=g("Mi"); let vp="";
   if(fin.r==="H"&&fin.a==="werden"){ const pa=g("Pa"); vp=(/^wurde/.test(fin.t)?(p===4?"were":"was"):(p===4?"are":"is"))+" "+(pa?BB_PP[pa.v]||"":""); }
+  else if(fin.r==="H"&&Mi){ const I=g("I"); vp=({ müssen:"had to", können:p===1||p===3?"was able to":"were able to", wollen:"wanted to" })[Mi.v]+" "+(I?BB_BASE[I.v]||"":""); }
   else if(fin.r==="H"){ const pa=g("Pa"); vp=pa?BB_PAST[pa.v]||"":""; }
+  else if(fin.r==="V"&&fin.v==="sein"&&!fin.kon) vp=p===3?"is":p===1?"am":"are";
+  else if(fin.r==="V"&&fin.past) vp=fin.v==="sagen"?"said":BB_BASE[fin.v]||"";
   else if(fin.r==="V"&&fin.kon) vp=fin.v==="sein"?"were":"had";
   else if(fin.r==="M"){ const I=g("I"), b=I?BB_BASE[I.v]||"":""; vp=(/^w[üu]rde/.test(fin.t)?"would":/^m[öo]chte/.test(fin.t)?"would like to":/^kann/.test(fin.t)?"can":p===3?"has to":"have to")+" "+b; }
   else { const b=BB_BASE[fin.v]||""; vp=A?(p===3?"likes to ":"like to ")+b:(p===3?bbEn3(b):b); }
-  let obj=""; if(D&&O) obj=O.pron?`${BB_EN[O.t]} to ${BB_EN[D.t]}`:`${BB_EN[D.t]} ${BB_EN[O.t]}`; else if(O) obj=BB_EN[O.t]||""; else if(D) obj=BB_EN[D.t]||"";
+  let obj=""; if(D&&O) obj=O.pron?`${BB_EN[O.t]} to ${BB_EN[D.t]}`:`${BB_EN[D.t]} ${BB_EN[O.t]}`; else if(O) obj=O.en||BB_EN[O.t]||""; else if(D) obj=BB_EN[D.t]||"";
+  if(Q) obj=[obj,BB_EN[Q.t]||Q.t].filter(Boolean).join(" ");
   const front=ws[0]&&(ws[0].r==="T"||ws[0].r==="P")?ws[0]:null;
   const tail=[P&&P!==front?BB_EN[P.t]:"",T&&T!==front?BB_EN[T.t]:""].filter(Boolean).join(" ");
   return [front?BB_EN[front.t]:"", subj, vp, obj, B?BB_EN[B.t]:"", tail].filter(Boolean).join(" ").replace(/\s+/g," ").trim(); }
 function bbEnUm(ws){ const g=r=>ws.find(w=>w.r===r), I=g("I"), O=g("O"), P=g("P"), T=g("T"); if(!I) return ""; return ["to",BB_BASE[I.v]||"",O?BB_EN[O.t]:"",P?BB_EN[P.t]:"",T?BB_EN[T.t]:""].filter(Boolean).join(" "); }
-function bbEn(ws){ const k=ws.findIndex(w=>w.r==="K"), cap=x=>x.charAt(0).toUpperCase()+x.slice(1), J={ weil:"because", wenn:"if", dass:"that" };
+function bbEn(ws){ if(ws.some(w=>w.r==="Ar")) ws=bbNpJoin(ws);
+  const k=ws.findIndex(w=>w.r==="K"), cap=x=>x.charAt(0).toUpperCase()+x.slice(1), J={ weil:"because", wenn:"if", dass:"that" };
+  if(ws[0]&&ws[0].r==="Je"){ const d=ws.findIndex(w=>w.r==="De"); if(d<2||!ws[d+1]) return ""; const a=bbEnClause(ws.slice(2,d)), b=bbEnClause(ws.slice(d+2)); return a&&b?`The ${BB_EN[ws[1].t]||""} ${a}, the ${BB_EN[ws[d+1].t]||""} ${b}.`:""; }
+  const se=bbSayEnd(ws); if(se>0){ const a=bbEnClause(ws.slice(0,se)), b=bbEnClause(ws.slice(se)); return a&&b?cap(a)+" "+b+".":""; }
   const r=ws.findIndex(w=>w.r==="R"), u=ws.findIndex(w=>w.r==="U");
   if(u===0){ const e=bbClauseEnd(ws); if(e<0) return ""; const a=bbEnUm(ws.slice(1,e+1)), b=bbEnClause(ws.slice(e+1)); return a&&b?cap(a)+", "+b+".":""; }
   if(u>0){ const a=bbEnClause(ws.slice(0,u)), b=bbEnUm(ws.slice(u+1)); return a&&b?cap(a)+" "+b+".":""; }
@@ -9308,13 +9431,17 @@ function bbEn(ws){ const k=ws.findIndex(w=>w.r==="K"), cap=x=>x.charAt(0).toUppe
   if(k===0){ const e=bbClauseEnd(ws); if(e<0) return ""; const a=bbEnClause(ws.slice(1,e+1)), b=bbEnClause(ws.slice(e+1)); return a&&b?cap((J[ws[0].t]||"")+" "+a)+", "+b+".":""; }
   if(k>0){ const a=bbEnClause(ws.slice(0,k)), b=bbEnClause(ws.slice(k+1)); return a&&b?cap(a)+" "+(J[ws[k].t]||"that")+" "+b+".":""; }
   const a=bbEnClause(ws); return a?cap(a)+".":""; }
-function bbInSub(ws){ const k=ws.findIndex(w=>["K","R","U"].includes(w.r)); if(k<0) return ws.map(()=>false);
+function bbInSub(ws){ if(ws[0]&&ws[0].r==="Je"){ const d=ws.findIndex(w=>w.r==="De"); return ws.map((w,i)=>i>1&&(d<0||i<d)); }
+  const k=ws.findIndex(w=>["K","R","U"].includes(w.r)); if(k<0) return ws.map(()=>false);
   if(k===0){ const e=bbClauseEnd(ws); return ws.map((w,i)=>i>0&&(e<0||i<=e)); }
   return ws.map((w,i)=>i>k); }
 function bbPart(w,inSub){ const L={ S:[tr("Subject","Subjekt","Sujeto"),tr("who?","wer?","¿quién?")],
-    V:inSub?[tr("Verb (end)","Verb (Ende)","Verbo (final)"),tr("side clause","Nebensatz","subordinada")]:[tr("Verb (position 2)","Verb (Position 2)","Verbo (posición 2)"),tr("conjugated","konjugiert","conjugado")],
-    M:[tr("Modal verb (position 2)","Modalverb (Position 2)","Verbo modal (posición 2)"),tr("conjugated","konjugiert","conjugado")], I:[tr("Infinitive (end)","Infinitiv (Ende)","Infinitivo (final)"),""],
-    H:[tr("Helper verb (position 2)","Hilfsverb (Position 2)","Verbo auxiliar (posición 2)"),w.a==="werden"?"werden":"haben / sein"], Pa:[tr("Participle (end)","Partizip (Ende)","Participio (final)"),w.a==="werden"?tr("Passive","Passiv","Pasiva"):"Perfekt"],
+    V:inSub?[tr("Verb (end)","Verb (Ende)","Verbo (final)"),w.k1?"Konjunktiv I":w.kon?"Konjunktiv II":tr("side clause","Nebensatz","subordinada")]:[tr("Verb (position 2)","Verb (Position 2)","Verbo (posición 2)"),w.k1?"Konjunktiv I":w.kon?"Konjunktiv II":tr("conjugated","konjugiert","conjugado")],
+    M:[tr("Modal verb (position 2)","Modalverb (Position 2)","Verbo modal (posición 2)"),w.kon?"Konjunktiv II":tr("conjugated","konjugiert","conjugado")],
+    Mi:[tr("Modal (very end)","Modalverb (ganz am Ende)","Modal (al final)"),tr("double infinitive","Doppelinfinitiv","doble infinitivo")], Je:["je … desto",tr("the more …","je mehr …","cuanto más …")], De:["desto",tr("the more …","umso …","más …")],
+    Cp:[tr("Comparative","Komparativ","Comparativo"),"-er"], Q:[tr("Adjective","Adjektiv","Adjetivo"),tr("how?","wie?","¿cómo?")], Ar:[tr("Article","Artikel","Artículo"),w.c==="akk"?"Akkusativ":w.c==="nom"?"Nominativ":"der · die · das"],
+    Pj:[tr("Participle as adjective","Partizip als Adjektiv","Participio como adjetivo"),tr(`ending -${w.e}`,`Endung -${w.e}`,`terminación -${w.e}`)], N:[tr("Noun","Nomen","Sustantivo"),{ m:"der", f:"die", n:"das" }[w.g]||""], I:[tr("Infinitive (end)","Infinitiv (Ende)","Infinitivo (final)"),""],
+    H:[inSub?tr("Helper verb","Hilfsverb","Verbo auxiliar"):tr("Helper verb (position 2)","Hilfsverb (Position 2)","Verbo auxiliar (posición 2)"),inSub?tr("side clause","Nebensatz","subordinada"):w.a==="werden"?"werden":"haben / sein"], Pa:[tr("Participle (end)","Partizip (Ende)","Participio (final)"),w.a==="werden"?tr("Passive","Passiv","Pasiva"):"Perfekt"],
     U:["um … zu",tr("in order to","Zweck","para")], Z:["zu",tr("before the infinitive","vor dem Infinitiv","antes del infinitivo")], B:[tr("By whom?","Von wem?","¿Por quién?"),"von …"],
     D:["Dativ",tr("to whom?","wem?","¿a quién?")], O:["Akkusativ",tr("what?","was?","¿qué?")], T:[tr("Time","Zeit","Tiempo"),tr("when?","wann?","¿cuándo?")], P:[tr("Place","Ort","Lugar"),tr("where?","wo? wohin?","¿dónde?")],
     A:["gerne",tr("likes to","mag","le gusta")], K:[tr("Joiner","Konjunktion","Conjunción"),tr("verb to the end","Verb ans Ende","verbo al final")],
@@ -9330,7 +9457,15 @@ function bbWhy(ws){ if(!ws||!ws.length) return ""; const k=ws.findIndex(w=>w.r==
     ${m?`<div class="bbwen">${m.en?`🇬🇧 ${UI==="en"?"":`<small class="note">${tr("English","Englisch","Inglés")}:</small> `}`:"💬 "}${esc(m.t)}</div>`:""}${bbAltsHtml(ws)}</details>`; }
 /* ---- 🔀 other correct orders: put a different part first, verb second, the rest in natural German order (subject, pronouns, Dativ, time, place, Akkusativ), verb(s) at the end. Only orders the checker accepts are shown. */
 function bbAlts(ws, th){ if(!th||!BB_THEMES[th]) return [];
-  const rank=w=>w.r==="S"?0:w.pron&&w.r==="O"?1:w.pron&&w.r==="D"?2:({D:3,T:4,A:5,P:6,B:6.5,O:7})[w.r]??8, END=["I","Pa","X"];
+  if(ws.some(w=>["Ar","Je","De"].includes(w.r))) return [];
+  /* reported speech: with ⇄ without dass */
+  { const se=bbSayEnd(ws), kk=ws.findIndex(w=>w.r==="K"), T=BB_THEMES[th].tiles, di=T.findIndex(t=>t[0]==="dass"&&t[1]==="K");
+    const ok=c=>{ try{ return bbCheck(c,th).ok; }catch(e){ return false; } };
+    if(se>0&&di>=0){ const rest=ws.slice(se), v=rest.find(w=>["V","M","H"].includes(w.r)), S=rest.find(w=>w.r==="S"); if(!v||!S) return [];
+      const c=[...ws.slice(0,se),{ id:di, t:"dass", r:"K", ...(T[di][2]||{}) },S,...rest.filter(w=>w!==v&&w!==S),v]; return ok(c)?[{ t:bbSentence(c), ws:c }]:[]; }
+    if(kk>0&&ws[kk].t==="dass"&&ws.slice(0,kk).some(w=>w.say)){ const sub=ws.slice(kk+1), v=sub[sub.length-1], S=sub[0];
+      const c=[...ws.slice(0,kk),S,v,...sub.slice(1,-1)]; return ok(c)?[{ t:bbSentence(c), ws:c }]:[]; } }
+  const rank=w=>w.r==="S"?0:w.pron&&w.r==="O"?1:w.pron&&w.r==="D"?2:({D:3,T:4,A:5,P:6,B:6.5,O:7,Q:7.5})[w.r]??8, END=["I","Pa","X","Mi"];
   const tryAdd=(cand,mine,out,seen)=>{ let r; try{ r=bbCheck(cand,th); }catch(e){ return; } const t=bbSentence(cand); if(r&&r.ok&&t.toLowerCase()!==mine&&!seen[t]){ seen[t]=1; out.push({ t, ws:cand }); } };
   const k=ws.findIndex(w=>["K","R","U"].includes(w.r));
   /* weil/wenn/um part first ⇄ last */
@@ -9340,7 +9475,7 @@ function bbAlts(ws, th){ if(!th||!BB_THEMES[th]) return [];
   const head=k>=0?ws.slice(0,k):ws.slice(), tail=k>=0?ws.slice(k):[];
   if(head.length<3) return [];
   const vi=head.findIndex((w,i)=>i>0&&["V","M","H"].includes(w.r)); if(vi<0) return [];
-  const verb=head[vi], ends=head.filter((w,i)=>i!==vi&&["I","Pa","X","V","M","H"].includes(w.r)), rest=head.filter((w,i)=>i!==vi&&!ends.includes(w));
+  const verb=head[vi], ends=head.filter((w,i)=>i!==vi&&["I","Pa","X","Mi","V","M","H"].includes(w.r)), rest=head.filter((w,i)=>i!==vi&&!ends.includes(w));
   const mine=bbSentence(ws).toLowerCase(), out=[], seen={};
   if(k>0&&["K","U"].includes(ws[k].r)&&ws[k].t!=="dass"&&verb.v!=="glauben"){ const S=rest.find(w=>w.r==="S"); if(S) tryAdd([...tail,verb,S,...rest.filter(w=>w!==S).sort((a,b)=>rank(a)-rank(b)),...ends],mine,out,seen); }
   const FR={S:0,T:1,P:2,D:3,O:4,B:5}, fronts=rest.filter(w=>!w.pron&&w.r!=="B").sort((a,b)=>(FR[a.r]??9)-(FR[b.r]??9));
@@ -9351,8 +9486,8 @@ function bbAlts(ws, th){ if(!th||!BB_THEMES[th]) return [];
 function bbAltsHtml(ws){ const th=BB.mode==="ch"&&BB.ch?BB_CH[BB.ch.k].th:BB.th, alts=bbAlts(ws,th); if(!alts.length) return "";
   return `<div class="bbalt"><b>🔀 ${tr("You could also say","Du könntest auch sagen","También podrías decir")}</b>${alts.map(a=>{ const q=bbInSub(a.ws);
     return `<details><summary lang="de">${esc(a.t)}</summary><div class="bbwrow" dir="ltr">${a.ws.map((w,i)=>bbPart(w,q[i])).join("")}</div></details>`; }).join("")}</div>`; }
-function bbSentence(ws){ const k=ws.findIndex(w=>["K","R","U"].includes(w.r)), e=k===0?bbClauseEnd(ws):-1;
-  const s=ws.map((w,i)=>(i===0?"":i===k?", ":" ")+w.t+(i===e&&i<ws.length-1?",":"")).join(""); return s.charAt(0).toUpperCase()+s.slice(1)+"."; }
+function bbSentence(ws){ const k=ws.findIndex(w=>["K","R","U","De"].includes(w.r)), e=k===0?bbClauseEnd(ws):-1, se=bbSayEnd(ws);
+  const s=ws.map((w,i)=>(i===0?"":i===k||i===se?", ":" ")+w.t+(i===e&&i<ws.length-1?",":"")).join(""); return s.charAt(0).toUpperCase()+s.slice(1)+"."; }
 function bbGo(){
   const typing=BB.s.input==="type", tiles=bbTiles(), ws=typing?bbTypeGo():BB.row.map(id=>tiles.find(t=>t.id===id)).filter(Boolean);
   if(!ws) return;
@@ -9432,7 +9567,7 @@ VIEWS.bridge = function(){
     ${r&&r.ok?"":`<div class="row" style="gap:8px;margin:10px 0"><button class="btn primary" style="flex:2" ${row.length||typing?"":"disabled"} onclick="bbGo()">✅ ${tr("Check","Prüfen","Comprobar")}</button>${typing?"":`<button class="btn secondary" style="flex:1" ${row.length?"":"disabled"} onclick="BB.row.pop();BB.res=null;xr()">↩</button>`}<button class="btn secondary" style="flex:1" ${row.length||typing?"":"disabled"} onclick="bbClear()">🗑</button></div>`}
     <div class="card bbtray" dir="ltr">${typing?`<div class="ecmeta">📖 ${tr("Words you can use (tap to add)","Wörter, die du nutzen kannst (tippen zum Einfügen)","Palabras que puedes usar (toca para añadir)")}</div>`:""}${groups.map(g=>`<div class="bbg">${tiles.filter(t=>t.r===g).map(t=>typing?`<button class="bbt sm" style="--c:${BB_COL[t.r]}" lang="de" onclick="bbIns('${esc(t.t).replace(/'/g,"&#39;")}')">${esc(t.t)}</button>`:bbTile(t,BB.row.includes(t.id)&&!BB_THEMES[BB.th].reuse)).join("")}</div>`).join("")}</div>
     ${ch?"":`<div class="card"><h3 style="margin:0 0 6px">🎯 ${tr("Challenges","Challenges","Retos")}</h3><p class="note" style="margin:0 0 8px">${tr("Build the German sentence for each English one. 5 sentences each.","Bau zu jedem englischen Satz den deutschen. Je 5 Sätze.","Construye la frase alemana para cada frase en inglés. 5 frases cada uno.")}</p>
-      ${BB_CH.map((cc,k)=>{ const open=k===0||(BB.s.ch[k-1]||0)>0; return `<button class="ectop" style="width:100%;background:none;border:0;border-top:1px solid var(--line);padding:10px 0;font:inherit;cursor:${open?"pointer":"default"};opacity:${open?1:.5}" ${open?`onclick="bbChStart(${k})"`:"disabled"}><span>${["1 · Ich lerne Deutsch.","2 · Heute lerne ich Deutsch.","3 · Ich möchte Deutsch lernen.","4 · Gestern habe ich Deutsch gelernt. <small class=\"note\">B1</small>","5 · …, weil ich hier lebe. <small class=\"note\">B1</small>","6 · Ich biete dem Gast ein Zimmer. <small class=\"note\">A2–B1</small>","7 · Ich rufe dich morgen an. <small class=\"note\">A2</small>","8 · Wenn ich Zeit habe, lese ich. <small class=\"note\">B1</small>","9 · Der Mann, der hier wohnt. <small class=\"note\">B1</small>","10 · …, um hier zu arbeiten. <small class=\"note\">B1</small>","11 · Wenn ich Zeit hätte, würde ich reisen. <small class=\"note\">B2</small>","12 · Das Haus wurde 1900 gebaut. <small class=\"note\">B2</small>"][k]}</span><b>${BB.s.ch[k]?"⭐".repeat(BB.s.ch[k]):open?"▶️":"🔒"}</b></button>`; }).join("")}</div>
+      ${BB_CH.map((cc,k)=>{ const open=k===0||(BB.s.ch[k-1]||0)>0; return `<button class="ectop" style="width:100%;background:none;border:0;border-top:1px solid var(--line);padding:10px 0;font:inherit;cursor:${open?"pointer":"default"};opacity:${open?1:.5}" ${open?`onclick="bbChStart(${k})"`:"disabled"}><span>${["1 · Ich lerne Deutsch.","2 · Heute lerne ich Deutsch.","3 · Ich möchte Deutsch lernen.","4 · Gestern habe ich Deutsch gelernt. <small class=\"note\">B1</small>","5 · …, weil ich hier lebe. <small class=\"note\">B1</small>","6 · Ich biete dem Gast ein Zimmer. <small class=\"note\">A2–B1</small>","7 · Ich rufe dich morgen an. <small class=\"note\">A2</small>","8 · Wenn ich Zeit habe, lese ich. <small class=\"note\">B1</small>","9 · Der Mann, der hier wohnt. <small class=\"note\">B1</small>","10 · …, um hier zu arbeiten. <small class=\"note\">B1</small>","11 · Wenn ich Zeit hätte, würde ich reisen. <small class=\"note\">B2</small>","12 · Das Haus wurde 1900 gebaut. <small class=\"note\">B2</small>","13 · Ich habe arbeiten müssen. <small class=\"note\">C1</small>","14 · Je mehr …, desto besser … <small class=\"note\">B2–C1</small>","15 · Er sagt, er habe keine Zeit. <small class=\"note\">C1</small>","16 · Das gestern gekaufte Auto … <small class=\"note\">C1–C2</small>"][k]}</span><b>${BB.s.ch[k]?"⭐".repeat(BB.s.ch[k]):open?"▶️":"🔒"}</b></button>`; }).join("")}</div>
     ${ch?"":bbQCard()+lgCard()+bbDnaCard()}
     <p class="note center">${tr("Your points are saved on this device.","Deine Punkte werden auf diesem Gerät gespeichert.","Tus puntos se guardan en este dispositivo.")}</p>`}`;
 };
