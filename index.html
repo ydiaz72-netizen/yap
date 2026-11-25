@@ -954,7 +954,7 @@
 <script>/* Extra interface languages live in /i18n/<code>.js (English text → translation). Load the chosen one before the app starts. */
 (function(){ try{ var X=["tr","uk","fa","ur"], v=localStorage.getItem("pt_ui");
   if(!v){ var n=String((navigator.languages&&navigator.languages[0])||navigator.language||"").slice(0,2).toLowerCase(); if(X.indexOf(n)>-1) v=n; }
-  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=48"><\/script>'); }catch(e){} })();</script>
+  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=49"><\/script>'); }catch(e){} })();</script>
 
 <script>
 /* ===================== CONTENT ===================== */
@@ -1384,7 +1384,7 @@ function bi(en,de,es){ if(es!==undefined) return tr(en,de,es); return `${en} <sp
 function uiSet(l){
   if(!UI_CODES.includes(l)) return;
   if(UI_EXTRA.includes(l) && !I18N_DATA[l]){
-    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=48";
+    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=49";
     sc.onload=()=>uiSet(l); sc.onerror=()=>bToast(offlineMsg()); document.head.appendChild(sc); return;
   }
   UI=l; I18N_T=null; I18N_M.clear();
@@ -8006,9 +8006,42 @@ const REC_URL="https://pontetalk.setzio.com/?ref=practice";
 function recShareText(){ const st=recState(), s=recStreak(), done=st.tips.filter(t=>recIsDone(st,t)).map(t=>"✅ "+recTx(t.t).replace(/\s*\([^()]*\d[^()]*\)\s*$/,""));
   return [tr(`🎯 Today I finished ${done.length}/${st.tips.length} German practices on PonteTalk!`,`🎯 Heute habe ich ${done.length}/${st.tips.length} Deutsch-Übungen auf PonteTalk geschafft!`,`🎯 ¡Hoy terminé ${done.length}/${st.tips.length} prácticas de alemán en PonteTalk!`)+(s.n>=2?` 🔥 ${tr(`${s.n}-day streak`,`${s.n} Tage am Stück`,`${s.n} días seguidos`)}`:""),
     ...done, "", tr("Practise with me, it's free 👉","Übe mit mir, es ist kostenlos 👉","Practica conmigo, es gratis 👉")+" "+REC_URL].join("\n"); }
+/* picture of today's finished tips, like a screenshot of the card (no % scores) */
+async function recShareImg(){ const st=recState(), sk=recStreak(), done=st.tips.filter(t=>recIsDone(st,t)).map(t=>recTx(t.t).replace(/\s*\([^()]*\d[^()]*\)\s*$/,""));
+  const W=1080, H=1350, c=document.createElement("canvas"); c.width=W; c.height=H; const g=c.getContext("2d"), rtl=UI_RTL.includes(UI);
+  try{ await Promise.all([document.fonts.load("800 60px 'Plus Jakarta Sans'"),document.fonts.load("600 60px Fredoka")]); }catch(e){}
+  const F=(w,px,f)=>`${w} ${px}px ${f||"'Plus Jakarta Sans'"}, system-ui, sans-serif`;
+  const rr=(x,y,w,h,r)=>{ g.beginPath(); g.moveTo(x+r,y); g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r); g.arcTo(x,y+h,x,y,r); g.arcTo(x,y,x+w,y,r); g.closePath(); };
+  const fit=(t,max)=>{ if(g.measureText(t).width<=max) return t; while(t.length>1&&g.measureText(t+"…").width>max) t=t.slice(0,-1); return t+"…"; };
+  g.fillStyle="#FAF7F2"; g.fillRect(0,0,W,H); g.fillStyle="#F25C3B"; g.fillRect(0,0,W,14); g.textBaseline="middle";
+  try{ const im=new Image(); im.src="/icon-192.png"; await im.decode(); g.save(); rr(70,60,96,96,24); g.clip(); g.drawImage(im,70,60,96,96); g.restore(); }catch(e){}
+  g.fillStyle="#1B2A41"; g.font=F(600,58,"Fredoka"); g.fillText("PonteTalk",190,110);
+  /* the card */
+  const cx=60, cy=200, cw=W-120, ch=H-cy-250; g.fillStyle="#fff"; g.shadowColor="rgba(27,42,65,.10)"; g.shadowBlur=30; rr(cx,cy,cw,ch,40); g.fill(); g.shadowBlur=0; g.strokeStyle="#E8E2D8"; g.lineWidth=2; rr(cx,cy,cw,ch,40); g.stroke();
+  const L=cx+50, R=cx+cw-50; g.direction=rtl?"rtl":"ltr";
+  g.fillStyle="#1B2A41"; g.font=F(800,46); g.textAlign=rtl?"right":"left"; g.fillText(fit("🎯 "+tr("My German practice","Mein Deutschtraining","Mi práctica de alemán"),cw-250),rtl?R:L,cy+80);
+  g.font=F(800,44); g.textAlign=rtl?"left":"right"; g.fillStyle="#5B6474"; g.fillText(`${done.length}/${st.tips.length} ✅`,rtl?L:R,cy+82);
+  g.fillStyle="#E8E2D8"; rr(L,cy+130,R-L,14,7); g.fill(); g.fillStyle="#1E8E5A"; const pw=(R-L)*done.length/Math.max(1,st.tips.length); rr(rtl?R-pw:L,cy+130,pw,14,7); g.fill();
+  g.textAlign=rtl?"right":"left"; g.fillStyle="#5B6474"; g.font=F(600,36);
+  g.fillText(fit((done.length===st.tips.length?"🎉 "+tr("All done for today. Great work!","Für heute alles geschafft. Super!","¡Todo hecho por hoy! ¡Buen trabajo!"):"💪 "+tr("Picked from your own progress.","Ausgewählt nach deinem Fortschritt.","Elegido según tu progreso."))+(sk.n>=2?`  🔥 ${sk.n}`:""),R-L),rtl?R:L,cy+195);
+  const top=cy+245, room=ch-(top-cy)-40, n=Math.max(1,done.length), gap=16, rh=Math.min(116,(room-gap*(n-1))/n), fs=Math.max(28,Math.min(42,rh*0.38));
+  done.forEach((t,i)=>{ const y=top+i*(rh+gap); g.fillStyle="#E6F6EC"; rr(L,y,R-L,rh,24); g.fill(); g.strokeStyle="#9AD3B0"; g.lineWidth=3; rr(L,y,R-L,rh,24); g.stroke();
+    const r=rh*0.3, ox=rtl?R-30-r:L+30+r; g.fillStyle="#1E8E5A"; g.beginPath(); g.arc(ox,y+rh/2,r,0,Math.PI*2); g.fill();
+    g.fillStyle="#fff"; g.textAlign="center"; g.font=F(800,r*1.2); g.fillText("✓",ox,y+rh/2+2);
+    g.fillStyle="#1E6B45"; g.font=F(800,fs); g.textAlign=rtl?"right":"left"; g.fillText(fit(t,R-L-r*2-90),rtl?ox-r-28:ox+r+28,y+rh/2+2); });
+  /* call to action */
+  g.textAlign="center"; g.direction="ltr"; g.fillStyle="#F25C3B"; rr(60,H-200,W-120,140,36); g.fill();
+  g.fillStyle="#fff"; g.font=F(800,44); g.fillText(fit(tr("Practise with me, it's free 👉","Übe mit mir, es ist kostenlos 👉","Practica conmigo, es gratis 👉"),W-200),W/2,H-155); g.font=F(700,38); g.fillText("pontetalk.setzio.com",W/2,H-100);
+  return await new Promise(res=>c.toBlob(res,"image/png")); }
 async function recShare(){ const text=recShareText();
-  try{ if(navigator.share){ await navigator.share({ title:"PonteTalk", text }); return; } }catch(e){ if(e&&e.name==="AbortError") return; }
-  try{ await navigator.clipboard.writeText(text); bToast(tr("Copied! Paste it in WhatsApp or anywhere 📋","Kopiert! In WhatsApp oder überall einfügen 📋","¡Copiado! Pégalo en WhatsApp o donde quieras 📋")); }catch(e){ window.prompt("",text); } }
+  bToast(tr("Making your picture…","Bild wird erstellt…","Creando tu imagen…"));
+  let blob=null; try{ blob=await recShareImg(); }catch(e){}
+  const file=blob?new File([blob],"pontetalk-practice.png",{ type:"image/png" }):null;
+  try{ if(file&&navigator.canShare&&navigator.canShare({ files:[file] })){ await navigator.share({ files:[file], text }); return; }
+    if(navigator.share){ await navigator.share({ title:"PonteTalk", text }); return; } }catch(e){ if(e&&e.name==="AbortError") return; }
+  if(blob){ const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="pontetalk-practice.png"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),4000); }
+  try{ await navigator.clipboard.writeText(text); }catch(e){}
+  bToast(tr("Picture saved and link copied. Paste it anywhere!","Bild gespeichert und Link kopiert. Überall einfügen!","Imagen guardada y enlace copiado. ¡Pégalo donde quieras!")); }
 const _homeView = VIEWS.home;
 VIEWS.home = function(){ return (A.user && A.status==="in") ? homeDash() : _homeView(); };
 
