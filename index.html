@@ -294,7 +294,7 @@
   .rdrow{display:flex;align-items:center;gap:10px}.rdcard{display:flex;align-items:center;gap:12px;width:100%;font:inherit;cursor:pointer;margin-bottom:10px;border:1px solid var(--line)}
   .rdsent{font-size:24px;font-weight:800;line-height:1.3;text-align:center;margin:6px 0}.rdmean{background:var(--soft,#F6F2EC);border-radius:14px;padding:10px 12px;text-align:center;font-size:17px;color:#2A8C82;font-weight:700;margin-top:8px}
   .rdsofar{color:var(--muted,#6B7A8F);font-size:15px;line-height:1.5;margin:4px 2px 10px}.rddots{display:flex;gap:5px;margin:6px 0 10px}.rddots i{flex:1;height:6px;border-radius:9px;background:var(--line,#E8E2D8)}.rddots i.on{background:#2A8C82}.rddots i.cur{background:var(--coral,#F25C3B)}
-  .ssbarw{height:6px;background:#EDE6DC;border-radius:6px;overflow:hidden;margin:0 0 12px}.ssbar{height:100%;width:100%;background:#F2B53A;transition:width .1s linear}.sscard{touch-action:pan-y;transition:transform .15s ease}.sshl{background:#F9DE8A;color:inherit;border-radius:5px;padding:0 3px}.sstfix{background:var(--soft,#F6F2EC);border-radius:12px;padding:10px 12px;font-weight:800;font-size:18px}
+  .pbpre{min-width:56px;height:56px;border-radius:14px;background:#F9DE8A;color:#2B2622;font-weight:900;font-size:18px;display:flex;align-items:center;justify-content:center;flex:none}.pbfix{color:#fff;font-weight:800;font-size:16px;padding:0 4px}.ssbarw{height:6px;background:#EDE6DC;border-radius:6px;overflow:hidden;margin:0 0 12px}.ssbar{height:100%;width:100%;background:#F2B53A;transition:width .1s linear}.sscard{touch-action:pan-y;transition:transform .15s ease}.sshl{background:#F9DE8A;color:inherit;border-radius:5px;padding:0 3px}.sstfix{background:var(--soft,#F6F2EC);border-radius:12px;padding:10px 12px;font-weight:800;font-size:18px}
   .rdq{display:flex;gap:8px;margin-top:14px}.rdq .btn{flex:1}.rdfb{margin:14px 0 10px;padding:10px 12px;border-radius:12px;font-weight:700}.rdfb.ok{background:#E3F4EC;color:#1E7B52}.rdfb.no{background:#FDEBE7;color:#B3361C}
   .vcpx{text-align:start;margin:10px 0 0;border:1px solid var(--line);font-size:14px}.vcpx .bbwrow{margin-top:8px}.bbwhy{margin-top:10px;background:#fff;border-radius:16px;padding:10px 12px}.bbwhy summary{font-weight:800;cursor:pointer}
   .bbwrow{display:flex;flex-wrap:wrap;gap:12px 10px;margin-top:10px}
@@ -7097,7 +7097,7 @@ function homeRecs(){
 }
 
 /* ===================== BOTTOM BAR ===================== */
-const NAV_TAB = { home:"home", bridge:"games", split:"games", board:"sessions", host:"sessions", session:"sessions", games:"games", account:"profile", xprofile:"profile" };
+const NAV_TAB = { home:"home", bridge:"games", split:"games", pbuild:"games", board:"sessions", host:"sessions", session:"sessions", games:"games", account:"profile", xprofile:"profile" };
 const WIDE = { home:"xl", board:"xl", host:"md", session:"md", account:"md", xprofile:"md", games:"md" };
 const ICO = {
   home:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10l9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>',
@@ -10587,7 +10587,8 @@ VIEWS.split = function(){
       <h2 style="margin:4px 0">${ok===n?tr("Prefix Master!","Präfix-Profi!","¡Maestro/a de prefijos!"):ok>=11?tr("Great job!","Super gemacht!","¡Muy bien!"):tr("Keep practicing","Weiter üben","Sigue practicando")}</h2>
       <p class="note">${tr(`${ok} of ${n} right`,`${ok} von ${n} richtig`,`${ok} de ${n} correctas`)} · ⭐ ${SS.pts}${rec?" · "+tr("new best!","neuer Rekord!","¡nuevo récord!"):""} · 🔥 ${SS.best}</p>
       <button class="btn primary" onclick="ssStart()">${tr("Play again","Nochmal","Otra vez")}</button>
-      <button class="btn secondary" style="margin-top:8px" onclick="SS.q=null;SS.done=false;xr()">${tr("Change level","Level wechseln","Cambiar nivel")}</button></div>
+      <button class="btn secondary" style="margin-top:8px" onclick="SS.q=null;SS.done=false;xr()">${tr("Change level","Level wechseln","Cambiar nivel")}</button>
+      <p class="note" style="margin:10px 0 0">${tr("Want to learn the patterns step by step?","Die Muster Schritt für Schritt lernen?","¿Quieres aprender los patrones paso a paso?")} <button class="linkbtn" onclick="pbOpen()">🧩 ${tr("Prefix Builder","Präfix-Baukasten","Constructor de prefijos")}</button></p></div>
       ${SS.miss.length?`<div class="card" style="text-align:start"><h3 style="margin:0 0 6px">🔁 ${tr("Review these","Nochmal ansehen","Repasa estas")}</h3>
         ${SS.miss.map(c=>`<div class="mwrow"><div style="flex:1;min-width:0"><b lang="de">${esc(c.v)}</b><div lang="de">${ssMark(c.fix)}</div><div class="note" style="margin:0">${esc(ssTr(c.w))}</div></div></div>`).join("")}</div>`:""}`; }
   const c=SS.q[SS.i], a=SS.ans;
@@ -10604,6 +10605,124 @@ VIEWS.split = function(){
     <button class="btn primary" style="margin-top:12px" onclick="ssNext()">${SS.i+1<SS.q.length?tr("Next","Weiter","Siguiente")+" →":tr("Finish","Fertig","Terminar")}</button></div>`;
 };
 
+/* ---- 🧩 Prefix Builder — build one prefix verb in all 5 patterns (split, modal, weil, Perfekt, zu) from word tiles.
+   Each step: pre = fixed start, a = answer chunks in order, alt = other correct orders, d = decoy tiles (the wrong split/stuck forms), m = meaning.
+   Solo, German only, progress on this device. Pairs with ✂️ Split or Stick?. */
+const PB_PAT = {
+  split:{ e:"✂️", en:"Present tense", de:"Präsens", es:"Presente",
+    w:{en:"Present tense: the verb goes 2nd, the prefix jumps to the very end.",es:"Presente: el verbo va en 2.º lugar y el prefijo salta al final."} },
+  modal:{ e:"🔗", en:"With a modal verb", de:"Mit Modalverb", es:"Con verbo modal",
+    w:{en:"The modal (muss, kann, will…) goes 2nd; the prefix verb stays whole at the end.",es:"El modal (muss, kann, will…) va en 2.º lugar; el verbo con prefijo queda entero al final."} },
+  weil:{ e:"🔗", en:"After weil / wenn / dass", de:"Nach weil / wenn / dass", es:"Después de weil / wenn / dass",
+    w:{en:"weil, wenn and dass send the verb to the end, and the prefix sticks back on.",es:"weil, wenn y dass mandan el verbo al final, y el prefijo se vuelve a pegar."} },
+  perf:{ e:"🕰️", en:"Perfekt (past)", de:"Perfekt", es:"Perfekt (pasado)",
+    w:{en:"Perfekt: ge- goes BETWEEN the prefix and the verb (auf-ge-standen). Moving verbs use sein.",es:"Perfekt: ge- va ENTRE el prefijo y el verbo (auf-ge-standen). Los verbos de movimiento usan sein."} },
+  zu:{ e:"➕", en:"With zu", de:"Mit zu", es:"Con zu",
+    w:{en:"zu goes BETWEEN the prefix and the verb: one word (auf-zu-stehen).",es:"zu va ENTRE el prefijo y el verbo: una sola palabra (auf-zu-stehen)."} }
+};
+const PB_ORDER = ["split","modal","weil","perf","zu"];
+const PB_V = [
+ { v:"abfahren", p:"ab-", m:{en:"to leave (vehicle)",es:"salir (un vehículo)"}, st:{
+   split:{ a:["Der Zug","fährt","um 9 Uhr","ab"], d:["abfährt"], m:{en:"The train leaves at 9.",es:"El tren sale a las 9."} },
+   modal:{ a:["Der Zug","muss","um 9 Uhr","abfahren"], d:["fahren","ab"], m:{en:"The train has to leave at 9.",es:"El tren tiene que salir a las 9."} },
+   weil:{ pre:"Wir müssen rennen,", a:["weil","der Zug","um 9 Uhr","abfährt"], d:["fährt","ab"], m:{en:"We have to run because the train leaves at 9.",es:"Tenemos que correr porque el tren sale a las 9."} },
+   perf:{ a:["Der Zug","ist","um 9 Uhr","abgefahren"], d:["geabfahren","hat"], m:{en:"The train left at 9.",es:"El tren salió a las 9."} },
+   zu:{ pre:"Es ist Zeit,", a:["jetzt","abzufahren"], d:["zu abfahren"], m:{en:"It's time to leave now.",es:"Es hora de salir ya."} } } },
+ { v:"ankommen", p:"an-", m:{en:"to arrive",es:"llegar"}, st:{
+   split:{ a:["Meine Schwester","kommt","morgen","an"], d:["ankommt"], m:{en:"My sister arrives tomorrow.",es:"Mi hermana llega mañana."} },
+   modal:{ a:["Meine Schwester","will","morgen","ankommen"], d:["kommen","an"], m:{en:"My sister wants to arrive tomorrow.",es:"Mi hermana quiere llegar mañana."} },
+   weil:{ pre:"Ich freue mich,", a:["weil","meine Schwester","morgen","ankommt"], d:["kommt","an"], m:{en:"I'm happy because my sister arrives tomorrow.",es:"Estoy feliz porque mi hermana llega mañana."} },
+   perf:{ a:["Meine Schwester","ist","gestern","angekommen"], d:["geankommen","hat"], m:{en:"My sister arrived yesterday.",es:"Mi hermana llegó ayer."} },
+   zu:{ pre:"Sie hofft,", a:["pünktlich","anzukommen"], d:["zu ankommen"], m:{en:"She hopes to arrive on time.",es:"Ella espera llegar a tiempo."} } } },
+ { v:"aufstehen", p:"auf-", m:{en:"to get up",es:"levantarse"}, st:{
+   split:{ a:["Ich","stehe","um 6 Uhr","auf"], d:["aufstehe"], m:{en:"I get up at 6.",es:"Me levanto a las 6."} },
+   modal:{ a:["Ich","muss","um 6 Uhr","aufstehen"], d:["stehen","auf"], m:{en:"I have to get up at 6.",es:"Tengo que levantarme a las 6."} },
+   weil:{ pre:"Ich bin müde,", a:["weil","ich","um 6 Uhr","aufstehe"], d:["stehe","auf"], m:{en:"I'm tired because I get up at 6.",es:"Estoy cansada porque me levanto a las 6."} },
+   perf:{ a:["Ich","bin","um 6 Uhr","aufgestanden"], d:["geaufstanden","habe"], m:{en:"I got up at 6.",es:"Me levanté a las 6."} },
+   zu:{ pre:"Es ist schwer,", a:["früh","aufzustehen"], d:["zu aufstehen"], m:{en:"It's hard to get up early.",es:"Es difícil levantarse temprano."} } } },
+ { v:"einsteigen", p:"ein-", m:{en:"to get on (bus, train)",es:"subirse (a un transporte)"}, st:{
+   split:{ a:["Wir","steigen","in den Bus","ein"], d:["einsteigen"], m:{en:"We get on the bus.",es:"Nos subimos al autobús."} },
+   modal:{ a:["Wir","können","jetzt","einsteigen"], d:["steigen","ein"], m:{en:"We can get on now.",es:"Ya podemos subir."} },
+   weil:{ pre:"Sag mir,", a:["wenn","wir","einsteigen"], d:["steigen","ein"], m:{en:"Tell me when we get on.",es:"Dime cuándo subimos."} },
+   perf:{ a:["Wir","sind","in den Bus","eingestiegen"], d:["geeinstiegen","haben"], m:{en:"We got on the bus.",es:"Nos subimos al autobús."} },
+   zu:{ pre:"Vergiss nicht,", a:["in den Bus","einzusteigen"], d:["zu einsteigen"], m:{en:"Don't forget to get on the bus.",es:"No olvides subirte al autobús."} } } },
+ { v:"aussteigen", p:"aus-", m:{en:"to get off (bus, train)",es:"bajarse (de un transporte)"}, st:{
+   split:{ a:["Ich","steige","am Bahnhof","aus"], d:["aussteige"], m:{en:"I get off at the station.",es:"Me bajo en la estación."} },
+   modal:{ a:["Ich","muss","am Bahnhof","aussteigen"], d:["steigen","aus"], m:{en:"I have to get off at the station.",es:"Tengo que bajarme en la estación."} },
+   weil:{ pre:"Sag Bescheid,", a:["wenn","wir","aussteigen"], d:["steigen","aus"], m:{en:"Let me know when we get off.",es:"Avisa cuando nos bajemos."} },
+   perf:{ a:["Ich","bin","am Bahnhof","ausgestiegen"], d:["geausstiegen","habe"], m:{en:"I got off at the station.",es:"Me bajé en la estación."} },
+   zu:{ pre:"Vergiss nicht,", a:["am Bahnhof","auszusteigen"], d:["zu aussteigen"], m:{en:"Don't forget to get off at the station.",es:"No olvides bajarte en la estación."} } } },
+ { v:"anrufen", p:"an-", m:{en:"to call (phone)",es:"llamar (por teléfono)"}, st:{
+   split:{ a:["Ich","rufe","dich","heute Abend","an"], d:["anrufe"], m:{en:"I'll call you tonight.",es:"Te llamo esta noche."} },
+   modal:{ a:["Ich","kann","dich","heute Abend","anrufen"], d:["rufen","an"], m:{en:"I can call you tonight.",es:"Puedo llamarte esta noche."} },
+   weil:{ pre:"Sie ist froh,", a:["weil","er","sie","anruft"], d:["ruft","an"], m:{en:"She's happy because he calls her.",es:"Ella está feliz porque él la llama."} },
+   perf:{ a:["Ich","habe","Mama","angerufen"], d:["geanrufen","bin"], m:{en:"I called Mom.",es:"Llamé a mamá."} },
+   zu:{ pre:"Ich habe vergessen,", a:["dich","anzurufen"], d:["zu anrufen"], m:{en:"I forgot to call you.",es:"Olvidé llamarte."} } } },
+ { v:"einkaufen", p:"ein-", m:{en:"to go shopping",es:"hacer la compra"}, st:{
+   split:{ a:["Wir","kaufen","am Samstag","ein"], d:["einkaufen"], m:{en:"We go shopping on Saturday.",es:"Hacemos la compra el sábado."} },
+   modal:{ a:["Wir","wollen","am Samstag","einkaufen"], d:["kaufen","ein"], m:{en:"We want to go shopping on Saturday.",es:"Queremos hacer la compra el sábado."} },
+   weil:{ pre:"Ich koche,", a:["wenn","ich","heute","einkaufe"], d:["kaufe","ein"], m:{en:"I'll cook if I go shopping today.",es:"Cocino si hago la compra hoy."} },
+   perf:{ a:["Ich","habe","gestern","eingekauft"], d:["geeinkauft","bin"], m:{en:"I went shopping yesterday.",es:"Ayer hice la compra."} },
+   zu:{ pre:"Ich habe keine Zeit,", a:["heute","einzukaufen"], d:["zu einkaufen"], m:{en:"I don't have time to go shopping today.",es:"No tengo tiempo de hacer la compra hoy."} } } },
+ { v:"besuchen", p:"be-", be:1, m:{en:"to visit",es:"visitar"}, st:{
+   split:{ a:["Ich","besuche","am Sonntag","meine Oma"], alt:[["Ich","besuche","meine Oma","am Sonntag"]], d:["suche","be"], m:{en:"I visit my grandma on Sunday.",es:"Visito a mi abuela el domingo."},
+     w:{en:"be- is NOT separable: it never splits off, not even in the present tense.",es:"be- NO es separable: nunca se separa, ni siquiera en presente."} },
+   modal:{ a:["Ich","will","am Sonntag","meine Oma","besuchen"], alt:[["Ich","will","meine Oma","am Sonntag","besuchen"]], d:["suchen","be"], m:{en:"I want to visit my grandma on Sunday.",es:"Quiero visitar a mi abuela el domingo."} },
+   weil:{ pre:"Ich bin glücklich,", a:["weil","ich","meine Oma","besuche"], d:["suche","be"], m:{en:"I'm happy because I'm visiting my grandma.",es:"Estoy feliz porque visito a mi abuela."} },
+   perf:{ a:["Ich","habe","meine Oma","besucht"], d:["gebesucht","bin"], m:{en:"I visited my grandma.",es:"Visité a mi abuela."},
+     w:{en:"be- verbs take NO ge- in the Perfekt: besucht, bekommen.",es:"Los verbos con be- NO llevan ge- en el Perfekt: besucht, bekommen."} },
+   zu:{ pre:"Ich habe keine Zeit,", a:["meine Oma","zu besuchen"], d:["bezusuchen"], m:{en:"I don't have time to visit my grandma.",es:"No tengo tiempo de visitar a mi abuela."},
+     w:{en:"be- doesn't split, so zu stays in front as its own word: zu besuchen.",es:"be- no se separa, así que zu va delante como palabra aparte: zu besuchen."} } } }
+];
+const PB={ s:null, vi:null, k:0, pool:[], row:[], res:null, tries:0, first:0, show:false };
+function pbLoad(){ if(PB.s) return; try{ PB.s=JSON.parse(localStorage.getItem("pt_pbuild")||"{}"); }catch(e){} PB.s=PB.s||{}; PB.s.best=PB.s.best||{}; }
+function pbSave(){ try{ localStorage.setItem("pt_pbuild",JSON.stringify(PB.s)); }catch(e){} }
+function pbOpen(){ pbLoad(); PB.vi=null; go("pbuild"); }
+function pbStart(i){ pbLoad(); PB.vi=i; PB.k=0; PB.first=0; pbStep(); }
+function pbStep(){ const st=PB_V[PB.vi].st[PB_ORDER[PB.k]], t=st.a.concat(st.d).map((x,i)=>({ id:i, t:x }));
+  for(let k=t.length-1;k>0;k--){ const j=Math.floor(Math.random()*(k+1)); [t[k],t[j]]=[t[j],t[k]]; }
+  PB.pool=t; PB.row=[]; PB.res=null; PB.tries=0; PB.show=false; xr(); }
+function pbAdd(id){ if(PB.res&&PB.res.ok) return; if(!PB.row.includes(id)){ PB.row.push(id); PB.res=null; xr(); } }
+function pbDel(k){ if(PB.res&&PB.res.ok) return; PB.row.splice(k,1); PB.res=null; xr(); }
+function pbCheck(){ const st=PB_V[PB.vi].st[PB_ORDER[PB.k]], got=PB.row.map(id=>PB.pool.find(x=>x.id===id).t).join(" ");
+  const ok=[st.a].concat(st.alt||[]).some(a=>a.join(" ")===got); PB.tries++;
+  if(ok&&PB.tries===1) PB.first++;
+  PB.res={ ok }; try{ if(navigator.vibrate) navigator.vibrate(ok?20:[40,40,40]); }catch(e){} xr(); }
+function pbNext(){ if(PB.k+1<PB_ORDER.length){ PB.k++; pbStep(); return; }
+  pbLoad(); const v=PB_V[PB.vi].v; PB.s.best[v]=Math.max(PB.s.best[v]||0,PB.first); pbSave(); PB.k=PB_ORDER.length; xr(); }
+function pbSent(st,words){ return `${st.pre?esc(st.pre)+" ":""}${words.map(esc).join(" ")}${st.q?"?":"."}`; }
+VIEWS.pbuild = function(){
+  pbLoad(); const inV=PB.vi!=null, V=inV?PB_V[PB.vi]:null;
+  const top=`<div class="topline"><button class="chip" onclick="${inV?"PB.vi=null;xr()":"go('games')"}">${uiBack()} ${inV?tr("All verbs","Alle Verben","Todos los verbos"):tr("Games","Spiele","Juegos")}</button><span>🇩🇪 ${tr("German only","Nur Deutsch","Solo alemán")}</span></div>`;
+  if(!inV){ const n=PB_ORDER.length;
+    return top+`<h2 style="margin:4px 0">🧩 ${tr("Prefix Builder","Präfix-Baukasten","Constructor de prefijos")}</h2>
+    <p class="sub" style="margin:0 0 10px">${tr("Pick a verb and build it in all 5 patterns. Watch out: some tiles are traps!","Wähl ein Verb und bau es in allen 5 Mustern. Achtung: Manche Kärtchen sind Fallen!","Elige un verbo y constrúyelo en los 5 patrones. Ojo: ¡algunas fichas son trampas!")}</p>
+    <p class="note" style="margin:0 0 12px">${PB_ORDER.map(k=>`${PB_PAT[k].e} ${tr(PB_PAT[k].en,PB_PAT[k].de,PB_PAT[k].es)}`).join(" · ")}</p>
+    ${PB_V.map((x,i)=>{ const b=PB.s.best[x.v]; return `<button class="card rdcard" onclick="pbStart(${i})"><div class="pbpre">${esc(x.p)}</div><div style="flex:1;min-width:0;text-align:start"><b lang="de">${esc(x.v)}</b><div class="note" style="margin:0">${esc(ssTr(x.m))}${x.be?` · 🔒 ${tr("never splits","nie trennbar","nunca se separa")}`:` · ✂️ ${tr("separable","trennbar","separable")}`}</div></div><span>${b==null?"▶️":b===n?"🏅":`⭐ ${b}/${n}`}</span></button>`; }).join("")}
+    <p class="note center">${tr("Want speed practice?","Lieber schnell üben?","¿Quieres practicar rápido?")} <button class="linkbtn" onclick="ssOpen()">✂️ ${tr("Split or Stick?","Trennen oder kleben?","¿Se separa o se pega?")}</button></p>`; }
+  if(PB.k>=PB_ORDER.length){ const n=PB_ORDER.length, f=PB.first;
+    return top+`<div class="card center"><div style="font-size:44px">${f===n?"🏅":f>=3?"🎉":"💪"}</div>
+      <h2 style="margin:4px 0">${f===n?tr("Prefix Master!","Präfix-Profi!","¡Maestro/a de prefijos!"):tr("Verb done!","Verb geschafft!","¡Verbo terminado!")}</h2>
+      <p class="note"><b lang="de">${esc(V.v)}</b> · ${tr(`${f} of ${n} on the first try`,`${f} von ${n} beim ersten Versuch`,`${f} de ${n} a la primera`)}</p>
+      <div style="text-align:start;margin:10px 0">${PB_ORDER.map(k=>{ const st=V.st[k]; return `<div class="mwrow"><div style="flex:1;min-width:0"><div class="ecmeta">${PB_PAT[k].e} ${tr(PB_PAT[k].en,PB_PAT[k].de,PB_PAT[k].es)}</div><div lang="de">${pbSent(st,st.a)}</div></div></div>`; }).join("")}</div>
+      ${PB.vi+1<PB_V.length?`<button class="btn primary" onclick="pbStart(${PB.vi+1})">${tr("Next verb","Nächstes Verb","Siguiente verbo")}: ${esc(PB_V[PB.vi+1].v)} →</button>`:""}
+      <button class="btn secondary" style="margin-top:8px" onclick="PB.vi=null;xr()">${tr("All verbs","Alle Verben","Todos los verbos")}</button></div>`; }
+  const key=PB_ORDER[PB.k], P=PB_PAT[key], st=V.st[key], r=PB.res, used=new Set(PB.row), rule=ssTr(st.w||P.w);
+  return top+`<div class="rddots" style="margin:0 0 8px">${PB_ORDER.map((x,k)=>`<i class="${k<PB.k?"on":k===PB.k?"cur":""}"></i>`).join("")}</div>
+    <div class="card"><div class="ecmeta">${P.e} ${tr(P.en,P.de,P.es)} · <span lang="de">${esc(V.v)}</span></div>
+      <p style="margin:6px 0 10px;font-weight:700" dir="auto">${tr("Build","Bau","Construye")}: “${esc(ssTr(st.m))}”</p>
+      <div class="bbriver ${r&&r.ok?"done":""}" dir="ltr">${st.pre?`<span class="pbfix" lang="de">${esc(st.pre)}</span>`:""}
+        ${PB.row.length?PB.row.map((id,k)=>`<button class="bbt" style="--c:#F2B53A;color:#2B2622" lang="de" onclick="pbDel(${k})">${esc(PB.pool.find(x=>x.id===id).t)}</button>`).join("")
+          :`<span class="note" style="margin:0;color:#fff">${tr("Tap the tiles below →","Tippe unten auf die Kärtchen →","Toca las fichas de abajo →")}</span>`}</div>
+      ${r&&r.ok?"":`<div class="row" style="gap:6px;flex-wrap:wrap;margin:12px 0 4px" dir="ltr">${PB.pool.map(x=>`<button class="bbt" style="--c:#5B8FD8" lang="de" ${used.has(x.id)?"disabled":""} onclick="pbAdd(${x.id})">${esc(x.t)}</button>`).join("")}</div>`}
+      ${r?(r.ok?`<div class="rdfb ok">✅ ${PB.tries===1?tr("Perfect, first try!","Perfekt, beim ersten Versuch!","¡Perfecto, a la primera!"):tr("Got it!","Geschafft!","¡Lo lograste!")}</div>
+          <p style="margin:0 0 4px">💡 ${esc(rule)}</p>
+          <button class="btn primary" style="margin-top:8px" onclick="pbNext()">${PB.k+1<PB_ORDER.length?tr("Next pattern","Nächstes Muster","Siguiente patrón")+" →":tr("Finish","Fertig","Terminar")}</button>`
+        :`<div class="rdfb no">❌ ${tr("Not quite. Tap a tile in the river to take it back.","Nicht ganz. Tipp ein Kärtchen im Fluss an, um es zurückzunehmen.","No exactamente. Toca una ficha del río para quitarla.")}</div>
+          ${PB.tries>=2?(PB.show?`<div class="sstfix" lang="de">${pbSent(st,st.a)}</div><p style="margin:8px 0 0">💡 ${esc(rule)}</p>`:`<button class="linkbtn" onclick="PB.show=true;xr()">👁 ${tr("Show the answer","Lösung zeigen","Ver la respuesta")}</button>`):`<p class="note" style="margin:0">💡 ${esc(rule)}</p>`}`):""}
+      ${r&&r.ok?"":`<div class="row" style="gap:8px;margin-top:10px"><button class="btn secondary" style="flex:1" ${PB.row.length?"":"disabled"} onclick="PB.row=[];PB.res=null;xr()">↺ ${tr("Clear","Leeren","Borrar")}</button><button class="btn primary" style="flex:2" ${PB.row.length?"":"disabled"} onclick="pbCheck()">${tr("Check","Prüfen","Comprobar")}</button></div>`}</div>`;
+};
+
 VIEWS.games = function(){
   return `<h2>${tr("Games","Spiele","Juegos")}</h2>
   <p class="sub">${tr("Speaking games for 2–10 players.","Sprechspiele für 2–10 Personen.","Juegos de conversación para 2–10 jugadores.")}</p>
@@ -10615,6 +10734,8 @@ VIEWS.games = function(){
   </div>
   <div class="card"><h3>🌉 ${tr("Bridge Builder","Brückenbauer","Constructor de puentes")} <span class="note" style="font-weight:600">· 🇩🇪 ${tr("solo, German only","allein, nur Deutsch","solo, solo alemán")}</span></h3><p class="note">${tr("Build German sentences from word tiles. The better the word order and the longer the sentence, the more points.","Bau deutsche Sätze aus Wort-Kärtchen. Je besser die Satzstellung und je länger der Satz, desto mehr Punkte.","Construye frases en alemán con fichas. Cuanto mejor el orden y más larga la frase, más puntos.")}</p>
     <button class="btn primary" onclick="bbOpen()">${tr("Play","Spielen","Jugar")}</button></div>
+  <div class="card"><h3>🧩 ${tr("Prefix Builder","Präfix-Baukasten","Constructor de prefijos")} <span class="note" style="font-weight:600">· 🇩🇪 ${tr("solo, German only","allein, nur Deutsch","solo, solo alemán")}</span></h3><p class="note">${tr("Build one prefix verb in all 5 patterns: split, with a modal, after weil, Perfekt and zu. Some tiles are traps!","Bau ein Verb mit Präfix in allen 5 Mustern: getrennt, mit Modalverb, nach weil, Perfekt und zu. Manche Kärtchen sind Fallen!","Construye un verbo con prefijo en los 5 patrones: separado, con modal, después de weil, Perfekt y zu. ¡Algunas fichas son trampas!")}</p>
+    <button class="btn primary" onclick="pbOpen()">${tr("Play","Spielen","Jugar")}</button></div>
   <div class="card"><h3>✂️ ${tr("Split or Stick?","Trennen oder kleben?","¿Se separa o se pega?")} <span class="note" style="font-weight:600">· 🇩🇪 ${tr("solo, German only","allein, nur Deutsch","solo, solo alemán")}</span></h3><p class="note">${tr("Prefix verbs like einsteigen, ankommen, besuchen: does the prefix split off or stay stuck? Swipe fast, 10 seconds per card.","Verben wie einsteigen, ankommen, besuchen: Wird das Präfix getrennt oder bleibt es dran? Schnell wischen, 10 Sekunden pro Karte.","Verbos como einsteigen, ankommen, besuchen: ¿el prefijo se separa o se queda pegado? Desliza rápido, 10 segundos por tarjeta.")}</p>
     <button class="btn primary" onclick="ssOpen()">${tr("Play","Spielen","Jugar")}</button></div>
   <div class="card"><h3>📖 ${tr("Easy reads","Lesen","Lecturas fáciles")} <span class="note" style="font-weight:600">· 🇩🇪 A1–C1</span></h3><p class="note">${tr("Short stories with Pía, Bruno and friends. One sentence at a time, with the meaning and sentence parts.","Kurze Geschichten mit Pía, Bruno und Freunden. Satz für Satz, mit Bedeutung und Satzteilen.","Historias cortas con Pía, Bruno y sus amigos. Frase a frase, con significado y partes de la frase.")}</p>
