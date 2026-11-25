@@ -937,6 +937,7 @@
   }
   .hidden{display:none !important}
   .err{color:var(--coral);font-weight:700;font-size:14px;min-height:18px;margin-top:6px}
+.recrow{display:flex;align-items:center;gap:10px;width:100%;text-align:start;background:var(--bg,#FAF7F2);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin:6px 0 0;cursor:pointer;font:inherit;color:inherit}.recrow small{display:block;color:var(--muted,#5b6474);font-size:13px;margin-top:2px;font-weight:400}.recn{flex:0 0 26px;height:26px;border-radius:50%;background:var(--coral);color:#fff;font-weight:800;display:grid;place-items:center;font-size:14px}.recgo{font-size:22px;color:var(--coral);font-weight:700}
 </style>
 </head>
 <body>
@@ -7905,6 +7906,7 @@ function homeDash(){
       <div class="card" style="margin:0"><div class="dhead"><h1 class="dhi">${tr("Hi","Hallo","Hola")} ${esc(name)}</h1><div style="display:flex;gap:8px">${dmBtn()}${bellBtn()}</div></div>
         <p class="sub" style="margin:2px 0 14px">${tr("Here's what's next for you.","Das steht als Nächstes an.","Esto es lo próximo para ti.")}</p>${nextCard()}</div>
       ${holdCard()}
+      ${recCard()}
       ${weekCard().replace('<div class="card">','<div class="card" style="margin:0">')}
       ${rdDayCard()}
       ${acCard()}
@@ -7920,6 +7922,44 @@ function homeDash(){
   </div>
   ${legalLinks()}`;
 }
+/* ---------- 🎯 "Your next practice": 3 tips from this person's own stats (flashcards, Bridge Builder grammar, exam mistakes, reading, streak) ---------- */
+function recDays(){ const D=new Set(Object.keys(VC.days||{}).filter(k=>(VC.days[k].n||0)>0)); try{ bbLoad(); (BB.s.days||[]).forEach(d=>D.add(d)); rdLoad(); (RD.s.days||[]).forEach(d=>D.add(d)); }catch(e){} return D; }
+function recStreak(){ const D=recDays(), d=new Date(), today=D.has(bbDs(d)); if(!today) d.setDate(d.getDate()-1); let n=0; while(D.has(bbDs(d))){ n++; d.setDate(d.getDate()-1); } return { n, today }; }
+function recWrong(hist){ const m={}; for(const a of (hist&&hist.ans)||[]){ if(!(a.n in m)) m[a.n]=a.ok; } const v=Object.values(m); return { wrong:v.filter(x=>x===false).length, seen:v.length, ok:v.filter(Boolean).length }; }
+function recList(){
+  const R=[], now=Date.now(), P=VC.p||{}, L=tr;
+  let due=0, learned=0, shaky=0; for(const id in P){ const x=P[id]; if(!x||!x.r) continue; learned++; if(x.d<=now) due++; if((x.l||0)>=2) shaky++; }
+  const today=(VC.days||{})[vcToday()]||{ n:0, w:0 };
+  if(due>0) R.push({ p:due>=10?100:75, e:"🔁", t:L(`Review ${due} word${due>1?"s":""}`,`${due} Wörter wiederholen`,`Repasa ${due} palabra${due>1?"s":""}`),
+    why:L("They're due today. Reviewing on time is what makes words stick.","Sie sind heute dran. Pünktlich wiederholen macht Wörter fest.","Te tocan hoy. Repasar a tiempo es lo que fija las palabras."), go:"recVc()" });
+  if(!learned) R.push({ p:65, e:"🆕", t:L(`Start your first ${VC.goal} flashcards`,`Deine ersten ${VC.goal} Karteikarten`,`Empieza tus primeras ${VC.goal} tarjetas`),
+    why:L(`Level ${VC.level} words with audio.`,`Wörter auf Niveau ${VC.level} mit Audio.`,`Palabras de nivel ${VC.level} con audio.`), go:"recVc()" });
+  else if(!due&&(today.w||0)<VC.goal) R.push({ p:35, e:"🆕", t:L(`Learn ${VC.goal-(today.w||0)} new ${VC.level} words`,`${VC.goal-(today.w||0)} neue ${VC.level}-Wörter lernen`,`Aprende ${VC.goal-(today.w||0)} palabras nuevas de ${VC.level}`),
+    why:L("Nothing to review, so it's a good moment for new words.","Nichts zu wiederholen, also Zeit für neue Wörter.","No tienes repasos pendientes: buen momento para palabras nuevas."), go:"recVc()" });
+  if(shaky>=3) R.push({ p:55, e:"🧠", t:L(`${shaky} tricky words`,`${shaky} schwierige Wörter`,`${shaky} palabras difíciles`),
+    why:L("You forgot these 2+ times. Write each one in a sentence of your own.","Die hast du 2+ Mal vergessen. Schreib zu jedem einen eigenen Satz.","Las olvidaste 2+ veces. Escribe una frase propia con cada una."), go:"recVc('tricky')" });
+  if(VC.d){ const i=VC_LEVELS.indexOf(VC.level), nx=VC_LEVELS[i+1], s=vcStats(vcLv(VC.level)); if(nx&&s.total&&s.learned/s.total>=0.8)
+    R.push({ p:60, e:"⬆️", t:L(`Ready for ${nx}?`,`Bereit für ${nx}?`,`¿Listo/a para ${nx}?`), why:L(`You know ${Math.round(s.learned/s.total*100)}% of the ${VC.level} words.`,`Du kennst ${Math.round(s.learned/s.total*100)}% der ${VC.level}-Wörter.`,`Conoces el ${Math.round(s.learned/s.total*100)}% de las palabras de ${VC.level}.`),
+      go:`VC.level='${nx}';vcSaveLocal();recVc()` }); }
+  try{ bbLoad(); const D=BB.s.dna||{}, w=bbWeak();
+    if(w&&BB_DNA[w]){ const [o,b]=D[w], pct=Math.round(o/(o+b)*100); if(o+b>=3&&pct<75) R.push({ p:85-pct/5, e:"🧬", t:L(`Practise: ${BB_DNA[w][0][0]} (${pct}%)`,`Übe: ${BB_DNA[w][0][1]} (${pct}%)`,`Practica: ${BB_DNA[w][0][2]} (${pct}%)`),
+      why:tr(...BB_DNA[w][1]), go:`bbChStart(${BB_DNA[w][2]})` }); }
+    else if(!BB.s.pts) R.push({ p:20, e:"🌉", t:L("Try Bridge Builder","Probier den Brückenbauer","Prueba el Constructor de puentes"), why:L("Build German sentences from coloured tiles.","Bau deutsche Sätze aus bunten Kärtchen.","Construye frases en alemán con fichas de colores."), go:"bbOpen()" }); }catch(e){}
+  const lid=recWrong(typeof EX!=="undefined"&&EX.ans&&EX.ans.length?EX:exLocal()), dtz=recWrong(typeof DT!=="undefined"&&DT.ans&&DT.ans.length?DT:dtLocal());
+  if(lid.wrong>=3) R.push({ p:50+Math.min(20,lid.wrong), e:"🇩🇪", t:L(`Redo ${lid.wrong} Leben in Deutschland questions`,`${lid.wrong} Fragen „Leben in Deutschland“ wiederholen`,`Repite ${lid.wrong} preguntas de Leben in Deutschland`),
+    why:L(`You got them wrong last time (${Math.round(lid.ok/lid.seen*100)}% right overall).`,`Beim letzten Mal falsch (insgesamt ${Math.round(lid.ok/lid.seen*100)}% richtig).`,`Las fallaste la última vez (${Math.round(lid.ok/lid.seen*100)}% bien en total).`), go:"exOpen().then(()=>exStart('practice','__wrong'))" });
+  if(dtz.wrong>=3) R.push({ p:50+Math.min(20,dtz.wrong), e:"📝", t:L(`Redo ${dtz.wrong} exam questions`,`${dtz.wrong} Prüfungsfragen wiederholen`,`Repite ${dtz.wrong} preguntas de examen`),
+    why:L(`Your mistakes from DTZ / telc practice (${Math.round(dtz.ok/dtz.seen*100)}% right overall).`,`Deine Fehler aus dem DTZ-/telc-Training (insgesamt ${Math.round(dtz.ok/dtz.seen*100)}% richtig).`,`Tus errores de la práctica DTZ / telc (${Math.round(dtz.ok/dtz.seen*100)}% bien en total).`), go:"dtOpen().then(()=>dtStart('practice','wrong'))" });
+  try{ rdLoad(); const last=(RD.s.days||[]).slice(-1)[0], ago=last?Math.floor((now-new Date(last+"T12:00").getTime())/864e5):99;
+    if(ago>=3) R.push({ p:ago>=99?30:40, e:"📖", t:L("Read a short story","Lies eine kurze Geschichte","Lee una historia corta"),
+      why:ago>=99?L("Easy German stories with the meaning under each line.","Leichte deutsche Geschichten mit Bedeutung unter jeder Zeile.","Historias fáciles en alemán con el significado debajo."):L(`Your last story was ${ago} days ago.`,`Deine letzte Geschichte ist ${ago} Tage her.`,`Tu última historia fue hace ${ago} días.`), go:"rdOpen()" }); }catch(e){}
+  return R.sort((a,b)=>b.p-a.p).slice(0,3); }
+async function recVc(m){ await vcOpen(); if(VC.d) vcStart(m||"all"); }
+function recCard(){ const R=recList(); if(!R.length) return ""; const s=recStreak();
+  const head=s.n>=2?(s.today?`🔥 ${tr(`${s.n}-day streak. Nice!`,`${s.n} Tage am Stück. Super!`,`¡${s.n} días seguidos!`)}`:`🔥 ${tr(`Practise today to keep your ${s.n}-day streak`,`Üb heute, um deine ${s.n}-Tage-Serie zu halten`,`Practica hoy para no perder tu racha de ${s.n} días`)}`):"";
+  return `<div class="card" style="margin:0"><h3 style="margin:0 0 2px">🎯 ${tr("Your next practice","Dein nächstes Training","Tu próxima práctica")}</h3>
+    <p class="note" style="margin:0 0 8px">${head||tr("Picked from your own progress.","Ausgewählt nach deinem Fortschritt.","Elegido según tu progreso.")}</p>
+    ${R.map((r,i)=>`<button class="recrow" onclick="${r.go}"><span class="recn">${i+1}</span><span style="flex:1;min-width:0"><b>${r.e} ${esc(r.t)}</b><small>${esc(r.why)}</small></span><span class="recgo">›</span></button>`).join("")}</div>`; }
 const _homeView = VIEWS.home;
 VIEWS.home = function(){ return (A.user && A.status==="in") ? homeDash() : _homeView(); };
 
@@ -8535,6 +8575,7 @@ function vcStart(mode, theme){
   if(mode==="gender"){ const gr=GT_RULES[VC.gtRule], gg=VC.gtG; VC.gtRule=null; VC.gtG=null;
     const pool=W.filter(w=>vcNoun(w)&&w.lv!=="MINE"&&(gr?gtRule(w)===gr:gg?(gtRule(w)||{}).g===gg:w.lv===VC.level));
     for(const w of exShuffle(pool).slice(0,gr?15:20)) list.push({ id:w.id, type:"gender" }); }
+  else if(mode==="tricky"){ for(const w of exShuffle(W.filter(w=>{ const x=VC.p[w.id]; return x&&x.r&&(x.l||0)>=2; })).slice(0,20)) list.push({ id:w.id, type:Math.random()<.5?"flip":"pick" }); }
   else {
     const due=W.filter(w=>{ const x=VC.p[w.id]; return x&&x.r&&x.d<=now&&(!theme||w.t===theme); }).sort((a,b)=>VC.p[a.id].d-VC.p[b.id].d).slice(0,60);
     const today=VC.days[vcToday()]||{ w:0 }, room=theme?Math.max(VC.goal,10):Math.max(0,VC.goal-(today.w||0));
