@@ -7954,18 +7954,31 @@ function recList(){
   try{ rdLoad(); const last=(RD.s.days||[]).slice(-1)[0], ago=last?Math.floor((now-new Date(last+"T12:00").getTime())/864e5):99;
     if(ago>=3) R.push({ k:"read", p:ago>=99?30:40, e:"📖", t:L("Read a short story","Lies eine kurze Geschichte","Lee una historia corta"),
       why:ago>=99?L("Easy German stories with the meaning under each line.","Leichte deutsche Geschichten mit Bedeutung unter jeder Zeile.","Historias fáciles en alemán con el significado debajo."):L(`Your last story was ${ago} days ago.`,`Deine letzte Geschichte ist ${ago} Tage her.`,`Tu última historia fue hace ${ago} días.`), go:"rdOpen()" }); }catch(e){}
+  /* always-available extras, so "One more tip" never comes back empty */
+  try{ const D=BB.s.dna||{}, w=bbWeak(), ks=Object.keys(D).filter(k=>k!==w&&BB_DNA[k]&&D[k][1]).sort((a,b)=>D[a][0]/(D[a][0]+D[a][1])-D[b][0]/(D[b][0]+D[b][1])), k2=ks[0];
+    if(k2){ const [o,b]=D[k2], pct=Math.round(o/(o+b)*100); if(pct<90) R.push({ k:"bb2", p:14, e:"🧬", t:L(`Practise: ${BB_DNA[k2][0][0]} (${pct}%)`,`Übe: ${BB_DNA[k2][0][1]} (${pct}%)`,`Practica: ${BB_DNA[k2][0][2]} (${pct}%)`), why:tr(...BB_DNA[k2][1]), go:`bbChStart(${BB_DNA[k2][2]})` }); } }catch(e){}
+  try{ rdLoad(); if(!(RD.s.days||[]).includes(bbDs(new Date()))){ const st=rdOfDay(); R.push({ k:"story", p:13, e:"📖", t:st?L(`Story of the day: ${st.title.de}`,`Geschichte des Tages: ${st.title.de}`,`Historia del día: ${st.title.de}`):L("Read a short story","Lies eine kurze Geschichte","Lee una historia corta"),
+    why:L("A few minutes of reading at your level.","Ein paar Minuten Lesen auf deinem Niveau.","Unos minutos de lectura a tu nivel."), go:st?`rdOpen('${st.id}')`:"rdOpen()" }); } }catch(e){}
+  R.push({ k:"gender", p:12, e:"🔵", t:L("Play der · die · das (20 nouns)","der · die · das spielen (20 Nomen)","Juega der · die · das (20 sustantivos)"), why:L(`Guess the article of ${VC.level} nouns.`,`Rate den Artikel von ${VC.level}-Nomen.`,`Adivina el artículo de sustantivos de ${VC.level}.`), go:"recVc('gender')" });
+  if(learned) R.push({ k:"extra", p:11, e:"➕", t:L("Learn 5 extra words","5 Wörter extra lernen","Aprende 5 palabras extra"), why:L("Your daily goal is done. These are a bonus.","Dein Tagesziel ist geschafft. Das ist ein Bonus.","Tu meta diaria está hecha. Estas son extra."), go:"recExtra()" });
+  try{ bbLoad(); if(BB.s.pts) R.push({ k:"bbfree", p:10, e:"🌉", t:L("Build 5 sentences in Bridge Builder","Bau 5 Sätze im Brückenbauer","Construye 5 frases en el Constructor de puentes"), why:L("Free play: any words, any order you like.","Freies Spiel: beliebige Wörter und Reihenfolge.","Juego libre: las palabras y el orden que quieras."), go:"bbOpen()" }); }catch(e){}
+  if(lid.seen) R.push({ k:"mock", p:9, e:"🇩🇪", t:L("Leben in Deutschland mock test","Probetest Leben in Deutschland","Simulacro de Leben in Deutschland"), why:L(`33 questions like the real test (${Math.round(lid.ok/lid.seen*100)}% right so far).`,`33 Fragen wie im echten Test (bisher ${Math.round(lid.ok/lid.seen*100)}% richtig).`,`33 preguntas como en el examen real (${Math.round(lid.ok/lid.seen*100)}% bien hasta ahora).`), go:"exOpen().then(()=>exStart('mock'))" });
   return R.sort((a,b)=>b.p-a.p); }
+async function recExtra(){ await vcOpen(); if(!VC.d) return; const W=VC.d.words.filter(w=>w.lv===VC.level&&!(VC.p[w.id]&&VC.p[w.id].r)).slice(0,5);
+  if(!W.length){ vcStart("all"); return; } VC.run={ list:W.map(w=>({ id:w.id, type:"new" })), i:0, show:false, pick:null, ok:0, n:0, mode:"extra", seen:{} }; go("vocabq"); }
 async function recVc(m){ await vcOpen(); if(VC.d) vcStart(m||"all"); }
 /* today's tips stay the same all day; each gets ✅ when it's done (by finishing that practice, or when the stats show it) */
 function recState(){ let st=null; try{ st=JSON.parse(localStorage.getItem("pt_rec")||"null"); }catch(e){}
   const day=vcToday(); if(!st||st.day!==day){ st={ day, lv:VC.level, tips:recList().slice(0,3).map(({k,e,t,why,go})=>({k,e,t,why,go})), done:{} }; recSave(st); } return st; }
 function recSave(st){ try{ localStorage.setItem("pt_rec",JSON.stringify(st)); }catch(e){} }
 function recMark(k){ let st=null; try{ st=JSON.parse(localStorage.getItem("pt_rec")||"null"); }catch(e){} if(!st||st.day!==vcToday()||!st.tips.some(t=>t.k===k)) return; st.done[k]=1; recSave(st); }
+function recCount(k,n){ let st=null; try{ st=JSON.parse(localStorage.getItem("pt_rec")||"null"); }catch(e){} if(!st||st.day!==vcToday()||!st.tips.some(t=>t.k===k)) return; st.cnt=st.cnt||{}; st.cnt[k]=(st.cnt[k]||0)+1; if(st.cnt[k]>=n) st.done[k]=1; recSave(st); }
 function recIsDone(st,t){ if(st.done[t.k]) return true; const now=Date.now(), P=VC.p||{}, today=(VC.days||{})[vcToday()]||{};
   if(t.k==="vc") return !Object.values(P).some(x=>x&&x.r&&x.d<=now);
   if(t.k==="first") return Object.values(P).some(x=>x&&x.r);
   if(t.k==="new") return (today.w||0)>=VC.goal;
   if(t.k==="level") return VC.level!==st.lv;
+  if(t.k==="story") { try{ rdLoad(); return (RD.s.days||[]).includes(bbDs(new Date())); }catch(e){ return false; } }
   if(t.k==="bbtry") { try{ bbLoad(); return BB.s.pts>0; }catch(e){ return false; } }
   return false; }
 function recMore(){ const st=recState(), have=new Set(st.tips.map(t=>t.k)), nx=recList().find(t=>!have.has(t.k)); if(!nx){ bToast(tr("No more tips right now 🎉","Gerade keine weiteren Tipps 🎉","No hay más sugerencias ahora 🎉")); return; }
@@ -8656,7 +8669,7 @@ function vcPick(k){ const r=VC.run, c=r.list[r.i], w=VC.byId[c.id]; if(r.pick!==
   if(ok&&vcClip(w)) vcSay(w); xr(); }
 function vcNext(){ const r=VC.run; exHush(); r.i++; r.show=false; r.pick=null; if(r.i>=r.list.length){ vcFinish(); return; } xr(); }
 function vcQuit(){ exHush(); const r=VC.run; if(r&&r.n) vcFinish(); else { VC.run=null; go("vocab"); } }
-async function vcFinish(){ const r=VC.run; recMark(r.mode==="tricky"?"tricky":r.mode==="gender"?"gender":"vc"); VC.res={ n:r.n, ok:r.ok, mode:r.mode }; VC.run=null; go("vocabr"); await vcFlush(); }
+async function vcFinish(){ const r=VC.run; recMark(r.mode==="tricky"?"tricky":r.mode==="gender"?"gender":r.mode==="extra"?"extra":"vc"); VC.res={ n:r.n, ok:r.ok, mode:r.mode }; VC.run=null; go("vocabr"); await vcFlush(); }
 VIEWS.vocabr = function(){
   const x=VC.res||{ n:0, ok:0 }, st=vcStats(), sk=vcStreak();
   return `<div class="topline"><button class="chip" onclick="go('vocab')">${uiBack()} ${tr("Vocabulary","Wortschatz","Vocabulario")}</button><span></span></div>
@@ -9709,7 +9722,7 @@ function bbGo(){
     else { if(typing) bbTypeBonus(r); BB.s.streak++; if(BB.s.streak>=3){ const b=Math.round(r.pts*0.5); r.pts+=b; BB.rd.combo+=b; r.why.push([`🔥 ${tr("Streak","Serie","Racha")} ×1.5`,b]); }
       BB.rd.ok++; BB.rd.n++; BB.rd.xp+=r.pts; bbDay(); if(!BB.rd.best||ws.length>BB.rd.best.length) BB.rd.best=ws.map(w=>({ t:w.t, r:w.r })); if(BB.rd.n>=BB_ROUND) r.round=true;
       r.quests=bbQ("ok",r).concat(r.round?bbQ("bridge"):[]); bbDnaAdd(r);
-      BB.s.made[key]=1; bbXp(r.pts); BB.s.n++; BB.s.best=Math.max(BB.s.best,r.pts); }
+      BB.s.made[key]=1; bbXp(r.pts); BB.s.n++; recCount("bbfree",5); BB.s.best=Math.max(BB.s.best,r.pts); }
     r.up=bbLevel()>lv0; bbSave(); }
   else { BB.s.streak=0; bbDnaAdd(r); bbSave(); }
   xr();
@@ -9744,7 +9757,7 @@ function bbChCheck(ws){ const c=BB_CH[BB.ch.k], it=bbChIt(), got=ws.map(w=>w.t).
   xr(); }
 function bbChNext(){ const c=BB_CH[BB.ch.k]; BB.ch.i++; BB.ch.tries=0; BB.row=[]; BB.res=null; BB.typed=""; BB.tws=null;
   if(BB.ch.skip&&BB.ch.i>=bbChN()){ const pass=BB.ch.ok>=2; if(pass){ for(let j=0;j<BB.ch.skip;j++) BB.s.ch[j]=Math.max(BB.s.ch[j]||0,1); BB.ch.qs=bbQ("ch"); } bbSave(); BB.ch.done=pass?"pass":"fail"; xr(); return; }
-  if(BB.ch.i>=c.items.length){ const st=BB.ch.ok>=5?3:BB.ch.ok>=3?2:1; BB.s.ch[BB.ch.k]=Math.max(BB.s.ch[BB.ch.k]||0,st); BB.ch.qs=bbQ("ch"); bbSave(); BB.ch.done=st; recMark("bb"); }
+  if(BB.ch.i>=c.items.length){ const st=BB.ch.ok>=5?3:BB.ch.ok>=3?2:1; BB.s.ch[BB.ch.k]=Math.max(BB.s.ch[BB.ch.k]||0,st); BB.ch.qs=bbQ("ch"); bbSave(); BB.ch.done=st; recMark("bb"); recMark("bb2"); }
   xr(); }
 function bbTile(w,used,k){ return `<button class="bbt" style="--c:${BB_COL[w.r]}" ${used?"disabled":""} onclick="${k==null?`bbAdd(${w.id})`:`bbDel(${k})`}" lang="de">${esc(w.t)}${k==null?`<small>${bbRole(w.r)}</small>`:""}</button>`; }
 VIEWS.bridge = function(){
@@ -10082,7 +10095,7 @@ async function exFinish(timeUp){
   const correct=list.filter(q=>r.picks[q.n]===q.c).length, wrongQ=list.filter(q=>r.picks[q.n]!==q.c);
   const att={ mode:r.mode, state:EX.state, topic:r.topic, total:Math.max(1,list.length), correct, passed:r.mode==="mock"?correct>=17:null,
     seconds:Math.round((Date.now()-r.t0)/1000), wrong:wrongQ.map(q=>q.n) };
-  EX.res={ ...att, list, picks:{ ...r.picks } }; EX.run=null; recMark("lid"); go("examr");
+  EX.res={ ...att, list, picks:{ ...r.picks } }; EX.run=null; recMark("lid"); recMark("mock"); go("examr");
   if(list.length) await exSave(att, answers);
 }
 VIEWS.examr = function(){
@@ -10627,7 +10640,7 @@ VIEWS.story = function(){
 function rdAns(v){ const q=RD.cur.q[RD.q.i]; if(RD.q.ans!=null) return; RD.q.ans=v; if(v===q.ok) RD.q.ok++; xr(); }
 function rdQNext(){ const st=RD.cur; RD.show=false;
   if(RD.q.i+1<st.q.length){ RD.q.i++; RD.q.ans=null; xr(); return; }
-  rdLoad(); recMark("read"); RD.s.done[st.id]=Math.max(RD.s.done[st.id]||0,RD.q.ok); const t=bbDs(new Date()); if(!RD.s.days.includes(t)) RD.s.days=RD.s.days.concat([t]).slice(-60); rdSave();
+  rdLoad(); recMark("read"); recMark("story"); RD.s.done[st.id]=Math.max(RD.s.done[st.id]||0,RD.q.ok); const t=bbDs(new Date()); if(!RD.s.days.includes(t)) RD.s.days=RD.s.days.concat([t]).slice(-60); rdSave();
   RD.done={ ok:RD.q.ok }; RD.q=null; xr(); }
 
 /* ➕ add your own word + the list of words you added */
