@@ -8531,7 +8531,9 @@ function vcHow(){
 /* ---------- session ---------- */
 function vcStart(mode, theme){
   if(!VC.d) return; const now=Date.now(), W=VC.d.words, list=[];
-  if(mode==="gender"){ const gr=GT_RULES[VC.gtRule]; VC.gtRule=null; const pool=W.filter(w=>vcNoun(w)&&(gr?gtRule(w)===gr:w.lv===VC.level)); for(const w of exShuffle(pool).slice(0,gr?15:20)) list.push({ id:w.id, type:"gender" }); }
+  if(mode==="gender"){ const gr=GT_RULES[VC.gtRule], gg=VC.gtG; VC.gtRule=null; VC.gtG=null;
+    const pool=W.filter(w=>vcNoun(w)&&w.lv!=="MINE"&&(gr?gtRule(w)===gr:gg?(gtRule(w)||{}).g===gg:w.lv===VC.level));
+    for(const w of exShuffle(pool).slice(0,gr?15:20)) list.push({ id:w.id, type:"gender" }); }
   else {
     const due=W.filter(w=>{ const x=VC.p[w.id]; return x&&x.r&&x.d<=now&&(!theme||w.t===theme); }).sort((a,b)=>VC.p[a.id].d-VC.p[b.id].d).slice(0,60);
     const today=VC.days[vcToday()]||{ w:0 }, room=theme?Math.max(VC.goal,10):Math.max(0,VC.goal-(today.w||0));
@@ -8643,11 +8645,14 @@ function gtTipFor(w){ const r=gtRule(w); if(!r) return "";
   const hw=gtHow(r.how==="always"&&s.bad.length?"almost":r.how);
   return `<div class="note" style="margin-top:8px">💡 ${tr(`Words ending in <b><bdi dir="ltr">${r.e}</bdi></b> are ${hw} <b style="color:${GT_COL[r.g]}">${r.g}</b>.`,`Wörter auf <b><bdi dir="ltr">${r.e}</bdi></b> sind ${hw} <b style="color:${GT_COL[r.g]}">${r.g}</b>.`,`Las palabras en <b><bdi dir="ltr">${r.e}</bdi></b> son ${hw} <b style="color:${GT_COL[r.g]}">${r.g}</b>.`)} <button class="linkbtn" onclick="exHush();VC.run=null;go('vocabg')">${tr("All tips","Alle Tipps","Todos los consejos")}</button></div>`; }
 function gtPractise(i){ const r=GT_RULES[i]; if(!r) return; VC.gtRule=i; vcStart("gender"); }
+/* practise every ending of one article (all der / die / das endings, exceptions included) */
+function gtPractiseG(g){ VC.gtRule=null; VC.gtG=g; vcStart("gender"); }
 function gtWord(w){ return `<span style="white-space:nowrap" lang="de" dir="ltr">${vcWordHtml(w)}</span>`; }
 VIEWS.vocabg = function(){
   if(!VC.d) return `<p class="note">…</p>`;
   const card=g=>{ const rs=GT_RULES.map((r,i)=>[r,i]).filter(([r])=>r.g===g);
-    return `<div class="card" style="border-top:5px solid ${GT_COL[g]}"><h3 style="margin:0 0 6px"><b style="color:${GT_COL[g]}">${g}</b></h3>
+    return `<div class="card" style="border-top:5px solid ${GT_COL[g]}"><div class="ectop" style="align-items:center;margin:0 0 6px"><h3 style="margin:0"><b style="color:${GT_COL[g]}">${g}</b></h3>
+      <button class="chip" style="background:${GT_COL[g]};color:#fff;border-color:${GT_COL[g]};font-weight:700" onclick="gtPractiseG('${g}')">🎯 ${tr(`Practise all <bdi dir="ltr">${g}</bdi>`,`Alle <bdi dir="ltr">${g}</bdi> üben`,`Practicar todo <bdi dir="ltr">${g}</bdi>`)}</button></div>
       ${rs.map(([r,i])=>{ const s=gtStats(r); if(!s.n) return "";
         const pct=Math.round(s.ok/s.n*100);
         return `<div style="border-bottom:1px solid var(--line);padding:9px 0">
