@@ -8580,7 +8580,7 @@ VIEWS.vocabq = function(){
     h+=`<div class="vccard" style="min-height:180px"><div class="ecmeta">${tr("der, die or das?","der, die oder das?","¿der, die o das?")}</div><div class="vcw${vcSize(w)}" lang="de">${r.pick!==null?vcWordHtml(w):`<span style="color:#9AA1AC">___</span> ${esc(noun)}`}</div>
       ${r.pick!==null?`<div class="vcmean" dir="${dir}">${esc(vcTr(w))}</div>${w.pl?`<div class="vcpl">Plural: ${esc(w.pl)}</div>`:""}`:""}</div>
       <div class="vcg">${[["der","#2F6FD1"],["die","#D9466A"],["das","#2A8C82"]].map(([g,col],k)=>`<button style="background:${col};${r.pick!==null&&g!==w.g?"opacity:.35":""}" ${r.pick!==null?"disabled":""} onclick="vcPick(${k})">${g}</button>`).join("")}</div>
-      ${r.pick!==null?`<div class="${["der","die","das"][r.pick]===w.g?"ok":"err"}" style="margin-top:10px">${["der","die","das"][r.pick]===w.g?"✅ Richtig!":`❌ ${esc(w.w)}`}</div>${["der","die","das"][r.pick]!==w.g?gtTipFor(w):""}<button class="btn primary qbtn" style="margin-top:10px" onclick="vcNext()">${tr("Next →","Weiter →","Siguiente →")}</button>`:""}`;
+      ${r.pick!==null?`<div class="${["der","die","das"][r.pick]===w.g?"ok":"err"}" style="margin-top:10px">${["der","die","das"][r.pick]===w.g?"✅ Richtig!":`❌ ${esc(w.w)}`}</div>${gtExceptionFor(w)||(["der","die","das"][r.pick]!==w.g?gtTipFor(w):"")}<button class="btn primary qbtn" style="margin-top:10px" onclick="vcNext()">${tr("Next →","Weiter →","Siguiente →")}</button>`:""}`;
   }
   return h;
 };
@@ -8640,6 +8640,12 @@ function gtRule(w){ const h=gtHead(w); return GT_RULES.find(r=>r.rx.test(h)); }
 function gtStats(r){ const m=gtNouns().filter(w=>r.rx.test(gtHead(w))&&gtRule(w)===r), ok=m.filter(w=>w.g===r.g);
   return { n:m.length, ok:ok.length, ex:ok.slice(0,3), bad:m.filter(w=>w.g!==r.g) }; }
 function gtHow(how){ return how==="always"?tr("always","immer","siempre"):how==="almost"?tr("almost always","fast immer","casi siempre"):how==="usually"?tr("usually","meistens","normalmente"):tr("often","oft","a menudo"); }
+/* the word breaks its ending rule: say so, and show the compound's last word when we know it (das Schlafzimmer ← das Zimmer) */
+function gtExceptionFor(w){ const r=gtRule(w); if(!r || w.g===r.g) return "";
+  const h=gtHead(w); let part=null;
+  for(const n of gtNouns()){ const nh=gtHead(n); if(nh.length>=3 && nh!==h && h.endsWith(nh) && n.g===w.g && (!part || nh.length>gtHead(part).length)) part=n; }
+  const c=GT_COL[w.g], rc=GT_COL[r.g], hw=gtHow(r.how);
+  return `<div class="note" style="margin-top:8px;background:var(--sun-soft);border-radius:10px;padding:8px 10px">⚠️ <b>${tr("Exception!","Ausnahme!","¡Excepción!")}</b> ${tr(`Words ending in <b><bdi dir="ltr">${r.e}</bdi></b> are ${hw} <b style="color:${rc}">${r.g}</b>, but this one is <b style="color:${c}">${w.g}</b>.`,`Wörter auf <b><bdi dir="ltr">${r.e}</bdi></b> sind ${hw} <b style="color:${rc}">${r.g}</b>, aber dieses ist <b style="color:${c}">${w.g}</b>.`,`Las palabras en <b><bdi dir="ltr">${r.e}</bdi></b> son ${hw} <b style="color:${rc}">${r.g}</b>, pero esta es <b style="color:${c}">${w.g}</b>.`)}${part?`<br>🧩 ${tr("The last word decides:","Das letzte Wort entscheidet:","Decide la última palabra:")} <span lang="de" dir="ltr" style="unicode-bidi:isolate">${gtWord(part)}</span>`:""}</div>`; }
 function gtTipFor(w){ const r=gtRule(w); if(!r) return "";
   const s=gtStats(r); if(!s.n||s.ok/s.n<0.75) return "";
   const hw=gtHow(r.how==="always"&&s.bad.length?"almost":r.how);
