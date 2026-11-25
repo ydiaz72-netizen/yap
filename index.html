@@ -954,7 +954,7 @@
 <script>/* Extra interface languages live in /i18n/<code>.js (English text → translation). Load the chosen one before the app starts. */
 (function(){ try{ var X=["tr","uk","fa","ur"], v=localStorage.getItem("pt_ui");
   if(!v){ var n=String((navigator.languages&&navigator.languages[0])||navigator.language||"").slice(0,2).toLowerCase(); if(X.indexOf(n)>-1) v=n; }
-  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=49"><\/script>'); }catch(e){} })();</script>
+  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=50"><\/script>'); }catch(e){} })();</script>
 
 <script>
 /* ===================== CONTENT ===================== */
@@ -1384,7 +1384,7 @@ function bi(en,de,es){ if(es!==undefined) return tr(en,de,es); return `${en} <sp
 function uiSet(l){
   if(!UI_CODES.includes(l)) return;
   if(UI_EXTRA.includes(l) && !I18N_DATA[l]){
-    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=49";
+    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=50";
     sc.onload=()=>uiSet(l); sc.onerror=()=>bToast(offlineMsg()); document.head.appendChild(sc); return;
   }
   UI=l; I18N_T=null; I18N_M.clear();
@@ -8034,7 +8034,9 @@ async function recShareImg(){ const st=recState(), sk=recStreak(), done=st.tips.
   g.fillStyle="#fff"; g.font=F(800,44); g.fillText(fit(tr("Practise with me, it's free 👉","Übe mit mir, es ist kostenlos 👉","Practica conmigo, es gratis 👉"),W-200),W/2,H-155); g.font=F(700,38); g.fillText("pontetalk.setzio.com",W/2,H-100);
   return await new Promise(res=>c.toBlob(res,"image/png")); }
 async function recShare(){ const text=recShareText();
-  bToast(tr("Making your picture…","Bild wird erstellt…","Creando tu imagen…"));
+  /* copy first (still inside the tap): Facebook & co. drop shared text, so it can be pasted */
+  let copied=false; try{ navigator.clipboard.writeText(text).then(()=>{ copied=true; },()=>{}); }catch(e){}
+  bToast(tr("📋 Text copied. If the app leaves the post empty, just paste it","📋 Text kopiert. Wenn die App den Beitrag leer lässt, einfach einfügen","📋 Texto copiado. Si la app deja la publicación vacía, solo pégalo"));
   let blob=null; try{ blob=await recShareImg(); }catch(e){}
   const file=blob?new File([blob],"pontetalk-practice.png",{ type:"image/png" }):null;
   try{ if(file&&navigator.canShare&&navigator.canShare({ files:[file] })){ await navigator.share({ files:[file], text }); return; }
