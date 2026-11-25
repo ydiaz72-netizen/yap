@@ -294,6 +294,7 @@
   .rdrow{display:flex;align-items:center;gap:10px}.rdcard{display:flex;align-items:center;gap:12px;width:100%;font:inherit;cursor:pointer;margin-bottom:10px;border:1px solid var(--line)}
   .rdsent{font-size:24px;font-weight:800;line-height:1.3;text-align:center;margin:6px 0}.rdmean{background:var(--soft,#F6F2EC);border-radius:14px;padding:10px 12px;text-align:center;font-size:17px;color:#2A8C82;font-weight:700;margin-top:8px}
   .rdsofar{color:var(--muted,#6B7A8F);font-size:15px;line-height:1.5;margin:4px 2px 10px}.rddots{display:flex;gap:5px;margin:6px 0 10px}.rddots i{flex:1;height:6px;border-radius:9px;background:var(--line,#E8E2D8)}.rddots i.on{background:#2A8C82}.rddots i.cur{background:var(--coral,#F25C3B)}
+  .ssbarw{height:6px;background:#EDE6DC;border-radius:6px;overflow:hidden;margin:0 0 12px}.ssbar{height:100%;width:100%;background:#F2B53A;transition:width .1s linear}.sscard{touch-action:pan-y;transition:transform .15s ease}.sshl{background:#F9DE8A;color:inherit;border-radius:5px;padding:0 3px}.sstfix{background:var(--soft,#F6F2EC);border-radius:12px;padding:10px 12px;font-weight:800;font-size:18px}
   .rdq{display:flex;gap:8px;margin-top:14px}.rdq .btn{flex:1}.rdfb{margin:14px 0 10px;padding:10px 12px;border-radius:12px;font-weight:700}.rdfb.ok{background:#E3F4EC;color:#1E7B52}.rdfb.no{background:#FDEBE7;color:#B3361C}
   .vcpx{text-align:start;margin:10px 0 0;border:1px solid var(--line);font-size:14px}.vcpx .bbwrow{margin-top:8px}.bbwhy{margin-top:10px;background:#fff;border-radius:16px;padding:10px 12px}.bbwhy summary{font-weight:800;cursor:pointer}
   .bbwrow{display:flex;flex-wrap:wrap;gap:12px 10px;margin-top:10px}
@@ -7096,7 +7097,7 @@ function homeRecs(){
 }
 
 /* ===================== BOTTOM BAR ===================== */
-const NAV_TAB = { home:"home", bridge:"games", board:"sessions", host:"sessions", session:"sessions", games:"games", account:"profile", xprofile:"profile" };
+const NAV_TAB = { home:"home", bridge:"games", split:"games", board:"sessions", host:"sessions", session:"sessions", games:"games", account:"profile", xprofile:"profile" };
 const WIDE = { home:"xl", board:"xl", host:"md", session:"md", account:"md", xprofile:"md", games:"md" };
 const ICO = {
   home:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10l9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>',
@@ -10497,6 +10498,112 @@ function rdWords(st){ if(!st.kw||!st.kw.length) return ""; if(MW.list===null){ m
 async function rdSaveWord(i){ const st=RD.cur; if(!st) return; const L=i<0?st.kw:[st.kw[i]];
   for(const k of L){ if(!mwHas(k.w)) await mwAdd(k.w,rdTr(k.tr),k.ex,st.title.de); }
   bToast("✅ "+tr("Saved to your flashcards.","In deinen Karteikarten gespeichert.","Guardado en tus tarjetas.")); xr(); }
+/* ---- ✂️ Split or Stick? — German prefix verbs: does the prefix split off or stay stuck? Solo, German only, best score on this device. ----
+   ok = is the sentence correct; fix = correct version with [the key part]; w = the rule; m = meaning (en/es)
+   lvl 1 = present tense split vs. modal (together); lvl 2 adds weil/dass/wenn, Perfekt (ge- in the middle), zu, and be- (never splits) */
+const SS_DECK = [
+ {v:"einsteigen",s:"Wir steigen am Bahnhof ein.",ok:1,fix:"Wir [steigen] am Bahnhof [ein].",w:{en:"Main verb in 2nd place, prefix at the very end.",es:"El verbo va en 2.º lugar y el prefijo al final."},m:{en:"We get on at the station.",es:"Nos subimos en la estación."},lvl:1},
+ {v:"einsteigen",s:"Wir einsteigen am Bahnhof.",ok:0,fix:"Wir [steigen] am Bahnhof [ein].",w:{en:"ein- is separable: it goes to the end in a normal sentence.",es:"ein- es separable: va al final en una frase normal."},m:{en:"We get on at the station.",es:"Nos subimos en la estación."},lvl:1},
+ {v:"aussteigen",s:"Ich steige an der nächsten Haltestelle aus.",ok:1,fix:"Ich [steige] an der nächsten Haltestelle [aus].",w:{en:"Separable: verb 2nd, aus- at the end.",es:"Separable: verbo en 2.º lugar, aus- al final."},m:{en:"I get off at the next stop.",es:"Me bajo en la próxima parada."},lvl:1},
+ {v:"ankommen",s:"Der Bus ankommt um 10 Uhr.",ok:0,fix:"Der Bus [kommt] um 10 Uhr [an].",w:{en:"an- splits off and jumps to the end.",es:"an- se separa y salta al final."},m:{en:"The bus arrives at 10.",es:"El autobús llega a las 10."},lvl:1},
+ {v:"ankommen",s:"Meine Schwester kommt morgen an.",ok:1,fix:"Meine Schwester [kommt] morgen [an].",w:{en:"Separable: an- at the end.",es:"Separable: an- al final."},m:{en:"My sister arrives tomorrow.",es:"Mi hermana llega mañana."},lvl:1},
+ {v:"aufstehen",s:"Ich stehe jeden Tag um 6 Uhr auf.",ok:1,fix:"Ich [stehe] jeden Tag um 6 Uhr [auf].",w:{en:"auf- goes to the very end of the sentence.",es:"auf- va al final de la frase."},m:{en:"I get up at 6 every day.",es:"Me levanto todos los días a las 6."},lvl:1},
+ {v:"aufstehen",s:"Ich aufstehe jeden Tag früh.",ok:0,fix:"Ich [stehe] jeden Tag früh [auf].",w:{en:"auf- is separable.",es:"auf- es separable."},m:{en:"I get up early every day.",es:"Me levanto temprano todos los días."},lvl:1},
+ {v:"anrufen",s:"Ich rufe dich heute Abend an.",ok:1,fix:"Ich [rufe] dich heute Abend [an].",w:{en:"Separable: an- at the end.",es:"Separable: an- al final."},m:{en:"I'll call you tonight.",es:"Te llamo esta noche."},lvl:1},
+ {v:"anrufen",s:"Ich rufe an dich heute Abend.",ok:0,fix:"Ich [rufe] dich heute Abend [an].",w:{en:"The prefix goes to the END, not right after the verb.",es:"El prefijo va al FINAL, no justo después del verbo."},m:{en:"I'll call you tonight.",es:"Te llamo esta noche."},lvl:1},
+ {v:"abholen",s:"Er holt die Kinder um 3 Uhr ab.",ok:1,fix:"Er [holt] die Kinder um 3 Uhr [ab].",w:{en:"ab- at the end.",es:"ab- al final."},m:{en:"He picks the kids up at 3.",es:"Él recoge a los niños a las 3."},lvl:1},
+ {v:"ausatmen",s:"Atme langsam aus!",ok:1,fix:"[Atme] langsam [aus]!",w:{en:"Commands split too: prefix at the end.",es:"Las órdenes también se separan: prefijo al final."},m:{en:"Breathe out slowly!",es:"¡Exhala despacio!"},lvl:1},
+ {v:"einkaufen",s:"Wir kaufen am Samstag ein.",ok:1,fix:"Wir [kaufen] am Samstag [ein].",w:{en:"ein- at the end.",es:"ein- al final."},m:{en:"We go shopping on Saturday.",es:"Hacemos la compra el sábado."},lvl:1},
+ {v:"mitkommen",s:"Kommst du mit?",ok:1,fix:"[Kommst] du [mit]?",w:{en:"Questions split too.",es:"Las preguntas también se separan."},m:{en:"Are you coming along?",es:"¿Vienes conmigo?"},lvl:1},
+ {v:"fernsehen",s:"Am Abend fernsehen wir.",ok:0,fix:"Am Abend [sehen] wir [fern].",w:{en:"fern- is separable, even when the sentence starts with something else.",es:"fern- es separable, aunque la frase empiece con otra cosa."},m:{en:"In the evening we watch TV.",es:"Por la noche vemos la tele."},lvl:1},
+ {v:"einsteigen",s:"Wir müssen jetzt einsteigen.",ok:1,fix:"Wir müssen jetzt [einsteigen].",w:{en:"With a modal (müssen, können, wollen…) the verb stays whole at the end.",es:"Con un verbo modal (müssen, können, wollen…) el verbo queda entero al final."},m:{en:"We have to get on now.",es:"Tenemos que subir ahora."},lvl:1},
+ {v:"aufstehen",s:"Ich muss morgen früh stehen auf.",ok:0,fix:"Ich muss morgen früh [aufstehen].",w:{en:"After a modal the verb stays together.",es:"Después de un modal el verbo queda junto."},m:{en:"I have to get up early tomorrow.",es:"Tengo que levantarme temprano mañana."},lvl:1},
+ {v:"anrufen",s:"Kannst du mich später anrufen?",ok:1,fix:"Kannst du mich später [anrufen]?",w:{en:"Modal + verb: stuck together.",es:"Modal + verbo: juntos."},m:{en:"Can you call me later?",es:"¿Puedes llamarme más tarde?"},lvl:1},
+ {v:"abholen",s:"Ich will dich am Flughafen holen ab.",ok:0,fix:"Ich will dich am Flughafen [abholen].",w:{en:"Modal → the verb stays in one piece.",es:"Modal → el verbo queda en una pieza."},m:{en:"I want to pick you up at the airport.",es:"Quiero recogerte en el aeropuerto."},lvl:1},
+ {v:"mitkommen",s:"Möchtest du mitkommen?",ok:1,fix:"Möchtest du [mitkommen]?",w:{en:"möchten works like a modal: together.",es:"möchten funciona como un modal: junto."},m:{en:"Would you like to come along?",es:"¿Quieres venir?"},lvl:1},
+ {v:"einkaufen",s:"Wir können heute einkaufen.",ok:1,fix:"Wir können heute [einkaufen].",w:{en:"Modal + verb: together.",es:"Modal + verbo: juntos."},m:{en:"We can go shopping today.",es:"Podemos hacer la compra hoy."},lvl:1},
+ {v:"ankommen",s:"Ich rufe dich an, wenn ich ankomme.",ok:1,fix:"…, wenn ich [ankomme].",w:{en:"After weil/dass/wenn the verb goes to the end and the prefix sticks back on.",es:"Después de weil/dass/wenn el verbo va al final y el prefijo se vuelve a pegar."},m:{en:"I'll call you when I arrive.",es:"Te llamo cuando llegue."},lvl:2},
+ {v:"aufstehen",s:"Ich weiß, dass du früh stehst auf.",ok:0,fix:"…, dass du früh [aufstehst].",w:{en:"After dass: verb at the end, prefix stuck on.",es:"Después de dass: verbo al final, prefijo pegado."},m:{en:"I know that you get up early.",es:"Sé que te levantas temprano."},lvl:2},
+ {v:"aussteigen",s:"Sag mir, wenn wir aussteigen.",ok:1,fix:"…, wenn wir [aussteigen].",w:{en:"wenn sends the verb to the end: together.",es:"wenn manda el verbo al final: junto."},m:{en:"Tell me when we get off.",es:"Dime cuándo nos bajamos."},lvl:2},
+ {v:"anrufen",s:"Sie ist froh, weil er sie ruft an.",ok:0,fix:"…, weil er sie [anruft].",w:{en:"After weil: verb at the end, stuck together.",es:"Después de weil: verbo al final, junto."},m:{en:"She's happy because he calls her.",es:"Ella está feliz porque él la llama."},lvl:2},
+ {v:"einsteigen",s:"Wir sind in den Zug eingestiegen.",ok:1,fix:"Wir sind in den Zug [eingestiegen].",w:{en:"Perfekt: ge- goes BETWEEN prefix and verb: ein-ge-stiegen.",es:"Perfekt: ge- va ENTRE el prefijo y el verbo: ein-ge-stiegen."},m:{en:"We got on the train.",es:"Nos subimos al tren."},lvl:2},
+ {v:"aufstehen",s:"Ich bin um 7 Uhr geaufstanden.",ok:0,fix:"Ich bin um 7 Uhr [aufgestanden].",w:{en:"ge- goes in the middle: auf-ge-standen.",es:"ge- va en el medio: auf-ge-standen."},m:{en:"I got up at 7.",es:"Me levanté a las 7."},lvl:2},
+ {v:"anrufen",s:"Hast du Mama angerufen?",ok:1,fix:"Hast du Mama [angerufen]?",w:{en:"an-ge-rufen: ge- in the middle.",es:"an-ge-rufen: ge- en el medio."},m:{en:"Did you call Mom?",es:"¿Llamaste a mamá?"},lvl:2},
+ {v:"einkaufen",s:"Ich habe gestern gekauft ein.",ok:0,fix:"Ich habe gestern [eingekauft].",w:{en:"The Perfekt form is one word: ein-ge-kauft.",es:"La forma del Perfekt es una sola palabra: ein-ge-kauft."},m:{en:"I went shopping yesterday.",es:"Ayer hice la compra."},lvl:2},
+ {v:"abfahren",s:"Der Zug ist schon abgefahren.",ok:1,fix:"Der Zug ist schon [abgefahren].",w:{en:"ab-ge-fahren.",es:"ab-ge-fahren."},m:{en:"The train has already left.",es:"El tren ya salió."},lvl:2},
+ {v:"anrufen",s:"Ich habe vergessen, dich anzurufen.",ok:1,fix:"…, dich [anzurufen].",w:{en:"zu goes between prefix and verb: an-zu-rufen.",es:"zu va entre el prefijo y el verbo: an-zu-rufen."},m:{en:"I forgot to call you.",es:"Olvidé llamarte."},lvl:2},
+ {v:"aufstehen",s:"Es ist schwer, früh zu aufstehen.",ok:0,fix:"…, früh [aufzustehen].",w:{en:"Separable verbs put zu in the middle: auf-zu-stehen.",es:"Los verbos separables ponen zu en el medio: auf-zu-stehen."},m:{en:"It's hard to get up early.",es:"Es difícil levantarse temprano."},lvl:2},
+ {v:"besuchen",s:"Ich besuche am Sonntag meine Oma.",ok:1,fix:"Ich [besuche] am Sonntag meine Oma.",w:{en:"be- is NOT separable: it never moves.",es:"be- NO es separable: nunca se mueve."},m:{en:"I visit my grandma on Sunday.",es:"Visito a mi abuela el domingo."},lvl:2},
+ {v:"besuchen",s:"Ich suche am Sonntag meine Oma be.",ok:0,fix:"Ich [besuche] am Sonntag meine Oma.",w:{en:"be- never splits off.",es:"be- nunca se separa."},m:{en:"I visit my grandma on Sunday.",es:"Visito a mi abuela el domingo."},lvl:2},
+ {v:"bekommen",s:"Ich habe ein Paket gebekommen.",ok:0,fix:"Ich habe ein Paket [bekommen].",w:{en:"be- verbs take NO ge- in the Perfekt.",es:"Los verbos con be- NO llevan ge- en el Perfekt."},m:{en:"I got a package.",es:"Recibí un paquete."},lvl:2},
+ {v:"bekommen",s:"Hast du meine Nachricht bekommen?",ok:1,fix:"Hast du meine Nachricht [bekommen]?",w:{en:"be- verb: no ge-.",es:"Verbo con be-: sin ge-."},m:{en:"Did you get my message?",es:"¿Recibiste mi mensaje?"},lvl:2},
+ {v:"beantworten",s:"Er beantwortet die Frage sofort.",ok:1,fix:"Er [beantwortet] die Frage sofort.",w:{en:"be- stays stuck.",es:"be- se queda pegado."},m:{en:"He answers the question right away.",es:"Él responde la pregunta enseguida."},lvl:2},
+ {v:"besprechen",s:"Wir sprechen das Problem morgen be.",ok:0,fix:"Wir [besprechen] das Problem morgen.",w:{en:"be- is inseparable.",es:"be- es inseparable."},m:{en:"We'll discuss the problem tomorrow.",es:"Hablamos del problema mañana."},lvl:2},
+];
+const SS_N=15, SS_SECS=10;
+const SS={ lvl:1, q:null, i:0, pts:0, run:0, best:0, miss:[], ans:null, t0:0, tid:null, done:false, s:null };
+function ssLoad(){ if(SS.s) return; try{ SS.s=JSON.parse(localStorage.getItem("pt_split")||"{}"); }catch(e){} SS.s=SS.s||{}; SS.s.best=SS.s.best||{}; SS.s.plays=SS.s.plays||0; }
+function ssSave(){ try{ localStorage.setItem("pt_split",JSON.stringify(SS.s)); }catch(e){} }
+function ssTr(o){ return (vcLang()==="es"||UI==="es")?o.es:o.en; }
+function ssMark(t){ return esc(t).replace(/\[(.+?)\]/g,'<mark class="sshl">$1</mark>'); }
+function ssOpen(){ ssLoad(); ssStop(); SS.q=null; SS.done=false; go("split"); }
+function ssStop(){ if(SS.tid){ clearInterval(SS.tid); SS.tid=null; } }
+function ssStart(){ ssLoad(); const pool=SS_DECK.filter(c=>SS.lvl===2||c.lvl===1).slice();
+  for(let k=pool.length-1;k>0;k--){ const j=Math.floor(Math.random()*(k+1)); [pool[k],pool[j]]=[pool[j],pool[k]]; }
+  Object.assign(SS,{ q:pool.slice(0,SS_N), i:0, pts:0, run:0, best:0, miss:[], done:false }); ssDeal(); }
+function ssDeal(){ SS.ans=null; SS.t0=Date.now(); ssStop(); go("split");
+  SS.tid=setInterval(()=>{ if(S.screen!=="split"||SS.ans!==null){ ssStop(); return; }
+    const left=Math.max(0,1-(Date.now()-SS.t0)/(SS_SECS*1000)), b=document.getElementById("ssbar"); if(b) b.style.width=(left*100)+"%";
+    if(left<=0) ssAns(null); },100); }
+function ssAns(v){ if(!SS.q||SS.ans!==null||SS.done) return; ssStop(); const c=SS.q[SS.i], right=v!==null&&!!v===!!c.ok;
+  SS.ans={ v, right };
+  if(right){ SS.run++; SS.best=Math.max(SS.best,SS.run); SS.pts+=10+((Date.now()-SS.t0)<4000?5:0)+(SS.run>=3?5:0); }
+  else { SS.run=0; SS.miss.push(c); }
+  try{ if(navigator.vibrate) navigator.vibrate(right?20:[40,40,40]); }catch(e){}
+  xr(); }
+function ssNext(){ if(SS.i+1<SS.q.length){ SS.i++; ssDeal(); return; }
+  ssLoad(); SS.s.plays++; SS.s.best[SS.lvl]=Math.max(SS.s.best[SS.lvl]||0,SS.pts); ssSave(); SS.done=true; xr(); }
+function ssSwipe(el){ let x0=null;
+  el.addEventListener("touchstart",e=>{ x0=e.touches[0].clientX; },{passive:true});
+  el.addEventListener("touchmove",e=>{ if(x0===null) return; const dx=e.touches[0].clientX-x0; el.style.transform=`translateX(${dx}px) rotate(${dx/20}deg)`; },{passive:true});
+  el.addEventListener("touchend",e=>{ if(x0===null) return; const dx=e.changedTouches[0].clientX-x0; x0=null; el.style.transform=""; if(Math.abs(dx)>70) ssAns(dx>0); }); }
+AFTER.split = function(){ const el=document.getElementById("sscard"); if(el) ssSwipe(el); };
+VIEWS.split = function(){
+  ssLoad(); const lv=SS.lvl;
+  const top=`<div class="topline"><button class="chip" onclick="ssStop();${SS.q&&!SS.done?"SS.q=null;xr()":"SS.q=null;SS.done=false;go('games')"}">${uiBack()} ${SS.q&&!SS.done?tr("Stop","Stopp","Parar"):tr("Games","Spiele","Juegos")}</button><span>${SS.q&&!SS.done?`${SS.i+1} / ${SS.q.length} · ⭐ ${SS.pts} · 🔥 ${SS.run}`:"🇩🇪 "+tr("German only","Nur Deutsch","Solo alemán")}</span></div>`;
+  if(!SS.q) return top+`<h2 style="margin:4px 0">✂️ ${tr("Split or Stick?","Trennen oder kleben?","¿Se separa o se pega?")}</h2>
+    <p class="sub" style="margin:0 0 10px">${tr("German prefix verbs: does the prefix split off or stay stuck? Decide fast, 10 seconds per card.","Verben mit Präfix: Wird das Präfix getrennt oder bleibt es dran? Schnell entscheiden, 10 Sekunden pro Karte.","Verbos con prefijo en alemán: ¿el prefijo se separa o se queda pegado? Decide rápido, 10 segundos por tarjeta.")}</p>
+    <div class="card" style="text-align:start;line-height:1.55">
+      <b>✂️ ${tr("Split","Trennen","Se separa")}</b> · ${tr("normal sentence, question or command: prefix at the end","normaler Satz, Frage oder Aufforderung: Präfix ans Ende","frase normal, pregunta u orden: prefijo al final")}<br><span lang="de">Ich <mark class="sshl">steige</mark> in den Bus <mark class="sshl">ein</mark>.</span><br><br>
+      <b>🔗 ${tr("Stick","Kleben","Se pega")}</b> · ${tr("with a modal, after weil/dass/wenn, in the Perfekt","mit Modalverb, nach weil/dass/wenn, im Perfekt","con un modal, después de weil/dass/wenn, en el Perfekt")}<br><span lang="de">Ich muss <mark class="sshl">einsteigen</mark>. · …weil ich <mark class="sshl">einsteige</mark>. · <mark class="sshl">eingestiegen</mark></span><br><br>
+      <b>🔒 be-</b> · ${tr("never splits and takes no ge-","wird nie getrennt und bekommt kein ge-","nunca se separa y no lleva ge-")}<br><span lang="de">Ich habe Oma <mark class="sshl">besucht</mark>.</span></div>
+    <div class="row" style="gap:8px;margin:0 0 12px">
+      <button class="chip ${lv===1?"on":""}" style="flex:1" onclick="SS.lvl=1;xr()">🟢 ${tr("Easy","Leicht","Fácil")}${SS.s.best[1]?` · ⭐ ${SS.s.best[1]}`:""}</button>
+      <button class="chip ${lv===2?"on":""}" style="flex:1" onclick="SS.lvl=2;xr()">🟠 ${tr("Mix","Mix","Mezcla")}${SS.s.best[2]?` · ⭐ ${SS.s.best[2]}`:""}</button></div>
+    <p class="note" style="margin:0 0 10px">${lv===1?tr("Present tense vs. modal verbs.","Präsens oder Modalverb.","Presente o verbo modal."):tr("Adds weil/dass/wenn, Perfekt, zu and be- verbs.","Dazu weil/dass/wenn, Perfekt, zu und be-Verben.","Añade weil/dass/wenn, Perfekt, zu y verbos con be-.")}</p>
+    <button class="btn primary" onclick="ssStart()">${tr("Play","Spielen","Jugar")} · ${SS_N} ${tr("cards","Karten","tarjetas")}</button>`;
+  if(SS.done){ const n=SS.q.length, ok=n-SS.miss.length, rec=SS.pts>=(SS.s.best[lv]||0);
+    return top+`<div class="card center"><div style="font-size:44px">${ok===n?"🏅":ok>=11?"🎉":"💪"}</div>
+      <h2 style="margin:4px 0">${ok===n?tr("Prefix Master!","Präfix-Profi!","¡Maestro/a de prefijos!"):ok>=11?tr("Great job!","Super gemacht!","¡Muy bien!"):tr("Keep practicing","Weiter üben","Sigue practicando")}</h2>
+      <p class="note">${tr(`${ok} of ${n} right`,`${ok} von ${n} richtig`,`${ok} de ${n} correctas`)} · ⭐ ${SS.pts}${rec?" · "+tr("new best!","neuer Rekord!","¡nuevo récord!"):""} · 🔥 ${SS.best}</p>
+      <button class="btn primary" onclick="ssStart()">${tr("Play again","Nochmal","Otra vez")}</button>
+      <button class="btn secondary" style="margin-top:8px" onclick="SS.q=null;SS.done=false;xr()">${tr("Change level","Level wechseln","Cambiar nivel")}</button></div>
+      ${SS.miss.length?`<div class="card" style="text-align:start"><h3 style="margin:0 0 6px">🔁 ${tr("Review these","Nochmal ansehen","Repasa estas")}</h3>
+        ${SS.miss.map(c=>`<div class="mwrow"><div style="flex:1;min-width:0"><b lang="de">${esc(c.v)}</b><div lang="de">${ssMark(c.fix)}</div><div class="note" style="margin:0">${esc(ssTr(c.w))}</div></div></div>`).join("")}</div>`:""}`; }
+  const c=SS.q[SS.i], a=SS.ans;
+  if(!a) return top+`<div class="ssbarw"><div id="ssbar" class="ssbar"></div></div>
+    <div class="card sscard" id="sscard"><div class="ecmeta">${esc(c.v)}</div><div class="rdsent" lang="de">${esc(c.s)}</div>
+      <p class="note center" style="margin:6px 0 0">${tr("Is this sentence correct?","Ist der Satz richtig?","¿Esta frase es correcta?")}</p></div>
+    <div class="rdq"><button class="btn secondary" onclick="ssAns(false)">❌ ${tr("Wrong","Falsch","Incorrecta")}</button><button class="btn primary" onclick="ssAns(true)">✅ ${tr("Correct","Richtig","Correcta")}</button></div>
+    <p class="note center" style="margin:8px 0 0">${tr("or swipe ← wrong · correct →","oder wischen ← falsch · richtig →","o desliza ← incorrecta · correcta →")}</p>`;
+  return top+`<div class="card"><div class="ecmeta">${esc(c.v)}</div><div class="rdsent" lang="de" style="font-size:20px">${esc(c.s)}</div>
+    <div class="rdfb ${a.right?"ok":"no"}">${a.v===null?"⏰ "+tr("Time's up!","Zeit um!","¡Se acabó el tiempo!"):a.right?"✅ "+tr("Nice!","Super!","¡Bien!"):"❌ "+tr("Not quite.","Nicht ganz.","No exactamente.")} ${c.ok?tr("This sentence is correct.","Der Satz ist richtig.","La frase es correcta."):tr("This sentence is wrong.","Der Satz ist falsch.","La frase es incorrecta.")}</div>
+    <div class="sstfix" lang="de">${ssMark(c.fix)}</div>
+    <p style="margin:10px 0 4px">💡 ${esc(ssTr(c.w))}</p>
+    <p class="note" style="margin:0" dir="auto">${esc(ssTr(c.m))}</p>
+    <button class="btn primary" style="margin-top:12px" onclick="ssNext()">${SS.i+1<SS.q.length?tr("Next","Weiter","Siguiente")+" →":tr("Finish","Fertig","Terminar")}</button></div>`;
+};
+
 VIEWS.games = function(){
   return `<h2>${tr("Games","Spiele","Juegos")}</h2>
   <p class="sub">${tr("Speaking games for 2–10 players.","Sprechspiele für 2–10 Personen.","Juegos de conversación para 2–10 jugadores.")}</p>
@@ -10508,6 +10615,8 @@ VIEWS.games = function(){
   </div>
   <div class="card"><h3>🌉 ${tr("Bridge Builder","Brückenbauer","Constructor de puentes")} <span class="note" style="font-weight:600">· 🇩🇪 ${tr("solo, German only","allein, nur Deutsch","solo, solo alemán")}</span></h3><p class="note">${tr("Build German sentences from word tiles. The better the word order and the longer the sentence, the more points.","Bau deutsche Sätze aus Wort-Kärtchen. Je besser die Satzstellung und je länger der Satz, desto mehr Punkte.","Construye frases en alemán con fichas. Cuanto mejor el orden y más larga la frase, más puntos.")}</p>
     <button class="btn primary" onclick="bbOpen()">${tr("Play","Spielen","Jugar")}</button></div>
+  <div class="card"><h3>✂️ ${tr("Split or Stick?","Trennen oder kleben?","¿Se separa o se pega?")} <span class="note" style="font-weight:600">· 🇩🇪 ${tr("solo, German only","allein, nur Deutsch","solo, solo alemán")}</span></h3><p class="note">${tr("Prefix verbs like einsteigen, ankommen, besuchen: does the prefix split off or stay stuck? Swipe fast, 10 seconds per card.","Verben wie einsteigen, ankommen, besuchen: Wird das Präfix getrennt oder bleibt es dran? Schnell wischen, 10 Sekunden pro Karte.","Verbos como einsteigen, ankommen, besuchen: ¿el prefijo se separa o se queda pegado? Desliza rápido, 10 segundos por tarjeta.")}</p>
+    <button class="btn primary" onclick="ssOpen()">${tr("Play","Spielen","Jugar")}</button></div>
   <div class="card"><h3>📖 ${tr("Easy reads","Lesen","Lecturas fáciles")} <span class="note" style="font-weight:600">· 🇩🇪 A1–C1</span></h3><p class="note">${tr("Short stories with Pía, Bruno and friends. One sentence at a time, with the meaning and sentence parts.","Kurze Geschichten mit Pía, Bruno und Freunden. Satz für Satz, mit Bedeutung und Satzteilen.","Historias cortas con Pía, Bruno y sus amigos. Frase a frase, con significado y partes de la frase.")}</p>
     <button class="btn primary" onclick="rdOpen()">${tr("Read","Lesen","Leer")}</button></div>
   <div class="card"><h3>📅 ${tr("Game nights","Spieleabende","Noches de juegos")}</h3><p class="note">${tr("Join a scheduled game session with people from around the world.","Mach bei einem geplanten Spieleabend mit Leuten aus aller Welt mit.","Únete a una sesión de juego programada con gente de todo el mundo.")}</p>
