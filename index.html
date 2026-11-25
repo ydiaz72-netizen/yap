@@ -9471,6 +9471,105 @@ function bbEn(ws){ if(ws.some(w=>w.r==="Ar")) ws=bbNpJoin(ws);
   if(k===0){ const e=bbClauseEnd(ws); if(e<0) return ""; const a=bbEnClause(ws.slice(1,e+1)), b=bbEnClause(ws.slice(e+1)); return a&&b?cap((J[ws[0].t]||"")+" "+a)+", "+b+".":""; }
   if(k>0){ const a=bbEnClause(ws.slice(0,k)), b=bbEnClause(ws.slice(k+1)); return a&&b?cap(a)+" "+(J[ws[k].t]||"that")+" "+b+".":""; }
   const a=bbEnClause(ws); return a?cap(a)+".":""; }
+/* ---- 💬 the same meaning built in Spanish (app language es). Anything it can't say well returns "" and the English meaning is shown instead. ---- */
+const BB_ES_V={ trinken:"beber",essen:"comer",bestellen:"pedir",lesen:"leer",spielen:"jugar",sehen:"ver",lernen:"aprender",üben:"practicar",sprechen:"hablar",leben:"vivir",arbeiten:"trabajar",glauben:"creer",bieten:"ofrecer",geben:"dar",zeigen:"mostrar",anrufen:"llamar",aufstehen:"levantarse",einkaufen:"hacer la compra",haben:"tener",gehen:"ir",fahren:"ir",kennen:"conocer",suchen:"buscar",wohnen:"vivir",sparen:"ahorrar",kaufen:"comprar",studieren:"estudiar",reisen:"viajar",sagen:"decir",meinen:"creer",kommen:"venir",verstehen:"entender",bleiben:"quedarse",warten:"esperar",verkaufen:"vender",bauen:"construir",reparieren:"reparar",öffnen:"abrir",renovieren:"renovar",schreiben:"escribir" };
+const BB_ES_IRR={ ir:["voy","vas","va","vamos","van"], tener:["tengo","tienes","tiene","tenemos","tienen"], jugar:["juego","juegas","juega","jugamos","juegan"], pedir:["pido","pides","pide","pedimos","piden"],
+  ver:["veo","ves","ve","vemos","ven"], dar:["doy","das","da","damos","dan"], conocer:["conozco","conoces","conoce","conocemos","conocen"], ofrecer:["ofrezco","ofreces","ofrece","ofrecemos","ofrecen"],
+  entender:["entiendo","entiendes","entiende","entendemos","entienden"], mostrar:["muestro","muestras","muestra","mostramos","muestran"], poder:["puedo","puedes","puede","podemos","pueden"],
+  querer:["quiero","quieres","quiere","queremos","quieren"], hacer:["hago","haces","hace","hacemos","hacen"], decir:["digo","dices","dice","decimos","dicen"], venir:["vengo","vienes","viene","venimos","vienen"],
+  ser:["soy","eres","es","somos","son"], construir:["construyo","construyes","construye","construimos","construyen"], abrir:["abro","abres","abre","abrimos","abren"], estar:["estoy","estás","está","estamos","están"] };
+const BB_ES_PRET={ ir:["fui","fuiste","fue","fuimos","fueron"], ser:["fui","fuiste","fue","fuimos","fueron"], tener:["tuve","tuviste","tuvo","tuvimos","tuvieron"], poder:["pude","pudiste","pudo","pudimos","pudieron"],
+  querer:["quise","quisiste","quiso","quisimos","quisieron"], hacer:["hice","hiciste","hizo","hicimos","hicieron"], decir:["dije","dijiste","dijo","dijimos","dijeron"], estar:["estuve","estuviste","estuvo","estuvimos","estuvieron"],
+  jugar:["jugué","jugaste","jugó","jugamos","jugaron"], leer:["leí","leíste","leyó","leímos","leyeron"], venir:["vine","viniste","vino","vinimos","vinieron"] };
+const BB_ES_FUT={ tener:"tendr", poder:"podr", querer:"querr", hacer:"har", decir:"dir", venir:"vendr" };
+const BB_ES_REFL=["me","te","se","nos","se"];
+/* tense: pres · pret · cond · subj (imperfect subjunctive) → "me levanto", "hago la compra" */
+function bbEsConj(inf, tense, pi){ const parts=inf.split(" "); let v=parts[0], refl=false; const rest=parts.slice(1).join(" ");
+  if(/se$/.test(v)&&v!=="se"){ refl=true; v=v.slice(0,-2); }
+  const end=v.slice(-2), st=v.slice(0,-2); let f;
+  if(tense==="pres") f=BB_ES_IRR[v]?BB_ES_IRR[v][pi]:st+(end==="ar"?["o","as","a","amos","an"]:end==="er"?["o","es","e","emos","en"]:["o","es","e","imos","en"])[pi];
+  else if(tense==="pret") f=BB_ES_PRET[v]?BB_ES_PRET[v][pi]:st+(end==="ar"?["é","aste","ó","amos","aron"]:["í","iste","ió","imos","ieron"])[pi];
+  else if(tense==="cond") f=(BB_ES_FUT[v]||v)+["ía","ías","ía","íamos","ían"][pi];
+  else { const p3=bbEsConj(v,"pret",4).v.replace(/ron$/,""), acc=p3.replace(/([aeiou])$/,m=>({a:"á",e:"é",i:"í",o:"ó",u:"ú"})[m]); f=pi===3?acc+"ramos":p3+["ra","ras","ra","","ran"][pi]; }
+  return { v:f, refl:refl?BB_ES_REFL[pi]:"", rest }; }
+const BB_ES_S={ ich:["",0], du:["",1], wir:["",3], Lena:["Lena",2,"f"], Tom:["Tom",2,"m"], Sarah:["Sarah",2,"f"], sie:["ella",2,"f"], er:["él",2,"m"], "der Chef":["el jefe",2,"m"],
+  "das Haus":["la casa",2,"f"], "die Brücke":["el puente",2,"m"], "das Auto":["el coche",2,"m"], "die Fenster":["las ventanas",4,"f",1] };
+/* objects: [text, gustar form] · pron objects are clitics · neg: "keine Zeit" */
+const BB_ES_O={ "einen Kaffee":["un café","el café"], "einen Tee":["un té","el té"], "ein Wasser":["un agua","el agua"], "eine Brezel":["un pretzel","los pretzels",1], "ein Stück Kuchen":["un trozo de pastel","el pastel"],
+  "ein Buch":["un libro","los libros",1], "die Zeitung":["el periódico","el periódico"], "Fußball":["fútbol","el fútbol"], "Karten":["cartas","las cartas",1], "einen Film":["una película","el cine"], "eine Pizza":["una pizza","la pizza"],
+  "Deutsch":["alemán","el alemán"], "ein Zimmer":["una habitación"], "das Foto":["la foto"], "deine Mutter":["a tu madre"], "Zeit":["tiempo"], "keine Zeit":["tiempo",null,0,1], "den Mann":["al hombre","el hombre"], "die Frau":["a la mujer","la mujer"],
+  "das Buch":["el libro","el libro"], "die Wohnung":["el piso","el piso"], "einen Balkon":["un balcón"], "Geld":["dinero"], "ein Auto":["un coche"], "Brot":["pan"], "ein Haus":["una casa"], "Vokabeln":["vocabulario","el vocabulario"], "die Grammatik":["la gramática","la gramática"] };
+const BB_ES_CL={ es:"lo", dich:"te", mich:"me", ihm:"le", ihr:"le" };
+const BB_ES_D={ "dem Gast":["al huésped","le"], "der Freundin":["a su amiga","le"], "den Kindern":["a los niños","les"] };
+const BB_ES_T={ heute:"hoy", morgen:"mañana", "am Wochenende":"el fin de semana", "am Samstag":"el sábado", "am Sonntag":"el domingo", "heute Abend":"esta noche", gestern:"ayer", "letzte Woche":"la semana pasada",
+  "jeden Tag":"cada día", früh:"temprano", "am Abend":"por la noche", "1900":"en 1900", "jeden Morgen":"cada mañana", lange:"mucho tiempo" };
+const BB_ES_P={ "im Café":"en el café", "zu Hause":"en casa", "im Park":"en el parque", "ins Kino":"al cine", "nach Berlin":"a Berlín", "in Deutschland":"en Alemania", "in Erfurt":"en Erfurt", "im Supermarkt":"en el supermercado",
+  "nach Hause":"a casa", "in den Park":"al parque", hier:"aquí", "zum Bäcker":"a la panadería", "in Berlin":"en Berlín", "nach Spanien":"a España", "im Kurs":"en clase" };
+const BB_ES_B={ "von meinem Vater":"por mi padre", "von der Firma":"por la empresa", "von Lena":"por Lena" };
+const BB_ES_PP={ bauen:"construid", reparieren:"reparad", öffnen:"abiert", verkaufen:"vendid", kaufen:"comprad", renovieren:"renovad", schreiben:"escrit" };
+const BB_ES_Q={ krank:["enferm","estar"], rot:["roj","ser"], teuer:["car","ser"], alt:["viej","ser"] };
+const BB_ES_N={ Auto:["coche","m"], Wohnung:["piso","m"], Brief:["carta","f"], Brücke:["puente","m"] };
+const BB_ES_CP={ mehr:"más", besser:"mejor", schneller:"más rápido", öfter:"más a menudo", länger:"más tiempo" };
+function bbEsAgr(stem,g,pl){ return stem+(g==="f"?"a":"o")+(pl?"s":""); }
+/* "das gestern gekaufte Auto" → one part "el coche comprado ayer" */
+function bbEsNp(ws){ const out=[]; for(let i=0;i<ws.length;i++){ const w=ws[i]; if(w.r!=="Ar"){ out.push(w); continue; }
+    let j=i+1; const mods=[]; while(j<ws.length&&["T","B","P"].includes(ws[j].r)) mods.push(ws[j++]); const pj=ws[j], nn=ws[j+1]; if(!pj||!nn||nn.r!=="N") return null;
+    const N=BB_ES_N[nn.t], pp=BB_ES_PP[pj.v]; if(!N||!pp) return null;
+    const m=mods.map(x=>BB_ES_T[x.t]||BB_ES_B[x.t]||BB_ES_P[x.t]); if(m.some(x=>!x)) return null;
+    out.push({ t:ws.slice(i,j+2).map(x=>x.t).join(" "), r:w.c==="akk"?"O":"?", p:3, es:[(N[1]==="f"?"la ":"el ")+N[0], bbEsAgr(pp,N[1]), ...m].join(" "), g:N[1] }); i=j+1; }
+  out.forEach(w=>{ if(w.r==="?") w.r=out.some(x=>x.r==="S")?"O":"S"; }); return out; }
+/* one clause. ctx: { si: inside a "wenn" clause (Konjunktiv → subjuntivo), rel: the relative pronoun is the subject } */
+function bbEsClause(ws, ctx){ ctx=ctx||{}; const g=r=>ws.find(w=>w.r===r), S=g("S"), A=g("A"), T=g("T"), P=g("P"), D=g("D"), O=g("O"), B=g("B"), Q=g("Q"), I=g("I"), Mi=g("Mi"), Pa=g("Pa");
+  const fin=ws.find(w=>["V","M","H"].includes(w.r)); if(!fin) return null;
+  let subj="", pi=2, sg="m", spl=false;
+  if(S){ if(S.es){ subj=S.es; sg=S.g; } else { const s=BB_ES_S[S.t]; if(!s) return null; subj=s[0]; pi=s[1]; sg=s[2]||"m"; spl=!!s[3]; if(ctx.next&&(subj==="él"||subj==="ella")&&ctx.next===sg) subj=""; } }
+  else if(!ctx.rel) return null;
+  const tx=(m,k)=>{ if(!k) return ""; const v=m[k.t]; if(v==null) throw 0; return v; };
+  try{
+  let cl=[], obj="", neg=false, vp="", gus=null;
+  if(O){ if(O.es) obj=O.es; else if(O.pron){ const c=BB_ES_CL[O.t]; if(!c) return null; cl.push(c); } else { const o=BB_ES_O[O.t]; if(!o) return null; obj=o[0]; neg=!!o[3]; } }
+  let dtx=""; if(D){ if(D.pron) cl.unshift(tx(BB_ES_CL,D)); else { const d=BB_ES_D[D.t]; if(!d) return null; dtx=d[0]; cl.unshift(d[1]); } }
+  if(cl.length===2&&cl[0]==="le") cl[0]="se";
+  const time=tx(BB_ES_T,T), place=tx(BB_ES_P,P), by=tx(BB_ES_B,B);
+  const conj=(inf,tense)=>{ const c=bbEsConj(inf,tense,pi); return { v:c.v, refl:c.refl, rest:c.rest }; };
+  let c=null;
+  if(fin.r==="H"&&fin.a==="werden"){ const pp=Pa&&BB_ES_PP[Pa.v]; if(!pp) return null; c=(!/^wurde/.test(fin.t)&&!B&&BB_ES_V[Pa.v])?{ v:bbEsConj(BB_ES_V[Pa.v],"pres",pi).v, refl:"se" }:{ v:bbEsConj("ser",/^wurde/.test(fin.t)?"pret":"pres",pi).v+" "+bbEsAgr(pp,sg,spl) }; }
+  else if(fin.r==="H"&&Mi){ const m={ müssen:"tener", können:"poder", wollen:"querer" }[Mi.v]; if(!m||!I||!BB_ES_V[I.v]) return null; c=conj(m,"pret"); c.v+=(Mi.v==="müssen"?" que ":" ")+BB_ES_V[I.v]; }
+  else if(fin.r==="H"){ if(!Pa||!BB_ES_V[Pa.v]) return null; c=conj(BB_ES_V[Pa.v],"pret"); }
+  else if(fin.r==="V"&&fin.v==="sein"){ const q=Q&&BB_ES_Q[Q.t], verb=q?q[1]:"estar", tense=fin.kon?(ctx.si?"subj":"cond"):"pres"; c=conj(verb,tense); if(q) c.v+=" "+bbEsAgr(q[0],sg,spl); }
+  else if(fin.r==="V"&&fin.v==="mögen"){ const o=O&&BB_ES_O[O.t]; if(!o||!o[1]) return null; gus={ what:o[1], pl:!!o[2] }; obj=""; }
+  else if(fin.r==="V"){ const inf=BB_ES_V[fin.v]; if(!inf) return null;
+    if(A){ gus={ inf:(inf.replace(/se$/,"")+(/se$/.test(inf)?"se":"")) }; }
+    else c=conj(inf,fin.past?"pret":fin.kon?(ctx.si?"subj":"cond"):"pres"); }
+  else if(fin.r==="M"){ const inf=I?BB_ES_V[I.v]:null; if(!inf) return null; const iv=inf.split(" ")[0], ir=inf.split(" ").slice(1).join(" ");
+    if(/^w[üu]rde/.test(fin.t)) c=conj(inf,"cond");
+    else { const mv=/^m[öo]chte/.test(fin.t)?["querer","subj"]:/^kann/.test(fin.t)?["poder","pres"]:["tener","pres"]; c=conj(mv[0],mv[1]); c.v+=(mv[0]==="tener"?" que ":" ")+iv; c.rest=ir; if(/se$/.test(iv)){ c.v=c.v.replace(/se$/,""); c.refl=BB_ES_REFL[pi]; } } }
+  if(spielen(fin,I,Pa)&&obj){ obj=obj==="fútbol"?"al fútbol":obj==="cartas"?"a las cartas":obj; }
+  const front=!ctx.sub&&ws[0]&&(ws[0].r==="T"||ws[0].r==="P")?ws[0]:null, fr=front?(front.r==="T"?time:place):"";
+  const tail=[front===P?"":place, front===T?"":time].filter(Boolean).join(" ");
+  let core;
+  if(gus){ const dat=["me","te","le","nos","les"][pi], who=subj?`a ${subj} `:""; const g2=gus.inf?"gusta "+gus.inf:(gus.pl?"gustan ":"gusta ")+gus.what;
+    core=[who+(neg?"no ":"")+dat, g2, gus.inf?obj:"", dtx].filter(Boolean).join(" "); }
+  else core=[subj, neg?"no":"", c.refl, cl.join(" "), c.v, c.rest, obj, dtx].filter(Boolean).join(" ");
+  return [fr, core, by, tail].filter(Boolean).join(" ").replace(/\s+/g," ").trim();
+  }catch(e){ return null; } }
+function spielen(fin,I,Pa){ return [fin,I,Pa].some(x=>x&&x.v==="spielen"); }
+function bbEsUm(ws){ const g=r=>ws.find(w=>w.r===r), I=g("I"), O=g("O"), P=g("P"), T=g("T"); if(!I||!BB_ES_V[I.v]) return null;
+  const o=O?(BB_ES_O[O.t]||[])[0]:"", p=P?BB_ES_P[P.t]:"", t=T?BB_ES_T[T.t]:""; if(o==null||p==null||t==null) return null;
+  return ["para",BB_ES_V[I.v],o,p,t].filter(Boolean).join(" "); }
+function bbEs(ws){ if(ws.some(w=>w.r==="Ar")){ ws=bbEsNp(ws); if(!ws) return ""; }
+  const S0=ws.find(w=>w.r==="S"), G0=S0?(S0.g||(BB_ES_S[S0.t]||[])[2]||"x"):"x";
+  const k=ws.findIndex(w=>w.r==="K"), cap=x=>x.charAt(0).toUpperCase()+x.slice(1), ok=(...a)=>a.every(x=>x);
+  if(ws[0]&&ws[0].r==="Je"){ const d=ws.findIndex(w=>w.r==="De"); if(d<2||!ws[d+1]) return ""; const c1=BB_ES_CP[ws[1].t], c2=BB_ES_CP[ws[d+1].t], a=bbEsClause(ws.slice(2,d),{ sub:1 }), b=bbEsClause(ws.slice(d+2),{ next:G0 }); return ok(c1,c2,a,b)?`Cuanto ${c1} ${a}, ${c2} ${b}.`:""; }
+  const se=bbSayEnd(ws); if(se>0){ const a=bbEsClause(ws.slice(0,se)), b=bbEsClause(ws.slice(se),{ next:G0 }); return ok(a,b)?cap(a)+" que "+b+".":""; }
+  const r=ws.findIndex(w=>w.r==="R"), u=ws.findIndex(w=>w.r==="U");
+  if(u===0){ const e=bbClauseEnd(ws); if(e<0) return ""; const a=bbEsUm(ws.slice(1,e+1)), b=bbEsClause(ws.slice(e+1),{ next:G0 }); return ok(a,b)?cap(a)+", "+b+".":""; }
+  if(u>0){ const a=bbEsClause(ws.slice(0,u)), b=bbEsUm(ws.slice(u+1)); return ok(a,b)?cap(a)+" "+b+".":""; }
+  if(r>0){ const sub=ws.slice(r+1), own=sub.some(w=>w.r==="S"), a=bbEsClause(ws.slice(0,r)), b=bbEsClause(sub,{ rel:!own, sub:1, next:G0 }); return ok(a,b)?cap(a)+" que "+b+".":""; }
+  const J={ weil:"porque", wenn:"si", dass:"que" };
+  if(k===0){ const e=bbClauseEnd(ws); if(e<0) return ""; const kw=ws[0].t, a=bbEsClause(ws.slice(1,e+1),{ si:kw==="wenn", sub:1 }), b=bbEsClause(ws.slice(e+1),{ next:G0 }); return ok(a,b)?cap(({ weil:"como", wenn:"si", dass:"que" })[kw]+" "+a)+", "+b+".":""; }
+  if(k>0){ const kw=ws[k].t, a=bbEsClause(ws.slice(0,k)), b=bbEsClause(ws.slice(k+1),{ si:kw==="wenn", sub:1, next:G0 }); return ok(a,b)?cap(a)+" "+(J[kw]||"que")+" "+b+".":""; }
+  const a=bbEsClause(ws); return a?cap(a)+".":""; }
 /* flashcards: the example sentence split into its parts, same colours and labels as Bridge Builder */
 function vcParts(w){ return w?pxHtml(w.px):""; }
 function pxHtml(px){ if(!px||!px.length) return "";
@@ -9497,9 +9596,10 @@ function bbPart(w,inSub){ const L={ S:[tr("Subject","Subjekt","Sujeto"),tr("who?
     A:["gerne",tr("likes to","mag","le gusta")], K:[tr("Joiner","Konjunktion","Conjunción"),tr("verb to the end","Verb ans Ende","verbo al final")],
     X:[tr("Prefix (end)","Präfix (Ende)","Prefijo (final)"),w.v||""], R:[tr("Relative pronoun","Relativpronomen","Pronombre relativo"),w.c==="nom"?tr("who? (does it)","wer?","¿quién? (lo hace)"):w.c==="akk"?tr("whom?","wen?","¿a quién?"):"der · die · das"] }[w.q&&["V","M","H"].includes(w.r)?"Vq":w.r]||["",""];
   return `<div class="bbwp" style="--c:${BB_COL[w.r]}"><b lang="de">${esc(w.t)}</b><i></i><span>${L[0]}</span><small>${L[1]}</small></div>`; }
-/* meaning in the app language: a challenge sentence has a written translation; anything else is built in English */
+/* meaning in the app language: a challenge sentence has a written translation; anything else is built in Spanish (app in es) or English */
 function bbMeaning(ws){ const bag=x=>x.toLowerCase().split(" ").sort().join(" "), got=bag(ws.map(w=>w.t).join(" "));
   for(const c of BB_CH) for(const it of c.items) if(it[2].some(a=>bag(a)===got)) return { t:tr(it[0],it[0],it[1]), en:false };
+  if(UI==="es"){ const s=bbEs(ws); if(s) return { t:s, en:false }; }
   const e=bbEn(ws); return e?{ t:e, en:true }:null; }
 function bbWhy(ws){ if(!ws||!ws.length) return ""; const k=ws.findIndex(w=>w.r==="K"), m=bbMeaning(ws);
   return `<details class="bbwhy" open><summary>🔍 ${tr("See why it works","Warum es passt","Por qué funciona")}</summary>
