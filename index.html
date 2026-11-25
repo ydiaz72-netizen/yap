@@ -295,6 +295,7 @@
   .rdsent{font-size:24px;font-weight:800;line-height:1.3;text-align:center;margin:6px 0}.rdmean{background:var(--soft,#F6F2EC);border-radius:14px;padding:10px 12px;text-align:center;font-size:17px;color:#2A8C82;font-weight:700;margin-top:8px}
   .rdsofar{color:var(--muted,#6B7A8F);font-size:15px;line-height:1.5;margin:4px 2px 10px}.rddots{display:flex;gap:5px;margin:6px 0 10px}.rddots i{flex:1;height:6px;border-radius:9px;background:var(--line,#E8E2D8)}.rddots i.on{background:#2A8C82}.rddots i.cur{background:var(--coral,#F25C3B)}
   .ssbarw{height:6px;background:#EDE6DC;border-radius:6px;overflow:hidden;margin:0 0 12px}.ssbar{height:100%;width:100%;background:#F2B53A;transition:width .1s linear}.sscard{touch-action:pan-y;transition:transform .15s ease}.sshl{background:#F9DE8A;color:inherit;border-radius:5px;padding:0 3px}.sstfix{background:var(--soft,#F6F2EC);border-radius:12px;padding:10px 12px;font-weight:800;font-size:18px}
+  .kjslots{min-height:56px;border:2px dashed var(--line);border-radius:14px;padding:8px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0}.kjtiles{display:flex;flex-wrap:wrap;gap:8px}.kjuml{display:flex;gap:8px;margin-top:10px}.kjuml .chip{flex:1;font-size:18px}
   .rdq{display:flex;gap:8px;margin-top:14px}.rdq .btn{flex:1}.rdfb{margin:14px 0 10px;padding:10px 12px;border-radius:12px;font-weight:700}.rdfb.ok{background:#E3F4EC;color:#1E7B52}.rdfb.no{background:#FDEBE7;color:#B3361C}
   .vcpx{text-align:start;margin:10px 0 0;border:1px solid var(--line);font-size:14px}.vcpx .bbwrow{margin-top:8px}.bbwhy{margin-top:10px;background:#fff;border-radius:16px;padding:10px 12px}.bbwhy summary{font-weight:800;cursor:pointer}
   .bbwrow{display:flex;flex-wrap:wrap;gap:12px 10px;margin-top:10px}
@@ -953,7 +954,7 @@
 <script>/* Extra interface languages live in /i18n/<code>.js (English text → translation). Load the chosen one before the app starts. */
 (function(){ try{ var X=["tr","uk","fa","ur"], v=localStorage.getItem("pt_ui");
   if(!v){ var n=String((navigator.languages&&navigator.languages[0])||navigator.language||"").slice(0,2).toLowerCase(); if(X.indexOf(n)>-1) v=n; }
-  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=45"><\/script>'); }catch(e){} })();</script>
+  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=46"><\/script>'); }catch(e){} })();</script>
 
 <script>
 /* ===================== CONTENT ===================== */
@@ -1383,7 +1384,7 @@ function bi(en,de,es){ if(es!==undefined) return tr(en,de,es); return `${en} <sp
 function uiSet(l){
   if(!UI_CODES.includes(l)) return;
   if(UI_EXTRA.includes(l) && !I18N_DATA[l]){
-    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=45";
+    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=46";
     sc.onload=()=>uiSet(l); sc.onerror=()=>bToast(offlineMsg()); document.head.appendChild(sc); return;
   }
   UI=l; I18N_T=null; I18N_M.clear();
@@ -7099,7 +7100,7 @@ function homeRecs(){
 }
 
 /* ===================== BOTTOM BAR ===================== */
-const NAV_TAB = { home:"home", bridge:"games", split:"games", board:"sessions", host:"sessions", session:"sessions", games:"games", account:"profile", xprofile:"profile" };
+const NAV_TAB = { home:"home", bridge:"games", split:"games", conj:"games", board:"sessions", host:"sessions", session:"sessions", games:"games", account:"profile", xprofile:"profile" };
 const WIDE = { home:"xl", board:"xl", host:"md", session:"md", account:"md", xprofile:"md", games:"md" };
 const ICO = {
   home:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10l9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>',
@@ -10784,6 +10785,100 @@ VIEWS.split = function(){
     <button class="btn primary" style="margin-top:12px" onclick="ssNext()">${SS.i+1<SS.q.length?tr("Next","Weiter","Siguiente")+" →":tr("Finish","Fertig","Terminar")}</button></div>`;
 };
 
+/* ===================== ✍️ Konjugier mal!: conjugate verbs, then build the question for an answer (solo, German only) ===================== */
+const KJ_P=["ich","du","er / sie / es","wir","ihr","sie / Sie"];
+const KJ_SEIN=["bin","bist","ist","sind","seid","sind"], KJ_HABEN=["habe","hast","hat","haben","habt","haben"];
+function kjReg(inf){ const st=inf.replace(/en$/,""), e=/[td]$/.test(st)?"e":"", s=/[sßzx]$/.test(st)?"":"s"; return [st+"e",st+e+s+"t",st+e+"t",inf,st+e+"t",inf]; }
+const kjSep=(pre,f)=>f.map(x=>x+" "+pre), kjPerf=(part,aux)=>(aux==="s"?KJ_SEIN:KJ_HABEN).map(a=>a+" "+part);
+const KJ_QTIP=["Yes/no question: verb first. W-question: W-word, then verb, then subject. Answer with ich → ask with du; wir → ihr.","Ja/Nein-Frage: Verb zuerst. W-Frage: W-Wort, dann Verb, dann Subjekt. Antwort mit ich → Frage mit du; wir → ihr.","Pregunta de sí/no: el verbo primero. Pregunta con W: palabra W, verbo y sujeto. Respuesta con ich → pregunta con du; wir → ihr."];
+const KJ_LV=[
+ { e:"🟢", n:["Regular verbs","Regelmäßige Verben","Verbos regulares"], sub:"wohnen, lernen, arbeiten …", tense:"Präsens",
+   tip:["Endings: ich -e, du -st, er/sie/es -t, wir -en, ihr -t, sie/Sie -en. Stem ending in -t/-d: du arbeitest. Stem ending in -s/-ß/-z: du heißt.","Endungen: ich -e, du -st, er/sie/es -t, wir -en, ihr -t, sie/Sie -en. Stamm auf -t/-d: du arbeitest. Stamm auf -s/-ß/-z: du heißt.","Terminaciones: ich -e, du -st, er/sie/es -t, wir -en, ihr -t, sie/Sie -en. Raíz en -t/-d: du arbeitest. Raíz en -s/-ß/-z: du heißt."],
+   verbs:["wohnen","machen","lernen","spielen","kaufen","kochen","trinken","kommen","gehen","arbeiten","heißen","tanzen"].map(v=>[v,kjReg(v)]),
+   qs:[["Ich wohne in Erfurt.","Wo|wohnst|du|?","wohne|Wie"],["Ich heiße Ana.","Wie|heißt|du|?","heiße|Wer"],["Ich komme aus Puerto Rico.","Woher|kommst|du|?","komme|Wo"],["Ja, ich spiele Gitarre.","Spielst|du|Gitarre|?","Spiele|Was"],["Ich lerne Deutsch.","Was|lernst|du|?","lerne|Wie"],["Wir kochen heute Reis.","Was|kocht|ihr|heute|?","kochen|wir"],["Ich arbeite in Weimar.","Wo|arbeitest|du|?","arbeitst|Wann"],["Ja, ich trinke gern Kaffee.","Trinkst|du|gern|Kaffee|?","Trinke|Was"]] },
+ { e:"🟡", n:["Irregular verbs","Unregelmäßige Verben","Verbos irregulares"], sub:"sein, haben, fahren, lesen …", tense:"Präsens",
+   tip:["Strong verbs change the vowel only with du and er/sie/es: a→ä (fahren → du fährst), e→i/ie (essen → du isst, lesen → du liest). Learn sein, haben and wissen by heart!","Starke Verben ändern den Vokal nur bei du und er/sie/es: a→ä (fahren → du fährst), e→i/ie (essen → du isst, lesen → du liest). sein, haben und wissen auswendig lernen!","Los verbos fuertes cambian la vocal solo con du y er/sie/es: a→ä (fahren → du fährst), e→i/ie (essen → du isst, lesen → du liest). ¡Aprende sein, haben y wissen de memoria!"],
+   verbs:[["sein",KJ_SEIN],["haben",KJ_HABEN],["fahren",["fahre","fährst","fährt","fahren","fahrt","fahren"]],["essen",["esse","isst","isst","essen","esst","essen"]],["lesen",["lese","liest","liest","lesen","lest","lesen"]],["sprechen",["spreche","sprichst","spricht","sprechen","sprecht","sprechen"]],["nehmen",["nehme","nimmst","nimmt","nehmen","nehmt","nehmen"]],["sehen",["sehe","siehst","sieht","sehen","seht","sehen"]],["schlafen",["schlafe","schläfst","schläft","schlafen","schlaft","schlafen"]],["geben",["gebe","gibst","gibt","geben","gebt","geben"]],["werden",["werde","wirst","wird","werden","werdet","werden"]],["wissen",["weiß","weißt","weiß","wissen","wisst","wissen"]]],
+   qs:[["Ich bin 30 Jahre alt.","Wie alt|bist|du|?","bin|Wo"],["Ich habe zwei Kinder.","Wie viele|Kinder|hast|du|?","habe|Was"],["Ich fahre mit dem Bus zur Arbeit.","Wie|fährst|du|zur Arbeit|?","fahrst|Wo"],["Ich lese ein Buch.","Was|liest|du|?","lest|lese"],["Ja, ich spreche Spanisch.","Sprichst|du|Spanisch|?","Sprechst|Was"],["Er isst Pizza.","Was|isst|er|?","esst|Wer"],["Ja, wir haben Zeit.","Habt|ihr|Zeit|?","Haben|wir"],["Sie schläft bis acht.","Wie lange|schläft|sie|?","schlaft|Wann"]] },
+ { e:"🟠", n:["Modal verbs","Modalverben","Verbos modales"], sub:"können, müssen, möchten …", tense:"Präsens",
+   tip:["Modal verbs: ich and er/sie/es have no ending (ich kann, er kann). The second verb goes to the end, in the infinitive.","Modalverben: ich und er/sie/es haben keine Endung (ich kann, er kann). Das zweite Verb steht am Ende im Infinitiv.","Verbos modales: ich y er/sie/es no llevan terminación (ich kann, er kann). El segundo verbo va al final, en infinitivo."],
+   verbs:[["können",["kann","kannst","kann","können","könnt","können"]],["müssen",["muss","musst","muss","müssen","müsst","müssen"]],["wollen",["will","willst","will","wollen","wollt","wollen"]],["dürfen",["darf","darfst","darf","dürfen","dürft","dürfen"]],["sollen",["soll","sollst","soll","sollen","sollt","sollen"]],["möchten",["möchte","möchtest","möchte","möchten","möchtet","möchten"]]],
+   qs:[["Ja, ich kann gut schwimmen.","Kannst|du|gut|schwimmen|?","Kann|schwimmst"],["Ich muss um sieben aufstehen.","Wann|musst|du|aufstehen|?","muss|stehst"],["Ich möchte einen Kaffee.","Was|möchtest|du|?","möchte|Wie"],["Ja, du darfst hier parken.","Darf|ich|hier|parken|?","Darfst|du"],["Wir wollen nach Berlin fahren.","Wohin|wollt|ihr|fahren|?","Wo|wollen"],["Ja, ich kann morgen kommen.","Kannst|du|morgen|kommen|?","Kann|kommst"]] },
+ { e:"🔴", n:["Separable verbs","Trennbare Verben","Verbos separables"], sub:"aufstehen, einkaufen, anrufen …", tense:"Präsens",
+   tip:["Separable verbs: the prefix goes to the end. aufstehen → ich stehe … auf. Type both parts: stehe auf.","Trennbare Verben: Das Präfix geht ans Ende. aufstehen → ich stehe … auf. Tippe beides: stehe auf.","Verbos separables: el prefijo va al final. aufstehen → ich stehe … auf. Escribe las dos partes: stehe auf."],
+   verbs:[["aufstehen",kjSep("auf",["stehe","stehst","steht","stehen","steht","stehen"])],["einkaufen",kjSep("ein",kjReg("kaufen"))],["anrufen",kjSep("an",["rufe","rufst","ruft","rufen","ruft","rufen"])],["fernsehen",kjSep("fern",["sehe","siehst","sieht","sehen","seht","sehen"])],["mitkommen",kjSep("mit",kjReg("kommen"))],["aufräumen",kjSep("auf",kjReg("räumen"))]],
+   qs:[["Ich stehe um sieben auf.","Wann|stehst|du|auf|?","aufstehst|Wo"],["Ich kaufe im Rewe ein.","Wo|kaufst|du|ein|?","einkaufst|Wann"],["Ja, ich komme mit.","Kommst|du|mit|?","Mitkommst|Was"],["Ich rufe meine Mutter an.","Wen|rufst|du|an|?","Wer|anrufst"],["Wir sehen am Abend fern.","Wann|seht|ihr|fern|?","sehen|fernseht"],["Er räumt die Küche auf.","Was|räumt|er|auf|?","aufräumt|Wer"]] },
+ { e:"🟣", n:["Perfekt","Perfekt","Perfekt"], sub:"habe gemacht, bin gefahren …", tense:"Perfekt",
+   tip:["Perfekt = haben/sein + participle. Movement or change (gehen, fahren, kommen, aufstehen) → sein. Type both parts: habe gemacht.","Perfekt = haben/sein + Partizip II. Bewegung oder Veränderung (gehen, fahren, kommen, aufstehen) → sein. Tippe beides: habe gemacht.","Perfekt = haben/sein + participio. Movimiento o cambio (gehen, fahren, kommen, aufstehen) → sein. Escribe las dos partes: habe gemacht."],
+   verbs:[["machen",kjPerf("gemacht")],["gehen",kjPerf("gegangen","s")],["essen",kjPerf("gegessen")],["fahren",kjPerf("gefahren","s")],["trinken",kjPerf("getrunken")],["kommen",kjPerf("gekommen","s")],["lesen",kjPerf("gelesen")],["sehen",kjPerf("gesehen")],["kaufen",kjPerf("gekauft")],["aufstehen",kjPerf("aufgestanden","s")],["schlafen",kjPerf("geschlafen")],["arbeiten",kjPerf("gearbeitet")]],
+   qs:[["Ich habe Pizza gegessen.","Was|hast|du|gegessen|?","habe|gegesst"],["Ich bin nach Leipzig gefahren.","Wohin|bist|du|gefahren|?","hast|Wo"],["Ja, ich habe gut geschlafen.","Hast|du|gut|geschlafen|?","Bist|geschlaft"],["Wir sind um zehn gekommen.","Wann|seid|ihr|gekommen|?","habt|sind"],["Ich habe ein Buch gelesen.","Was|hast|du|gelesen|?","gelest|bist"],["Sie ist um sechs aufgestanden.","Wann|ist|sie|aufgestanden|?","hat|aufgesteht"]] }];
+const KJ_NC=7, KJ_NQ=4;
+const KJ={ lv:0, q:null, i:0, pts:0, run:0, best:0, lives:3, ok:0, ans:null, placed:[], miss:[], done:false, s:null };
+function kjLoad(){ if(KJ.s) return; try{ KJ.s=JSON.parse(localStorage.getItem("pt_kj")||"{}"); }catch(e){} KJ.s=KJ.s||{}; KJ.s.stars=KJ.s.stars||{}; }
+function kjSave(){ try{ localStorage.setItem("pt_kj",JSON.stringify(KJ.s)); }catch(e){} }
+function kjShuf(a){ a=a.slice(); for(let k=a.length-1;k>0;k--){ const j=Math.floor(Math.random()*(k+1)); [a[k],a[j]]=[a[j],a[k]]; } return a; }
+function kjNorm(s){ return String(s).toLowerCase().replace(/ä/g,"ae").replace(/ö/g,"oe").replace(/ü/g,"ue").replace(/ß/g,"ss").replace(/[.!?,]/g,"").replace(/\s+/g," ").trim(); }
+function kjOpen(){ kjLoad(); KJ.q=null; KJ.done=false; go("conj"); }
+function kjFocus(){ setTimeout(()=>{ const i=document.getElementById("kjin"); if(i) i.focus(); },60); }
+function kjStart(li){ kjLoad(); const L=KJ_LV[li], seen=new Set(), c=[];
+  while(c.length<KJ_NC){ const v=L.verbs[Math.floor(Math.random()*L.verbs.length)], p=Math.floor(Math.random()*6); if(seen.has(v[0]+p)) continue; seen.add(v[0]+p); c.push({ c:1, inf:v[0], p, sol:v[1][p] }); }
+  const q=kjShuf(L.qs).slice(0,KJ_NQ).map(x=>({ c:0, a:x[0], sol:x[1].split("|"), pool:kjShuf([...x[1].split("|"),...x[2].split("|")]) }));
+  Object.assign(KJ,{ lv:li, q:[...c,...q], i:0, pts:0, run:0, best:0, lives:3, ok:0, ans:null, placed:[], miss:[], done:false }); go("conj"); kjFocus(); }
+function kjUml(ch){ const i=document.getElementById("kjin"); if(!i||KJ.ans) return; const a=i.selectionStart??i.value.length, b=i.selectionEnd??a;
+  i.value=i.value.slice(0,a)+ch+i.value.slice(b); i.focus(); i.setSelectionRange(a+1,a+1); }
+function kjTile(k){ if(KJ.ans||KJ.placed.includes(k)) return; KJ.placed.push(k); xr(); }
+function kjUntile(n){ if(KJ.ans) return; KJ.placed.splice(n,1); xr(); }
+function kjSolText(it){ return it.c?`${it.p===2?"er/sie/es":KJ_P[it.p]} ${it.sol}`:it.sol.join(" ").replace(" ?","?"); }
+function kjCheck(){ const it=KJ.q&&KJ.q[KJ.i]; if(!it||KJ.ans) return; let right, given;
+  if(it.c){ const v=((document.getElementById("kjin")||{}).value||"").trim(); if(!v) return; given=v; right=kjNorm(v)===kjNorm(it.sol); }
+  else { if(!KJ.placed.length) return; given=KJ.placed.map(k=>it.pool[k]).join(" ").replace(" ?","?"); right=KJ.placed.map(k=>it.pool[k]).join(" ")===it.sol.join(" "); }
+  KJ.ans={ right, given };
+  if(right){ KJ.ok++; KJ.run++; KJ.best=Math.max(KJ.best,KJ.run); KJ.pts+=10+(KJ.run>2?5*(KJ.run-2):0); }
+  else { KJ.run=0; KJ.lives--; KJ.miss.push(it); }
+  try{ if(navigator.vibrate) navigator.vibrate(right?20:[40,40,40]); }catch(e){}
+  xr(); }
+function kjNext(){ if(KJ.lives>0&&KJ.i+1<KJ.q.length){ KJ.i++; KJ.ans=null; KJ.placed=[]; xr(); kjFocus(); return; }
+  kjLoad(); const r=KJ.ok/KJ.q.length, st=KJ.lives<=0?0:r>=.9?3:r>=.7?2:r>=.5?1:0; KJ.stars=st;
+  KJ.s.stars[KJ.lv]=Math.max(KJ.s.stars[KJ.lv]||0,st); KJ.s.plays=(KJ.s.plays||0)+1; kjSave(); KJ.done=true; xr(); }
+function kjStars(n){ return [1,2,3].map(i=>i<=n?"⭐":"☆").join(""); }
+VIEWS.conj = function(){
+  kjLoad(); const L=KJ_LV[KJ.lv], live=KJ.q&&!KJ.done;
+  const top=`<div class="topline"><button class="chip" onclick="${live?"KJ.q=null;xr()":"KJ.q=null;KJ.done=false;go('games')"}">${uiBack()} ${live?tr("Stop","Stopp","Parar"):tr("Games","Spiele","Juegos")}</button><span>${live?`${KJ.i+1} / ${KJ.q.length} · ⭐ ${KJ.pts} · ${"❤️".repeat(Math.max(0,KJ.lives))}${KJ.run>1?` · 🔥 ${KJ.run}`:""}`:"🇩🇪 "+tr("German only","Nur Deutsch","Solo alemán")}</span></div>`;
+  if(!KJ.q) return top+`<h2 style="margin:4px 0">✍️ Konjugier mal!</h2>
+    <p class="sub" style="margin:0 0 10px">${tr("Each level: first conjugate verbs, then build the right question for an answer. 3 lives, streaks give bonus points.","Jedes Level: erst Verben konjugieren, dann die passende Frage zu einer Antwort bauen. 3 Leben, Serien geben Bonuspunkte.","Cada nivel: primero conjuga verbos y luego construye la pregunta para una respuesta. 3 vidas; las rachas dan puntos extra.")}</p>
+    ${KJ_LV.map((l,i)=>`<button class="card rdcard" onclick="kjStart(${i})"><span style="font-size:28px">${l.e}</span><span style="flex:1;min-width:0;text-align:start"><b style="display:block">${i+1}. ${esc(tr(...l.n))}</b><span class="note" style="margin:0" lang="de" dir="ltr">${esc(l.sub)}</span></span><span aria-label="${KJ.s.stars[i]||0}/3">${kjStars(KJ.s.stars[i]||0)}</span></button>`).join("")}
+    <p class="note">${tr("Tip: umlauts also work as ae / oe / ue / ss.","Tipp: Umlaute gehen auch als ae / oe / ue / ss.","Consejo: las diéresis también valen como ae / oe / ue / ss.")}</p>`;
+  if(KJ.done){ const n=KJ.q.length, out=KJ.lives<=0;
+    return top+`<div class="card center"><div style="font-size:44px">${out?"💔":KJ.stars===3?"🏅":KJ.stars?"🎉":"💪"}</div>
+      <h2 style="margin:4px 0">${out?tr("Out of lives","Keine Leben mehr","Sin vidas"):KJ.stars===3?tr("Verb Master!","Verb-Profi!","¡Maestro/a de verbos!"):KJ.stars?tr("Great job!","Super gemacht!","¡Muy bien!"):tr("Keep practicing","Weiter üben","Sigue practicando")}</h2>
+      <p style="font-size:26px;margin:4px 0">${kjStars(KJ.stars)}</p>
+      <p class="note">${tr(`${KJ.ok} of ${n} right`,`${KJ.ok} von ${n} richtig`,`${KJ.ok} de ${n} correctas`)} · ⭐ ${KJ.pts} · 🔥 ${KJ.best}</p>
+      <button class="btn primary" onclick="kjStart(${KJ.lv})">${tr("Play again","Nochmal","Otra vez")}</button>
+      ${KJ.lv+1<KJ_LV.length?`<button class="btn secondary" style="margin-top:8px" onclick="kjStart(${KJ.lv+1})">${tr("Next level","Nächstes Level","Siguiente nivel")} →</button>`:""}
+      <button class="btn secondary" style="margin-top:8px" onclick="KJ.q=null;KJ.done=false;xr()">${tr("Change level","Level wechseln","Cambiar nivel")}</button></div>
+      ${KJ.miss.length?`<div class="card" style="text-align:start"><h3 style="margin:0 0 6px">🔁 ${tr("Review these","Nochmal ansehen","Repasa estas")}</h3>
+        ${KJ.miss.map(it=>`<div class="mwrow"><div style="flex:1;min-width:0" dir="ltr">${it.c?`<span class="note" style="margin:0">${esc(it.inf)}</span>`:`<span class="note" style="margin:0" lang="de">„${esc(it.a)}“</span>`}<div lang="de"><b>${esc(kjSolText(it))}</b></div></div></div>`).join("")}</div>`:""}`; }
+  const it=KJ.q[KJ.i], a=KJ.ans, tip=it.c?tr(...L.tip):tr(...KJ_QTIP);
+  const fb=a?`<div class="rdfb ${a.right?"ok":"no"}">${a.right?"✅ "+(KJ.run>2?tr(`Right! Streak ×${KJ.run}`,`Richtig! Serie ×${KJ.run}`,`¡Correcto! Racha ×${KJ.run}`):tr("Right!","Richtig!","¡Correcto!")):"❌ "+tr("Not quite.","Nicht ganz.","No exactamente.")}</div>
+    <div class="sstfix" lang="de" dir="ltr" style="font-size:20px;font-weight:800">${esc(kjSolText(it))}</div>
+    ${a.right?"":`<p class="note" style="margin:4px 0 0" dir="ltr">${tr("You wrote","Du hast geschrieben","Escribiste")}: <span lang="de">${esc(a.given)}</span></p><p style="margin:10px 0 4px">💡 ${esc(tip)}</p>`}
+    <button class="btn primary" style="margin-top:12px" onclick="kjNext()">${KJ.lives>0&&KJ.i+1<KJ.q.length?tr("Next","Weiter","Siguiente")+" →":tr("Finish","Fertig","Terminar")}</button>`:"";
+  const hint=a?"":`<details class="bbwhy" style="margin-top:12px"><summary>💡 ${tr("Show the rule","Regel zeigen","Ver la regla")}</summary><p style="margin:6px 0 0">${esc(tip)}</p></details>`;
+  if(it.c) return top+`<div class="card"><div class="ecmeta">${it.c?tr("Conjugate","Konjugieren","Conjuga"):""} · ${esc(L.tense)}</div>
+    <div class="rdsent" lang="de" dir="ltr">${esc(KJ_P[it.p])} ___</div><p class="note center" style="margin:0" lang="de" dir="ltr">(${esc(it.inf)})</p>
+    <form class="rdq" dir="ltr" onsubmit="event.preventDefault();kjCheck()"><input type="text" id="kjin" lang="de" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="${tr("Your answer","Deine Antwort","Tu respuesta")}" ${a?"disabled":""} value="${a?esc(a.given):""}" style="flex:1;min-width:0">${a?"":`<button class="btn primary" style="flex:0 0 auto;width:auto;margin:0">OK</button>`}</form>
+    ${a?"":`<div class="kjuml" dir="ltr">${["ä","ö","ü","ß"].map(c=>`<button type="button" class="chip" onclick="kjUml('${c}')">${c}</button>`).join("")}</div>`}
+    ${fb}${hint}</div>`;
+  return top+`<div class="card"><div class="ecmeta">${tr("Build the question","Bau die Frage","Construye la pregunta")}</div>
+    <p class="note" style="margin:6px 0 0">${tr("The answer is:","Die Antwort ist:","La respuesta es:")}</p>
+    <div class="rdsent" lang="de" dir="ltr" style="font-size:21px">„${esc(it.a)}“</div>
+    <p style="margin:4px 0 0;font-weight:700">${tr("What was the question?","Wie lautet die Frage?","¿Cuál era la pregunta?")}</p>
+    <div class="kjslots" dir="ltr" lang="de">${KJ.placed.length?KJ.placed.map((k,n)=>`<button class="chip on" onclick="kjUntile(${n})">${esc(it.pool[k])}</button>`).join(""):`<span class="note" style="margin:0">${tr("Tap the words in order…","Tippe die Wörter der Reihe nach…","Toca las palabras en orden…")}</span>`}</div>
+    ${a?"":`<div class="kjtiles" dir="ltr" lang="de">${it.pool.map((w,k)=>KJ.placed.includes(k)?"":`<button class="chip" onclick="kjTile(${k})">${esc(w)}</button>`).join("")}</div>
+    <div class="rdq"><button class="btn secondary" onclick="KJ.placed=[];xr()">${tr("Clear","Löschen","Borrar")}</button><button class="btn primary" onclick="kjCheck()">${tr("Check","Prüfen","Comprobar")}</button></div>`}
+    ${fb}${hint}</div>`;
+};
+
 VIEWS.games = function(){
   return `<h2>${tr("Games","Spiele","Juegos")}</h2>
   <p class="sub">${tr("Speaking games for 2–10 players.","Sprechspiele für 2–10 Personen.","Juegos de conversación para 2–10 jugadores.")}</p>
@@ -10797,6 +10892,8 @@ VIEWS.games = function(){
     <button class="btn primary" onclick="bbOpen()">${tr("Play","Spielen","Jugar")}</button></div>
   <div class="card"><h3>✂️ ${tr("Split or Stick?","Trennen oder kleben?","¿Se separa o se pega?")} <span class="note" style="font-weight:600">· 🇩🇪 ${tr("solo, German only","allein, nur Deutsch","solo, solo alemán")}</span></h3><p class="note">${tr("Prefix verbs like einsteigen, ankommen, besuchen: does the prefix split off or stay stuck? Swipe fast, 10 seconds per card.","Verben wie einsteigen, ankommen, besuchen: Wird das Präfix getrennt oder bleibt es dran? Schnell wischen, 10 Sekunden pro Karte.","Verbos como einsteigen, ankommen, besuchen: ¿el prefijo se separa o se queda pegado? Desliza rápido, 10 segundos por tarjeta.")}</p>
     <button class="btn primary" onclick="ssOpen()">${tr("Play","Spielen","Jugar")}</button></div>
+  <div class="card"><h3>✍️ Konjugier mal! <span class="note" style="font-weight:600">· 🇩🇪 ${tr("solo, German only","allein, nur Deutsch","solo, solo alemán")}</span></h3><p class="note">${tr("Conjugate verbs, then build the question for an answer. 5 levels: regular, irregular, modal and separable verbs, Perfekt.","Verben konjugieren, dann die Frage zu einer Antwort bauen. 5 Level: regelmäßig, unregelmäßig, Modalverben, trennbare Verben, Perfekt.","Conjuga verbos y luego construye la pregunta para una respuesta. 5 niveles: regulares, irregulares, modales, separables y Perfekt.")}</p>
+    <button class="btn primary" onclick="kjOpen()">${tr("Play","Spielen","Jugar")}</button></div>
   <div class="card"><h3>📖 ${tr("Easy reads","Lesen","Lecturas fáciles")} <span class="note" style="font-weight:600">· 🇩🇪 A1–C1</span></h3><p class="note">${tr("Short stories with Pía, Bruno and friends. One sentence at a time, with the meaning and sentence parts.","Kurze Geschichten mit Pía, Bruno und Freunden. Satz für Satz, mit Bedeutung und Satzteilen.","Historias cortas con Pía, Bruno y sus amigos. Frase a frase, con significado y partes de la frase.")}</p>
     <button class="btn primary" onclick="rdOpen()">${tr("Read","Lesen","Leer")}</button></div>
   <div class="card"><h3>📅 ${tr("Game nights","Spieleabende","Noches de juegos")}</h3><p class="note">${tr("Join a scheduled game session with people from around the world.","Mach bei einem geplanten Spieleabend mit Leuten aus aller Welt mit.","Únete a una sesión de juego programada con gente de todo el mundo.")}</p>
