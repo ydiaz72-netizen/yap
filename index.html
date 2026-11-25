@@ -954,7 +954,7 @@
 <script>/* Extra interface languages live in /i18n/<code>.js (English text → translation). Load the chosen one before the app starts. */
 (function(){ try{ var X=["tr","uk","fa","ur"], v=localStorage.getItem("pt_ui");
   if(!v){ var n=String((navigator.languages&&navigator.languages[0])||navigator.language||"").slice(0,2).toLowerCase(); if(X.indexOf(n)>-1) v=n; }
-  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=46"><\/script>'); }catch(e){} })();</script>
+  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=47"><\/script>'); }catch(e){} })();</script>
 
 <script>
 /* ===================== CONTENT ===================== */
@@ -1384,7 +1384,7 @@ function bi(en,de,es){ if(es!==undefined) return tr(en,de,es); return `${en} <sp
 function uiSet(l){
   if(!UI_CODES.includes(l)) return;
   if(UI_EXTRA.includes(l) && !I18N_DATA[l]){
-    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=46";
+    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=47";
     sc.onload=()=>uiSet(l); sc.onerror=()=>bToast(offlineMsg()); document.head.appendChild(sc); return;
   }
   UI=l; I18N_T=null; I18N_M.clear();
@@ -10762,7 +10762,7 @@ VIEWS.split = function(){
       <button class="chip ${lv===1?"on":""}" style="flex:1" onclick="SS.lvl=1;xr()">🟢 ${tr("Easy","Leicht","Fácil")}${SS.s.best[1]?` · ⭐ ${SS.s.best[1]}`:""}</button>
       <button class="chip ${lv===2?"on":""}" style="flex:1" onclick="SS.lvl=2;xr()">🟠 ${tr("Mix","Mix","Mezcla")}${SS.s.best[2]?` · ⭐ ${SS.s.best[2]}`:""}</button></div>
     <p class="note" style="margin:0 0 10px">${lv===1?tr("Present tense vs. modal verbs.","Präsens oder Modalverb.","Presente o verbo modal."):tr("Adds weil/dass/wenn, Perfekt, zu and be- verbs.","Dazu weil/dass/wenn, Perfekt, zu und be-Verben.","Añade weil/dass/wenn, Perfekt, zu y verbos con be-.")}</p>
-    <button class="btn primary" onclick="ssStart()">${tr("Play","Spielen","Jugar")} · ${SS_N} ${tr("cards","Karten","tarjetas")}</button>`;
+    <button class="btn primary" onclick="ssStart()">${playLbl()} · ${SS_N} ${tr("cards","Karten","tarjetas")}</button>`;
   if(SS.done){ const n=SS.q.length, ok=n-SS.miss.length, rec=SS.pts>=(SS.s.best[lv]||0);
     return top+`<div class="card center"><div style="font-size:44px">${ok===n?"🏅":ok>=11?"🎉":"💪"}</div>
       <h2 style="margin:4px 0">${ok===n?tr("Prefix Master!","Präfix-Profi!","¡Maestro/a de prefijos!"):ok>=11?tr("Great job!","Super gemacht!","¡Muy bien!"):tr("Keep practicing","Weiter üben","Sigue practicando")}</h2>
@@ -10840,11 +10840,13 @@ function kjCheck(){ const it=KJ.q&&KJ.q[KJ.i]; if(!it||KJ.ans) return; let right
 function kjNext(){ if(KJ.lives>0&&KJ.i+1<KJ.q.length){ KJ.i++; KJ.ans=null; KJ.placed=[]; xr(); kjFocus(); return; }
   kjLoad(); const r=KJ.ok/KJ.q.length, st=KJ.lives<=0?0:r>=.9?3:r>=.7?2:r>=.5?1:0; KJ.stars=st;
   KJ.s.stars[KJ.lv]=Math.max(KJ.s.stars[KJ.lv]||0,st); KJ.s.plays=(KJ.s.plays||0)+1; kjSave(); KJ.done=true; xr(); }
+function kjName(){ const n=tr("Conjugate!","Konjugier mal!","¡Conjuga!"); return UI==="de"?n:`${esc(n)} <span class="note" style="font-weight:600" lang="de">· Konjugier mal!</span>`; }
+function playLbl(){ return UI_EXTRA.includes(UI)?trX("Play (game)"):tr("Play","Spielen","Jugar"); }
 function kjStars(n){ return [1,2,3].map(i=>i<=n?"⭐":"☆").join(""); }
 VIEWS.conj = function(){
   kjLoad(); const L=KJ_LV[KJ.lv], live=KJ.q&&!KJ.done;
   const top=`<div class="topline"><button class="chip" onclick="${live?"KJ.q=null;xr()":"KJ.q=null;KJ.done=false;go('games')"}">${uiBack()} ${live?tr("Stop","Stopp","Parar"):tr("Games","Spiele","Juegos")}</button><span>${live?`${KJ.i+1} / ${KJ.q.length} · ⭐ ${KJ.pts} · ${"❤️".repeat(Math.max(0,KJ.lives))}${KJ.run>1?` · 🔥 ${KJ.run}`:""}`:"🇩🇪 "+tr("German only","Nur Deutsch","Solo alemán")}</span></div>`;
-  if(!KJ.q) return top+`<h2 style="margin:4px 0">✍️ Konjugier mal!</h2>
+  if(!KJ.q) return top+`<h2 style="margin:4px 0">✍️ ${kjName()}</h2>
     <p class="sub" style="margin:0 0 10px">${tr("Each level: first conjugate verbs, then build the right question for an answer. 3 lives, streaks give bonus points.","Jedes Level: erst Verben konjugieren, dann die passende Frage zu einer Antwort bauen. 3 Leben, Serien geben Bonuspunkte.","Cada nivel: primero conjuga verbos y luego construye la pregunta para una respuesta. 3 vidas; las rachas dan puntos extra.")}</p>
     ${KJ_LV.map((l,i)=>`<button class="card rdcard" onclick="kjStart(${i})"><span style="font-size:28px">${l.e}</span><span style="flex:1;min-width:0;text-align:start"><b style="display:block">${i+1}. ${esc(tr(...l.n))}</b><span class="note" style="margin:0" lang="de" dir="ltr">${esc(l.sub)}</span></span><span aria-label="${KJ.s.stars[i]||0}/3">${kjStars(KJ.s.stars[i]||0)}</span></button>`).join("")}
     <p class="note">${tr("Tip: umlauts also work as ae / oe / ue / ss.","Tipp: Umlaute gehen auch als ae / oe / ue / ss.","Consejo: las diéresis también valen como ae / oe / ue / ss.")}</p>`;
@@ -10889,11 +10891,11 @@ VIEWS.games = function(){
       <button class="btn secondary" onclick="O.err='';go('online')">${tr("Create or join a room","Raum erstellen oder beitreten","Crear o unirse a una sala")}</button></div>
   </div>
   <div class="card"><h3>🌉 ${tr("Bridge Builder","Brückenbauer","Constructor de puentes")} <span class="note" style="font-weight:600">· 🇩🇪 ${tr("solo, German only","allein, nur Deutsch","solo, solo alemán")}</span></h3><p class="note">${tr("Build German sentences from word tiles. The better the word order and the longer the sentence, the more points.","Bau deutsche Sätze aus Wort-Kärtchen. Je besser die Satzstellung und je länger der Satz, desto mehr Punkte.","Construye frases en alemán con fichas. Cuanto mejor el orden y más larga la frase, más puntos.")}</p>
-    <button class="btn primary" onclick="bbOpen()">${tr("Play","Spielen","Jugar")}</button></div>
+    <button class="btn primary" onclick="bbOpen()">${playLbl()}</button></div>
   <div class="card"><h3>✂️ ${tr("Split or Stick?","Trennen oder kleben?","¿Se separa o se pega?")} <span class="note" style="font-weight:600">· 🇩🇪 ${tr("solo, German only","allein, nur Deutsch","solo, solo alemán")}</span></h3><p class="note">${tr("Prefix verbs like einsteigen, ankommen, besuchen: does the prefix split off or stay stuck? Swipe fast, 10 seconds per card.","Verben wie einsteigen, ankommen, besuchen: Wird das Präfix getrennt oder bleibt es dran? Schnell wischen, 10 Sekunden pro Karte.","Verbos como einsteigen, ankommen, besuchen: ¿el prefijo se separa o se queda pegado? Desliza rápido, 10 segundos por tarjeta.")}</p>
-    <button class="btn primary" onclick="ssOpen()">${tr("Play","Spielen","Jugar")}</button></div>
-  <div class="card"><h3>✍️ Konjugier mal! <span class="note" style="font-weight:600">· 🇩🇪 ${tr("solo, German only","allein, nur Deutsch","solo, solo alemán")}</span></h3><p class="note">${tr("Conjugate verbs, then build the question for an answer. 5 levels: regular, irregular, modal and separable verbs, Perfekt.","Verben konjugieren, dann die Frage zu einer Antwort bauen. 5 Level: regelmäßig, unregelmäßig, Modalverben, trennbare Verben, Perfekt.","Conjuga verbos y luego construye la pregunta para una respuesta. 5 niveles: regulares, irregulares, modales, separables y Perfekt.")}</p>
-    <button class="btn primary" onclick="kjOpen()">${tr("Play","Spielen","Jugar")}</button></div>
+    <button class="btn primary" onclick="ssOpen()">${playLbl()}</button></div>
+  <div class="card"><h3>✍️ ${kjName()} <span class="note" style="font-weight:600">· 🇩🇪 ${tr("solo, German only","allein, nur Deutsch","solo, solo alemán")}</span></h3><p class="note">${tr("Conjugate verbs, then build the question for an answer. 5 levels: regular, irregular, modal and separable verbs, Perfekt.","Verben konjugieren, dann die Frage zu einer Antwort bauen. 5 Level: regelmäßig, unregelmäßig, Modalverben, trennbare Verben, Perfekt.","Conjuga verbos y luego construye la pregunta para una respuesta. 5 niveles: regulares, irregulares, modales, separables y Perfekt.")}</p>
+    <button class="btn primary" onclick="kjOpen()">${playLbl()}</button></div>
   <div class="card"><h3>📖 ${tr("Easy reads","Lesen","Lecturas fáciles")} <span class="note" style="font-weight:600">· 🇩🇪 A1–C1</span></h3><p class="note">${tr("Short stories with Pía, Bruno and friends. One sentence at a time, with the meaning and sentence parts.","Kurze Geschichten mit Pía, Bruno und Freunden. Satz für Satz, mit Bedeutung und Satzteilen.","Historias cortas con Pía, Bruno y sus amigos. Frase a frase, con significado y partes de la frase.")}</p>
     <button class="btn primary" onclick="rdOpen()">${tr("Read","Lesen","Leer")}</button></div>
   <div class="card"><h3>📅 ${tr("Game nights","Spieleabende","Noches de juegos")}</h3><p class="note">${tr("Join a scheduled game session with people from around the world.","Mach bei einem geplanten Spieleabend mit Leuten aus aller Welt mit.","Únete a una sesión de juego programada con gente de todo el mundo.")}</p>
