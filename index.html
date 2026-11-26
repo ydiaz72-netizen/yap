@@ -940,6 +940,7 @@
   .err{color:var(--coral);font-weight:700;font-size:14px;min-height:18px;margin-top:6px}
 .recrow{display:flex;align-items:center;gap:10px;width:100%;text-align:start;background:var(--bg,#FAF7F2);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin:6px 0 0;cursor:pointer;font:inherit;color:inherit}.recrow small{display:block;color:var(--muted,#5b6474);font-size:13px;margin-top:2px;font-weight:400}.recn{flex:0 0 26px;height:26px;border-radius:50%;background:var(--coral);color:#fff;font-weight:800;display:grid;place-items:center;font-size:14px}.recgo{font-size:22px;color:var(--coral);font-weight:700}
 .recrow.done{background:#E6F6EC;border-color:#9AD3B0}.recrow.done .recn{background:#1E8E5A}.recrow.done b{color:#1E6B45}.recbar{height:6px;background:var(--line);border-radius:99px;overflow:hidden;margin:6px 0 8px}.recbar i{display:block;height:100%;background:#1E8E5A;border-radius:99px;transition:width .4s}
+.hmopts{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.hmlv{display:flex;gap:4px;flex-wrap:wrap}.hmopts select{flex:1;min-width:140px;padding:8px 10px}.hmhint{text-align:center;margin:10px 0 6px;font-size:15px}.hmword{display:flex;justify-content:center;gap:5px;flex-wrap:wrap;margin:6px 0 2px}.hmslot{width:26px;height:34px;border-bottom:3px solid #1B2A41;display:flex;align-items:flex-end;justify-content:center;font-size:24px;font-weight:800;color:#1B2A41}.hmslot.miss{color:#C0392B}.hmkeys{display:flex;flex-direction:column;gap:5px}.hmrow{display:flex;justify-content:center;gap:4px}.hmkey{flex:0 1 32px;min-width:0;height:44px;border-radius:8px;border:1px solid var(--line);background:#fff;font:inherit;font-size:17px;font-weight:800;color:#1B2A41;cursor:pointer;padding:0}.hmkey.ok{background:#2A8C82;color:#fff;border-color:#2A8C82}.hmkey.no{background:#E5E1DA;color:#9AA0A8;text-decoration:line-through}.hmact{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px}.hmact .chip{min-height:44px;padding:0 14px}.hmend.win{border:2px solid #1E8E5A;background:#F0FAF4}.hmend.lose{border:2px solid #5DADE2;background:#EEF7FC}@keyframes hmdrop{to{transform:translateY(60px) rotate(25deg);opacity:0}}.hmdrop{animation:hmdrop .7s ease-in forwards;transform-box:fill-box;transform-origin:center}@keyframes hmfall{from{transform:translate(132px,40px)}to{transform:translate(132px,112px)}}.hmfall{animation:hmfall .6s ease-in}@keyframes hmhop{0%,100%{transform:translate(132px,40px)}50%{transform:translate(132px,18px)}}.hmhop{animation:hmhop .5s ease-in-out 2}@keyframes hmsplash{from{opacity:1;transform:scale(.3)}to{opacity:0;transform:scale(1.4)}}.hmsplash{animation:hmsplash .9s ease-out forwards;transform-box:fill-box;transform-origin:center}
 </style>
 </head>
 <body>
@@ -7963,6 +7964,7 @@ function recList(){
   R.push({ k:"gender", p:12, e:"🔵", t:L("Play der · die · das (20 nouns)","der · die · das spielen (20 Nomen)","Juega der · die · das (20 sustantivos)"), why:L(`Guess the article of ${VC.level} nouns.`,`Rate den Artikel von ${VC.level}-Nomen.`,`Adivina el artículo de sustantivos de ${VC.level}.`), go:"recVc('gender')" });
   if(learned) R.push({ k:"extra", p:11, e:"➕", t:L("Learn 5 extra words","5 Wörter extra lernen","Aprende 5 palabras extra"), why:L("Your daily goal is done. These are a bonus.","Dein Tagesziel ist geschafft. Das ist ein Bonus.","Tu meta diaria está hecha. Estas son extra."), go:"recExtra()" });
   try{ bbLoad(); if(BB.s.pts) R.push({ k:"bbfree", p:10, e:"🌉", t:L("Build 5 sentences in Bridge Builder","Bau 5 Sätze im Brückenbauer","Construye 5 frases en el Constructor de puentes"), why:L("Free play: any words, any order you like.","Freies Spiel: beliebige Wörter und Reihenfolge.","Juego libre: las palabras y el orden que quieras."), go:"bbOpen()" }); }catch(e){}
+  R.push({ k:"hm", p:8, e:"🌉", t:L("Save the Pal: guess 3 words","Rette den Pal: 3 Wörter erraten","Salva al Pal: adivina 3 palabras"), why:L("Word guessing with your flashcard words.","Wörterraten mit deinen Karteikarten-Wörtern.","Adivina palabras de tus tarjetas."), go:"hmOpen()" });
   if(lid.seen) R.push({ k:"mock", p:9, e:"🇩🇪", t:L("Leben in Deutschland mock test","Probetest Leben in Deutschland","Simulacro de Leben in Deutschland"), why:L(`33 questions like the real test (${Math.round(lid.ok/lid.seen*100)}% right so far).`,`33 Fragen wie im echten Test (bisher ${Math.round(lid.ok/lid.seen*100)}% richtig).`,`33 preguntas como en el examen real (${Math.round(lid.ok/lid.seen*100)}% bien hasta ahora).`), go:"exOpen().then(()=>exStart('mock'))" });
   return R.sort((a,b)=>b.p-a.p); }
 async function recExtra(){ await vcOpen(); if(!VC.d) return; const W=VC.d.words.filter(w=>w.lv===VC.level&&!(VC.p[w.id]&&VC.p[w.id].r)).slice(0,5);
@@ -10925,6 +10927,77 @@ VIEWS.conj = function(){
     ${fb}${hint}</div>`;
 };
 
+/* ---------- 🌉 Save the Pal: word guessing on a bridge. Each wrong letter drops a plank; 6 and the Pal falls in the water. Words come from the flashcard decks. ---------- */
+const HM={ s:null, lv:null, th:"", w:null, pal:"kiko", got:[], bad:[], hint:0, end:null, anim:"" };
+const HM_MAX=6, HM_ORDER=[0,5,1,4,2,3], HM_KEYS=["QWERTZUIOPÜ","ASDFGHJKLÖÄ","YXCVBNMß"];
+function hmLoad(){ if(HM.s) return; try{ HM.s=JSON.parse(localStorage.getItem("pt_hm")||"{}"); }catch(e){} HM.s=Object.assign({ win:0, lose:0, st:0, best:0, days:[] },HM.s||{}); }
+function hmSave(){ try{ localStorage.setItem("pt_hm",JSON.stringify(HM.s)); }catch(e){} }
+function hmUp(c){ return c==="ß"?"ß":c.toUpperCase(); }
+function hmBase(w){ return (w.w||"").replace(/^(der|die|das) /,""); }
+function hmOk(w){ const b=hmBase(w); return w.lv!=="MINE"&&/^[A-Za-zÄÖÜäöüß]{3,12}$/.test(b); }
+async function hmOpen(){ hmLoad(); HM.lv=HM.lv||VC.level||"A1"; if(!VC.d){ go("hangman"); try{ await vcLoadData(); }catch(e){} } hmNew(); Promise.all([DT.man===undefined?dtLoadManifest():null, MW.list===null?mwLoad():null]).then(()=>{ if(S.screen==="hangman") xr(); }).catch(()=>{}); }
+function hmNew(){ if(!VC.d){ go("hangman"); return; }
+  const pool=VC.d.words.filter(w=>w.lv===HM.lv&&(!HM.th||w.t===HM.th)&&hmOk(w)&&(!HM.w||w.id!==HM.w.id));
+  if(!pool.length){ HM.th=""; return hmNew(); }
+  const ks=Object.keys(PALS); Object.assign(HM,{ w:pool[Math.floor(Math.random()*pool.length)], pal:ks[Math.floor(Math.random()*ks.length)], got:[], bad:[], hint:0, end:null, anim:"" }); go("hangman"); }
+function hmLetters(){ return [...hmBase(HM.w)].map(hmUp); }
+function hmGuess(c){ if(HM.end||HM.got.includes(c)||HM.bad.includes(c)) return; const L=hmLetters();
+  if(L.includes(c)){ HM.got.push(c); HM.anim=""; } else { HM.bad.push(c); HM.anim="drop"; }
+  hmCheck(); xr(); }
+function hmHint(){ if(HM.end||HM.bad.length>=HM_MAX-1) return; const left=[...new Set(hmLetters())].filter(c=>!HM.got.includes(c)); if(!left.length) return;
+  HM.got.push(left[Math.floor(Math.random()*left.length)]); HM.bad.push("💡"); HM.hint++; HM.anim="drop"; hmCheck(); xr(); }
+function hmCheck(){ const L=hmLetters(), won=L.every(c=>HM.got.includes(c)), lost=HM.bad.length>=HM_MAX;
+  if(!won&&!lost) return; hmLoad(); HM.end=won?"win":"lose"; HM.anim=won?"win":"fall";
+  if(won){ HM.s.win++; HM.s.st++; HM.s.best=Math.max(HM.s.best,HM.s.st); } else { HM.s.lose++; HM.s.st=0; }
+  const t=bbDs(new Date()); if(!HM.s.days.includes(t)) HM.s.days=HM.s.days.concat([t]).slice(-60); hmSave(); recCount("hm",3); }
+async function hmMine(){ const w=HM.w; if(await mwAdd(w.w, vcTr(w), w.ex, "hangman")){ HM.mine=w.id; bToast(tr("Added to My words ✅","Zu Meine Wörter hinzugefügt ✅","Añadida a Mis palabras ✅")); xr(); } }
+function hmBridge(){ const gone=HM.bad.length, removed=new Set(HM_ORDER.slice(0,gone)), lastGone=gone?HM_ORDER[gone-1]:-1, fall=HM.end==="lose", win=HM.end==="win";
+  let planks=""; for(let i=0;i<6;i++){ const x=52+i*36.5; if(removed.has(i)){ if(i===lastGone&&HM.anim==="drop") planks+=`<rect class="hmdrop" x="${x}" y="98" width="34" height="10" rx="2" fill="#B07A45" stroke="#1B2A41" stroke-width="1.5"/>`; continue; }
+    planks+=`<rect x="${x}" y="98" width="34" height="10" rx="2" fill="#C68B52" stroke="#1B2A41" stroke-width="1.5"/>`; }
+  const palY=fall?112:40, palCls=fall?"hmfall":win?"hmhop":"";
+  return `<svg viewBox="0 0 320 172" width="100%" role="img" aria-label="${tr(`Bridge with ${6-gone} of 6 planks left`,`Brücke mit ${6-gone} von 6 Brettern`,`Puente con ${6-gone} de 6 tablas`)}" style="display:block;max-width:420px;margin:0 auto">
+    <rect x="0" y="0" width="320" height="172" rx="16" fill="#E8F4F8"/>
+    <path d="M0 140 Q20 134 40 140 T80 140 T120 140 T160 140 T200 140 T240 140 T280 140 T320 140 V172 H0Z" fill="#5DADE2"/>
+    <path d="M0 150 Q20 144 40 150 T80 150 T120 150 T160 150 T200 150 T240 150 T280 150 T320 150" fill="none" stroke="#fff" stroke-width="2" opacity=".6"/>
+    <path d="M0 96 H52 V172 H0Z" fill="#8CBF5A" stroke="#1B2A41" stroke-width="2"/><path d="M268 96 H320 V172 H268Z" fill="#8CBF5A" stroke="#1B2A41" stroke-width="2"/>
+    <path d="M0 96 H52 M268 96 H320" stroke="#5E9B3A" stroke-width="5"/>
+    <line x1="46" y1="70" x2="46" y2="100" stroke="#1B2A41" stroke-width="4"/><line x1="274" y1="70" x2="274" y2="100" stroke="#1B2A41" stroke-width="4"/>
+    <path d="M46 72 Q160 ${gone>=4?104:92} 274 72" fill="none" stroke="#6B4A2B" stroke-width="2.5"/>
+    ${planks}
+    ${fall?`<circle cx="160" cy="142" r="14" fill="none" stroke="#fff" stroke-width="3" class="hmsplash"/><circle cx="160" cy="142" r="24" fill="none" stroke="#fff" stroke-width="2" class="hmsplash" style="animation-delay:.15s"/>`:""}
+    <g class="${palCls}" transform="translate(132 ${palY})"><svg width="60" height="60" viewBox="0 0 100 100" aria-hidden="true">${PALS[HM.pal].s.replace(/'/g,'"')}</svg></g>
+    <text x="300" y="24" text-anchor="end" font-size="14" font-weight="800" fill="${gone>=4?"#C0392B":"#1B2A41"}">${"🪵".repeat(6-gone)}</text>
+  </svg>`; }
+VIEWS.hangman = function(){ hmLoad();
+  if(!VC.d) return `<p class="note center">…</p>`;
+  const w=HM.w, L=hmLetters(), P=PALS[HM.pal], m=(w.w||"").match(/^(der|die|das) /), lab=t=>{ const l=vcLang(); return l==="es"?t[2]:l==="ar"?t[3]:l==="fa"?t[4]:t[1]; };
+  const slots=L.map(c=>`<span class="hmslot ${HM.got.includes(c)?"on":""} ${HM.end==="lose"&&!HM.got.includes(c)?"miss":""}">${HM.got.includes(c)||HM.end?c:""}</span>`).join("");
+  const keys=HM_KEYS.map(r=>`<div class="hmrow">${[...r].map(c=>{ const st=HM.got.includes(c)?"ok":HM.bad.includes(c)?"no":""; return `<button class="hmkey ${st}" ${st||HM.end?"disabled":""} onclick="hmGuess('${c}')" aria-label="${c}">${c}</button>`; }).join("")}</div>`).join("");
+  const themes=Object.entries(VC.d.themes).filter(([k])=>VC.d.words.some(x=>x.lv===HM.lv&&x.t===k&&hmOk(x)));
+  return `<div class="topline"><button class="chip" onclick="go('games')">${uiBack()} ${tr("Games","Spiele","Juegos")}</button><span>🔥 ${HM.s.st} · ✅ ${HM.s.win}</span></div>
+  <h2 style="margin:4px 0 2px">🌉 ${tr("Save the Pal","Rette den Pal","Salva al Pal")}</h2>
+  <p class="note" style="margin:0 0 8px">${tr(`Guess the word before ${P.n} falls in the water. Each wrong letter drops a plank.`,`Errate das Wort, bevor ${P.n} ins Wasser fällt. Jeder falsche Buchstabe kostet ein Brett.`,`Adivina la palabra antes de que ${P.n} caiga al agua. Cada letra incorrecta quita una tabla.`)}</p>
+  <div class="hmopts"><div class="hmlv">${VC_LEVELS.map(l=>`<button class="chip ${l===HM.lv?"on":""}" onclick="HM.lv='${l}';HM.th='';hmNew()">${l}</button>`).join("")}</div>
+    <select class="input" aria-label="${tr("Topic","Thema","Tema")}" onchange="HM.th=this.value;hmNew()"><option value="">${tr("All topics","Alle Themen","Todos los temas")}</option>${themes.map(([k,t])=>`<option value="${k}" ${k===HM.th?"selected":""}>${t[0]} ${esc(lab(t))}</option>`).join("")}</select></div>
+  <div class="card" style="margin:8px 0;padding:12px">${hmBridge()}
+    <div class="hmhint">💡 <b>${esc(vcTr(w))}</b>${m?` · <span class="${m[1]}" style="font-weight:800">${m[1]}</span>`:""} · ${L.length} ${tr("letters","Buchstaben","letras")}</div>
+    <div class="hmword" lang="de">${slots}</div>
+    ${HM.bad.filter(x=>x!=="💡").length?`<div class="note center" style="margin:4px 0 0">${tr("Wrong","Falsch","Incorrectas")}: <b style="color:#C0392B;letter-spacing:2px">${HM.bad.filter(x=>x!=="💡").join(" ")}</b></div>`:""}
+  </div>
+  ${HM.end?`<div class="card hmend ${HM.end}">
+    <h3 style="margin:0 0 4px">${HM.end==="win"?`🎉 ${tr(`${P.n} is safe!`,`${P.n} ist gerettet!`,`¡${P.n} está a salvo!`)}`:`💦 ${tr(`Splash! ${P.n} fell in.`,`Platsch! ${P.n} ist ins Wasser gefallen.`,`¡Plaf! ${P.n} cayó al agua.`)}`}</h3>
+    <div style="font-size:22px;font-weight:800" lang="de">${vcWordHtml(w)}${w.pl&&!w.pl.startsWith("(")?` <span class="note" style="font-size:15px">· ${tr("plural","Plural","plural")}: ${esc(w.pl)}</span>`:""}</div>
+    <div style="color:var(--teal,#2A8C82);font-weight:700">${esc(vcTr(w))}</div>
+    ${w.ex?`<div class="note" lang="de" style="margin:6px 0 0">„${esc(w.ex)}“</div>`:""}
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+      ${vcClip(w)?`<button class="chip" onclick="vcSay(HM.w)">🔊 ${tr("Listen","Anhören","Escuchar")}</button>`:""}
+      ${HM.mine===w.id||mwHas(w.w)?`<span class="chip on">✅ ${tr("In My words","In Meine Wörter","En Mis palabras")}</span>`:`<button class="chip" onclick="hmMine()">➕ ${tr("My words","Meine Wörter","Mis palabras")}</button>`}
+    </div>
+    <button class="btn primary" style="width:100%;margin-top:12px" onclick="hmNew()">${tr("Next word","Nächstes Wort","Siguiente palabra")} →</button></div>`
+  :`<div class="hmkeys">${keys}</div>
+    <div class="hmact"><button class="chip" ${HM.bad.length>=HM_MAX-1?"disabled":""} onclick="hmHint()">💡 ${tr("Show a letter · −1 plank","Buchstabe zeigen · −1 Brett","Mostrar una letra · −1 tabla")}</button>
+    <button class="chip" onclick="hmNew()">⏭ ${tr("Skip","Überspringen","Saltar")}</button></div>`}
+  <p class="note center" style="margin-top:10px">${tr(`Best streak: ${HM.s.best} · Saved: ${HM.s.win} · Fell: ${HM.s.lose}`,`Beste Serie: ${HM.s.best} · Gerettet: ${HM.s.win} · Gefallen: ${HM.s.lose}`,`Mejor racha: ${HM.s.best} · Salvados: ${HM.s.win} · Caídas: ${HM.s.lose}`)}</p>`; };
 VIEWS.games = function(){
   return `<h2>${tr("Games","Spiele","Juegos")}</h2>
   <p class="sub">${tr("Speaking games for 2–10 players.","Sprechspiele für 2–10 Personen.","Juegos de conversación para 2–10 jugadores.")}</p>
@@ -10940,6 +11013,8 @@ VIEWS.games = function(){
     <button class="btn primary" onclick="ssOpen()">${playLbl()}</button></div>
   <div class="card"><h3>✍️ ${kjName()} <span class="note" style="font-weight:600">· 🇩🇪 ${tr("solo, German only","allein, nur Deutsch","solo, solo alemán")}</span></h3><p class="note">${tr("Conjugate verbs, then build the question for an answer. 5 levels: regular, irregular, modal and separable verbs, Perfekt.","Verben konjugieren, dann die Frage zu einer Antwort bauen. 5 Level: regelmäßig, unregelmäßig, Modalverben, trennbare Verben, Perfekt.","Conjuga verbos y luego construye la pregunta para una respuesta. 5 niveles: regulares, irregulares, modales, separables y Perfekt.")}</p>
     <button class="btn primary" onclick="kjOpen()">${playLbl()}</button></div>
+  <div class="card"><h3>🌉 ${tr("Save the Pal","Rette den Pal","Salva al Pal")} <span class="note" style="font-weight:600">· 🇩🇪 A1–C1</span></h3><p class="note">${tr("Guess the German word letter by letter. Wrong letters drop planks from the bridge!","Errate das deutsche Wort Buchstabe für Buchstabe. Falsche Buchstaben lassen Bretter fallen!","Adivina la palabra alemana letra por letra. ¡Las letras incorrectas quitan tablas del puente!")}</p>
+    <button class="btn primary" onclick="hmOpen()">${playLbl()}</button></div>
   <div class="card"><h3>📖 ${tr("Easy reads","Lesen","Lecturas fáciles")} <span class="note" style="font-weight:600">· 🇩🇪 A1–C1</span></h3><p class="note">${tr("Short stories with Pía, Bruno and friends. One sentence at a time, with the meaning and sentence parts.","Kurze Geschichten mit Pía, Bruno und Freunden. Satz für Satz, mit Bedeutung und Satzteilen.","Historias cortas con Pía, Bruno y sus amigos. Frase a frase, con significado y partes de la frase.")}</p>
     <button class="btn primary" onclick="rdOpen()">${tr("Read","Lesen","Leer")}</button></div>
   <div class="card"><h3>📅 ${tr("Game nights","Spieleabende","Noches de juegos")}</h3><p class="note">${tr("Join a scheduled game session with people from around the world.","Mach bei einem geplanten Spieleabend mit Leuten aus aller Welt mit.","Únete a una sesión de juego programada con gente de todo el mundo.")}</p>
