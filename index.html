@@ -793,6 +793,18 @@
   .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
   .fblink{font-weight:700;color:var(--coral);margin-bottom:6px}
   #tnav .tlogo .beta{font-size:10px;padding:2px 7px;margin-inline-start:2px}
+  .cstab{width:100%;border-collapse:collapse;font-size:14px;min-width:340px}
+  .cstab th,.cstab td{padding:7px 6px;border-bottom:1px solid var(--line);text-align:start;vertical-align:top}
+  .cstab thead th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+  .cstab thead small{display:block;text-transform:none;letter-spacing:0;font-weight:600}
+  .cstab mark{background:#FFE9B8;color:inherit;font-weight:800;border-radius:6px;padding:1px 5px;white-space:nowrap}
+  .csl{margin:10px 0 8px;padding-inline-start:4px;list-style:none}.csl li{margin:6px 0;line-height:1.45}
+  .cslv{display:flex;flex-wrap:wrap;gap:6px}.cslv .chip{min-height:44px}
+  .cssent{font-size:24px;font-weight:700;line-height:1.4;margin:6px 0}
+  .csgap{display:inline-block;min-width:56px;border-bottom:3px solid var(--coral);color:transparent}
+  .csans{border-bottom:3px solid currentColor}
+  .csopts{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:8px;margin-top:10px}.csopts .exopt{text-align:center;font-weight:800;font-size:18px;margin:0}
+  .cswhy{background:#F3EFE8;border-radius:12px;padding:10px 12px;margin-top:8px;line-height:1.5}
   .beta-note{display:block;font-size:12px;margin-top:8px;color:var(--muted)}
   .hero{position:relative;text-align:center;padding:8px 0 4px;margin-bottom:6px}
   .blob{position:absolute;border-radius:50%;filter:blur(36px);opacity:.55;z-index:-1}
@@ -963,7 +975,7 @@
 <script>/* Extra interface languages live in /i18n/<code>.js (English text → translation). Load the chosen one before the app starts. */
 (function(){ try{ var X=["tr","uk","fa","ur"], v=localStorage.getItem("pt_ui");
   if(!v){ var n=String((navigator.languages&&navigator.languages[0])||navigator.language||"").slice(0,2).toLowerCase(); if(X.indexOf(n)>-1) v=n; }
-  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=51"><\/script>'); }catch(e){} })();</script>
+  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=52"><\/script>'); }catch(e){} })();</script>
 
 <script>
 /* ===================== CONTENT ===================== */
@@ -1393,7 +1405,7 @@ function bi(en,de,es){ if(es!==undefined) return tr(en,de,es); return `${en} <sp
 function uiSet(l){
   if(!UI_CODES.includes(l)) return;
   if(UI_EXTRA.includes(l) && !I18N_DATA[l]){
-    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=51";
+    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=52";
     sc.onload=()=>uiSet(l); sc.onerror=()=>bToast(offlineMsg()); document.head.appendChild(sc); return;
   }
   UI=l; I18N_T=null; I18N_M.clear();
@@ -8726,6 +8738,7 @@ function vcStart(mode, theme){
   if(mode==="gender"){ const gr=GT_RULES[VC.gtRule], gg=VC.gtG; VC.gtRule=null; VC.gtG=null;
     const pool=W.filter(w=>vcNoun(w)&&w.lv!=="MINE"&&(gr?gtRule(w)===gr:gg?(gtRule(w)||{}).g===gg:w.lv===VC.level));
     for(const w of exShuffle(pool).slice(0,gr?15:20)) list.push({ id:w.id, type:"gender" }); }
+  else if(mode==="case"){ list.push(...csBuild(VC.csLv||"akk")); }
   else if(mode==="tricky"){ for(const w of exShuffle(W.filter(w=>{ const x=VC.p[w.id]; return x&&x.r&&(x.l||0)>=2; })).slice(0,20)) list.push({ id:w.id, type:Math.random()<.5?"flip":"pick" }); }
   else {
     const due=W.filter(w=>{ const x=VC.p[w.id]; return x&&x.r&&x.d<=now&&(!theme||w.t===theme); }).sort((a,b)=>VC.p[a.id].d-VC.p[b.id].d).slice(0,60);
@@ -8736,10 +8749,10 @@ function vcStart(mode, theme){
     for(const w of fresh) list.push({ id:w.id, type:"new" });
     if(!list.length&&!theme) for(const w of W.filter(w=>w.lv===VC.level&&!(VC.p[w.id]&&VC.p[w.id].r)).slice(0,VC.goal)) list.push({ id:w.id, type:"new" }); // extra words on request
   }
-  if(!list.length){ bToast(mode==="gender"?tr("Nothing yet","Noch nichts","Aún nada"):tr("All done for today 🎉","Für heute alles erledigt 🎉","Todo hecho por hoy 🎉")); return; }
-  VC.run={ list:mode==="gender"?list:[...list.filter(c=>c.type!=="new").slice(0,10), ...list.filter(c=>c.type==="new"), ...list.filter(c=>c.type!=="new").slice(10)], i:0, show:false, pick:null, ok:0, n:0, mode, seen:{} };
+  if(!list.length){ bToast(mode==="gender"||mode==="case"?tr("Nothing yet","Noch nichts","Aún nada"):tr("All done for today 🎉","Für heute alles erledigt 🎉","Todo hecho por hoy 🎉")); return; }
+  VC.run={ list:mode==="gender"||mode==="case"?list:[...list.filter(c=>c.type!=="new").slice(0,10), ...list.filter(c=>c.type==="new"), ...list.filter(c=>c.type!=="new").slice(10)], i:0, show:false, pick:null, ok:0, n:0, mode, seen:{} };
   go("vocabq");
-  let seen=false; try{ seen=!!localStorage.getItem("pt_vc_how"); }catch(e){} if(!seen&&mode!=="gender") setTimeout(vcHow,250);
+  let seen=false; try{ seen=!!localStorage.getItem("pt_vc_how"); }catch(e){} if(!seen&&mode!=="gender"&&mode!=="case") setTimeout(vcHow,250);
 }
 function vcOpts(w){ const pool=VC.d.words.filter(x=>x.id!==w.id&&x.t===w.t), more=VC.d.words.filter(x=>x.id!==w.id);
   const o=exShuffle(pool.length>=3?pool:more).slice(0,3); return exShuffle([w,...o]); }
@@ -8768,6 +8781,17 @@ VIEWS.vocabq = function(){
       ${c.opts.map((o,k)=>{ let cl=""; if(r.pick!==null){ if(o.id===w.id) cl="ok"; else if(k===r.pick) cl="no"; }
         return `<button class="exopt ${cl}" ${r.pick!==null?"disabled":""} onclick="vcPick(${k})"><span lang="${c.type==="listen"?"":"de"}" dir="${c.type==="listen"?dir:"auto"}">${c.type==="listen"?esc(vcTr(o)):vcWordHtml(o)}</span></button>`; }).join("")}
       ${r.pick!==null?`<div class="vccard" style="min-height:0;margin-top:10px"><div class="vcw" style="font-size:26px" lang="de">${vcWordHtml(w)} ${vcSpk(w)}</div>${reveal}</div><button class="btn primary qbtn" style="margin-top:10px" onclick="vcNext()">${tr("Next →","Weiter →","Siguiente →")}</button>`:""}`;
+  } else if(c.type==="case"){
+    const noun=w.w.replace(/^(der|die|das) /,""), done=r.pick!==null, okk=done&&c.opts[r.pick]===c.ans, lab=(CS_LV.find(x=>x[0]===VC.csLv)||CS_LV[0]);
+    const gap=done?`<b class="csans" style="color:${GT_COL[w.g]}">${c.ans}</b>`:`<span class="csgap">___</span>`;
+    const sent=esc(c.t).replace("___",gap).replace("{N}",`<span class="csn">${esc(noun)}</span>`);
+    h+=`<div class="vccard" style="min-height:190px"><div class="ecmeta">${lab[1]} ${tr("Which article?","Welcher Artikel?","¿Qué artículo?")} · ${tr(lab[2],lab[3],lab[4])}</div>
+      <div class="cssent" lang="de" dir="ltr">${sent.charAt(0)==="<"?sent:sent}</div>
+      <div class="note" style="margin-top:6px">💡 <span lang="de" dir="ltr" style="unicode-bidi:isolate">${vcWordHtml(w)}</span> · <span dir="${dir}">${esc(vcTr(w))}</span></div></div>
+      <div class="csopts">${c.opts.map((o,k)=>{ let cl=""; if(done){ if(o===c.ans) cl="ok"; else if(k===r.pick) cl="no"; } return `<button class="exopt ${cl}" ${done?"disabled":""} onclick="vcPick(${k})" lang="de">${o}</button>`; }).join("")}</div>
+      ${done?`<div class="${okk?"ok":"err"}" style="margin-top:10px">${okk?"✅ Richtig!":"❌ "+tr("Not quite","Nicht ganz","Casi")}</div>
+        <div class="cswhy">${csWhy(c)}<div class="note" style="margin-top:4px">${csRule(c)}</div></div>
+        <button class="btn primary qbtn" style="margin-top:10px" onclick="vcNext()">${tr("Next →","Weiter →","Siguiente →")}</button>`:""}`;
   } else if(c.type==="gender"){
     const noun=w.w.replace(/^(der|die|das) /,"");
     h+=`<div class="vccard" style="min-height:180px"><div class="ecmeta">${tr("der, die or das?","der, die oder das?","¿der, die o das?")}</div><div class="vcw${vcSize(w)}" lang="de">${r.pick!==null?vcWordHtml(w):`<span style="color:#9AA1AC">___</span> ${esc(noun)}`}</div>
@@ -8781,13 +8805,14 @@ function vcRate(g){ const r=VC.run, c=r.list[r.i]; vcGrade(c.id,g); r.n++; if(g>
   if(g===0&&!r.seen[c.id]){ r.seen[c.id]=1; r.list.splice(Math.min(r.list.length, r.i+4), 0, { id:c.id, type:"flip" }); }
   vcNext(true); }
 function vcPick(k){ const r=VC.run, c=r.list[r.i], w=VC.byId[c.id]; if(r.pick!==null) return; r.pick=k;
-  const ok=c.type==="gender"?["der","die","das"][k]===w.g:c.opts[k].id===w.id;
-  if(r.mode==="gender"){ r.n++; if(ok) r.ok++; const t=vcToday(), dd=VC.days[t]||(VC.days[t]={ n:0,c:0,w:0 }); dd.n++; if(ok) dd.c++; VC.dayDirty=true; }
+  const ok=c.type==="case"?c.opts[k]===c.ans:c.type==="gender"?["der","die","das"][k]===w.g:c.opts[k].id===w.id;
+  if(c.type==="case") csAdd(c.c,ok);
+  if(r.mode==="gender"||r.mode==="case"){ r.n++; if(ok) r.ok++; const t=vcToday(), dd=VC.days[t]||(VC.days[t]={ n:0,c:0,w:0 }); dd.n++; if(ok) dd.c++; VC.dayDirty=true; }
   else { vcGrade(c.id, ok?2:0); r.n++; if(ok) r.ok++; if(!ok&&!r.seen[c.id]){ r.seen[c.id]=1; r.list.splice(Math.min(r.list.length, r.i+4), 0, { id:c.id, type:"flip" }); } }
   if(ok&&vcClip(w)) vcSay(w); xr(); }
 function vcNext(){ const r=VC.run; exHush(); r.i++; r.show=false; r.pick=null; if(r.i>=r.list.length){ vcFinish(); return; } xr(); }
 function vcQuit(){ exHush(); const r=VC.run; if(r&&r.n) vcFinish(); else { VC.run=null; go("vocab"); } }
-async function vcFinish(){ const r=VC.run; recMark(r.mode==="tricky"?"tricky":r.mode==="gender"?"gender":r.mode==="extra"?"extra":"vc"); VC.res={ n:r.n, ok:r.ok, mode:r.mode }; VC.run=null; go("vocabr"); await vcFlush(); }
+async function vcFinish(){ const r=VC.run; recMark(r.mode==="tricky"?"tricky":r.mode==="gender"?"gender":r.mode==="case"?"case":r.mode==="extra"?"extra":"vc"); VC.res={ n:r.n, ok:r.ok, mode:r.mode }; VC.run=null; go("vocabr"); await vcFlush(); }
 VIEWS.vocabr = function(){
   const x=VC.res||{ n:0, ok:0 }, st=vcStats(), sk=vcStreak();
   return `<div class="topline"><button class="chip" onclick="go('vocab')">${uiBack()} ${tr("Vocabulary","Wortschatz","Vocabulario")}</button><span></span></div>
@@ -8796,6 +8821,60 @@ VIEWS.vocabr = function(){
       ${(()=>{ const s2=vcStats(vcLv(VC.level)); return `<p class="note">${VC.level}: ${tr(`${s2.learned} of ${s2.total} words learned · ${s2.mastered} mastered`,`${s2.learned} von ${s2.total} Wörtern gelernt · ${s2.mastered} sicher`,`${s2.learned} de ${s2.total} palabras aprendidas · ${s2.mastered} dominadas`)}</p>`; })()}
       <div class="row" style="gap:8px;justify-content:center;margin-top:10px"><button class="btn primary" onclick="vcStart('learn')">${tr("Keep going","Weiter","Seguir")}</button><button class="btn secondary" onclick="go('vocab')">${tr(`Done`,`Fertig`,`Hecho`)}</button></div></div>`;
 };
+/* ---------- 🧩 der → den → dem: articles in sentences (Nominativ · Akkusativ · Dativ). Nouns come from the flashcard decks. ---------- */
+const CS_ART={ def:{ nom:{ der:"der", die:"die", das:"das" }, akk:{ der:"den", die:"die", das:"das" }, dat:{ der:"dem", die:"der", das:"dem" } },
+               ind:{ nom:{ der:"ein", die:"eine", das:"ein" }, akk:{ der:"einen", die:"eine", das:"ein" }, dat:{ der:"einem", die:"einer", das:"einem" } } };
+/* {N} = noun; w = word that decides the case (shown in the explanation); p = only for people */
+const CS_T={
+  nom:[{ t:"___ {N} ist neu.", w:"" },{ t:"Wo ist ___ {N}?", w:"" },{ t:"___ {N} gefällt mir.", w:"" }],
+  akk:[{ t:"Ich finde ___ {N} gut.", w:"finden" },{ t:"Kennst du ___ {N}?", w:"kennen" },{ t:"Ich mag ___ {N}.", w:"mögen" },{ t:"Wir brauchen ___ {N}.", w:"brauchen" },
+       { t:"Ich sehe ___ {N}.", w:"sehen" },{ t:"Das ist für ___ {N}.", w:"für" },{ t:"Es gibt ___ {N}.", w:"es gibt", ind:1 },{ t:"Ich besuche ___ {N}.", w:"besuchen", p:1 }],
+  dat:[{ t:"Ich spreche mit ___ {N}.", w:"mit", p:1 },{ t:"Was machst du mit ___ {N}?", w:"mit" },{ t:"Ich bin zufrieden mit ___ {N}.", w:"mit" },
+       { t:"Ich helfe ___ {N}.", w:"helfen", p:1 },{ t:"Ich danke ___ {N}.", w:"danken", p:1 },{ t:"Das gehört ___ {N}.", w:"gehören", p:1 }]
+};
+const CS_WEAK=/(e|ent|ant|ist|at|oge|graf)$/i, CS_WEAKW=["Herr","Mensch","Nachbar","Bauer","Held","Prinz","Bär","Fürst","Kunde","Junge","Name","Gedanke","Glaube","Buchstabe"];
+const CS_LV=[["akk","🟦","Akkusativ","Akkusativ","Acusativo"],["dat","🟧","Dativ","Dativ","Dativo"],["ind","🟪","ein · einen · einem","ein · einen · einem","ein · einen · einem"],["mix","🎲","Everything mixed","Alles gemischt","Todo mezclado"]];
+const CS_PERSON=/\b(mother|father|parent|friend|teacher|doctor|brother|sister|child|son|daughter|man|woman|wife|husband|neighbou?r|colleague|boss|partner|grand(mother|father|ma|pa)|aunt|uncle|cousin|baby|girl|boy|student|pupil|waiter|waitress|customer|guest|driver|nurse|cook|chef|seller|salesperson|employee|employer|manager|owner|tenant|landlord|landlady|lawyer|police(man|woman)?|officer|baker|farmer|artist|actor|actress|singer|engineer|mechanic|dentist|pharmacist|patient|tourist|passenger|person|people|lady|gentleman|family)\b/i;
+function csPerson(w){ return CS_PERSON.test((w.tr&&w.tr.en)||""); }
+function csNounOk(w){ if(!vcNoun(w)||w.lv==="MINE") return false; const n=(w.w||"").replace(/^(der|die|das) /,""); if(!/^[A-ZÄÖÜ][a-zäöüß]+$/.test(n)) return false;
+  if(w.g==="der"&&(CS_WEAK.test(n)||CS_WEAKW.includes(n))) return false; return true; }
+function csLoad(){ try{ return JSON.parse(localStorage.getItem("pt_case")||"{}"); }catch(e){ return {}; } }
+function csAdd(c,ok){ const s=csLoad(), x=s[c]||[0,0]; x[1]++; if(ok) x[0]++; s[c]=x; try{ localStorage.setItem("pt_case",JSON.stringify(s)); }catch(e){} }
+function csBuild(lv){ const W=VC.d.words, lvs=VC_LEVELS.slice(0,Math.max(1,VC_LEVELS.indexOf(VC.level)+1));
+  const all=exShuffle(W.filter(w=>csNounOk(w)&&lvs.includes(w.lv))), m=all.filter(w=>w.g==="der"), o=all.filter(w=>w.g!=="der"), pool=[], out=[];
+  while(m.length||o.length){ if(m.length) pool.push(m.pop()); if(o.length) pool.push(o.pop()); }   /* masculine is where the article changes, so about half the nouns are der */
+  for(const w of pool){ if(out.length>=15) break;
+    const people=csPerson(w), ind=lv==="ind"||(lv==="mix"&&Math.random()<.35);
+    let cases=lv==="akk"?["akk","akk","akk","nom"]:lv==="dat"?["dat","dat","dat","akk","nom"]:["nom","akk","akk","dat","dat"];
+    const c=cases[Math.floor(Math.random()*cases.length)];
+    const ts=CS_T[c].filter(t=>(!t.p||people)&&(!t.ind||ind)); if(!ts.length) continue;
+    const t=ts[Math.floor(Math.random()*ts.length)], k=ind||t.ind?"ind":"def";
+    const opts=k==="ind"?["ein","eine","einen","einem","einer"]:lv==="akk"?["der","die","das","den"]:["der","die","das","den","dem"];
+    out.push({ id:w.id, type:"case", c, k, t:t.t, why:t.w, ans:CS_ART[k][c][w.g], opts }); }
+  return out; }
+function csStart(lv){ if(!VC.d) return; VC.csLv=lv||VC.csLv||"akk"; vcStart("case"); }
+function csWhy(c){ const n=c.c, w=VC.byId[c.id], noun=(w.w||"").replace(/^(der|die|das) /,""), g=w.g, from=CS_ART[c.k].nom[g];
+  const caseN=n==="nom"?"Nominativ":n==="akk"?"Akkusativ":"Dativ", q=n==="nom"?tr("Who/what?","Wer/Was?","¿Quién/qué?"):n==="akk"?tr("Whom/what?","Wen/Was?","¿A quién/qué?"):tr("To/with whom?","Wem?","¿A/con quién?");
+  const trig=n==="nom"?tr("It's the subject","Es ist das Subjekt","Es el sujeto"):`<b lang="de">${esc(c.why)}</b>`;
+  return `${trig} → <b>${caseN}</b> <span class="note">(${q})</span> · <span lang="de"><b style="color:${GT_COL[g]}">${g}</b> ${esc(noun)}: ${from} → <b style="color:${GT_COL[g]}">${c.ans}</b></span>`; }
+function csRule(c){ return c.c==="akk"?tr("Akkusativ: only masculine changes (der → den, ein → einen).","Akkusativ: nur maskulin ändert sich (der → den, ein → einen).","Acusativo: solo cambia el masculino (der → den, ein → einen).")
+  :c.c==="dat"?tr("Dativ: der/das → dem, die → der, plural → den + -n.","Dativ: der/das → dem, die → der, Plural → den + -n.","Dativo: der/das → dem, die → der, plural → den + -n.")
+  :tr("Nominativ: the subject keeps der, die, das.","Nominativ: Das Subjekt behält der, die, das.","Nominativo: el sujeto mantiene der, die, das."); }
+function csCard(){ const st=csLoad(), pct=k=>{ const x=st[k]; return x&&x[1]?` · ${Math.round(x[0]/x[1]*100)}%`:""; };
+  const row=(lab,a,b,c)=>`<tr><th scope="row">${lab}</th><td>${a}</td><td>${b}</td><td>${c}</td></tr>`, B=(g,t)=>`<b style="color:${GT_COL[g]}">${t}</b>`;
+  return `<div class="card" id="cases" style="border-top:5px solid #2F4B7C"><h3 style="margin:0 0 4px">🧩 der → den → dem</h3>
+    <p class="note" style="margin:0 0 8px">${tr("The article changes with its job in the sentence. Ask the question to find the case.","Der Artikel ändert sich mit seiner Rolle im Satz. Stell die Frage, dann findest du den Fall.","El artículo cambia según su función en la frase. Haz la pregunta para encontrar el caso.")}</p>
+    <div style="overflow-x:auto"><table class="cstab" lang="de" dir="ltr"><thead><tr><th></th><th>Nominativ<small>${tr("Who? Wer?","Wer?","¿Quién? Wer?")}</small></th><th>Akkusativ<small>${tr("Whom/what? Wen?","Wen? Was?","¿Qué? Wen?")}</small></th><th>Dativ<small>${tr("To whom? Wem?","Wem?","¿A quién? Wem?")}</small></th></tr></thead><tbody>
+      ${row(B("der","der ♂"),"der · ein",`<mark>den · einen</mark>`,`<mark>dem · einem</mark>`)}
+      ${row(B("die","die ♀"),"die · eine","die · eine",`<mark>der · einer</mark>`)}
+      ${row(B("das","das ⚪"),"das · ein","das · ein",`<mark>dem · einem</mark>`)}
+      ${row("Plural","die · keine","die · keine",`<mark>den (+ -n)</mark>`)}</tbody></table></div>
+    <ul class="csl">
+      <li>💡 ${tr("Akkusativ: only <b>masculine</b> changes.","Akkusativ: nur <b>maskulin</b> ändert sich.","Acusativo: solo cambia el <b>masculino</b>.")}</li>
+      <li>🟦 ${tr("Akkusativ after","Akkusativ nach","Acusativo después de")} <span lang="de" dir="ltr"><b>haben, sehen, brauchen, kaufen, mögen, finden, es gibt</b> · <b>für, ohne, durch, gegen, um</b></span></li>
+      <li>🟧 ${tr("Dativ after","Dativ nach","Dativo después de")} <span lang="de" dir="ltr"><b>mit, aus, bei, von, zu, nach, seit</b> · <b>helfen, danken, gefallen, gehören</b></span></li>
+      <li>🗣️ ${tr("Class tip: answer with one sentence + <b>weil</b>.","Tipp aus dem Kurs: Antworte mit einem Satz + <b>weil</b>.","Consejo de clase: responde con una frase + <b>weil</b>.")} <span lang="de" dir="ltr" class="note">(Ich mag <b>den</b> Winter, weil ich Schnee liebe.)</span></li></ul>
+    <div class="cslv">${CS_LV.map(([k,e,en,de,es],i)=>`<button class="chip" onclick="csStart('${k}')">${e} ${i+1} · ${tr(en,de,es)}${k==="akk"||k==="dat"?pct(k):""}</button>`).join("")}</div></div>`; }
 /* ---------- der · die · das tips (ending rules, counted from our own word lists) ---------- */
 const GT_RULES=[
   { g:"die", e:"-ung", rx:/ung$/, how:"always" },
@@ -8864,7 +8943,8 @@ VIEWS.vocabg = function(){
   const li=(g,t,ex)=>`<li style="margin:4px 0"><b style="color:${GT_COL[g]}">${g}</b>: ${t} <span lang="de" dir="ltr" class="note" style="unicode-bidi:isolate;display:inline-block">(${ex})</span></li>`;
   return `<div class="topline"><button class="chip" onclick="go('vocab')">${uiBack()} ${tr("Vocabulary","Wortschatz","Vocabulario")}</button><span></span></div>
     <div class="card"><h2 style="margin:0 0 4px">💡 der · die · das</h2>
-      <p class="note" style="margin:0">${tr("The ending of a noun often tells you its article. Here are the rules that work best, counted from the words in this app.","Die Endung eines Nomens verrät oft den Artikel. Hier sind die Regeln, die am besten funktionieren, gezählt mit den Wörtern in dieser App.","La terminación de un sustantivo suele indicar su artículo. Aquí tienes las reglas que mejor funcionan, contadas con las palabras de esta app.")}</p></div>
+      <p class="note" style="margin:0">${tr("The ending of a noun often tells you its article. Here are the rules that work best, counted from the words in this app.","Die Endung eines Nomens verrät oft den Artikel. Hier sind die Regeln, die am besten funktionieren, gezählt mit den Wörtern in dieser App.","La terminación de un sustantivo suele indicar su artículo. Aquí tienes las reglas que mejor funcionan, contadas con las palabras de esta app.")}</p>
+      <button class="linkbtn" style="margin-top:6px" onclick="document.getElementById('cases').scrollIntoView({behavior:'smooth'})">🧩 ${tr("New: der → den → dem (cases) ↓","Neu: der → den → dem (Fälle) ↓","Nuevo: der → den → dem (casos) ↓")}</button></div>
     <div class="card"><h3 style="margin:0 0 6px">⭐ ${tr("5 golden rules","5 goldene Regeln","5 reglas de oro")}</h3><ol style="margin:0;padding-inline-start:20px">
       <li style="margin:4px 0">${tr("Always learn a noun with its article and colour.","Lerne jedes Nomen immer mit Artikel und Farbe.","Aprende siempre el sustantivo con su artículo y color.")}</li>
       <li style="margin:4px 0">${tr("In compound nouns, the last word decides.","Bei zusammengesetzten Nomen entscheidet das letzte Wort.","En las palabras compuestas, decide la última palabra.")} <span lang="de" dir="ltr" class="note" style="unicode-bidi:isolate;display:inline-block">(<b style="color:#2A8C82">das</b> Haus + <b style="color:#D9466A">die</b> Tür = <b style="color:#D9466A">die</b> Haustür)</span></li>
@@ -8880,6 +8960,7 @@ VIEWS.vocabg = function(){
       ${li("das",tr("young people and animals","junge Menschen und Tiere","personas y animales jóvenes"),"das Kind, das Baby, das Kalb")}
       ${li("das",tr("colours, metals, languages","Farben, Metalle, Sprachen","colores, metales, idiomas"),"das Blau, das Gold, das Deutsch")}
       ${li("das",tr("hotels, cafés, cinemas","Hotels, Cafés, Kinos","hoteles, cafés, cines"),"das Hotel, das Café, das Kino")}</ul></div>
+    ${csCard()}
     <h3 style="margin:14px 4px 6px">🔤 ${tr("Endings","Endungen","Terminaciones")}</h3>
     ${card("die")}${card("der")}${card("das")}
     <div class="card center"><button class="btn primary qbtn" onclick="VC.gtRule=null;vcStart('gender')">🔵🔴🟢 ${tr("Play der · die · das","der · die · das spielen","Jugar der · die · das")}</button></div>`;
@@ -9985,6 +10066,7 @@ VIEWS.vocab = function(){
       <button class="btn secondary qbtn" style="margin-top:8px" onclick="MW.form=null;go('mwadd')">➕ ${tr("Add a word","Wort hinzufügen","Añadir una palabra")}${own?` · ✍️ ${own}`:""}</button></div>`; })()}
     <div class="card"><h3 style="margin:0 0 4px">🎲 ${tr("Quick games","Schnelle Spiele","Juegos rápidos")}</h3>
       <button class="btn secondary qbtn" onclick="VC.gtRule=null;vcStart('gender')">🔵🔴🟢 der · die · das (${tr("20 nouns","20 Nomen","20 sustantivos")})</button>
+      <button class="btn secondary qbtn" style="margin-top:8px" onclick="csStart('akk')">🧩 der → den → dem (${tr("fill the article","Artikel einsetzen","completa el artículo")})</button>
       <button class="btn secondary qbtn" style="margin-top:8px" onclick="go('vocabg')">💡 ${tr("der · die · das tips","der · die · das Tipps","Consejos der · die · das")}</button>
       <button class="btn secondary qbtn" style="margin-top:8px" onclick="bbOpen()">🌉 ${tr("Bridge Builder: build sentences","Brückenbauer: Sätze bauen","Constructor de puentes: frases")}</button>
       ${duCard()}</div>
