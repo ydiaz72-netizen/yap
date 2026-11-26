@@ -785,6 +785,14 @@
   .powered .pw-sub{display:block;font-size:12.5px;margin-top:2px}
   .powered u{color:var(--coral);font-weight:700}
   .beta{display:inline-block;vertical-align:middle;background:var(--sun);color:#5A3B00;font:700 13px 'Plus Jakarta Sans',Nunito,system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:999px;position:relative;top:-4px}
+  .betabar{display:flex;align-items:center;gap:8px 10px;flex-wrap:wrap;background:#FDF2D8;border:1px solid #F2B544;border-radius:14px;padding:8px 10px 8px 12px;margin:0 0 12px;font-size:13.5px;line-height:1.35}
+  .betabar .btag{flex:none;display:inline-flex;align-items:center;gap:4px;background:#F2B544;color:#5A3B00;border-radius:999px;padding:2px 9px;font-size:12px;white-space:nowrap}
+  .betabar .bmsg{flex:1 1 220px;min-width:0;color:#5A3B00}
+  .betabar .bgo{border:none;background:var(--coral);color:#fff;font:700 13.5px 'Plus Jakarta Sans',Nunito,system-ui,sans-serif;border-radius:999px;padding:0 14px;min-height:40px;cursor:pointer;white-space:nowrap}
+  .betabar .bx{border:none;background:none;color:#5A3B00;font-size:16px;min-width:36px;min-height:40px;cursor:pointer;border-radius:10px}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  .fblink{font-weight:700;color:var(--coral);margin-bottom:6px}
+  #tnav .tlogo .beta{font-size:10px;padding:2px 7px;margin-inline-start:2px}
   .beta-note{display:block;font-size:12px;margin-top:8px;color:var(--muted)}
   .hero{position:relative;text-align:center;padding:8px 0 4px;margin-bottom:6px}
   .blob{position:absolute;border-radius:50%;filter:blur(36px);opacity:.55;z-index:-1}
@@ -955,7 +963,7 @@
 <script>/* Extra interface languages live in /i18n/<code>.js (English text → translation). Load the chosen one before the app starts. */
 (function(){ try{ var X=["tr","uk","fa","ur"], v=localStorage.getItem("pt_ui");
   if(!v){ var n=String((navigator.languages&&navigator.languages[0])||navigator.language||"").slice(0,2).toLowerCase(); if(X.indexOf(n)>-1) v=n; }
-  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=50"><\/script>'); }catch(e){} })();</script>
+  if(X.indexOf(v)>-1) document.write('<script src="/i18n/'+v+'.js?v=51"><\/script>'); }catch(e){} })();</script>
 
 <script>
 /* ===================== CONTENT ===================== */
@@ -1385,7 +1393,7 @@ function bi(en,de,es){ if(es!==undefined) return tr(en,de,es); return `${en} <sp
 function uiSet(l){
   if(!UI_CODES.includes(l)) return;
   if(UI_EXTRA.includes(l) && !I18N_DATA[l]){
-    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=50";
+    const sc=document.createElement("script"); sc.src="/i18n/"+l+".js?v=51";
     sc.onload=()=>uiSet(l); sc.onerror=()=>bToast(offlineMsg()); document.head.appendChild(sc); return;
   }
   UI=l; I18N_T=null; I18N_M.clear();
@@ -1461,7 +1469,7 @@ function render(){
   if(S.screen!=="lobby"){ const c=$("ochat"); if(c) c.remove(); }
   stopTimer(false);
   const v = VIEWS[S.screen]();
-  app.innerHTML = v;
+  app.innerHTML = (NAV_TAB[S.screen]&&typeof betaBar==="function"?betaBar():"") + v;
   window.scrollTo(0,0);
   if(AFTER[S.screen]) AFTER[S.screen]();
   if(typeof navSync==="function") navSync();
@@ -3304,7 +3312,7 @@ function confirmDelete(){
     }catch(e){ $("delYes").disabled=false; $("delMsg").textContent=authErr(e); }
   };
 }
-function legalLinks(){ return `<p class="legal"><button onclick="openLegal('impressum')">Impressum</button> · <button onclick="openLegal('privacy')">Datenschutz · Privacy</button></p>`; }
+function legalLinks(){ return `<p class="legal">${typeof fbBtn==="function"?fbBtn()+"<br>":""}<button onclick="openLegal('impressum')">Impressum</button> · <button onclick="openLegal('privacy')">Datenschutz · Privacy</button></p>`; }
 function openLegal(which){ if(S.screen!=="impressum" && S.screen!=="privacy") A.legalRet=S.screen; go(which); }
 function legalBack(){ const r=A.legalRet||"home"; if(r==="lobby" && !O.G) go("home"); else if(r==="results" && !S.players.length) go("home"); else go(r); }
 const G_LOGO = `<svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>`;
@@ -3778,6 +3786,60 @@ async function repBlockOnly(){
 }
 
 /* Admin: Reports page */
+/* ---------- 🧪 Beta bar + 💡 Feedback (ideas, problems, anything). Anyone can send; admins read it in Profile → 🛠. ---------- */
+const FB = { kind:"idea", list:null, filter:"new", count:0 };
+function fbBarHidden(){ try{ const t=+localStorage.getItem("pt_beta_hide")||0; return Date.now()-t < 7*864e5; }catch(e){ return false; } }
+function fbBarHide(){ try{ localStorage.setItem("pt_beta_hide", String(Date.now())); }catch(e){} const b=document.getElementById("betabar"); if(b) b.remove(); }
+function betaBar(){ if(fbBarHidden()) return "";
+  return `<div id="betabar" class="betabar" role="note"><span class="btag">🧪 <b>${tr("Beta","Beta","Beta")}</b></span>
+    <span class="bmsg">${tr("PonteTalk is a free beta and still being built, so some things may not work yet. Your ideas shape it!","PonteTalk ist eine kostenlose Beta und wird noch gebaut. Manches klappt vielleicht noch nicht. Deine Ideen formen die App!","PonteTalk es una beta gratuita y aún está en construcción, así que algunas cosas pueden fallar. ¡Tus ideas le dan forma!")}</span>
+    <button class="bgo" onclick="fbOpen()">💡 ${tr("Send feedback","Feedback senden","Enviar sugerencias")}</button>
+    <button class="bx" aria-label="${tr("Hide for a week","Eine Woche ausblenden","Ocultar una semana")}" onclick="fbBarHide()">✕</button></div>`; }
+function fbBtn(){ return `<button class="linkbtn fblink" onclick="fbOpen()">💡 ${tr("Ideas or problems? Tell us","Ideen oder Probleme? Sag es uns","¿Ideas o problemas? Cuéntanos")}</button>`; }
+function fbOpen(kind){ FB.kind=kind||FB.kind||"idea"; const old=document.getElementById("fbSheet"); if(old) old.remove();
+  const box=document.createElement("div"); box.className="sheet-bg"; box.id="fbSheet";
+  box.innerHTML=`<div class="sheet" role="dialog" aria-label="${tr("Send feedback","Feedback senden","Enviar sugerencias")}">${fbSheetHtml()}</div>`;
+  box.addEventListener("click",e=>{ if(e.target===box) box.remove(); });
+  document.body.appendChild(box); setTimeout(()=>{ const t=document.getElementById("fbText"); if(t) t.focus(); },50); }
+function fbKind(k){ FB.kind=k; document.querySelectorAll("#fbSheet .fbk").forEach(b=>b.classList.toggle("on",b.dataset.k===k)); const t=document.getElementById("fbText"); if(t) t.placeholder=fbPh(); }
+function fbPh(){ return FB.kind==="bug"?tr("What happened? What did you tap, and what did you expect?","Was ist passiert? Was hast du angetippt und was hast du erwartet?","¿Qué pasó? ¿Qué tocaste y qué esperabas?")
+  :FB.kind==="idea"?tr("Your idea: a feature, a game, a language, anything!","Deine Idee: eine Funktion, ein Spiel, eine Sprache, alles!","Tu idea: una función, un juego, un idioma, ¡lo que sea!")
+  :tr("Tell us anything","Erzähl uns alles","Cuéntanos lo que quieras"); }
+function fbSheetHtml(){ const K=[["idea","💡",tr("Idea","Idee","Idea")],["bug","🐞",tr("Something's broken","Etwas klappt nicht","Algo no funciona")],["other","💬",tr("Other","Sonstiges","Otro")]];
+  return `<h3 style="margin:0 0 4px">💡 ${tr("Help us build PonteTalk","Hilf uns, PonteTalk zu bauen","Ayúdanos a construir PonteTalk")}</h3>
+  <p class="note" style="margin:0 0 12px">🧪 ${tr("PonteTalk is a free beta. Every idea and every problem you send is read by the team.","PonteTalk ist eine kostenlose Beta. Jede Idee und jedes Problem liest das Team.","PonteTalk es una beta gratuita. El equipo lee cada idea y cada problema que envías.")}</p>
+  <div class="row" style="margin:0 0 10px;flex-wrap:wrap;gap:6px">${K.map(([k,e,l])=>`<button class="chip fbk ${FB.kind===k?"on":""}" data-k="${k}" onclick="fbKind('${k}')">${e} ${esc(l)}</button>`).join("")}</div>
+  <label class="sr-only" for="fbText">${tr("Your message","Deine Nachricht","Tu mensaje")}</label>
+  <textarea id="fbText" class="input" rows="5" maxlength="2000" placeholder="${esc(fbPh())}" style="width:100%;resize:vertical"></textarea>
+  ${A.user?"":`<label class="note" for="fbMail" style="display:block;margin:8px 0 4px">${tr("Your email, if you'd like an answer (optional)","Deine E-Mail, falls du eine Antwort möchtest (optional)","Tu email, si quieres respuesta (opcional)")}</label>
+  <input id="fbMail" class="input" type="email" maxlength="200" autocomplete="email" style="width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:14px;font:inherit;background:#fff">`}
+  <p class="note" style="margin:8px 0 12px">📎 ${tr("We also save the screen you're on, your app language and device type, so we can find the problem.","Wir speichern auch den Bildschirm, deine App-Sprache und den Gerätetyp, damit wir das Problem finden.","También guardamos la pantalla en la que estás, el idioma de la app y el tipo de dispositivo, para encontrar el problema.")}</p>
+  <button class="btn primary" id="fbSend" onclick="fbSend()">${tr("Send","Senden","Enviar")}</button>
+  <button class="btn secondary" onclick="document.getElementById('fbSheet').remove()">${tr("Cancel","Abbrechen","Cancelar")}</button>`; }
+async function fbSend(){ const t=document.getElementById("fbText"), msg=(t&&t.value||"").trim(), mail=(document.getElementById("fbMail")||{}).value||"";
+  if(msg.length<3){ bToast(tr("Please write a few words first.","Bitte schreib zuerst ein paar Wörter.","Escribe unas palabras primero.")); return; }
+  if(!A.sb){ bToast(GENERIC_ERR()); return; }
+  const b=document.getElementById("fbSend"); if(b){ b.disabled=true; b.textContent="…"; }
+  const dev=`${/Android/i.test(navigator.userAgent)?"Android":/iPhone|iPad/i.test(navigator.userAgent)?"iOS":/Mac/i.test(navigator.userAgent)?"Mac":/Win/i.test(navigator.userAgent)?"Windows":"Other"} · ${innerWidth}×${innerHeight}${matchMedia("(display-mode: standalone)").matches?" · app":""}`;
+  try{ const { error }=await A.sb.rpc("pt_feedback_send",{ p_kind:FB.kind, p_message:msg, p_contact:mail||null, p_screen:S.screen, p_ui:UI, p_device:dev }); if(error) throw error;
+    const s=document.getElementById("fbSheet"); if(s) s.remove(); bToast("💛 "+tr("Thank you! Your message reached the PonteTalk team.","Danke! Deine Nachricht ist beim PonteTalk-Team angekommen.","¡Gracias! Tu mensaje llegó al equipo de PonteTalk.")); }
+  catch(e){ if(b){ b.disabled=false; b.textContent=tr("Send","Senden","Enviar"); }
+    bToast(/feedback_too_many/.test(String(e&&e.message))?tr("That's a lot of messages! Please try again in an hour.","Das sind viele Nachrichten! Bitte versuch es in einer Stunde wieder.","¡Muchos mensajes! Inténtalo de nuevo en una hora."):bErr(e)); } }
+/* admin list */
+function fbAdminOpen(){ FB.list=null; go("feedback"); fbLoad(); }
+async function fbLoad(){ try{ const { data, error }=await A.sb.rpc("pt_feedback_list",{ p_status:FB.filter==="all"?null:FB.filter }); if(error) throw error; FB.list=data||[]; }catch(e){ FB.list=[]; bToast(bErr(e)); } if(S.screen==="feedback") xr(); }
+async function fbSet(id,st){ try{ const { error }=await A.sb.rpc("pt_feedback_set",{ p_id:id, p_status:st }); if(error) throw error; const r=(FB.list||[]).find(x=>x.id===id); if(r) r.status=st; if(st!=="new") FB.count=Math.max(0,FB.count-1); xr(); }catch(e){ bToast(bErr(e)); } }
+VIEWS.feedback = function(){ const KE={ idea:"💡 Idea", bug:"🐞 Problem", other:"💬 Other" }, L=FB.list;
+  const chip=(k,l)=>`<button class="chip ${FB.filter===k?"on":""}" onclick="FB.filter='${k}';FB.list=null;xr();fbLoad()">${l}</button>`;
+  return `<div class="topline"><button class="chip" onclick="go('account')">${uiBack()} Profile</button><span>💡 Feedback</span></div>
+  <h2>💡 Feedback</h2><p class="sub">Ideas and problems people sent from the beta bar and the 💡 links.</p>
+  <div class="row" style="margin-bottom:12px">${chip("new","New")}${chip("seen","Seen")}${chip("done","Done")}${chip("all","All")}</div>
+  ${L===null?`<p class="note center">Loading…</p>`:!L.length?`<div class="card center"><div style="font-size:40px">🎉</div><p class="note">Nothing here</p></div>`
+  :L.map(r=>`<div class="card" style="border-inline-start:5px solid ${r.kind==="bug"?"var(--coral)":r.kind==="idea"?"var(--sun,#F2B544)":"var(--line)"}">
+     <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><b>${KE[r.kind]||r.kind}</b><span class="note">${esc(fmtWhen(r.created_at))}</span></div>
+     <p style="margin:6px 0;white-space:pre-wrap">${esc(r.message)}</p>
+     <p class="note" style="margin:0 0 8px">${r.name?`👤 ${esc(r.name)}${r.email?` · ${esc(r.email)}`:""}`:`👤 Guest${r.contact?` · ✉️ ${esc(r.contact)}`:""}`}${r.user_id&&r.contact?` · ✉️ ${esc(r.contact)}`:""} · 📱 ${esc(r.screen||"?")} · ${esc((r.ui||"").toUpperCase())} · ${esc(r.device||"")}</p>
+     <div class="row" style="gap:6px">${["new","seen","done"].map(s=>`<button class="chip ${r.status===s?"on":""}" onclick="fbSet(${r.id},'${s}')">${s==="new"?"🆕 New":s==="seen"?"👀 Seen":"✅ Done"}</button>`).join("")}</div></div>`).join("")}`; };
 const RA = { admin:false, count:0, list:null, filter:"open", notes:{}, holds:{} };
 /* Account pause (hold): my own status, for the Home banner */
 const HOLD = { uid:null, on:false };
@@ -3807,8 +3869,8 @@ async function raHold(uid, on){
 async function raCheck(){
   if(!A.user || !A.sb) return;
   try{
-    const [a,c]=await Promise.all([A.sb.rpc("pt_is_admin"), A.sb.rpc("pt_admin_report_count")]);
-    RA.admin=!!(a&&a.data); RA.count=(c&&c.data)||0;
+    const [a,c,f]=await Promise.all([A.sb.rpc("pt_is_admin"), A.sb.rpc("pt_admin_report_count"), A.sb.rpc("pt_feedback_count")]);
+    RA.admin=!!(a&&a.data); RA.count=(c&&c.data)||0; FB.count=(f&&f.data)||0;
     if(S.screen==="account") xr();
   }catch(e){}
 }
@@ -3817,6 +3879,7 @@ function raCard(){
   return `<div class="card" style="border:2px solid ${RA.count?"var(--coral)":"var(--line)"}"><h3 style="margin:0 0 4px">🛠 Reports · Meldungen ${RA.count?`<span class="chbadge">${RA.count}</span>`:""}</h3>
     <p class="note" style="margin:0 0 8px">${RA.count?`${RA.count} open report${RA.count>1?"s":""} to review.`:"No open reports. 🎉"}</p>
     <button class="btn secondary" onclick="raOpen()">Open reports · Meldungen öffnen</button>
+    <button class="btn secondary" onclick="fbAdminOpen()">💡 Feedback${FB.count?` <span class="chbadge">${FB.count}</span>`:""}</button>
     <button class="btn secondary" onclick="stOpen()">📊 Stats · Statistiken</button>
     <button class="btn secondary" onclick="dsOpen()">🎙️ Audio studio · German exam</button></div>`;
 }
@@ -7145,7 +7208,7 @@ function navSync(){
   if(A.user){ nbStart(); nbFresh(); } else if(NB.timer){ clearInterval(NB.timer); NB.timer=null; NB.list=[]; NB.unread=0; }
   const me = A.user ? `${dmBtn()}${bellBtn()}<button class="tme" aria-label="Profile" onclick="${NAV_ITEMS[4][3]}">${A.profile&&A.profile.avatar_url?`<img src="${esc(A.profile.avatar_url)}" alt="">`:esc((meName()||"?").charAt(0).toUpperCase())}</button>`
                     : `<button class="tsign" onclick="${NAV_ITEMS[4][3]}">${tr("Sign in","Anmelden","Entrar")}</button>`;
-  t.innerHTML = `<div class="tin"><button class="tlogo" onclick="goHome()"><span class="plogo">${ICO.logo}</span>PonteTalk</button>
+  t.innerHTML = `<div class="tin"><button class="tlogo" onclick="goHome()"><span class="plogo">${ICO.logo}</span>PonteTalk <span class="beta">Beta</span></button>
     <nav class="tlinks" aria-label="Main">${NAV_ITEMS.slice(0,4).map(([k,en,de,fn,es])=>`<button class="${tab===k?"on":""}" ${tab===k?'aria-current="page"':""} onclick="${fn}">${ICO[k]}${tr(en,de,es)}</button>`).join("")}</nav>${me}</div>`;
 }
 
@@ -8439,6 +8502,7 @@ function nbText(n){
     case "reminder_15m": return "⏰ "+tr(`${t} starts in 15 minutes.`,`${t} beginnt in 15 Minuten.`,`${t} empieza en 15 minutos.`);
     case "new_member":   { const nm=n.from_name&&n.from_name!=="Member"?esc(n.from_name):esc(d.email||tr("someone","jemand","alguien"));
                            return "👋 "+tr(`New member: ${nm}`,`Neues Mitglied: ${nm}`,`Nuevo miembro: ${nm}`)+(d.total?` · ${tr(`${d.total} accounts in total`,`${d.total} Konten insgesamt`,`${d.total} cuentas en total`)}`:""); }
+    case "feedback":     return (d.kind==="bug"?"🐞 ":"💡 ")+tr("New feedback","Neues Feedback","Nuevas sugerencias")+`: “${esc(d.text||"")}”`;
     case "duel_done":    return "⚔️ "+tr(`${who} played your duel. Tap to see who won!`,`${who} hat dein Duell gespielt. Tippe, um zu sehen, wer gewonnen hat!`,`${who} jugó tu duelo. ¡Toca para ver quién ganó!`);
     case "word_fixed":   return "✏️ "+tr(`${who} fixed your word <b>“${esc(d.old||"")}”</b>: now <b>“${esc(d.word||"")}”</b> (${t}). Tap to see it.`,`${who} hat dein Wort <b>„${esc(d.old||"")}“</b> korrigiert: jetzt <b>„${esc(d.word||"")}“</b> (${t}). Tippe zum Ansehen.`,`${who} corrigió tu palabra <b>“${esc(d.old||"")}”</b>: ahora <b>“${esc(d.word||"")}”</b> (${t}). Toca para verla.`);
     case "echo_new":     return "🎙️ "+tr(`New Echo Challenge by ${who}: ${ph}. Listen and record your echo!`,`Neue Echo Challenge von ${who}: ${ph}. Hör zu und nimm dich auf!`,`Nuevo reto Echo de ${who}: ${ph}. ¡Escucha y graba tu eco!`);
@@ -8490,6 +8554,7 @@ async function nbTap(id){
   if(n.kind==="report"){ raOpen(); return; }
   if(n.kind==="duel_done" && n.data && n.data.code){ duOpen(n.data.code); return; }
   if(n.kind==="new_member"){ stOpen(); return; }
+  if(n.kind==="feedback"){ fbAdminOpen(); return; }
   if(/^echo_/.test(n.kind) && n.data && n.data.lounge){ await luEnter(n.data.lounge); ecOpen(); return; }
   if(n.activity_id){ if(n.kind==="chat") chOpen(n.activity_id); else if(n.kind==="word_fixed") wdOpen(n.activity_id); else sOpen(n.activity_id); }
 }
