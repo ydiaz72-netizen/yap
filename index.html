@@ -11281,7 +11281,10 @@ function brPdf(){ const R=brCalc(), c=R.cur, name=meName()||"", d=new Date(), fr
     tr(`Active ${c.days||0} of 7 days, ${R.mins} minutes.`,`Aktiv an ${c.days||0} von 7 Tagen, ${R.mins} Minuten.`,`Activo ${c.days||0} de 7 días, ${R.mins} minutos.`)].filter(Boolean).join(" ");
   const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>PonteTalk Bridge Report</title><style>
   @font-face{font-family:PJ;font-weight:200 800;src:url(${location.origin}/fonts/plus-jakarta-sans-latin-wght-normal.woff2)}
-  @page{size:A4;margin:14mm} *{box-sizing:border-box} body{font-family:PJ,Helvetica,Arial,sans-serif;color:#1B2A41;margin:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  @page{size:A4;margin:12mm} *{box-sizing:border-box} html{background:#E9E3DA} body{font-family:PJ,Helvetica,Arial,sans-serif;color:#1B2A41;margin:24px auto;max-width:720px;background:#fff;padding:32px 36px;border-radius:10px;box-shadow:0 10px 30px #0002;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .bar-top{max-width:720px;margin:16px auto -8px;display:flex;justify-content:flex-end;gap:8px} .bar-top button{font:inherit;font-weight:800;border:0;border-radius:999px;padding:10px 16px;background:#F25C3B;color:#fff;cursor:pointer}
+  @media print{ html{background:#fff} body{margin:0;max-width:none;padding:0;box-shadow:none;border-radius:0} .noprint{display:none!important} }
+  @media (max-width:760px){ body{margin:0;border-radius:0;padding:20px 16px} .two{grid-template-columns:1fr!important} }
   .hd{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #F25C3B;padding-bottom:10px;margin-bottom:14px} h1{margin:2px 0;font-size:24px} .k{font-size:11px;font-weight:800;color:#5B6474;letter-spacing:.6px} .n{color:#5B6474;font-size:13px}
   .card{border:1px solid #E6E0D7;border-radius:14px;padding:12px 14px;margin-bottom:12px;break-inside:avoid} h3{margin:0 0 8px;font-size:16px} .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .r{display:flex;justify-content:space-between;font-size:13px;margin-top:6px} .bar{height:7px;background:#F0EBE3;border-radius:9px;overflow:hidden;margin-top:3px} .bar i{display:block;height:100%}
@@ -11298,7 +11301,8 @@ function brPdf(){ const R=brCalc(), c=R.cur, name=meName()||"", d=new Date(), fr
   ${(R.d.mist||[]).length?`<div class="card"><h3>🔁 ${tr("Mistakes this week","Fehler diese Woche","Errores esta semana")}</h3>${R.d.mist.slice(0,8).map(m=>`<div class="m">${m.w&&m.r?`<s>${esc(m.w)}</s> → <b>${esc(m.r)}</b>`:`✗ ${esc(m.i||"")}`}</div>`).join("")}</div>`:""}
   <div class="card"><h3>💬 ${tr("Note for the teacher","Notiz für die Lehrkraft","Nota para el profe")}</h3><div class="n">${esc(note)}</div></div>
   <div class="n" style="text-align:center">pontetalk.setzio.com · ${tr("Free beta","Kostenlose Beta","Beta gratuita")}</div>
-  <script>window.onload=()=>setTimeout(()=>window.print(),400)<\/script></body></html>`;
+  <div class="noprint" style="text-align:center;margin-top:16px"><button onclick="window.print()" style="font:inherit;font-weight:800;border:0;border-radius:999px;padding:12px 20px;background:#F25C3B;color:#fff;cursor:pointer">📄 ${tr("Save as PDF / Print","Als PDF speichern / Drucken","Guardar como PDF / Imprimir")}</button></div>
+  <script>window.onload=()=>setTimeout(()=>window.print(),500)<\/script></body></html>`;
   const w=window.open("","_blank"); if(!w){ bToast(tr("Allow pop-ups to download the PDF","Erlaube Pop-ups für das PDF","Permite ventanas emergentes para el PDF")); return; } w.document.open(); w.document.write(html); w.document.close(); }
 const SB_CH=[
 {id:"a1-coffee",lv:"A1",s:"Ich:S|trinke:V|Kaffee.:O",e:"I drink coffee.",es:"Bebo café.",st:[
