@@ -794,6 +794,7 @@
   .fblink{font-weight:700;color:var(--coral);margin-bottom:6px}
   #tnav .tlogo .beta{font-size:10px;padding:2px 7px;margin-inline-start:2px}
 .ssmean{margin:6px 0 2px;color:var(--teal,#2A8C82);font-weight:700}
+  .ndbody{white-space:pre-wrap;background:#FAF7F2;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:14px;max-height:220px;overflow:auto}
   .cstab{width:100%;border-collapse:collapse;font-size:14px;min-width:340px}
   .cstab th,.cstab td{padding:7px 6px;border-bottom:1px solid var(--line);text-align:start;vertical-align:top}
   .cstab thead th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
@@ -3108,6 +3109,7 @@ function authReturn(){
   else if(r==="cafes") cfOpen();
   else if(r==="lounge"){ let id=LU.pend; try{ id=id||sessionStorage.getItem("pt_lounge"); }catch(e){} if(id) luEnter(id); else luOpen(); }
   else if(r==="bridge") bbOpen();
+  else if(r==="xprofile") xOpen();
   else if(r==="duel"){ let c=DU.code; try{ c=c||sessionStorage.getItem("pt_duel"); sessionStorage.removeItem("pt_duel"); }catch(e){} if(c) duOpen(c); else vcOpen(); }
   else if(r==="lounges") luOpen();
   else if(r==="partners") ptOpen();
@@ -3892,10 +3894,50 @@ function raCard(){
   return `<div class="card" style="border:2px solid ${RA.count?"var(--coral)":"var(--line)"}"><h3 style="margin:0 0 4px">🛠 Reports · Meldungen ${RA.count?`<span class="chbadge">${RA.count}</span>`:""}</h3>
     <p class="note" style="margin:0 0 8px">${RA.count?`${RA.count} open report${RA.count>1?"s":""} to review.`:"No open reports. 🎉"}</p>
     <button class="btn secondary" onclick="raOpen()">Open reports · Meldungen öffnen</button>
+    <button class="btn secondary" onclick="ndOpen()">📧 Incomplete profiles</button>
     <button class="btn secondary" onclick="fbAdminOpen()">💡 Feedback${FB.count?` <span class="chbadge">${FB.count}</span>`:""}</button>
     <button class="btn secondary" onclick="stOpen()">📊 Stats · Statistiken</button>
     <button class="btn secondary" onclick="dsOpen()">🎙️ Audio studio · German exam</button></div>`;
 }
+/* ---------- 📧 Admin: members without languages. The app prepares the email (you send it from your own email, BCC) and sends each a 🔔. ---------- */
+const ND = { list:null, stats:null, hideDone:true, lang:"en" };
+const ND_LINK="https://pontetalk.setzio.com/?go=languages";
+const ND_TXT={
+ en:{ s:"One step left: which languages do you speak? 🌉", b:`Hi!\n\nYou joined PonteTalk, yay! 🎉 There's just one thing missing: your languages. Without them we can't show you people to practise with.\n\nIt takes 30 seconds, this link opens the right page:\n${ND_LINK}\n\nOnce it's done you'll see sessions, partners and your lounge, all matched to you.\n\nSee you on the bridge,\nYvette from PonteTalk\n(free beta: ideas and problems are always welcome, just reply to this email)` },
+ es:{ s:"Te falta un paso: ¿qué idiomas hablas? 🌉", b:`¡Hola!\n\nTe uniste a PonteTalk, ¡qué bien! 🎉 Solo falta una cosa: tus idiomas. Sin ellos no podemos mostrarte personas con quienes practicar.\n\nTardas 30 segundos, este enlace abre la página correcta:\n${ND_LINK}\n\nEn cuanto lo hagas verás sesiones, compañeros y tu sala, todo según tus idiomas.\n\n¡Nos vemos en el puente!\nYvette de PonteTalk\n(beta gratuita: tus ideas y problemas son bienvenidos, solo responde a este email)` },
+ de:{ s:"Nur noch ein Schritt: Welche Sprachen sprichst du? 🌉", b:`Hallo!\n\nSchön, dass du bei PonteTalk bist! 🎉 Eine Sache fehlt noch: deine Sprachen. Ohne sie können wir dir niemanden zum Üben zeigen.\n\nDas dauert 30 Sekunden, dieser Link öffnet die richtige Seite:\n${ND_LINK}\n\nDanach siehst du Sessions, Partner und deine Lounge, alles passend zu dir.\n\nBis bald auf der Brücke,\nYvette von PonteTalk\n(kostenlose Beta: Ideen und Probleme sind immer willkommen, antworte einfach auf diese E-Mail)` }};
+function ndOpen(){ ND.list=null; go("nudge"); ndLoad(); }
+async function ndLoad(){ try{ const [a,b]=await Promise.all([A.sb.rpc("pt_admin_incomplete"),A.sb.rpc("pt_admin_nudge_stats")]); if(a.error) throw a.error;
+    ND.list=a.data||[]; ND.stats=(b&&b.data&&b.data[0])||null; }catch(e){ ND.list=[]; bToast(bErr(e)); } if(S.screen==="nudge") xr(); }
+function ndRows(){ return (ND.list||[]).filter(r=>!ND.hideDone||!r.nudged_at||Date.now()-new Date(r.nudged_at)>14*864e5); }
+function ndCopy(t,msg){ try{ navigator.clipboard.writeText(t).then(()=>bToast("📋 "+msg),()=>prompt("Copy:",t)); }catch(e){ prompt("Copy:",t); } }
+function ndMail(){ const R=ndRows(), T=ND_TXT[ND.lang]; if(!R.length) return;
+  location.href="mailto:?bcc="+encodeURIComponent(R.map(r=>r.email).join(","))+"&subject="+encodeURIComponent(T.s)+"&body="+encodeURIComponent(T.b); }
+async function ndMark(){ const R=ndRows(); if(!R.length) return; if(!confirm(`Mark ${R.length} as sent and send each a 🔔 reminder in the app?`)) return;
+  try{ const { error }=await A.sb.rpc("pt_admin_nudge",{ p_ids:R.map(r=>r.user_id) }); if(error) throw error; bToast(`✅ ${R.length} marked · 🔔 sent`); ndLoad(); }catch(e){ bToast(bErr(e)); } }
+VIEWS.nudge = function(){ const L=ND.list, R=ndRows(), T=ND_TXT[ND.lang], st=ND.stats;
+  const chip=(k,l)=>`<button class="chip ${ND.lang===k?"on":""}" onclick="ND.lang='${k}';xr()">${l}</button>`;
+  return `<div class="topline"><button class="chip" onclick="go('account')">${uiBack()} Profile</button><span>📧 Nudge</span></div>
+  <h2>📧 Incomplete profiles</h2><p class="sub">Members with <b>no languages</b> yet. They get no matches, partners or lounge until they add them.</p>
+  ${st?`<div class="card" style="display:flex;gap:16px;flex-wrap:wrap"><span>📨 Nudged so far: <b>${st.nudged}</b></span><span>✅ Added languages since: <b>${st.completed}</b>${st.nudged?` (${Math.round(st.completed/st.nudged*100)}%)`:""}</span></div>`:""}
+  ${L===null?`<p class="note center">Loading…</p>`:!L.length?`<div class="card center"><div style="font-size:40px">🎉</div><p class="note">Everyone has languages!</p></div>`:`
+  <div class="card"><h3 style="margin:0 0 6px">1 · Send the email</h3>
+    <div class="row" style="gap:6px;margin-bottom:8px">${chip("en","🇬🇧 English")}${chip("es","🇪🇸 Español")}${chip("de","🇩🇪 Deutsch")}</div>
+    <div class="note" style="margin:0 0 4px"><b>Subject:</b> ${esc(T.s)}</div>
+    <div class="ndbody">${esc(T.b)}</div>
+    <button class="btn primary" style="margin-top:10px" ${R.length?"":"disabled"} onclick="ndMail()">✉️ Open in my email app (${R.length} in BCC)</button>
+    <div class="row" style="gap:6px;margin-top:8px;flex-wrap:wrap">
+      <button class="chip" onclick="ndCopy(ndRows().map(r=>r.email).join(', '),'Emails copied, paste them into BCC')">📋 Copy emails</button>
+      <button class="chip" onclick="ndCopy(ND_TXT[ND.lang].s,'Subject copied')">📋 Copy subject</button>
+      <button class="chip" onclick="ndCopy(ND_TXT[ND.lang].b,'Text copied')">📋 Copy text</button></div>
+    <p class="note" style="margin:8px 0 0">Always put the addresses in <b>BCC</b>, so nobody sees the others.</p></div>
+  <div class="card"><h3 style="margin:0 0 6px">2 · After sending</h3>
+    <button class="btn secondary" ${R.length?"":"disabled"} onclick="ndMark()">✅ Mark ${R.length} as sent + send 🔔 in the app</button>
+    <p class="note" style="margin:6px 0 0">The bell says “Add your languages so we can match you” and opens the right page.</p></div>
+  <div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><h3 style="margin:0">👥 ${R.length} of ${L.length}</h3>
+    <label class="note" style="display:flex;gap:6px;align-items:center;margin:0"><input type="checkbox" ${ND.hideDone?"checked":""} onchange="ND.hideDone=this.checked;xr()"> Hide people nudged in the last 14 days</label></div>
+    ${R.map(r=>`<div class="mwrow"><div style="flex:1;min-width:0"><b>${esc(r.name||"(no name)")}</b> <span class="note">${esc(r.email)}</span>
+      <div class="note" style="margin:0">Joined ${esc(fmtWhen(r.joined))}${r.nudged_at?` · nudged ${r.times}× (last ${esc(fmtWhen(r.nudged_at))})`:" · never nudged"}</div></div></div>`).join("")||`<p class="note">Everyone here was nudged recently.</p>`}</div>`}`; };
 function raOpen(){ RA.list=null; go("reports"); raLoad(); }
 /* Admin: Stats page */
 const ST = { k:null, items:null, who:null, item:null };
@@ -7196,7 +7238,7 @@ const NAV_ITEMS = [
   ["shop","Shop","Shop","shOpen()","Tienda"],
   ["profile","Profile","Profil","A.ret='home';A.err='';A.msg='';go('account')","Perfil"]
 ];
-NAV_TAB.shop="shop"; NAV_TAB.shopedit="shop"; NAV_TAB.shopitem="shop"; WIDE.shopitem="md"; NAV_TAB.cafes="sessions"; NAV_TAB.cafeedit="sessions"; NAV_TAB.chat="sessions"; WIDE.chat="md"; NAV_TAB.blocks="profile"; WIDE.blocks="md"; NAV_TAB.partners="sessions"; WIDE.partners="xl"; NAV_TAB.partner="sessions"; WIDE.partner="md"; NAV_TAB.lounges="sessions"; NAV_TAB.lounge="sessions"; WIDE.lounges="xl"; WIDE.lounge="md"; NAV_TAB.reports="profile"; WIDE.reports="md";
+NAV_TAB.nudge="account"; NAV_TAB.shop="shop"; NAV_TAB.shopedit="shop"; NAV_TAB.shopitem="shop"; WIDE.shopitem="md"; NAV_TAB.cafes="sessions"; NAV_TAB.cafeedit="sessions"; NAV_TAB.chat="sessions"; WIDE.chat="md"; NAV_TAB.blocks="profile"; WIDE.blocks="md"; NAV_TAB.partners="sessions"; WIDE.partners="xl"; NAV_TAB.partner="sessions"; WIDE.partner="md"; NAV_TAB.lounges="sessions"; NAV_TAB.lounge="sessions"; WIDE.lounges="xl"; WIDE.lounge="md"; NAV_TAB.reports="profile"; WIDE.reports="md";
 WIDE.cafes="xl"; WIDE.cafeedit="md";
 WIDE.shop="xl"; WIDE.shopedit="md"; WIDE.palboard="xl";
 ICO.shop='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>';
@@ -8515,6 +8557,7 @@ function nbText(n){
     case "reminder_15m": return "⏰ "+tr(`${t} starts in 15 minutes.`,`${t} beginnt in 15 Minuten.`,`${t} empieza en 15 minutos.`);
     case "new_member":   { const nm=n.from_name&&n.from_name!=="Member"?esc(n.from_name):esc(d.email||tr("someone","jemand","alguien"));
                            return "👋 "+tr(`New member: ${nm}`,`Neues Mitglied: ${nm}`,`Nuevo miembro: ${nm}`)+(d.total?` · ${tr(`${d.total} accounts in total`,`${d.total} Konten insgesamt`,`${d.total} cuentas en total`)}`:""); }
+    case "profile_nudge": return "🗣️ "+tr("Add your languages so we can match you with people to practise with.","Trag deine Sprachen ein, damit wir dir Leute zum Üben zeigen können.","Añade tus idiomas para que podamos mostrarte personas con quienes practicar.");
     case "feedback":     return (d.kind==="bug"?"🐞 ":"💡 ")+tr("New feedback","Neues Feedback","Nuevas sugerencias")+`: “${esc(d.text||"")}”`;
     case "duel_done":    return "⚔️ "+tr(`${who} played your duel. Tap to see who won!`,`${who} hat dein Duell gespielt. Tippe, um zu sehen, wer gewonnen hat!`,`${who} jugó tu duelo. ¡Toca para ver quién ganó!`);
     case "word_fixed":   return "✏️ "+tr(`${who} fixed your word <b>“${esc(d.old||"")}”</b>: now <b>“${esc(d.word||"")}”</b> (${t}). Tap to see it.`,`${who} hat dein Wort <b>„${esc(d.old||"")}“</b> korrigiert: jetzt <b>„${esc(d.word||"")}“</b> (${t}). Tippe zum Ansehen.`,`${who} corrigió tu palabra <b>“${esc(d.old||"")}”</b>: ahora <b>“${esc(d.word||"")}”</b> (${t}). Toca para verla.`);
@@ -8568,6 +8611,7 @@ async function nbTap(id){
   if(n.kind==="duel_done" && n.data && n.data.code){ duOpen(n.data.code); return; }
   if(n.kind==="new_member"){ stOpen(); return; }
   if(n.kind==="feedback"){ fbAdminOpen(); return; }
+  if(n.kind==="profile_nudge"){ xOpen(); return; }
   if(/^echo_/.test(n.kind) && n.data && n.data.lounge){ await luEnter(n.data.lounge); ecOpen(); return; }
   if(n.activity_id){ if(n.kind==="chat") chOpen(n.activity_id); else if(n.kind==="word_fixed") wdOpen(n.activity_id); else sOpen(n.activity_id); }
 }
@@ -11266,6 +11310,8 @@ try{ const sid=new URLSearchParams(location.search).get("s"); if(sid && /^[0-9a-
   if(!PALS[k]) return; S.palKey=k; const L=palLobby();
   if(L){ S.players=L.players||[]; const had=S.players.find(p=>p.pal===k); S.screen="paljoin"; S.draft.name=had?had.name:""; }
   else S.screen="palmeet"; }catch(e){} })();
+try{ if(new URLSearchParams(location.search).get("go")==="languages"){ history.replaceState(null,"",location.pathname); let n=0; const w=setInterval(()=>{ n++;
+    if(A.status==="in"&&A.user){ clearInterval(w); xOpen(); } else if((A.status==="out"&&n>2)||n>20){ clearInterval(w); A.ret="xprofile"; go("account"); } },400); } }catch(e){}
 try{ if(new URLSearchParams(location.search).has("bb")){ document.addEventListener("DOMContentLoaded",()=>{ bbOpen(); history.replaceState(null,"",location.pathname); }); } }catch(e){}
 try{ if(new URLSearchParams(location.search).has("stats")){ S.screen="stats"; let n=0; const w=setInterval(()=>{ n++; if(A.status==="in"&&A.user){ clearInterval(w); stLoad(); } else if((A.status==="out"&&n>2)||n>20){ clearInterval(w); A.ret="stats"; A.msg="Sign in to see stats · Bitte anmelden"; go("account"); } },500); } }catch(e){}
 try{ if(new URLSearchParams(location.search).has("reports")){ S.screen="reports"; let n=0; const w=setInterval(()=>{ n++; if(A.status==="in"&&A.user){ clearInterval(w); raLoad(); } else if((A.status==="out"&&n>2)||n>20){ clearInterval(w); A.ret="reports"; A.msg="Sign in to see reports · Bitte anmelden"; go("account"); } },500); } }catch(e){}
