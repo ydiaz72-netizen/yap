@@ -2,10 +2,10 @@
 // Sends the branded "add your languages" email through Resend.
 // Only admins can use it: the admin check happens in the database (pt_admin_incomplete / pt_admin_nudge).
 // Secret needed in Supabase → Edge Functions → Secrets:  RESEND_API_KEY = re_...
-// Body: { lang: "en"|"es"|"de", ids?: string[], preview?: true, test?: true }
+// Body: { kind?: "langs"|"times", lang: "en"|"es"|"de", ids?: string[], preview?: true, test?: true }
 
 const APP = "https://pontetalk.setzio.com";
-const LINK = APP + "/?go=languages";
+const LINKS: Record<string, string> = { langs: APP + "/?go=languages", times: APP + "/?go=times" };
 const FROM = "PonteTalk <noreply@setzio.com>";
 const REPLY = "yvette@setzio.com";
 const cors = {
@@ -75,8 +75,25 @@ const T: Record<string, any> = {
   },
 };
 
-export function emailHtml(lang: string, name: string): string {
-  const t = T[lang] || T.en;
+// 🕒 second email: has languages, but no free times yet
+const TIMES: Record<string, any> = {
+  en: { subject: "When are you free to practise? 🕒", pre: "Tap the times that suit you, and partners can find a time that works for both of you.",
+        p1: "Thanks for adding your languages! 🙌",
+        p2: "One more tiny step: <b>when are you usually free?</b> Partners only see people whose times match theirs, so right now nobody can find a time with you.",
+        btn: "Add my free times", time: "Just tap a few times, about 20 seconds", emoji: "🕒" },
+  es: { subject: "¿Cuándo puedes practicar? 🕒", pre: "Marca las horas que te van bien y tus compañeros encontrarán un momento para los dos.",
+        p1: "¡Gracias por añadir tus idiomas! 🙌",
+        p2: "Un pasito más: <b>¿cuándo sueles tener tiempo?</b> Los compañeros solo ven a personas con horarios que coinciden, así que ahora nadie puede encontrar un momento contigo.",
+        btn: "Añadir mis horas libres", time: "Solo marca algunas horas, unos 20 segundos", emoji: "🕒" },
+  de: { subject: "Wann hast du Zeit zum Üben? 🕒", pre: "Tipp die Zeiten an, die dir passen, und Partner finden einen Termin, der für euch beide klappt.",
+        p1: "Danke, dass du deine Sprachen eingetragen hast! 🙌",
+        p2: "Noch ein kleiner Schritt: <b>Wann hast du meistens Zeit?</b> Partner sehen nur Leute, deren Zeiten passen, also kann gerade niemand einen Termin mit dir finden.",
+        btn: "Meine freien Zeiten eintragen", time: "Einfach ein paar Zeiten antippen, etwa 20 Sekunden", emoji: "🕒" },
+};
+const tpl = (kind: string, lang: string) => ({ ...(T[lang] || T.en), emoji: "🗣️", ...(kind === "times" ? TIMES[lang] || TIMES.en : {}) });
+
+export function emailHtml(lang: string, name: string, kind = "langs"): string {
+  const t = tpl(kind, lang), LINK = LINKS[kind] || LINKS.langs;
   const F = "'Plus Jakarta Sans',Helvetica,Arial,sans-serif";
   const ben = t.b.map(([e, h, d]: string[]) => `
       <tr><td style="padding:0 0 12px" valign="top">
@@ -101,7 +118,7 @@ export function emailHtml(lang: string, name: string): string {
       <p style="margin:0 0 12px;font-size:16px;line-height:25px">${t.p1}</p>
       <p style="margin:0 0 24px;font-size:16px;line-height:25px">${t.p2}</p>
       <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center"><tr><td align="center" bgcolor="#F25C3B" style="border-radius:999px">
-        <a href="${LINK}" style="display:inline-block;padding:15px 34px;font-family:${F};font-size:17px;font-weight:800;color:#FFFFFF;text-decoration:none;border-radius:999px">🗣️ ${t.btn} →</a>
+        <a href="${LINK}" style="display:inline-block;padding:15px 34px;font-family:${F};font-size:17px;font-weight:800;color:#FFFFFF;text-decoration:none;border-radius:999px">${t.emoji} ${t.btn} →</a>
       </td></tr></table>
       <p style="margin:10px 0 26px;text-align:center;font-size:13px;color:#5B6474">⏱️ ${t.time}</p>
       <div style="border-top:1px solid #E6E0D7;margin:0 0 20px"></div>
@@ -121,8 +138,8 @@ export function emailHtml(lang: string, name: string): string {
 </td></tr></table></body></html>`;
 }
 
-function emailText(lang: string, name: string): string {
-  const t = T[lang] || T.en;
+function emailText(lang: string, name: string, kind = "langs"): string {
+  const t = tpl(kind, lang), LINK = LINKS[kind] || LINKS.langs;
   const strip = (s: string) => s.replace(/<[^>]+>/g, "");
   return [t.hi(name), "", strip(t.p1), strip(t.p2), "", `${t.btn}: ${LINK}`, `(${t.time})`, "", t.after,
     ...t.b.map((x: string[]) => `• ${x[1]}: ${x[2]}`), "", t.sign, t.team, "", t.beta, "", t.why, t.stop].join("\n");
@@ -135,6 +152,7 @@ Deno.serve(async (req) => {
   try {
     const body = await req.json().catch(() => ({}));
     const lang = ["en", "es", "de"].includes(body.lang) ? body.lang : "en";
+    const kind = body.kind === "times" ? "times" : "langs";
     const auth = req.headers.get("Authorization") || "";
     const apikey = req.headers.get("apikey") || Deno.env.get("SUPABASE_ANON_KEY") || "";
     const base = Deno.env.get("SUPABASE_URL")!;
@@ -145,8 +163,8 @@ Deno.serve(async (req) => {
       if (!r.ok) throw new Error((d && (d.message || d.hint)) || `${fn} failed`);
       return d;
     };
-    const list: any[] = await rpc("pt_admin_incomplete"); // throws admins_only for everyone else
-    if (body.preview) return json({ subject: T[lang].subject, html: emailHtml(lang, "Lena") });
+    const list: any[] = await rpc("pt_admin_incomplete", { p_kind: kind }); // throws admins_only for everyone else
+    if (body.preview) return json({ subject: tpl(kind, lang).subject, html: emailHtml(lang, "Lena", kind) });
 
     const key = Deno.env.get("RESEND_API_KEY");
     if (!key) return json({ error: "RESEND_API_KEY is missing in Supabase → Edge Functions → Secrets" }, 500);
@@ -157,8 +175,8 @@ Deno.serve(async (req) => {
       return d;
     };
     const mail = (to: string, name: string) => ({
-      from: FROM, to: [to], reply_to: REPLY, subject: T[lang].subject,
-      html: emailHtml(lang, name), text: emailText(lang, name),
+      from: FROM, to: [to], reply_to: REPLY, subject: tpl(kind, lang).subject,
+      html: emailHtml(lang, name, kind), text: emailText(lang, name, kind),
       headers: { "List-Unsubscribe": `<mailto:${REPLY}?subject=stop>` },
     });
 
@@ -178,7 +196,7 @@ Deno.serve(async (req) => {
       await send(chunk.map((p) => mail(p.email, (p.name || "").split(" ")[0])));
       sent += chunk.length; done.push(...chunk.map((p) => p.user_id));
     }
-    await rpc("pt_admin_nudge", { p_ids: done }); // remembers the date + sends the 🔔
+    await rpc("pt_admin_nudge", { p_ids: done, p_kind: kind }); // remembers the date + sends the 🔔
     return json({ sent });
   } catch (e) {
     return json({ error: String((e as Error).message || e) }, 400);

@@ -3111,6 +3111,7 @@ function authReturn(){
   else if(r==="lounge"){ let id=LU.pend; try{ id=id||sessionStorage.getItem("pt_lounge"); }catch(e){} if(id) luEnter(id); else luOpen(); }
   else if(r==="bridge") bbOpen();
   else if(r==="xprofile") xOpen();
+  else if(r==="xtimes") xOpenTimes();
   else if(r==="duel"){ let c=DU.code; try{ c=c||sessionStorage.getItem("pt_duel"); sessionStorage.removeItem("pt_duel"); }catch(e){} if(c) duOpen(c); else vcOpen(); }
   else if(r==="lounges") luOpen();
   else if(r==="partners") ptOpen();
@@ -3483,6 +3484,7 @@ async function xLoad(){
   if(S.screen==="xprofile") render();
 }
 function xOpen(){ X.loaded=false; go("xprofile"); xLoad(); }
+function xOpenTimes(){ xOpen(); let n=0; const w=setInterval(()=>{ n++; const b=document.querySelector(".xslot"); if(b||n>25){ clearInterval(w); if(b) b.scrollIntoView({ behavior:"smooth", block:"center" }); } },300); }
 function xBack(){ const a=X.after; X.after=null; if(a && a.back==="session" && a.sid) sOpen(a.sid); else if(a && a.back==="board") bOpen(); else go("account"); }
 function xRole(k,role){
   const cur=X.langs[k];
@@ -3901,36 +3903,33 @@ function raCard(){
     <button class="btn secondary" onclick="dsOpen()">🎙️ Audio studio · German exam</button></div>`;
 }
 /* ---------- 📧 Admin: members without languages. The app prepares the email (you send it from your own email, BCC) and sends each a 🔔. ---------- */
-const ND = { list:null, stats:null, hideDone:true, lang:"en", off:{}, prev:{}, busy:false };
-const ND_LINK="https://pontetalk.setzio.com/?go=languages";
-const ND_TXT={
- en:{ s:"One step left: which languages do you speak? 🌉", b:`Hi!\n\nYou joined PonteTalk, yay! 🎉 There's just one thing missing: your languages. Without them we can't show you people to practise with.\n\nIt takes 30 seconds, this link opens the right page:\n${ND_LINK}\n\nOnce it's done you'll see sessions, partners and your lounge, all matched to you.\n\nSee you on the bridge,\nYvette from PonteTalk\n(free beta: ideas and problems are always welcome, just reply to this email)` },
- es:{ s:"Te falta un paso: ¿qué idiomas hablas? 🌉", b:`¡Hola!\n\nTe uniste a PonteTalk, ¡qué bien! 🎉 Solo falta una cosa: tus idiomas. Sin ellos no podemos mostrarte personas con quienes practicar.\n\nTardas 30 segundos, este enlace abre la página correcta:\n${ND_LINK}\n\nEn cuanto lo hagas verás sesiones, compañeros y tu sala, todo según tus idiomas.\n\n¡Nos vemos en el puente!\nYvette de PonteTalk\n(beta gratuita: tus ideas y problemas son bienvenidos, solo responde a este email)` },
- de:{ s:"Nur noch ein Schritt: Welche Sprachen sprichst du? 🌉", b:`Hallo!\n\nSchön, dass du bei PonteTalk bist! 🎉 Eine Sache fehlt noch: deine Sprachen. Ohne sie können wir dir niemanden zum Üben zeigen.\n\nDas dauert 30 Sekunden, dieser Link öffnet die richtige Seite:\n${ND_LINK}\n\nDanach siehst du Sessions, Partner und deine Lounge, alles passend zu dir.\n\nBis bald auf der Brücke,\nYvette von PonteTalk\n(kostenlose Beta: Ideen und Probleme sind immer willkommen, antworte einfach auf diese E-Mail)` }};
+const ND = { list:null, stats:null, hideDone:true, lang:"en", off:{}, prev:{}, subj:{}, busy:false, kind:"langs" };
 function ndSel(){ return ndRows().filter(r=>!ND.off[r.user_id]); }
 async function ndFn(body){ const { data, error }=await A.sb.functions.invoke("send-nudge",{ body }); if(error){ let m=error.message; try{ const j=await error.context.json(); m=j.error||m; }catch(e){} throw new Error(m); } if(data&&data.error) throw new Error(data.error); return data; }
-async function ndPreview(){ const l=ND.lang; if(ND.prev[l]) return; ND.prev[l]="…"; try{ const d=await ndFn({ preview:true, lang:l }); ND.prev[l]=d.html; }catch(e){ ND.prev[l]="ERR:"+e.message; } if(S.screen==="nudge") xr(); }
-async function ndTest(){ if(ND.busy) return; ND.busy=true; xr(); try{ const d=await ndFn({ test:true, lang:ND.lang }); bToast("📬 Test sent to "+d.to); }catch(e){ bToast("⚠️ "+e.message); } ND.busy=false; xr(); }
+async function ndPreview(){ const l=ND.kind+"-"+ND.lang; if(ND.prev[l]) return; ND.prev[l]="…"; try{ const d=await ndFn({ preview:true, lang:ND.lang, kind:ND.kind }); ND.prev[l]=d.html; ND.subj[l]=d.subject; }catch(e){ ND.prev[l]="ERR:"+e.message; } if(S.screen==="nudge") xr(); }
+async function ndTest(){ if(ND.busy) return; ND.busy=true; xr(); try{ const d=await ndFn({ test:true, lang:ND.lang, kind:ND.kind }); bToast("📬 Test sent to "+d.to); }catch(e){ bToast("⚠️ "+e.message); } ND.busy=false; xr(); }
 async function ndSend(){ const R=ndSel(); if(!R.length||ND.busy) return;
   if(!confirm(`Send the ${ {en:"English",es:"Spanish",de:"German"}[ND.lang] } email to ${R.length} ${R.length===1?"person":"people"}?`)) return;
-  ND.busy=true; xr(); try{ const d=await ndFn({ lang:ND.lang, ids:R.map(r=>r.user_id) }); bToast(`✅ ${d.sent} sent · 🔔 bell sent too`); ND.off={}; await ndLoad(); }catch(e){ bToast("⚠️ "+e.message); } ND.busy=false; xr(); }
+  ND.busy=true; xr(); try{ const d=await ndFn({ lang:ND.lang, kind:ND.kind, ids:R.map(r=>r.user_id) }); bToast(`✅ ${d.sent} sent · 🔔 bell sent too`); ND.off={}; await ndLoad(); }catch(e){ bToast("⚠️ "+e.message); } ND.busy=false; xr(); }
+function ndKind(k){ if(ND.kind===k) return; ND.kind=k; ND.list=null; ND.stats=null; ND.off={}; xr(); ndLoad(); }
 function ndOpen(){ ND.list=null; go("nudge"); ndLoad(); }
-async function ndLoad(){ try{ const [a,b]=await Promise.all([A.sb.rpc("pt_admin_incomplete"),A.sb.rpc("pt_admin_nudge_stats")]); if(a.error) throw a.error;
+async function ndLoad(){ try{ const [a,b]=await Promise.all([A.sb.rpc("pt_admin_incomplete",{ p_kind:ND.kind }),A.sb.rpc("pt_admin_nudge_stats",{ p_kind:ND.kind })]); if(a.error) throw a.error;
     ND.list=a.data||[]; ND.stats=(b&&b.data&&b.data[0])||null; }catch(e){ ND.list=[]; bToast(bErr(e)); } if(S.screen==="nudge") xr(); }
 function ndRows(){ return (ND.list||[]).filter(r=>!ND.hideDone||!r.nudged_at||Date.now()-new Date(r.nudged_at)>14*864e5); }
-function ndCopy(t,msg){ try{ navigator.clipboard.writeText(t).then(()=>bToast("📋 "+msg),()=>prompt("Copy:",t)); }catch(e){ prompt("Copy:",t); } }
-VIEWS.nudge = function(){ const L=ND.list, R=ndRows(), T=ND_TXT[ND.lang], st=ND.stats;
+VIEWS.nudge = function(){ const L=ND.list, R=ndRows(), PK=ND.kind+"-"+ND.lang, tm=ND.kind==="times", st=ND.stats;
   const chip=(k,l)=>`<button class="chip ${ND.lang===k?"on":""}" onclick="ND.lang='${k}';xr()">${l}</button>`;
   return `<div class="topline"><button class="chip" onclick="go('account')">${uiBack()} Profile</button><span>📧 Nudge</span></div>
-  <h2>📧 Incomplete profiles</h2><p class="sub">Members with <b>no languages</b> yet. They get no matches, partners or lounge until they add them.</p>
-  ${st?`<div class="card" style="display:flex;gap:16px;flex-wrap:wrap"><span>📨 Nudged so far: <b>${st.nudged}</b></span><span>✅ Added languages since: <b>${st.completed}</b>${st.nudged?` (${Math.round(st.completed/st.nudged*100)}%)`:""}</span></div>`:""}
-  ${L===null?`<p class="note center">Loading…</p>`:!L.length?`<div class="card center"><div style="font-size:40px">🎉</div><p class="note">Everyone has languages!</p></div>`:`
+  <h2>📧 Incomplete profiles</h2>
+  <div class="row" style="gap:6px;margin:0 0 10px"><button class="chip ${tm?"":"on"}" onclick="ndKind('langs')">🗣️ No languages</button><button class="chip ${tm?"on":""}" onclick="ndKind('times')">🕒 No free times</button></div>
+  <p class="sub">${tm?"Members who added languages but <b>no free times</b>. Partners can't find a time with them.":"Members with <b>no languages</b> yet. They get no matches, partners or lounge until they add them."}</p>
+  ${st?`<div class="card" style="display:flex;gap:16px;flex-wrap:wrap"><span>📨 Nudged so far: <b>${st.nudged}</b></span><span>✅ Added ${tm?"times":"languages"} since: <b>${st.completed}</b>${st.nudged?` (${Math.round(st.completed/st.nudged*100)}%)`:""}</span></div>`:""}
+  ${L===null?`<p class="note center">Loading…</p>`:!L.length?`<div class="card center"><div style="font-size:40px">🎉</div><p class="note">${tm?"Everyone with languages has free times too!":"Everyone has languages!"}</p></div>`:`
   <div class="card"><h3 style="margin:0 0 6px">✉️ The email</h3>
     <div class="row" style="gap:6px;margin-bottom:8px">${chip("en","🇬🇧 English")}${chip("es","🇪🇸 Español")}${chip("de","🇩🇪 Deutsch")}</div>
-    ${(()=>{ const h=ND.prev[ND.lang]; if(!h){ setTimeout(ndPreview,0); return `<p class="note">Loading preview…</p>`; }
+    ${(()=>{ const h=ND.prev[PK]; if(!h){ setTimeout(ndPreview,0); return `<p class="note">Loading preview…</p>`; }
       if(h==="…") return `<p class="note">Loading preview…</p>`;
       if(h.startsWith("ERR:")) return `<p class="note" style="color:var(--coral)">⚠️ Preview not available: ${esc(h.slice(4))}<br>Is the <b>send-nudge</b> function set up in Supabase?</p><button class="chip" onclick="ND.prev={};xr()">↻ Try again</button>`;
-      return `<div class="note" style="margin:0 0 4px"><b>Subject:</b> ${esc(T.s)}</div><iframe class="ndframe" sandbox srcdoc="${esc(h)}"></iframe>`; })()}
+      return `<div class="note" style="margin:0 0 4px"><b>Subject:</b> ${esc(ND.subj[PK]||"")}</div><iframe class="ndframe" sandbox srcdoc="${esc(h)}"></iframe>`; })()}
     <div class="row" style="gap:8px;margin-top:10px;flex-wrap:wrap">
       <button class="btn secondary" ${ND.busy?"disabled":""} onclick="ndTest()">📬 Send a test to me</button>
       <button class="btn primary" ${ND.busy||!ndSel().length?"disabled":""} onclick="ndSend()">${ND.busy?"Sending…":`🚀 Send to ${ndSel().length} ${ndSel().length===1?"person":"people"}`}</button></div>
@@ -8558,6 +8557,7 @@ function nbText(n){
     case "reminder_15m": return "⏰ "+tr(`${t} starts in 15 minutes.`,`${t} beginnt in 15 Minuten.`,`${t} empieza en 15 minutos.`);
     case "new_member":   { const nm=n.from_name&&n.from_name!=="Member"?esc(n.from_name):esc(d.email||tr("someone","jemand","alguien"));
                            return "👋 "+tr(`New member: ${nm}`,`Neues Mitglied: ${nm}`,`Nuevo miembro: ${nm}`)+(d.total?` · ${tr(`${d.total} accounts in total`,`${d.total} Konten insgesamt`,`${d.total} cuentas en total`)}`:""); }
+    case "times_nudge": return "🕒 "+tr("Add your free times so partners can find a time that works for you both.","Trag deine freien Zeiten ein, damit Partner einen passenden Termin finden.","Añade tus horas libres para que tus compañeros encuentren un momento para los dos.");
     case "profile_nudge": return "🗣️ "+tr("Add your languages so we can match you with people to practise with.","Trag deine Sprachen ein, damit wir dir Leute zum Üben zeigen können.","Añade tus idiomas para que podamos mostrarte personas con quienes practicar.");
     case "feedback":     return (d.kind==="bug"?"🐞 ":"💡 ")+tr("New feedback","Neues Feedback","Nuevas sugerencias")+`: “${esc(d.text||"")}”`;
     case "duel_done":    return "⚔️ "+tr(`${who} played your duel. Tap to see who won!`,`${who} hat dein Duell gespielt. Tippe, um zu sehen, wer gewonnen hat!`,`${who} jugó tu duelo. ¡Toca para ver quién ganó!`);
@@ -8613,6 +8613,7 @@ async function nbTap(id){
   if(n.kind==="new_member"){ stOpen(); return; }
   if(n.kind==="feedback"){ fbAdminOpen(); return; }
   if(n.kind==="profile_nudge"){ xOpen(); return; }
+  if(n.kind==="times_nudge"){ xOpenTimes(); return; }
   if(/^echo_/.test(n.kind) && n.data && n.data.lounge){ await luEnter(n.data.lounge); ecOpen(); return; }
   if(n.activity_id){ if(n.kind==="chat") chOpen(n.activity_id); else if(n.kind==="word_fixed") wdOpen(n.activity_id); else sOpen(n.activity_id); }
 }
@@ -11312,8 +11313,8 @@ try{ const sid=new URLSearchParams(location.search).get("s"); if(sid && /^[0-9a-
   if(L){ S.players=L.players||[]; const had=S.players.find(p=>p.pal===k); S.screen="paljoin"; S.draft.name=had?had.name:""; }
   else S.screen="palmeet"; }catch(e){} })();
 try{ const q=new URLSearchParams(location.search); if(q.has("impressum")||q.has("datenschutz")){ S.screen=q.has("impressum")?"impressum":"privacy"; history.replaceState(null,"",location.pathname); } }catch(e){}
-try{ if(new URLSearchParams(location.search).get("go")==="languages"){ history.replaceState(null,"",location.pathname); let n=0; const w=setInterval(()=>{ n++;
-    if(A.status==="in"&&A.user){ clearInterval(w); xOpen(); } else if((A.status==="out"&&n>2)||n>20){ clearInterval(w); A.ret="xprofile"; go("account"); } },400); } }catch(e){}
+try{ const g=new URLSearchParams(location.search).get("go"); if(g==="languages"||g==="times"){ history.replaceState(null,"",location.pathname); let n=0; const w=setInterval(()=>{ n++;
+    if(A.status==="in"&&A.user){ clearInterval(w); g==="times"?xOpenTimes():xOpen(); } else if((A.status==="out"&&n>2)||n>20){ clearInterval(w); A.ret=g==="times"?"xtimes":"xprofile"; go("account"); } },400); } }catch(e){}
 try{ if(new URLSearchParams(location.search).has("bb")){ document.addEventListener("DOMContentLoaded",()=>{ bbOpen(); history.replaceState(null,"",location.pathname); }); } }catch(e){}
 try{ if(new URLSearchParams(location.search).has("stats")){ S.screen="stats"; let n=0; const w=setInterval(()=>{ n++; if(A.status==="in"&&A.user){ clearInterval(w); stLoad(); } else if((A.status==="out"&&n>2)||n>20){ clearInterval(w); A.ret="stats"; A.msg="Sign in to see stats · Bitte anmelden"; go("account"); } },500); } }catch(e){}
 try{ if(new URLSearchParams(location.search).has("reports")){ S.screen="reports"; let n=0; const w=setInterval(()=>{ n++; if(A.status==="in"&&A.user){ clearInterval(w); raLoad(); } else if((A.status==="out"&&n>2)||n>20){ clearInterval(w); A.ret="reports"; A.msg="Sign in to see reports · Bitte anmelden"; go("account"); } },500); } }catch(e){}
