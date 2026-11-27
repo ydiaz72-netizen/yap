@@ -805,6 +805,16 @@
   .sbs{font-size:17px;line-height:28px;margin:0 0 6px}.sbtip{font-size:14px;background:#FAF7F2;border-radius:12px;padding:8px 10px;margin-top:10px}
   .sbnew{outline:3px solid #F2B544;outline-offset:4px;border-radius:8px}.sbrow{margin-top:12px}.sbdet{margin-top:8px}.sbdet summary{font-weight:800;cursor:pointer;font-size:14px}
   .sbw{cursor:pointer;border-bottom:2px dotted #C9C0B3}.sbw:active{background:#FDF2D8}
+  .brbr{position:relative;height:132px;margin:4px 0 6px}.brdeck{position:absolute;left:0;right:0;top:86px;height:12px;background:#1B2A41;border-radius:6px}
+  .brarc{position:absolute;left:4%;right:4%;top:34px;height:54px;border:5px solid #F25C3B;border-bottom:0;border-radius:50% 50% 0 0/100% 100% 0 0;opacity:.85}
+  .brpl{position:absolute;top:78px;width:7.4%;height:10px;border-radius:3px;background:#E6E0D7}.brpl.on{background:#F2B544}.brpl.new{background:#2A8C82}
+  .brlab{position:absolute;top:104px;font-size:11px;color:var(--muted);transform:translateX(-50%)}.brpal{position:absolute;top:22px;width:52px;height:52px;transform:translateX(-50%);display:block}.brpal svg{width:100%;height:100%}
+  .brghost{position:absolute;top:52px;transform:translateX(-50%);font-size:10px;font-weight:800;color:#8A919E;background:#fff;border:1px dashed #C9C0B3;border-radius:999px;padding:2px 7px;white-space:nowrap}
+  .brstats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0 0 4px}.brstats div{background:#fff;border:1px solid var(--line);border-radius:16px;padding:10px 4px;text-align:center}.brstats b{display:block;font-size:21px}.brstats span{font-size:11px;color:var(--muted);font-weight:700}
+  .brsec{font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.6px;text-transform:uppercase;margin:16px 4px 8px}
+  .brrow{display:flex;justify-content:space-between;gap:8px}.brbar{height:8px;background:#F0EBE3;border-radius:99px;overflow:hidden;margin-top:6px}.brbar i{display:block;height:100%;border-radius:99px}
+  .brfx{border-left:5px solid #F25C3B}.brfx h4{margin:0 0 4px;font-size:16px}.brgo{margin-top:10px;background:#F25C3B;color:#fff;border:0;border-radius:999px;padding:9px 14px;font:inherit;font-weight:800;font-size:14px;cursor:pointer}
+  .brmis{font-size:15px;padding:7px 0;border-top:1px solid var(--line)}.brmis:first-child{border-top:0}.brmis s{color:#B8371C}.brmis b{color:#1E6B63}.brplan div{padding:4px 0}.brcard{cursor:pointer}
   .sbhint{margin-top:6px;font-size:14px;color:#D6DCE6}
   .sbtense{background:#1B2A41;color:#F2B544;border-radius:999px;padding:1px 8px;letter-spacing:0;text-transform:none}.sbtl{margin-bottom:10px}.sbline{border-left:4px solid #F2B544;padding-left:10px;margin:0 0 12px}
   .sbdone{padding:6px 0;border-top:1px solid var(--line);font-size:15px}.sbdone:first-of-type{border-top:0}
@@ -7233,7 +7243,7 @@ function homeRecs(){
 }
 
 /* ===================== BOTTOM BAR ===================== */
-const NAV_TAB = { sbuild:"games", home:"home", bridge:"games", split:"games", conj:"games", board:"sessions", host:"sessions", session:"sessions", games:"games", account:"profile", xprofile:"profile" };
+const NAV_TAB = { report:"home", sbuild:"games", home:"home", bridge:"games", split:"games", conj:"games", board:"sessions", host:"sessions", session:"sessions", games:"games", account:"profile", xprofile:"profile" };
 const WIDE = { home:"xl", board:"xl", host:"md", session:"md", account:"md", xprofile:"md", games:"md" };
 const ICO = {
   home:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10l9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>',
@@ -8042,6 +8052,7 @@ function homeDash(){
         <p class="sub" style="margin:2px 0 14px">${tr("Here's what's next for you.","Das steht als Nächstes an.","Esto es lo próximo para ti.")}</p>${nextCard()}</div>
       ${holdCard()}
       ${recCard()}
+      ${brCard()}
       ${weekCard().replace('<div class="card">','<div class="card" style="margin:0">')}
       ${rdDayCard()}
       ${acCard()}
@@ -11174,6 +11185,105 @@ async function llFlush(){ const q=llQ(); if(!q.length||!(A.user&&A.sb)||LL.busy)
   try{ const { error }=await A.sb.rpc("pt_learn_add",{ p_rows:batch }); if(!error){ LL.q=llQ().slice(batch.length); llKeep(); } }catch(e){} LL.busy=false; }
 document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="hidden") llFlush(); });
 setInterval(llFlush,60000);
+/* ---------- 🌉 Bridge Report: last 7 days, by skill ---------- */
+const BR={ d:null, busy:false, at:0 };
+const BR_SB={ dat:["Dativ (wem?)","Dativ (wem?)","Dativo (wem?)"], akk:["Akkusativ (was?)","Akkusativ (was?)","Acusativo (was?)"], wo:["wo? → Dativ","wo? → Dativ","wo? → dativo"],
+  wohin:["wohin? → Akkusativ","wohin? → Akkusativ","wohin? → acusativo"], pd:["Prepositions + Dativ","Präpositionen + Dativ","Preposiciones + dativo"], pa:["Prepositions + Akkusativ","Präpositionen + Akkusativ","Preposiciones + acusativo"],
+  po:["Verb + preposition","Verb + Präposition","Verbo + preposición"], pg:["Genitiv","Genitiv","Genitivo"], time:["Verb in slot 2","Verb auf Platz 2","Verbo en posición 2"], mo:["Verb in slot 2","Verb auf Platz 2","Verbo en posición 2"],
+  weil:["Verb at the end (weil, dass …)","Verb am Ende (weil, dass …)","Verbo al final (weil, dass …)"], link:0, dass:0, sub:0, rel:0, um:0, jd:0,
+  perf:["Perfekt","Perfekt","Perfekt"], prat:["Präteritum","Präteritum","Präteritum"], fut:["Future","Futur","Futuro"], fut2:0, modal:["Modal verbs","Modalverben","Verbos modales"],
+  neg:["nicht / kein","nicht / kein","nicht / kein"], swap:["Articles & endings","Artikel & Endungen","Artículos y terminaciones"], part:0, k2:["Konjunktiv II","Konjunktiv II","Konjunktiv II"],
+  k1:["Konjunktiv I","Konjunktiv I","Konjunktiv I"], pass:["Passive","Passiv","Pasiva"], plusq:["Plusquamperfekt","Plusquamperfekt","Plusquamperfekt"], two:["C1 style","C1-Stil","Estilo C1"], nom:0 };
+const BR_ALIAS={ mo:"time", link:"weil", dass:"weil", sub:"weil", rel:"weil", um:"weil", jd:"weil", fut2:"fut", part:"swap", nom:"two" };
+function brSkill(s){ const L=a=>tr(a[0],a[1],a[2]);
+  if(s.startsWith("sb:")||s.startsWith("sbt:")){ let k=s.split(":")[1]; k=BR_ALIAS[k]||k; const a=BR_SB[k]; return a?{ k:"sb:"+k, l:L(a), go:`sbFocus('${k}')` }:null; }
+  if(s==="vocab") return { k:"vocab", l:tr("Words","Wortschatz","Vocabulario"), go:"recVc()" };
+  if(s==="gender") return { k:"gender", l:"der / die / das", go:"recVc('gender')" };
+  if(s.startsWith("case:")){ const c=s.slice(5); return { k:s, l:tr(`Cases: ${c}`,`Fälle: ${c}`,`Casos: ${c}`), go:`vcOpen().then(()=>csStart('${c}'))` }; }
+  if(s.startsWith("bb:")) return { k:"bb", l:tr("Word order","Satzbau","Orden de las palabras"), go:"bbOpen()" };
+  if(s==="split") return { k:"split", l:tr("Separable verbs","Trennbare Verben","Verbos separables"), go:"ssOpen()" };
+  if(s==="conj"||s==="question") return { k:"conj", l:tr("Verb forms","Verbformen","Formas verbales"), go:"kjOpen()" };
+  if(s==="spelling") return { k:"spell", l:tr("Spelling","Rechtschreibung","Ortografía"), go:"hmOpen()" };
+  return null; }
+function brGroups(w){ const m={}; for(const x of (BR.d&&BR.d.skills)||[]){ if(x.w!==w) continue; const g=brSkill(x.s); if(!g) continue; const o=m[g.k]||(m[g.k]={ ...g, n:0, ok:0, raw:[] }); o.n+=x.n; o.ok+=x.ok; o.raw.push(x.s); } return Object.values(m); }
+function brPlank(){ const lv=VC.level||"A1", i=Math.max(0,VC_LEVELS.indexOf(lv)); let share=0; try{ const st=vcStats(vcLv(lv)); share=st.total?Math.min(1,(st.mastered+st.learned*.25)/st.total):0; }catch(e){}
+  const pos=Math.min(10,i*2+share*2); return { pos, plank:Math.floor(pos)+1, lv, plus:share>=.5 }; }
+function brHist(cur){ let h={}; try{ h=JSON.parse(localStorage.getItem("pt_bridge")||"{}"); }catch(e){}
+  const wk=x=>{ const d=new Date(x); d.setHours(0,0,0,0); d.setDate(d.getDate()-((d.getDay()+6)%7)); return d.toISOString().slice(0,10); };
+  const now=wk(Date.now()), last=wk(Date.now()-7*864e5); if(!h[now]||h[now]<cur){ h[now]=cur; try{ localStorage.setItem("pt_bridge",JSON.stringify(h)); }catch(e){} }
+  return h[last]!=null?h[last]:null; }
+async function brLoad(force){ if(!(A.user&&A.sb)||BR.busy) return; if(!force&&BR.d&&Date.now()-BR.at<5*60000) return; BR.busy=true;
+  try{ await llFlush(); if(!VC.d){ try{ await vcLoadData(); }catch(e){} } let tz="Europe/Berlin"; try{ tz=Intl.DateTimeFormat().resolvedOptions().timeZone||tz; }catch(e){}
+    const { data, error }=await A.sb.rpc("pt_bridge_report",{ p_tz:tz }); if(error) throw error; BR.d=data||{}; BR.at=Date.now(); }catch(e){ BR.err=e; } BR.busy=false; if(["home","report"].includes(S.screen)) xr(); }
+function brOpen(){ go("report"); brLoad(true); }
+function sbFocus(k){ const all=[...SB_CH.map(c=>({ c, set:"build" })),...SB_TN.map(c=>({ c, set:"tense" }))], lv=sbPickLv();
+  const has=o=>o.c.st.findIndex(x=>(BR_ALIAS[x[0]]||x[0])===k);
+  let pool=all.filter(o=>o.c.lv===lv&&has(o)>=0); if(!pool.length) pool=all.filter(o=>has(o)>=0); if(!pool.length){ sbOpen(); return; }
+  const o=pool[Math.floor(Math.random()*pool.length)]; sbLoad(); SB.set=o.set; SB.lv=o.c.lv; SB.ch=o.c; SB.i=has(o); SB.first=[]; SB.word=null; SB.mode=["B1","C1"].includes(SB.lv)?"type":"tiles"; sbReset(); go("sbuild"); }
+function brBridge(prev,now){ const X=i=>3+i*8.6, pal=palArt("pia",50);
+  const planks=Array.from({ length:11 },(_,i)=>`<i class="brpl ${prev!=null&&i>=prev-1&&i<now-1?"new":i<now?"on":""}" style="left:${X(i)}%"></i>`).join("");
+  const labs=[[7,"A1"],[28,"A2"],[50,"B1"],[71,"B2"],[92,"C1"]].map(([p,l])=>`<b class="brlab" style="left:${p}%">${l}</b>`).join("");
+  return `<div class="brbr"><div class="brarc"></div><div class="brdeck"></div>${planks}${labs}
+   ${prev!=null&&prev!==now?`<span class="brghost" style="left:${X(prev-1)+3.7}%">${tr("last week","letzte Woche","semana pasada")}</span>`:""}
+   <span class="brpal" style="left:${X(now-1)+3.7}%">${pal?pal:"🧍"}</span></div>`; }
+function brCalc(){ const d=BR.d||{}, cur=d.cur||{}, prev=d.prev||{}, G=brGroups("cur").filter(g=>g.n>0);
+  const rate=g=>g.ok/g.n, good=G.filter(g=>g.n>=4&&rate(g)>=.8).sort((a,b)=>b.n-a.n).slice(0,2);
+  const focus=G.filter(g=>g.n>=2&&rate(g)<.8).sort((a,b)=>rate(a)-rate(b)||b.n-a.n).slice(0,2);
+  const P=brPlank(), last=brHist(P.plank); return { d, cur, prev, G, good, focus, P, last, mins:Math.round((cur.secs||0)/60) }; }
+function brEx(g){ const m=((BR.d&&BR.d.mist)||[]).find(x=>g.raw.includes(x.s)&&x.w&&x.r); return m; }
+VIEWS.report = function(){ const back=`<div class="topline"><button class="chip" onclick="go('home')">${uiBack()} ${tr("Home","Start","Inicio")}</button><span>🌉 ${tr("Bridge Report","Brücken-Bericht","Informe del puente")}</span></div>`;
+  if(!(A.user&&A.status==="in")) return back+`<div class="card center"><p>${tr("Sign in to see your report.","Melde dich an, um deinen Bericht zu sehen.","Inicia sesión para ver tu informe.")}</p><button class="btn primary" onclick="go('account')">${tr("Sign in","Anmelden","Iniciar sesión")}</button></div>`;
+  if(!BR.d) return back+`<p class="note center">${tr("Loading…","Lädt…","Cargando…")}</p>`;
+  const R=brCalc(), c=R.cur, LVN=`${R.P.lv}${R.P.plus?"+":""}`;
+  if(!R.d.total) return back+`<div class="card center"><div style="font-size:42px">🌉</div><h3>${tr("Your first report is on its way","Dein erster Bericht kommt bald","Tu primer informe está en camino")}</h3><p class="note">${tr("Play a few rounds (flashcards, Sentence Builder…) and your report fills up.","Spiel ein paar Runden (Karteikarten, Satzbauer …), dann füllt sich dein Bericht.","Juega unas rondas (tarjetas, Constructor de frases…) y tu informe se irá llenando.")}</p><button class="btn primary" onclick="sbOpen()">🧱 ${tr("Sentence Builder","Satzbauer","Constructor de frases")}</button></div>`;
+  const diff=R.last!=null?R.P.plank-R.last:null, toNext=Math.max(0,(VC_LEVELS.indexOf(R.P.lv)+1)*2+1-R.P.plank), nextLv=VC_LEVELS[VC_LEVELS.indexOf(R.P.lv)+1];
+  const bar=(g,col)=>`<div class="brrow"><b>${esc(g.l)}</b><span class="note">${g.ok} / ${g.n}</span></div><div class="brbar"><i style="width:${Math.round(g.ok/g.n*100)}%;background:${col}"></i></div>`;
+  const mist=((R.d.mist)||[]).slice(0,6);
+  return back+`<p class="sub" style="margin:0 0 10px">${tr("Last 7 days · German","Letzte 7 Tage · Deutsch","Últimos 7 días · Alemán")}</p>
+  <div class="card"><div class="sblab">${tr("Where you are","Wo du stehst","Dónde estás")}</div>${brBridge(R.last,R.P.plank)}
+    <b style="font-size:17px">${tr("Plank","Brett","Tabla")} ${R.P.plank} · ${LVN}</b>
+    <p class="note" style="margin:2px 0 0">${diff==null?tr("Your first week on the bridge. Next week you'll see how far you got.","Deine erste Woche auf der Brücke. Nächste Woche siehst du, wie weit du gekommen bist.","Tu primera semana en el puente. La semana que viene verás cuánto has avanzado."):diff>0?tr(`Last week: plank ${R.last}. <b style="color:#2A8C82">+${diff}</b> 🎉`,`Letzte Woche: Brett ${R.last}. <b style="color:#2A8C82">+${diff}</b> 🎉`,`Semana pasada: tabla ${R.last}. <b style="color:#2A8C82">+${diff}</b> 🎉`):tr(`Same plank as last week. Keep going!`,`Gleiches Brett wie letzte Woche. Weiter so!`,`La misma tabla que la semana pasada. ¡Sigue así!`)}${nextLv&&toNext?" "+tr(`${toNext} more to ${nextLv}.`,`Noch ${toNext} bis ${nextLv}.`,`${toNext} más hasta ${nextLv}.`):""}</p>
+    <p class="note" style="margin:4px 0 0;font-size:12px">${tr("Your plank grows as you master the flashcard words of your level.","Dein Brett wächst, wenn du die Karteikarten deines Niveaus meisterst.","Tu tabla avanza al dominar las tarjetas de tu nivel.")}</p></div>
+  <div class="brstats"><div><b>${c.days||0}🔥</b><span>${tr("active days","aktive Tage","días activos")}</span></div><div><b>${R.mins}</b><span>${tr("minutes","Minuten","minutos")}</span></div><div><b>${c.words||0}</b><span>${tr("words right","Wörter richtig","palabras bien")}</span></div><div><b>${c.sent||0}</b><span>${tr("sentences","Sätze","frases")}</span></div></div>
+  ${R.good.length?`<div class="brsec">💪 ${tr("Going well","Läuft gut","Va bien")}</div><div class="card">${R.good.map(g=>bar(g,"#2A8C82")).join('<div style="height:10px"></div>')}</div>`:""}
+  <div class="brsec">🎯 ${R.focus.length?tr(`Focus on ${R.focus.length===1?"this":"these 2"}`,`Darauf achten`,`Céntrate en ${R.focus.length===1?"esto":"estos 2"}`):tr("Focus","Fokus","Enfoque")}</div>
+  ${R.focus.length?R.focus.map((g,i)=>{ const m=brEx(g); return `<div class="card brfx" style="${i?"border-left-color:#F2B544":""}"><h4>${i+1} · ${esc(g.l)}</h4><p class="note" style="margin:0">${tr(`${g.ok} of ${g.n} right.`,`${g.ok} von ${g.n} richtig.`,`${g.ok} de ${g.n} bien.`)}${m?` ${tr("You wrote","Du hast geschrieben","Escribiste")} <s lang="de">${esc(m.w)}</s> → <b lang="de">${esc(m.r)}</b>`:""}</p><button class="brgo" onclick="${g.go}">▶ ${tr("Practise now · 5 min","Jetzt üben · 5 Min.","Practicar ahora · 5 min")}</button></div>`; }).join("")
+    :`<div class="card"><p style="margin:0">${tr("Nothing to fix this week. 🎉 Try the next level or something new.","Diese Woche nichts zu verbessern. 🎉 Probier das nächste Niveau oder etwas Neues.","Nada que corregir esta semana. 🎉 Prueba el siguiente nivel o algo nuevo.")}</p></div>`}
+  ${mist.length?`<div class="brsec">🔁 ${tr("Your mistakes this week","Deine Fehler diese Woche","Tus errores esta semana")}</div><div class="card">${mist.map(m=>`<div class="brmis" lang="de">${m.w&&m.r?`<s>${esc(m.w)}</s> → <b>${esc(m.r)}</b>`:`✗ <b>${esc(m.i||"")}</b>`}</div>`).join("")}</div>`:""}
+  <div class="brsec">📅 ${tr("Next week's mini plan","Mini-Plan für nächste Woche","Mini plan para la semana que viene")}</div>
+  <div class="card brplan">${(R.focus[0]?[`☐ 3 × ${esc(R.focus[0].l)}`]:[]).concat([tr("☐ 10 flashcards a day","☐ 10 Karteikarten am Tag","☐ 10 tarjetas al día"),tr("☐ 1 session or lounge chat","☐ 1 Session oder Lounge-Chat","☐ 1 sesión o chat en la sala")]).map(x=>`<div>${x}</div>`).join("")}</div>
+  <button class="btn primary" onclick="brPdf()">📄 ${tr("Download PDF","PDF herunterladen","Descargar PDF")}</button>
+  <p class="note center" style="margin:8px 0 0">${tr("Save it or send it to your teacher.","Speichern oder an deine Lehrkraft schicken.","Guárdalo o envíaselo a tu profe.")}</p>`; };
+function brCard(){ if(!(A.user&&A.status==="in")) return ""; if(!BR.d){ brLoad(); return ""; } if(!BR.d.total) return "";
+  const R=brCalc(), f=R.focus[0];
+  return `<div class="card brcard" style="margin:0" onclick="brOpen()"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h3 style="margin:0">🌉 ${tr("My Bridge Report","Mein Brücken-Bericht","Mi informe del puente")}</h3><span class="chip">${tr("Open","Öffnen","Abrir")} →</span></div>
+    <p class="note" style="margin:6px 0 0">${tr("Plank","Brett","Tabla")} ${R.P.plank} · ${R.P.lv}${R.P.plus?"+":""} · ${R.cur.days||0}🔥 · ${R.mins} min${f?` · 🎯 ${esc(f.l)}`:""}</p></div>`; }
+function brPdf(){ const R=brCalc(), c=R.cur, name=meName()||"", d=new Date(), from=new Date(Date.now()-6*864e5), fmt=x=>x.toLocaleDateString(UI==="de"?"de-DE":UI==="es"?"es-ES":"en-GB",{ day:"numeric", month:"short" });
+  const bar=(g)=>{ const p=Math.round(g.ok/g.n*100), col=p>=80?"#2A8C82":p>=50?"#F2B544":"#F25C3B"; return `<div class="r"><span>${esc(g.l)}</span><span>${g.ok}/${g.n}</span></div><div class="bar"><i style="width:${p}%;background:${col}"></i></div>`; };
+  const note=[R.good.length?tr(`Strong: ${R.good.map(g=>g.l).join(", ")}.`,`Stark: ${R.good.map(g=>g.l).join(", ")}.`,`Puntos fuertes: ${R.good.map(g=>g.l).join(", ")}.`):"",
+    R.focus.length?tr(`Needs practice: ${R.focus.map(g=>g.l).join(", ")}.`,`Braucht Übung: ${R.focus.map(g=>g.l).join(", ")}.`,`Necesita práctica: ${R.focus.map(g=>g.l).join(", ")}.`):"",
+    tr(`Active ${c.days||0} of 7 days, ${R.mins} minutes.`,`Aktiv an ${c.days||0} von 7 Tagen, ${R.mins} Minuten.`,`Activo ${c.days||0} de 7 días, ${R.mins} minutos.`)].filter(Boolean).join(" ");
+  const html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>PonteTalk Bridge Report</title><style>
+  @font-face{font-family:PJ;font-weight:200 800;src:url(${location.origin}/fonts/plus-jakarta-sans-latin-wght-normal.woff2)}
+  @page{size:A4;margin:14mm} *{box-sizing:border-box} body{font-family:PJ,Helvetica,Arial,sans-serif;color:#1B2A41;margin:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .hd{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #F25C3B;padding-bottom:10px;margin-bottom:14px} h1{margin:2px 0;font-size:24px} .k{font-size:11px;font-weight:800;color:#5B6474;letter-spacing:.6px} .n{color:#5B6474;font-size:13px}
+  .card{border:1px solid #E6E0D7;border-radius:14px;padding:12px 14px;margin-bottom:12px;break-inside:avoid} h3{margin:0 0 8px;font-size:16px} .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .r{display:flex;justify-content:space-between;font-size:13px;margin-top:6px} .bar{height:7px;background:#F0EBE3;border-radius:9px;overflow:hidden;margin-top:3px} .bar i{display:block;height:100%}
+  .fx{border-left:5px solid #F25C3B} .m{font-size:13px;padding:4px 0;border-top:1px solid #F0EBE3} .m:first-child{border-top:0} s{color:#B8371C} .m b{color:#1E6B63}
+  ${document.querySelector("style")?"":""} .brbr{position:relative;height:120px;margin:4px 0 8px} .brdeck{position:absolute;left:0;right:0;top:78px;height:11px;background:#1B2A41;border-radius:6px} .brarc{position:absolute;left:4%;right:4%;top:28px;height:52px;border:4px solid #F25C3B;border-bottom:0;border-radius:50% 50% 0 0/100% 100% 0 0}
+  .brpl{position:absolute;top:70px;width:7.4%;height:9px;border-radius:3px;background:#E6E0D7} .brpl.on{background:#F2B544} .brpl.new{background:#2A8C82} .brlab{position:absolute;top:94px;font-size:11px;color:#5B6474;transform:translateX(-50%)}
+  .brpal{position:absolute;top:14px;width:50px;height:50px;transform:translateX(-50%);display:block} .brpal svg{width:100%;height:100%} .brghost{position:absolute;top:44px;transform:translateX(-50%);font-size:10px;font-weight:800;color:#8A919E;border:1px dashed #C9C0B3;border-radius:99px;padding:1px 6px;background:#fff;white-space:nowrap}
+  </style></head><body>
+  <div class="hd"><div><div class="k">BRIDGE REPORT · ${fmt(from)} – ${fmt(d)} ${d.getFullYear()}</div><h1>${name?esc(name)+" · ":""}${tr("German","Deutsch","Alemán")}</h1><div class="n">${tr("Level","Niveau","Nivel")} ${R.P.lv}${R.P.plus?"+":""} · ${tr("plank","Brett","tabla")} ${R.P.plank} / 11</div></div><div style="font-weight:800;font-size:20px">Ponte<span style="color:#F25C3B">Talk</span></div></div>
+  ${brBridge(R.last,R.P.plank)}
+  <div class="two"><div class="card"><h3>📈 ${tr("This week","Diese Woche","Esta semana")}</h3><div class="n" style="line-height:22px">${tr("Active days","Aktive Tage","Días activos")}: <b>${c.days||0} / 7</b><br>${tr("Practice time","Übungszeit","Tiempo de práctica")}: <b>${R.mins} min</b><br>${tr("Answers","Antworten","Respuestas")}: <b>${c.n||0}</b> (${c.n?Math.round(c.ok/c.n*100):0}% ${tr("right","richtig","bien")})<br>${tr("Words right","Wörter richtig","Palabras bien")}: <b>${c.words||0}</b> · ${tr("Sentences","Sätze","Frases")}: <b>${c.sent||0}</b></div></div>
+   <div class="card"><h3>🧩 ${tr("Skills","Fähigkeiten","Habilidades")}</h3>${R.G.slice().sort((a,b)=>b.n-a.n).slice(0,6).map(bar).join("")||`<div class="n">—</div>`}</div></div>
+  ${R.focus.length?`<div class="card fx"><h3>🎯 ${tr("Focus for next week","Fokus für nächste Woche","Enfoque para la semana que viene")}</h3>${R.focus.map((g,i)=>{ const m=brEx(g); return `<div class="n" style="margin-top:4px"><b style="color:#1B2A41">${i+1}. ${esc(g.l)}</b> · ${g.ok}/${g.n}${m?` · <s>${esc(m.w)}</s> → <b>${esc(m.r)}</b>`:""}</div>`; }).join("")}</div>`:""}
+  ${(R.d.mist||[]).length?`<div class="card"><h3>🔁 ${tr("Mistakes this week","Fehler diese Woche","Errores esta semana")}</h3>${R.d.mist.slice(0,8).map(m=>`<div class="m">${m.w&&m.r?`<s>${esc(m.w)}</s> → <b>${esc(m.r)}</b>`:`✗ ${esc(m.i||"")}`}</div>`).join("")}</div>`:""}
+  <div class="card"><h3>💬 ${tr("Note for the teacher","Notiz für die Lehrkraft","Nota para el profe")}</h3><div class="n">${esc(note)}</div></div>
+  <div class="n" style="text-align:center">pontetalk.setzio.com · ${tr("Free beta","Kostenlose Beta","Beta gratuita")}</div>
+  <script>window.onload=()=>setTimeout(()=>window.print(),400)<\/script></body></html>`;
+  const w=window.open("","_blank"); if(!w){ bToast(tr("Allow pop-ups to download the PDF","Erlaube Pop-ups für das PDF","Permite ventanas emergentes para el PDF")); return; } w.document.open(); w.document.write(html); w.document.close(); }
 const SB_CH=[
 {id:"a1-coffee",lv:"A1",s:"Ich:S|trinke:V|Kaffee.:O",e:"I drink coffee.",es:"Bebo café.",st:[
  ["time","am Morgen","Am Morgen:T+|trinke:V|ich:S|Kaffee.:O","In the morning I drink coffee.","Por la mañana bebo café."],
