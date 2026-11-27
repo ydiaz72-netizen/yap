@@ -794,6 +794,17 @@
   .fblink{font-weight:700;color:var(--coral);margin-bottom:6px}
   #tnav .tlogo .beta{font-size:10px;padding:2px 7px;margin-inline-start:2px}
 .ssmean{margin:6px 0 2px;color:var(--teal,#2A8C82);font-weight:700}
+  .sbsteps{display:flex;gap:6px;margin:0 0 12px}.sbsteps span{flex:1;height:8px;border-radius:99px;background:var(--line)}.sbsteps .d{background:#2A8C82}.sbsteps .c{background:var(--coral,#F25C3B)}
+  .sblab{font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin:0 0 6px}.sbnow{font-size:19px;font-weight:800;line-height:27px}
+  .sbtask{background:#1B2A41;color:#fff;border-radius:20px;padding:14px 16px;margin:0 0 12px}.sbtask .sblab{color:#F2B544}
+  .sbinp{width:100%;border:2px solid var(--coral,#F25C3B);border-radius:16px;padding:12px;font:inherit;font-size:17px;line-height:25px;margin:0 0 6px;resize:vertical;background:#fff}
+  .sbslot{border:2px dashed #C9C0B3;border-radius:16px;padding:10px;min-height:64px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:#fff;margin:0 0 10px}
+  .sbpool{display:flex;flex-wrap:wrap;gap:8px}.sbtile{font:inherit;font-weight:800;font-size:17px;background:#fff;border:2px solid var(--line);border-bottom-width:4px;border-radius:12px;padding:7px 12px;color:var(--ink,#1B2A41);cursor:pointer}
+  .sbtile.in{border-color:#2F4B7C;background:#E7EDF6;color:#2F4B7C}.sbtile.used{opacity:.25}
+  .sbbad{background:#FCE6DF;color:#B8371C;border-radius:5px;padding:0 3px;font-weight:800;text-decoration:line-through}.sbgood{background:#DDEFEC;color:#1E6B63;border-radius:5px;padding:0 3px;font-weight:800}
+  .sbs{font-size:17px;line-height:28px;margin:0 0 6px}.sbtip{font-size:14px;background:#FAF7F2;border-radius:12px;padding:8px 10px;margin-top:10px}
+  .sbnew{outline:3px solid #F2B544;outline-offset:4px;border-radius:8px}.sbrow{margin-top:12px}.sbdet{margin-top:8px}.sbdet summary{font-weight:800;cursor:pointer;font-size:14px}
+  .sbdone{padding:6px 0;border-top:1px solid var(--line);font-size:15px}.sbdone:first-of-type{border-top:0}
   .ndframe{width:100%;height:560px;border:1px solid var(--line);border-radius:14px;background:#FAF7F2}
   .ndbody{white-space:pre-wrap;background:#FAF7F2;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:14px;max-height:220px;overflow:auto}
   .cstab{width:100%;border-collapse:collapse;font-size:14px;min-width:340px}
@@ -7219,7 +7230,7 @@ function homeRecs(){
 }
 
 /* ===================== BOTTOM BAR ===================== */
-const NAV_TAB = { home:"home", bridge:"games", split:"games", conj:"games", board:"sessions", host:"sessions", session:"sessions", games:"games", account:"profile", xprofile:"profile" };
+const NAV_TAB = { sbuild:"games", home:"home", bridge:"games", split:"games", conj:"games", board:"sessions", host:"sessions", session:"sessions", games:"games", account:"profile", xprofile:"profile" };
 const WIDE = { home:"xl", board:"xl", host:"md", session:"md", account:"md", xprofile:"md", games:"md" };
 const ICO = {
   home:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10l9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>',
@@ -9510,7 +9521,7 @@ function bbTypeBonus(r){ const clean=!(BB.spell||[]).length, b=clean?3:1;
   r.typed=true; r.pts+=b; r.why.push(["✍️ "+tr("Typed it yourself","Selbst getippt","Escrita por ti"),b]);
   if(!clean) r.spell=BB.spell.slice(); return b; }
 function bbIns(t){ const el=document.getElementById("bbin"); BB.typed=((el?el.value:BB.typed)||"").replace(/\s+$/,"")+(BB.typed?" ":"")+t+" "; if(el){ el.value=BB.typed; el.focus(); } }
-const BB_COL={ S:"#2F4B7C", V:"#F25C3B", M:"#D9481F", I:"#C2401F", O:"#2A8C82", T:"#E8A21A", P:"#7B5BC4", A:"#5B6474", H:"#D9481F", Pa:"#B23A1C", K:"#1E8E5A", D:"#B0286A", X:"#8A3FA0", R:"#13806B", U:"#1E8E5A", Z:"#5B6474", B:"#3C7DBF", Mi:"#A8321A", Je:"#1E8E5A", De:"#1E8E5A", Cp:"#C2781A", Q:"#2A8C82", Ar:"#2F4B7C", Pj:"#B23A1C", N:"#2F4B7C", Rf:"#6B7A8F", Pd:"#2A8C82", Mo:"#8A6D3B", Ng:"#C0392B", Po:"#3C7DBF", Oc:"#5B6474", J:"#1E8E5A" };
+const BB_COL={ S:"#2F4B7C", V:"#F25C3B", M:"#D9481F", I:"#C2401F", O:"#2A8C82", T:"#E8A21A", P:"#7B5BC4", A:"#5B6474", H:"#D9481F", Pa:"#B23A1C", K:"#1E8E5A", D:"#B0286A", X:"#8A3FA0", R:"#13806B", U:"#1E8E5A", Z:"#5B6474", B:"#3C7DBF", Mi:"#A8321A", Je:"#1E8E5A", De:"#1E8E5A", Cp:"#C2781A", Q:"#2A8C82", Ar:"#2F4B7C", Pj:"#B23A1C", N:"#2F4B7C", Rf:"#6B7A8F", Pd:"#2A8C82", Mo:"#8A6D3B", Ng:"#C0392B", Po:"#3C7DBF", Oc:"#5B6474", J:"#1E8E5A", Wo:"#B0286A", Wh:"#2A8C82", PD:"#B0286A", PA:"#2A8C82", Rd:"#13806B" };
 function bbRole(r){ return { Mi:tr("modal (end)","Modal (Ende)","modal (final)"), Je:"je", De:"desto", Cp:tr("comparative","Komparativ","comparativo"), Q:tr("how?","wie?","¿cómo?"), Ar:tr("article","Artikel","artículo"), Pj:tr("participle + ending","Partizip + Endung","participio + terminación"), N:tr("noun","Nomen","sustantivo"), U:tr("in order to","um … zu","para"), Z:"zu", B:tr("by whom","von wem","por quién"), X:tr("prefix (end)","Präfix (Ende)","prefijo (final)"), R:tr("which / who","der/die/das","que"), H:tr("helper verb","Hilfsverb","verbo auxiliar"), Pa:tr("participle (end)","Partizip (Ende)","participio (final)"), K:tr("joiner","Verbinder","conector"), D:tr("to whom","wem","a quién"), S:tr("who","wer","quién"),V:tr("verb","Verb","verbo"),M:tr("verb","Verb","verbo"),I:tr("verb (end)","Verb (Ende)","verbo (final)"),O:tr("what","was","qué"),T:tr("when","wann","cuándo"),P:tr("where","wo","dónde"),A:tr("extra","extra","extra")}[r]; }
 /* the grammar check: returns {ok, bad:[index], msg, pts, why:[...]} */
 function bbSubErr(sub,off,E){
@@ -9922,7 +9933,10 @@ function bbPart(w,inSub){ const L={ S:[tr("Subject","Subjekt","Sujeto"),tr("who?
     Pj:[tr("Participle as adjective","Partizip als Adjektiv","Participio como adjetivo"),tr(`ending -${w.e}`,`Endung -${w.e}`,`terminación -${w.e}`)], N:[tr("Noun","Nomen","Sustantivo"),{ m:"der", f:"die", n:"das" }[w.g]||""], I:[tr("Infinitive (end)","Infinitiv (Ende)","Infinitivo (final)"),""],
     H:[inSub?tr("Helper verb","Hilfsverb","Verbo auxiliar"):tr("Helper verb (position 2)","Hilfsverb (Position 2)","Verbo auxiliar (posición 2)"),inSub?tr("side clause","Nebensatz","subordinada"):w.a==="werden"?"werden":"haben / sein"], Pa:[tr("Participle (end)","Partizip (Ende)","Participio (final)"),w.a==="werden"?tr("Passive","Passiv","Pasiva"):"Perfekt"],
     U:["um … zu",tr("in order to","Zweck","para")], Z:["zu",tr("before the infinitive","vor dem Infinitiv","antes del infinitivo")], B:[tr("By whom?","Von wem?","¿Por quién?"),"von …"],
-    D:["Dativ",tr("to whom?","wem?","¿a quién?")], O:["Akkusativ",tr("what?","was?","¿qué?")], T:[tr("Time","Zeit","Tiempo"),tr("when?","wann?","¿cuándo?")], P:[tr("Place","Ort","Lugar"),tr("where?","wo? wohin?","¿dónde?")],
+    D:["Dativ",tr("to whom?","wem?","¿a quién?")],
+    Wo:[tr("Place + Dativ","Ort + Dativ","Lugar + dativo"),tr("where? (wo?)","wo?","¿dónde? (wo?)")], Wh:[tr("Place + Akk","Ort + Akk","Lugar + acusativo"),tr("where to? (wohin?)","wohin?","¿adónde? (wohin?)")],
+    PD:[tr("Prep. + Dativ","Präp. + Dativ","Prep. + dativo"),"mit · bei · zu · nach"], PA:[tr("Prep. + Akk","Präp. + Akk","Prep. + acusativo"),"für · ohne · durch"],
+    Rd:[tr("Prep. + relative","Präp. + Relativpronomen","Prep. + relativo"),"in dem · in der"], O:["Akkusativ",tr("what?","was?","¿qué?")], T:[tr("Time","Zeit","Tiempo"),tr("when?","wann?","¿cuándo?")], P:[tr("Place","Ort","Lugar"),tr("where?","wo? wohin?","¿dónde?")],
     A:["gerne",tr("likes to","mag","le gusta")], K:[tr("Joiner","Konjunktion","Conjunción"),tr("verb to the end","Verb ans Ende","verbo al final")],
     X:[tr("Prefix (end)","Präfix (Ende)","Prefijo (final)"),w.v||""], R:[tr("Relative pronoun","Relativpronomen","Pronombre relativo"),w.c==="nom"?tr("who? (does it)","wer?","¿quién? (lo hace)"):w.c==="akk"?tr("whom?","wen?","¿a quién?"):"der · die · das"] }[w.q&&["V","M","H"].includes(w.r)?"Vq":w.r]||["",""];
   return `<div class="bbwp" style="--c:${BB_COL[w.r]}"><b lang="de">${esc(w.t)}</b><i></i><span>${L[0]}</span><small>${L[1]}</small></div>`; }
@@ -11142,6 +11156,237 @@ function hmSave(){ try{ localStorage.setItem("pt_hm",JSON.stringify(HM.s)); }cat
 function hmUp(c){ return c==="ß"?"ß":c.toUpperCase(); }
 function hmBase(w){ return (w.w||"").replace(/^(der|die|das) /,""); }
 function hmOk(w){ const b=hmBase(w); return w.lv!=="MINE"&&/^[A-Za-zÄÖÜäöüß]{3,12}$/.test(b); }
+/* ---------- 🧱 Sentence Builder: one sentence grows step by step. Parts: "text:Role" joined by "|", "+" = new in this step. ---------- */
+const SB_CH=[
+{id:"a1-coffee",lv:"A1",s:"Ich:S|trinke:V|Kaffee.:O",e:"I drink coffee.",es:"Bebo café.",st:[
+ ["time","am Morgen","Am Morgen:T+|trinke:V|ich:S|Kaffee.:O","In the morning I drink coffee.","Por la mañana bebo café."],
+ ["pd","mit + meine Mutter","Am Morgen:T|trinke:V|ich:S|mit meiner Mutter:PD+|Kaffee.:O","In the morning I drink coffee with my mother.","Por la mañana bebo café con mi madre."],
+ ["wo","in + die Küche","Am Morgen:T|trinke:V|ich:S|mit meiner Mutter:PD|in der Küche:Wo+|Kaffee.:O","In the morning I drink coffee with my mother in the kitchen.","Por la mañana bebo café con mi madre en la cocina."],
+ ["neg","kein","Am Morgen:T|trinke:V|ich:S|mit meiner Mutter:PD|in der Küche:Wo|keinen Kaffee.:O+","In the morning I don't drink coffee with my mother in the kitchen.","Por la mañana no bebo café con mi madre en la cocina."]]},
+{id:"a1-dog",lv:"A1",s:"Der Hund:S|schläft.:V",e:"The dog sleeps.",es:"El perro duerme.",st:[
+ ["wo","auf + das Sofa","Der Hund:S|schläft:V|auf dem Sofa.:Wo+","The dog sleeps on the sofa.","El perro duerme en el sofá."],
+ ["time","heute","Heute:T+|schläft:V|der Hund:S|auf dem Sofa.:Wo","Today the dog sleeps on the sofa.","Hoy el perro duerme en el sofá."],
+ ["neg","nicht","Heute:T|schläft:V|der Hund:S|nicht:Ng+|auf dem Sofa.:Wo","Today the dog isn't sleeping on the sofa.","Hoy el perro no duerme en el sofá."],
+ ["swap","der Hund → die Katze","Heute:T|schläft:V|die Katze:S+|nicht:Ng|auf dem Sofa.:Wo","Today the cat isn't sleeping on the sofa.","Hoy la gata no duerme en el sofá."]]},
+{id:"a1-brother",lv:"A1",s:"Ich:S|habe:V|einen Bruder.:O",e:"I have a brother.",es:"Tengo un hermano.",st:[
+ ["swap","der Bruder → die Schwester","Ich:S|habe:V|eine Schwester.:O+","I have a sister.","Tengo una hermana.","akk"],
+ ["neg","kein","Ich:S|habe:V|keine Schwester.:O+","I don't have a sister.","No tengo hermana."],
+ ["swap","die Schwester → das Auto","Ich:S|habe:V|kein Auto.:O+","I don't have a car.","No tengo coche.","akk"],
+ ["pa","für + die Arbeit","Ich:S|habe:V|kein Auto:O|für die Arbeit.:PA+","I don't have a car for work.","No tengo coche para el trabajo."]]},
+{id:"a1-bread",lv:"A1",s:"Anna:S|kauft:V|Brot.:O",e:"Anna buys bread.",es:"Anna compra pan.",st:[
+ ["pd","bei + der Bäcker","Anna:S|kauft:V|beim Bäcker:PD+|Brot.:O","Anna buys bread at the bakery.","Anna compra pan en la panadería.","beim"],
+ ["time","jeden Tag","Jeden Tag:T+|kauft:V|Anna:S|beim Bäcker:PD|Brot.:O","Every day Anna buys bread at the bakery.","Cada día Anna compra pan en la panadería."],
+ ["pa","für + ihre Familie","Jeden Tag:T|kauft:V|Anna:S|beim Bäcker:PD|Brot:O|für ihre Familie.:PA+","Every day Anna buys bread for her family at the bakery.","Cada día Anna compra pan para su familia en la panadería."]]},
+{id:"a1-football",lv:"A1",s:"Wir:S|spielen:V|Fußball.:O",e:"We play football.",es:"Jugamos al fútbol.",st:[
+ ["wo","in + der Park","Wir:S|spielen:V|im Park:Wo+|Fußball.:O","We play football in the park.","Jugamos al fútbol en el parque.","im"],
+ ["time","am Samstag","Am Samstag:T+|spielen:V|wir:S|im Park:Wo|Fußball.:O","On Saturday we play football in the park.","El sábado jugamos al fútbol en el parque."],
+ ["pd","mit + unsere Freunde","Am Samstag:T|spielen:V|wir:S|mit unseren Freunden:PD+|im Park:Wo|Fußball.:O","On Saturday we play football in the park with our friends.","El sábado jugamos al fútbol en el parque con nuestros amigos.","pldat"]]},
+{id:"a1-berlin",lv:"A1",s:"Ich:S|wohne:V|in Berlin.:P",e:"I live in Berlin.",es:"Vivo en Berlín.",st:[
+ ["time","seit + zwei Jahre","Seit zwei Jahren:T+|wohne:V|ich:S|in Berlin.:P","I've lived in Berlin for two years.","Vivo en Berlín desde hace dos años.","seit"],
+ ["pd","mit + mein Freund","Seit zwei Jahren:T|wohne:V|ich:S|mit meinem Freund:PD+|in Berlin.:P","I've lived in Berlin with my boyfriend for two years.","Vivo en Berlín con mi novio desde hace dos años."],
+ ["swap","in Berlin → in + die Schweiz","Seit zwei Jahren:T|wohne:V|ich:S|mit meinem Freund:PD|in der Schweiz.:Wo+","I've lived in Switzerland with my boyfriend for two years.","Vivo en Suiza con mi novio desde hace dos años.","country"]]},
+
+{id:"a2-ball",lv:"A2",s:"Der Mann:S|kauft:V|einen Ball.:O",e:"The man buys a ball.",es:"El hombre compra una pelota.",st:[
+ ["dat","sein Sohn (his son)","Der Mann:S|kauft:V|seinem Sohn:D+|einen Ball.:O","The man buys his son a ball.","El hombre le compra una pelota a su hijo."],
+ ["time","heute","Heute:T+|kauft:V|der Mann:S|seinem Sohn:D|einen Ball.:O","Today the man buys his son a ball.","Hoy el hombre le compra una pelota a su hijo."],
+ ["swap","der Ball → die Torte","Heute:T|kauft:V|der Mann:S|seinem Sohn:D|eine Torte.:O+","Today the man buys his son a cake.","Hoy el hombre le compra una tarta a su hijo.","akk"],
+ ["weil","er hat Geburtstag","Heute:T|kauft:V|der Mann:S|seinem Sohn:D|eine Torte,:O|weil:K+|er:S+|Geburtstag:O+|hat.:V+","Today the man buys his son a cake because it's his birthday.","Hoy el hombre le compra una tarta a su hijo porque es su cumpleaños."],
+ ["perf","kaufen → gekauft","Heute:T|hat:H+|der Mann:S|seinem Sohn:D|eine Torte:O|gekauft,:Pa+|weil:K|er:S|Geburtstag:O|hat.:V","Today the man bought his son a cake because it's his birthday.","Hoy el hombre le ha comprado una tarta a su hijo porque es su cumpleaños."]]},
+{id:"a2-phone",lv:"A2",s:"Das Handy:S|liegt:V|auf dem Tisch.:Wo",e:"The phone is on the table.",es:"El móvil está sobre la mesa.",st:[
+ ["wohin","Ich lege das Handy … (auf + der Tisch)","Ich:S+|lege:V+|das Handy:O+|auf den Tisch.:Wh+","I put the phone on the table.","Pongo el móvil sobre la mesa.","legen"],
+ ["time","jeden Abend","Jeden Abend:T+|lege:V|ich:S|das Handy:O|auf den Tisch.:Wh","Every evening I put the phone on the table.","Cada noche pongo el móvil sobre la mesa."],
+ ["weil","ich will schlafen","Jeden Abend:T|lege:V|ich:S|das Handy:O|auf den Tisch,:Wh|weil:K+|ich:S+|schlafen:I+|will.:M+","Every evening I put the phone on the table because I want to sleep.","Cada noche pongo el móvil sobre la mesa porque quiero dormir.","weilmod"],
+ ["swap","auf den Tisch → in + die Schublade","Jeden Abend:T|lege:V|ich:S|das Handy:O|in die Schublade,:Wh+|weil:K|ich:S|schlafen:I|will.:M","Every evening I put the phone in the drawer because I want to sleep.","Cada noche meto el móvil en el cajón porque quiero dormir.","wohin"]]},
+{id:"a2-cinema",lv:"A2",s:"Wir:S|gehen:V|ins Kino.:Wh",e:"We're going to the cinema.",es:"Vamos al cine.",st:[
+ ["time","am Freitag","Am Freitag:T+|gehen:V|wir:S|ins Kino.:Wh","On Friday we're going to the cinema.","El viernes vamos al cine."],
+ ["pd","mit + meine Kollegen","Am Freitag:T|gehen:V|wir:S|mit meinen Kollegen:PD+|ins Kino.:Wh","On Friday we're going to the cinema with my colleagues.","El viernes vamos al cine con mis compañeros.","pldat"],
+ ["modal","wollen","Am Freitag:T|wollen:M+|wir:S|mit meinen Kollegen:PD|ins Kino:Wh|gehen.:I+","On Friday we want to go to the cinema with my colleagues.","El viernes queremos ir al cine con mis compañeros."],
+ ["dass","Ich glaube, dass …","Ich:S+|glaube,:V+|dass:K+|wir:S|am Freitag:T|mit meinen Kollegen:PD|ins Kino:Wh|gehen:I|wollen.:M","I think that we want to go to the cinema with my colleagues on Friday.","Creo que el viernes queremos ir al cine con mis compañeros."]]},
+{id:"a2-banana",lv:"A2",s:"Sie:S|gibt:V|dem Kind:D|einen Apfel.:O",e:"She gives the child an apple.",es:"Le da una manzana al niño.",st:[
+ ["swap","der Apfel → die Banane","Sie:S|gibt:V|dem Kind:D|eine Banane.:O+","She gives the child a banana.","Le da un plátano al niño.","akk"],
+ ["swap","das Kind → die Kinder (plural)","Sie:S|gibt:V|den Kindern:D+|eine Banane.:O","She gives the children a banana.","Les da un plátano a los niños.","pldat"],
+ ["pd","nach + die Schule","Sie:S|gibt:V|den Kindern:D|nach der Schule:PD+|eine Banane.:O","She gives the children a banana after school.","Les da un plátano a los niños después del colegio."],
+ ["perf","geben → gegeben","Sie:S|hat:H+|den Kindern:D|nach der Schule:PD|eine Banane:O|gegeben.:Pa+","She gave the children a banana after school.","Les dio un plátano a los niños después del colegio."]]},
+{id:"a2-bus",lv:"A2",s:"Ich:S|warte.:V",e:"I'm waiting.",es:"Espero.",st:[
+ ["po","auf + der Bus","Ich:S|warte:V|auf den Bus.:Po+","I'm waiting for the bus.","Espero el autobús.","warten"],
+ ["wo","an + die Haltestelle","Ich:S|warte:V|an der Haltestelle:Wo+|auf den Bus.:Po","I'm waiting for the bus at the stop.","Espero el autobús en la parada."],
+ ["time","seit + 20 Minuten","Seit 20 Minuten:T+|warte:V|ich:S|an der Haltestelle:Wo|auf den Bus.:Po","I've been waiting for the bus at the stop for 20 minutes.","Llevo 20 minutos esperando el autobús en la parada.","seit"],
+ ["weil","mein Auto ist kaputt","Seit 20 Minuten:T|warte:V|ich:S|an der Haltestelle:Wo|auf den Bus,:Po|weil:K+|mein Auto:S+|kaputt:Pd+|ist.:V+","I've been waiting for the bus at the stop for 20 minutes because my car is broken.","Llevo 20 minutos esperando el autobús en la parada porque mi coche está averiado."]]},
+{id:"a2-father",lv:"A2",s:"Mein Vater:S|arbeitet.:V",e:"My father works.",es:"Mi padre trabaja.",st:[
+ ["wo","in + ein Krankenhaus","Mein Vater:S|arbeitet:V|in einem Krankenhaus.:Wo+","My father works in a hospital.","Mi padre trabaja en un hospital.","einem"],
+ ["time","seit 2015","Seit 2015:T+|arbeitet:V|mein Vater:S|in einem Krankenhaus.:Wo","My father has worked in a hospital since 2015.","Mi padre trabaja en un hospital desde 2015."],
+ ["dass","Ich weiß, dass …","Ich:S+|weiß,:V+|dass:K+|mein Vater:S|seit 2015:T|in einem Krankenhaus:Wo|arbeitet.:V","I know that my father has worked in a hospital since 2015.","Sé que mi padre trabaja en un hospital desde 2015."]]},
+{id:"a2-spain",lv:"A2",s:"Wir:S|fahren:V|nach Spanien.:P",e:"We're going to Spain.",es:"Vamos a España.",st:[
+ ["time","im Sommer","Im Sommer:T+|fahren:V|wir:S|nach Spanien.:P","In summer we're going to Spain.","En verano vamos a España."],
+ ["pd","mit + der Zug","Im Sommer:T|fahren:V|wir:S|mit dem Zug:PD+|nach Spanien.:P","In summer we're going to Spain by train.","En verano vamos a España en tren."],
+ ["swap","nach Spanien → zu + meine Oma","Im Sommer:T|fahren:V|wir:S|mit dem Zug:PD|zu meiner Oma.:PD+","In summer we're going to my grandma's by train.","En verano vamos en tren a casa de mi abuela.","zu"],
+ ["perf","fahren → gefahren","Im Sommer:T|sind:H+|wir:S|mit dem Zug:PD|zu meiner Oma:PD|gefahren.:Pa+","In summer we went to my grandma's by train.","En verano fuimos en tren a casa de mi abuela.","sein"]]},
+{id:"a2-picture",lv:"A2",s:"Das Bild:S|hängt:V|an der Wand.:Wo",e:"The picture is hanging on the wall.",es:"El cuadro está colgado en la pared.",st:[
+ ["wohin","Ich hänge das Bild … (an + die Wand)","Ich:S+|hänge:V+|das Bild:O+|an die Wand.:Wh+","I hang the picture on the wall.","Cuelgo el cuadro en la pared."],
+ ["swap","an die Wand → neben + das Fenster","Ich:S|hänge:V|das Bild:O|neben das Fenster.:Wh+","I hang the picture next to the window.","Cuelgo el cuadro al lado de la ventana.","wohin"],
+ ["perf","hängen → gehängt","Ich:S|habe:H+|das Bild:O|neben das Fenster:Wh|gehängt.:Pa+","I hung the picture next to the window.","He colgado el cuadro al lado de la ventana."],
+ ["wo","Jetzt … hängt (wo?)","Jetzt:T+|hängt:V+|das Bild:S+|neben dem Fenster.:Wo+","Now the picture is hanging next to the window.","Ahora el cuadro está colgado al lado de la ventana."]]},
+
+{id:"b1-german",lv:"B1",s:"Ich:S|lerne:V|Deutsch.:O",e:"I'm learning German.",es:"Aprendo alemán.",st:[
+ ["weil","ich möchte in Deutschland arbeiten","Ich:S|lerne:V|Deutsch,:O|weil:K+|ich:S+|in Deutschland:P+|arbeiten:I+|möchte.:M+","I'm learning German because I'd like to work in Germany.","Aprendo alemán porque me gustaría trabajar en Alemania.","weilmod"],
+ ["time","seit + ein Jahr","Seit einem Jahr:T+|lerne:V|ich:S|Deutsch,:O|weil:K|ich:S|in Deutschland:P|arbeiten:I|möchte.:M","I've been learning German for a year because I'd like to work in Germany.","Aprendo alemán desde hace un año porque me gustaría trabajar en Alemania.","seit"],
+ ["pd","mit + eine App","Seit einem Jahr:T|lerne:V|ich:S|mit einer App:PD+|Deutsch,:O|weil:K|ich:S|in Deutschland:P|arbeiten:I|möchte.:M","I've been learning German with an app for a year because I'd like to work in Germany.","Aprendo alemán con una app desde hace un año porque me gustaría trabajar en Alemania."],
+ ["link","weil → obwohl · es ist schwer","Seit einem Jahr:T|lerne:V|ich:S|mit einer App:PD|Deutsch,:O|obwohl:K+|es:S+|schwer:Pd+|ist.:V+","I've been learning German with an app for a year, although it's hard.","Aprendo alemán con una app desde hace un año, aunque es difícil.","obwohl"]]},
+{id:"b1-help",lv:"B1",s:"Er:S|hat:H|mir:D|geholfen.:Pa",e:"He helped me.",es:"Me ayudó.",st:[
+ ["swap","mir → seine Nachbarin","Er:S|hat:H|seiner Nachbarin:D+|geholfen.:Pa","He helped his neighbour.","Ayudó a su vecina.","helfen"],
+ ["pd","bei + der Umzug","Er:S|hat:H|seiner Nachbarin:D|beim Umzug:PD+|geholfen.:Pa","He helped his neighbour with the move.","Ayudó a su vecina con la mudanza.","beim"],
+ ["time","letzte Woche","Letzte Woche:T+|hat:H|er:S|seiner Nachbarin:D|beim Umzug:PD|geholfen.:Pa","Last week he helped his neighbour with the move.","La semana pasada ayudó a su vecina con la mudanza."],
+ ["dass","Sie erzählt, dass …","Sie:S+|erzählt,:V+|dass:K+|er:S|letzte Woche:T|seiner Nachbarin:D|beim Umzug:PD|geholfen:Pa|hat.:H","She says that last week he helped his neighbour with the move.","Ella cuenta que la semana pasada ayudó a su vecina con la mudanza.","dassperf"]]},
+{id:"b1-happy",lv:"B1",s:"Ich:S|freue:V|mich.:Rf",e:"I'm happy.",es:"Me alegro.",st:[
+ ["po","auf + das Wochenende","Ich:S|freue:V|mich:Rf|auf das Wochenende.:Po+","I'm looking forward to the weekend.","Tengo ganas de que llegue el fin de semana.","freuen"],
+ ["swap","auf das Wochenende → über + das Geschenk","Ich:S|freue:V|mich:Rf|über das Geschenk.:Po+","I'm happy about the present.","Me alegro del regalo.","freuen"],
+ ["pd","von + meine Schwester","Ich:S|freue:V|mich:Rf|über das Geschenk:Po|von meiner Schwester.:PD+","I'm happy about the present from my sister.","Me alegro del regalo de mi hermana."],
+ ["mo","sehr","Ich:S|freue:V|mich:Rf|sehr:Mo+|über das Geschenk:Po|von meiner Schwester.:PD","I'm very happy about the present from my sister.","Me alegro mucho del regalo de mi hermana."]]},
+{id:"b1-fridge",lv:"B1",s:"Die Flaschen:S|stehen:V|im Kühlschrank.:Wo",e:"The bottles are in the fridge.",es:"Las botellas están en la nevera.",st:[
+ ["wohin","Wir stellen die Flaschen … (in + der Kühlschrank)","Wir:S+|stellen:V+|die Flaschen:O+|in den Kühlschrank.:Wh+","We put the bottles in the fridge.","Ponemos las botellas en la nevera.","stellen"],
+ ["swap","die Flaschen → der Käse · stellen → legen","Wir:S|legen:V+|den Käse:O+|in den Kühlschrank.:Wh","We put the cheese in the fridge.","Ponemos el queso en la nevera.","legen"],
+ ["time","nach + das Einkaufen","Nach dem Einkaufen:T+|legen:V|wir:S|den Käse:O|in den Kühlschrank.:Wh","After shopping we put the cheese in the fridge.","Después de hacer la compra ponemos el queso en la nevera."],
+ ["perf","legen → gelegt","Nach dem Einkaufen:T|haben:H+|wir:S|den Käse:O|in den Kühlschrank:Wh|gelegt.:Pa+","After shopping we put the cheese in the fridge (past).","Después de hacer la compra pusimos el queso en la nevera."],
+ ["wo","Jetzt … liegt (wo?)","Jetzt:T+|liegt:V+|der Käse:S+|im Kühlschrank.:Wo+","Now the cheese is in the fridge.","Ahora el queso está en la nevera.","im"]]},
+{id:"b1-sleep",lv:"B1",s:"Ich:S|kann:M|nicht:Ng|schlafen.:I",e:"I can't sleep.",es:"No puedo dormir.",st:[
+ ["weil","der Nachbar macht Musik","Ich:S|kann:M|nicht:Ng|schlafen,:I|weil:K+|der Nachbar:S+|Musik:O+|macht.:V+","I can't sleep because the neighbour is playing music.","No puedo dormir porque el vecino pone música."],
+ ["time","seit Tagen","Seit Tagen:T+|kann:M|ich:S|nicht:Ng|schlafen,:I|weil:K|der Nachbar:S|Musik:O|macht.:V","For days I haven't been able to sleep because the neighbour is playing music.","Desde hace días no puedo dormir porque el vecino pone música."],
+ ["swap","der Nachbar → die Nachbarn · Musik → laute Musik","Seit Tagen:T|kann:M|ich:S|nicht:Ng|schlafen,:I|weil:K|die Nachbarn:S+|laute Musik:O+|machen.:V+","For days I haven't been able to sleep because the neighbours play loud music.","Desde hace días no puedo dormir porque los vecinos ponen música alta."],
+ ["prat","können → konnte · machen → machten","Seit Tagen:T|konnte:M+|ich:S|nicht:Ng|schlafen,:I|weil:K|die Nachbarn:S|laute Musik:O|machten.:V+","For days I couldn't sleep because the neighbours played loud music.","Durante días no pude dormir porque los vecinos ponían música alta."]]},
+{id:"b1-email",lv:"B1",s:"Ich:S|schreibe:V|eine E-Mail.:O",e:"I'm writing an email.",es:"Escribo un correo.",st:[
+ ["dat","mein Chef","Ich:S|schreibe:V|meinem Chef:D+|eine E-Mail.:O","I'm writing my boss an email.","Le escribo un correo a mi jefe."],
+ ["um","einen Tag Urlaub bekommen","Ich:S|schreibe:V|meinem Chef:D|eine E-Mail,:O|um:U+|einen Tag Urlaub:O+|zu:Z+|bekommen.:I+","I'm writing my boss an email to get a day off.","Le escribo un correo a mi jefe para conseguir un día libre."],
+ ["time","morgen früh","Morgen früh:T+|schreibe:V|ich:S|meinem Chef:D|eine E-Mail,:O|um:U|einen Tag Urlaub:O|zu:Z|bekommen.:I","Tomorrow morning I'll write my boss an email to get a day off.","Mañana por la mañana le escribo un correo a mi jefe para conseguir un día libre."],
+ ["modal","müssen","Morgen früh:T|muss:M+|ich:S|meinem Chef:D|eine E-Mail:O|schreiben,:I+|um:U|einen Tag Urlaub:O|zu:Z|bekommen.:I","Tomorrow morning I have to write my boss an email to get a day off.","Mañana por la mañana tengo que escribirle un correo a mi jefe para conseguir un día libre."]]},
+{id:"b1-club",lv:"B1",s:"Das:S|ist:V|das Restaurant.:Pd",e:"That's the restaurant.",es:"Ese es el restaurante.",st:[
+ ["rel","wir haben dort gegessen · in + das Restaurant","Das:S|ist:V|das Restaurant,:Pd|in dem:Rd+|wir:S+|gegessen:Pa+|haben.:H+","That's the restaurant where we ate.","Ese es el restaurante en el que comimos."],
+ ["swap","das Restaurant → die Bar","Das:S|ist:V|die Bar,:Pd+|in der:Rd+|wir:S|gegessen:Pa|haben.:H","That's the bar where we ate.","Ese es el bar en el que comimos.","rel"],
+ ["swap","die Bar → der Club · gegessen → getanzt","Das:S|ist:V|der Club,:Pd+|in dem:Rd+|wir:S|getanzt:Pa+|haben.:H","That's the club where we danced.","Esa es la discoteca en la que bailamos.","rel"],
+ ["time","letzten Samstag","Das:S|ist:V|der Club,:Pd|in dem:Rd|wir:S|letzten Samstag:T+|getanzt:Pa|haben.:H","That's the club where we danced last Saturday.","Esa es la discoteca en la que bailamos el sábado pasado.","timesub"]]},
+{id:"b1-doctor",lv:"B1",s:"Ich:S|gehe:V|zum Arzt.:PD",e:"I'm going to the doctor.",es:"Voy al médico.",st:[
+ ["weil","ich habe Kopfschmerzen","Ich:S|gehe:V|zum Arzt,:PD|weil:K+|ich:S+|Kopfschmerzen:O+|habe.:V+","I'm going to the doctor because I have a headache.","Voy al médico porque me duele la cabeza."],
+ ["time","morgen","Morgen:T+|gehe:V|ich:S|zum Arzt,:PD|weil:K|ich:S|Kopfschmerzen:O|habe.:V","Tomorrow I'm going to the doctor because I have a headache.","Mañana voy al médico porque me duele la cabeza."],
+ ["swap","der Arzt → die Apotheke","Morgen:T|gehe:V|ich:S|zur Apotheke,:PD+|weil:K|ich:S|Kopfschmerzen:O|habe.:V","Tomorrow I'm going to the pharmacy because I have a headache.","Mañana voy a la farmacia porque me duele la cabeza.","zu"],
+ ["pd","nach + die Arbeit","Morgen:T|gehe:V|ich:S|nach der Arbeit:PD+|zur Apotheke,:PD|weil:K|ich:S|Kopfschmerzen:O|habe.:V","Tomorrow after work I'm going to the pharmacy because I have a headache.","Mañana después del trabajo voy a la farmacia porque me duele la cabeza."],
+ ["link","weil → wenn · ich habe noch Kopfschmerzen","Morgen:T|gehe:V|ich:S|nach der Arbeit:PD|zur Apotheke,:PD|wenn:K+|ich:S|noch:Mo+|Kopfschmerzen:O|habe.:V","Tomorrow after work I'll go to the pharmacy if I still have a headache.","Mañana después del trabajo iré a la farmacia si todavía me duele la cabeza.","wenn"]]}
+];
+const SB_KIND={
+ time:[c=>tr(`Start the sentence with: ${c}`,`Beginne den Satz mit: ${c}`,`Empieza la frase con: ${c}`),"⏰",()=>tr("Something else first? The verb stays in slot 2 and the subject moves behind it.","Etwas anderes vorne? Das Verb bleibt auf Platz 2, das Subjekt rutscht dahinter.","¿Otra cosa al principio? El verbo se queda en la posición 2 y el sujeto va detrás.")],
+ dat:[c=>tr(`Add to / for whom (Dativ): ${c}`,`Ergänze wem? (Dativ): ${c}`,`Añade a / para quién (dativo): ${c}`),"🎁",()=>tr("Dativ answers wem? der → dem, die → der, das → dem, ein → einem.","Dativ antwortet auf wem? der → dem, die → der, das → dem, ein → einem.","El dativo responde a wem? der → dem, die → der, das → dem, ein → einem.")],
+ akk:[c=>tr(`Add what (Akkusativ): ${c}`,`Ergänze was? (Akkusativ): ${c}`,`Añade qué (acusativo): ${c}`),"🎯",()=>tr("Akkusativ: only der changes (den, einen). die and das stay the same.","Akkusativ: nur der ändert sich (den, einen). die und das bleiben gleich.","Acusativo: solo cambia der (den, einen). die y das no cambian.")],
+ pd:[c=>tr(`Add (preposition + Dativ): ${c}`,`Ergänze (Präposition + Dativ): ${c}`,`Añade (preposición + dativo): ${c}`),"🟡",()=>tr("aus, bei, mit, nach, seit, von, zu always take Dativ. bei dem → beim, zu dem → zum, zu der → zur.","aus, bei, mit, nach, seit, von, zu: immer Dativ. bei dem → beim, zu dem → zum, zu der → zur.","aus, bei, mit, nach, seit, von, zu siempre llevan dativo. bei dem → beim, zu dem → zum, zu der → zur.")],
+ pa:[c=>tr(`Add (preposition + Akkusativ): ${c}`,`Ergänze (Präposition + Akkusativ): ${c}`,`Añade (preposición + acusativo): ${c}`),"🟢",()=>tr("durch, für, gegen, ohne, um always take Akkusativ.","durch, für, gegen, ohne, um: immer Akkusativ.","durch, für, gegen, ohne, um siempre llevan acusativo.")],
+ wo:[c=>tr(`Say where it is (wo? → Dativ): ${c}`,`Sag, wo es ist (wo? → Dativ): ${c}`,`Di dónde está (wo? → dativo): ${c}`),"📍",()=>tr("an, auf, in, über, unter, vor, hinter, neben, zwischen + wo? (where it is) = Dativ.","an, auf, in, über, unter, vor, hinter, neben, zwischen + wo? = Dativ.","an, auf, in, über, unter, vor, hinter, neben, zwischen + wo? (dónde está) = dativo.")],
+ wohin:[c=>tr(`Say where it goes (wohin? → Akkusativ): ${c}`,`Sag, wohin es geht (wohin? → Akkusativ): ${c}`,`Di adónde va (wohin? → acusativo): ${c}`),"➡️",()=>tr("Same prepositions + wohin? (movement, where to) = Akkusativ: auf den Tisch, in die Schublade.","Dieselben Präpositionen + wohin? (Bewegung) = Akkusativ: auf den Tisch, in die Schublade.","Las mismas preposiciones + wohin? (movimiento) = acusativo: auf den Tisch, in die Schublade.")],
+ po:[c=>tr(`Add what it's about (verb + preposition): ${c}`,`Ergänze (Verb + Präposition): ${c}`,`Añade (verbo + preposición): ${c}`),"🔗",()=>tr("Some verbs always come with a preposition. Learn them as a pair.","Manche Verben haben immer eine Präposition. Lerne sie als Paar.","Algunos verbos siempre van con una preposición. Apréndelos en pareja.")],
+ weil:[c=>tr(`Add a reason with weil: ${c}`,`Ergänze einen Grund mit weil: ${c}`,`Añade un motivo con weil: ${c}`),"🔗",()=>tr("After weil the verb jumps to the very end. Comma before weil.","Nach weil springt das Verb ans Ende. Komma vor weil.","Después de weil el verbo salta al final. Coma antes de weil.")],
+ link:[c=>tr(`Change the joiner: ${c}`,`Tausch die Konjunktion: ${c}`,`Cambia el conector: ${c}`),"🔀",()=>tr("weil, obwohl, wenn, dass all send the verb to the end.","weil, obwohl, wenn, dass schicken das Verb ans Ende.","weil, obwohl, wenn, dass mandan el verbo al final.")],
+ dass:[c=>tr(`Start with: ${c}`,`Beginne mit: ${c}`,`Empieza con: ${c}`),"💬",()=>tr("dass sends the verb to the end. The rest keeps its order.","dass schickt das Verb ans Ende. Der Rest bleibt gleich.","dass manda el verbo al final. El resto no cambia.")],
+ perf:[c=>tr(`Put it in the Perfekt (past): ${c}`,`Setz es ins Perfekt: ${c}`,`Ponlo en Perfekt (pasado): ${c}`),"🕰️",()=>tr("haben or sein in slot 2, the participle goes to the very end.","haben oder sein auf Platz 2, das Partizip ganz ans Ende.","haben o sein en la posición 2, el participio al final.")],
+ prat:[c=>tr(`Put it in the Präteritum (past): ${c}`,`Setz es ins Präteritum: ${c}`,`Ponlo en Präteritum (pasado): ${c}`),"🕰️",()=>tr("Modal verbs in the past usually use Präteritum: konnte, wollte, musste.","Modalverben in der Vergangenheit meist im Präteritum: konnte, wollte, musste.","Los verbos modales en pasado suelen ir en Präteritum: konnte, wollte, musste.")],
+ modal:[c=>tr(`Add the modal verb: ${c}`,`Ergänze das Modalverb: ${c}`,`Añade el verbo modal: ${c}`),"💪",()=>tr("The modal verb takes slot 2, the main verb goes to the end (infinitive).","Das Modalverb nimmt Platz 2, das Hauptverb geht ans Ende (Infinitiv).","El verbo modal va en la posición 2, el verbo principal al final (infinitivo).")],
+ neg:[c=>tr(`Make it negative: ${c}`,`Verneine den Satz: ${c}`,`Hazla negativa: ${c}`),"🚫",()=>tr("kein replaces ein (or no article) and changes like ein. nicht goes before the part you negate.","kein ersetzt ein (oder kein Artikel) und ändert sich wie ein. nicht steht vor dem verneinten Teil.","kein sustituye a ein (o sin artículo) y cambia como ein. nicht va antes de la parte que niegas.")],
+ swap:[c=>tr(`Change: ${c}`,`Ändere: ${c}`,`Cambia: ${c}`),"🔄",()=>tr("New word, new gender? Check that the article still fits the case.","Neues Wort, neues Genus? Prüf, ob der Artikel zum Fall passt.","¿Palabra nueva, género nuevo? Comprueba que el artículo encaja con el caso.")],
+ um:[c=>tr(`Add the purpose with um … zu: ${c}`,`Ergänze das Ziel mit um … zu: ${c}`,`Añade la finalidad con um … zu: ${c}`),"🎯",()=>tr("um … zu = in order to. zu + infinitive at the very end.","um … zu = Zweck. zu + Infinitiv ganz am Ende.","um … zu = para. zu + infinitivo al final.")],
+ rel:[c=>tr(`Join with a relative clause: ${c}`,`Verbinde mit einem Relativsatz: ${c}`,`Une con una oración de relativo: ${c}`),"🪢",()=>tr("Preposition + der/die/das in the right case (in + wo? → in dem). The verb goes to the end.","Präposition + der/die/das im richtigen Fall (in + wo? → in dem). Verb ans Ende.","Preposición + der/die/das en el caso correcto (in + wo? → in dem). El verbo al final.")],
+ mo:[c=>tr(`Add how: ${c}`,`Ergänze wie: ${c}`,`Añade cómo: ${c}`),"✨",()=>tr("Little words like sehr, gern, noch go right after the verb and pronouns.","Kleine Wörter wie sehr, gern, noch stehen direkt nach Verb und Pronomen.","Palabras como sehr, gern, noch van justo después del verbo y los pronombres.")]
+};
+const SB_TIP={
+ akk:()=>SB_KIND.akk[2](), wohin:()=>SB_KIND.wohin[2](), rel:()=>SB_KIND.rel[2](),
+ beim:()=>tr("bei + dem = beim. bei always takes Dativ.","bei + dem = beim. bei: immer Dativ.","bei + dem = beim. bei siempre lleva dativo."),
+ im:()=>tr("in + dem = im. wo? (where it is) → Dativ.","in + dem = im. wo? → Dativ.","in + dem = im. wo? (dónde está) → dativo."),
+ pldat:()=>tr("Plural Dativ: den/meinen/unseren + the noun gets -n: den Kindern, unseren Freunden.","Plural Dativ: den/meinen/unseren + Nomen mit -n: den Kindern, unseren Freunden.","Dativo plural: den/meinen/unseren + el sustantivo con -n: den Kindern, unseren Freunden."),
+ seit:()=>tr("seit always takes Dativ (zwei Jahre → seit zwei Jahren). German uses the present tense here.","seit: immer Dativ (zwei Jahre → seit zwei Jahren). Im Deutschen steht hier Präsens.","seit siempre lleva dativo (zwei Jahre → seit zwei Jahren). En alemán se usa el presente."),
+ country:()=>tr("Some countries have an article: die Schweiz → in der Schweiz (wo? → Dativ).","Manche Länder haben einen Artikel: die Schweiz → in der Schweiz (wo? → Dativ).","Algunos países llevan artículo: die Schweiz → in der Schweiz (wo? → dativo)."),
+ legen:()=>tr("liegen = wo? → Dativ (auf dem Tisch). legen = wohin? → Akkusativ (auf den Tisch).","liegen = wo? → Dativ (auf dem Tisch). legen = wohin? → Akkusativ (auf den Tisch).","liegen = wo? → dativo (auf dem Tisch). legen = wohin? → acusativo (auf den Tisch)."),
+ stellen:()=>tr("stehen = wo? → Dativ (im Kühlschrank). stellen = wohin? → Akkusativ (in den Kühlschrank).","stehen = wo? → Dativ (im Kühlschrank). stellen = wohin? → Akkusativ (in den Kühlschrank).","stehen = wo? → dativo (im Kühlschrank). stellen = wohin? → acusativo (in den Kühlschrank)."),
+ weilmod:()=>tr("weil sends the verbs to the end. With a modal, the modal goes last: schlafen will.","weil schickt die Verben ans Ende. Mit Modalverb steht es ganz hinten: schlafen will.","weil manda los verbos al final. Con modal, el modal va el último: schlafen will."),
+ warten:()=>tr("warten auf + Akkusativ: auf den Bus.","warten auf + Akkusativ: auf den Bus.","warten auf + acusativo: auf den Bus."),
+ einem:()=>tr("ein in Dativ: einem (der/das), einer (die).","ein im Dativ: einem (der/das), einer (die).","ein en dativo: einem (der/das), einer (die)."),
+ zu:()=>tr("nach for cities and countries, zu for people and places. zu + dem = zum, zu + der = zur.","nach für Städte und Länder, zu für Personen und Orte. zu + dem = zum, zu + der = zur.","nach para ciudades y países, zu para personas y lugares. zu + dem = zum, zu + der = zur."),
+ sein:()=>tr("Moving from A to B → Perfekt with sein: sind gefahren.","Bewegung von A nach B → Perfekt mit sein: sind gefahren.","Moverse de A a B → Perfekt con sein: sind gefahren."),
+ obwohl:()=>tr("obwohl = although. Like weil, it sends the verb to the end.","obwohl = Gegengrund. Wie weil schickt es das Verb ans Ende.","obwohl = aunque. Como weil, manda el verbo al final."),
+ wenn:()=>tr("wenn = if / when. Verb to the end, like weil.","wenn = Bedingung. Verb ans Ende, wie bei weil.","wenn = si / cuando. Verbo al final, como weil."),
+ helfen:()=>tr("helfen always takes Dativ: seiner Nachbarin (die → der, -er).","helfen: immer Dativ: seiner Nachbarin (die → der, -er).","helfen siempre lleva dativo: seiner Nachbarin (die → der, -er)."),
+ dassperf:()=>tr("In a side clause the helper verb goes last: geholfen hat.","Im Nebensatz steht das Hilfsverb ganz hinten: geholfen hat.","En la subordinada el auxiliar va el último: geholfen hat."),
+ freuen:()=>tr("sich freuen auf + Akk = looking forward (future). sich freuen über + Akk = happy about (now).","sich freuen auf + Akk = Zukunft. sich freuen über + Akk = jetzt / vorbei.","sich freuen auf + Akk = tener ganas (futuro). sich freuen über + Akk = alegrarse de (ahora)."),
+ timesub:()=>tr("In a side clause, time goes after the subject. The verbs stay at the end.","Im Nebensatz steht die Zeit nach dem Subjekt. Die Verben bleiben am Ende.","En la subordinada, el tiempo va después del sujeto. Los verbos se quedan al final.")
+};
+const SB_TRAP={dem:"den",den:"dem",einem:"einen",einen:"einem",seinem:"seinen",seinen:"seinem",meinem:"meinen",meinen:"meinem",meiner:"meine",meine:"meiner",seiner:"seine",unseren:"unsere",der:"die",die:"der",das:"dem",beim:"bei",zum:"zur",zur:"zum",im:"in",ins:"im",eine:"einen",keinen:"kein",keine:"keinen",kein:"keinen",einer:"eine",ihre:"ihrer",hat:"hatte",habe:"hat",will:"wollen",möchte:"möchten"};
+const SB={ lv:null, ch:null, i:0, mode:null, inp:"", pick:[], pool:[], res:null, first:[], s:{ lv:null, done:[] } };
+function sbLoad(){ try{ const j=JSON.parse(localStorage.getItem("pt_sb")||"{}"); SB.s=Object.assign({ lv:null, done:[] },j); }catch(e){} }
+function sbSave(){ try{ localStorage.setItem("pt_sb",JSON.stringify(SB.s)); }catch(e){} }
+function sbParts(s){ return s.split("|").map(x=>{ const k=x.lastIndexOf(":"); const r=x.slice(k+1); return { t:x.slice(0,k), r:r.replace("+",""), n:r.includes("+") }; }); }
+function sbText(p){ return p.map(x=>x.t).join(" "); }
+function sbNorm(s){ return String(s||"").toLowerCase().replace(/[.,!?;:"„“«»()]/g," ").replace(/\s+/g," ").trim(); }
+function sbToks(s){ const n=sbNorm(s); return n?n.split(" "):[]; }
+function sbSubAt(p){ const k=p.findIndex(x=>["K","Rd","U"].includes(x.r)); return k<0?p.length:k; }
+function sbPerms(a){ if(a.length<2) return [a]; const o=[]; a.forEach((x,i)=>sbPerms(a.slice(0,i).concat(a.slice(i+1))).forEach(r=>o.push([x,...r]))); return o; }
+/* fixed: slot 1, verb 2, subject behind it, end verbs and the joiner + subject of a side clause; everything in the middle may swap places */
+function sbSegs(seg,sub){ if(!seg.length) return { h:[], m:[], t:[] };
+  let i; if(sub){ i=1; if(seg[1]&&seg[1].r==="S") i=2; } else { i=Math.min(2,seg.length); if(seg[0].r!=="S"&&seg[i]&&seg[i].r==="S") i++; while(seg[i]&&seg[i].r==="Rf") i++; }
+  const END=sub?["V","H","M","I","Pa","Z"]:["Pa","I"]; let j=seg.length; while(j>i&&END.includes(seg[j-1].r)) j--;
+  return { h:seg.slice(0,i), m:seg.slice(i,j), t:seg.slice(j) }; }
+function sbOk(user,p){ const u=sbToks(user).join(" "); const k=sbSubAt(p), A=sbSegs(p.slice(0,k),false), B=sbSegs(p.slice(k),true);
+  const tx=a=>a.map(x=>sbNorm(x.t)).filter(Boolean).join(" ");
+  for(const ma of sbPerms(A.m)) for(const mb of sbPerms(B.m)){ if([tx(A.h),tx(ma),tx(A.t),tx(B.h),tx(mb),tx(B.t)].filter(Boolean).join(" ")===u) return true; }
+  return false; }
+function sbLcs(a,b){ const n=a.length,m=b.length,d=Array.from({length:n+1},()=>new Array(m+1).fill(0));
+  for(let i=n-1;i>=0;i--) for(let j=m-1;j>=0;j--) d[i][j]=a[i]===b[j]?d[i+1][j+1]+1:Math.max(d[i+1][j],d[i][j+1]);
+  const ka=new Set(),kb=new Set(); let i=0,j=0; while(i<n&&j<m){ if(a[i]===b[j]){ ka.add(i); kb.add(j); i++; j++; } else if(d[i+1][j]>=d[i][j+1]) i++; else j++; } return [ka,kb]; }
+function sbDiff(user,ans){ const U=String(user).trim().split(/\s+/), Aw=ans.split(" "), [ku,ka]=sbLcs(U.map(sbNorm),Aw.map(sbNorm));
+  return { u:U.map((w,i)=>ku.has(i)?esc(w):`<span class="sbbad">${esc(w)}</span>`).join(" "), a:Aw.map((w,i)=>ka.has(i)?esc(w):`<span class="sbgood">${esc(w)}</span>`).join(" ") }; }
+function sbStruct(p,hl){ const k=sbSubAt(p); return `<div class="bbwrow sbrow" dir="ltr">${p.map((x,i)=>{ const h=bbPart({ t:x.t.replace(/[.,]$/,""), r:x.r },i>=k); return hl&&x.n?h.replace('class="bbwp"','class="bbwp sbnew"'):h; }).join("")}</div>`; }
+function sbMean(o){ return UI==="es"?o.es:o.e; }
+function sbCur(){ const c=SB.ch; return SB.i===0?{ p:sbParts(c.s), e:c.e, es:c.es }:(x=>({ p:sbParts(x[2]), e:x[3], es:x[4] }))(c.st[SB.i-1]); }
+function sbStep(){ const x=SB.ch.st[SB.i]; return { k:x[0], c:x[1], p:sbParts(x[2]), e:x[3], es:x[4], tip:x[5] }; }
+function sbTip(s){ return (SB_TIP[s.tip]||SB_KIND[s.k][2])(); }
+function sbPickLv(){ const m={ A0:"A1", A1:"A1", A2:"A2" }; return SB.s.lv||m[VC&&VC.level]||(VC&&VC.level?"B1":"A1"); }
+function sbOpen(lv){ sbLoad(); SB.lv=lv||sbPickLv(); SB.s.lv=SB.lv; sbSave();
+  const all=SB_CH.filter(c=>c.lv===SB.lv); let left=all.filter(c=>!SB.s.done.includes(c.id)&&(!SB.ch||c.id!==SB.ch.id));
+  if(!left.length){ SB.s.done=SB.s.done.filter(id=>!all.some(c=>c.id===id)); sbSave(); left=all.filter(c=>!SB.ch||c.id!==SB.ch.id); if(!left.length) left=all; }
+  SB.ch=left[Math.floor(Math.random()*left.length)]; SB.i=0; SB.first=[]; SB.mode=SB.lv==="B1"?"type":"tiles"; sbReset(); go("sbuild"); }
+function sbReset(){ SB.res=null; SB.inp=""; SB.pick=[]; const s=sbStep(), toks=sbText(s.p).split(" ");
+  const nw=new Set(s.p.filter(x=>x.n).flatMap(x=>x.t.split(" ").map(sbNorm)));
+  const cand=toks.map((t,i)=>({ t, i, k:sbNorm(t) })).filter(o=>SB_TRAP[o.k]).sort((a,b)=>(nw.has(b.k)?1:0)-(nw.has(a.k)?1:0));
+  const pool=toks.slice(); if(cand.length){ const o=cand[0]; let tr2=SB_TRAP[o.k]; if(o.t[0]!==o.t[0].toLowerCase()) tr2=tr2[0].toUpperCase()+tr2.slice(1); if(!toks.map(sbNorm).includes(sbNorm(tr2))) pool.push(tr2); }
+  SB.pool=shuffle(pool.map((t,i)=>({ t, i }))); }
+function sbTap(i){ if(SB.res) return; const k=SB.pick.indexOf(i); if(k>=0) SB.pick.splice(k,1); else SB.pick.push(i); xr(); }
+function sbAnswer(){ return SB.mode==="tiles"?SB.pick.map(i=>SB.pool.find(o=>o.i===i).t).join(" "):SB.inp; }
+function sbCheck(){ const s=sbStep(), u=sbAnswer().trim(); if(!u) return; const ok=sbOk(u,s.p);
+  if(SB.first[SB.i]===undefined) SB.first[SB.i]=ok;
+  SB.res={ ok, u }; if(!ok&&SB.first[SB.i]===false&&!SB.res.saved){ SB.res.saved=1; try{ mwAdd(sbText(s.p),sbMean(s),null,"🧱"); }catch(e){} } xr(); }
+function sbAgain(){ SB.res=null; if(SB.mode==="tiles") SB.pick=[]; xr(); setTimeout(()=>{ const t=document.getElementById("sbinp"); if(t) t.focus(); },50); }
+function sbNext(){ if(SB.i<SB.ch.st.length-1){ SB.i++; sbReset(); } else { SB.i=SB.ch.st.length; if(!SB.s.done.includes(SB.ch.id)) SB.s.done.push(SB.ch.id); sbSave(); } xr(); window.scrollTo(0,0); }
+function sbMode(m){ SB.mode=m; SB.res=null; SB.pick=[]; xr(); }
+VIEWS.sbuild = function(){ if(!SB.ch) return ""; const c=SB.ch, n=c.st.length, lvc=l=>`<button class="chip ${SB.lv===l?"on":""}" onclick="sbOpen('${l}')">${l}</button>`;
+  const head=`<div class="topline"><button class="chip" onclick="go('games')">${uiBack()} ${tr("Games","Spiele","Juegos")}</button><span>🧱 ${tr("Sentence Builder","Satzbauer","Constructor de frases")}</span></div>
+   <div class="row" style="gap:6px;margin:0 0 10px">${lvc("A1")}${lvc("A2")}${lvc("B1")}</div>
+   <div class="sbsteps">${c.st.map((_,i)=>`<span class="${i<SB.i?"d":i===SB.i?"c":""}"></span>`).join("")}</div>`;
+  if(SB.i>=n){ const st=sbParts(c.s), en=sbParts(c.st[n-1][2]), good=SB.first.filter(Boolean).length;
+    return head+`<div class="card center"><div style="font-size:46px">🏆</div><h3 style="margin:4px 0">${tr("Sentence built!","Satz gebaut!","¡Frase construida!")}</h3><p class="note" style="margin:0">${tr(`${good} of ${n} steps right first time`,`${good} von ${n} Schritten gleich richtig`,`${good} de ${n} pasos bien a la primera`)}</p></div>
+     <div class="card"><div class="sblab">${tr("Where you started","Dein Anfang","Donde empezaste")}</div><p lang="de" style="margin:0 0 12px;font-size:17px">${esc(sbText(st))}</p>
+      <div class="sblab">${tr("Where you ended","Dein Ziel","Donde terminaste")}</div><p lang="de" style="margin:0;font-size:17px;font-weight:800">${esc(sbText(en))}</p><p class="note" style="margin:4px 0 0">${esc(sbMean({ e:c.st[n-1][3], es:c.st[n-1][4] }))}</p>${sbStruct(en,false)}</div>
+     <div class="card"><div class="sblab">${tr("You practised","Du hast geübt","Has practicado")}</div>${c.st.map((x,i)=>`<div class="sbdone">${SB_KIND[x[0]][1]} <span lang="de">${esc(x[1])}</span> <b>${SB.first[i]?"✓":"✗ → ✓"}</b></div>`).join("")}</div>
+     <div class="row" style="gap:8px"><button class="btn secondary" onclick="go('games')">${tr("Done","Fertig","Listo")}</button><button class="btn primary" onclick="sbOpen(SB.lv)">🧱 ${tr("New sentence","Neuer Satz","Nueva frase")}</button></div>`; }
+  const cur=sbCur(), s=sbStep(), K=SB_KIND[s.k], R=SB.res, ans=sbText(s.p), noHelp=SB.lv==="B1"&&SB.mode==="type";
+  let body=`<div class="card"><div class="sblab">${tr("Your sentence","Dein Satz","Tu frase")} · ${SB.lv}</div><div class="sbnow" lang="de">${esc(sbText(cur.p))}</div><p class="note" style="margin:2px 0 0">${esc(sbMean(cur))}</p>
+    ${R?"":`<details class="sbdet" ${noHelp?"":"open"}><summary>🧩 ${tr("Structure","Satzbau","Estructura")}</summary>${sbStruct(cur.p,false)}</details>`}</div>
+    <div class="sbtask"><div class="sblab">${tr(`Step ${SB.i+1} of ${n}`,`Schritt ${SB.i+1} von ${n}`,`Paso ${SB.i+1} de ${n}`)} · ${K[1]}</div><div lang="de" style="font-size:17px;font-weight:700">${esc(K[0](s.c))}</div></div>`;
+  if(!R){ body+=`<div class="row" style="gap:6px;margin:0 0 8px"><button class="chip ${SB.mode==="tiles"?"on":""}" onclick="sbMode('tiles')">🧩 ${tr("Tiles","Kacheln","Fichas")}</button><button class="chip ${SB.mode==="type"?"on":""}" onclick="sbMode('type')">⌨️ ${tr("Type","Tippen","Escribir")}</button></div>`;
+    if(SB.mode==="tiles") body+=`<div class="sbslot">${SB.pick.map(i=>`<button class="sbtile in" lang="de" onclick="sbTap(${i})">${esc(SB.pool.find(o=>o.i===i).t)}</button>`).join("")||`<span class="note">${tr("Tap the words in order","Tippe die Wörter der Reihe nach an","Toca las palabras en orden")}</span>`}</div>
+      <div class="sbpool">${SB.pool.map(o=>`<button class="sbtile ${SB.pick.includes(o.i)?"used":""}" lang="de" onclick="sbTap(${o.i})">${esc(o.t)}</button>`).join("")}</div>
+      <p class="note center" style="margin:6px 0 10px">${tr("One extra tile is a trap 😉","Eine Kachel ist eine Falle 😉","Una ficha es una trampa 😉")}</p>`;
+    else body+=`<textarea id="sbinp" class="sbinp" lang="de" rows="3" autocapitalize="sentences" spellcheck="false" placeholder="${tr("Write the whole new sentence","Schreib den ganzen neuen Satz","Escribe la frase nueva entera")}" oninput="SB.inp=this.value">${esc(SB.inp)}</textarea>${noHelp?`<p class="note center" style="margin:6px 0 10px">🙈 ${tr("No hints in B1 mode","Keine Hilfe im B1-Modus","Sin pistas en modo B1")}</p>`:""}`;
+    body+=`<button class="btn primary" onclick="sbCheck()">✅ ${tr("Check","Prüfen","Comprobar")}</button>`; }
+  else { const d=sbDiff(R.u,ans);
+    body+=`<div class="card" style="${R.ok?"border-color:#9FD3C9":"border-color:#F2B4A4"}">${R.ok?`<div class="sblab" style="color:#1E6B63">✅ ${tr("Right!","Richtig!","¡Correcto!")}</div><p class="sbnow" lang="de" style="margin:0">${esc(R.u)}</p>${sbNorm(R.u)!==sbNorm(ans)?`<p class="note" style="margin:6px 0 0">${tr("Also common:","Auch üblich:","También es común:")} <span lang="de">${esc(ans)}</span></p>`:""}`
+      :`<div class="sblab" style="color:#B8371C">❌ ${tr("Almost!","Fast!","¡Casi!")}</div><p class="sbs" lang="de">${d.u}</p><p class="sbs" lang="de" style="margin:0">${d.a}</p>`}
+      <p class="note" style="margin:6px 0 0">${esc(sbMean(s))}</p></div>
+     <div class="card"><div class="sblab">🧩 ${tr("Structure","Satzbau","Estructura")}</div>${sbStruct(s.p,true)}<div class="sbtip">💡 <span lang="de">${esc(sbTip(s))}</span></div></div>
+     <div class="row" style="gap:8px">${R.ok?"":`<button class="btn secondary" onclick="sbAgain()">🔁 ${tr("Try again","Nochmal","Otra vez")}</button>`}<button class="btn primary" onclick="sbNext()">${SB.i<n-1?tr("Next step →","Nächster Schritt →","Siguiente paso →"):tr("Finish 🏆","Fertig 🏆","Terminar 🏆")}</button></div>
+     ${!R.ok?`<p class="note center" style="margin:10px 0 0">➕ ${tr("Saved to your flashcards","In deinen Karteikarten gespeichert","Guardada en tus tarjetas")}</p>`:""}`; }
+  return head+body; };
 async function hmOpen(){ hmLoad(); HM.lv=HM.lv||VC.level||"A1"; if(!VC.d){ go("hangman"); try{ await vcLoadData(); }catch(e){} } hmNew(); Promise.all([DT.man===undefined?dtLoadManifest():null, MW.list===null?mwLoad():null]).then(()=>{ if(S.screen==="hangman") xr(); }).catch(()=>{}); }
 function hmNew(){ if(!VC.d){ go("hangman"); return; }
   const pool=VC.d.words.filter(w=>w.lv===HM.lv&&(!HM.th||w.t===HM.th)&&hmOk(w)&&(!HM.w||w.id!==HM.w.id));
@@ -11220,6 +11465,8 @@ VIEWS.games = function(){
     <button class="btn primary" onclick="ssOpen()">${playLbl()}</button></div>
   <div class="card"><h3>✍️ ${kjName()} <span class="note" style="font-weight:600">· 🇩🇪 ${tr("solo, German only","allein, nur Deutsch","solo, solo alemán")}</span></h3><p class="note">${tr("Conjugate verbs, then build the question for an answer. 5 levels: regular, irregular, modal and separable verbs, Perfekt.","Verben konjugieren, dann die Frage zu einer Antwort bauen. 5 Level: regelmäßig, unregelmäßig, Modalverben, trennbare Verben, Perfekt.","Conjuga verbos y luego construye la pregunta para una respuesta. 5 niveles: regulares, irregulares, modales, separables y Perfekt.")}</p>
     <button class="btn primary" onclick="kjOpen()">${playLbl()}</button></div>
+  <div class="card"><h3>🧱 ${tr("Sentence Builder","Satzbauer","Constructor de frases")} <span class="note" style="font-weight:600">· 🇩🇪 A1–B1</span></h3><p class="note">${tr("One sentence that grows step by step: Dativ, Akkusativ, bei, auf, weil, Perfekt… with the sentence structure after every step.","Ein Satz, der Schritt für Schritt wächst: Dativ, Akkusativ, bei, auf, weil, Perfekt … mit Satzbau nach jedem Schritt.","Una frase que crece paso a paso: dativo, acusativo, bei, auf, weil, Perfekt… con la estructura después de cada paso.")}</p>
+    <button class="btn primary" onclick="sbOpen()">${playLbl()}</button></div>
   <div class="card"><h3>🌉 ${tr("Save the Pal","Rette den Pal","Salva al Pal")} <span class="note" style="font-weight:600">· 🇩🇪 A1–C1</span></h3><p class="note">${tr("Guess the German word letter by letter. Wrong letters drop planks from the bridge!","Errate das deutsche Wort Buchstabe für Buchstabe. Falsche Buchstaben lassen Bretter fallen!","Adivina la palabra alemana letra por letra. ¡Las letras incorrectas quitan tablas del puente!")}</p>
     <button class="btn primary" onclick="hmOpen()">${playLbl()}</button></div>
   <div class="card"><h3>📖 ${tr("Easy reads","Lesen","Lecturas fáciles")} <span class="note" style="font-weight:600">· 🇩🇪 A1–C1</span></h3><p class="note">${tr("Short stories with Pía, Bruno and friends. One sentence at a time, with the meaning and sentence parts.","Kurze Geschichten mit Pía, Bruno und Freunden. Satz für Satz, mit Bedeutung und Satzteilen.","Historias cortas con Pía, Bruno y sus amigos. Frase a frase, con significado y partes de la frase.")}</p>
