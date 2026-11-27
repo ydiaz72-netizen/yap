@@ -192,6 +192,9 @@
   .brow .bt i{display:block;font-style:normal;font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase}
   .brow .bt b{font-size:16px}
   .brow .bm{flex:1;min-width:0}
+  .bwho{flex:0 0 34%;min-width:0;border-left:1px dashed var(--line);padding-left:12px;display:flex;flex-direction:column;gap:6px}
+  .bwl{display:flex;gap:6px;align-items:flex-start;font-size:14px}.bwf{font-size:16px;line-height:20px}.bwn{font-size:13px;color:var(--muted);line-height:18px;overflow-wrap:anywhere}
+  @media(max-width:640px){ .brow{flex-wrap:wrap} .brow .bm{flex:1 1 0} .bwho{order:5;flex:1 1 100%;border-left:0;border-top:1px dashed var(--line);padding:8px 0 0 70px} }
   .brow .brt{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .brow .bs{flex:none;font-size:12px;font-weight:800;border-radius:999px;padding:4px 9px;background:var(--plum-soft);color:var(--plum);white-space:nowrap}
   .brow .bs.ok{background:var(--teal-soft);color:#1F6B63}
@@ -4482,6 +4485,16 @@ function bStatus(s){
   if(s.my_status==="waitlisted") return [`🕒 #${s.my_position||"?"}`,""];
   return s.seats_open>0 ? [tr(`${s.seats_open} left`,`${s.seats_open} frei`,`${s.seats_open} libres`),""] : [tr("Full","Voll","Completa"),"full"];
 }
+/* list view: who's coming, per language (names for hosts, counts for everyone) */
+function bWho(s){ const la=s.language_a, lb=s.language_b, ps=s.is_host?B.people[s.activity_id]:null, fl=l=>T[l]?T[l].flag:"", nm=l=>T[l]?esc(lname(l)):esc(l||"");
+  if(!la||!lb) return "";
+  const side=p=>{ if(p.side) return p.side; const L=p.languages||[], sp=c=>L.some(x=>x.code===c&&x.role!=="learning"); return sp(la)&&!sp(lb)?"a":sp(lb)&&!sp(la)?"b":L.some(x=>x.code===lb&&x.role==="learning")?"a":L.some(x=>x.code===la&&x.role==="learning")?"b":"?"; };
+  const line=(k,l,n,names,seats)=>`<div class="bwl"><span class="bwf">${fl(l)}</span><div style="min-width:0"><b>${tr(`${nm(l)} speakers`,`${nm(l)}-Sprechende`,`Hablan ${nm(l).toLowerCase()}`)}${seats?` <span class="note">${n}/${seats}</span>`:` <span class="note">${n}</span>`}</b>${names!=null?`<div class="bwn">${names.length?names.map(esc).join(", "):tr("nobody yet","noch niemand","nadie aún")}</div>`:""}</div></div>`;
+  if(ps){ const inn=ps.filter(p=>p.status==="joined"||p.status==="offered"), A1=inn.filter(p=>side(p)==="a"), B1=inn.filter(p=>side(p)==="b"), U=inn.filter(p=>side(p)==="?"), pend=ps.filter(p=>p.status==="pending").length;
+    const first=p=>String(p.name||tr("Member","Mitglied","Miembro")).split(" ")[0];
+    return `<div class="bwho" aria-label="${tr("Who's coming","Wer kommt","Quién viene")}">${line("a",la,A1.length,A1.map(first),s.balanced?s.seats_a:0)}${line("b",lb,B1.length,B1.map(first),s.balanced?s.seats_b:0)}${U.length?`<div class="bwn">❓ ${U.map(first).map(esc).join(", ")}</div>`:""}${pend?`<div class="bwn" style="color:#B8371C;font-weight:800">🔔 ${tr(`${pend} asking to join`,`${pend} möchte${pend>1?"n":""} teilnehmen`,`${pend} pide${pend>1?"n":""} unirse`)}</div>`:""}</div>`; }
+  if(s.balanced&&s.taken_a!=null) return `<div class="bwho">${line("a",la,s.taken_a,null,s.seats_a)}${line("b",lb,s.taken_b,null,s.seats_b)}</div>`;
+  return ""; }
 function bRow(s, dayMode){
   const d=new Date(s.starts_at), st=bStatus(s), g=s.type==="game";
   const t=d.toLocaleTimeString(uiLoc(),{hour:"2-digit",minute:"2-digit"});
@@ -4491,6 +4504,7 @@ function bRow(s, dayMode){
     <div class="bm"><div class="brt">${s.visibility==="private"?"🔒 ":""}${g?"🎲 ":""}${esc(s.title)}</div>${fitsBadge(s)}
       <div class="note" style="margin:0;font-size:12px">🕒 ${tr("your time","deine Zeit","tu hora")}${hostShort(s.starts_at,s.host_time_zone)?` · ${esc(hostShort(s.starts_at,s.host_time_zone))}`:""}</div>
       <div class="note" style="margin:0">${s.format==="in_person"?`📍 ${esc(s.city||"")} · `:""}${codesPair(s.language_a,s.language_b)} · ${lvlRange(s.level_min,s.level_max)} · ${s.duration_min} min</div></div>
+    ${bWho(s)}
     ${CU[s.activity_id]?`<span title="${tr("Unread chat messages","Ungelesene Nachrichten","Mensajes sin leer")}">💬${chBadge(s.activity_id)}</span>`:""}<span class="bs ${st[1]}">${st[0]}</span><span class="chev" aria-hidden="true">›</span></button>`;
 }
 function bDayLabel(iso){
