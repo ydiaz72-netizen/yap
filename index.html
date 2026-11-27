@@ -11448,7 +11448,9 @@ async function sbWord(raw){ const w=String(raw).replace(/[.,!?;:]/g,"").trim(); 
   if(g){ const p=g.split("|"); form=UI==="es"?p[2]:p[1]; }
   if(g&&own) mean=form; else if(dw&&dw.tr&&dw.tr[L]) mean=dw.tr[L]; else if(g) mean=form; else if(dw&&dw.tr&&dw.tr.en) mean=dw.tr.en;
   const shown=dw?dw.w:base, fm=g&&form&&form!==mean?form:"";
-  SB.word={ w, base:shown, mean:mean||tr("No meaning found yet","Noch keine Bedeutung","Aún sin significado"), form:fm, ok:!!mean }; xr(); }
+  if(MW.list===null){ try{ await mwLoad(); }catch(e){} }
+  const have=!!dw||(typeof mwHas==="function"&&(mwHas(shown)||mwHas(w)))||/[+/…]/.test(shown);
+  SB.word={ w, base:shown, mean:mean||tr("No meaning found yet","Noch keine Bedeutung","Aún sin significado"), form:fm, ok:!!mean, have, deck:!!dw }; xr(); }
 async function sbWordSave(){ const W=SB.word; if(!W||!W.ok) return; const r=await mwAdd(W.base,W.mean,null,"🧱"); bToast(r==="deck"?tr("✅ It's in your flashcards now","✅ Jetzt in deinen Karteikarten","✅ Ya está en tus tarjetas"):r?tr("✅ Saved to your flashcards","✅ In deinen Karteikarten gespeichert","✅ Guardada en tus tarjetas"):tr("Couldn't save","Nicht gespeichert","No se pudo guardar")); SB.word=null; xr(); }
 const SB_KIND={
  time:[c=>tr(`Start the sentence with: ${c}`,`Beginne den Satz mit: ${c}`,`Empieza la frase con: ${c}`),"⏰",()=>tr("Something else first? The verb stays in slot 2 and the subject moves behind it.","Etwas anderes vorne? Das Verb bleibt auf Platz 2, das Subjekt rutscht dahinter.","¿Otra cosa al principio? El verbo se queda en la posición 2 y el sujeto va detrás.")],
@@ -11615,7 +11617,7 @@ function sbWordSheet(){ const W=SB.word; if(!W) return "";
     <div><div class="sblab">${tr("Tap a word","Wort antippen","Toca una palabra")}</div><div lang="de" style="font-size:24px;font-weight:800">${esc(W.w)}</div>${W.base.toLowerCase()!==W.w.toLowerCase()?`<div class="note" lang="de" style="margin:2px 0 0">→ ${esc(W.base)}</div>`:""}</div>
     <button class="chip" onclick="SB.word=null;xr()">✕</button></div>
     <p style="font-size:18px;margin:12px 0 4px">💬 ${esc(W.mean)}</p>${W.form?`<p class="note" style="margin:0">${esc(W.form)}</p>`:""}
-    ${W.ok?`<button class="btn secondary" style="margin-top:14px" onclick="sbWordSave()">➕ ${tr("Add to my flashcards","Zu meinen Karteikarten","Añadir a mis tarjetas")}</button>`:""}</div></div>`; }
+    ${W.ok&&!W.have?`<button class="btn secondary" style="margin-top:14px" onclick="sbWordSave()">➕ ${tr("Add to my flashcards","Zu meinen Karteikarten","Añadir a mis tarjetas")}</button>`:W.deck?`<p class="note" style="margin:12px 0 0">✅ ${tr("Already in the PonteTalk flashcards","Schon in den PonteTalk-Karteikarten","Ya está en las tarjetas de PonteTalk")}</p>`:""}</div></div>`; }
 async function hmOpen(){ hmLoad(); HM.lv=HM.lv||VC.level||"A1"; if(!VC.d){ go("hangman"); try{ await vcLoadData(); }catch(e){} } hmNew(); Promise.all([DT.man===undefined?dtLoadManifest():null, MW.list===null?mwLoad():null]).then(()=>{ if(S.screen==="hangman") xr(); }).catch(()=>{}); }
 function hmNew(){ if(!VC.d){ go("hangman"); return; }
   const pool=VC.d.words.filter(w=>w.lv===HM.lv&&(!HM.th||w.t===HM.th)&&hmOk(w)&&(!HM.w||w.id!==HM.w.id));
