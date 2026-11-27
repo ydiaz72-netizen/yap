@@ -11300,18 +11300,21 @@ function brCard(){ if(!(A.user&&A.status==="in")) return ""; if(!BR.d){ brLoad()
   const R=brCalc(), f=R.focus[0];
   return `<div class="card brcard" style="margin:0" onclick="brOpen()"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h3 style="margin:0">🌉 ${tr("My Bridge Report","Mein Brücken-Bericht","Mi informe del puente")}</h3><span class="chip">${tr("Open","Öffnen","Abrir")} →</span></div>
     <p class="note" style="margin:6px 0 0">${tr("Plank","Brett","Tabla")} ${R.P.plank} · ${R.P.lv}${R.P.plus?"+":""} · ${R.cur.days||0}🔥 · ${R.mins} min${f?` · 🎯 ${esc(f.l)}`:""}</p></div>`; }
-async function brShare(){ const R=brCalc(), c=R.cur, LVN=`${R.P.lv}${R.P.plus?"+":""}`, url="https://pontetalk.setzio.com";
+async function brShare(){ const R=brCalc(), c=R.cur, LVN=`${R.P.lv}${R.P.plus?"+":""}`, url="https://pontetalk.setzio.com", F=R.focus[0];
   const txt=tr(`🌉 I'm on plank ${R.P.plank} of 11 (${LVN}) on my German bridge with PonteTalk! This week: ${c.days||0} active days, ${R.mins} minutes, ${c.sent||0} sentences built.`,
     `🌉 Ich bin auf Brett ${R.P.plank} von 11 (${LVN}) meiner Deutsch-Brücke mit PonteTalk! Diese Woche: ${c.days||0} aktive Tage, ${R.mins} Minuten, ${c.sent||0} Sätze gebaut.`,
-    `🌉 ¡Voy por la tabla ${R.P.plank} de 11 (${LVN}) de mi puente de alemán con PonteTalk! Esta semana: ${c.days||0} días activos, ${R.mins} minutos, ${c.sent||0} frases construidas.`);
+    `🌉 ¡Voy por la tabla ${R.P.plank} de 11 (${LVN}) de mi puente de alemán con PonteTalk! Esta semana: ${c.days||0} días activos, ${R.mins} minutos, ${c.sent||0} frases construidas.`)
+    +" "+tr("🎯 Every week it tells me exactly what to practise next.","🎯 Jede Woche sagt es mir genau, was ich als Nächstes üben soll.","🎯 Cada semana me dice exactamente qué practicar.");
   const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 600 600"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1B2A41"/><stop offset="1" stop-color="#2F4B7C"/></linearGradient></defs>
     <rect width="600" height="600" fill="url(#g)"/><text x="40" y="70" font-family="Helvetica,Arial,sans-serif" font-size="30" font-weight="800" fill="#fff">Ponte<tspan fill="#F25C3B">Talk</tspan></text>
     <text x="40" y="150" font-family="Helvetica,Arial,sans-serif" font-size="20" font-weight="800" fill="#F2B544" letter-spacing="1">${esc(tr("MY GERMAN BRIDGE","MEINE DEUTSCH-BRÜCKE","MI PUENTE DE ALEMÁN"))}</text>
     <text x="40" y="210" font-family="Helvetica,Arial,sans-serif" font-size="48" font-weight="800" fill="#fff">${esc(tr(`Plank ${R.P.plank} of 11`,`Brett ${R.P.plank} von 11`,`Tabla ${R.P.plank} de 11`))}</text>
     <rect x="40" y="228" width="${30+LVN.length*14}" height="34" rx="17" fill="#F2B544"/><text x="${55}" y="252" font-family="Helvetica,Arial,sans-serif" font-size="20" font-weight="800" fill="#1B2A41">${LVN}</text>
     <g transform="translate(0,270)">${brBridge(R.last,R.P.plank,true).replace(/<svg class="brsvg"[^>]*>/,'<svg x="0" y="0" width="600" height="168" viewBox="0 0 600 168">')}</g>
-    <text x="40" y="500" font-family="Helvetica,Arial,sans-serif" font-size="22" fill="#fff">🔥 ${c.days||0} ${esc(tr("days","Tage","días"))}   ⏱️ ${R.mins} min   🧱 ${c.sent||0} ${esc(tr("sentences","Sätze","frases"))}</text>
-    <text x="40" y="560" font-family="Helvetica,Arial,sans-serif" font-size="18" fill="rgba(255,255,255,.7)">pontetalk.setzio.com</text></svg>`;
+    <text x="40" y="490" font-family="Helvetica,Arial,sans-serif" font-size="22" fill="#fff">🔥 ${c.days||0} ${esc(tr("days","Tage","días"))}   ⏱️ ${R.mins} min   🧱 ${c.sent||0} ${esc(tr("sentences","Sätze","frases"))}</text>
+    <rect x="40" y="520" width="520" height="44" rx="14" fill="rgba(255,255,255,.12)"/>
+    <text x="58" y="548" font-family="Helvetica,Arial,sans-serif" font-size="17" font-weight="700" fill="#fff">🎯 ${esc(F?tr(`My focus this week: ${F.l}`,`Mein Fokus diese Woche: ${F.l}`,`Mi enfoque esta semana: ${F.l}`):tr("Personal tips & a plan every week","Jede Woche persönliche Tipps & Plan","Consejos y plan personal cada semana"))}</text>
+    <text x="40" y="588" font-family="Helvetica,Arial,sans-serif" font-size="15" fill="rgba(255,255,255,.7)">${esc(F?tr("Personal plan every week · pontetalk.setzio.com","Persönlicher Plan jede Woche · pontetalk.setzio.com","Plan personal cada semana · pontetalk.setzio.com"):"pontetalk.setzio.com")}</text></svg>`;
   BR.sh={ txt, url, img:null, file:null }; xr();
   try{ const img=new Image(); img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg); await img.decode();
     const cv=document.createElement("canvas"); cv.width=1080; cv.height=1080; cv.getContext("2d").drawImage(img,0,0,1080,1080);
