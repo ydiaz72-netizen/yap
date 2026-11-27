@@ -8628,6 +8628,7 @@ async function vcMineLoad(){
   VC.mineN=0; if(!(A.user&&A.sb)) return;
   try{ const { data, error }=await A.sb.rpc("pt_words_mine"); if(error) throw error;
     for(const r of data||[]){ if(!r.word||!r.meaning) continue;
+      if((r.lang||"de")==="de"){ const dw=vcDeckWord(r.word); if(dw){ if(!vcStudying(dw)){ const now=Date.now(); VC.p[dw.id]={ i:0, e:2.5, d:now, r:1, l:0, u:now }; VC.dirty[dw.id]=1; } continue; } }   /* already a PonteTalk card */
       const m=r.lang==="de"&&/^(der|die|das) \S/.test(r.word)?r.word.slice(0,3):null;
       const w={ id:"sw-"+r.id, w:r.word, t:"mine", lv:"MINE", ex:r.example||"", tr:{ en:r.meaning }, src:r.title||"", lang:r.lang||"de", ok:r.status };
       if(m) w.g=m;
@@ -8640,7 +8641,15 @@ function mwLocal(){ try{ return JSON.parse(localStorage.getItem("pt_mywords")||"
 function mwLocalSave(l){ try{ localStorage.setItem("pt_mywords",JSON.stringify(l)); }catch(e){} }
 async function mwLoad(){ if(A.user&&A.sb){ try{ const { data, error }=await A.sb.rpc("pt_mywords_list"); if(error) throw error; MW.list=data||[]; return MW.list; }catch(e){} } MW.list=mwLocal(); return MW.list; }
 function mwHas(word){ return (MW.list||[]).some(x=>x.word.toLowerCase()===String(word).toLowerCase()); }
+/* A word that is already in the PonteTalk decks is never added again as "my word": it goes into your reviews instead. */
+function vcNorm(t){ return String(t||"").toLowerCase().replace(/^(der|die|das)\s+/,"").replace(/[.,!?;:„“"']/g,"").trim(); }
+function vcDeckWord(t){ if(!VC.d) return null; const n=vcNorm(t); return n?VC.d.words.find(w=>w.lv!=="MINE"&&vcNorm(w.w)===n)||null:null; }
+function vcStudying(w){ const x=w&&VC.p[w.id]; return !!(x&&x.r); }
+function vcStudy(id){ const now=Date.now(); if(!vcStudying(VC.byId[id])){ VC.p[id]={ i:0, e:2.5, d:now, r:1, l:0, u:now }; VC.dirty[id]=1; vcFlush(); } }
+function vcDeckToast(w){ bToast("🃏 "+tr(`Already in PonteTalk flashcards (${w.lv}). It's in your reviews now.`,`Schon in den PonteTalk-Karteikarten (${w.lv}). Jetzt in deinen Wiederholungen.`,`Ya está en las tarjetas de PonteTalk (${w.lv}). Ahora está en tus repasos.`)); }
 async function mwAdd(word, meaning, example, src){ word=String(word||"").trim(); meaning=String(meaning||"").trim(); if(!word||!meaning) return false;
+  if(!VC.d){ try{ await vcLoadData(); }catch(e){} }
+  const dw=vcDeckWord(word); if(dw){ vcStudy(dw.id); return "deck"; }
   if(MW.list===null) await mwLoad(); if(mwHas(word)) return true;
   if(A.user&&A.sb){ try{ const { data, error }=await A.sb.rpc("pt_mywords_add",{ p_word:word, p_meaning:meaning, p_example:example||null, p_src:src||null }); if(error) throw error;
       MW.list.unshift({ id:data, word, meaning, example:example||null, src:src||null }); vcMineMerge(); return true; }catch(e){ bToast(tr("Couldn't save the word. Check your connection.","Wort konnte nicht gespeichert werden. Prüfe deine Verbindung.","No se pudo guardar la palabra. Revisa tu conexión.")); return false; } }
@@ -8651,7 +8660,8 @@ async function mwDel(id){ if(A.user&&A.sb&&!String(id).startsWith("l")){ try{ co
 /* put my own words into the flashcard deck next to the session words */
 function vcMineMerge(){ if(!VC.d||!MW.list) return;
   VC.d.words=VC.d.words.filter(w=>!String(w.id).startsWith("mw-")); for(const id in VC.byId) if(id.startsWith("mw-")) delete VC.byId[id];
-  for(const r of MW.list){ const tr0={}; VC_LANGS.forEach(([c])=>tr0[c]=r.meaning);
+  for(const r of MW.list){ if(vcDeckWord(r.word)) continue;   /* already a PonteTalk card: don't show it twice */
+    const tr0={}; VC_LANGS.forEach(([c])=>tr0[c]=r.meaning);
     const w={ id:"mw-"+r.id, w:r.word, t:"mine", lv:"MINE", ex:r.example||"", tr:tr0, src:r.src||"", lang:"de", own:1 };
     const m=/^(der|die|das) \S/.test(r.word)?r.word.slice(0,3):null; if(m) w.g=m;
     VC.d.words.push(w); VC.byId[w.id]=w; } }
@@ -10863,15 +10873,17 @@ async function mwSave(){ const g=id=>(document.getElementById(id)||{}).value||""
   MW.form={ word, meaning, example };
   if(!word||!meaning){ bToast(tr("Add the word and its meaning.","Gib das Wort und die Bedeutung ein.","Escribe la palabra y su significado.")); return; }
   if(mwHas(word)){ bToast(tr("You already have this word.","Dieses Wort hast du schon.","Ya tienes esta palabra.")); return; }
+  if(!VC.d){ try{ await vcLoadData(); }catch(e){} }
+  const dw=vcDeckWord(word); if(dw){ vcStudy(dw.id); MW.form=null; vcDeckToast(dw); xr(); return; }
   if(await mwAdd(word,meaning,example,null)){ MW.form=null; bToast("✅ "+tr("Saved! It will come up in your flashcards.","Gespeichert! Es kommt in deinen Karteikarten.","¡Guardada! Saldrá en tus tarjetas.")); xr(); } }
 /* 📚 words from a story → my words */
 function rdWords(st){ if(!st.kw||!st.kw.length) return ""; if(MW.list===null){ mwLoad().then(()=>xr()); }
-  const all=st.kw.every(k=>mwHas(k.w));
+  const known=w=>mwHas(w)||vcStudying(vcDeckWord(w)), all=st.kw.every(k=>known(k.w));
   return `<div class="card" style="text-align:start"><h3 style="margin:0 0 6px">📚 ${tr("Words from this story","Wörter aus der Geschichte","Palabras de esta historia")}</h3>
-    ${st.kw.map((k,i)=>`<div class="mwrow"><div style="flex:1;min-width:0"><b lang="de">${esc(k.w)}</b> <span class="note" dir="auto">· ${esc(rdTr(k.tr))}</span></div>${mwHas(k.w)?`<span class="note">✓</span>`:`<button class="chip" onclick="rdSaveWord(${i})">➕</button>`}</div>`).join("")}
+    ${st.kw.map((k,i)=>`<div class="mwrow"><div style="flex:1;min-width:0"><b lang="de">${esc(k.w)}</b> <span class="note" dir="auto">· ${esc(rdTr(k.tr))}</span></div>${known(k.w)?`<span class="note">✓</span>`:`<button class="chip" onclick="rdSaveWord(${i})">➕</button>`}</div>`).join("")}
     ${all?`<p class="note" style="margin:8px 0 0">✅ ${tr("All saved to your flashcards.","Alle in deinen Karteikarten.","Todas guardadas en tus tarjetas.")}</p>`:`<button class="btn secondary" style="margin-top:8px" onclick="rdSaveWord(-1)">➕ ${tr("Save all to my flashcards","Alle in meine Karteikarten","Guardar todas en mis tarjetas")}</button>`}</div>`; }
 async function rdSaveWord(i){ const st=RD.cur; if(!st) return; const L=i<0?st.kw:[st.kw[i]];
-  for(const k of L){ if(!mwHas(k.w)) await mwAdd(k.w,rdTr(k.tr),k.ex,st.title.de); }
+  for(const k of L){ if(!mwHas(k.w)&&!vcStudying(vcDeckWord(k.w))) await mwAdd(k.w,rdTr(k.tr),k.ex,st.title.de); }
   bToast("✅ "+tr("Saved to your flashcards.","In deinen Karteikarten gespeichert.","Guardado en tus tarjetas.")); xr(); }
 /* ---- ✂️ Split or Stick? — German prefix verbs: does the prefix split off or stay stuck? Solo, German only, best score on this device. ----
    ok = is the sentence correct; fix = correct version with [the key part]; w = the rule; m = meaning (en/es)
@@ -11099,7 +11111,7 @@ function hmCheck(){ const L=hmLetters(), won=L.every(c=>HM.got.includes(c)), los
   if(!won&&!lost) return; hmLoad(); HM.end=won?"win":"lose"; HM.anim=won?"win":"fall";
   if(won){ HM.s.win++; HM.s.st++; HM.s.best=Math.max(HM.s.best,HM.s.st); } else { HM.s.lose++; HM.s.st=0; }
   const t=bbDs(new Date()); if(!HM.s.days.includes(t)) HM.s.days=HM.s.days.concat([t]).slice(-60); hmSave(); recCount("hm",3); }
-async function hmMine(){ const w=HM.w; if(await mwAdd(w.w, vcTr(w), w.ex, "hangman")){ HM.mine=w.id; bToast(tr("Added to My words ✅","Zu Meine Wörter hinzugefügt ✅","Añadida a Mis palabras ✅")); xr(); } }
+function hmMine(){ const w=HM.w; vcStudy(w.id); bToast("🃏 "+tr("Added to your flashcard reviews ✅","Zu deinen Karteikarten-Wiederholungen hinzugefügt ✅","Añadida a tus repasos de tarjetas ✅")); xr(); }
 function hmBridge(){ const gone=HM.bad.length, removed=new Set(HM_ORDER.slice(0,gone)), lastGone=gone?HM_ORDER[gone-1]:-1, fall=HM.end==="lose", win=HM.end==="win";
   let planks=""; for(let i=0;i<6;i++){ const x=52+i*36.5; if(removed.has(i)){ if(i===lastGone&&HM.anim==="drop") planks+=`<rect class="hmdrop" x="${x}" y="98" width="34" height="10" rx="2" fill="#B07A45" stroke="#1B2A41" stroke-width="1.5"/>`; continue; }
     planks+=`<rect x="${x}" y="98" width="34" height="10" rx="2" fill="#C68B52" stroke="#1B2A41" stroke-width="1.5"/>`; }
@@ -11140,7 +11152,7 @@ VIEWS.hangman = function(){ hmLoad();
     ${w.ex?`<div class="note" lang="de" style="margin:6px 0 0">„${esc(w.ex)}“</div>`:""}
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
       ${vcClip(w)?`<button class="chip" onclick="vcSay(HM.w)">🔊 ${tr("Listen","Anhören","Escuchar")}</button>`:""}
-      ${HM.mine===w.id||mwHas(w.w)?`<span class="chip on">✅ ${tr("In My words","In Meine Wörter","En Mis palabras")}</span>`:`<button class="chip" onclick="hmMine()">➕ ${tr("My words","Meine Wörter","Mis palabras")}</button>`}
+      ${vcStudying(w)?`<span class="chip on">✅ ${tr("In your flashcards","In deinen Karteikarten","En tus tarjetas")}</span>`:`<button class="chip" onclick="hmMine()">🃏 ${tr("Practise in flashcards","In Karteikarten üben","Practicar en tarjetas")}</button>`}
     </div>
     <button class="btn primary" style="width:100%;margin-top:12px" onclick="hmNew()">${tr("Next word","Nächstes Wort","Siguiente palabra")} →</button></div>`
   :`<div class="hmkeys">${keys}</div>
