@@ -804,6 +804,7 @@
   .sbbad{background:#FCE6DF;color:#B8371C;border-radius:5px;padding:0 3px;font-weight:800;text-decoration:line-through}.sbgood{background:#DDEFEC;color:#1E6B63;border-radius:5px;padding:0 3px;font-weight:800}
   .sbs{font-size:17px;line-height:28px;margin:0 0 6px}.sbtip{font-size:14px;background:#FAF7F2;border-radius:12px;padding:8px 10px;margin-top:10px}
   .sbnew{outline:3px solid #F2B544;outline-offset:4px;border-radius:8px}.sbrow{margin-top:12px}.sbdet{margin-top:8px}.sbdet summary{font-weight:800;cursor:pointer;font-size:14px}
+  .sbtense{background:#1B2A41;color:#F2B544;border-radius:999px;padding:1px 8px;letter-spacing:0;text-transform:none}.sbtl{margin-bottom:10px}.sbline{border-left:4px solid #F2B544;padding-left:10px;margin:0 0 12px}
   .sbdone{padding:6px 0;border-top:1px solid var(--line);font-size:15px}.sbdone:first-of-type{border-top:0}
   .ndframe{width:100%;height:560px;border:1px solid var(--line);border-radius:14px;background:#FAF7F2}
   .ndbody{white-space:pre-wrap;background:#FAF7F2;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:14px;max-height:220px;overflow:auto}
@@ -11270,6 +11271,39 @@ const SB_CH=[
  ["pd","nach + die Arbeit","Morgen:T|gehe:V|ich:S|nach der Arbeit:PD+|zur Apotheke,:PD|weil:K|ich:S|Kopfschmerzen:O|habe.:V","Tomorrow after work I'm going to the pharmacy because I have a headache.","Mañana después del trabajo voy a la farmacia porque me duele la cabeza."],
  ["link","weil → wenn · ich habe noch Kopfschmerzen","Morgen:T|gehe:V|ich:S|nach der Arbeit:PD|zur Apotheke,:PD|wenn:K+|ich:S|noch:Mo+|Kopfschmerzen:O|habe.:V","Tomorrow after work I'll go to the pharmacy if I still have a headache.","Mañana después del trabajo iré a la farmacia si todavía me duele la cabeza.","wenn"]]}
 ];
+/* ⏳ same sentence in every tense */
+const SB_TN=[
+{id:"t-pasta",lv:"A1",s:"Ich:S|koche:V|Pasta.:O",e:"I cook pasta.",es:"Cocino pasta.",st:[
+ ["perf","gestern · kochen → gekocht","Gestern:T+|habe:H+|ich:S|Pasta:O|gekocht.:Pa+","Yesterday I cooked pasta.","Ayer cociné pasta."],
+ ["prat","gestern · kochen → kochte","Gestern:T|kochte:V+|ich:S|Pasta.:O","Yesterday I cooked pasta.","Ayer cociné pasta.","pratw"],
+ ["fut","morgen","Morgen:T+|werde:H+|ich:S|Pasta:O|kochen.:I+","Tomorrow I will cook pasta.","Mañana cocinaré pasta."]]},
+{id:"t-tired",lv:"A1",s:"Ich:S|bin:V|müde.:Pd",e:"I'm tired.",es:"Estoy cansada.",st:[
+ ["prat","gestern · sein → war","Gestern:T+|war:V+|ich:S|müde.:Pd","Yesterday I was tired.","Ayer estaba cansada.","prats"],
+ ["perf","gestern · sein → gewesen","Gestern:T|bin:H+|ich:S|müde:Pd|gewesen.:Pa+","Yesterday I was tired.","Ayer estuve cansada.","sein2"],
+ ["fut","morgen","Morgen:T+|werde:H+|ich:S|müde:Pd|sein.:I+","Tomorrow I will be tired.","Mañana estaré cansada."]]},
+{id:"t-hamburg",lv:"A2",s:"Wir:S|fahren:V|nach Hamburg.:P",e:"We're going to Hamburg.",es:"Vamos a Hamburgo.",st:[
+ ["perf","letzte Woche · fahren → gefahren","Letzte Woche:T+|sind:H+|wir:S|nach Hamburg:P|gefahren.:Pa+","Last week we went to Hamburg.","La semana pasada fuimos a Hamburgo.","sein"],
+ ["prat","letzte Woche · fahren → fuhren","Letzte Woche:T|fuhren:V+|wir:S|nach Hamburg.:P","Last week we went to Hamburg.","La semana pasada fuimos a Hamburgo.","pratw"],
+ ["fut","nächste Woche","Nächste Woche:T+|werden:H+|wir:S|nach Hamburg:P|fahren.:I+","Next week we will go to Hamburg.","La semana que viene iremos a Hamburgo."]]},
+{id:"t-time",lv:"A2",s:"Sie:S|hat:V|keine Zeit.:O",e:"She has no time.",es:"No tiene tiempo.",st:[
+ ["prat","gestern · haben → hatte","Gestern:T+|hatte:V+|sie:S|keine Zeit.:O","Yesterday she had no time.","Ayer no tenía tiempo.","prats"],
+ ["perf","gestern · haben → gehabt","Gestern:T|hat:H+|sie:S|keine Zeit:O|gehabt.:Pa+","Yesterday she had no time.","Ayer no tuvo tiempo."],
+ ["fut","am Wochenende","Am Wochenende:T+|wird:H+|sie:S|keine Zeit:O|haben.:I+","At the weekend she won't have time.","El fin de semana no tendrá tiempo."]]},
+{id:"t-train",lv:"A2",s:"Der Zug:S|kommt:V|um acht Uhr.:T",e:"The train comes at eight.",es:"El tren llega a las ocho.",st:[
+ ["perf","gestern · kommen → gekommen","Gestern:T+|ist:H+|der Zug:S|um acht Uhr:T|gekommen.:Pa+","Yesterday the train came at eight.","Ayer el tren llegó a las ocho.","sein"],
+ ["prat","gestern · kommen → kam","Gestern:T|kam:V+|der Zug:S|um acht Uhr.:T","Yesterday the train came at eight.","Ayer el tren llegó a las ocho.","pratw"],
+ ["fut","morgen","Morgen:T+|wird:H+|der Zug:S|um acht Uhr:T|kommen.:I+","Tomorrow the train will come at eight.","Mañana el tren llegará a las ocho."]]},
+{id:"t-letter",lv:"A2",s:"Du:S|schreibst:V|deiner Mutter:D|einen Brief.:O",e:"You write your mother a letter.",es:"Le escribes una carta a tu madre.",st:[
+ ["perf","gestern · schreiben → geschrieben","Gestern:T+|hast:H+|du:S|deiner Mutter:D|einen Brief:O|geschrieben.:Pa+","Yesterday you wrote your mother a letter.","Ayer le escribiste una carta a tu madre."],
+ ["prat","gestern · schreiben → schriebst","Gestern:T|schriebst:V+|du:S|deiner Mutter:D|einen Brief.:O","Yesterday you wrote your mother a letter.","Ayer le escribiste una carta a tu madre.","pratw"],
+ ["fut","morgen","Morgen:T+|wirst:H+|du:S|deiner Mutter:D|einen Brief:O|schreiben.:I+","Tomorrow you will write your mother a letter.","Mañana le escribirás una carta a tu madre."]]},
+{id:"t-work",lv:"B1",s:"Ich:S|muss:M|arbeiten.:I",e:"I have to work.",es:"Tengo que trabajar.",st:[
+ ["prat","gestern · müssen → musste","Gestern:T+|musste:M+|ich:S|arbeiten.:I","Yesterday I had to work.","Ayer tuve que trabajar.","pratm"],
+ ["fut","am Samstag","Am Samstag:T+|werde:H+|ich:S|arbeiten:I|müssen.:Mi+","On Saturday I will have to work.","El sábado tendré que trabajar.","futm"]]},
+{id:"t-gym",lv:"B1",s:"Ich:S|gehe:V|ins Fitnessstudio,:Wh|weil:K|ich:S|fit:Pd|bleiben:I|will.:M",e:"I go to the gym because I want to stay fit.",es:"Voy al gimnasio porque quiero mantenerme en forma.",st:[
+ ["perf","gestern · gehen → gegangen · wollen → wollte","Gestern:T+|bin:H+|ich:S|ins Fitnessstudio:Wh|gegangen,:Pa+|weil:K|ich:S|fit:Pd|bleiben:I|wollte.:M+","Yesterday I went to the gym because I wanted to stay fit.","Ayer fui al gimnasio porque quería mantenerme en forma.","mix"],
+ ["fut","morgen","Morgen:T+|werde:H+|ich:S|ins Fitnessstudio:Wh|gehen,:I+|weil:K|ich:S|fit:Pd|bleiben:I|will.:M","Tomorrow I will go to the gym because I want to stay fit.","Mañana iré al gimnasio porque quiero mantenerme en forma."]]}
+];
 const SB_KIND={
  time:[c=>tr(`Start the sentence with: ${c}`,`Beginne den Satz mit: ${c}`,`Empieza la frase con: ${c}`),"⏰",()=>tr("Something else first? The verb stays in slot 2 and the subject moves behind it.","Etwas anderes vorne? Das Verb bleibt auf Platz 2, das Subjekt rutscht dahinter.","¿Otra cosa al principio? El verbo se queda en la posición 2 y el sujeto va detrás.")],
  dat:[c=>tr(`Add to / for whom (Dativ): ${c}`,`Ergänze wem? (Dativ): ${c}`,`Añade a / para quién (dativo): ${c}`),"🎁",()=>tr("Dativ answers wem? der → dem, die → der, das → dem, ein → einem.","Dativ antwortet auf wem? der → dem, die → der, das → dem, ein → einem.","El dativo responde a wem? der → dem, die → der, das → dem, ein → einem.")],
@@ -11284,6 +11318,7 @@ const SB_KIND={
  dass:[c=>tr(`Start with: ${c}`,`Beginne mit: ${c}`,`Empieza con: ${c}`),"💬",()=>tr("dass sends the verb to the end. The rest keeps its order.","dass schickt das Verb ans Ende. Der Rest bleibt gleich.","dass manda el verbo al final. El resto no cambia.")],
  perf:[c=>tr(`Put it in the Perfekt (past): ${c}`,`Setz es ins Perfekt: ${c}`,`Ponlo en Perfekt (pasado): ${c}`),"🕰️",()=>tr("haben or sein in slot 2, the participle goes to the very end.","haben oder sein auf Platz 2, das Partizip ganz ans Ende.","haben o sein en la posición 2, el participio al final.")],
  prat:[c=>tr(`Put it in the Präteritum (past): ${c}`,`Setz es ins Präteritum: ${c}`,`Ponlo en Präteritum (pasado): ${c}`),"🕰️",()=>tr("Modal verbs in the past usually use Präteritum: konnte, wollte, musste.","Modalverben in der Vergangenheit meist im Präteritum: konnte, wollte, musste.","Los verbos modales en pasado suelen ir en Präteritum: konnte, wollte, musste.")],
+ fut:[c=>tr(`Put it in the future (Futur I): ${c}`,`Setz es ins Futur I: ${c}`,`Ponlo en futuro (Futur I): ${c}`),"🔮",()=>tr("Future: werden in slot 2, the main verb goes to the end as infinitive.","Futur I: werden auf Platz 2, das Hauptverb als Infinitiv ans Ende.","Futuro: werden en la posición 2, el verbo principal al final en infinitivo.")],
  modal:[c=>tr(`Add the modal verb: ${c}`,`Ergänze das Modalverb: ${c}`,`Añade el verbo modal: ${c}`),"💪",()=>tr("The modal verb takes slot 2, the main verb goes to the end (infinitive).","Das Modalverb nimmt Platz 2, das Hauptverb geht ans Ende (Infinitiv).","El verbo modal va en la posición 2, el verbo principal al final (infinitivo).")],
  neg:[c=>tr(`Make it negative: ${c}`,`Verneine den Satz: ${c}`,`Hazla negativa: ${c}`),"🚫",()=>tr("kein replaces ein (or no article) and changes like ein. nicht goes before the part you negate.","kein ersetzt ein (oder kein Artikel) und ändert sich wie ein. nicht steht vor dem verneinten Teil.","kein sustituye a ein (o sin artículo) y cambia como ein. nicht va antes de la parte que niegas.")],
  swap:[c=>tr(`Change: ${c}`,`Ändere: ${c}`,`Cambia: ${c}`),"🔄",()=>tr("New word, new gender? Check that the article still fits the case.","Neues Wort, neues Genus? Prüf, ob der Artikel zum Fall passt.","¿Palabra nueva, género nuevo? Comprueba que el artículo encaja con el caso.")],
@@ -11310,10 +11345,16 @@ const SB_TIP={
  helfen:()=>tr("helfen always takes Dativ: seiner Nachbarin (die → der, -er).","helfen: immer Dativ: seiner Nachbarin (die → der, -er).","helfen siempre lleva dativo: seiner Nachbarin (die → der, -er)."),
  dassperf:()=>tr("In a side clause the helper verb goes last: geholfen hat.","Im Nebensatz steht das Hilfsverb ganz hinten: geholfen hat.","En la subordinada el auxiliar va el último: geholfen hat."),
  freuen:()=>tr("sich freuen auf + Akk = looking forward (future). sich freuen über + Akk = happy about (now).","sich freuen auf + Akk = Zukunft. sich freuen über + Akk = jetzt / vorbei.","sich freuen auf + Akk = tener ganas (futuro). sich freuen über + Akk = alegrarse de (ahora)."),
+ pratw:()=>tr("Präteritum is mostly used in writing. When speaking, Germans usually say the Perfekt instead.","Präteritum steht vor allem in Texten. Beim Sprechen nimmt man meist das Perfekt.","El Präteritum se usa sobre todo por escrito. Al hablar, se suele usar el Perfekt."),
+ prats:()=>tr("sein and haben use Präteritum even when speaking: war, hatte.","sein und haben: auch beim Sprechen Präteritum: war, hatte.","sein y haben usan Präteritum también al hablar: war, hatte."),
+ sein2:()=>tr("Perfekt of sein uses sein: ich bin … gewesen. It's correct, but war is more common.","Perfekt von sein mit sein: ich bin … gewesen. Richtig, aber war ist üblicher.","El Perfekt de sein va con sein: ich bin … gewesen. Es correcto, pero war es más común."),
+ pratm:()=>tr("Modal verbs in the past: Präteritum without umlaut: müssen → musste, können → konnte.","Modalverben in der Vergangenheit: Präteritum ohne Umlaut: müssen → musste, können → konnte.","Modales en pasado: Präteritum sin diéresis: müssen → musste, können → konnte."),
+ futm:()=>tr("Future with a modal: werden in slot 2, then both infinitives at the very end: arbeiten müssen.","Futur mit Modalverb: werden auf Platz 2, beide Infinitive ganz am Ende: arbeiten müssen.","Futuro con modal: werden en la posición 2 y los dos infinitivos al final: arbeiten müssen."),
+ mix:()=>tr("Main clause in Perfekt (bin gegangen), modal in the weil part in Präteritum (wollte).","Hauptsatz im Perfekt (bin gegangen), Modalverb im weil-Satz im Präteritum (wollte).","Oración principal en Perfekt (bin gegangen), el modal en la parte con weil en Präteritum (wollte)."),
  timesub:()=>tr("In a side clause, time goes after the subject. The verbs stay at the end.","Im Nebensatz steht die Zeit nach dem Subjekt. Die Verben bleiben am Ende.","En la subordinada, el tiempo va después del sujeto. Los verbos se quedan al final.")
 };
 const SB_TRAP={dem:"den",den:"dem",einem:"einen",einen:"einem",seinem:"seinen",seinen:"seinem",meinem:"meinen",meinen:"meinem",meiner:"meine",meine:"meiner",seiner:"seine",unseren:"unsere",der:"die",die:"der",das:"dem",beim:"bei",zum:"zur",zur:"zum",im:"in",ins:"im",eine:"einen",keinen:"kein",keine:"keinen",kein:"keinen",einer:"eine",ihre:"ihrer",hat:"hatte",habe:"hat",will:"wollen",möchte:"möchten"};
-const SB={ lv:null, ch:null, i:0, mode:null, inp:"", pick:[], pool:[], res:null, first:[], s:{ lv:null, done:[] } };
+const SB={ set:"build", lv:null, ch:null, i:0, mode:null, inp:"", pick:[], pool:[], res:null, first:[], s:{ lv:null, done:[] } };
 function sbLoad(){ try{ const j=JSON.parse(localStorage.getItem("pt_sb")||"{}"); SB.s=Object.assign({ lv:null, done:[] },j); }catch(e){} }
 function sbSave(){ try{ localStorage.setItem("pt_sb",JSON.stringify(SB.s)); }catch(e){} }
 function sbParts(s){ return s.split("|").map(x=>{ const k=x.lastIndexOf(":"); const r=x.slice(k+1); return { t:x.slice(0,k), r:r.replace("+",""), n:r.includes("+") }; }); }
@@ -11325,7 +11366,7 @@ function sbPerms(a){ if(a.length<2) return [a]; const o=[]; a.forEach((x,i)=>sbP
 /* fixed: slot 1, verb 2, subject behind it, end verbs and the joiner + subject of a side clause; everything in the middle may swap places */
 function sbSegs(seg,sub){ if(!seg.length) return { h:[], m:[], t:[] };
   let i; if(sub){ i=1; if(seg[1]&&seg[1].r==="S") i=2; } else { i=Math.min(2,seg.length); if(seg[0].r!=="S"&&seg[i]&&seg[i].r==="S") i++; while(seg[i]&&seg[i].r==="Rf") i++; }
-  const END=sub?["V","H","M","I","Pa","Z"]:["Pa","I"]; let j=seg.length; while(j>i&&END.includes(seg[j-1].r)) j--;
+  const END=sub?["V","H","M","I","Pa","Z","Mi"]:["Pa","I","Mi"]; let j=seg.length; while(j>i&&END.includes(seg[j-1].r)) j--;
   return { h:seg.slice(0,i), m:seg.slice(i,j), t:seg.slice(j) }; }
 function sbOk(user,p){ const u=sbToks(user).join(" "); const k=sbSubAt(p), A=sbSegs(p.slice(0,k),false), B=sbSegs(p.slice(k),true);
   const tx=a=>a.map(x=>sbNorm(x.t)).filter(Boolean).join(" ");
@@ -11336,14 +11377,15 @@ function sbLcs(a,b){ const n=a.length,m=b.length,d=Array.from({length:n+1},()=>n
   const ka=new Set(),kb=new Set(); let i=0,j=0; while(i<n&&j<m){ if(a[i]===b[j]){ ka.add(i); kb.add(j); i++; j++; } else if(d[i+1][j]>=d[i][j+1]) i++; else j++; } return [ka,kb]; }
 function sbDiff(user,ans){ const U=String(user).trim().split(/\s+/), Aw=ans.split(" "), [ku,ka]=sbLcs(U.map(sbNorm),Aw.map(sbNorm));
   return { u:U.map((w,i)=>ku.has(i)?esc(w):`<span class="sbbad">${esc(w)}</span>`).join(" "), a:Aw.map((w,i)=>ka.has(i)?esc(w):`<span class="sbgood">${esc(w)}</span>`).join(" ") }; }
-function sbStruct(p,hl){ const k=sbSubAt(p); return `<div class="bbwrow sbrow" dir="ltr">${p.map((x,i)=>{ const h=bbPart({ t:x.t.replace(/[.,]$/,""), r:x.r },i>=k); return hl&&x.n?h.replace('class="bbwp"','class="bbwp sbnew"'):h; }).join("")}</div>`; }
+function sbStruct(p,hl){ const k=sbSubAt(p); return `<div class="bbwrow sbrow" dir="ltr">${p.map((x,i)=>{ const h=bbPart({ t:x.t.replace(/[.,]$/,""), r:x.r, a:x.r==="H"&&/^(werd|wird|wirst)/i.test(x.t)?"werden":undefined },i>=k); return hl&&x.n?h.replace('class="bbwp"','class="bbwp sbnew"'):h; }).join("")}</div>`; }
 function sbMean(o){ return UI==="es"?o.es:o.e; }
 function sbCur(){ const c=SB.ch; return SB.i===0?{ p:sbParts(c.s), e:c.e, es:c.es }:(x=>({ p:sbParts(x[2]), e:x[3], es:x[4] }))(c.st[SB.i-1]); }
 function sbStep(){ const x=SB.ch.st[SB.i]; return { k:x[0], c:x[1], p:sbParts(x[2]), e:x[3], es:x[4], tip:x[5] }; }
 function sbTip(s){ return (SB_TIP[s.tip]||SB_KIND[s.k][2])(); }
 function sbPickLv(){ const m={ A0:"A1", A1:"A1", A2:"A2" }; return SB.s.lv||m[VC&&VC.level]||(VC&&VC.level?"B1":"A1"); }
-function sbOpen(lv){ sbLoad(); SB.lv=lv||sbPickLv(); SB.s.lv=SB.lv; sbSave();
-  const all=SB_CH.filter(c=>c.lv===SB.lv); let left=all.filter(c=>!SB.s.done.includes(c.id)&&(!SB.ch||c.id!==SB.ch.id));
+const SB_TNAME={ perf:"Perfekt", prat:"Präteritum", fut:"Futur I" };
+function sbOpen(lv,set){ sbLoad(); if(set) SB.set=set; SB.lv=lv||sbPickLv(); SB.s.lv=SB.lv; sbSave();
+  const all=(SB.set==="tense"?SB_TN:SB_CH).filter(c=>c.lv===SB.lv); let left=all.filter(c=>!SB.s.done.includes(c.id)&&(!SB.ch||c.id!==SB.ch.id));
   if(!left.length){ SB.s.done=SB.s.done.filter(id=>!all.some(c=>c.id===id)); sbSave(); left=all.filter(c=>!SB.ch||c.id!==SB.ch.id); if(!left.length) left=all; }
   SB.ch=left[Math.floor(Math.random()*left.length)]; SB.i=0; SB.first=[]; SB.mode=SB.lv==="B1"?"type":"tiles"; sbReset(); go("sbuild"); }
 function sbReset(){ SB.res=null; SB.inp=""; SB.pick=[]; const s=sbStep(), toks=sbText(s.p).split(" ");
@@ -11361,8 +11403,16 @@ function sbNext(){ if(SB.i<SB.ch.st.length-1){ SB.i++; sbReset(); } else { SB.i=
 function sbMode(m){ SB.mode=m; SB.res=null; SB.pick=[]; xr(); }
 VIEWS.sbuild = function(){ if(!SB.ch) return ""; const c=SB.ch, n=c.st.length, lvc=l=>`<button class="chip ${SB.lv===l?"on":""}" onclick="sbOpen('${l}')">${l}</button>`;
   const head=`<div class="topline"><button class="chip" onclick="go('games')">${uiBack()} ${tr("Games","Spiele","Juegos")}</button><span>🧱 ${tr("Sentence Builder","Satzbauer","Constructor de frases")}</span></div>
+   <div class="row" style="gap:6px;margin:0 0 8px;flex-wrap:wrap"><button class="chip ${SB.set==="build"?"on":""}" onclick="sbOpen(SB.lv,'build')">🧱 ${tr("Build","Bauen","Construir")}</button><button class="chip ${SB.set==="tense"?"on":""}" onclick="sbOpen(SB.lv,'tense')">⏳ ${tr("Past · Present · Future","Vergangenheit · Gegenwart · Zukunft","Pasado · Presente · Futuro")}</button></div>
    <div class="row" style="gap:6px;margin:0 0 10px">${lvc("A1")}${lvc("A2")}${lvc("B1")}</div>
    <div class="sbsteps">${c.st.map((_,i)=>`<span class="${i<SB.i?"d":i===SB.i?"c":""}"></span>`).join("")}</div>`;
+  if(SB.i>=n&&SB.set==="tense"){ const good=SB.first.filter(Boolean).length, rows=[{ k:"pres", p:sbParts(c.s), e:c.e, es:c.es },...c.st.map(x=>({ k:x[0], p:sbParts(x[2]), e:x[3], es:x[4] }))];
+    const ico={ pres:"🟢", perf:"🟠", prat:"🟤", fut:"🔮" }, nm={ pres:"Präsens", perf:"Perfekt", prat:"Präteritum", fut:"Futur I" }, when={ pres:tr("now","jetzt","ahora"), perf:tr("past (spoken)","Vergangenheit (gesprochen)","pasado (hablado)"), prat:tr("past (written)","Vergangenheit (geschrieben)","pasado (escrito)"), fut:tr("future","Zukunft","futuro") };
+    const ord={ prat:0, perf:1, pres:2, fut:3 }; rows.sort((a,b)=>ord[a.k]-ord[b.k]);
+    return head+`<div class="card center"><div style="font-size:42px">⏳</div><h3 style="margin:4px 0">${tr("One sentence, every time","Ein Satz, jede Zeit","Una frase, todos los tiempos")}</h3><p class="note" style="margin:0">${tr(`${good} of ${n} right first time`,`${good} von ${n} gleich richtig`,`${good} de ${n} bien a la primera`)}</p></div>
+     <div class="sbline">${rows.map(r=>`<div class="card sbtl"><div class="sblab">${ico[r.k]} ${nm[r.k]} · ${when[r.k]}</div><p lang="de" style="margin:0;font-size:17px;font-weight:800">${esc(sbText(r.p))}</p><p class="note" style="margin:2px 0 0">${esc(sbMean(r))}</p>${sbStruct(r.p.map(x=>({ ...x, n:["V","H","M","Pa","I","Mi"].includes(x.r) })),true)}</div>`).join("")}</div>
+     <div class="card sbtip" style="margin-top:0">💡 ${tr("Watch the verbs: one verb in slot 2 (Präsens, Präteritum), or a helper in slot 2 + a second verb at the end (Perfekt, Futur).","Achte auf die Verben: ein Verb auf Platz 2 (Präsens, Präteritum) oder ein Hilfsverb auf Platz 2 + ein zweites Verb am Ende (Perfekt, Futur).","Fíjate en los verbos: un verbo en la posición 2 (Präsens, Präteritum), o un auxiliar en la posición 2 + otro verbo al final (Perfekt, Futur).")}</div>
+     <div class="row" style="gap:8px"><button class="btn secondary" onclick="go('games')">${tr("Done","Fertig","Listo")}</button><button class="btn primary" onclick="sbOpen(SB.lv)">⏳ ${tr("New sentence","Neuer Satz","Nueva frase")}</button></div>`; }
   if(SB.i>=n){ const st=sbParts(c.s), en=sbParts(c.st[n-1][2]), good=SB.first.filter(Boolean).length;
     return head+`<div class="card center"><div style="font-size:46px">🏆</div><h3 style="margin:4px 0">${tr("Sentence built!","Satz gebaut!","¡Frase construida!")}</h3><p class="note" style="margin:0">${tr(`${good} of ${n} steps right first time`,`${good} von ${n} Schritten gleich richtig`,`${good} de ${n} pasos bien a la primera`)}</p></div>
      <div class="card"><div class="sblab">${tr("Where you started","Dein Anfang","Donde empezaste")}</div><p lang="de" style="margin:0 0 12px;font-size:17px">${esc(sbText(st))}</p>
@@ -11370,7 +11420,7 @@ VIEWS.sbuild = function(){ if(!SB.ch) return ""; const c=SB.ch, n=c.st.length, l
      <div class="card"><div class="sblab">${tr("You practised","Du hast geübt","Has practicado")}</div>${c.st.map((x,i)=>`<div class="sbdone">${SB_KIND[x[0]][1]} <span lang="de">${esc(x[1])}</span> <b>${SB.first[i]?"✓":"✗ → ✓"}</b></div>`).join("")}</div>
      <div class="row" style="gap:8px"><button class="btn secondary" onclick="go('games')">${tr("Done","Fertig","Listo")}</button><button class="btn primary" onclick="sbOpen(SB.lv)">🧱 ${tr("New sentence","Neuer Satz","Nueva frase")}</button></div>`; }
   const cur=sbCur(), s=sbStep(), K=SB_KIND[s.k], R=SB.res, ans=sbText(s.p), noHelp=SB.lv==="B1"&&SB.mode==="type";
-  let body=`<div class="card"><div class="sblab">${tr("Your sentence","Dein Satz","Tu frase")} · ${SB.lv}</div><div class="sbnow" lang="de">${esc(sbText(cur.p))}</div><p class="note" style="margin:2px 0 0">${esc(sbMean(cur))}</p>
+  let body=`<div class="card"><div class="sblab">${tr("Your sentence","Dein Satz","Tu frase")} · ${SB.lv}${SB.set==="tense"?` · <span class="sbtense">${SB.i===0?"Präsens":SB_TNAME[c.st[SB.i-1][0]]||""}</span>`:""}</div><div class="sbnow" lang="de">${esc(sbText(cur.p))}</div><p class="note" style="margin:2px 0 0">${esc(sbMean(cur))}</p>
     ${R?"":`<details class="sbdet" ${noHelp?"":"open"}><summary>🧩 ${tr("Structure","Satzbau","Estructura")}</summary>${sbStruct(cur.p,false)}</details>`}</div>
     <div class="sbtask"><div class="sblab">${tr(`Step ${SB.i+1} of ${n}`,`Schritt ${SB.i+1} von ${n}`,`Paso ${SB.i+1} de ${n}`)} · ${K[1]}</div><div lang="de" style="font-size:17px;font-weight:700">${esc(K[0](s.c))}</div></div>`;
   if(!R){ body+=`<div class="row" style="gap:6px;margin:0 0 8px"><button class="chip ${SB.mode==="tiles"?"on":""}" onclick="sbMode('tiles')">🧩 ${tr("Tiles","Kacheln","Fichas")}</button><button class="chip ${SB.mode==="type"?"on":""}" onclick="sbMode('type')">⌨️ ${tr("Type","Tippen","Escribir")}</button></div>`;
@@ -11465,7 +11515,7 @@ VIEWS.games = function(){
     <button class="btn primary" onclick="ssOpen()">${playLbl()}</button></div>
   <div class="card"><h3>✍️ ${kjName()} <span class="note" style="font-weight:600">· 🇩🇪 ${tr("solo, German only","allein, nur Deutsch","solo, solo alemán")}</span></h3><p class="note">${tr("Conjugate verbs, then build the question for an answer. 5 levels: regular, irregular, modal and separable verbs, Perfekt.","Verben konjugieren, dann die Frage zu einer Antwort bauen. 5 Level: regelmäßig, unregelmäßig, Modalverben, trennbare Verben, Perfekt.","Conjuga verbos y luego construye la pregunta para una respuesta. 5 niveles: regulares, irregulares, modales, separables y Perfekt.")}</p>
     <button class="btn primary" onclick="kjOpen()">${playLbl()}</button></div>
-  <div class="card"><h3>🧱 ${tr("Sentence Builder","Satzbauer","Constructor de frases")} <span class="note" style="font-weight:600">· 🇩🇪 A1–B1</span></h3><p class="note">${tr("One sentence that grows step by step: Dativ, Akkusativ, bei, auf, weil, Perfekt… with the sentence structure after every step.","Ein Satz, der Schritt für Schritt wächst: Dativ, Akkusativ, bei, auf, weil, Perfekt … mit Satzbau nach jedem Schritt.","Una frase que crece paso a paso: dativo, acusativo, bei, auf, weil, Perfekt… con la estructura después de cada paso.")}</p>
+  <div class="card"><h3>🧱 ${tr("Sentence Builder","Satzbauer","Constructor de frases")} <span class="note" style="font-weight:600">· 🇩🇪 A1–B1</span></h3><p class="note">${tr("One sentence that grows step by step: Dativ, Akkusativ, bei, auf, weil… or the same sentence in past, present and future. With the sentence structure after every step.","Ein Satz, der Schritt für Schritt wächst: Dativ, Akkusativ, bei, auf, weil … oder derselbe Satz in Vergangenheit, Gegenwart und Zukunft. Mit Satzbau nach jedem Schritt.","Una frase que crece paso a paso: dativo, acusativo, bei, auf, weil… o la misma frase en pasado, presente y futuro. Con la estructura después de cada paso.")}</p>
     <button class="btn primary" onclick="sbOpen()">${playLbl()}</button></div>
   <div class="card"><h3>🌉 ${tr("Save the Pal","Rette den Pal","Salva al Pal")} <span class="note" style="font-weight:600">· 🇩🇪 A1–C1</span></h3><p class="note">${tr("Guess the German word letter by letter. Wrong letters drop planks from the bridge!","Errate das deutsche Wort Buchstabe für Buchstabe. Falsche Buchstaben lassen Bretter fallen!","Adivina la palabra alemana letra por letra. ¡Las letras incorrectas quitan tablas del puente!")}</p>
     <button class="btn primary" onclick="hmOpen()">${playLbl()}</button></div>
