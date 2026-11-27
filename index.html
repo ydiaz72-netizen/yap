@@ -9264,8 +9264,20 @@ const BB_THEMES={
   ["lerne","V",{p:1,v:"lernen"}],["lernt","V",{p:3,v:"lernen"}],["lernen","V",{p:4,v:"lernen"}],
   ["arbeite","V",{p:1,v:"arbeiten"}],["arbeitet","V",{p:3,v:"arbeiten"}],["arbeiten","V",{p:4,v:"arbeiten"}],
   ["Zeit","O",{k:"time"}],["keine Zeit","O",{k:"time"}],["ein Buch","O",{k:"read"}],["Deutsch","O",{k:"lang"}],
-  ["heute","T"],["am Abend","T"],["nach Hause","P"],["in den Park","P"],["in Erfurt","P"],["weil","K"],["wenn","K"]],
-  fit:{haben:["time"],lesen:["read"],lernen:["lang"],gehen:[],leben:[],arbeiten:[]} },
+  ["heute","T"],["am Abend","T"],["nach Hause","P"],["in den Park","P"],["in Erfurt","P"],["weil","K"],["wenn","K"],
+  ["du","S",{p:2}],["er","S",{p:3}],["es","S",{p:3}],
+  ["hast","V",{p:2,v:"haben"}],["lebst","V",{p:2,v:"leben"}],["regnet","V",{p:3,v:"regnen"}],
+  ["bleibe","V",{p:1,v:"bleiben"}],["bleibst","V",{p:2,v:"bleiben"}],["bleibt","V",{p:3,v:"bleiben"}],["bleiben","V",{p:4,v:"bleiben"}],
+  ["bin","V",{p:1,v:"sein"}],["bist","V",{p:2,v:"sein"}],["ist","V",{p:3,v:"sein"}],["sind","V",{p:4,v:"sein"}],
+  ["trinke","V",{p:1,v:"trinken"}],["trinkst","V",{p:2,v:"trinken"}],["trinkt","V",{p:3,v:"trinken"}],["trinken","V",{p:4,v:"trinken"}],
+  ["koche","V",{p:1,v:"kochen"}],["kochst","V",{p:2,v:"kochen"}],["kocht","V",{p:3,v:"kochen"}],["kochen","V",{p:4,v:"kochen"}],
+  ["schlafe","V",{p:1,v:"schlafen"}],["schläfst","V",{p:2,v:"schlafen"}],["schläft","V",{p:3,v:"schlafen"}],["schlafen","V",{p:4,v:"schlafen"}],
+  ["komme","V",{p:1,v:"kommen"}],["kommst","V",{p:2,v:"kommen"}],["kommt","V",{p:3,v:"kommen"}],["kommen","V",{p:4,v:"kommen"}],
+  ["spiele","V",{p:1,v:"spielen"}],["spielst","V",{p:2,v:"spielen"}],["spielt","V",{p:3,v:"spielen"}],["spielen","V",{p:4,v:"spielen"}],
+  ["spreche","V",{p:1,v:"sprechen"}],["sprichst","V",{p:2,v:"sprechen"}],["spricht","V",{p:3,v:"sprechen"}],["sprechen","V",{p:4,v:"sprechen"}],
+  ["Hunger","O",{k:"hunger"}],["müde","O",{k:"adj"}],["einen Kaffee","O",{k:"drink"}],["Tee","O",{k:"drink"}],["Pasta","O",{k:"food"}],["Fußball","O",{k:"sport"}],
+  ["zu Hause","P"],["morgen","T"]],
+  fit:{haben:["time","hunger"],lesen:["read"],lernen:["lang"],gehen:[],leben:[],arbeiten:[],regnen:[],bleiben:[],sein:["adj"],trinken:["drink"],kochen:["food"],schlafen:[],kommen:[],spielen:["sport"],sprechen:["lang"]} },
  rel:{ e:"🔗", en:"der, die, das: relative clauses", de:"der, die, das: Relativsätze", es:"der, die, das: relativo", lv:9, cf:"B1", reuse:true, tiles:[
   ["ich","S",{p:1}],["du","S",{p:2}],["wir","S",{p:4}],["Lena","S",{p:3}],
   ["kenne","V",{p:1,v:"kennen"}],["kennst","V",{p:2,v:"kennen"}],["kennt","V",{p:3,v:"kennen"}],["kennen","V",{p:4,v:"kennen"}],
@@ -9353,7 +9365,22 @@ const BB_CH=[
 ,
  { lv:6, th:"wem", items:[["I'm offering the guest a room.","Le ofrezco una habitación al huésped.",["ich biete dem Gast ein Zimmer"]],["You show your friend the photo.","Le enseñas la foto a tu amiga.",["du zeigst der Freundin das Foto"]],["Lena gives the children a book.","Lena les da un libro a los niños.",["Lena gibt den Kindern ein Buch"]],["Today I'm showing him the photo.","Hoy le enseño la foto.",["heute zeige ich ihm das Foto","ich zeige ihm heute das Foto"]],["We give it to the guest.","Se lo damos al huésped.",["wir geben es dem Gast"]]]},
  { lv:7, th:"trenn", items:[["I'll call you tomorrow.","Te llamo mañana.",["ich rufe dich morgen an","morgen rufe ich dich an"]],["We get up early.","Nos levantamos temprano.",["wir stehen früh auf","früh stehen wir auf"]],["On Saturday Lena does the shopping at the supermarket.","El sábado Lena hace la compra en el supermercado.",["am Samstag kauft Lena im Supermarkt ein","Lena kauft am Samstag im Supermarkt ein"]],["Today you call your mother.","Hoy llamas a tu madre.",["heute rufst du deine Mutter an","du rufst heute deine Mutter an"]],["Tomorrow we do the shopping.","Mañana hacemos la compra.",["morgen kaufen wir ein","wir kaufen morgen ein"]]]},
- { lv:8, th:"wenn", items:[["If I have time, I read a book.","Si tengo tiempo, leo un libro.",["wenn ich Zeit habe lese ich ein Buch","ich lese ein Buch wenn ich Zeit habe"]],["Because I live in Erfurt, I learn German.","Como vivo en Erfurt, aprendo alemán.",["weil ich in Erfurt lebe lerne ich Deutsch","ich lerne Deutsch weil ich in Erfurt lebe"]],["If we have time, we go to the park.","Si tenemos tiempo, vamos al parque.",["wenn wir Zeit haben gehen wir in den Park","wir gehen in den Park wenn wir Zeit haben"]],["Because Lena works, she has no time.","Como Lena trabaja, no tiene tiempo.",["weil Lena arbeitet hat sie keine Zeit"]],["If Lena has time, she goes home.","Si Lena tiene tiempo, se va a casa.",["wenn Lena Zeit hat geht sie nach Hause"]]]},
+ { lv:8, th:"wenn", items:[["If I have time, I read a book.","Si tengo tiempo, leo un libro.",["wenn ich Zeit habe lese ich ein Buch","ich lese ein Buch wenn ich Zeit habe"]],["Because I live in Erfurt, I learn German.","Como vivo en Erfurt, aprendo alemán.",["weil ich in Erfurt lebe lerne ich Deutsch","ich lerne Deutsch weil ich in Erfurt lebe"]],["If we have time, we go to the park.","Si tenemos tiempo, vamos al parque.",["wenn wir Zeit haben gehen wir in den Park","wir gehen in den Park wenn wir Zeit haben"]],["Because Lena works, she has no time.","Como Lena trabaja, no tiene tiempo.",["weil Lena arbeitet hat sie keine Zeit"]],["If Lena has time, she goes home.","Si Lena tiene tiempo, se va a casa.",["wenn Lena Zeit hat geht sie nach Hause"]],
+   ["If it rains, I stay at home.","Si llueve, me quedo en casa.",["wenn es regnet bleibe ich zu Hause","ich bleibe zu Hause wenn es regnet"]],
+   ["Because I'm tired, I sleep.","Como estoy cansada, duermo.",["weil ich müde bin schlafe ich","ich schlafe weil ich müde bin"]],
+   ["When you're hungry, you cook pasta.","Cuando tienes hambre, cocinas pasta.",["wenn du Hunger hast kochst du Pasta","du kochst Pasta wenn du Hunger hast"]],
+   ["Because Lena is tired, she drinks a coffee.","Como Lena está cansada, se toma un café.",["weil Lena müde ist trinkt sie einen Kaffee","Lena trinkt einen Kaffee weil sie müde ist"]],
+   ["If we have time, we play football.","Si tenemos tiempo, jugamos al fútbol.",["wenn wir Zeit haben spielen wir Fußball","wir spielen Fußball wenn wir Zeit haben"]],
+   ["Because you live in Erfurt, you speak German.","Como vives en Erfurt, hablas alemán.",["weil du in Erfurt lebst sprichst du Deutsch","du sprichst Deutsch weil du in Erfurt lebst"]],
+   ["If it rains, we read a book.","Si llueve, leemos un libro.",["wenn es regnet lesen wir ein Buch","wir lesen ein Buch wenn es regnet"]],
+   ["Because he's hungry, he goes home.","Como tiene hambre, se va a casa.",["weil er Hunger hat geht er nach Hause","er geht nach Hause weil er Hunger hat"]],
+   ["If you're tired, you stay at home.","Si estás cansado, te quedas en casa.",["wenn du müde bist bleibst du zu Hause","du bleibst zu Hause wenn du müde bist"]],
+   ["Because we work, we have no time.","Como trabajamos, no tenemos tiempo.",["weil wir arbeiten haben wir keine Zeit","wir haben keine Zeit weil wir arbeiten"]],
+   ["If Lena comes tomorrow, we cook pasta.","Si Lena viene mañana, cocinamos pasta.",["wenn Lena morgen kommt kochen wir Pasta","wir kochen Pasta wenn Lena morgen kommt"]],
+   ["Because it's raining, Lena drinks tea.","Como llueve, Lena toma té.",["weil es regnet trinkt Lena Tee","Lena trinkt Tee weil es regnet"]],
+   ["If I'm hungry in the evening, I cook pasta.","Si tengo hambre por la noche, cocino pasta.",["wenn ich am Abend Hunger habe koche ich Pasta","ich koche Pasta wenn ich am Abend Hunger habe"]],
+   ["Because you're sleeping, I read a book.","Como duermes, leo un libro.",["weil du schläfst lese ich ein Buch","ich lese ein Buch weil du schläfst"]],
+   ["If he comes home today, we play football.","Si hoy viene a casa, jugamos al fútbol.",["wenn er heute nach Hause kommt spielen wir Fußball","wir spielen Fußball wenn er heute nach Hause kommt"]]]},
  { lv:9, th:"rel", items:[["I know the man who lives here.","Conozco al hombre que vive aquí.",["ich kenne den Mann der hier wohnt"]],["We're looking for the flat that has a balcony.","Buscamos el piso que tiene balcón.",["wir suchen die Wohnung die einen Balkon hat"]],["Lena knows the woman who lives in Erfurt.","Lena conoce a la mujer que vive en Erfurt.",["Lena kennt die Frau die in Erfurt wohnt"]],["I like the book that you know.","Me gusta el libro que conoces.",["ich mag das Buch das du kennst"]],["You know the man I like.","Conoces al hombre que me gusta.",["du kennst den Mann den ich mag"]]]},
  { lv:10, th:"umzu", items:[["I learn German in order to work here.","Aprendo alemán para trabajar aquí.",["ich lerne Deutsch um hier zu arbeiten"]],["We save money to buy a car.","Ahorramos dinero para comprar un coche.",["wir sparen Geld um ein Auto zu kaufen"]],["Lena goes to the baker's to buy bread.","Lena va a la panadería a comprar pan.",["Lena geht zum Bäcker um Brot zu kaufen"]],["You learn every day in order to study in Germany.","Aprendes cada día para estudiar en Alemania.",["du lernst jeden Tag um in Deutschland zu studieren"]],["I save money to study in Germany.","Ahorro dinero para estudiar en Alemania.",["ich spare Geld um in Deutschland zu studieren"]]]},
  { lv:11, th:"kon", items:[["If I had time, I would travel.","Si tuviera tiempo, viajaría.",["wenn ich Zeit hätte würde ich reisen"]],["If we had money, we would buy a house.","Si tuviéramos dinero, compraríamos una casa.",["wenn wir Geld hätten würden wir ein Haus kaufen"]],["If I were in Berlin, I would learn German every day.","Si estuviera en Berlín, aprendería alemán cada día.",["wenn ich in Berlin wäre würde ich jeden Tag Deutsch lernen"]],["If you had time, you would travel to Spain.","Si tuvieras tiempo, viajarías a España.",["wenn du Zeit hättest würdest du nach Spanien reisen"]],["I would buy a house if I had money.","Compraría una casa si tuviera dinero.",["ich würde ein Haus kaufen wenn ich Geld hätte"]]]},
@@ -10059,7 +10086,8 @@ function bbChN(){ return BB.ch.ord?BB.ch.ord.length:BB_CH[BB.ch.k].items.length;
 /* ⏭️ test out: 3 sentences from the challenge before; 2 right on the first try unlocks everything up to challenge k */
 function bbSkipStart(k){ bbLoad(); const src=k-1, n=BB_CH[src].items.length, ord=[...Array(n).keys()].sort(()=>Math.random()-.5).slice(0,3);
   BB.mode="ch"; BB.th=BB_CH[src].th; BB.ch={ k:src, i:0, ok:0, tries:0, ord, skip:k }; BB.row=[]; BB.res=null; BB.typed=""; BB.tws=null; go("bridge"); }
-function bbChStart(k){ bbLoad(); const c=BB_CH[k]; BB.mode="ch"; BB.th=c.th; BB.ch={ k, i:0, ok:0, tries:0 }; BB.row=[]; BB.res=null; go("bridge"); }
+function bbChStart(k){ bbLoad(); const c=BB_CH[k]; BB.mode="ch"; BB.th=c.th; BB.ch={ k, i:0, ok:0, tries:0 };
+  if(c.items.length>6){ const idx=c.items.map((_,i)=>i); for(let i=idx.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [idx[i],idx[j]]=[idx[j],idx[i]]; } BB.ch.ord=idx.slice(0,5); } BB.row=[]; BB.res=null; go("bridge"); }
 function bbChTiles(){ const c=BB_CH[BB.ch.k], T=BB_THEMES[c.th].tiles.map((t,i)=>({ id:i, t:t[0], r:t[1], ...(t[2]||{}) }));
   const need=bbChIt()[2][0].split(" "), used=new Set(), pick=[];
   /* tiles of the first answer, matched greedily (multi-word tiles first), plus a few distractors */
