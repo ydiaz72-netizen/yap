@@ -826,6 +826,7 @@
   .shgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px 6px}.shb{background:none;border:0;color:#fff;font:inherit;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;padding:0}
   .shb i{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:22px;font-weight:800;color:#fff;box-shadow:0 4px 12px #0003;transition:transform .15s}.shb:hover i,.shb:active i{transform:scale(1.08)}
   .shb span{font-size:12px;font-weight:700;color:rgba(255,255,255,.85)}.shnote{font-size:12px;color:rgba(255,255,255,.6);margin:14px 0 0}
+  .brwhy{font-size:12px;color:rgba(255,255,255,.65);margin:10px 0 0;line-height:17px}
   .brok{display:flex;gap:12px;align-items:flex-start;border-left:5px solid #2A8C82}
   .brsec{font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.6px;text-transform:uppercase;margin:16px 4px 8px}
   .brrow{display:flex;justify-content:space-between;gap:8px}.brbar{height:8px;background:#F0EBE3;border-radius:99px;overflow:hidden;margin-top:6px}.brbar i{display:block;height:100%;border-radius:99px}
@@ -11245,11 +11246,16 @@ function brSkill(s){ const L=a=>tr(a[0],a[1],a[2]);
   if(s==="spelling") return { k:"spell", l:tr("Spelling","Rechtschreibung","Ortografía"), go:"hmOpen()" };
   return null; }
 function brGroups(w){ const m={}; for(const x of (BR.d&&BR.d.skills)||[]){ if(x.w!==w) continue; const g=brSkill(x.s); if(!g) continue; const o=m[g.k]||(m[g.k]={ ...g, n:0, ok:0, raw:[] }); o.n+=x.n; o.ok+=x.ok; o.raw.push(x.s); } return Object.values(m); }
-function brPlank(){ const lv=VC.level||"A1", i=Math.max(0,VC_LEVELS.indexOf(lv)); let share=0; try{ const st=vcStats(vcLv(lv)); share=st.total?Math.min(1,(st.mastered+st.learned*.25)/st.total):0; }catch(e){}
-  const pos=Math.min(10,i*2+share*2); return { pos, plank:Math.floor(pos)+1, lv, plus:share>=.5 }; }
-function brHist(cur){ let h={}; try{ h=JSON.parse(localStorage.getItem("pt_bridge")||"{}"); }catch(e){}
+/* honest bridge: built from the words you really know at every level (not the level you picked) */
+const BR_LV=["A1","A2","B1","B2","C1"];
+function brPlank(){ let pos=0;
+  for(const lv of BR_LV){ let st={ total:0 }; try{ st=vcStats(vcLv(lv)); }catch(e){} if(!st.total) continue;
+    const known=st.mastered+0.4*(st.learned-st.mastered); pos+=2*Math.min(1,known/(0.8*st.total)); }
+  pos=Math.min(10.99,pos); const plank=Math.floor(pos)+1, li=Math.min(5,Math.floor((plank-1)/2)), lv=li<5?BR_LV[li]:"C2";
+  return { pos, plank, lv, li, plus:li<5&&plank%2===0 }; }
+function brHist(cur){ let h={}; try{ h=JSON.parse(localStorage.getItem("pt_bridge2")||"{}"); }catch(e){}
   const wk=x=>{ const d=new Date(x); d.setHours(0,0,0,0); d.setDate(d.getDate()-((d.getDay()+6)%7)); return d.toISOString().slice(0,10); };
-  const now=wk(Date.now()), last=wk(Date.now()-7*864e5); if(!h[now]||h[now]<cur){ h[now]=cur; try{ localStorage.setItem("pt_bridge",JSON.stringify(h)); }catch(e){} }
+  const now=wk(Date.now()), last=wk(Date.now()-7*864e5); if(!h[now]||h[now]<cur){ h[now]=cur; try{ localStorage.setItem("pt_bridge2",JSON.stringify(h)); }catch(e){} }
   return h[last]!=null?h[last]:null; }
 async function brLoad(force){ if(!(A.user&&A.sb)||BR.busy) return; if(!force&&BR.d&&Date.now()-BR.at<5*60000) return; BR.busy=true;
   try{ await llFlush(); if(!VC.d){ try{ await vcLoadData(); }catch(e){} } let tz="Europe/Berlin"; try{ tz=Intl.DateTimeFormat().resolvedOptions().timeZone||tz; }catch(e){}
@@ -11284,7 +11290,7 @@ VIEWS.report = function(){ const back=`<div class="topline"><button class="chip"
   if(!BR.d) return back+`<p class="note center">${tr("Loading…","Lädt…","Cargando…")}</p>`;
   const R=brCalc(), c=R.cur, LVN=`${R.P.lv}${R.P.plus?"+":""}`;
   if(!R.d.total) return back+`<div class="card center"><div style="font-size:42px">🌉</div><h3>${tr("Your first report is on its way","Dein erster Bericht kommt bald","Tu primer informe está en camino")}</h3><p class="note">${tr("Play a few rounds (flashcards, Sentence Builder…) and your report fills up.","Spiel ein paar Runden (Karteikarten, Satzbauer …), dann füllt sich dein Bericht.","Juega unas rondas (tarjetas, Constructor de frases…) y tu informe se irá llenando.")}</p><button class="btn primary" onclick="sbOpen()">🧱 ${tr("Sentence Builder","Satzbauer","Constructor de frases")}</button></div>`;
-  const diff=R.last!=null?R.P.plank-R.last:null, toNext=Math.max(0,(VC_LEVELS.indexOf(R.P.lv)+1)*2+1-R.P.plank), nextLv=VC_LEVELS[VC_LEVELS.indexOf(R.P.lv)+1];
+  const diff=R.last!=null?R.P.plank-R.last:null, toNext=Math.max(0,(R.P.li+1)*2+1-R.P.plank), nextLv=R.P.li<4?BR_LV[R.P.li+1]:R.P.li===4?"C2":null;
   const bar=(g,col)=>`<div class="brrow"><b>${esc(g.l)}</b><span class="note">${g.ok} / ${g.n}</span></div><div class="brbar"><i style="width:${Math.round(g.ok/g.n*100)}%;background:${col}"></i></div>`;
   const mist=((R.d.mist)||[]).slice(0,6);
   return brShSheet()+back+`<p class="sub" style="margin:0 0 10px">${tr("Last 7 days · German","Letzte 7 Tage · Deutsch","Últimos 7 días · Alemán")}</p>
@@ -11294,6 +11300,7 @@ VIEWS.report = function(){ const back=`<div class="topline"><button class="chip"
     <div class="brmsg">${diff==null?tr("🌱 Your first week on the bridge. Next week you'll see how far you got.","🌱 Deine erste Woche auf der Brücke. Nächste Woche siehst du, wie weit du gekommen bist.","🌱 Tu primera semana en el puente. La semana que viene verás cuánto avanzaste."):diff>0?tr(`🎉 +${diff} plank${diff>1?"s":""} since last week!`,`🎉 +${diff} Brett${diff>1?"er":""} seit letzter Woche!`,`🎉 ¡+${diff} tabla${diff>1?"s":""} desde la semana pasada!`):tr("💪 Same plank as last week. Keep going!","💪 Gleiches Brett wie letzte Woche. Weiter so!","💪 La misma tabla que la semana pasada. ¡Sigue!")}
       ${nextLv&&toNext?`<span class="brnext">${tr(`${toNext} to ${nextLv}`,`noch ${toNext} bis ${nextLv}`,`${toNext} hasta ${nextLv}`)}</span>`:""}</div>
     <div class="brdays">${brDays(c.dayset)}</div>
+    <p class="brwhy">ℹ️ ${tr("Your plank is built from the words you really know at every level (A1 → C1), not from the level you practise at. Every 2 planks = one level.","Dein Brett zählt die Wörter, die du auf jedem Niveau (A1 → C1) wirklich kannst, nicht das Niveau, auf dem du übst. Je 2 Bretter = ein Niveau.","Tu tabla se basa en las palabras que de verdad sabes en cada nivel (A1 → C1), no en el nivel en que practicas. Cada 2 tablas = un nivel.")}</p>
     <button class="brshare" onclick="brShare()">📤 ${tr("Share","Teilen","Compartir")}</button></div>
   <div class="brstats"><div><i style="background:#FDE7E1">🔥</i><b>${c.days||0}</b><span>${tr("active days","aktive Tage","días activos")}</span></div><div><i style="background:#E7EDF6">⏱️</i><b>${R.mins}</b><span>${tr("minutes","Minuten","minutos")}</span></div><div><i style="background:#FDF2D8">🃏</i><b>${c.words||0}</b><span>${tr("words right","Wörter richtig","palabras bien")}</span></div><div><i style="background:#DDEFEC">🧱</i><b>${c.sent||0}</b><span>${tr("sentences","Sätze","frases")}</span></div></div>
   ${(c.n||0)<15?`<p class="note center" style="margin:8px 0 0;font-size:13px">ℹ️ ${tr(`${c.n||0} answers so far. After about 15, your tips get sharper.`,`Bisher ${c.n||0} Antworten. Ab etwa 15 werden deine Tipps genauer.`,`${c.n||0} respuestas hasta ahora. Con unas 15, tus consejos serán más precisos.`)}</p>`:""}
