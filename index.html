@@ -8101,6 +8101,16 @@ function homeDash(){
 function recDays(){ const D=new Set(Object.keys(VC.days||{}).filter(k=>(VC.days[k].n||0)>0)); try{ bbLoad(); (BB.s.days||[]).forEach(d=>D.add(d)); rdLoad(); (RD.s.days||[]).forEach(d=>D.add(d)); }catch(e){} return D; }
 function recStreak(){ const D=recDays(), d=new Date(), today=D.has(bbDs(d)); if(!today) d.setDate(d.getDate()-1); let n=0; while(D.has(bbDs(d))){ n++; d.setDate(d.getDate()-1); } return { n, today }; }
 function recWrong(hist){ const m={}; for(const a of (hist&&hist.ans)||[]){ if(!(a.n in m)) m[a.n]=a.ok; } const v=Object.values(m); return { wrong:v.filter(x=>x===false).length, seen:v.length, ok:v.filter(Boolean).length }; }
+/* grammar skills: Bridge Builder + Sentence Builder together, live */
+const SB_DNA_MAP={ time:"inv", mo:"inv", weil:"sub", dass:"sub", link:"sub", sub:"sub", perf:"perf", modal:"modal", k2:"kon", k1:"k1", pass:"pass", jd:"je", part:"padj", um:"umzu", rel:"rel", dat:"dat" };
+function sbSkAdd(kind,ok){ const k=SB_DNA_MAP[kind]; if(!k) return; let D={}; try{ D=JSON.parse(localStorage.getItem("pt_sbsk")||"{}"); }catch(e){} D[k]=D[k]||[0,0]; D[k][ok?0:1]++; try{ localStorage.setItem("pt_sbsk",JSON.stringify(D)); }catch(e){} }
+function recDna(){ let S={}; try{ bbLoad(); }catch(e){} try{ S=JSON.parse(localStorage.getItem("pt_sbsk")||"{}"); }catch(e){} const D={}, B=(typeof BB!=="undefined"&&BB.s&&BB.s.dna)||{};
+  for(const src of [B,S]) for(const k in src){ D[k]=D[k]||[0,0]; D[k][0]+=src[k][0]||0; D[k][1]+=src[k][1]||0; } return D; }
+function recWeak(D){ let w=null, wp=2; for(const k in D){ const [o,b]=D[k]; if(!b) continue; const p=o/(o+b); if(p<wp||(p===wp&&b>D[w][1])){ wp=p; w=k; } } return w; }
+function recTitle(r){ let k=r.sk; if(!k&&(r.k==="bb"||r.k==="bb2")){ const t=recTx(r.t); k=Object.keys(BB_DNA).find(x=>BB_DNA[x][0].some(n=>t.includes(n))); }
+  return k&&BB_DNA[k]?recSkLabel(k):recTx(r.t); }
+function recSkLabel(k){ const D=recDna(), x=D[k]||[0,0], n=x[0]+x[1], nm=BB_DNA[k]?tr(...BB_DNA[k][0]):k;
+  return n<3?tr(`Practise: ${nm}`,`Übe: ${nm}`,`Practica: ${nm}`):tr(`Practise: ${nm} · ${x[0]} of ${n} right`,`Übe: ${nm} · ${x[0]} von ${n} richtig`,`Practica: ${nm} · ${x[0]} de ${n} bien`); }
 function recList(){
   const R=[], now=Date.now(), P=VC.p||{}, L=tr;
   let due=0, learned=0, shaky=0; for(const id in P){ const x=P[id]; if(!x||!x.r) continue; learned++; if(x.d<=now) due++; if((x.l||0)>=2) shaky++; }
@@ -8116,8 +8126,8 @@ function recList(){
   if(VC.d){ const i=VC_LEVELS.indexOf(VC.level), nx=VC_LEVELS[i+1], s=vcStats(vcLv(VC.level)); if(nx&&s.total&&s.learned/s.total>=0.8)
     R.push({ k:"level", p:60, e:"⬆️", t:L(`Ready for ${nx}?`,`Bereit für ${nx}?`,`¿Listo/a para ${nx}?`), why:L(`You know ${Math.round(s.learned/s.total*100)}% of the ${VC.level} words.`,`Du kennst ${Math.round(s.learned/s.total*100)}% der ${VC.level}-Wörter.`,`Conoces el ${Math.round(s.learned/s.total*100)}% de las palabras de ${VC.level}.`),
       go:`VC.level='${nx}';vcSaveLocal();recVc()` }); }
-  try{ bbLoad(); const D=BB.s.dna||{}, w=bbWeak();
-    if(w&&BB_DNA[w]){ const [o,b]=D[w], pct=Math.round(o/(o+b)*100); if(o+b>=3&&pct<75) R.push({ k:"bb", p:85-pct/5, e:"🧬", t:L(`Practise: ${tr(...BB_DNA[w][0])} (${pct}%)`,`Übe: ${BB_DNA[w][0][1]} (${pct}%)`,`Practica: ${BB_DNA[w][0][2]} (${pct}%)`),
+  try{ bbLoad(); const D=recDna(), w=recWeak(D);
+    if(w&&BB_DNA[w]){ const [o,b]=D[w], pct=Math.round(o/(o+b)*100); if(o+b>=3&&pct<75) R.push({ k:"bb", sk:w, p:85-pct/5, e:"🧬", t:L(`Practise: ${tr(...BB_DNA[w][0])} (${pct}%)`,`Übe: ${BB_DNA[w][0][1]} (${pct}%)`,`Practica: ${BB_DNA[w][0][2]} (${pct}%)`),
       why:tr(...BB_DNA[w][1]), go:`bbChStart(${BB_DNA[w][2]})` }); }
     else if(!BB.s.pts) R.push({ k:"bbtry", p:20, e:"🌉", t:L("Try Bridge Builder","Probier den Brückenbauer","Prueba el Constructor de puentes"), why:L("Build German sentences from coloured tiles.","Bau deutsche Sätze aus bunten Kärtchen.","Construye frases en alemán con fichas de colores."), go:"bbOpen()" }); }catch(e){}
   const lid=recWrong(typeof EX!=="undefined"&&EX.ans&&EX.ans.length?EX:exLocal()), dtz=recWrong(typeof DT!=="undefined"&&DT.ans&&DT.ans.length?DT:dtLocal());
@@ -8129,8 +8139,8 @@ function recList(){
     if(ago>=3) R.push({ k:"read", p:ago>=99?30:40, e:"📖", t:L("Read a short story","Lies eine kurze Geschichte","Lee una historia corta"),
       why:ago>=99?L("Easy German stories with the meaning under each line.","Leichte deutsche Geschichten mit Bedeutung unter jeder Zeile.","Historias fáciles en alemán con el significado debajo."):L(`Your last story was ${ago} days ago.`,`Deine letzte Geschichte ist ${ago} Tage her.`,`Tu última historia fue hace ${ago} días.`), go:"rdOpen()" }); }catch(e){}
   /* always-available extras, so "One more tip" never comes back empty */
-  try{ const D=BB.s.dna||{}, w=bbWeak(), ks=Object.keys(D).filter(k=>k!==w&&BB_DNA[k]&&D[k][1]).sort((a,b)=>D[a][0]/(D[a][0]+D[a][1])-D[b][0]/(D[b][0]+D[b][1])), k2=ks[0];
-    if(k2){ const [o,b]=D[k2], pct=Math.round(o/(o+b)*100); if(pct<90) R.push({ k:"bb2", p:14, e:"🧬", t:L(`Practise: ${tr(...BB_DNA[k2][0])} (${pct}%)`,`Übe: ${BB_DNA[k2][0][1]} (${pct}%)`,`Practica: ${BB_DNA[k2][0][2]} (${pct}%)`), why:tr(...BB_DNA[k2][1]), go:`bbChStart(${BB_DNA[k2][2]})` }); } }catch(e){}
+  try{ const D=recDna(), w=recWeak(D), ks=Object.keys(D).filter(k=>k!==w&&BB_DNA[k]&&D[k][1]).sort((a,b)=>D[a][0]/(D[a][0]+D[a][1])-D[b][0]/(D[b][0]+D[b][1])), k2=ks[0];
+    if(k2){ const [o,b]=D[k2], pct=Math.round(o/(o+b)*100); if(pct<90) R.push({ k:"bb2", sk:k2, p:14, e:"🧬", t:L(`Practise: ${tr(...BB_DNA[k2][0])} (${pct}%)`,`Übe: ${BB_DNA[k2][0][1]} (${pct}%)`,`Practica: ${BB_DNA[k2][0][2]} (${pct}%)`), why:tr(...BB_DNA[k2][1]), go:`bbChStart(${BB_DNA[k2][2]})` }); } }catch(e){}
   try{ rdLoad(); if(!(RD.s.days||[]).includes(bbDs(new Date()))){ const st=rdOfDay(); R.push({ k:"story", p:13, e:"📖", t:st?L(`Story of the day: ${st.title.de}`,`Geschichte des Tages: ${st.title.de}`,`Historia del día: ${st.title.de}`):L("Read a short story","Lies eine kurze Geschichte","Lee una historia corta"),
     why:L("A few minutes of reading at your level.","Ein paar Minuten Lesen auf deinem Niveau.","Unos minutos de lectura a tu nivel."), go:st?`rdOpen('${st.id}')`:"rdOpen()" }); } }catch(e){}
   R.push({ k:"gender", p:12, e:"🔵", t:L("Play der · die · das (20 nouns)","der · die · das spielen (20 Nomen)","Juega der · die · das (20 sustantivos)"), why:L(`Guess the article of ${VC.level} nouns.`,`Rate den Artikel von ${VC.level}-Nomen.`,`Adivina el artículo de sustantivos de ${VC.level}.`), go:"recVc('gender')" });
@@ -8172,7 +8182,7 @@ function recCard(){ const st=recState(); if(!st.tips.length) return ""; const s=
   return `<div class="card" style="margin:0"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><h3 style="margin:0 0 2px">🎯 ${tr("Your next practice","Dein nächstes Training","Tu próxima práctica")}</h3><span class="note" style="margin:0;font-weight:700">${nd}/${st.tips.length} ✅</span></div>
     <div class="recbar"><i style="width:${Math.round(nd/st.tips.length*100)}%"></i></div>
     <p class="note" style="margin:0 0 8px">${head}</p>
-    ${st.tips.map((r,i)=>`<button class="recrow ${done[i]?"done":""}" onclick="${r.go}"><span class="recn">${done[i]?"✓":i+1}</span><span style="flex:1;min-width:0"><b>${r.e} ${esc(recTx(r.t))}</b><small>${done[i]?tr("Done today 🎉","Heute erledigt 🎉","Hecho hoy 🎉"):esc(recTx(r.why))}</small></span><span class="recgo">›</span></button>`).join("")}
+    ${st.tips.map((r,i)=>`<button class="recrow ${done[i]?"done":""}" onclick="${r.go}"><span class="recn">${done[i]?"✓":i+1}</span><span style="flex:1;min-width:0"><b>${r.e} ${esc(recTitle(r))}</b><small>${done[i]?tr("Done today 🎉","Heute erledigt 🎉","Hecho hoy 🎉"):esc(recTx(r.why))}</small></span><span class="recgo">›</span></button>`).join("")}
     ${all?`<button class="btn secondary" style="margin-top:10px;width:100%" onclick="recMore()">➕ ${tr("One more tip","Noch ein Tipp","Una sugerencia más")}</button>`:""}
     ${nd?`<button class="btn primary" style="margin-top:10px;width:100%" onclick="recShare()">📤 ${tr("Share my progress & invite friends","Fortschritt teilen & Freunde einladen","Compartir mi progreso e invitar amigos")}</button>`:""}</div>`; }
 /* 📤 share today's finished tips + an invite to join (no % scores, just what was done) */
@@ -11779,7 +11789,7 @@ function sbReset(){ SB.res=null; SB.inp=""; SB.pick=[]; const s=sbStep(), toks=s
 function sbTap(i){ if(SB.res) return; const k=SB.pick.indexOf(i); if(k>=0) SB.pick.splice(k,1); else SB.pick.push(i); xr(); }
 function sbAnswer(){ return SB.mode==="tiles"?SB.pick.map(i=>SB.pool.find(o=>o.i===i).t).join(" "):SB.inp; }
 function sbCheck(){ const s=sbStep(), u=sbAnswer().trim(); if(!u) return; const ok=sbOk(u,s.p);
-  if(SB.first[SB.i]===undefined){ SB.first[SB.i]=ok; llAdd("sb",(SB.set==="tense"?"sbt:":"sb:")+s.k,ok,sbText(s.p),u,sbText(s.p)); }
+  if(SB.first[SB.i]===undefined){ SB.first[SB.i]=ok; sbSkAdd(s.k,ok); llAdd("sb",(SB.set==="tense"?"sbt:":"sb:")+s.k,ok,sbText(s.p),u,sbText(s.p)); }
   SB.res={ ok, u }; if(!ok&&SB.first[SB.i]===false&&!SB.res.saved){ SB.res.saved=1; try{ mwAdd(sbText(s.p),sbMean(s),null,"🧱"); }catch(e){} } xr(); }
 function sbAgain(){ SB.res=null; if(SB.mode==="tiles") SB.pick=[]; xr(); setTimeout(()=>{ const t=document.getElementById("sbinp"); if(t) t.focus(); },50); }
 function sbNext(){ if(SB.i<SB.ch.st.length-1){ SB.i++; sbReset(); } else { SB.i=SB.ch.st.length; if(!SB.s.done.includes(SB.ch.id)) SB.s.done.push(SB.ch.id); sbSave(); } xr(); window.scrollTo(0,0); }
