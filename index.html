@@ -6692,9 +6692,11 @@ async function bRespond(id,uid,yes){
   await bLoad();
 }
 async function bCancel(id){
-  const cs=calRow(id), soon=cs && new Date(cs.starts_at)-Date.now() < 2*3600000 && (cs.seats-(cs.seats_open||0))>0;
+  const cs=calRow(id); let soon=cs && new Date(cs.starts_at)-Date.now() < 2*3600000 && (cs.seats-(cs.seats_open||0))>0, free=false;
+  if(soon){ try{ const { data }=await A.sb.rpc("pt_side_missing",{ p_activity:id }); free=data===true; }catch(e){} if(free) soon=false; }
   if(!window.confirm(tr("Cancel this session for everyone?","Session für alle absagen?","¿Cancelar esta sesión para todos?")
-     +(soon?"\n\n⚠️ "+tr("It starts in less than 2 hours and people are coming, so this counts as a late cancel (½ strike). Your free monthly pass covers the first one.","Sie beginnt in weniger als 2 Stunden und es kommen Leute: das zählt als späte Absage (½ Strike). Dein freier Monatspass deckt die erste ab.","Empieza en menos de 2 horas y viene gente: cuenta como cancelación tardía (½ strike). Tu pase mensual gratis cubre la primera."):""))) return;
+     +(free?"\n\n✅ "+tr("One language has nobody yet, so this late cancel is free (no strike).","Für eine Sprache ist noch niemand da, daher ist diese späte Absage kostenlos (kein Strike).","Para un idioma aún no hay nadie, así que esta cancelación tardía es gratis (sin falta).")
+     :"")+(soon?"\n\n⚠️ "+tr("It starts in less than 2 hours and people are coming, so this counts as a late cancel (½ strike). Your free monthly pass covers the first one.","Sie beginnt in weniger als 2 Stunden und es kommen Leute: das zählt als späte Absage (½ Strike). Dein freier Monatspass deckt die erste ab.","Empieza en menos de 2 horas y viene gente: cuenta como cancelación tardía (½ strike). Tu pase mensual gratis cubre la primera."):""))) return;
   try{
     const { error } = await A.sb.from("activities").update({ status:"cancelled" }).eq("id",id);
     if(error) throw error;
