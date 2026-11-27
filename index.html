@@ -820,6 +820,12 @@
   .brdays i{width:26px;height:26px;border-radius:50%;border:2px solid rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-style:normal;font-size:13px;font-weight:800}.brdays .on i{background:#F2B544;border-color:#F2B544;color:#1B2A41}.brdays .today{color:#fff}
   .brstats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0 0 4px}.brstats div{background:#fff;border:1px solid var(--line);border-radius:18px;padding:12px 4px 10px;text-align:center}.brstats i{display:inline-flex;width:34px;height:34px;border-radius:50%;align-items:center;justify-content:center;font-style:normal;font-size:17px}.brstats b{display:block;font-size:22px;margin-top:4px}.brstats span{font-size:11px;color:var(--muted);font-weight:700}
   .brhero{position:relative}.brshare{position:absolute;top:14px;right:14px;background:rgba(255,255,255,.14);color:#fff;border:0;border-radius:999px;padding:7px 12px;font:inherit;font-weight:800;font-size:13px;cursor:pointer}
+  .shsheet{background:linear-gradient(160deg,#1B2A41,#2F4B7C)!important;color:#fff;max-width:480px}
+  .shprev{margin:14px 0 8px;border-radius:18px;overflow:hidden;background:rgba(255,255,255,.06);text-align:center;box-shadow:0 8px 24px #0004}.shprev img{width:100%;display:block}
+  .shtxt{font-size:13px;color:rgba(255,255,255,.75);margin:6px 0 12px;line-height:19px}
+  .shgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px 6px}.shb{background:none;border:0;color:#fff;font:inherit;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;padding:0}
+  .shb i{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:22px;font-weight:800;color:#fff;box-shadow:0 4px 12px #0003;transition:transform .15s}.shb:hover i,.shb:active i{transform:scale(1.08)}
+  .shb span{font-size:12px;font-weight:700;color:rgba(255,255,255,.85)}.shnote{font-size:12px;color:rgba(255,255,255,.6);margin:14px 0 0}
   .brok{display:flex;gap:12px;align-items:flex-start;border-left:5px solid #2A8C82}
   .brsec{font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.6px;text-transform:uppercase;margin:16px 4px 8px}
   .brrow{display:flex;justify-content:space-between;gap:8px}.brbar{height:8px;background:#F0EBE3;border-radius:99px;overflow:hidden;margin-top:6px}.brbar i{display:block;height:100%;border-radius:99px}
@@ -11271,7 +11277,7 @@ VIEWS.report = function(){ const back=`<div class="topline"><button class="chip"
   const diff=R.last!=null?R.P.plank-R.last:null, toNext=Math.max(0,(VC_LEVELS.indexOf(R.P.lv)+1)*2+1-R.P.plank), nextLv=VC_LEVELS[VC_LEVELS.indexOf(R.P.lv)+1];
   const bar=(g,col)=>`<div class="brrow"><b>${esc(g.l)}</b><span class="note">${g.ok} / ${g.n}</span></div><div class="brbar"><i style="width:${Math.round(g.ok/g.n*100)}%;background:${col}"></i></div>`;
   const mist=((R.d.mist)||[]).slice(0,6);
-  return back+`<p class="sub" style="margin:0 0 10px">${tr("Last 7 days · German","Letzte 7 Tage · Deutsch","Últimos 7 días · Alemán")}</p>
+  return brShSheet()+back+`<p class="sub" style="margin:0 0 10px">${tr("Last 7 days · German","Letzte 7 Tage · Deutsch","Últimos 7 días · Alemán")}</p>
   <div class="brhero"><div class="brhl">${tr("Where you are","Wo du stehst","Dónde estás")}</div>
     <div class="brbig">${tr(`Plank <b>${R.P.plank}</b> of 11`,`Brett <b>${R.P.plank}</b> von 11`,`Tabla <b>${R.P.plank}</b> de 11`)} <span class="brlv">${LVN}</span></div>
     ${brBridge(R.last,R.P.plank,true)}
@@ -11306,14 +11312,31 @@ async function brShare(){ const R=brCalc(), c=R.cur, LVN=`${R.P.lv}${R.P.plus?"+
     <g transform="translate(0,270)">${brBridge(R.last,R.P.plank,true).replace(/<svg class="brsvg"[^>]*>/,'<svg x="0" y="0" width="600" height="168" viewBox="0 0 600 168">')}</g>
     <text x="40" y="500" font-family="Helvetica,Arial,sans-serif" font-size="22" fill="#fff">🔥 ${c.days||0} ${esc(tr("days","Tage","días"))}   ⏱️ ${R.mins} min   🧱 ${c.sent||0} ${esc(tr("sentences","Sätze","frases"))}</text>
     <text x="40" y="560" font-family="Helvetica,Arial,sans-serif" font-size="18" fill="rgba(255,255,255,.7)">pontetalk.setzio.com</text></svg>`;
-  let file=null;
+  BR.sh={ txt, url, img:null, file:null }; xr();
   try{ const img=new Image(); img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg); await img.decode();
     const cv=document.createElement("canvas"); cv.width=1080; cv.height=1080; cv.getContext("2d").drawImage(img,0,0,1080,1080);
-    const blob=await new Promise(r=>cv.toBlob(r,"image/png")); if(blob) file=new File([blob],"pontetalk-bridge.png",{ type:"image/png" }); }catch(e){}
-  try{ if(file&&navigator.canShare&&navigator.canShare({ files:[file] })){ await navigator.share({ files:[file], text:txt+" "+url }); return; }
-    if(navigator.share){ await navigator.share({ text:txt, url }); return; } }catch(e){ if(e&&e.name==="AbortError") return; }
-  if(file){ const a=document.createElement("a"); a.href=URL.createObjectURL(file); a.download=file.name; a.click(); }
-  try{ await navigator.clipboard.writeText(txt+" "+url); bToast(tr("📋 Text copied and picture saved. Paste it anywhere!","📋 Text kopiert und Bild gespeichert. Füge es überall ein!","📋 Texto copiado e imagen guardada. ¡Pégalo donde quieras!")); }catch(e){} }
+    BR.sh.img=cv.toDataURL("image/png"); const blob=await new Promise(r=>cv.toBlob(r,"image/png")); if(blob) BR.sh.file=new File([blob],"pontetalk-bridge.png",{ type:"image/png" }); }catch(e){}
+  if(S.screen==="report") xr(); }
+function brShTo(k){ const h=BR.sh; if(!h) return; const t=h.txt+" "+h.url, E=encodeURIComponent, open=u=>window.open(u,"_blank","noopener");
+  if(k==="wa") open("https://wa.me/?text="+E(t));
+  else if(k==="tg") open("https://t.me/share/url?url="+E(h.url)+"&text="+E(h.txt));
+  else if(k==="fb") open("https://www.facebook.com/sharer/sharer.php?u="+E(h.url)+"&quote="+E(h.txt));
+  else if(k==="x") open("https://twitter.com/intent/tweet?text="+E(h.txt)+"&url="+E(h.url));
+  else if(k==="li") open("https://www.linkedin.com/sharing/share-offsite/?url="+E(h.url));
+  else if(k==="mail") location.href="mailto:?subject="+E(tr("My German bridge 🌉","Meine Deutsch-Brücke 🌉","Mi puente de alemán 🌉"))+"&body="+E(t);
+  else if(k==="copy"){ try{ navigator.clipboard.writeText(t).then(()=>bToast(tr("📋 Copied! Paste it anywhere","📋 Kopiert! Füge es überall ein","📋 ¡Copiado! Pégalo donde quieras")),()=>prompt("",t)); }catch(e){ prompt("",t); } }
+  else if(k==="save"&&h.img){ const a=document.createElement("a"); a.href=h.img; a.download="pontetalk-bridge.png"; document.body.appendChild(a); a.click(); a.remove(); bToast(tr("🖼️ Picture saved. Add it to your post!","🖼️ Bild gespeichert. Häng es an deinen Beitrag!","🖼️ Imagen guardada. ¡Añádela a tu publicación!")); }
+  else if(k==="more"){ (async()=>{ try{ if(h.file&&navigator.canShare&&navigator.canShare({ files:[h.file] })) await navigator.share({ files:[h.file], text:t }); else await navigator.share({ text:h.txt, url:h.url }); }catch(e){} })(); } }
+function brShSheet(){ const h=BR.sh; if(!h) return "";
+  const b=(k,ic,l,bg)=>`<button class="shb" onclick="brShTo('${k}')"><i style="background:${bg}">${ic}</i><span>${l}</span></button>`;
+  return `<div class="sheet-bg" onclick="if(event.target===this){BR.sh=null;xr()}"><div class="sheet shsheet">
+    <div style="display:flex;justify-content:space-between;align-items:center"><div><div class="brhl">${tr("Show it off","Zeig es her","Preséntalo")}</div><h3 style="margin:2px 0 0;color:#fff">${tr("Share your bridge 🌉","Teile deine Brücke 🌉","Comparte tu puente 🌉")}</h3></div><button class="brshare" style="position:static" onclick="BR.sh=null;xr()">✕</button></div>
+    <div class="shprev">${h.img?`<img src="${h.img}" alt="">`:`<div class="note" style="color:#fff;padding:40px 0">${tr("Making your picture…","Bild wird erstellt …","Creando tu imagen…")}</div>`}</div>
+    <p class="shtxt">${esc(h.txt)}</p>
+    <div class="shgrid">${b("wa","💬","WhatsApp","#25D366")}${b("fb","👍","Facebook","#1877F2")}${b("mail","✉️",tr("Email","E-Mail","Email"),"#F25C3B")}${b("tg","✈️","Telegram","#229ED9")}
+      ${b("x","𝕏","X","#000")}${b("li","💼","LinkedIn","#0A66C2")}${b("copy","📋",tr("Copy text","Text kopieren","Copiar texto"),"#5B6474")}${b("save","🖼️",tr("Save picture","Bild speichern","Guardar imagen"),"#F2B544")}
+      ${navigator.share?b("more","⋯",tr("More apps","Weitere Apps","Más apps"),"rgba(255,255,255,.2)"):""}</div>
+    <p class="shnote">💡 ${tr("For Instagram or a post with the picture: tap Save picture, then add it in the app.","Für Instagram oder einen Beitrag mit Bild: Bild speichern und in der App hinzufügen.","Para Instagram o una publicación con imagen: guarda la imagen y añádela en la app.")}</p></div></div>`; }
 function brPdf(){ const R=brCalc(), c=R.cur, name=meName()||"", d=new Date(), from=new Date(Date.now()-6*864e5), fmt=x=>x.toLocaleDateString(UI==="de"?"de-DE":UI==="es"?"es-ES":"en-GB",{ day:"numeric", month:"short" });
   const bar=(g)=>{ const p=Math.round(g.ok/g.n*100), col=p>=80?"#2A8C82":p>=50?"#F2B544":"#F25C3B"; return `<div class="r"><span>${esc(g.l)}</span><span>${g.ok}/${g.n}</span></div><div class="bar"><i style="width:${p}%;background:${col}"></i></div>`; };
   const note=[R.good.length?tr(`Strong: ${R.good.map(g=>g.l).join(", ")}.`,`Stark: ${R.good.map(g=>g.l).join(", ")}.`,`Puntos fuertes: ${R.good.map(g=>g.l).join(", ")}.`):"",
