@@ -794,6 +794,7 @@
   .fblink{font-weight:700;color:var(--coral);margin-bottom:6px}
   #tnav .tlogo .beta{font-size:10px;padding:2px 7px;margin-inline-start:2px}
 .ssmean{margin:6px 0 2px;color:var(--teal,#2A8C82);font-weight:700}
+  .ndframe{width:100%;height:560px;border:1px solid var(--line);border-radius:14px;background:#FAF7F2}
   .ndbody{white-space:pre-wrap;background:#FAF7F2;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:14px;max-height:220px;overflow:auto}
   .cstab{width:100%;border-collapse:collapse;font-size:14px;min-width:340px}
   .cstab th,.cstab td{padding:7px 6px;border-bottom:1px solid var(--line);text-align:start;vertical-align:top}
@@ -3900,43 +3901,43 @@ function raCard(){
     <button class="btn secondary" onclick="dsOpen()">🎙️ Audio studio · German exam</button></div>`;
 }
 /* ---------- 📧 Admin: members without languages. The app prepares the email (you send it from your own email, BCC) and sends each a 🔔. ---------- */
-const ND = { list:null, stats:null, hideDone:true, lang:"en" };
+const ND = { list:null, stats:null, hideDone:true, lang:"en", off:{}, prev:{}, busy:false };
 const ND_LINK="https://pontetalk.setzio.com/?go=languages";
 const ND_TXT={
  en:{ s:"One step left: which languages do you speak? 🌉", b:`Hi!\n\nYou joined PonteTalk, yay! 🎉 There's just one thing missing: your languages. Without them we can't show you people to practise with.\n\nIt takes 30 seconds, this link opens the right page:\n${ND_LINK}\n\nOnce it's done you'll see sessions, partners and your lounge, all matched to you.\n\nSee you on the bridge,\nYvette from PonteTalk\n(free beta: ideas and problems are always welcome, just reply to this email)` },
  es:{ s:"Te falta un paso: ¿qué idiomas hablas? 🌉", b:`¡Hola!\n\nTe uniste a PonteTalk, ¡qué bien! 🎉 Solo falta una cosa: tus idiomas. Sin ellos no podemos mostrarte personas con quienes practicar.\n\nTardas 30 segundos, este enlace abre la página correcta:\n${ND_LINK}\n\nEn cuanto lo hagas verás sesiones, compañeros y tu sala, todo según tus idiomas.\n\n¡Nos vemos en el puente!\nYvette de PonteTalk\n(beta gratuita: tus ideas y problemas son bienvenidos, solo responde a este email)` },
  de:{ s:"Nur noch ein Schritt: Welche Sprachen sprichst du? 🌉", b:`Hallo!\n\nSchön, dass du bei PonteTalk bist! 🎉 Eine Sache fehlt noch: deine Sprachen. Ohne sie können wir dir niemanden zum Üben zeigen.\n\nDas dauert 30 Sekunden, dieser Link öffnet die richtige Seite:\n${ND_LINK}\n\nDanach siehst du Sessions, Partner und deine Lounge, alles passend zu dir.\n\nBis bald auf der Brücke,\nYvette von PonteTalk\n(kostenlose Beta: Ideen und Probleme sind immer willkommen, antworte einfach auf diese E-Mail)` }};
+function ndSel(){ return ndRows().filter(r=>!ND.off[r.user_id]); }
+async function ndFn(body){ const { data, error }=await A.sb.functions.invoke("send-nudge",{ body }); if(error){ let m=error.message; try{ const j=await error.context.json(); m=j.error||m; }catch(e){} throw new Error(m); } if(data&&data.error) throw new Error(data.error); return data; }
+async function ndPreview(){ const l=ND.lang; if(ND.prev[l]) return; ND.prev[l]="…"; try{ const d=await ndFn({ preview:true, lang:l }); ND.prev[l]=d.html; }catch(e){ ND.prev[l]="ERR:"+e.message; } if(S.screen==="nudge") xr(); }
+async function ndTest(){ if(ND.busy) return; ND.busy=true; xr(); try{ const d=await ndFn({ test:true, lang:ND.lang }); bToast("📬 Test sent to "+d.to); }catch(e){ bToast("⚠️ "+e.message); } ND.busy=false; xr(); }
+async function ndSend(){ const R=ndSel(); if(!R.length||ND.busy) return;
+  if(!confirm(`Send the ${ {en:"English",es:"Spanish",de:"German"}[ND.lang] } email to ${R.length} ${R.length===1?"person":"people"}?`)) return;
+  ND.busy=true; xr(); try{ const d=await ndFn({ lang:ND.lang, ids:R.map(r=>r.user_id) }); bToast(`✅ ${d.sent} sent · 🔔 bell sent too`); ND.off={}; await ndLoad(); }catch(e){ bToast("⚠️ "+e.message); } ND.busy=false; xr(); }
 function ndOpen(){ ND.list=null; go("nudge"); ndLoad(); }
 async function ndLoad(){ try{ const [a,b]=await Promise.all([A.sb.rpc("pt_admin_incomplete"),A.sb.rpc("pt_admin_nudge_stats")]); if(a.error) throw a.error;
     ND.list=a.data||[]; ND.stats=(b&&b.data&&b.data[0])||null; }catch(e){ ND.list=[]; bToast(bErr(e)); } if(S.screen==="nudge") xr(); }
 function ndRows(){ return (ND.list||[]).filter(r=>!ND.hideDone||!r.nudged_at||Date.now()-new Date(r.nudged_at)>14*864e5); }
 function ndCopy(t,msg){ try{ navigator.clipboard.writeText(t).then(()=>bToast("📋 "+msg),()=>prompt("Copy:",t)); }catch(e){ prompt("Copy:",t); } }
-function ndMail(){ const R=ndRows(), T=ND_TXT[ND.lang]; if(!R.length) return;
-  location.href="mailto:?bcc="+encodeURIComponent(R.map(r=>r.email).join(","))+"&subject="+encodeURIComponent(T.s)+"&body="+encodeURIComponent(T.b); }
-async function ndMark(){ const R=ndRows(); if(!R.length) return; if(!confirm(`Mark ${R.length} as sent and send each a 🔔 reminder in the app?`)) return;
-  try{ const { error }=await A.sb.rpc("pt_admin_nudge",{ p_ids:R.map(r=>r.user_id) }); if(error) throw error; bToast(`✅ ${R.length} marked · 🔔 sent`); ndLoad(); }catch(e){ bToast(bErr(e)); } }
 VIEWS.nudge = function(){ const L=ND.list, R=ndRows(), T=ND_TXT[ND.lang], st=ND.stats;
   const chip=(k,l)=>`<button class="chip ${ND.lang===k?"on":""}" onclick="ND.lang='${k}';xr()">${l}</button>`;
   return `<div class="topline"><button class="chip" onclick="go('account')">${uiBack()} Profile</button><span>📧 Nudge</span></div>
   <h2>📧 Incomplete profiles</h2><p class="sub">Members with <b>no languages</b> yet. They get no matches, partners or lounge until they add them.</p>
   ${st?`<div class="card" style="display:flex;gap:16px;flex-wrap:wrap"><span>📨 Nudged so far: <b>${st.nudged}</b></span><span>✅ Added languages since: <b>${st.completed}</b>${st.nudged?` (${Math.round(st.completed/st.nudged*100)}%)`:""}</span></div>`:""}
   ${L===null?`<p class="note center">Loading…</p>`:!L.length?`<div class="card center"><div style="font-size:40px">🎉</div><p class="note">Everyone has languages!</p></div>`:`
-  <div class="card"><h3 style="margin:0 0 6px">1 · Send the email</h3>
+  <div class="card"><h3 style="margin:0 0 6px">✉️ The email</h3>
     <div class="row" style="gap:6px;margin-bottom:8px">${chip("en","🇬🇧 English")}${chip("es","🇪🇸 Español")}${chip("de","🇩🇪 Deutsch")}</div>
-    <div class="note" style="margin:0 0 4px"><b>Subject:</b> ${esc(T.s)}</div>
-    <div class="ndbody">${esc(T.b)}</div>
-    <button class="btn primary" style="margin-top:10px" ${R.length?"":"disabled"} onclick="ndMail()">✉️ Open in my email app (${R.length} in BCC)</button>
-    <div class="row" style="gap:6px;margin-top:8px;flex-wrap:wrap">
-      <button class="chip" onclick="ndCopy(ndRows().map(r=>r.email).join(', '),'Emails copied, paste them into BCC')">📋 Copy emails</button>
-      <button class="chip" onclick="ndCopy(ND_TXT[ND.lang].s,'Subject copied')">📋 Copy subject</button>
-      <button class="chip" onclick="ndCopy(ND_TXT[ND.lang].b,'Text copied')">📋 Copy text</button></div>
-    <p class="note" style="margin:8px 0 0">Always put the addresses in <b>BCC</b>, so nobody sees the others.</p></div>
-  <div class="card"><h3 style="margin:0 0 6px">2 · After sending</h3>
-    <button class="btn secondary" ${R.length?"":"disabled"} onclick="ndMark()">✅ Mark ${R.length} as sent + send 🔔 in the app</button>
-    <p class="note" style="margin:6px 0 0">The bell says “Add your languages so we can match you” and opens the right page.</p></div>
+    ${(()=>{ const h=ND.prev[ND.lang]; if(!h){ setTimeout(ndPreview,0); return `<p class="note">Loading preview…</p>`; }
+      if(h==="…") return `<p class="note">Loading preview…</p>`;
+      if(h.startsWith("ERR:")) return `<p class="note" style="color:var(--coral)">⚠️ Preview not available: ${esc(h.slice(4))}<br>Is the <b>send-nudge</b> function set up in Supabase?</p><button class="chip" onclick="ND.prev={};xr()">↻ Try again</button>`;
+      return `<div class="note" style="margin:0 0 4px"><b>Subject:</b> ${esc(T.s)}</div><iframe class="ndframe" sandbox srcdoc="${esc(h)}"></iframe>`; })()}
+    <div class="row" style="gap:8px;margin-top:10px;flex-wrap:wrap">
+      <button class="btn secondary" ${ND.busy?"disabled":""} onclick="ndTest()">📬 Send a test to me</button>
+      <button class="btn primary" ${ND.busy||!ndSel().length?"disabled":""} onclick="ndSend()">${ND.busy?"Sending…":`🚀 Send to ${ndSel().length} ${ndSel().length===1?"person":"people"}`}</button></div>
+    <p class="note" style="margin:8px 0 0">Each person gets their own email (“Hi Lena,”) from PonteTalk. Replies go to yvette@setzio.com. They also get a 🔔 in the app.</p></div>
   <div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><h3 style="margin:0">👥 ${R.length} of ${L.length}</h3>
     <label class="note" style="display:flex;gap:6px;align-items:center;margin:0"><input type="checkbox" ${ND.hideDone?"checked":""} onchange="ND.hideDone=this.checked;xr()"> Hide people nudged in the last 14 days</label></div>
-    ${R.map(r=>`<div class="mwrow"><div style="flex:1;min-width:0"><b>${esc(r.name||"(no name)")}</b> <span class="note">${esc(r.email)}</span>
+    ${R.map(r=>`<div class="mwrow"><input type="checkbox" style="width:20px;height:20px;flex:none" ${ND.off[r.user_id]?"":"checked"} onchange="ND.off['${r.user_id}']=!this.checked;xr()"><div style="flex:1;min-width:0"><b>${esc(r.name||"(no name)")}</b> <span class="note">${esc(r.email)}</span>
       <div class="note" style="margin:0">Joined ${esc(fmtWhen(r.joined))}${r.nudged_at?` · nudged ${r.times}× (last ${esc(fmtWhen(r.nudged_at))})`:" · never nudged"}</div></div></div>`).join("")||`<p class="note">Everyone here was nudged recently.</p>`}</div>`}`; };
 function raOpen(){ RA.list=null; go("reports"); raLoad(); }
 /* Admin: Stats page */
@@ -11310,6 +11311,7 @@ try{ const sid=new URLSearchParams(location.search).get("s"); if(sid && /^[0-9a-
   if(!PALS[k]) return; S.palKey=k; const L=palLobby();
   if(L){ S.players=L.players||[]; const had=S.players.find(p=>p.pal===k); S.screen="paljoin"; S.draft.name=had?had.name:""; }
   else S.screen="palmeet"; }catch(e){} })();
+try{ const q=new URLSearchParams(location.search); if(q.has("impressum")||q.has("datenschutz")){ S.screen=q.has("impressum")?"impressum":"privacy"; history.replaceState(null,"",location.pathname); } }catch(e){}
 try{ if(new URLSearchParams(location.search).get("go")==="languages"){ history.replaceState(null,"",location.pathname); let n=0; const w=setInterval(()=>{ n++;
     if(A.status==="in"&&A.user){ clearInterval(w); xOpen(); } else if((A.status==="out"&&n>2)||n>20){ clearInterval(w); A.ret="xprofile"; go("account"); } },400); } }catch(e){}
 try{ if(new URLSearchParams(location.search).has("bb")){ document.addEventListener("DOMContentLoaded",()=>{ bbOpen(); history.replaceState(null,"",location.pathname); }); } }catch(e){}
