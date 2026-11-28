@@ -765,6 +765,16 @@
   .dktile.g-der{border-left:4px solid #2F6FD1}.dktile.g-die{border-left:4px solid #D9466A}.dktile.g-das{border-left:4px solid #2A8C82}
   .dkt1{font-size:17px;font-weight:700;text-align:center}.dkt2{font-weight:700;font-size:15px}
   .dkx{position:absolute;top:6px;right:6px;background:none;border:none;cursor:pointer;font-size:14px;opacity:.6}
+  .dktb{display:flex;gap:2px;align-items:center;flex-wrap:nowrap;overflow-x:auto;background:#F6F3EE;border:1px solid var(--line);border-bottom:none;border-radius:12px 12px 0 0;padding:5px;margin-top:10px;scrollbar-width:none}.dktb::-webkit-scrollbar{display:none}
+  .dktb button{flex:none;min-width:34px;height:32px;padding:0 8px;border:none;background:none;border-radius:8px;font:inherit;font-size:15px;color:var(--ink);cursor:pointer}.dktb button:hover{background:#fff}.dktb button.on{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.12);color:var(--plum)}
+  .dktb .g-der,.dktb .g-die,.dktb .g-das{font-weight:700;font-size:13px}.dkhl{background:#FFE58A;padding:0 4px;border-radius:3px;font-weight:700}.dksep{width:1px;height:20px;background:var(--line);margin:0 4px;flex:none}
+  .dked .dkrt{margin-top:0!important;border-radius:0 0 12px 12px;border:1px solid var(--line);background:#fff;padding:12px 14px;min-height:300px;max-height:65vh;overflow-y:auto;outline:none;line-height:1.6;font-size:15px;font-weight:400;white-space:pre-wrap;word-break:break-word}.dkrt b{font-weight:700}
+  .dked .dkrt:focus{border-color:var(--coral)}.dkrt:empty::before{content:attr(data-ph);color:#9AA1AD}
+  .dkrt h3{font-size:19px;margin:10px 0 4px;font-weight:700}.dkrt ul,.dkrt ol{margin:4px 0;padding-inline-start:24px}.dkrt mark{background:#FFE58A;border-radius:3px;padding:0 2px}
+  .dkrt ul.ckl{list-style:none;padding-inline-start:4px}.dkrt ul.ckl>li{position:relative;padding-inline-start:28px}
+  .dkrt ul.ckl>li::before{content:"";position:absolute;inset-inline-start:0;top:4px;width:17px;height:17px;border:2px solid #9AA1AD;border-radius:5px;cursor:pointer;box-sizing:border-box}
+  .dkrt ul.ckl>li.done{color:var(--muted);text-decoration:line-through}.dkrt ul.ckl>li.done::before{background:#2A8C82;border-color:#2A8C82;content:"✓";color:#fff;font-size:12px;line-height:13px;text-align:center;font-weight:700}
+  .dkrt .g-der,.dkrt .g-die,.dkrt .g-das{font-weight:700}
   .rfhero{background:linear-gradient(160deg,#1B2A41,#2F4B7C);border-radius:24px;padding:18px;margin:0 0 12px;color:#fff;box-shadow:0 8px 24px #1B2A4133}
   .rfladder{display:flex;align-items:center;gap:4px}.rfstep{flex:1;text-align:center;background:rgba(255,255,255,.08);border-radius:16px;padding:10px 4px;opacity:.6}.rfstep.on{background:rgba(242,181,68,.2);opacity:1;box-shadow:inset 0 0 0 2px #F2B544}
   .rfstep .rfe{display:block;font-size:28px}.rfstep b{display:block;font-size:12.5px;margin-top:2px}.rfstep small{font-size:11px;color:rgba(255,255,255,.7)}.rfline{width:10px;height:2px;background:rgba(255,255,255,.3);flex:none}
@@ -8649,7 +8659,7 @@ VIEWS.desk = function(){
   if(!(A.user&&A.status==="in")) return top+`<div class="card center"><div style="font-size:40px">🗂️</div><h3>${tr("Your own study desk","Dein eigener Lern-Schreibtisch","Tu propio escritorio de estudio")}</h3><p class="note">${tr("Sign in to keep your notes, words and guides in one place.","Melde dich an, um Notizen, Wörter und Materialien an einem Ort zu haben.","Entra para tener tus notas, palabras y guías en un solo lugar.")}</p><button class="btn primary" onclick="A.ret='desk';go('account')">${tr("Sign in","Anmelden","Iniciar sesión")}</button></div>`;
   if(DK.n===null) return top+`<p class="note center" style="margin-top:40px">${tr("Loading…","Lädt…","Cargando…")}</p>`;
   if(DK.ed){ dkGrab(); const ae=document.activeElement, fid=ae&&(ae.id==="dkti"||ae.id==="dkbo")?ae.id:null, ss=fid?ae.selectionStart:0, se=fid?ae.selectionEnd:0, sc=fid==="dkbo"?ae.scrollTop:0;
-    if(fid) setTimeout(()=>{ const el=document.getElementById(fid); if(el&&document.activeElement!==el){ el.focus(); try{ el.setSelectionRange(ss,se); }catch(e){} el.scrollTop=sc; } },0);
+    if(fid) setTimeout(()=>{ const el=document.getElementById(fid); if(el&&document.activeElement!==el){ el.focus(); if(fid==="dkbo") dkCaretEnd(el); else try{ el.setSelectionRange(ss,se); }catch(e){} el.scrollTop=sc; } },0);
     return top+dkEditor(); }   /* keep what you typed (and the cursor) if the screen refreshes while you write */
   const nG=dkGuides().length, nW=dkWords().length;
   const tb=(k,l,n)=>`<button class="${DK.tab===k?"on":""}" aria-pressed="${DK.tab===k}" onclick="DK.tab='${k}';DK.pick=false;xr()">${l}${n==null?"":` <span class="dkn">${n}</span>`}</button>`;
@@ -8685,7 +8695,7 @@ function dkDash(){
   const ic=n=>{ const f=dkFolder(n.folder_id); return `<span class="dkic" style="background:${f?DK_COL[f.color]:"var(--plum)"}1F;color:${f?DK_COL[f.color]:"var(--plum)"}">${n.pinned?"📌":"📝"}</span>`; };
   const notesCard=`<div class="dkc"><div class="dkch"><h3>${tr("My notes","Meine Notizen","Mis notas")}</h3><button class="dkround" aria-label="${tr("All notes","Alle Notizen","Todas las notas")}" onclick="DK.tab='notes';xr()">↗</button></div>
     ${first?`<button class="dkfeat" onclick="dkEdit('${first.id}')"><span class="dkbadge">${first.pinned?tr("Pinned","Angeheftet","Fijada"):tr("Last edited","Zuletzt bearbeitet","Última editada")}</span>
-        <div class="dkft">${esc(first.title||tr("Untitled","Ohne Titel","Sin título"))}</div><div class="dkfb">${esc((first.body||"").replace(/\s+/g," ").slice(0,90))}</div>
+        <div class="dkft">${esc(first.title||tr("Untitled","Ohne Titel","Sin título"))}</div><div class="dkfb">${esc(dkPlain(first.body).replace(/\s+/g," ").slice(0,90))}</div>
         <div class="dkfm">${dkFolder(first.folder_id)?esc(dkFolder(first.folder_id).name)+" · ":""}${dkDate(first.updated_at)}<span>${tr("Continue","Weiter","Seguir")} →</span></div></button>
       ${rest.map(n=>`<button class="dkrowi" onclick="dkEdit('${n.id}')">${ic(n)}<span class="dkrt">${esc(n.title||tr("Untitled","Ohne Titel","Sin título"))}</span><span class="dkrd">${dkDate(n.updated_at)}</span></button>`).join("")}
       <button class="dkrowi add" onclick="DK.tab='notes';DK.pick=true;xr()"><span class="dkic">＋</span><span class="dkrt">${tr("New note","Neue Notiz","Nota nueva")}</span></button>`
@@ -8733,12 +8743,78 @@ function dkTpls(){ return [
     tr("This week I want to…\n\n☐ \n☐ \n☐ \n","Diese Woche will ich…\n\n☐ \n☐ \n☐ \n","Esta semana quiero…\n\n☐ \n☐ \n☐ \n")]]; }
 function dkTplHtml(big){ return `<div class="dktpls ${big?"big":""}">${big?"":`<button class="dktpl blank" onclick="dkNew()"><span class="dkic">📄</span>${tr("Blank","Leer","En blanco")}</button>`}${dkTpls().map(t=>`<button class="dktpl" onclick="dkNew('${t[0]}')"><span class="dkic c-${t[3]}">${t[1]}</span>${t[2]}</button>`).join("")}</div>`; }
 
+/* ✍️ Rich text notes: stored as cleaned-up HTML that starts with "<!--rt-->"; older notes are plain text */
+const DK_RT="<!--rt-->";
+const DK_INK={ "#2f6fd1":"g-der", "#d9466a":"g-die", "#2a8c82":"g-das" };
+function dkIsRich(b){ return String(b||"").startsWith(DK_RT); }
+function dkRich(b){ b=String(b||""); if(dkIsRich(b)) return b.slice(DK_RT.length);
+  const out=[]; let list=null;
+  const close=()=>{ if(list){ out.push(list.tag==="ck"?`<ul class="ckl">${list.items.join("")}</ul>`:`<${list.tag}>${list.items.join("")}</${list.tag}>`); list=null; } };
+  for(const raw of b.split("\n")){ const m=/^(☐|☑|- |\d+\. )\s*(.*)$/.exec(raw);
+    if(m){ const tag=m[1]==="☐"||m[1]==="☑"?"ck":m[1]==="- "?"ul":"ol"; if(!list||list.tag!==tag){ close(); list={tag,items:[]}; }
+      list.items.push(`<li${m[1]==="☑"?' class="done"':""}>${esc(m[2])||"<br>"}</li>`); continue; }
+    close(); const t=raw.trimEnd();
+    out.push(t?(/:$/.test(t)&&t.length<60?`<div><b>${esc(t)}</b> </div>`:`<div>${esc(t)}</div>`):"<div><br></div>"); }
+  close(); return out.join(""); }
+function dkHex(c){ c=String(c||"").trim().toLowerCase(); const m=/^rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(c); if(m) return "#"+[m[1],m[2],m[3]].map(x=>(+x).toString(16).padStart(2,"0")).join(""); return c; }
+function dkClean(html){
+  const t=document.createElement("template"); t.innerHTML=html;
+  const MAP={ B:"b", STRONG:"b", I:"i", EM:"i", U:"u", S:"s", STRIKE:"s", DEL:"s", H1:"h3", H2:"h3", H3:"h3", H4:"h3", UL:"ul", OL:"ol", LI:"li", DIV:"div", P:"div", BR:"br", MARK:"mark" };
+  const DROP=/^(SCRIPT|STYLE|IFRAME|OBJECT|EMBED|svg|SVG|MATH|TEMPLATE|META|LINK|IMG|VIDEO|AUDIO|INPUT|BUTTON|TEXTAREA|SELECT|FORM)$/;
+  function walk(node){ const frag=document.createDocumentFragment();
+    for(const ch of [...node.childNodes]){
+      if(ch.nodeType===3){ frag.appendChild(document.createTextNode(ch.nodeValue)); continue; }
+      if(ch.nodeType!==1||DROP.test(ch.tagName)) continue;
+      const kids=walk(ch); let tag=MAP[ch.tagName], el=null;
+      const st=ch.style||{}, col=dkHex(ch.getAttribute("color")||st.color), bg=dkHex(st.backgroundColor);
+      if(tag){ el=document.createElement(tag);
+        if(tag==="ul"&&ch.classList.contains("ckl")) el.className="ckl";
+        if(tag==="li"&&ch.classList.contains("done")) el.className="done"; }
+      else if(ch.tagName==="SPAN"&&/^g-(der|die|das)$/.test(ch.className)){ el=document.createElement("span"); el.className=ch.className; }
+      if(!el && DK_INK[col]){ el=document.createElement("span"); el.className=DK_INK[col]; }
+      else if(el && el.tagName!=="SPAN" && DK_INK[col]){ const sp=document.createElement("span"); sp.className=DK_INK[col]; sp.appendChild(kids); el.appendChild(sp); frag.appendChild(el); continue; }
+      if(bg && bg!=="transparent" && !/^#?(fff|ffffff)$/.test(bg.replace("#",""))){ const mk=document.createElement("mark"); mk.appendChild(kids); if(el){ el.appendChild(mk); frag.appendChild(el); } else frag.appendChild(mk); continue; }
+      if(el){ if(tag!=="br") el.appendChild(kids); frag.appendChild(el); } else frag.appendChild(kids); }
+    return frag; }
+  const box=document.createElement("div"); box.appendChild(walk(t.content)); return box.innerHTML; }
+function dkPlain(b){ b=String(b||""); if(!dkIsRich(b)) return b;
+  const t=document.createElement("template"); t.innerHTML=b.slice(DK_RT.length).replace(/<li class="done">/g,"<li>☑ ").replace(/<\/(div|li|h3)>|<br>/g,"\n"); return (t.content.textContent||"").replace(/\n{3,}/g,"\n\n").trim(); }
+function dkBodyEmpty(b){ return !dkPlain(b).replace(/[☐☑\s]/g,""); }
+/* toolbar */
+function dkCmd(c,v){ const ed=document.getElementById("dkbo"); if(!ed) return; ed.focus();
+  try{ document.execCommand("styleWithCSS",false,false); }catch(e){}
+  if(c==="h3"){ const b=dkBlock(); document.execCommand("formatBlock",false,b&&b.tagName==="H3"?"div":"h3"); }
+  else if(c==="check"){ const li=dkBlock("LI"), ul=li&&li.parentNode; if(ul&&ul.classList.contains("ckl")) document.execCommand("insertUnorderedList");
+    else { if(!(ul&&ul.tagName==="UL")) document.execCommand("insertUnorderedList"); const n=dkBlock("LI"); if(n&&n.parentNode) n.parentNode.classList.add("ckl"); } }
+  else if(c==="ink"){ const cur=dkHex(document.queryCommandValue("foreColor")); document.execCommand("foreColor",false,cur===v?"#1b2a41":v); }
+  else if(c==="mark"){ const cur=dkHex(document.queryCommandValue("backColor")); document.execCommand("backColor",false,cur==="#ffe58a"?"#ffffff":"#FFE58A"); }
+  else if(c==="clear"){ document.execCommand("removeFormat"); document.execCommand("backColor",false,"#ffffff"); const b=dkBlock(); if(b&&b.tagName==="H3") document.execCommand("formatBlock",false,"div"); }
+  else document.execCommand(c);
+  if(DK.ed) DK.ed.touched=1; dkTbSync(); }
+function dkBlock(tag){ const sel=getSelection(); let n=sel&&sel.anchorNode; const ed=document.getElementById("dkbo");
+  while(n&&n!==ed){ if(n.nodeType===1&&(tag?n.tagName===tag:/^(H3|DIV|LI)$/.test(n.tagName))) return n; n=n.parentNode; } return null; }
+function dkTbSync(){ const tb=document.querySelector(".dktb"); if(!tb) return; const q=k=>{ try{ return document.queryCommandState(k); }catch(e){ return false; } };
+  const b=dkBlock(), li=dkBlock("LI"), ck=!!(li&&li.parentNode&&li.parentNode.classList.contains("ckl")), col=dkHex((()=>{ try{ return document.queryCommandValue("foreColor"); }catch(e){ return ""; } })());
+  const on={ bold:q("bold"), italic:q("italic"), underline:q("underline"), strikeThrough:q("strikeThrough")&&!(li&&li.classList.contains("done")), h3:!!(b&&b.tagName==="H3"), insertUnorderedList:q("insertUnorderedList")&&!ck, insertOrderedList:q("insertOrderedList"), check:ck, "#2f6fd1":col==="#2f6fd1", "#d9466a":col==="#d9466a", "#2a8c82":col==="#2a8c82" };
+  tb.querySelectorAll("[data-k]").forEach(x=>x.classList.toggle("on",!!on[x.dataset.k])); }
+function dkTb(){ const B=(k,c,v,label,title)=>`<button type="button" data-k="${k}" title="${title}" aria-label="${title}" onmousedown="event.preventDefault()" onclick="dkCmd('${c}'${v?`,'${v}'`:""})">${label}</button>`;
+  return `<div class="dktb" role="toolbar" aria-label="${tr("Formatting","Formatierung","Formato")}">
+    ${B("bold","bold","","<b>B</b>",tr("Bold (Ctrl+B)","Fett (Strg+B)","Negrita (Ctrl+B)"))}${B("italic","italic","","<i>I</i>",tr("Italic (Ctrl+I)","Kursiv (Strg+I)","Cursiva (Ctrl+I)"))}${B("underline","underline","","<u>U</u>",tr("Underline (Ctrl+U)","Unterstrichen (Strg+U)","Subrayado (Ctrl+U)"))}${B("strikeThrough","strikeThrough","","<s>S</s>",tr("Strike through","Durchgestrichen","Tachado"))}
+    <span class="dksep"></span>${B("h3","h3","","H",tr("Heading","Überschrift","Título"))}${B("insertUnorderedList","insertUnorderedList","","•≡",tr("Bullet list","Aufzählung","Lista"))}${B("insertOrderedList","insertOrderedList","","1≡",tr("Numbered list","Nummerierte Liste","Lista numerada"))}${B("check","check","","☑",tr("Checklist","Checkliste","Lista de tareas"))}
+    <span class="dksep"></span>${B("mark","mark","",'<span class="dkhl">A</span>',tr("Highlight","Markieren","Resaltar"))}${B("#2f6fd1","ink","#2f6fd1",'<span class="g-der">der</span>',tr("Blue: masculine (der)","Blau: maskulin (der)","Azul: masculino (der)"))}${B("#d9466a","ink","#d9466a",'<span class="g-die">die</span>',tr("Red: feminine (die)","Rot: feminin (die)","Rojo: femenino (die)"))}${B("#2a8c82","ink","#2a8c82",'<span class="g-das">das</span>',tr("Green: neuter (das)","Grün: neutral (das)","Verde: neutro (das)"))}
+    <span class="dksep"></span>${B("clear","clear","","⌫",tr("Clear formatting","Formatierung entfernen","Quitar formato"))}</div>`; }
+function dkEdKey(ev){ if(DK.ed) DK.ed.touched=1; }
+function dkEdClick(ev){ const li=ev.target.closest&&ev.target.closest("ul.ckl>li"); if(!li) return; const r=li.getBoundingClientRect(), x=ev.clientX-r.left;
+  if(document.dir==="rtl"?r.right-ev.clientX<26:x<26){ li.classList.toggle("done"); if(DK.ed) DK.ed.touched=1; ev.preventDefault(); } dkTbSync(); }
+function dkEdPaste(ev){ ev.preventDefault(); const t=(ev.clipboardData||window.clipboardData).getData("text/plain"); document.execCommand("insertText",false,t); if(DK.ed) DK.ed.touched=1; }
+function dkCaretEnd(el,node){ try{ const r=document.createRange(); r.selectNodeContents(node||el); r.collapse(false); const s=getSelection(); s.removeAllRanges(); s.addRange(r); }catch(e){} }
+
 /* 📝 Notes */
 function dkNotesHtml(){
   const F=DK.f||[], q=DK.q.trim().toLowerCase();
   let L=dkNotesF();
   if(DK.folder==="pin") L=L.filter(n=>n.pinned); else if(DK.folder==="none") L=L.filter(n=>!n.folder_id); else if(DK.folder!=="all") L=L.filter(n=>n.folder_id===DK.folder);
-  if(q) L=L.filter(n=>(n.title+" "+n.body).toLowerCase().includes(q));
+  if(q) L=L.filter(n=>(n.title+" "+dkPlain(n.body)).toLowerCase().includes(q));
   L=[...L].sort((a,b)=>(b.pinned-a.pinned)||(b.updated_at>a.updated_at?1:-1));
   const fc=(k,label,dot)=>`<button class="chip ${DK.folder===k?"on":""}" onclick="DK.folder='${k}';DK.fEd=null;xr()">${dot?`<span class="dkdot" style="background:${dot}"></span>`:""}${label}</button>`;
   const cur=dkFolder(DK.folder);
@@ -8759,22 +8835,22 @@ function dkNoteList(L){
   return `<div class="dkgrid">${L.map((n,i)=>{ const f=dkFolder(n.folder_id), t=T[n.lang], c=f?f.color:"sun";
     return `<button class="dknote" style="--c:${f?DK_COL[f.color]:"#2F4B7C"}" onclick="dkEdit('${n.id}')">
       <div class="dkt">${n.pinned?"📌 ":""}${esc(n.title||tr("Untitled","Ohne Titel","Sin título"))}</div>
-      <div class="dkb">${esc((n.body||"").slice(0,220))}</div>
+      <div class="dkb">${esc(dkPlain(n.body).slice(0,220))}</div>
       <div class="dkm">${t?t.flag+" ":""}${f?esc(f.name)+" · ":""}${dkDate(n.updated_at)}</div></button>`; }).join("")}</div>`;
 }
 function dkPaint(){ const el=document.getElementById("dknotes"); if(!el){ xr(); return; }
   const q=DK.q.trim().toLowerCase(); let L=dkNotesF();
   if(DK.folder==="pin") L=L.filter(n=>n.pinned); else if(DK.folder==="none") L=L.filter(n=>!n.folder_id); else if(DK.folder!=="all") L=L.filter(n=>n.folder_id===DK.folder);
-  if(q) L=L.filter(n=>(n.title+" "+n.body).toLowerCase().includes(q));
+  if(q) L=L.filter(n=>(n.title+" "+dkPlain(n.body)).toLowerCase().includes(q));
   el.innerHTML=dkNoteList([...L].sort((a,b)=>(b.pinned-a.pinned)||(b.updated_at>a.updated_at?1:-1))); }
 function dkNew(tpl){ DK.pick=false; const fid=dkFolder(DK.folder)?DK.folder:null, langs=dkLangs(), T0=tpl?dkTpls().find(t=>t[0]===tpl):null;
   const learn=(R.mine||[]).find(m=>m.role==="learning");
-  DK.ed={ id:null, title:T0?T0[4]:"", body:T0?T0[5]:"", folder_id:fid, lang:learn?learn.code:(langs[0]||null), pinned:false }; xr(); setTimeout(()=>{ const tt=T0&&/: $/.test(T0[4]), i=document.getElementById(T0&&!tt?"dkbo":"dkti"), ae=document.activeElement; if(i&&!(ae&&ae.closest&&ae.closest(".dked"))){ i.focus(); if(tt){ const n=i.value.length; try{ i.setSelectionRange(n,n); }catch(e){} } else if(T0){ const k=i.value.indexOf(": \n"); const k2=i.value.indexOf("1. "), at=k>=0?k+2:k2>=0?k2+3:0; try{ i.setSelectionRange(at,at); }catch(e){} } } },30); }
+  DK.ed={ id:null, title:T0?T0[4]:"", body:T0?T0[5]:"", folder_id:fid, lang:learn?learn.code:(langs[0]||null), pinned:false }; xr(); setTimeout(()=>{ const tt=T0&&/: $/.test(T0[4]), i=document.getElementById(T0&&!tt?"dkbo":"dkti"), ae=document.activeElement; if(i&&!(ae&&ae.closest&&ae.closest(".dked"))){ i.focus(); if(tt){ const n=i.value.length; try{ i.setSelectionRange(n,n); }catch(e){} } else if(T0) dkCaretEnd(i,i.firstElementChild||i); } },30); }
 function dkEdit(id){ const n=(DK.n||[]).find(x=>x.id===id); if(!n) return; DK.ed=Object.assign({},n); xr(); }
 function dkGrab(){ const e=DK.ed; if(!e) return; const g=id=>document.getElementById(id);
-  if(g("dkti")) e.title=g("dkti").value; if(g("dkbo")) e.body=g("dkbo").value; if(g("dkfo")) e.folder_id=g("dkfo").value||null; if(g("dkla")) e.lang=g("dkla").value||null; }
+  if(g("dkti")) e.title=g("dkti").value; if(g("dkbo")) e.body=DK_RT+dkClean(g("dkbo").innerHTML); if(g("dkfo")) e.folder_id=g("dkfo").value||null; if(g("dkla")) e.lang=g("dkla").value||null; }
 function dkDirty(){ const e=DK.ed; if(!e) return false; dkGrab(); const o=e.id?(DK.n||[]).find(x=>x.id===e.id):null;
-  return o ? ["title","body","folder_id","lang","pinned"].some(k=>(o[k]||null)!==(e[k]||null)) : !!(e.title.trim()||e.body.trim()); }
+  return o ? (!!e.touched || ["title","folder_id","lang","pinned"].some(k=>(o[k]||null)!==(e[k]||null))) : !!(e.title.trim()||!dkBodyEmpty(e.body)); }
 function dkClose(){ if(dkDirty()&&!confirm(tr("Leave without saving?","Ohne Speichern verlassen?","¿Salir sin guardar?"))) return; DK.ed=null; xr(); }
 function dkEditor(){ const e=DK.ed, F=DK.f||[], f=dkFolder(e.folder_id);
   return `<div class="card dked" style="border-top:4px solid ${f?DK_COL[f.color]:"#2F4B7C"}">
@@ -8784,14 +8860,16 @@ function dkEditor(){ const e=DK.ed, F=DK.f||[], f=dkFolder(e.folder_id);
       <select id="dkla" aria-label="${tr("Language","Sprache","Idioma")}"><option value="">🌍 ${tr("Any language","Alle Sprachen","Cualquier idioma")}</option>${dkLangs(e.lang).map(k=>`<option value="${k}" ${e.lang===k?"selected":""}>${T[k].flag} ${esc(lname(k))}</option>`).join("")}</select>
       <button class="chip ${e.pinned?"on":""}" onclick="dkGrab();DK.ed.pinned=!DK.ed.pinned;xr()">📌 ${e.pinned?tr("Pinned","Angeheftet","Fijada"):tr("Pin","Anheften","Fijar")}</button>
     </div>
-    <textarea id="dkbo" class="dkbo" maxlength="20000" placeholder="${tr("Write anything: rules, example sentences, words from a session, questions for your partner…","Schreib alles auf: Regeln, Beispielsätze, Wörter aus einer Session, Fragen an deinen Partner…","Escribe lo que quieras: reglas, frases de ejemplo, palabras de una sesión, preguntas para tu compañero…")}">${esc(e.body||"")}</textarea>
+    ${dkTb()}
+    <div id="dkbo" class="dkbo dkrt" contenteditable="true" role="textbox" aria-multiline="true" spellcheck="true" data-ph="${tr("Write anything: rules, example sentences, words from a session, questions for your partner…","Schreib alles auf: Regeln, Beispielsätze, Wörter aus einer Session, Fragen an deinen Partner…","Escribe lo que quieras: reglas, frases de ejemplo, palabras de una sesión, preguntas para tu compañero…")}" oninput="dkEdKey()" onkeyup="dkTbSync()" onmouseup="dkTbSync()" onclick="dkEdClick(event)" onpaste="dkEdPaste(event)">${dkRich(e.body)}</div>
     <div class="dkrow"><button class="btn primary" ${DK.busy?"disabled":""} onclick="dkSave()">${DK.busy?tr("Saving…","Speichert…","Guardando…"):"💾 "+tr("Save","Speichern","Guardar")}</button>
       <button class="btn secondary" onclick="dkClose()">${tr("Cancel","Abbrechen","Cancelar")}</button>
       ${e.id?`<button class="linkbtn dkdel" onclick="dkDel('${e.id}')">🗑 ${tr("Delete","Löschen","Borrar")}</button>`:""}</div>
   </div>`; }
 async function dkSave(){ dkGrab(); const e=DK.ed; if(!e) return;
-  if(!e.title.trim()&&!e.body.trim()){ bToast(tr("Write something first ✍️","Schreib erst etwas ✍️","Escribe algo primero ✍️")); return; }
-  const row={ title:e.title.trim().slice(0,80), body:e.body.slice(0,20000), folder_id:e.folder_id||null, lang:e.lang||null, pinned:!!e.pinned };
+  if(!e.title.trim()&&dkBodyEmpty(e.body)){ bToast(tr("Write something first ✍️","Schreib erst etwas ✍️","Escribe algo primero ✍️")); return; }
+  if(e.body.length>20000){ bToast(tr("This note is too long. Split it into two notes.","Diese Notiz ist zu lang. Teile sie in zwei Notizen.","Esta nota es demasiado larga. Divídela en dos.")); return; }
+  const row={ title:e.title.trim().slice(0,80), body:e.body, folder_id:e.folder_id||null, lang:e.lang||null, pinned:!!e.pinned };
   DK.busy=true; xr();
   try{ const r=e.id ? await A.sb.from("desk_notes").update(row).eq("id",e.id).select().single() : await A.sb.from("desk_notes").insert(row).select().single();
     if(r.error) throw r.error;
