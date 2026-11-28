@@ -8677,6 +8677,8 @@ function nbText(n){
     case "times_nudge": return "🕒 "+tr("Add your free times so partners can find a time that works for you both.","Trag deine freien Zeiten ein, damit Partner einen passenden Termin finden.","Añade tus horas libres para que tus compañeros encuentren un momento para los dos.");
     case "ref_joined":  { const c=d.count||1, nx=RF_TIERS.find(x=>c<x[0]), tt=rfTier(c);
                            return "🎉 "+tr(`${esc(d.name||"A friend")} joined with your invite!`,`${esc(d.name||"Ein Freund")} ist über deine Einladung dabei!`,`¡${esc(d.name||"Un amigo")} se unió con tu invitación!`)+" "+(tt&&tt[0]===c?tr(`You're now ${tt[1]} ${tt[2][0]}!`,`Du bist jetzt ${tt[1]} ${tt[2][1]}!`,`¡Ahora eres ${tt[1]} ${tt[2][2]}!`):nx?tr(`${nx[0]-c} more to ${nx[1]} ${nx[2][0]}.`,`Noch ${nx[0]-c} bis ${nx[1]} ${nx[2][1]}.`,`${nx[0]-c} más para ${nx[1]} ${nx[2][2]}.`):""); }
+    case "shop_new":    { const lg=d.lang&&T[d.lang]?`${T[d.lang].flag} ${esc(lname(d.lang))}`:""; const ti=esc(d.title||"");
+                           return "📚 "+tr(`New for your ${lg}: “${ti}”. Tap to open.`,`Neu für dein ${lg}: „${ti}“. Tippe zum Öffnen.`,`Nuevo para tu ${lg}: «${ti}». Toca para abrir.`); }
     case "profile_nudge": return "🗣️ "+tr("Add your languages so we can match you with people to practise with.","Trag deine Sprachen ein, damit wir dir Leute zum Üben zeigen können.","Añade tus idiomas para que podamos mostrarte personas con quienes practicar.");
     case "feedback":     return (d.kind==="bug"?"🐞 ":"💡 ")+tr("New feedback","Neues Feedback","Nuevas sugerencias")+`: “${esc(d.text||"")}”`;
     case "duel_done":    return "⚔️ "+tr(`${who} played your duel. Tap to see who won!`,`${who} hat dein Duell gespielt. Tippe, um zu sehen, wer gewonnen hat!`,`${who} jugó tu duelo. ¡Toca para ver quién ganó!`);
@@ -8689,6 +8691,7 @@ function nbText(n){
     default:             return tr(`Update for ${t}.`,`Neuigkeit zu ${t}.`,`Novedad sobre ${t}.`);
   }
 }
+function d0(n){ return n&&n.data&&typeof n.data==="object"?n.data:{}; }
 function nbChanges(d){
   const ch=Array.isArray(d.changes)?d.changes:[];
   if(!ch.length) return tr("updated by the host.","vom Host geändert.","actualizada por el anfitrión.");
@@ -8734,6 +8737,7 @@ async function nbTap(id){
   if(n.kind==="profile_nudge"){ xOpen(); return; }
   if(n.kind==="times_nudge"){ xOpenTimes(); return; }
   if(n.kind==="ref_joined"){ RF.d=null; go("invite"); return; }
+  if(n.kind==="shop_new"&&d0(n).item){ SH.one=null; SH.oneId=d0(n).item; go("shopitem"); shOneLoad(SH.oneId); return; }
   if(/^echo_/.test(n.kind) && n.data && n.data.lounge){ await luEnter(n.data.lounge); ecOpen(); return; }
   if(n.activity_id){ if(n.kind==="chat") chOpen(n.activity_id); else if(n.kind==="word_fixed") wdOpen(n.activity_id); else sOpen(n.activity_id); }
 }
