@@ -8623,6 +8623,8 @@ function nbText(n){
     case "new_member":   { const nm=n.from_name&&n.from_name!=="Member"?esc(n.from_name):esc(d.email||tr("someone","jemand","alguien"));
                            return "👋 "+tr(`New member: ${nm}`,`Neues Mitglied: ${nm}`,`Nuevo miembro: ${nm}`)+(d.total?` · ${tr(`${d.total} accounts in total`,`${d.total} Konten insgesamt`,`${d.total} cuentas en total`)}`:""); }
     case "times_nudge": return "🕒 "+tr("Add your free times so partners can find a time that works for you both.","Trag deine freien Zeiten ein, damit Partner einen passenden Termin finden.","Añade tus horas libres para que tus compañeros encuentren un momento para los dos.");
+    case "shop_new":    { const lg=d.lang&&T[d.lang]?`${T[d.lang].flag} ${esc(lname(d.lang))}`:""; const ti=esc(d.title||"");
+                           return "📚 "+tr(`New for your ${lg}: “${ti}”. Tap to open.`,`Neu für dein ${lg}: „${ti}“. Tippe zum Öffnen.`,`Nuevo para tu ${lg}: «${ti}». Toca para abrir.`); }
     case "profile_nudge": return "🗣️ "+tr("Add your languages so we can match you with people to practise with.","Trag deine Sprachen ein, damit wir dir Leute zum Üben zeigen können.","Añade tus idiomas para que podamos mostrarte personas con quienes practicar.");
     case "feedback":     return (d.kind==="bug"?"🐞 ":"💡 ")+tr("New feedback","Neues Feedback","Nuevas sugerencias")+`: “${esc(d.text||"")}”`;
     case "duel_done":    return "⚔️ "+tr(`${who} played your duel. Tap to see who won!`,`${who} hat dein Duell gespielt. Tippe, um zu sehen, wer gewonnen hat!`,`${who} jugó tu duelo. ¡Toca para ver quién ganó!`);
@@ -8635,6 +8637,7 @@ function nbText(n){
     default:             return tr(`Update for ${t}.`,`Neuigkeit zu ${t}.`,`Novedad sobre ${t}.`);
   }
 }
+function d0(n){ return n&&n.data&&typeof n.data==="object"?n.data:{}; }
 function nbChanges(d){
   const ch=Array.isArray(d.changes)?d.changes:[];
   if(!ch.length) return tr("updated by the host.","vom Host geändert.","actualizada por el anfitrión.");
@@ -8679,6 +8682,7 @@ async function nbTap(id){
   if(n.kind==="feedback"){ fbAdminOpen(); return; }
   if(n.kind==="profile_nudge"){ xOpen(); return; }
   if(n.kind==="times_nudge"){ xOpenTimes(); return; }
+  if(n.kind==="shop_new"&&d0(n).item){ SH.one=null; SH.oneId=d0(n).item; go("shopitem"); shOneLoad(SH.oneId); return; }
   if(/^echo_/.test(n.kind) && n.data && n.data.lounge){ await luEnter(n.data.lounge); ecOpen(); return; }
   if(n.activity_id){ if(n.kind==="chat") chOpen(n.activity_id); else if(n.kind==="word_fixed") wdOpen(n.activity_id); else sOpen(n.activity_id); }
 }
