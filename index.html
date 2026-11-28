@@ -699,6 +699,26 @@
   .rfprog{height:8px;background:rgba(255,255,255,.15);border-radius:99px;overflow:hidden;margin-top:12px}.rfprog i{display:block;height:100%;background:#F2B544;border-radius:99px}
   .rflink{background:#F6F2EC;border-radius:12px;padding:10px 12px;font-weight:700;font-size:14px;display:flex;justify-content:space-between;gap:8px;cursor:pointer;overflow-wrap:anywhere}
   .rfsb span{color:var(--ink,#1B2A41)!important}.rffr{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-top:1px solid var(--line)}.rffr:first-of-type{border-top:0}
+  .nwbtn{position:relative;width:44px;height:44px;border-radius:22px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;cursor:pointer;flex:none;padding:0;font-size:19px}
+  .nwdot{position:absolute;top:2px;right:2px;width:11px;height:11px;border-radius:50%;background:#F25C3B;border:2px solid #fff}
+  @media (min-width:900px){ .dhead .nwbtn{display:none} }
+  .nwsheet{background:linear-gradient(165deg,#1B2A41,#2F4B7C);border-radius:24px;padding:18px 14px 20px;color:#fff;box-shadow:0 10px 28px #1B2A4133}
+  .nwk{font-size:12px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:#F2B544}.nwclose{background:rgba(255,255,255,.14);color:#fff;border:0;border-radius:50%;width:38px;height:38px;font-size:16px;cursor:pointer}
+  .nwtabs{display:flex;gap:6px;margin:12px 0 14px}.nwtabs button{border:0;border-radius:999px;padding:8px 14px;font:inherit;font-weight:800;font-size:14px;background:rgba(255,255,255,.12);color:#fff;cursor:pointer}.nwtabs .on{background:#F2B544;color:#1B2A41}
+  .nwnote{font-size:13.5px;color:rgba(255,255,255,.8);margin:0 0 12px}
+  .nwcard{background:#fff;color:var(--ink,#1B2A41);border-radius:20px;padding:14px;margin-bottom:12px;box-shadow:0 8px 20px #0003}.nwcard.sm{padding:11px 14px}
+  .nwh{display:flex;gap:12px;align-items:center}.nwpal svg{width:50px;height:50px;display:block}.nwemo{font-size:30px;line-height:1;flex:none}
+  .nwcard h4{margin:3px 0 0;font-size:16px}.nwcard p{margin:8px 0 10px;font-size:14px;color:var(--muted);line-height:20px}
+  .nwtag{display:inline-block;font-size:10.5px;font-weight:800;border-radius:999px;padding:2px 8px;letter-spacing:.4px}.nwtag.new{background:#FCE6DF;color:#B8371C}.nwtag.improved{background:#DDEFEC;color:#1E6B63}.nwtag.fixed{background:#E7EDF6;color:#2F4B7C}
+  .nwdate{font-size:11px;color:#8A919E;font-weight:700}.nwx{margin-left:auto;background:none;border:0;font-size:16px;cursor:pointer;opacity:.6}
+  .nwr{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}.nwrx{display:flex;gap:5px}.nwrx button{border:0;background:#F6F2EC;border-radius:999px;padding:5px 9px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}.nwrx .me{background:#FDF2D8;box-shadow:inset 0 0 0 2px #F2B544}
+  .nwtry{background:#F25C3B;color:#fff;border:0;border-radius:999px;padding:8px 13px;font:inherit;font-weight:800;font-size:13.5px;cursor:pointer}
+  .nwvote{background:#fff;color:var(--ink,#1B2A41);border-radius:18px;padding:12px 14px;margin-bottom:10px;display:flex;gap:12px;align-items:center;width:100%;border:0;font:inherit}
+  .nwvote b{font-size:15px}.nwvote small{display:block;color:var(--muted);font-size:12.5px;margin-top:1px}.nwvbar{height:6px;background:#F0EBE3;border-radius:9px;margin-top:7px;overflow:hidden}.nwvbar i{display:block;height:100%;background:#F2B544}
+  .nwvb{border:2px solid var(--line);background:#fff;border-radius:14px;padding:7px 10px;font:inherit;font-weight:800;font-size:13.5px;min-width:62px;cursor:pointer;color:var(--ink,#1B2A41)}.nwvb.on{background:#2A8C82;border-color:#2A8C82;color:#fff}
+  .nwidea{background:rgba(255,255,255,.08);color:#fff;border:1px dashed rgba(255,255,255,.4);cursor:pointer}.nwidea small{color:rgba(255,255,255,.7)}.nwidea .nwvb{background:transparent;color:#fff;border-color:rgba(255,255,255,.4)}
+  .nwadd{width:100%;border:1px dashed rgba(255,255,255,.5);background:rgba(255,255,255,.08);color:#fff;border-radius:16px;padding:11px;font:inherit;font-weight:800;margin-bottom:12px;cursor:pointer}
+  .nwform .nwin{width:100%;margin:5px 0;border:1px solid var(--line);border-radius:12px;padding:9px 11px;font:inherit;font-size:14px;background:#fff}
   .nbbell{position:relative;width:44px;height:44px;border-radius:22px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;cursor:pointer;color:var(--ink);flex:none;padding:0}
   .nbdot{position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;border-radius:10px;background:var(--coral);color:#fff;font:800 11px 'Plus Jakarta Sans',sans-serif;display:grid;place-items:center;padding:0 5px;box-sizing:border-box}
   .dhead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
@@ -7281,7 +7301,7 @@ function homeRecs(){
 }
 
 /* ===================== BOTTOM BAR ===================== */
-const NAV_TAB = { invite:"account", report:"home", sbuild:"games", home:"home", bridge:"games", split:"games", conj:"games", board:"sessions", host:"sessions", session:"sessions", games:"games", account:"profile", xprofile:"profile" };
+const NAV_TAB = { news:"home", invite:"account", report:"home", sbuild:"games", home:"home", bridge:"games", split:"games", conj:"games", board:"sessions", host:"sessions", session:"sessions", games:"games", account:"profile", xprofile:"profile" };
 const WIDE = { home:"xl", board:"xl", host:"md", session:"md", account:"md", xprofile:"md", games:"md" };
 const ICO = {
   home:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10l9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>',
@@ -7323,7 +7343,7 @@ function navSync(){
   cl.add("has-nav");
   n.innerHTML = NAV_ITEMS.map(([k,en,de,fn,es])=>`<button class="${tab===k?"on":""}" ${tab===k?'aria-current="page"':""} onclick="${fn}">${ICO[k]}${tr(en,de,es)}</button>`).join("");
   if(A.user){ nbStart(); nbFresh(); } else if(NB.timer){ clearInterval(NB.timer); NB.timer=null; NB.list=[]; NB.unread=0; }
-  const me = A.user ? `${dmBtn()}${bellBtn()}<button class="tme" aria-label="Profile" onclick="${NAV_ITEMS[4][3]}">${A.profile&&A.profile.avatar_url?`<img src="${esc(A.profile.avatar_url)}" alt="">`:esc((meName()||"?").charAt(0).toUpperCase())}</button>`
+  const me = A.user ? `${nwBtn()}${dmBtn()}${bellBtn()}<button class="tme" aria-label="Profile" onclick="${NAV_ITEMS[4][3]}">${A.profile&&A.profile.avatar_url?`<img src="${esc(A.profile.avatar_url)}" alt="">`:esc((meName()||"?").charAt(0).toUpperCase())}</button>`
                     : `<button class="tsign" onclick="${NAV_ITEMS[4][3]}">${tr("Sign in","Anmelden","Entrar")}</button>`;
   t.innerHTML = `<div class="tin"><button class="tlogo" onclick="goHome()"><span class="plogo">${ICO.logo}</span>PonteTalk <span class="beta">Beta</span></button>
     <nav class="tlinks" aria-label="Main">${NAV_ITEMS.slice(0,4).map(([k,en,de,fn,es])=>`<button class="${tab===k?"on":""}" ${tab===k?'aria-current="page"':""} onclick="${fn}">${ICO[k]}${tr(en,de,es)}</button>`).join("")}</nav>${me}</div>`;
@@ -8086,7 +8106,7 @@ function homeDash(){
   const speak=(R.mine||[]).filter(m=>m.role!=="learning").map(m=>T[m.code]?lname(m.code):m.code);
   return `<div class="dash">
     <div style="min-width:0;display:flex;flex-direction:column;gap:18px">
-      <div class="card" style="margin:0"><div class="dhead"><h1 class="dhi">${tr("Hi","Hallo","Hola")} ${esc(name)}</h1><div style="display:flex;gap:8px">${dmBtn()}${bellBtn()}</div></div>
+      <div class="card" style="margin:0"><div class="dhead"><h1 class="dhi">${tr("Hi","Hallo","Hola")} ${esc(name)}</h1><div style="display:flex;gap:8px">${nwBtn()}${dmBtn()}${bellBtn()}</div></div>
         <p class="sub" style="margin:2px 0 14px">${tr("Here's what's next for you.","Das steht als Nächstes an.","Esto es lo próximo para ti.")}</p>${nextCard()}</div>
       ${holdCard()}
       ${recCard()}
@@ -8514,6 +8534,63 @@ async function rfClaim(){ let r=null; try{ r=JSON.parse(localStorage.getItem("pt
     if(data&&data.ok) bToast("🎉 "+(data.name?tr(`You joined with ${data.name}'s invite. Welcome!`,`Du bist über ${data.name}s Einladung dabei. Willkommen!`,`Te uniste con la invitación de ${data.name}. ¡Bienvenido/a!`):tr("Welcome to PonteTalk!","Willkommen bei PonteTalk!","¡Bienvenido/a a PonteTalk!"))); }catch(e){}
   RF.claiming=false; }
 setInterval(rfClaim,5000);
+/* ---------- 🎁 What's new: updates + reactions, "Coming soon" voting ---------- */
+const NW={ d:null, tab:"up", busy:false, admin:false, form:null };
+const NW_GO={ report:["🌉 Bridge Report","brOpen()"], sbuild:["🧱 Sentence Builder","sbOpen()"], tenses:["⏳ Past · Present · Future","sbOpen(undefined,'tense')"], cards:["🃏 Flashcards","recVc()"],
+  games:["🎮 Games","go('games')"], shop:["🛍️ PonteShop","shOpen()"], sessions:["📅 Sessions","go('sessions')"], partners:["🤝 Find partners","xOpen()"], hangman:["🌉 Save the Pal","hmOpen()"], bridge:["🌉 Bridge Builder","bbOpen()"] };
+const NW_RX=["🔥","❤️","👍","🤔"];
+function nwSeen(){ try{ return localStorage.getItem("pt_news_seen")||""; }catch(e){ return ""; } }
+function nwLatest(){ const u=(NW.d&&NW.d.updates)||[]; return u.length?u[0].created_at:""; }
+function nwUnseen(){ const l=nwLatest(); return !!l&&l>nwSeen(); }
+function nwBtn(){ return `<button class="nwbtn" aria-label="${tr("What's new","Neuigkeiten","Novedades")}" onclick="nwOpen()">🎁${nwUnseen()?`<span class="nwdot"></span>`:""}</button>`; }
+function nwSync(){ document.querySelectorAll(".nwbtn").forEach(b=>{ b.outerHTML=nwBtn(); }); }
+async function nwLoad(){ if(NW.busy) return; NW.busy=true;
+  try{ const sb=(typeof authClient==="function"?authClient():A.sb); const { data, error }=await sb.rpc("pt_news"); if(error) throw error; NW.d=data||{ updates:[], ideas:[] }; }catch(e){ NW.d=NW.d||{ updates:[], ideas:[], err:true }; }
+  if(A.user&&A.sb){ try{ const a=await A.sb.rpc("pt_is_admin"); NW.admin=!!a.data; }catch(e){} }
+  NW.busy=false; nwSync(); if(S.screen==="news"){ nwMarkSeen(); xr(); } }
+function nwMarkSeen(){ const l=nwLatest(); if(l){ try{ localStorage.setItem("pt_news_seen",l); }catch(e){} } nwSync(); }
+function nwOpen(tab){ if(tab) NW.tab=tab; go("news"); nwMarkSeen(); nwLoad(); }
+function nwT(o,f){ return (UI==="de"&&o[f+"_de"])||(UI==="es"&&o[f+"_es"])||o[f+"_en"]||""; }
+function nwNeedIn(){ if(A.user&&A.status==="in") return false; bToast(tr("Sign in to react and vote","Melde dich an, um zu reagieren und abzustimmen","Inicia sesión para reaccionar y votar")); go("account"); return true; }
+async function nwReact(id,e){ if(nwNeedIn()) return; const u=NW.d.updates.find(x=>x.id===id); if(!u) return; const on=(u.mine||[]).includes(e);
+  u.mine=on?u.mine.filter(x=>x!==e):[...(u.mine||[]),e]; u.reacts=u.reacts||{}; u.reacts[e]=Math.max(0,(u.reacts[e]||0)+(on?-1:1)); xr();
+  try{ const { error }=await A.sb.rpc("pt_news_react",{ p_id:id, p_emoji:e }); if(error) throw error; }catch(err){ bToast(bErr(err)); nwLoad(); } }
+async function nwVote(id){ if(nwNeedIn()) return; const i=NW.d.ideas.find(x=>x.id===id); if(!i) return; i.voted=!i.voted; i.votes=Math.max(0,(i.votes||0)+(i.voted?1:-1)); xr();
+  try{ const { error }=await A.sb.rpc("pt_idea_vote",{ p_id:id }); if(error) throw error; if(i.voted) bToast(tr("🙋 Thanks! Your vote counts.","🙋 Danke! Deine Stimme zählt.","🙋 ¡Gracias! Tu voto cuenta.")); }catch(err){ bToast(bErr(err)); nwLoad(); } }
+function nwTry(go_){ if(!go_) return; if(/^https?:\/\//.test(go_)){ window.open(go_,"_blank","noopener"); return; } const g=NW_GO[go_]; if(g) new Function(g[1])(); }
+async function nwHide(id){ if(!confirm(tr("Hide this from everyone?","Für alle ausblenden?","¿Ocultar para todos?"))) return; try{ await A.sb.rpc("pt_news_hide",{ p_id:id }); nwLoad(); }catch(e){ bToast(bErr(e)); } }
+function nwFormOpen(type){ NW.form={ type, tag:"new", emoji:type==="idea"?"💡":"✨", pal:"", title_en:"", title_de:"", title_es:"", body_en:"", body_de:"", body_es:"", try_go:"" }; xr(); }
+async function nwPost(){ const f=NW.form; if(!f||!f.title_en.trim()){ bToast(tr("Add an English title","Englischen Titel eingeben","Añade un título en inglés")); return; }
+  try{ const { error }=await A.sb.rpc("pt_news_post",{ p:f }); if(error) throw error; NW.form=null; bToast("✅ "+tr("Posted!","Veröffentlicht!","¡Publicado!")); NW.tab=f.type==="idea"?"soon":"up"; nwLoad(); }catch(e){ bToast(bErr(e)); } }
+function nwFormHtml(){ const f=NW.form, I=(k,ph,ta)=>ta?`<textarea class="nwin" rows="2" placeholder="${ph}" oninput="NW.form.${k}=this.value">${esc(f[k])}</textarea>`:`<input class="nwin" placeholder="${ph}" value="${esc(f[k])}" oninput="NW.form.${k}=this.value">`;
+  return `<div class="nwcard nwform"><b>${f.type==="idea"?"🗳️ New idea":"📰 New update"}</b>
+   ${f.type==="idea"?"":`<div class="row" style="gap:6px;margin:8px 0">${["new","improved","fixed"].map(t=>`<button class="chip ${f.tag===t?"on":""}" onclick="NW.form.tag='${t}';xr()">${t.toUpperCase()}</button>`).join("")}</div>`}
+   <div style="display:flex;gap:6px">${I("emoji","Emoji")}${f.type==="idea"?"":`<select class="nwin" onchange="NW.form.pal=this.value"><option value="">No Pal</option>${Object.keys(PALS).map(k=>`<option value="${k}" ${f.pal===k?"selected":""}>${esc(PALS[k].n)}</option>`).join("")}</select>`}</div>
+   ${I("title_en","Title (English) *")}${I("body_en","Short text (English)",1)}
+   <details><summary class="note">🇩🇪 🇪🇸 German / Spanish (optional)</summary>${I("title_de","Titel (Deutsch)")}${I("body_de","Text (Deutsch)",1)}${I("title_es","Título (español)")}${I("body_es","Texto (español)",1)}</details>
+   ${f.type==="idea"?"":`<select class="nwin" onchange="NW.form.try_go=this.value"><option value="">No “Try it” button</option>${Object.entries(NW_GO).map(([k,v])=>`<option value="${k}" ${f.try_go===k?"selected":""}>Try it → ${v[0]}</option>`).join("")}</select>`}
+   <div class="row" style="gap:8px;margin-top:8px"><button class="btn secondary" onclick="NW.form=null;xr()">${tr("Cancel","Abbrechen","Cancelar")}</button><button class="btn primary" onclick="nwPost()">🚀 ${tr("Post","Veröffentlichen","Publicar")}</button></div></div>`; }
+VIEWS.news = function(){ const D=NW.d, tab=NW.tab, fmt=t=>new Date(t).toLocaleDateString(UI==="de"?"de-DE":UI==="es"?"es-ES":"en-GB",{ day:"numeric", month:"short" });
+  const tagL={ new:tr("NEW","NEU","NUEVO"), improved:tr("IMPROVED","BESSER","MEJORADO"), fixed:tr("FIXED","BEHOBEN","ARREGLADO") };
+  let body;
+  if(!D) body=`<p class="nwnote">${tr("Loading…","Lädt…","Cargando…")}</p>`;
+  else if(tab==="up"){ const U=D.updates||[];
+    body=(NW.admin?(NW.form&&NW.form.type==="update"?nwFormHtml():`<button class="nwadd" onclick="nwFormOpen('update')">＋ ${tr("Post an update","Update posten","Publicar novedad")}</button>`):"")
+     +(U.map(u=>{ const t=nwT(u,"title"), b=nwT(u,"body"), small=!b&&!u.try_go, pal=u.pal&&typeof palArt==="function"?palArt(u.pal,52):"";
+      return `<div class="nwcard ${small?"sm":""}"><div class="nwh">${pal?`<span class="nwpal">${pal}</span>`:`<span class="nwemo">${esc(u.emoji||"✨")}</span>`}<div style="min-width:0"><span class="nwtag ${u.tag}">${tagL[u.tag]||""}</span> <span class="nwdate">· ${fmt(u.created_at)}</span><h4>${pal&&u.emoji?esc(u.emoji)+" ":""}${esc(t)}</h4></div>${NW.admin?`<button class="nwx" onclick="nwHide('${u.id}')" aria-label="hide">🗑</button>`:""}</div>
+        ${b?`<p>${esc(b)}</p>`:""}${small?"":`<div class="nwr"><div class="nwrx">${NW_RX.map(e=>{ const n=(u.reacts||{})[e]||0, me=(u.mine||[]).includes(e); return `<button class="${me?"me":""}" onclick="nwReact('${u.id}','${e}')">${e}${n?` ${n}`:""}</button>`; }).join("")}</div>${u.try_go?`<button class="nwtry" onclick="nwTry('${esc(u.try_go)}')">${tr("Try it","Ausprobieren","Probar")} →</button>`:""}</div>`}</div>`; }).join("")
+     ||`<p class="nwnote">${tr("No updates yet.","Noch keine Updates.","Aún no hay novedades.")}</p>`); }
+  else { const I=D.ideas||[], mx=Math.max(1,...I.map(i=>i.votes||0)), st={ building:tr("🚧 Building","🚧 In Arbeit","🚧 En marcha"), done:tr("✅ Done","✅ Fertig","✅ Hecho") };
+    body=`<p class="nwnote">${tr("Tap 🙋 on the ideas you want. The most wanted get built first.","Tippe 🙋 bei den Ideen, die du willst. Die beliebtesten bauen wir zuerst.","Toca 🙋 en las ideas que quieras. Las más pedidas se construyen primero.")}</p>`
+     +(NW.admin?(NW.form&&NW.form.type==="idea"?nwFormHtml():`<button class="nwadd" onclick="nwFormOpen('idea')">＋ ${tr("Add an idea","Idee hinzufügen","Añadir idea")}</button>`):"")
+     +I.map(i=>`<div class="nwvote"><span class="nwemo" style="font-size:26px">${esc(i.emoji||"💡")}</span><div style="flex:1;min-width:0"><b>${esc(nwT(i,"title"))}</b>${st[i.status]?` <span class="nwtag improved">${st[i.status]}</span>`:""}<small>${esc(nwT(i,"body"))}</small><div class="nwvbar"><i style="width:${Math.round((i.votes||0)/mx*100)}%"></i></div></div>
+        <button class="nwvb ${i.voted?"on":""}" onclick="nwVote('${i.id}')">🙋 ${i.votes||0}</button>${NW.admin?`<button class="nwx" onclick="nwHide('${i.id}')">🗑</button>`:""}</div>`).join("")
+     +`<button class="nwvote nwidea" onclick="${typeof fbOpen==="function"?"fbOpen()":"go('feedback')"}"><span class="nwemo" style="font-size:26px">💡</span><div style="flex:1;text-align:left"><b>${tr("Got an idea?","Eine Idee?","¿Tienes una idea?")}</b><small>${tr("Suggest something new","Schlag etwas Neues vor","Sugiere algo nuevo")}</small></div><span class="nwvb">＋</span></button>`; }
+  return `<div class="nwsheet"><div style="display:flex;justify-content:space-between;align-items:center"><div><div class="nwk">${tr("What's new","Neuigkeiten","Novedades")}</div>
+     <h2 style="margin:2px 0 0;color:#fff">${tab==="up"?tr("Fresh on the bridge ✨","Neu auf der Brücke ✨","Novedades en el puente ✨"):tr("What should we build next? 🗳️","Was bauen wir als Nächstes? 🗳️","¿Qué construimos ahora? 🗳️")}</h2></div>
+     <button class="nwclose" onclick="go('home')" aria-label="close">✕</button></div>
+    <div class="nwtabs"><button class="${tab==="up"?"on":""}" onclick="NW.tab='up';NW.form=null;xr()">📰 ${tr("Updates","Updates","Novedades")}</button><button class="${tab==="soon"?"on":""}" onclick="NW.tab='soon';NW.form=null;xr()">🗳️ ${tr("Coming soon","Demnächst","Próximamente")}</button></div>
+    ${body}</div>`; };
 function bellBtn(){
   if(!A.user || (NP.loaded && !NP.v.in_app)) return "";
   const n=NB.unread;
@@ -11312,6 +11389,7 @@ async function llFlush(){ const q=llQ(); if(!q.length||!(A.user&&A.sb)||LL.busy)
   try{ const { error }=await A.sb.rpc("pt_learn_add",{ p_rows:batch }); if(!error){ LL.q=llQ().slice(batch.length); llKeep(); } }catch(e){} LL.busy=false; }
 document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="hidden") llFlush(); });
 setInterval(llFlush,60000);
+setTimeout(()=>{ try{ nwLoad(); }catch(e){} },2500); setInterval(()=>{ try{ nwLoad(); }catch(e){} },30*60000);
 /* ---------- 🌉 Bridge Report: last 7 days, by skill ---------- */
 const BR={ d:null, busy:false, at:0 };
 const BR_SB={ dat:["Dativ (wem?)","Dativ (wem?)","Dativo (wem?)"], akk:["Akkusativ (was?)","Akkusativ (was?)","Acusativo (was?)"], wo:["wo? → Dativ","wo? → Dativ","wo? → dativo"],
