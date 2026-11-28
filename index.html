@@ -692,6 +692,13 @@
   .lstep b.n{flex:none;width:32px;height:32px;border-radius:16px;background:var(--plum-soft);color:var(--plum);display:grid;place-items:center;font-size:15px}
   .lstep h3{font-size:16px;margin:2px 0 2px}
   .lstep p{margin:0;font-size:14px;color:var(--muted)}
+  .rfmini{display:flex;gap:12px;align-items:center;cursor:pointer}.rfbig{font-size:32px}
+  .rfhero{background:linear-gradient(160deg,#1B2A41,#2F4B7C);border-radius:24px;padding:18px;margin:0 0 12px;color:#fff;box-shadow:0 8px 24px #1B2A4133}
+  .rfladder{display:flex;align-items:center;gap:4px}.rfstep{flex:1;text-align:center;background:rgba(255,255,255,.08);border-radius:16px;padding:10px 4px;opacity:.6}.rfstep.on{background:rgba(242,181,68,.2);opacity:1;box-shadow:inset 0 0 0 2px #F2B544}
+  .rfstep .rfe{display:block;font-size:28px}.rfstep b{display:block;font-size:12.5px;margin-top:2px}.rfstep small{font-size:11px;color:rgba(255,255,255,.7)}.rfline{width:10px;height:2px;background:rgba(255,255,255,.3);flex:none}
+  .rfprog{height:8px;background:rgba(255,255,255,.15);border-radius:99px;overflow:hidden;margin-top:12px}.rfprog i{display:block;height:100%;background:#F2B544;border-radius:99px}
+  .rflink{background:#F6F2EC;border-radius:12px;padding:10px 12px;font-weight:700;font-size:14px;display:flex;justify-content:space-between;gap:8px;cursor:pointer;overflow-wrap:anywhere}
+  .rfsb span{color:var(--ink,#1B2A41)!important}.rffr{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-top:1px solid var(--line)}.rffr:first-of-type{border-top:0}
   .nbbell{position:relative;width:44px;height:44px;border-radius:22px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;cursor:pointer;color:var(--ink);flex:none;padding:0}
   .nbdot{position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;border-radius:10px;background:var(--coral);color:#fff;font:800 11px 'Plus Jakarta Sans',sans-serif;display:grid;place-items:center;padding:0 5px;box-sizing:border-box}
   .dhead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
@@ -823,7 +830,7 @@
   .shsheet{background:linear-gradient(160deg,#1B2A41,#2F4B7C)!important;color:#fff;max-width:480px}
   .shprev{margin:14px 0 8px;border-radius:18px;overflow:hidden;background:rgba(255,255,255,.06);text-align:center;box-shadow:0 8px 24px #0004}.shprev img{width:100%;display:block}
   .shtxt{font-size:13px;color:rgba(255,255,255,.75);margin:6px 0 12px;line-height:19px}
-  .shgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px 6px}.shb{background:none;border:0;color:#fff;font:inherit;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;padding:0}
+  .sxgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px 6px}.shb{background:none;border:0;color:#fff;font:inherit;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;padding:0}
   .shb i{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:22px;font-weight:800;color:#fff;box-shadow:0 4px 12px #0003;transition:transform .15s}.shb:hover i,.shb:active i{transform:scale(1.08)}
   .shb span{font-size:12px;font-weight:700;color:rgba(255,255,255,.85)}.shnote{font-size:12px;color:rgba(255,255,255,.6);margin:14px 0 0}
   .brwhy{font-size:12px;color:rgba(255,255,255,.65);margin:10px 0 0;line-height:17px}
@@ -3445,6 +3452,7 @@ VIEWS.account = function(){
     <button class="chip" onclick="editProfile()">✏️ ${tr("Edit","Bearbeiten","Editar")}</button>
   </div>
   ${msg}
+  ${rfCard(true)}
   <div class="card">${uiPicker().replace('margin:0 0 14px','')}</div>
   <div class="card"><h3>🌍 ${tr("Language exchange","Sprachtandem","Intercambio de idiomas")}</h3>
     <p class="note" style="margin-top:0">${tr("Add your languages and free times to get matched with partners and sessions.","Trage Sprachen und Zeiten ein, um passende Partner und Sessions zu finden.","Añade tus idiomas y tus horarios libres para encontrar compañeros y sesiones.")}</p>
@@ -7273,7 +7281,7 @@ function homeRecs(){
 }
 
 /* ===================== BOTTOM BAR ===================== */
-const NAV_TAB = { report:"home", sbuild:"games", home:"home", bridge:"games", split:"games", conj:"games", board:"sessions", host:"sessions", session:"sessions", games:"games", account:"profile", xprofile:"profile" };
+const NAV_TAB = { invite:"account", report:"home", sbuild:"games", home:"home", bridge:"games", split:"games", conj:"games", board:"sessions", host:"sessions", session:"sessions", games:"games", account:"profile", xprofile:"profile" };
 const WIDE = { home:"xl", board:"xl", host:"md", session:"md", account:"md", xprofile:"md", games:"md" };
 const ICO = {
   home:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10l9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>',
@@ -8462,6 +8470,50 @@ function npCard(){
 /* ===================== IN-APP NOTIFICATIONS (bell) ===================== */
 const NB = { list:[], unread:0, timer:null };
 ICO.bell = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>';
+/* ---------- 🤝 Invite friends: personal link + badge ladder ---------- */
+const RF={ d:null, busy:false };
+const RF_TIERS=[[1,"🌱",["Bridge Starter","Brücken-Starter","Iniciador del puente"]],[3,"🌉",["Bridge Builder","Brückenbauer","Constructor de puentes"]],[5,"🏅",["Ambassador","Botschafter","Embajador"]]];
+function rfTier(n){ let t=null; for(const x of RF_TIERS) if(n>=x[0]) t=x; return t; }
+function rfLink(){ return RF.d&&RF.d.code?`https://pontetalk.setzio.com/?i=${RF.d.code}`:""; }
+async function rfLoad(){ if(!(A.user&&A.sb)||RF.busy) return; RF.busy=true;
+  try{ await A.sb.rpc("pt_my_ref"); const { data, error }=await A.sb.rpc("pt_my_ref_stats"); if(error) throw error; RF.d=data; }catch(e){ RF.d=RF.d||{ err:true }; } RF.busy=false; if(["account","invite"].includes(S.screen)) xr(); }
+function rfText(){ return tr("Practise languages with me on PonteTalk 🌉 games, flashcards and real conversations, free:","Übe mit mir Sprachen auf PonteTalk 🌉 Spiele, Karteikarten und echte Gespräche, kostenlos:","Practica idiomas conmigo en PonteTalk 🌉 juegos, tarjetas y conversaciones reales, gratis:"); }
+function rfShare(k){ const L=rfLink(), t=rfText(); if(!L) return; const E=encodeURIComponent;
+  if(k==="wa") window.open("https://wa.me/?text="+E(t+" "+L),"_blank","noopener");
+  else if(k==="mail") location.href="mailto:?subject="+E("PonteTalk 🌉")+"&body="+E(t+"\n\n"+L);
+  else if(k==="more"&&navigator.share) navigator.share({ text:t, url:L }).catch(()=>{});
+  else { try{ navigator.clipboard.writeText(L).then(()=>bToast(tr("📋 Link copied!","📋 Link kopiert!","📋 ¡Enlace copiado!")),()=>prompt("",L)); }catch(e){ prompt("",L); } } }
+function rfCard(compact){ if(!(A.user&&A.status==="in")) return ""; if(!RF.d){ rfLoad(); return ""; } if(RF.d.err) return "";
+  const n=RF.d.counted||0, t=rfTier(n), next=RF_TIERS.find(x=>n<x[0]), pend=(RF.d.friends||[]).filter(f=>!f.ok).length;
+  if(compact) return `<div class="card rfmini" onclick="go('invite')"><span class="rfbig">${t?t[1]:"🤝"}</span><div style="flex:1;min-width:0"><b>${t?tr(...t[2]):tr("Invite friends","Freunde einladen","Invita a amigos")}</b><div class="note" style="margin:0">${next?tr(`${n} of ${next[0]} friends → ${next[1]} ${next[2][0]}`,`${n} von ${next[0]} Freunden → ${next[1]} ${next[2][1]}`,`${n} de ${next[0]} amigos → ${next[1]} ${next[2][2]}`):tr("🏅 Ambassador! Thank you 💛","🏅 Botschafter! Danke 💛","🏅 ¡Embajador! Gracias 💛")}</div></div><span class="chip">${tr("Invite","Einladen","Invitar")} →</span></div>`;
+  return "";
+}
+VIEWS.invite = function(){ const back=`<div class="topline"><button class="chip" onclick="go('account')">${uiBack()} ${tr("Profile","Profil","Perfil")}</button><span>🤝 ${tr("Invite friends","Freunde einladen","Invita a amigos")}</span></div>`;
+  if(!(A.user&&A.status==="in")) return back+`<div class="card center"><p>${tr("Sign in to get your invite link.","Melde dich an, um deinen Einladungslink zu bekommen.","Inicia sesión para obtener tu enlace.")}</p><button class="btn primary" onclick="go('account')">${tr("Sign in","Anmelden","Iniciar sesión")}</button></div>`;
+  if(!RF.d){ rfLoad(); return back+`<p class="note center">${tr("Loading…","Lädt…","Cargando…")}</p>`; }
+  const n=RF.d.counted||0, t=rfTier(n), next=RF_TIERS.find(x=>n<x[0]), L=rfLink(), F=RF.d.friends||[];
+  return back+`<div class="rfhero"><div class="brhl">${tr("Bring your practice partners","Bring deine Übungspartner mit","Trae a tus compañeros de práctica")}</div>
+    <h2 style="margin:4px 0 2px;color:#fff">${tr("More friends = more people to practise with 🌉","Mehr Freunde = mehr Leute zum Üben 🌉","Más amigos = más gente con quien practicar 🌉")}</h2>
+    <p style="margin:0 0 14px;color:rgba(255,255,255,.75);font-size:14px">${tr("A friend counts once they join with your link and add their languages.","Ein Freund zählt, sobald er mit deinem Link beitritt und seine Sprachen einträgt.","Un amigo cuenta cuando se une con tu enlace y añade sus idiomas.")}</p>
+    <div class="rfladder">${RF_TIERS.map(([k,e,nm],i)=>`<div class="rfstep ${n>=k?"on":""}"><span class="rfe">${e}</span><b>${tr(...nm)}</b><small>${k} ${tr(k>1?"friends":"friend",k>1?"Freunde":"Freund",k>1?"amigos":"amigo")}</small></div>`).join('<i class="rfline"></i>')}</div>
+    <div class="rfprog"><i style="width:${Math.min(100,n/5*100)}%"></i></div>
+    <p style="margin:8px 0 0;font-size:15px"><b>${n}</b> ${tr(n===1?"friend counted":"friends counted",n===1?"Freund zählt":"Freunde zählen",n===1?"amigo cuenta":"amigos cuentan")}${next?` · ${tr(`${next[0]-n} more to ${next[1]} ${next[2][0]}`,`noch ${next[0]-n} bis ${next[1]} ${next[2][1]}`,`${next[0]-n} más para ${next[1]} ${next[2][2]}`)}`:" · 🏅 "+tr("you did it!","geschafft!","¡lo lograste!")}</p></div>
+  <div class="card"><h3 style="margin:0 0 8px">🔗 ${tr("Your invite link","Dein Einladungslink","Tu enlace de invitación")}</h3>
+    <div class="rflink" onclick="rfShare('copy')">${esc(L)} <span>📋</span></div>
+    <div class="sxgrid" style="margin-top:14px">${[["wa","💬","WhatsApp","#25D366"],["mail","✉️",tr("Email","E-Mail","Email"),"#F25C3B"],["copy","📋",tr("Copy link","Link kopieren","Copiar enlace"),"#5B6474"]].concat(navigator.share?[["more","⋯",tr("More apps","Weitere Apps","Más apps"),"#2F4B7C"]]:[]).map(([k,ic,l,bg])=>`<button class="shb rfsb" onclick="rfShare('${k}')"><i style="background:${bg}">${ic}</i><span>${l}</span></button>`).join("")}</div></div>
+  <div class="card"><h3 style="margin:0 0 8px">👥 ${tr("Friends who joined","Freunde, die beigetreten sind","Amigos que se unieron")}</h3>
+    ${F.length?F.map(f=>`<div class="rffr"><b>${esc(f.name)}</b><span class="note" style="margin:0">${f.ok?"✅ "+tr("counts","zählt","cuenta"):"⏳ "+tr("needs to add languages","muss noch Sprachen eintragen","falta añadir idiomas")}</span></div>`).join("")
+      :`<p class="note" style="margin:0">${tr("No one yet. Your first friend makes you a 🌱 Bridge Starter!","Noch niemand. Dein erster Freund macht dich zum 🌱 Brücken-Starter!","Nadie aún. ¡Tu primer amigo te convierte en 🌱 Iniciador del puente!")}</p>`}</div>
+  <p class="note center">💡 ${tr("Tip: invite someone who speaks the language you're learning. They'll want to learn yours!","Tipp: Lade jemanden ein, der deine Lernsprache spricht. Er will bestimmt deine lernen!","Consejo: invita a alguien que hable el idioma que aprendes. ¡Querrá aprender el tuyo!")}</p>`; };
+/* someone opened an invite link: remember it, claim it once they're signed in */
+try{ const q=new URLSearchParams(location.search), i=q.get("i"); if(i&&/^[a-z0-9]{4,12}$/i.test(i)){ localStorage.setItem("pt_ref",JSON.stringify({ c:i.toLowerCase(), t:Date.now() })); q.delete("i"); history.replaceState(null,"",location.pathname+(q.toString()?"?"+q:"")); } }catch(e){}
+async function rfClaim(){ let r=null; try{ r=JSON.parse(localStorage.getItem("pt_ref")||"null"); }catch(e){} if(!r||!(A.user&&A.status==="in"&&A.sb)||RF.claiming) return;
+  if(Date.now()-r.t>30*864e5){ localStorage.removeItem("pt_ref"); return; } RF.claiming=true;
+  try{ const { data, error }=await A.sb.rpc("pt_ref_claim",{ p_code:r.c }); if(error) throw error;
+    if(data&&data.why!=="sign_in") localStorage.removeItem("pt_ref");
+    if(data&&data.ok) bToast("🎉 "+(data.name?tr(`You joined with ${data.name}'s invite. Welcome!`,`Du bist über ${data.name}s Einladung dabei. Willkommen!`,`Te uniste con la invitación de ${data.name}. ¡Bienvenido/a!`):tr("Welcome to PonteTalk!","Willkommen bei PonteTalk!","¡Bienvenido/a a PonteTalk!"))); }catch(e){}
+  RF.claiming=false; }
+setInterval(rfClaim,5000);
 function bellBtn(){
   if(!A.user || (NP.loaded && !NP.v.in_app)) return "";
   const n=NB.unread;
@@ -8623,6 +8675,8 @@ function nbText(n){
     case "new_member":   { const nm=n.from_name&&n.from_name!=="Member"?esc(n.from_name):esc(d.email||tr("someone","jemand","alguien"));
                            return "👋 "+tr(`New member: ${nm}`,`Neues Mitglied: ${nm}`,`Nuevo miembro: ${nm}`)+(d.total?` · ${tr(`${d.total} accounts in total`,`${d.total} Konten insgesamt`,`${d.total} cuentas en total`)}`:""); }
     case "times_nudge": return "🕒 "+tr("Add your free times so partners can find a time that works for you both.","Trag deine freien Zeiten ein, damit Partner einen passenden Termin finden.","Añade tus horas libres para que tus compañeros encuentren un momento para los dos.");
+    case "ref_joined":  { const c=d.count||1, nx=RF_TIERS.find(x=>c<x[0]), tt=rfTier(c);
+                           return "🎉 "+tr(`${esc(d.name||"A friend")} joined with your invite!`,`${esc(d.name||"Ein Freund")} ist über deine Einladung dabei!`,`¡${esc(d.name||"Un amigo")} se unió con tu invitación!`)+" "+(tt&&tt[0]===c?tr(`You're now ${tt[1]} ${tt[2][0]}!`,`Du bist jetzt ${tt[1]} ${tt[2][1]}!`,`¡Ahora eres ${tt[1]} ${tt[2][2]}!`):nx?tr(`${nx[0]-c} more to ${nx[1]} ${nx[2][0]}.`,`Noch ${nx[0]-c} bis ${nx[1]} ${nx[2][1]}.`,`${nx[0]-c} más para ${nx[1]} ${nx[2][2]}.`):""); }
     case "profile_nudge": return "🗣️ "+tr("Add your languages so we can match you with people to practise with.","Trag deine Sprachen ein, damit wir dir Leute zum Üben zeigen können.","Añade tus idiomas para que podamos mostrarte personas con quienes practicar.");
     case "feedback":     return (d.kind==="bug"?"🐞 ":"💡 ")+tr("New feedback","Neues Feedback","Nuevas sugerencias")+`: “${esc(d.text||"")}”`;
     case "duel_done":    return "⚔️ "+tr(`${who} played your duel. Tap to see who won!`,`${who} hat dein Duell gespielt. Tippe, um zu sehen, wer gewonnen hat!`,`${who} jugó tu duelo. ¡Toca para ver quién ganó!`);
@@ -8679,6 +8733,7 @@ async function nbTap(id){
   if(n.kind==="feedback"){ fbAdminOpen(); return; }
   if(n.kind==="profile_nudge"){ xOpen(); return; }
   if(n.kind==="times_nudge"){ xOpenTimes(); return; }
+  if(n.kind==="ref_joined"){ RF.d=null; go("invite"); return; }
   if(/^echo_/.test(n.kind) && n.data && n.data.lounge){ await luEnter(n.data.lounge); ecOpen(); return; }
   if(n.activity_id){ if(n.kind==="chat") chOpen(n.activity_id); else if(n.kind==="word_fixed") wdOpen(n.activity_id); else sOpen(n.activity_id); }
 }
@@ -11381,7 +11436,7 @@ function brShSheet(){ const h=BR.sh; if(!h) return "";
     <div style="display:flex;justify-content:space-between;align-items:center"><div><div class="brhl">${tr("Show it off","Zeig es her","Preséntalo")}</div><h3 style="margin:2px 0 0;color:#fff">${tr("Share your bridge 🌉","Teile deine Brücke 🌉","Comparte tu puente 🌉")}</h3></div><button class="brshare" style="position:static" onclick="BR.sh=null;xr()">✕</button></div>
     <div class="shprev">${h.img?`<img src="${h.img}" alt="">`:`<div class="note" style="color:#fff;padding:40px 0">${tr("Making your picture…","Bild wird erstellt …","Creando tu imagen…")}</div>`}</div>
     <p class="shtxt">${esc(h.txt)}</p>
-    <div class="shgrid">${b("wa","💬","WhatsApp","#25D366")}${b("fb","👍","Facebook","#1877F2")}${b("mail","✉️",tr("Email","E-Mail","Email"),"#F25C3B")}${b("tg","✈️","Telegram","#229ED9")}
+    <div class="sxgrid">${b("wa","💬","WhatsApp","#25D366")}${b("fb","👍","Facebook","#1877F2")}${b("mail","✉️",tr("Email","E-Mail","Email"),"#F25C3B")}${b("tg","✈️","Telegram","#229ED9")}
       ${b("x","𝕏","X","#000")}${b("li","💼","LinkedIn","#0A66C2")}${b("copy","📋",tr("Copy text","Text kopieren","Copiar texto"),"#5B6474")}${b("save","🖼️",tr("Save picture","Bild speichern","Guardar imagen"),"#F2B544")}
       ${navigator.share?b("more","⋯",tr("More apps","Weitere Apps","Más apps"),"rgba(255,255,255,.2)"):""}</div>
     <p class="shnote">💡 ${tr("For Instagram or a post with the picture: tap Save picture, then add it in the app.","Für Instagram oder einen Beitrag mit Bild: Bild speichern und in der App hinzufügen.","Para Instagram o una publicación con imagen: guarda la imagen y añádela en la app.")}</p></div></div>`; }
