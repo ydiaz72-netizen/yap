@@ -709,38 +709,62 @@
   .dkwords{display:flex;flex-direction:column;gap:8px}.dkw{display:flex;gap:10px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
   .dkwex{font-size:13px;font-style:italic;color:var(--muted);margin-top:2px}.dkopen{width:auto!important;flex:none;margin:0!important;padding:8px 12px!important}
   .dkadd{margin-bottom:12px}.dkadd b{display:block;margin-bottom:8px}
-  .dktoday{background:linear-gradient(135deg,#2F4B7C,#2A8C82);color:#fff;border-radius:22px;padding:16px;margin-bottom:12px;box-shadow:0 10px 26px rgba(47,75,124,.22)}
-  .dkhi{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.dkhi1{font-family:Fredoka,inherit;font-size:22px;font-weight:600}.dkhi2{font-size:13px;opacity:.85;margin-top:2px}.dkdeskico{font-size:34px;filter:drop-shadow(0 3px 6px rgba(0,0,0,.2))}
-  .dkstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0 12px}
-  .dkst{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:9px 8px;display:flex;flex-direction:column;gap:2px;color:#fff;font:inherit;text-align:start}
-  .dkst b{font-family:Fredoka,inherit;font-size:20px;font-weight:600}.dkst span{font-size:11.5px;opacity:.9;line-height:1.2}button.dkst{cursor:pointer}button.dkst:hover{background:rgba(255,255,255,.22)}
-  .dkwotd{background:#FFF8E6;color:var(--ink);border-radius:16px;padding:12px 14px;cursor:pointer;box-shadow:0 4px 0 #E8C77A;transition:transform .25s}.dkwotd:active{transform:scale(.98)}
-  .dkwotd.flip{background:#E9F6F3;box-shadow:0 4px 0 #9ACFC6}
-  .dkwl{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:700;color:#8A6A1F;text-transform:uppercase;letter-spacing:.04em}.dkwotd.flip .dkwl{color:#1F6E66}
-  .dkwn{background:none;border:none;font-size:16px;cursor:pointer;padding:2px 4px}
-  .dkww{font-family:Fredoka,inherit;font-size:28px;font-weight:600;margin:4px 0 2px;line-height:1.15}.dkwe{font-size:13px;color:var(--muted);font-style:italic}
+  .dkp{max-width:1080px;margin:0 auto;width:100%;min-width:0}.dkweek span{min-width:0}
+  .dkwel{font-size:clamp(26px,4.4vw,38px);font-weight:700;letter-spacing:-.02em;margin:4px 0 14px;color:var(--ink)}.dkwel span{color:#9AA1AD;font-weight:400}
+  .dklang{display:flex;gap:4px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:4px;margin-bottom:10px;overflow-x:auto}
+  .dklang button{flex:1;white-space:nowrap;border:none;background:none;border-radius:10px;padding:8px 12px;font:inherit;font-size:14px;color:var(--muted);cursor:pointer}.dklang button.on{background:var(--bg);color:var(--ink);font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  .dktabs2{display:flex;gap:18px;border-bottom:1px solid var(--line);margin-bottom:16px;overflow-x:auto}
+  .dktabs2 button{border:none;background:none;font:inherit;font-weight:600;font-size:15px;color:var(--muted);padding:8px 0 10px;border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer;white-space:nowrap}.dktabs2 button.on{color:var(--ink);border-bottom-color:var(--ink)}.dkn{opacity:.55;font-weight:500;font-size:13px}
+  .dkgrid2{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:14px;align-items:start}.dkmain,.dkside{display:flex;flex-direction:column;gap:14px}
+  .dkpair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}.dkmain>*,.dkside>*{min-width:0}
+  @media(max-width:1023px){.dkgrid2{grid-template-columns:minmax(0,1fr)}.dkside{order:-1;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr))}}
+  @media(max-width:560px){.dkpair{grid-template-columns:minmax(0,1fr)}}
+  .dkc{background:#fff;border:1px solid #ECE7DF;border-radius:20px;padding:18px;box-shadow:0 1px 2px rgba(27,42,65,.04)}
+  .dkch{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}.dkch h3{margin:0;font-size:19px;font-weight:700;letter-spacing:-.01em}
+  .dkround{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:15px;display:grid;place-items:center;flex:none;color:var(--ink)}.dkround:hover{background:var(--bg)}
+  .dkpill{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer;color:var(--ink)}.dkpill:hover{background:var(--bg)}
+  .dkfeat{display:block;width:100%;text-align:start;border:none;cursor:pointer;background:linear-gradient(135deg,#2F4B7C,#3D5F99);color:#fff;border-radius:16px;padding:14px;font:inherit;margin-bottom:8px}
+  .dkbadge{display:inline-block;background:#F25C3B;color:#fff;font-size:11px;font-weight:700;border-radius:999px;padding:2px 8px}
+  .dkft{font-weight:700;font-size:16px;margin:8px 0 3px}.dkfb{font-size:12.5px;opacity:.8;line-height:1.35;max-height:34px;overflow:hidden}
+  .dkfm{display:flex;justify-content:space-between;font-size:12px;opacity:.85;margin-top:10px}.dkfm span{font-weight:700;opacity:1}
+  .dkrowi{display:flex;align-items:center;gap:10px;width:100%;border:none;background:#F6F3EE;border-radius:14px;padding:10px 12px;margin-top:8px;font:inherit;cursor:pointer;text-align:start;color:var(--ink)}.dkrowi:hover{background:#EFEBE4}
+  .dkrowi.add{background:#fff;border:1.5px dashed var(--line);color:var(--muted)}
+  .dkic{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;flex:none;background:#fff;font-size:15px}
+  .dkrt{flex:1;min-width:0;font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dkrd{font-size:12px;color:var(--muted)}.dkplus{color:var(--muted);font-size:18px}
+  .dksub{font-size:13.5px;color:var(--muted);margin:0 0 4px}.dkover{font-size:12px;color:var(--muted);font-weight:600}
+  .dkbig{display:flex;align-items:center;gap:10px;font-size:52px;font-weight:600;letter-spacing:-.03em;line-height:1;margin:2px 0 14px}.dkbig span{font-size:12.5px;font-weight:500;color:var(--muted);letter-spacing:0;line-height:1.25}
+  .dkbars{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .dkbarc{background:#F6F3EE;border:none;border-radius:14px;padding:10px;text-align:start;font:inherit;color:var(--ink);cursor:pointer}.dkbarc:disabled{cursor:default}.dkbarc:not(:disabled):hover{background:#EFEBE4}
+  .dkbl{font-size:13px;font-weight:600;margin-bottom:8px}.dkbt{height:22px;border-radius:7px;overflow:hidden}.dkbf{height:100%;border-radius:7px;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;padding:0 7px;min-width:fit-content;box-sizing:border-box}
+  .dkbarc.soon{border:1.5px dashed var(--line);background:#fff;display:flex;flex-direction:column;justify-content:space-between}.dkbn{font-weight:700;font-size:15px;color:var(--plum)}
+  .dktbl{font-size:14px}.dkth,.dktr{display:grid;grid-template-columns:minmax(0,2.4fr) 1fr 1.1fr auto;gap:10px;align-items:center}
+  .dkth{font-size:12px;color:var(--muted);padding:0 0 8px;border-bottom:1px solid var(--line)}.dktr{padding:10px 0;border-bottom:1px solid #F1EDE6}.dktr:last-child{border-bottom:none}
+  .dktt{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dktag{font-style:normal;background:#E8F0FB;color:#2F6FD1;font-size:12px;font-weight:600;border-radius:6px;padding:3px 8px;white-space:nowrap}
+  .dkopen2{border:none;background:#2A8C82;color:#fff;font:inherit;font-size:12.5px;font-weight:700;border-radius:8px;padding:6px 10px;cursor:pointer}
+  @media(max-width:560px){.dkth{display:none}.dktr{grid-template-columns:minmax(0,1fr) auto;row-gap:4px}.dktr>span:nth-child(2),.dktr>span:nth-child(3){font-size:12px;color:var(--muted)}.dktr>span:nth-child(4){grid-row:1/3;grid-column:2}}
+  .dkweek{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}.dkweek span{aspect-ratio:1;border-radius:10px;display:grid;place-items:center;background:#F6F3EE;color:var(--muted);font-size:13px;font-weight:600;position:relative}
+  .dkweek span.on{background:#2F4B7C;color:#FFD15C;font-size:15px}.dkweek span.now{background:#fff;border:1.5px solid var(--line);color:var(--ink)}.dkweek span.now::after{content:"";position:absolute;top:5px;right:5px;width:6px;height:6px;border-radius:50%;background:#F25C3B}
+  .dktask{display:flex;align-items:center;gap:12px;width:100%;border:none;background:none;padding:8px 0;font:inherit;cursor:pointer;text-align:start;color:var(--ink)}
+  .dkti2{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font-size:16px;flex:none}.dkti2.done{background:#D3EFEA;border-color:#D3EFEA;color:#2A8C82;font-weight:700}
+  .dktl{flex:1;display:flex;flex-direction:column;font-weight:600;font-size:14.5px}.dktl small{font-weight:500;font-size:11.5px;color:var(--muted)}
+  .dkmin{background:#F6F3EE;border-radius:9px;padding:5px 9px;font-weight:700;font-size:15px}.dkmin small{font-size:11px;color:var(--muted);margin-left:1px}
+  .dkgo{width:100%;margin-top:10px;border:none;border-radius:12px;background:#1B2A41;color:#fff;font:inherit;font-weight:700;font-size:15px;padding:12px;cursor:pointer}.dkgo:hover{background:#26395A}
+  .dkwotd2{cursor:pointer}.dkwd{font-size:26px;font-weight:700;letter-spacing:-.01em;line-height:1.2}
   .g-der{color:#2F6FD1}.g-die{color:#D9466A}.g-das{color:#2A8C82}
-  .dktpls{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 10px;margin-bottom:6px;scrollbar-width:none}.dktpls::-webkit-scrollbar{display:none}
-  .dktpls.big{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));overflow:visible}
-  .dktpl{flex:none;display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-width:120px;padding:12px;border-radius:14px;border:none;font:inherit;font-weight:700;font-size:13.5px;color:var(--ink);cursor:pointer;text-align:start;box-shadow:0 3px 0 rgba(0,0,0,.08);transition:transform .15s}
-  .dktpl span{font-size:24px}.dktpl:hover{transform:translateY(-2px) rotate(-1deg)}.dktpl.blank{background:#fff;border:1.5px dashed var(--line)}
   .c-sun{background:#FFF1C2}.c-coral{background:#FFDCD2}.c-teal{background:#D3EFEA}.c-plum{background:#DDE5F4}.c-sky{background:#D6EAFB}.c-leaf{background:#DDF0CF}
-  .dkempty2{background:#fff;border:1px solid var(--line);border-radius:20px;padding:16px;text-align:center}.dkempty2 .dktpls{text-align:start}.dkemh{font-family:Fredoka,inherit;font-size:20px;font-weight:600}
-  .dkgrid{gap:16px;padding:6px 2px}
-  .dknote{position:relative;border:none!important;border-radius:4px 4px 14px 4px;transform:rotate(var(--r,0deg));box-shadow:0 8px 16px rgba(27,42,65,.10),0 1px 0 rgba(0,0,0,.05);transition:transform .18s,box-shadow .18s;padding-top:18px}
-  .dknote:hover{transform:rotate(0) translateY(-3px) scale(1.02);box-shadow:0 14px 24px rgba(27,42,65,.16)}
-  .dktape{position:absolute;top:-8px;left:50%;width:62px;height:18px;margin-left:-31px;background:rgba(255,255,255,.65);border:1px solid rgba(0,0,0,.05);transform:rotate(-3deg);border-radius:2px}
-  .dkpin{position:absolute;top:-10px;right:8px;font-size:20px}
-  .dknote .dkt{font-family:Fredoka,inherit;font-weight:600;font-size:17px}.dknote .dkb{color:#3D4A5C}.dknote .dkm{color:#5B6474}
-  .dked{border:none}.dked .dkti{background:transparent;font-family:Fredoka,inherit;border-bottom-color:rgba(0,0,0,.12)}.dked .dkbo{background:rgba(255,255,255,.7);border-color:rgba(0,0,0,.08)}
-  .dkguess{margin:0 0 8px}
+  .dktpls{display:flex;gap:8px;overflow-x:auto;padding:2px 0 10px;margin-bottom:6px;scrollbar-width:none}.dktpls::-webkit-scrollbar{display:none}
+  .dktpls.big{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));overflow:visible}
+  .dktpl{flex:none;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;border:1px solid var(--line);background:#fff;font:inherit;font-weight:600;font-size:13.5px;color:var(--ink);cursor:pointer;text-align:start}.dktpl:hover{background:var(--bg)}.dktpl.blank{border-style:dashed}
+  .dkempty2{background:#fff;border:1px solid #ECE7DF;border-radius:20px;padding:18px}.dkemh{font-size:19px;font-weight:700}
+  .dkgrid{gap:12px}
+  .dknote{border:1px solid #ECE7DF!important;border-left:4px solid var(--c,#2F4B7C)!important;border-radius:14px;background:#fff;min-height:120px}
+  .dknote:hover{box-shadow:0 6px 18px rgba(27,42,65,.08)}.dknote .dkt{font-size:15.5px}
   .dktiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
-  .dktile{position:relative;min-height:96px;border-radius:16px;background:#fff;border:1.5px solid var(--line);box-shadow:0 4px 0 var(--line);padding:12px;display:flex;flex-direction:column;justify-content:center;cursor:pointer;transition:transform .2s}
-  .dktile:hover{transform:translateY(-2px)}.dktile.on{color:var(--ink);background:#E9F6F3;border-color:#9ACFC6;box-shadow:0 4px 0 #9ACFC6;animation:dkflip .3s}
-  .dktile.g-der{border-top:5px solid #2F6FD1}.dktile.g-die{border-top:5px solid #D9466A}.dktile.g-das{border-top:5px solid #2A8C82}
-  .dkt1{font-family:Fredoka,inherit;font-size:19px;font-weight:600;text-align:center}.dkt2{font-weight:700;font-size:15px}
+  .dktile{position:relative;min-height:90px;border-radius:14px;background:#fff;border:1px solid #ECE7DF;padding:12px;display:flex;flex-direction:column;justify-content:center;cursor:pointer;transition:background .15s}
+  .dktile:hover{background:#FBFAF7}.dktile.on{color:var(--ink);background:#F2F8F7;border-color:#BFE0DA}
+  .dktile.g-der{border-left:4px solid #2F6FD1}.dktile.g-die{border-left:4px solid #D9466A}.dktile.g-das{border-left:4px solid #2A8C82}
+  .dkt1{font-size:17px;font-weight:700;text-align:center}.dkt2{font-weight:700;font-size:15px}
   .dkx{position:absolute;top:6px;right:6px;background:none;border:none;cursor:pointer;font-size:14px;opacity:.6}
-  @keyframes dkflip{0%{transform:rotateY(90deg)}100%{transform:rotateY(0)}}
   .rfhero{background:linear-gradient(160deg,#1B2A41,#2F4B7C);border-radius:24px;padding:18px;margin:0 0 12px;color:#fff;box-shadow:0 8px 24px #1B2A4133}
   .rfladder{display:flex;align-items:center;gap:4px}.rfstep{flex:1;text-align:center;background:rgba(255,255,255,.08);border-radius:16px;padding:10px 4px;opacity:.6}.rfstep.on{background:rgba(242,181,68,.2);opacity:1;box-shadow:inset 0 0 0 2px #F2B544}
   .rfstep .rfe{display:block;font-size:28px}.rfstep b{display:block;font-size:12.5px;margin-top:2px}.rfstep small{font-size:11px;color:rgba(255,255,255,.7)}.rfline{width:10px;height:2px;background:rgba(255,255,255,.3);flex:none}
@@ -7352,7 +7376,7 @@ function homeRecs(){
 
 /* ===================== BOTTOM BAR ===================== */
 const NAV_TAB = { desk:"home", news:"home", invite:"account", report:"home", sbuild:"games", home:"home", bridge:"games", split:"games", conj:"games", board:"sessions", host:"sessions", session:"sessions", games:"games", account:"profile", xprofile:"profile" };
-const WIDE = { home:"xl", board:"xl", host:"md", session:"md", account:"md", xprofile:"md", games:"md" };
+const WIDE = { desk:"xl", home:"xl", board:"xl", host:"md", session:"md", account:"md", xprofile:"md", games:"md" };
 const ICO = {
   home:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10l9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>',
   sessions:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>',
@@ -8594,9 +8618,9 @@ function nwSeen(){ try{ return localStorage.getItem("pt_news_seen")||""; }catch(
 function nwLatest(){ const u=(NW.d&&NW.d.updates)||[]; return u.length?u[0].created_at:""; }
 function nwUnseen(){ const l=nwLatest(); return !!l&&l>nwSeen(); }
 /* 🗂️ Student Desk: your own notes in folders, the words you saved, and PonteShop guides you pinned (sql/desk.sql). Private to you. */
-const DK={ f:null, n:null, pins:null, sw:null, err:"", tab:"notes", folder:"all", q:"", wq:"", ed:null, busy:false, fEd:null };
+const DK={ f:null, n:null, pins:null, sw:null, err:"", tab:"home", lang:"", folder:"all", q:"", wq:"", ed:null, busy:false, fEd:null };
 const DK_COL={ teal:"#2A8C82", plum:"#2F4B7C", sun:"#E0A12E", coral:"#F25C3B", sky:"#3B8FD9", leaf:"#5A9E3A" };
-function dkOpen(){ DK.ed=null; DK.fEd=null; go("desk"); dkLoad(); if(SH.list===null||SH.list===undefined) shLoad(); }
+function dkOpen(){ DK.ed=null; DK.fEd=null; DK.tab="home"; go("desk"); dkLoad(); if(SH.list===null||SH.list===undefined) shLoad(); }
 async function dkLoad(){
   if(!(A.user&&A.sb)) return; DK.err="";
   try{
@@ -8621,18 +8645,21 @@ function dkLangs(extra){ const s=[...new Set([...(R.mine||[]).map(m=>m.code), ..
 function dkCount(){ return (DK.n||[]).length; }
 
 VIEWS.desk = function(){
-  const top=`<div class="topline"><button class="chip" onclick="${DK.ed?"dkClose()":"goHome()"}">${uiBack()} ${DK.ed?tr("Desk","Schreibtisch","Escritorio"):tr("Back","Zurück","Atrás")}</button><span>🗂️ ${tr("My Desk","Mein Schreibtisch","Mi escritorio")}</span></div>`;
+  const top=`<div class="topline"><button class="chip" onclick="${DK.ed?"dkClose()":DK.tab!=="home"?"DK.tab='home';xr()":"goHome()"}">${uiBack()} ${DK.ed||DK.tab!=="home"?tr("Desk","Schreibtisch","Escritorio"):tr("Back","Zurück","Atrás")}</button><span>🗂️ ${tr("My Desk","Mein Schreibtisch","Mi escritorio")}</span></div>`;
   if(!(A.user&&A.status==="in")) return top+`<div class="card center"><div style="font-size:40px">🗂️</div><h3>${tr("Your own study desk","Dein eigener Lern-Schreibtisch","Tu propio escritorio de estudio")}</h3><p class="note">${tr("Sign in to keep your notes, words and guides in one place.","Melde dich an, um Notizen, Wörter und Materialien an einem Ort zu haben.","Entra para tener tus notas, palabras y guías en un solo lugar.")}</p><button class="btn primary" onclick="A.ret='desk';go('account')">${tr("Sign in","Anmelden","Iniciar sesión")}</button></div>`;
   if(DK.n===null) return top+`<p class="note center" style="margin-top:40px">${tr("Loading…","Lädt…","Cargando…")}</p>`;
   if(DK.ed){ dkGrab(); const ae=document.activeElement, fid=ae&&(ae.id==="dkti"||ae.id==="dkbo")?ae.id:null, ss=fid?ae.selectionStart:0, se=fid?ae.selectionEnd:0, sc=fid==="dkbo"?ae.scrollTop:0;
     if(fid) setTimeout(()=>{ const el=document.getElementById(fid); if(el&&document.activeElement!==el){ el.focus(); try{ el.setSelectionRange(ss,se); }catch(e){} el.scrollTop=sc; } },0);
     return top+dkEditor(); }   /* keep what you typed (and the cursor) if the screen refreshes while you write */
   const nG=dkGuides().length, nW=dkWords().length;
-  const tb=(k,l,n)=>`<button class="${DK.tab===k?"on":""}" aria-pressed="${DK.tab===k}" onclick="DK.tab='${k}';xr()">${l} <span class="dkn">${n}</span></button>`;
-  return top+dkToday()+`
+  const tb=(k,l,n)=>`<button class="${DK.tab===k?"on":""}" aria-pressed="${DK.tab===k}" onclick="DK.tab='${k}';DK.pick=false;xr()">${l}${n==null?"":` <span class="dkn">${n}</span>`}</button>`;
+  const name=meName()||"";
+  return top+`<div class="dkp">
+    <h1 class="dkwel"><span>${tr("Welcome back,","Willkommen zurück,","Bienvenido/a,")}</span> ${esc(name||tr("friend","Freund","amigo"))}!</h1>
     ${DK.err?`<div class="card" style="background:var(--coral-soft);padding:10px 14px">${esc(DK.err)}</div>`:""}
-    <div class="vsw dktabs" role="group">${tb("notes","📝 "+tr("Notes","Notizen","Notas"),dkCount())}${tb("words","🃏 "+tr("Words","Wörter","Palabras"),nW)}${tb("guides","📘 "+tr("Guides","Materialien","Guías"),nG)}</div>
-    ${DK.tab==="words"?dkWordsHtml():DK.tab==="guides"?dkGuidesHtml():dkNotesHtml()}`;
+    ${dkLangTabs()}
+    <div class="dktabs2" role="tablist">${tb("home",tr("Overview","Übersicht","Resumen"))}${tb("notes",tr("Notes","Notizen","Notas"),dkNotesF().length)}${tb("words",tr("Words","Wörter","Palabras"),nW)}${tb("guides",tr("Guides","Materialien","Guías"),dkGuidesF().length)}</div>
+    ${DK.tab==="home"?dkDash():DK.tab==="words"?dkWordsHtml():DK.tab==="guides"?dkGuidesHtml():dkNotesHtml()}</div>`;
 };
 
 
@@ -8641,23 +8668,56 @@ function dkDue(){ const now=Date.now(); let n=0; for(const id in VC.p){ const x=
 function dkWeekNotes(){ const t=Date.now()-7*864e5; return (DK.n||[]).filter(n=>new Date(n.updated_at).getTime()>=t).length; }
 function dkWotd(){ const W=dkWords(); if(!W.length) return null; const d=new Date(); let h=d.getFullYear()*400+d.getMonth()*31+d.getDate()+(DK.wShift||0); return W[((h%W.length)+W.length)%W.length]; }
 function dkGender(w){ const m=/^(der|die|das)\s/i.exec(w||""); return m?m[1].toLowerCase():""; }
-function dkToday(){
-  const st=typeof vcStreak==="function"?vcStreak():0, due=dkDue(), wk=dkWeekNotes(), w=dkWotd(), h=new Date().getHours();
-  const hi=h<12?tr("Good morning","Guten Morgen","Buenos días"):h<18?tr("Good afternoon","Guten Tag","Buenas tardes"):tr("Good evening","Guten Abend","Buenas noches");
-  const name=(typeof meName==="function"&&meName())||"";
-  return `<div class="dktoday">
-    <div class="dkhi"><div><div class="dkhi1">${hi}${name?", "+esc(name):""} ☕</div><div class="dkhi2">${tr("Your desk is ready. Only you can see it.","Dein Schreibtisch ist bereit. Nur du siehst ihn.","Tu escritorio está listo. Solo tú lo ves.")}</div></div><span class="dkdeskico">🗂️</span></div>
-    <div class="dkstats">
-      <div class="dkst fire"><b>🔥 ${st}</b><span>${tr("day streak","Tage am Stück","días seguidos")}</span></div>
-      <button class="dkst due" onclick="vcOpen()"><b>🃏 ${due}</b><span>${due?tr("to review →","zu wiederholen →","por repasar →"):tr("all reviewed ✓","alles wiederholt ✓","todo repasado ✓")}</span></button>
-      <div class="dkst pen"><b>✍️ ${wk}</b><span>${tr("notes this week","Notizen diese Woche","notas esta semana")}</span></div>
-    </div>
-    ${w?`<div class="dkwotd ${DK.wFlip?"flip":""}" onclick="DK.wFlip=!DK.wFlip;xr()" role="button" tabindex="0">
-      <div class="dkwl">✨ ${tr("Word of the day","Wort des Tages","Palabra del día")} <button class="dkwn" aria-label="${tr("Another word","Anderes Wort","Otra palabra")}" onclick="event.stopPropagation();DK.wShift=(DK.wShift||0)+1;DK.wFlip=false;xr()">🔀</button></div>
-      ${DK.wFlip?`<div class="dkww">${esc(w.meaning)}</div>${w.ex?`<div class="dkwe">„${esc(w.ex)}“</div>`:`<div class="dkwe">${esc(w.word)}</div>`}`
-        :`<div class="dkww g-${dkGender(w.word)}">${esc(w.word)}</div><div class="dkwe">${tr("Tap to see the meaning","Tippen für die Bedeutung","Toca para ver el significado")}</div>`}
-    </div>`:""}
+function dkLangTabs(){ const L=dkLangs(); if(L.length<2) return "";
+  const b=(k,l)=>`<button class="${DK.lang===k?"on":""}" onclick="DK.lang='${k}';xr()">${l}</button>`;
+  return `<div class="dklang">${b("",tr("All languages","Alle Sprachen","Todos los idiomas"))}${L.map(k=>b(k,`${T[k].flag} ${esc(lname(k))}`)).join("")}</div>`; }
+function dkNotesF(){ const L=DK.n||[]; return DK.lang?L.filter(n=>n.lang===DK.lang):L; }
+function dkGuidesF(){ const L=dkGuides(); return DK.lang?L.filter(it=>!it.language||it.language===DK.lang):L; }
+function dkWeek(){ const d=new Date(), dow=(d.getDay()+6)%7, out=[];
+  for(let i=0;i<7;i++){ const x=new Date(d); x.setDate(d.getDate()-dow+i); const k=`${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,"0")}-${String(x.getDate()).padStart(2,"0")}`;
+    out.push({ l:x.toLocaleDateString(UI==="de"?"de-DE":UI==="es"?"es-ES":"en-GB",{weekday:"narrow"}), done:!!((VC.days||{})[k]||{}).n, today:i===dow, future:i>dow }); }
+  return out; }
+function dkWordStats(){ const now=Date.now(); let learning=0, mastered=0, due=0; for(const id in VC.p){ const x=VC.p[id]; if(!x||!x.r) continue; if(x.i>=21) mastered++; else learning++; if(x.d<=now) due++; } return { learning, mastered, due, total:learning+mastered }; }
+function dkDash(){
+  const st=typeof vcStreak==="function"?vcStreak():0, wk=dkWeek(), ws=dkWordStats(), today=(VC.days||{})[vcToday()]||{};
+  const goal=VC.goal||10, newLeft=Math.max(0,goal-(today.w||0)), notesToday=(DK.n||[]).filter(n=>new Date(n.updated_at).toDateString()===new Date().toDateString()).length;
+  const N=dkNotesF().slice().sort((a,b)=>(b.pinned-a.pinned)||(b.updated_at>a.updated_at?1:-1)), first=N[0], rest=N.slice(1,3);
+  const ic=n=>{ const f=dkFolder(n.folder_id); return `<span class="dkic" style="background:${f?DK_COL[f.color]:"var(--plum)"}1F;color:${f?DK_COL[f.color]:"var(--plum)"}">${n.pinned?"📌":"📝"}</span>`; };
+  const notesCard=`<div class="dkc"><div class="dkch"><h3>${tr("My notes","Meine Notizen","Mis notas")}</h3><button class="dkround" aria-label="${tr("All notes","Alle Notizen","Todas las notas")}" onclick="DK.tab='notes';xr()">↗</button></div>
+    ${first?`<button class="dkfeat" onclick="dkEdit('${first.id}')"><span class="dkbadge">${first.pinned?tr("Pinned","Angeheftet","Fijada"):tr("Last edited","Zuletzt bearbeitet","Última editada")}</span>
+        <div class="dkft">${esc(first.title||tr("Untitled","Ohne Titel","Sin título"))}</div><div class="dkfb">${esc((first.body||"").replace(/\s+/g," ").slice(0,90))}</div>
+        <div class="dkfm">${dkFolder(first.folder_id)?esc(dkFolder(first.folder_id).name)+" · ":""}${dkDate(first.updated_at)}<span>${tr("Continue","Weiter","Seguir")} →</span></div></button>
+      ${rest.map(n=>`<button class="dkrowi" onclick="dkEdit('${n.id}')">${ic(n)}<span class="dkrt">${esc(n.title||tr("Untitled","Ohne Titel","Sin título"))}</span><span class="dkrd">${dkDate(n.updated_at)}</span></button>`).join("")}
+      <button class="dkrowi add" onclick="DK.tab='notes';DK.pick=true;xr()"><span class="dkic">＋</span><span class="dkrt">${tr("New note","Neue Notiz","Nota nueva")}</span></button>`
+     :`<p class="dksub">${tr("Start with a template:","Starte mit einer Vorlage:","Empieza con una plantilla:")}</p>${dkTpls().slice(0,3).map(t=>`<button class="dkrowi" onclick="dkNew('${t[0]}')"><span class="dkic c-${t[3]}">${t[1]}</span><span class="dkrt">${t[2]}</span><span class="dkplus">＋</span></button>`).join("")}`}
   </div>`;
+  const bar=(label,n,max,col,soft,click)=>`<button class="dkbarc" ${click?`onclick="${click}"`:"disabled"}><div class="dkbl">${label}</div><div class="dkbt" style="background:${soft}"><div class="dkbf" style="width:${max?Math.max(n?8:0,Math.round(100*n/max)):0}%;background:${col}">${n}</div></div></button>`;
+  const max=Math.max(ws.total,ws.due,1);
+  const wordsCard=`<div class="dkc"><div class="dkch"><h3>${tr("My words","Meine Wörter","Mis palabras")}</h3><button class="dkpill" onclick="vcOpen()">▷ ${tr("Practise","Üben","Practicar")}</button></div>
+    <div class="dkbig">${ws.total}<span>${tr("words in your<br>flashcards","Wörter in deinen<br>Karteikarten","palabras en tus<br>tarjetas")}</span></div>
+    <div class="dkbars">${bar(tr("Due today","Heute fällig","Para hoy"),ws.due,max,"#F25C3B","#FCE6DF","vcOpen()")}${bar(tr("Learning","Am Lernen","Aprendiendo"),ws.learning,max,"#2F4B7C","#DDE5F4","vcOpen()")}${bar(tr("Mastered","Gemeistert","Dominadas"),ws.mastered,max,"#2A8C82","#D3EFEA","")}
+      <button class="dkbarc soon" onclick="DK.tab='words';xr()"><div class="dkbl">${tr("Your saved words","Deine gespeicherten Wörter","Tus palabras guardadas")}</div><div class="dkbn">${dkWords().length} →</div></button></div>
+  </div>`;
+  const G=dkGuidesF().slice(0,4);
+  const guidesCard=`<div class="dkc dkwide"><div class="dkch"><h3>${tr("My guides","Meine Materialien","Mis guías")}</h3><button class="dkround" aria-label="PonteShop" onclick="shOpen()">＋</button></div>
+    ${G.length?`<div class="dktbl"><div class="dkth"><span>${tr("Title","Titel","Título")}</span><span>${tr("Type","Art","Tipo")}</span><span>${tr("Language","Sprache","Idioma")}</span><span></span></div>
+      ${G.map(it=>{ const k=shKind(it.kind), t=T[it.language]; return `<div class="dktr"><span class="dktt">${k[1]} ${esc(it.title)}</span><span><i class="dktag">${esc(k[2])}</i></span><span>${t?t.flag+" "+esc(lname(it.language)):"🌍"}</span><span><button class="dkopen2" onclick="shGet('${it.id}')">${tr("Open","Öffnen","Abrir")}</button></span></div>`; }).join("")}</div>
+      ${dkGuidesF().length>4?`<button class="linkbtn" style="margin-top:8px" onclick="DK.tab='guides';xr()">${tr("See all","Alle ansehen","Ver todas")} (${dkGuidesF().length}) →</button>`:""}`
+     :`<p class="dksub">${tr("Pin free guides from PonteShop with 📌 and they show up here.","Hefte kostenlose Materialien aus PonteShop mit 📌 an, dann erscheinen sie hier.","Fija guías gratis de PonteShop con 📌 y aparecerán aquí.")}</p><button class="dkpill" onclick="shOpen()">📘 PonteShop</button>`}
+  </div>`;
+  const actCard=`<div class="dkc"><div class="dkch"><h3>${tr("Activity","Aktivität","Actividad")}</h3><button class="dkround" aria-label="${tr("Flashcards","Karteikarten","Tarjetas")}" onclick="vcOpen()">📅</button></div>
+    <div class="dkbig">${st}<span>${tr("days<br>in a row","Tage<br>am Stück","días<br>seguidos")}</span></div>
+    <div class="dkweek">${wk.map(d=>`<span class="${d.done?"on":d.today?"now":""}" title="${d.l}">${d.done?"⚡":d.l}</span>`).join("")}</div></div>`;
+  const task=(ic,n,label,mins,done,click)=>`<button class="dktask" onclick="${click}"><span class="dkti2 ${done?"done":""}">${done?"✓":ic}</span><span class="dktl"><small>${n}</small>${label}</span><span class="dkmin">${done?"✓":mins+"<small>m</small>"}</span></button>`;
+  const tasksCard=`<div class="dkc"><div class="dkch"><h3>${tr("Daily tasks","Tagesaufgaben","Tareas de hoy")}</h3></div>
+    ${task("🔁",tr(`${ws.due} cards`,`${ws.due} Karten`,`${ws.due} tarjetas`),tr("Repeat words","Wörter wiederholen","Repasar palabras"),Math.max(1,Math.ceil(ws.due*0.2)),!ws.due,"vcOpen()")}
+    ${task("💡",tr(`${newLeft} of ${goal} left`,`${newLeft} von ${goal} übrig`,`quedan ${newLeft} de ${goal}`),tr("Learn new words","Neue Wörter lernen","Aprender palabras nuevas"),Math.max(1,Math.ceil(newLeft*0.5)),!newLeft,"vcOpen()")}
+    ${task("✍️",notesToday?tr(`${notesToday} today`,`${notesToday} heute`,`${notesToday} hoy`):tr("1 note","1 Notiz","1 nota"),tr("Write a note","Notiz schreiben","Escribir una nota"),5,notesToday>0,"dkNew('recap')")}
+    <button class="dkgo" onclick="vcOpen()">${tr("Start practising","Jetzt üben","Empezar a practicar")}</button></div>`;
+  const w=dkWotd();
+  const wotdCard=w?`<div class="dkc dkwotd2" onclick="DK.wFlip=!DK.wFlip;xr()" role="button" tabindex="0"><div class="dkch"><small class="dkover">${tr("Word of the day","Wort des Tages","Palabra del día")}</small><button class="dkround" aria-label="${tr("Another word","Anderes Wort","Otra palabra")}" onclick="event.stopPropagation();DK.wShift=(DK.wShift||0)+1;DK.wFlip=false;xr()">›</button></div>
+    <div class="dkwd g-${DK.wFlip?"":dkGender(w.word)}">${esc(DK.wFlip?w.meaning:w.word)}</div><div class="dksub" style="margin:2px 0 0">${DK.wFlip?esc(w.ex||w.word):tr("Tap to see the meaning","Tippen für die Bedeutung","Toca para ver el significado")}</div></div>`:"";
+  return `<div class="dkgrid2"><div class="dkmain"><div class="dkpair">${notesCard}${wordsCard}</div>${guidesCard}</div><aside class="dkside">${actCard}${tasksCard}${wotdCard}</aside></div>`;
 }
 /* 🧩 Note templates: never start from a blank page */
 function dkTpls(){ return [
@@ -8671,12 +8731,12 @@ function dkTpls(){ return [
     "1. \n2. \n3. \n"],
   ["goal","🎯",tr("Weekly goal","Wochenziel","Meta semanal"),"plum",tr("This week","Diese Woche","Esta semana"),
     tr("This week I want to…\n\n☐ \n☐ \n☐ \n","Diese Woche will ich…\n\n☐ \n☐ \n☐ \n","Esta semana quiero…\n\n☐ \n☐ \n☐ \n")]]; }
-function dkTplHtml(big){ return `<div class="dktpls ${big?"big":""}">${big?"":`<button class="dktpl blank" onclick="dkNew()"><span>📄</span>${tr("Blank","Leer","En blanco")}</button>`}${dkTpls().map(t=>`<button class="dktpl c-${t[3]}" onclick="dkNew('${t[0]}')"><span>${t[1]}</span>${t[2]}</button>`).join("")}</div>`; }
+function dkTplHtml(big){ return `<div class="dktpls ${big?"big":""}">${big?"":`<button class="dktpl blank" onclick="dkNew()"><span class="dkic">📄</span>${tr("Blank","Leer","En blanco")}</button>`}${dkTpls().map(t=>`<button class="dktpl" onclick="dkNew('${t[0]}')"><span class="dkic c-${t[3]}">${t[1]}</span>${t[2]}</button>`).join("")}</div>`; }
 
 /* 📝 Notes */
 function dkNotesHtml(){
   const F=DK.f||[], q=DK.q.trim().toLowerCase();
-  let L=DK.n||[];
+  let L=dkNotesF();
   if(DK.folder==="pin") L=L.filter(n=>n.pinned); else if(DK.folder==="none") L=L.filter(n=>!n.folder_id); else if(DK.folder!=="all") L=L.filter(n=>n.folder_id===DK.folder);
   if(q) L=L.filter(n=>(n.title+" "+n.body).toLowerCase().includes(q));
   L=[...L].sort((a,b)=>(b.pinned-a.pinned)||(b.updated_at>a.updated_at?1:-1));
@@ -8694,17 +8754,16 @@ function dkNotesHtml(){
     <div id="dknotes">${dkNoteList(L)}</div>`;
 }
 function dkNoteList(L){
-  if(!(DK.n||[]).length) return `<div class="dkempty2"><div class="dkemh">📝 ${tr("Start your first note","Starte deine erste Notiz","Empieza tu primera nota")}</div><p class="note" style="margin:2px 0 12px">${tr("Pick a template. It's already set up, you just fill it in.","Wähl eine Vorlage. Alles ist vorbereitet, du füllst nur aus.","Elige una plantilla. Ya está preparada, solo la rellenas.")}</p>${dkTplHtml(true)}<button class="linkbtn" style="margin-top:10px" onclick="dkNew()">📄 ${tr("or start with a blank page","oder mit einer leeren Seite","o empieza en blanco")}</button></div>`;
+  if(!(DK.n||[]).length) return `<div class="dkempty2"><div class="dkemh">${tr("Start your first note","Starte deine erste Notiz","Empieza tu primera nota")}</div><p class="note" style="margin:2px 0 12px">${tr("Pick a template. It's already set up, you just fill it in.","Wähl eine Vorlage. Alles ist vorbereitet, du füllst nur aus.","Elige una plantilla. Ya está preparada, solo la rellenas.")}</p>${dkTplHtml(true)}<button class="linkbtn" style="margin-top:10px" onclick="dkNew()">📄 ${tr("or start with a blank page","oder mit einer leeren Seite","o empieza en blanco")}</button></div>`;
   if(!L.length) return `<p class="note center" style="margin-top:20px">${tr("No notes here yet.","Hier gibt's noch keine Notizen.","Aquí aún no hay notas.")}</p>`;
   return `<div class="dkgrid">${L.map((n,i)=>{ const f=dkFolder(n.folder_id), t=T[n.lang], c=f?f.color:"sun";
-    return `<button class="dknote c-${c}" style="--r:${[-1.4,.9,-.6,1.3,-1,.5][i%6]}deg" onclick="dkEdit('${n.id}')">
-      <span class="dktape"></span>${n.pinned?`<span class="dkpin">📌</span>`:""}
-      <div class="dkt">${esc(n.title||tr("Untitled","Ohne Titel","Sin título"))}</div>
+    return `<button class="dknote" style="--c:${f?DK_COL[f.color]:"#2F4B7C"}" onclick="dkEdit('${n.id}')">
+      <div class="dkt">${n.pinned?"📌 ":""}${esc(n.title||tr("Untitled","Ohne Titel","Sin título"))}</div>
       <div class="dkb">${esc((n.body||"").slice(0,220))}</div>
       <div class="dkm">${t?t.flag+" ":""}${f?esc(f.name)+" · ":""}${dkDate(n.updated_at)}</div></button>`; }).join("")}</div>`;
 }
 function dkPaint(){ const el=document.getElementById("dknotes"); if(!el){ xr(); return; }
-  const q=DK.q.trim().toLowerCase(); let L=DK.n||[];
+  const q=DK.q.trim().toLowerCase(); let L=dkNotesF();
   if(DK.folder==="pin") L=L.filter(n=>n.pinned); else if(DK.folder==="none") L=L.filter(n=>!n.folder_id); else if(DK.folder!=="all") L=L.filter(n=>n.folder_id===DK.folder);
   if(q) L=L.filter(n=>(n.title+" "+n.body).toLowerCase().includes(q));
   el.innerHTML=dkNoteList([...L].sort((a,b)=>(b.pinned-a.pinned)||(b.updated_at>a.updated_at?1:-1))); }
@@ -8718,7 +8777,7 @@ function dkDirty(){ const e=DK.ed; if(!e) return false; dkGrab(); const o=e.id?(
   return o ? ["title","body","folder_id","lang","pinned"].some(k=>(o[k]||null)!==(e[k]||null)) : !!(e.title.trim()||e.body.trim()); }
 function dkClose(){ if(dkDirty()&&!confirm(tr("Leave without saving?","Ohne Speichern verlassen?","¿Salir sin guardar?"))) return; DK.ed=null; xr(); }
 function dkEditor(){ const e=DK.ed, F=DK.f||[], f=dkFolder(e.folder_id);
-  return `<div class="card dked c-${f?f.color:"sun"}">
+  return `<div class="card dked" style="border-top:4px solid ${f?DK_COL[f.color]:"#2F4B7C"}">
     <input type="text" id="dkti" class="dkti" maxlength="80" placeholder="${tr("Title","Titel","Título")}" value="${esc(e.title||"")}">
     <div class="dkrow">
       <select id="dkfo" aria-label="${tr("Folder","Ordner","Carpeta")}"><option value="">📂 ${tr("No folder","Ohne Ordner","Sin carpeta")}</option>${F.map(f=>`<option value="${f.id}" ${e.folder_id===f.id?"selected":""}>📁 ${esc(f.name)}</option>`).join("")}</select>
@@ -8782,7 +8841,7 @@ async function dkWordDel(id){ if(!confirm(tr("Delete this word?","Dieses Wort l�
 
 /* 📘 Guides: PonteShop resources you pinned or already downloaded */
 function dkGuides(){ const P=DK.pins||[]; return (SH.list||[]).filter(it=>P.includes(String(it.id))||it.mine).sort((a,b)=>{ const x=P.indexOf(String(a.id)), y=P.indexOf(String(b.id)); return (x<0?999:x)-(y<0?999:y); }); }
-function dkGuidesHtml(){ const L=dkGuides(), P=DK.pins||[];
+function dkGuidesHtml(){ const L=dkGuidesF(), P=DK.pins||[];
   if(SH.list===null||SH.list===undefined) return `<p class="note center" style="margin-top:30px">${tr("Loading…","Lädt…","Cargando…")}</p>`;
   if(!L.length) return `<div class="card center dkempty"><div style="font-size:40px">📘</div><h3>${tr("No guides yet","Noch keine Materialien","Aún no hay guías")}</h3><p class="note">${tr("In PonteShop, tap 📌 Desk on any guide to keep it here.","Tippe in PonteShop bei einem Material auf 📌 Schreibtisch, um es hier zu behalten.","En PonteShop, toca 📌 Escritorio en cualquier guía para guardarla aquí.")}</p><button class="btn primary" onclick="shOpen()">📘 ${tr("Open PonteShop","PonteShop öffnen","Abrir PonteShop")}</button></div>`;
   return `<div class="dkwords">${L.map(it=>{ const k=shKind(it.kind), t=T[it.language], pin=P.includes(String(it.id));
