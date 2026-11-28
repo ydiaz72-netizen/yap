@@ -693,6 +693,22 @@
   .lstep h3{font-size:16px;margin:2px 0 2px}
   .lstep p{margin:0;font-size:14px;color:var(--muted)}
   .rfmini{display:flex;gap:12px;align-items:center;cursor:pointer}.rfbig{font-size:32px}
+  .dkhero{background:linear-gradient(135deg,var(--plum-soft),var(--teal-soft));border-radius:var(--radius);padding:16px 18px;margin-bottom:12px}.dkhero h2{margin:0 0 4px}.dkhero p{margin:0;color:var(--muted);font-size:14px}
+  .dktabs{margin:0 0 12px;width:100%}.dktabs button{flex:1}.dkn{opacity:.6;font-size:12px}
+  .dkbar{display:flex;gap:8px;margin-bottom:10px}.dkbar input{flex:1;min-width:0;margin:0}.dkbar .btn{width:auto;flex:none;margin:0;padding:10px 14px}
+  .dkfolders{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}.dkdot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-inline-end:6px}
+  .dkfact{font-size:13px;margin:0 0 10px}.dkfed input{margin:8px 0}
+  .dkcols{display:flex;gap:8px;margin-bottom:10px}.dkcol{width:28px;height:28px;border-radius:50%;border:3px solid transparent;cursor:pointer;padding:0}.dkcol.on{border-color:var(--ink)}
+  .dkrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.dkrow .btn{width:auto;margin:0;padding:10px 16px}.dkrow input{flex:1;min-width:120px;margin:0}.dkrow select{flex:1;min-width:130px;margin:0;padding:10px 12px;border:1.5px solid var(--line);border-radius:12px;background:#fff;font:inherit;font-size:15px;color:var(--ink)}
+  .dkgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+  .dknote{text-align:start;background:var(--card);border:1px solid var(--line);border-top:5px solid var(--line);border-radius:16px;padding:12px 14px;cursor:pointer;font:inherit;color:inherit;display:flex;flex-direction:column;gap:6px;min-height:110px}
+  .dknote:hover{box-shadow:0 4px 14px rgba(27,42,65,.08)}.dkt{font-weight:700}.dkb{font-size:13px;color:var(--muted);white-space:pre-line;overflow:hidden;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;flex:1}
+  .dkm{font-size:12px;color:var(--muted);margin-top:2px}
+  .dked .dkti{font-size:20px;font-weight:700;border:none;border-bottom:1px solid var(--line);border-radius:0;padding:6px 2px;margin:0 0 10px}
+  .dked .dkbo{width:100%;min-height:300px;margin:10px 0;line-height:1.55;font-size:15px;resize:vertical}.dkdel{margin-inline-start:auto;color:var(--coral)}
+  .dkwords{display:flex;flex-direction:column;gap:8px}.dkw{display:flex;gap:10px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+  .dkwex{font-size:13px;font-style:italic;color:var(--muted);margin-top:2px}.dkopen{width:auto!important;flex:none;margin:0!important;padding:8px 12px!important}
+  .dkadd{margin-bottom:12px}.dkadd b{display:block;margin-bottom:8px}
   .rfhero{background:linear-gradient(160deg,#1B2A41,#2F4B7C);border-radius:24px;padding:18px;margin:0 0 12px;color:#fff;box-shadow:0 8px 24px #1B2A4133}
   .rfladder{display:flex;align-items:center;gap:4px}.rfstep{flex:1;text-align:center;background:rgba(255,255,255,.08);border-radius:16px;padding:10px 4px;opacity:.6}.rfstep.on{background:rgba(242,181,68,.2);opacity:1;box-shadow:inset 0 0 0 2px #F2B544}
   .rfstep .rfe{display:block;font-size:28px}.rfstep b{display:block;font-size:12.5px;margin-top:2px}.rfstep small{font-size:11px;color:rgba(255,255,255,.7)}.rfline{width:10px;height:2px;background:rgba(255,255,255,.3);flex:none}
@@ -3175,6 +3191,7 @@ function authReturn(){
   if(r==="results" && S.players.length && S.gid) go("results");
   else if(r==="lobby" && O.G) go("lobby");
   else if(r==="shop") shOpen();
+  else if(r==="desk") dkOpen();
   else if(r==="cafes") cfOpen();
   else if(r==="lounge"){ let id=LU.pend; try{ id=id||sessionStorage.getItem("pt_lounge"); }catch(e){} if(id) luEnter(id); else luOpen(); }
   else if(r==="bridge") bbOpen();
@@ -3204,7 +3221,7 @@ function GENERIC_ERR(){ return tr("Something went wrong — please try again","E
 function offlineMsg(){ return tr("You need internet to sign in","Zum Anmelden brauchst du Internet","Necesitas internet para entrar"); }
 async function signOut(){
   try{ await A.sb.auth.signOut(); }catch(e){}
-  A.user=null; A.profile=null; A.games=null; A.status="out"; A.step="email"; A.code=""; A.msg=tr("Signed out","Abgemeldet","Sesión cerrada"); render();
+  A.user=null; A.profile=null; A.games=null; DK.f=DK.n=DK.pins=DK.sw=null; DK.ed=null; A.status="out"; A.step="email"; A.code=""; A.msg=tr("Signed out","Abgemeldet","Sesión cerrada"); render();
 }
 
 /* ---- profile ---- */
@@ -3392,7 +3409,7 @@ function confirmDelete(){
       if(error) throw error;
       try{ await A.sb.auth.signOut(); }catch(e){}
       lsSet("pt_queue",null); lsSet("pt_pending",null);
-      A.user=null; A.profile=null; A.games=null; A.status="out"; A.step="email"; A.msg=tr("Your account was deleted","Dein Konto wurde gelöscht","Tu cuenta fue eliminada");
+      A.user=null; A.profile=null; A.games=null; DK.f=DK.n=DK.pins=DK.sw=null; DK.ed=null; A.status="out"; A.step="email"; A.msg=tr("Your account was deleted","Dein Konto wurde gelöscht","Tu cuenta fue eliminada");
       box.remove(); render();
     }catch(e){ $("delYes").disabled=false; $("delMsg").textContent=authErr(e); }
   };
@@ -3473,6 +3490,7 @@ VIEWS.account = function(){
   </div>
   ${msg}
   ${rfCard(true)}
+  ${dkCard()}
   <div class="card">${uiPicker().replace('margin:0 0 14px','')}</div>
   <div class="card"><h3>🌍 ${tr("Language exchange","Sprachtandem","Intercambio de idiomas")}</h3>
     <p class="note" style="margin-top:0">${tr("Add your languages and free times to get matched with partners and sessions.","Trage Sprachen und Zeiten ein, um passende Partner und Sessions zu finden.","Añade tus idiomas y tus horarios libres para encontrar compañeros y sesiones.")}</p>
@@ -7301,7 +7319,7 @@ function homeRecs(){
 }
 
 /* ===================== BOTTOM BAR ===================== */
-const NAV_TAB = { news:"home", invite:"account", report:"home", sbuild:"games", home:"home", bridge:"games", split:"games", conj:"games", board:"sessions", host:"sessions", session:"sessions", games:"games", account:"profile", xprofile:"profile" };
+const NAV_TAB = { desk:"home", news:"home", invite:"account", report:"home", sbuild:"games", home:"home", bridge:"games", split:"games", conj:"games", board:"sessions", host:"sessions", session:"sessions", games:"games", account:"profile", xprofile:"profile" };
 const WIDE = { home:"xl", board:"xl", host:"md", session:"md", account:"md", xprofile:"md", games:"md" };
 const ICO = {
   home:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10l9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>',
@@ -7522,7 +7540,7 @@ function shCard(it){
     </div>
     ${it.description?`<p class="shdesc">${esc(it.description)}</p>`:""}
     <p class="note" style="margin:0">${it.has_link?"🔗 "+tr("Link (opens in a new tab)","Link (öffnet in neuem Tab)","Enlace (se abre en otra pestaña)"):`📄 ${esc(it.file_name||"")}${it.file_size?` · ${shSize(it.file_size)}`:""}`}${it.mine&&A.user?" · ✓ "+tr("You have this","Hast du schon","Ya lo tienes"):""}</p>
-    ${act}${!manage && it.visibility!=="unlisted" ? `<div class="shadm" style="margin-top:8px"><button class="chip" onclick="shShare('${it.id}')">🔗 ${tr("Share","Teilen","Compartir")}</button></div>` : ""}${admin}
+    ${act}${!manage && it.visibility!=="unlisted" ? `<div class="shadm" style="margin-top:8px">${dkPinChip(it)}<button class="chip" onclick="shShare('${it.id}')">🔗 ${tr("Share","Teilen","Compartir")}</button></div>` : A.user?`<div class="shadm" style="margin-top:8px">${dkPinChip(it)}</div>`:""}${admin}
   </div>`;
 }
 
@@ -7534,7 +7552,7 @@ function shRow(it){
     <div class="shico" style="${t?`background:${t.color}1F`:""}">${k[1]}</div>
     <div style="flex:1;min-width:0"><div class="rt">${esc(it.title)}${it.price_cents>0?"":` <span class="shfree" style="margin-inline-start:6px;vertical-align:2px">${tr("Free","Kostenlos","Gratis")}</span>`}</div>
       <div class="note" style="margin:2px 0 0">${t?`${t.flag} ${esc(lname(it.language))}`:"🌍 "+tr("Any","Alle","Cualquiera")} · ${it.level==null?tr("All levels","Alle Niveaus","Todos los niveles"):RANKS[it.level]} · ${esc(k[2])}${b?` · 📖 ${tr("in","auf","en")} ${esc(UI==="es"?lname(it.base_language).toLowerCase():lname(it.base_language))}`:""}${SH.admin?` · ⬇ ${it.downloads||0}`:""}${it.mine&&A.user?" · ✓":""}</div></div>
-    <div class="shract">${SH.admin||it.is_owner?`<button class="chip" style="flex:none" onclick="shEdit('${it.id}')" aria-label="Edit">✏️</button>`:""}${it.visibility!=="unlisted"||SH.admin||it.is_owner?`<button class="chip" style="flex:none" onclick="shShare('${it.id}')" aria-label="${tr("Share","Teilen","Compartir")}" title="${tr("Share","Teilen","Compartir")}">🔗</button>`:""}${A.user&&shCanPreview(it)?`<button class="chip shrpv" onclick="shPreview('${it.id}')" aria-label="Preview" title="${tr("Preview","Vorschau","Vista previa")}">👁 ${tr("Preview","Vorschau","Vista previa")}</button>`:""}${btn}</div></div>`;
+    <div class="shract">${A.user?dkPinChip(it).replace(/📌 [^<]*/,"📌").replace('class="chip','style="flex:none" class="chip'):""}${SH.admin||it.is_owner?`<button class="chip" style="flex:none" onclick="shEdit('${it.id}')" aria-label="Edit">✏️</button>`:""}${it.visibility!=="unlisted"||SH.admin||it.is_owner?`<button class="chip" style="flex:none" onclick="shShare('${it.id}')" aria-label="${tr("Share","Teilen","Compartir")}" title="${tr("Share","Teilen","Compartir")}">🔗</button>`:""}${A.user&&shCanPreview(it)?`<button class="chip shrpv" onclick="shPreview('${it.id}')" aria-label="Preview" title="${tr("Preview","Vorschau","Vista previa")}">👁 ${tr("Preview","Vorschau","Vista previa")}</button>`:""}${btn}</div></div>`;
 }
 function shListHtml(){
   const list=SH.list;
@@ -8084,6 +8102,7 @@ function quickCard(){
     <button class="btn secondary qbtn" onclick="luOpen()">🛋️ ${tr("Chat in a lounge","In einer Lounge chatten","Chatear en una sala")} <span data-lupres-all>${lpAll()}</span></button>
     <button class="btn secondary qbtn" onclick="ptOpen()">👥 ${tr("Find a partner","Partner finden","Buscar compañero")} <span data-ptcount>${ptCountHtml()}</span></button>
     <button class="btn secondary qbtn" onclick="cfOpen()">☕ ${tr("Find a language café","Sprachcafé finden","Buscar un café de idiomas")}</button>
+    <button class="btn secondary qbtn" onclick="dkOpen()">🗂️ ${tr("My Desk","Mein Schreibtisch","Mi escritorio")}</button>
     <button class="btn secondary qbtn" onclick="vcOpen()">🃏 ${tr("Vocabulary flashcards","Vokabel-Karteikarten","Tarjetas de vocabulario")}</button>
     <button class="btn secondary qbtn" onclick="exOpen()">🇩🇪 ${tr("Leben in Deutschland test","Leben-in-Deutschland-Test","Test Leben in Deutschland")}</button>
     <button class="btn secondary qbtn" onclick="dtOpen()">🎓 ${tr("German exam A2–B1 (DTZ)","Deutschprüfung A2–B1 (DTZ)","Examen de alemán A2–B1 (DTZ)")}</button>
@@ -8542,6 +8561,172 @@ const NW_RX=["🔥","❤️","👍","🤔"];
 function nwSeen(){ try{ return localStorage.getItem("pt_news_seen")||""; }catch(e){ return ""; } }
 function nwLatest(){ const u=(NW.d&&NW.d.updates)||[]; return u.length?u[0].created_at:""; }
 function nwUnseen(){ const l=nwLatest(); return !!l&&l>nwSeen(); }
+/* 🗂️ Student Desk: your own notes in folders, the words you saved, and PonteShop guides you pinned (sql/desk.sql). Private to you. */
+const DK={ f:null, n:null, pins:null, sw:null, err:"", tab:"notes", folder:"all", q:"", wq:"", ed:null, busy:false, fEd:null };
+const DK_COL={ teal:"#2A8C82", plum:"#2F4B7C", sun:"#E0A12E", coral:"#F25C3B", sky:"#3B8FD9", leaf:"#5A9E3A" };
+function dkOpen(){ DK.ed=null; DK.fEd=null; go("desk"); dkLoad(); if(SH.list===null||SH.list===undefined) shLoad(); }
+async function dkLoad(){
+  if(!(A.user&&A.sb)) return; DK.err="";
+  try{
+    const [f,n,p]=await Promise.all([
+      A.sb.from("desk_folders").select("id,name,color,created_at").order("created_at"),
+      A.sb.from("desk_notes").select("id,folder_id,lang,title,body,pinned,updated_at").order("updated_at",{ascending:false}).limit(500),
+      A.sb.from("desk_pins").select("item_id,created_at").order("created_at",{ascending:false})]);
+    for(const r of [f,n,p]) if(r.error) throw r.error;
+    DK.f=f.data||[]; DK.n=n.data||[]; DK.pins=(p.data||[]).map(x=>x.item_id);
+  }catch(e){ DK.err=dkErr(e); DK.f=DK.f||[]; DK.n=DK.n||[]; DK.pins=DK.pins||[]; }
+  if(MW.list===null) await mwLoad();
+  try{ const { data }=await A.sb.rpc("pt_words_mine"); DK.sw=(data||[]).filter(r=>r.word&&r.meaning); }catch(e){ DK.sw=[]; }
+  if(S.screen==="desk"||S.screen==="shop"||S.screen==="shopitem") xr();
+}
+function dkErr(e){ const m=String((e&&e.message)||e||"");
+  if(m.includes("desk_limit")) return tr("Your desk is full. Delete a few old notes first.","Dein Schreibtisch ist voll. Lösche erst ein paar alte Notizen.","Tu escritorio está lleno. Borra primero algunas notas viejas.");
+  if(/desk_(folders|notes|pins)/.test(m)&&/does not exist|schema cache/i.test(m)) return tr("The desk isn't switched on yet (run sql/desk.sql).","Der Schreibtisch ist noch nicht aktiv (sql/desk.sql ausführen).","El escritorio aún no está activado (ejecuta sql/desk.sql).");
+  return bErr(e); }
+function dkFolder(id){ return (DK.f||[]).find(f=>f.id===id)||null; }
+function dkDate(iso){ try{ return new Date(iso).toLocaleDateString(UI==="de"?"de-DE":UI==="es"?"es-ES":"en-GB",{ day:"numeric", month:"short" }); }catch(e){ return ""; } }
+function dkLangs(extra){ const s=[...new Set([...(R.mine||[]).map(m=>m.code), ...(extra?[extra]:[])])].filter(k=>T[k]); return s; }
+function dkCount(){ return (DK.n||[]).length; }
+
+VIEWS.desk = function(){
+  const top=`<div class="topline"><button class="chip" onclick="${DK.ed?"dkClose()":"goHome()"}">${uiBack()} ${DK.ed?tr("Desk","Schreibtisch","Escritorio"):tr("Back","Zurück","Atrás")}</button><span>🗂️ ${tr("My Desk","Mein Schreibtisch","Mi escritorio")}</span></div>`;
+  if(!(A.user&&A.status==="in")) return top+`<div class="card center"><div style="font-size:40px">🗂️</div><h3>${tr("Your own study desk","Dein eigener Lern-Schreibtisch","Tu propio escritorio de estudio")}</h3><p class="note">${tr("Sign in to keep your notes, words and guides in one place.","Melde dich an, um Notizen, Wörter und Materialien an einem Ort zu haben.","Entra para tener tus notas, palabras y guías en un solo lugar.")}</p><button class="btn primary" onclick="A.ret='desk';go('account')">${tr("Sign in","Anmelden","Iniciar sesión")}</button></div>`;
+  if(DK.n===null) return top+`<p class="note center" style="margin-top:40px">${tr("Loading…","Lädt…","Cargando…")}</p>`;
+  if(DK.ed){ dkGrab(); const ae=document.activeElement, fid=ae&&(ae.id==="dkti"||ae.id==="dkbo")?ae.id:null, ss=fid?ae.selectionStart:0, se=fid?ae.selectionEnd:0, sc=fid==="dkbo"?ae.scrollTop:0;
+    if(fid) setTimeout(()=>{ const el=document.getElementById(fid); if(el&&document.activeElement!==el){ el.focus(); try{ el.setSelectionRange(ss,se); }catch(e){} el.scrollTop=sc; } },0);
+    return top+dkEditor(); }   /* keep what you typed (and the cursor) if the screen refreshes while you write */
+  const nG=dkGuides().length, nW=dkWords().length;
+  const tb=(k,l,n)=>`<button class="${DK.tab===k?"on":""}" aria-pressed="${DK.tab===k}" onclick="DK.tab='${k}';xr()">${l} <span class="dkn">${n}</span></button>`;
+  return top+`<div class="dkhero"><h2>🗂️ ${tr("My Desk","Mein Schreibtisch","Mi escritorio")}</h2><p>${tr("Your notes, your words and your guides, all in one place. Only you can see it.","Deine Notizen, Wörter und Materialien an einem Ort. Nur du siehst das.","Tus notas, tus palabras y tus guías en un solo lugar. Solo tú lo ves.")}</p></div>
+    ${DK.err?`<div class="card" style="background:var(--coral-soft);padding:10px 14px">${esc(DK.err)}</div>`:""}
+    <div class="vsw dktabs" role="group">${tb("notes","📝 "+tr("Notes","Notizen","Notas"),dkCount())}${tb("words","🃏 "+tr("Words","Wörter","Palabras"),nW)}${tb("guides","📘 "+tr("Guides","Materialien","Guías"),nG)}</div>
+    ${DK.tab==="words"?dkWordsHtml():DK.tab==="guides"?dkGuidesHtml():dkNotesHtml()}`;
+};
+
+/* 📝 Notes */
+function dkNotesHtml(){
+  const F=DK.f||[], q=DK.q.trim().toLowerCase();
+  let L=DK.n||[];
+  if(DK.folder==="pin") L=L.filter(n=>n.pinned); else if(DK.folder==="none") L=L.filter(n=>!n.folder_id); else if(DK.folder!=="all") L=L.filter(n=>n.folder_id===DK.folder);
+  if(q) L=L.filter(n=>(n.title+" "+n.body).toLowerCase().includes(q));
+  L=[...L].sort((a,b)=>(b.pinned-a.pinned)||(b.updated_at>a.updated_at?1:-1));
+  const fc=(k,label,dot)=>`<button class="chip ${DK.folder===k?"on":""}" onclick="DK.folder='${k}';DK.fEd=null;xr()">${dot?`<span class="dkdot" style="background:${dot}"></span>`:""}${label}</button>`;
+  const cur=dkFolder(DK.folder);
+  const fEd=DK.fEd?`<div class="card dkfed"><b>${DK.fEd.id?tr("Rename folder","Ordner umbenennen","Renombrar carpeta"):tr("New folder","Neuer Ordner","Carpeta nueva")}</b>
+      <input type="text" id="dkfname" maxlength="40" placeholder="${tr("e.g. Grammar, Verbs, Exam prep","z. B. Grammatik, Verben, Prüfung","p. ej. Gramática, Verbos, Examen")}" value="${esc(DK.fEd.name||"")}" onkeydown="if(event.key==='Enter')dkFolderSave()">
+      <div class="dkcols">${Object.keys(DK_COL).map(c=>`<button class="dkcol ${DK.fEd.color===c?"on":""}" style="background:${DK_COL[c]}" aria-label="${c}" onclick="DK.fEd.name=document.getElementById('dkfname').value;DK.fEd.color='${c}';xr()"></button>`).join("")}</div>
+      <div class="dkrow"><button class="btn primary" ${DK.busy?"disabled":""} onclick="dkFolderSave()">${tr("Save","Speichern","Guardar")}</button><button class="btn secondary" onclick="DK.fEd=null;xr()">${tr("Cancel","Abbrechen","Cancelar")}</button></div></div>`:"";
+  return `<div class="dkbar"><input type="text" placeholder="🔍 ${tr("Search my notes","Notizen durchsuchen","Buscar en mis notas")}" value="${esc(DK.q)}" oninput="DK.q=this.value;dkPaint()" autocomplete="off"><button class="btn primary" onclick="dkNew()">＋ ${tr("New note","Neue Notiz","Nota nueva")}</button></div>
+    <div class="dkfolders">${fc("all",tr("All","Alle","Todas"))}${(DK.n||[]).some(n=>n.pinned)?fc("pin","📌 "+tr("Pinned","Angeheftet","Fijadas")):""}${F.map(f=>fc(f.id,esc(f.name),DK_COL[f.color]||DK_COL.teal)).join("")}${F.length&&(DK.n||[]).some(n=>!n.folder_id)?fc("none",tr("No folder","Ohne Ordner","Sin carpeta")):""}<button class="chip" onclick="DK.fEd={name:'',color:'teal'};xr();setTimeout(()=>{const i=document.getElementById('dkfname');i&&i.focus()},30)">＋ ${tr("Folder","Ordner","Carpeta")}</button></div>
+    ${cur&&!DK.fEd?`<div class="dkfact"><button class="linkbtn" onclick="DK.fEd={id:'${cur.id}',name:dkFolder('${cur.id}').name,color:'${cur.color}'};xr()">✏️ ${tr("Rename","Umbenennen","Renombrar")}</button> · <button class="linkbtn" onclick="dkFolderDel('${cur.id}')">🗑 ${tr("Delete folder","Ordner löschen","Borrar carpeta")}</button></div>`:""}
+    ${fEd}
+    <div id="dknotes">${dkNoteList(L)}</div>`;
+}
+function dkNoteList(L){
+  if(!(DK.n||[]).length) return `<div class="card center dkempty"><div style="font-size:40px">📝</div><h3>${tr("Your first note","Deine erste Notiz","Tu primera nota")}</h3><p class="note">${tr("Write down a grammar rule, phrases from a session, or what you want to practise next.","Schreib eine Grammatikregel auf, Sätze aus einer Session oder was du als Nächstes üben willst.","Apunta una regla de gramática, frases de una sesión o lo que quieres practicar después.")}</p><button class="btn primary" onclick="dkNew()">＋ ${tr("New note","Neue Notiz","Nota nueva")}</button></div>`;
+  if(!L.length) return `<p class="note center" style="margin-top:20px">${tr("No notes here yet.","Hier gibt's noch keine Notizen.","Aquí aún no hay notas.")}</p>`;
+  return `<div class="dkgrid">${L.map(n=>{ const f=dkFolder(n.folder_id), t=T[n.lang];
+    return `<button class="dknote" style="border-top-color:${f?DK_COL[f.color]||DK_COL.teal:"var(--line)"}" onclick="dkEdit('${n.id}')">
+      <div class="dkt">${n.pinned?"📌 ":""}${esc(n.title||tr("Untitled","Ohne Titel","Sin título"))}</div>
+      <div class="dkb">${esc((n.body||"").slice(0,180))}</div>
+      <div class="dkm">${t?t.flag+" ":""}${f?esc(f.name)+" · ":""}${dkDate(n.updated_at)}</div></button>`; }).join("")}</div>`;
+}
+function dkPaint(){ const el=document.getElementById("dknotes"); if(!el){ xr(); return; }
+  const q=DK.q.trim().toLowerCase(); let L=DK.n||[];
+  if(DK.folder==="pin") L=L.filter(n=>n.pinned); else if(DK.folder==="none") L=L.filter(n=>!n.folder_id); else if(DK.folder!=="all") L=L.filter(n=>n.folder_id===DK.folder);
+  if(q) L=L.filter(n=>(n.title+" "+n.body).toLowerCase().includes(q));
+  el.innerHTML=dkNoteList([...L].sort((a,b)=>(b.pinned-a.pinned)||(b.updated_at>a.updated_at?1:-1))); }
+function dkNew(){ const fid=dkFolder(DK.folder)?DK.folder:null, langs=dkLangs();
+  const learn=(R.mine||[]).find(m=>m.role==="learning");
+  DK.ed={ id:null, title:"", body:"", folder_id:fid, lang:learn?learn.code:(langs[0]||null), pinned:false }; xr(); setTimeout(()=>{ const i=document.getElementById("dkti"), ae=document.activeElement; if(i&&!(ae&&ae.closest&&ae.closest(".dked"))) i.focus(); },30); }
+function dkEdit(id){ const n=(DK.n||[]).find(x=>x.id===id); if(!n) return; DK.ed=Object.assign({},n); xr(); }
+function dkGrab(){ const e=DK.ed; if(!e) return; const g=id=>document.getElementById(id);
+  if(g("dkti")) e.title=g("dkti").value; if(g("dkbo")) e.body=g("dkbo").value; if(g("dkfo")) e.folder_id=g("dkfo").value||null; if(g("dkla")) e.lang=g("dkla").value||null; }
+function dkDirty(){ const e=DK.ed; if(!e) return false; dkGrab(); const o=e.id?(DK.n||[]).find(x=>x.id===e.id):null;
+  return o ? ["title","body","folder_id","lang","pinned"].some(k=>(o[k]||null)!==(e[k]||null)) : !!(e.title.trim()||e.body.trim()); }
+function dkClose(){ if(dkDirty()&&!confirm(tr("Leave without saving?","Ohne Speichern verlassen?","¿Salir sin guardar?"))) return; DK.ed=null; xr(); }
+function dkEditor(){ const e=DK.ed, F=DK.f||[];
+  return `<div class="card dked">
+    <input type="text" id="dkti" class="dkti" maxlength="80" placeholder="${tr("Title","Titel","Título")}" value="${esc(e.title||"")}">
+    <div class="dkrow">
+      <select id="dkfo" aria-label="${tr("Folder","Ordner","Carpeta")}"><option value="">📂 ${tr("No folder","Ohne Ordner","Sin carpeta")}</option>${F.map(f=>`<option value="${f.id}" ${e.folder_id===f.id?"selected":""}>📁 ${esc(f.name)}</option>`).join("")}</select>
+      <select id="dkla" aria-label="${tr("Language","Sprache","Idioma")}"><option value="">🌍 ${tr("Any language","Alle Sprachen","Cualquier idioma")}</option>${dkLangs(e.lang).map(k=>`<option value="${k}" ${e.lang===k?"selected":""}>${T[k].flag} ${esc(lname(k))}</option>`).join("")}</select>
+      <button class="chip ${e.pinned?"on":""}" onclick="dkGrab();DK.ed.pinned=!DK.ed.pinned;xr()">📌 ${e.pinned?tr("Pinned","Angeheftet","Fijada"):tr("Pin","Anheften","Fijar")}</button>
+    </div>
+    <textarea id="dkbo" class="dkbo" maxlength="20000" placeholder="${tr("Write anything: rules, example sentences, words from a session, questions for your partner…","Schreib alles auf: Regeln, Beispielsätze, Wörter aus einer Session, Fragen an deinen Partner…","Escribe lo que quieras: reglas, frases de ejemplo, palabras de una sesión, preguntas para tu compañero…")}">${esc(e.body||"")}</textarea>
+    <div class="dkrow"><button class="btn primary" ${DK.busy?"disabled":""} onclick="dkSave()">${DK.busy?tr("Saving…","Speichert…","Guardando…"):"💾 "+tr("Save","Speichern","Guardar")}</button>
+      <button class="btn secondary" onclick="dkClose()">${tr("Cancel","Abbrechen","Cancelar")}</button>
+      ${e.id?`<button class="linkbtn dkdel" onclick="dkDel('${e.id}')">🗑 ${tr("Delete","Löschen","Borrar")}</button>`:""}</div>
+  </div>`; }
+async function dkSave(){ dkGrab(); const e=DK.ed; if(!e) return;
+  if(!e.title.trim()&&!e.body.trim()){ bToast(tr("Write something first ✍️","Schreib erst etwas ✍️","Escribe algo primero ✍️")); return; }
+  const row={ title:e.title.trim().slice(0,80), body:e.body.slice(0,20000), folder_id:e.folder_id||null, lang:e.lang||null, pinned:!!e.pinned };
+  DK.busy=true; xr();
+  try{ const r=e.id ? await A.sb.from("desk_notes").update(row).eq("id",e.id).select().single() : await A.sb.from("desk_notes").insert(row).select().single();
+    if(r.error) throw r.error;
+    DK.n=[r.data, ...(DK.n||[]).filter(x=>x.id!==r.data.id)]; DK.ed=null; bToast("✅ "+tr("Note saved","Notiz gespeichert","Nota guardada"));
+  }catch(err){ bToast(dkErr(err)); }
+  DK.busy=false; xr(); }
+async function dkDel(id){ if(!confirm(tr("Delete this note?","Diese Notiz löschen?","¿Borrar esta nota?"))) return;
+  try{ const r=await A.sb.from("desk_notes").delete().eq("id",id); if(r.error) throw r.error; DK.n=(DK.n||[]).filter(x=>x.id!==id); DK.ed=null; xr(); }catch(e){ bToast(dkErr(e)); } }
+async function dkFolderSave(){ const i=document.getElementById("dkfname"), name=(i?i.value:"").trim(), F=DK.fEd; if(!F) return;
+  if(!name){ bToast(tr("Give the folder a name","Gib dem Ordner einen Namen","Ponle un nombre a la carpeta")); return; }
+  DK.busy=true;
+  try{ const row={ name:name.slice(0,40), color:F.color||"teal" };
+    const r=F.id ? await A.sb.from("desk_folders").update(row).eq("id",F.id).select().single() : await A.sb.from("desk_folders").insert(row).select().single();
+    if(r.error) throw r.error;
+    DK.f=F.id ? DK.f.map(x=>x.id===F.id?r.data:x) : [...(DK.f||[]), r.data]; DK.folder=r.data.id; DK.fEd=null;
+  }catch(e){ bToast(dkErr(e)); }
+  DK.busy=false; xr(); }
+async function dkFolderDel(id){ const f=dkFolder(id); if(!f) return;
+  if(!confirm(tr(`Delete the folder “${f.name}”? Its notes stay on your desk.`,`Ordner „${f.name}“ löschen? Die Notizen bleiben auf deinem Schreibtisch.`,`¿Borrar la carpeta “${f.name}”? Sus notas se quedan en tu escritorio.`))) return;
+  try{ const r=await A.sb.from("desk_folders").delete().eq("id",id); if(r.error) throw r.error;
+    DK.f=DK.f.filter(x=>x.id!==id); DK.n=(DK.n||[]).map(n=>n.folder_id===id?Object.assign({},n,{folder_id:null}):n); DK.folder="all"; xr(); }catch(e){ bToast(dkErr(e)); } }
+
+/* 🃏 Words: words you added yourself + words from your sessions */
+function dkWords(){ const out=[], seen=new Set();
+  for(const w of MW.list||[]){ const k=w.word.toLowerCase(); if(seen.has(k)) continue; seen.add(k); out.push({ id:w.id, word:w.word, meaning:w.meaning, ex:w.example, src:w.src, own:1 }); }
+  for(const w of DK.sw||[]){ const k=w.word.toLowerCase(); if(seen.has(k)) continue; seen.add(k); out.push({ word:w.word, meaning:w.meaning, ex:w.example, src:w.title, lang:w.lang, sess:1 }); }
+  return out; }
+function dkWordsHtml(){ const all=dkWords(), q=DK.wq.trim().toLowerCase(), L=q?all.filter(w=>(w.word+" "+w.meaning).toLowerCase().includes(q)):all;
+  return `<div class="card dkadd"><b>＋ ${tr("Add a word","Wort hinzufügen","Añadir una palabra")}</b>
+      <div class="dkrow"><input type="text" id="dkww" maxlength="80" placeholder="${tr("Word","Wort","Palabra")}"><input type="text" id="dkwm" maxlength="120" placeholder="${tr("Meaning","Bedeutung","Significado")}" onkeydown="if(event.key==='Enter')dkWordAdd()"><button class="btn primary" onclick="dkWordAdd()">${tr("Add","Hinzufügen","Añadir")}</button></div>
+      <p class="note" style="margin:6px 0 0">${tr("New words become flashcards automatically.","Neue Wörter werden automatisch zu Karteikarten.","Las palabras nuevas se convierten en tarjetas automáticamente.")}</p></div>
+    ${all.length?`<div class="dkbar"><input type="text" placeholder="🔍 ${tr("Search my words","Wörter durchsuchen","Buscar mis palabras")}" value="${esc(DK.wq)}" oninput="DK.wq=this.value;xr();setTimeout(()=>{const i=document.querySelector('.dkbar input');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length)}},0)" autocomplete="off"><button class="btn secondary" style="background:var(--teal);color:#fff" onclick="vcMineOpen()">🎯 ${tr("Practise","Üben","Practicar")}</button></div>
+    <div class="dkwords">${L.map(w=>`<div class="dkw"><div style="flex:1;min-width:0"><b>${esc(w.word)}</b> <span class="note" style="margin:0">— ${esc(w.meaning)}</span>${w.ex?`<div class="dkwex">„${esc(w.ex)}“</div>`:""}<div class="dkm">${w.sess?"💬 "+tr("From your session","Aus deiner Session","De tu sesión")+(w.src?": "+esc(w.src):""):"✍️ "+tr("Added by you","Von dir hinzugefügt","Añadida por ti")+(w.src?" · "+esc(w.src):"")}</div></div>${w.own?`<button class="chip" style="flex:none" aria-label="${tr("Delete","Löschen","Borrar")}" onclick="dkWordDel('${w.id}')">🗑</button>`:""}</div>`).join("")||`<p class="note center">${tr("No match.","Kein Treffer.","Sin resultados.")}</p>`}</div>`
+    :`<div class="card center dkempty"><div style="font-size:40px">🃏</div><p class="note">${tr("Words you save from sessions, stories and Sentence Builder show up here.","Wörter, die du aus Sessions, Geschichten und dem Satzbauer speicherst, erscheinen hier.","Las palabras que guardes de sesiones, historias y el Constructor de frases aparecen aquí.")}</p></div>`}`; }
+async function dkWordAdd(){ const w=document.getElementById("dkww"), m=document.getElementById("dkwm"); if(!w||!m) return;
+  if(!w.value.trim()||!m.value.trim()){ bToast(tr("Add the word and its meaning","Wort und Bedeutung eintragen","Escribe la palabra y su significado")); return; }
+  const r=await mwAdd(w.value, m.value, null, tr("My Desk","Mein Schreibtisch","Mi escritorio"));
+  if(r==="deck"){ vcDeckToast(vcDeckWord(w.value)); }
+  else if(r) bToast("✅ "+tr("Added to your flashcards","Zu deinen Karteikarten hinzugefügt","Añadida a tus tarjetas"));
+  xr(); }
+async function dkWordDel(id){ if(!confirm(tr("Delete this word?","Dieses Wort löschen?","¿Borrar esta palabra?"))) return; await mwDel(id); }
+
+/* 📘 Guides: PonteShop resources you pinned or already downloaded */
+function dkGuides(){ const P=DK.pins||[]; return (SH.list||[]).filter(it=>P.includes(String(it.id))||it.mine).sort((a,b)=>{ const x=P.indexOf(String(a.id)), y=P.indexOf(String(b.id)); return (x<0?999:x)-(y<0?999:y); }); }
+function dkGuidesHtml(){ const L=dkGuides(), P=DK.pins||[];
+  if(SH.list===null||SH.list===undefined) return `<p class="note center" style="margin-top:30px">${tr("Loading…","Lädt…","Cargando…")}</p>`;
+  if(!L.length) return `<div class="card center dkempty"><div style="font-size:40px">📘</div><h3>${tr("No guides yet","Noch keine Materialien","Aún no hay guías")}</h3><p class="note">${tr("In PonteShop, tap 📌 Desk on any guide to keep it here.","Tippe in PonteShop bei einem Material auf 📌 Schreibtisch, um es hier zu behalten.","En PonteShop, toca 📌 Escritorio en cualquier guía para guardarla aquí.")}</p><button class="btn primary" onclick="shOpen()">📘 ${tr("Open PonteShop","PonteShop öffnen","Abrir PonteShop")}</button></div>`;
+  return `<div class="dkwords">${L.map(it=>{ const k=shKind(it.kind), t=T[it.language], pin=P.includes(String(it.id));
+    return `<div class="dkw"><div class="shico" style="${t?`background:${t.color}1F`:""}">${k[1]}</div><div style="flex:1;min-width:0"><b>${esc(it.title)}</b><div class="dkm">${t?t.flag+" "+esc(lname(it.language))+" · ":""}${esc(k[2])}${it.mine?" · ✓ "+tr("Downloaded","Heruntergeladen","Descargada"):""}</div></div>
+      <button class="btn primary dkopen" onclick="shGet('${it.id}')">${it.has_link?"↗":"⬇"} ${tr("Open","Öffnen","Abrir")}</button>${pin?`<button class="chip" style="flex:none" aria-label="${tr("Unpin","Lösen","Quitar")}" onclick="dkPin('${it.id}')">📌</button>`:""}</div>`; }).join("")}</div>
+    <p class="center" style="margin-top:10px"><button class="linkbtn" onclick="shOpen()">${tr("Find more in PonteShop →","Mehr in PonteShop →","Más en PonteShop →")}</button></p>`; }
+function dkPinned(id){ return (DK.pins||[]).includes(String(id)); }
+async function dkPin(id){ if(!(A.user&&A.sb)) return; id=String(id);
+  if(DK.pins===null){ await dkLoad(); }
+  const on=!dkPinned(id);
+  try{ const r=on ? await A.sb.from("desk_pins").insert({ item_id:id }) : await A.sb.from("desk_pins").delete().eq("item_id",id);
+    if(r.error) throw r.error;
+    DK.pins=on?[id,...DK.pins]:DK.pins.filter(x=>x!==id);
+    bToast(on?"📌 "+tr("On your desk","Auf deinem Schreibtisch","En tu escritorio"):tr("Removed from your desk","Vom Schreibtisch entfernt","Quitada de tu escritorio"));
+  }catch(e){ bToast(dkErr(e)); }
+  xr(); }
+function dkPinChip(it){ if(!A.user) return ""; if(DK.pins===null&&A.sb){ DK.pins=[]; dkLoad(); } const on=dkPinned(it.id);
+  return `<button class="chip ${on?"on":""}" onclick="dkPin('${it.id}')">📌 ${on?tr("On desk","Auf dem Schreibtisch","En el escritorio"):tr("Desk","Schreibtisch","Escritorio")}</button>`; }
+function dkCard(){ if(!(A.user&&A.status==="in")) return ""; const n=(DK.n||[]).length;
+  return `<div class="card rfmini" onclick="dkOpen()"><span class="rfbig">🗂️</span><div style="flex:1;min-width:0"><b>${tr("My Desk","Mein Schreibtisch","Mi escritorio")}</b><div class="note" style="margin:0">${DK.n?tr(`${n} notes · your words and guides`,`${n} Notizen · deine Wörter und Materialien`,`${n} notas · tus palabras y guías`):tr("Notes, words and guides in one place","Notizen, Wörter und Materialien an einem Ort","Notas, palabras y guías en un solo lugar")}</div></div><span class="chip">${tr("Open","Öffnen","Abrir")}</span></div>`; }
+
 function nwBtn(){ return `<button class="nwbtn" aria-label="${tr("What's new","Neuigkeiten","Novedades")}" onclick="nwOpen()">🎁${nwUnseen()?`<span class="nwdot"></span>`:""}</button>`; }
 function nwSync(){ document.querySelectorAll(".nwbtn").forEach(b=>{ b.outerHTML=nwBtn(); }); }
 async function nwLoad(){ if(NW.busy) return; NW.busy=true;
